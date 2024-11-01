@@ -1,13 +1,13 @@
-# STM32F103C8T6 (Blue Pill) Bare Metal Repository
-  - Basic Repository for understanding the Registers present in Blue Pill Module
-  - Created basic source files to use Registers for controlling purpose
-  - Boot Process:
+# **STM32F103C8T6 (Blue Pill) Bare Metal Repository**
+  - *Boot Process:*
       1. Power ON
       2. Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
       3. Reset_Handler is called (Vector Table Offset: 0x01)
          - Copy ".data" section from FLASH to SRAM (.data referes to initialised variables)
          - Initilise ".bss" section to 0 (.bss referes to uninitialised variables)
          - Main function is called
+  - Basic Repository for understanding the Registers present in Blue Pill Module
+  - Created basic source files to use Registers for controlling purpose
   - `Projects/Template` is the template which can be used as base while creating New Project
 
 ## Repository Structure
