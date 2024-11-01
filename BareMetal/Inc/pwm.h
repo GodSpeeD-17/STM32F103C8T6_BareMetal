@@ -9,7 +9,7 @@
 #define __PWM_H__
 
 // Dependency
-#include "gpio_function.h"
+#include "gpio.h"
 #include "timer.h"
 
 // IMP: Store this value in ARR always to simplify the PWM calculation

@@ -1,10 +1,10 @@
 /***************************************************************************************
- *  File: gpio_function.c
+ *  File: gpio.c
  *  Created on: 14/09/2024
  *  Author: shrey_shah
  ***************************************************************************************/
 
-#include "gpio_function.h"
+#include "gpio.h"
 
 /**
  * @brief Enables Clock for respective GPIO

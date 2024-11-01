@@ -5,8 +5,8 @@
  ***************************************************************************************/
 
 // Header Guards
-#ifndef _SYSTICK_H_
-#define _SYSTICK_H_
+#ifndef __SYSTICK_H__
+#define __SYSTICK_H__
 
 #include "reg_map.h"
 
@@ -54,4 +54,4 @@ void set_curr_ticks(uint64_t tick_value);
  */
 __attribute__((weak)) void SysTick_Handler(void);
 
-#endif /* _SYSTICK_H_ */
+#endif /* __SYSTICK_H__ */

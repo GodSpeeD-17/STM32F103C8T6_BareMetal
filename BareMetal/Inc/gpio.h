@@ -1,12 +1,12 @@
 /***************************************************************************************
- *  File: gpio_function.h
+ *  File: gpio.h
  *  Created on: 14/09/2024
  *  Author: shrey_shah
  ***************************************************************************************/
 
 // Header Guards
-#ifndef _GPIO_FUNCTION_H_
-#define _GPIO_FUNCTION_H_
+#ifndef __GPIO__H__
+#define __GPIO__H__
 
 // Register Address Mapping
 #include "reg_map.h"
@@ -118,4 +118,4 @@ void reset_OB_LED(void);
  */
 void toggle_OB_LED(void);
 
-#endif /* _GPIO_FUNCTION_H_ */
+#endif /* __GPIO__H__ */

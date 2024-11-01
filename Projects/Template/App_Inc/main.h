@@ -3,7 +3,7 @@
 #define __MAIN_H__
 
 // Bare Metal Libraries
-#include "gpio_function.h"
+#include "gpio.h"
 #include "rcc.h"
 #include "systick.h"
 #include "timer.h"
