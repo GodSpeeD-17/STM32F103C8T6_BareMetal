@@ -69,7 +69,6 @@ BareMetal
       |    |- stm32_startup.c           # Startup File (Contains Vecotor Table Mapping)
       |
       |- Makefile                       # Automation File (Used for compilation and flashing)
-      |
 ```
 
 ## Makefile Basic Commands
