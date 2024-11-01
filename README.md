@@ -1,13 +1,14 @@
 # STM32F103C8T6 (Blue Pill) Bare Metal Repository
   - Basic Repository for understanding the Registers present in Blue Pill Module
-  - Created basic source files to use Registers for controlling purpose  
+  - Created basic source files to use Registers for controlling purpose
+  - `Projects/Template` is the template which can be used as base while creating new project
 
 ## Repository Structure
-  - BareMetal: Consists of all the Register Address Mapping along with basic functionality Source Code
-  - Projects: Consists of User Specific Application
-  - Reference_Docs: All the Reference Documentation relevant to the topic
+  - `BareMetal`: Consists of all the Register Address Mapping along with basic functionality Source Code
+  - `Projects`: Consists of User Specific Application
+  - `Reference_Docs`: All the Reference Documentation relevant to the topic
 
-## Make File Basic Commands
+## Makefile Basic Commands
   - `make all`: Compiles all the .c files including "BareMetal" directory
   - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - `make user`: Compiles all the .c files present in the folder
@@ -19,7 +20,24 @@
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
   - Flash: 64kB (0x08000000)
   - SRAM: 20kB (0x20000000)
-  - Vector Table: 76 
+  - Vector Table: 76
+        - ARM Cortex M3 IRQ: 11
+        - STM32F103C8T6: 59 
+        - Reserved: 6
 
 ## STM32F103C8T6 Reference Manual
 [STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17596951/STM32F103C_Reference_Manual.pdf)
+
+## Project Structure
+```
+Project_Name
+    |- App_Inc
+    |  |- main.h
+    |- App_Src
+    |  |- main.c
+    |- App_Inc
+    |  |- stm32_ls.ld
+    |- App_Inc
+    |  |- stm32_startup.c
+    |- Makefile
+```
