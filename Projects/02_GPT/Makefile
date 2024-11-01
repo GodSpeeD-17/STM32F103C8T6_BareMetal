@@ -7,7 +7,7 @@
 		# -mcpu {Machine CPU} 
 		# -mthumb {Thumb Instruction Set [ARM CORTEX Mx supports only Thumb Instruction Set]}
 		# -O {Optimization Level, 0 is no optimization}
-		# -std {C Standard to be used for Compilation})	
+		# -std {C Standard to be used for Compilation}
 	# Basic Commands:
 		# make all: All the folders
 		# make clean: All the folders
