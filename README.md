@@ -30,8 +30,8 @@
   - Power ON
   - Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
   - Reset_Handler is called (Vector Table Offset: 0x01)
-    1. Copy ".data" section from FLASH to SRAM (.data referes to initialised variables)
-    2. Initilise ".bss" section to 0 (.bss referes to uninitialised variables)
+    1. Copy ".data" section from FLASH to SRAM (.data refers to initialized variables)
+    2. Initialize ".bss" section to 0 (.bss refers to uninitialized variables)
     3. Main function is called
 
 ## BareMetal Structure
@@ -42,7 +42,7 @@ BareMetal
     |  |- pwm.h                        # PWM Header File
     |  |- rcc.h                        # Clock Configuration Header File
     |  |- regmap.h                     # Main Register Mapping Header File
-    |  |- systick.h                    # SysTick Header File (ARM Cotex-M3)
+    |  |- systick.h                    # SysTick Header File (ARM Cortex-M3)
     |  |- timer.h                      # Timer Header File
     |
     |- Src
@@ -60,13 +60,13 @@ BareMetal
       |    |- main.h                    # Application Header File
       |
       |- App_Src
-      |    |- main.c                    # Application Souce File
+      |    |- main.c                    # Application Source File
       |
       |- Linker
       |    |- stm32_ls.ld               # Linker Script (Contains the mapping of sections to the address)
       |
       |- Startup
-      |    |- stm32_startup.c           # Startup File (Contains Vecotor Table Mapping)
+      |    |- stm32_startup.c           # Startup File (Contains Vector Table Mapping)
       |
       |- Makefile                       # Automation File (Used for compilation and flashing)
 ```
