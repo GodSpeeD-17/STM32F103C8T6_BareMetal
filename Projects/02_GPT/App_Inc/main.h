@@ -13,7 +13,7 @@
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
 #define DELAY_MS                        ((uint32_t) 1000) 
 #define LED_PORT                        (GPIOA)
-#define LED_PIN                         (GPIO_PIN_1)   
+#define LED_PIN                         (GPIO_PIN_2)   
 #define GP_TIMER                        (TIM4)
 #define GPT_FREQ                        (FREQ_1kHz)   
 #define GPT_ARR                         (DEFAULT_ARR_VALUE)
