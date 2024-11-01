@@ -9,11 +9,11 @@
 
 ## Make File Basic Commands
   - `make all`: Compiles all the .c files including "BareMetal" directory
-  - make clean: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
-  - make user: Compiles all the .c files present in the folder
-  - make clean_project: Cleans the extra intermediate files used for compiling present in the Current Directory
-  - make flash: Flashes Current Project's .bin file at Flash Address (0x080000000)
-  - make erase_flash: Flashes Template Project's .bin file (Infinite loop) 
+  - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
+  - `make user`: Compiles all the .c files present in the folder
+  - `make clean_project`: Cleans the extra intermediate files used for compiling present in the Current Directory
+  - `make flash`: Flashes Current Project's .bin file at Flash Address (0x080000000)
+  - `make erase_flash`: Flashes Template Project's .bin file (Infinite loop) 
 
 ## STM32F103C8T6 Pinout
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
