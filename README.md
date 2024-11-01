@@ -62,10 +62,10 @@ BareMetal
       |- App_Src
       |    |- main.c                    # Application Souce File
       |
-      |- App_Inc
+      |- Linker
       |    |- stm32_ls.ld               # Linker Script (Contains the mapping of sections to the address)
       |
-      |- App_Inc
+      |- Startup
       |    |- stm32_startup.c           # Startup File (Contains Vecotor Table Mapping)
       |
       |- Makefile                       # Automation File (Used for compilation and flashing)
