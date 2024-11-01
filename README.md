@@ -8,7 +8,7 @@
   - Reference_Docs: All the Reference Documentation relevant to the topic
 
 ## Make File Basic Commands
-  - make all: Compiles all the .c files including "BareMetal" directory
+  - `make all`: Compiles all the .c files including "BareMetal" directory
   - make clean: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - make user: Compiles all the .c files present in the folder
   - make clean_project: Cleans the extra intermediate files used for compiling present in the Current Directory
