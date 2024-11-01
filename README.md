@@ -1,7 +1,14 @@
 # STM32F103C8T6 (Blue Pill) Bare Metal Repository
   - Basic Repository for understanding the Registers present in Blue Pill Module
   - Created basic source files to use Registers for controlling purpose
-  - `Projects/Template` is the template which can be used as base while creating new project
+  - Boot Process:
+      1. Power ON
+      2. Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
+      3. Reset_Handler is called (Vector Table Offset: 0x01)
+         (a) Copy ".data" section from FLASH to SRAM (.data referes to initialised variables)
+         (b) Initilise ".bss" section to 0 (.bss referes to uninitialised variables)
+         (c) Main function is called 
+  - `Projects/Template` is the template which can be used as base while creating New Project
 
 ## Repository Structure
   - `BareMetal`: Consists of all the Register Address Mapping along with basic functionality Source Code
@@ -32,12 +39,16 @@
 ```
 Project_Name
     |- App_Inc
-    |  |- main.h
+    |    |- main.h                    # Application Header File
+    |
     |- App_Src
-    |  |- main.c
+    |    |- main.c                    # Application Souce File
+    |
     |- App_Inc
-    |  |- stm32_ls.ld
+    |    |- stm32_ls.ld               # Linker Script (Contains the mapping of sections to the address)
+    |
     |- App_Inc
-    |  |- stm32_startup.c
-    |- Makefile
+    |    |- stm32_startup.c           # Startup File (Contains Vecotor Table Mapping)
+    |
+    |- Makefile                       # Automation File (Used for compilation and flashing)
 ```
