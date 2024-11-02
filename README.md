@@ -26,7 +26,7 @@
     - STM32F103C8T6: 59 
     - Reserved: 6
 
-## *Boot Process:*
+## Boot Process:
   - Power ON
   - Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
   - Reset_Handler is called (Vector Table Offset: 0x01)
@@ -38,15 +38,26 @@
 ```
 BareMetal
     |- Inc
-    |  |- gpio_function.h              # GPIO Header File
+    |  |- Core
+    |  |  |-advtim_reg_map.h           # Advanced Timer Structure {TIM1, -TIM8-}
+    |  |  |-afio_reg_map.h             # Alternate Function Input Output (AFIO) Structure
+    |  |  |-flash_reg_map.h            # Flash Structure
+    |  |  |-gpio_reg_map.h             # General Purpose Input Output (GPIO) Structure
+    |  |  |-gpt_reg_map.h              # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
+    |  |  |-nvic_reg_map.h             # Nested Vector Interrupt Control (NVIC) Structure
+    |  |  |-rcc_reg_map.h              # Reset and Clock Control (RCC) Structure
+    |  |  |-systick_reg_map.h          # SysTick Structure
+    |  |  |-wwdg_reg_map.h             # Window Watchdog (WWDG) Structure
+    |  |- gpio.h                       # GPIO Header File
+    |  |- nvic.h                       # NVIC Header File
     |  |- pwm.h                        # PWM Header File
     |  |- rcc.h                        # Clock Configuration Header File
-    |  |- regmap.h                     # Main Register Mapping Header File
+    |  |- reg_map.h                    # Main Register Mapping Header File
     |  |- systick.h                    # SysTick Header File (ARM Cortex-M3)
     |  |- timer.h                      # Timer Header File
     |
     |- Src
-    |  |- gpio_function.c              # GPIO Source File
+    |  |- gpio.c                       # GPIO Source File
     |  |- pwm.c                        # PWM Source File
     |  |- rcc.c                        # Clock Configuration Source File
     |  |- systick.c                    # SysTick Source File (ARM Cortex-M3)
