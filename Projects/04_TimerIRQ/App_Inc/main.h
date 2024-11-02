@@ -37,6 +37,6 @@ extern volatile uint32_t APB2Clock;
 /**
  * @brief TIM2 IRQ Handler
  */
-void TIM2_IRQHandler(void);
+__attribute__((weak)) void TIM2_IRQHandler(void);
 
 #endif /* __MAIN_H__ */

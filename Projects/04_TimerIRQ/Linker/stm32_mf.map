@@ -28,7 +28,7 @@ LOAD ./App_Src/main.o
                 0x0000000008000130                . = ALIGN (0x4)
                 0x0000000008000130                _evector = .
 
-.text           0x0000000008000130      0x930
+.text           0x0000000008000130      0x9a8
                 0x0000000008000130                . = ALIGN (0x4)
                 0x0000000008000130                _stext = .
  *(.text*)
@@ -117,6 +117,7 @@ LOAD ./App_Src/main.o
                 0x0000000008000990                FSMC_IRQHandler
                 0x0000000008000990                TIM1_UP_IRQHandler
                 0x0000000008000990                WWDG_IRQHandler
+                0x0000000008000990                TIM2_IRQHandler
                 0x0000000008000990                TIM1_BRK_IRQHandler
                 0x0000000008000990                EXTI1_IRQHandler
                 0x0000000008000990                DMA2_Channel4_5_IRQHandler
@@ -131,38 +132,37 @@ LOAD ./App_Src/main.o
                 0x0000000008000990                I2C1_ER_IRQHandler
                 0x0000000008000990                DMA2_Channel3_IRQHandler
                 0x0000000008000992                Reset_Handler
- .text          0x00000000080009f4       0x6c ./App_Src/main.o
+ .text          0x00000000080009f4       0xe4 ./App_Src/main.o
                 0x00000000080009f4                main
-                0x0000000008000a34                TIM2_IRQHandler
-                0x0000000008000a60                . = ALIGN (0x4)
-                0x0000000008000a60                _etext = .
+                0x0000000008000ad8                . = ALIGN (0x4)
+                0x0000000008000ad8                _etext = .
 
-.glue_7         0x0000000008000a60        0x0
- .glue_7        0x0000000008000a60        0x0 linker stubs
+.glue_7         0x0000000008000ad8        0x0
+ .glue_7        0x0000000008000ad8        0x0 linker stubs
 
-.glue_7t        0x0000000008000a60        0x0
- .glue_7t       0x0000000008000a60        0x0 linker stubs
+.glue_7t        0x0000000008000ad8        0x0
+ .glue_7t       0x0000000008000ad8        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008000a60        0x0
- .vfp11_veneer  0x0000000008000a60        0x0 linker stubs
+.vfp11_veneer   0x0000000008000ad8        0x0
+ .vfp11_veneer  0x0000000008000ad8        0x0 linker stubs
 
-.v4_bx          0x0000000008000a60        0x0
- .v4_bx         0x0000000008000a60        0x0 linker stubs
+.v4_bx          0x0000000008000ad8        0x0
+ .v4_bx         0x0000000008000ad8        0x0 linker stubs
 
-.iplt           0x0000000008000a60        0x0
- .iplt          0x0000000008000a60        0x0 ../../BareMetal/Src/rcc.o
+.iplt           0x0000000008000ad8        0x0
+ .iplt          0x0000000008000ad8        0x0 ../../BareMetal/Src/rcc.o
 
-.rel.dyn        0x0000000008000a60        0x0
- .rel.iplt      0x0000000008000a60        0x0 ../../BareMetal/Src/rcc.o
+.rel.dyn        0x0000000008000ad8        0x0
+ .rel.iplt      0x0000000008000ad8        0x0 ../../BareMetal/Src/rcc.o
 
-.rodata         0x0000000008000a60        0x0
-                0x0000000008000a60                . = ALIGN (0x4)
-                0x0000000008000a60                _srodata = .
+.rodata         0x0000000008000ad8        0x0
+                0x0000000008000ad8                . = ALIGN (0x4)
+                0x0000000008000ad8                _srodata = .
  *(.rodata*)
-                0x0000000008000a60                . = ALIGN (0x4)
-                0x0000000008000a60                _erodata = .
+                0x0000000008000ad8                . = ALIGN (0x4)
+                0x0000000008000ad8                _erodata = .
 
-.data           0x0000000020000000        0x0 load address 0x0000000008000a60
+.data           0x0000000020000000        0x0 load address 0x0000000008000ad8
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data*)
@@ -175,12 +175,12 @@ LOAD ./App_Src/main.o
  .data          0x0000000020000000        0x0 ./App_Src/main.o
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _edata = .
-                0x0000000008000a60                _sidata = LOADADDR (.data)
+                0x0000000008000ad8                _sidata = LOADADDR (.data)
 
-.igot.plt       0x0000000020000000        0x0 load address 0x0000000008000a60
+.igot.plt       0x0000000020000000        0x0 load address 0x0000000008000ad8
  .igot.plt      0x0000000020000000        0x0 ../../BareMetal/Src/rcc.o
 
-.bss            0x0000000020000000       0x20 load address 0x0000000008000a60
+.bss            0x0000000020000000       0x20 load address 0x0000000008000ad8
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sbss = .
  *(.bss*)
