@@ -10,6 +10,12 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
+    // Disable Timer
+    disable_GPT(GP_TIMER);
+
+    // Configure Timer
+    config_GPT(GP_TIMER, TIMER_ARR, TIMER_FREQ, TIMER_CNT);
+
     // Infinite Loop
     while(1){
 

@@ -55,7 +55,7 @@ USER_SRC_DIR = ./App_Src
 # Include Path Updation
 INCLUDES = -I $(INC_DIR)
 # Optimization Level
-OPT_LEVEL = -O0
+OPT_LEVEL = -O1
 # C Standard
 C_STD = gnu11
 # CC Modified Flags (DO NOT ADD SPACE)

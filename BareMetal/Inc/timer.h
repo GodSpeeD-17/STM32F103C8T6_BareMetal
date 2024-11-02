@@ -84,29 +84,71 @@
 
 /**
  * @brief Enables the Clock for General Purpose Timer
- * @param[in] TIMx General Purpose Timer
+ * @param[in] GP_TIMx General Purpose Timer
  * @note RCC->APB1ENR
  */
-void enable_GPT_clk(GPT_REG_STRUCT* TIMx);
+inline __attribute__((always_inline)) void enable_GPT_clk(GPT_REG_STRUCT* GP_TIMx){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+		
+	// Enable the clock for the timer
+	if(GP_TIMx == TIM2)
+		RCC->APB1ENR.BIT.TIM2EN = BIT_SET;
+	else if(GP_TIMx == TIM3)
+		RCC->APB1ENR.BIT.TIM3EN = BIT_SET;
+	else if(GP_TIMx == TIM4)
+		RCC->APB1ENR.BIT.TIM4EN = BIT_SET;
+}
 
 /**
  * @brief Disables the Clock for General Purpose Timer
- * @param[in] TIMx General Purpose Timer
+ * @param[in] GP_TIMx General Purpose Timer
  * @note RCC->APB1ENR
  */
-void disable_GPT_clk(GPT_REG_STRUCT* TIMx);
+inline __attribute__((always_inline)) void disable_GPT_clk(GPT_REG_STRUCT* GP_TIMx){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Disable the clock for the timer
+	if(GP_TIMx == TIM2)
+		RCC->APB1ENR.BIT.TIM2EN = BIT_RESET;
+	else if(GP_TIMx == TIM3)
+		RCC->APB1ENR.BIT.TIM3EN = BIT_RESET;
+	else if(GP_TIMx == TIM4)
+		RCC->APB1ENR.BIT.TIM4EN = BIT_RESET;
+}
 
 /**
- * @brief Enables the General Purpose TIMx
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @brief Enables the General Purpose GP_TIMx
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  */
-void enable_GPT(GPT_REG_STRUCT* TIMx);
+inline __attribute__((always_inline)) void enable_GPT(GPT_REG_STRUCT* GP_TIMx){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Enable GP_TIMx
+	GP_TIMx->CR1.BIT.CEN = BIT_SET;
+}
 
 /**
- * @brief Disables the General Purpose TIMx
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @brief Disables the General Purpose GP_TIMx
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  */
-void disable_GPT(GPT_REG_STRUCT* TIMx);
+inline __attribute__((always_inline)) void disable_GPT(GPT_REG_STRUCT* GP_TIMx){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Disable GP_TIMx
+	GP_TIMx->CR1.BIT.CEN = BIT_RESET;
+}
 
 /**
  * @brief Enables the General Purpose TIMx's Channel
@@ -128,7 +170,26 @@ void disable_GPT_CH(GPT_REG_STRUCT* TIMx, uint8_t channel);
  * @param[in] arr_value Auto-Reload Register Value
  * @return Prescaler Value
  */
-__attribute__((always_inline)) static inline uint16_t calc_GPT_PSC(uint32_t freq_Hz, uint16_t arr_value);
+inline __attribute__((always_inline)) uint16_t calc_GPT_PSC(uint32_t freq_Hz, uint16_t arr_value){
+	
+	// Final Value
+	uint32_t prescaler_value = 0x00;
+	
+	// Calculate the Timer Frequency
+	if((RCC->CFGR.BIT.PPRE1 == APB1_DIV_1))
+		prescaler_value = get_APB1_freq();
+	else
+		prescaler_value = (uint32_t)(2 * get_APB1_freq());
+	
+	// Update the value based upon the desired frequency
+	prescaler_value /= freq_Hz;
+
+	// Update the value based upon the ARR Value
+	prescaler_value /= (arr_value + 1);
+
+	// Final Calculated Value
+	return (uint16_t)(prescaler_value - 1);
+} 
 
 /**
  * @brief Configure General Purpose GP_TIMx (Clock Source + Frequency)
@@ -145,24 +206,21 @@ void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, u
 /**
  * @brief Configures GP Timer Counting Mode along with Direction
  * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
- * @param[in] cms_mode `TIMx_MODE_...`
+ * @param[in] cms_mode Centre-aligned mode selection `TIMx_MODE_...`
  * @param[in] direction `TIMx_COUNT_UP`, `TIMx_COUNT_DOWN`
  */
-void config_GPT_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t cms_mode, uint8_t direction);
+inline __attribute__((always_inline)) void set_GPT_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t cms_mode, uint8_t direction){
+	
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return; 
 
-/**
- * @brief Updates the frequency of already configured General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
- * @param[in] freq_Hz Timer Frequency (in Hz)
- */
-void update_GPT_freq(GPT_REG_STRUCT* GP_TIMx, uint32_t freq_Hz);
+	// Centre-Aligned Mode Selection
+	GP_TIMx->CR1.BIT.CMS = cms_mode;
 
-/**
- * @brief Updates the frequency of already configured General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
- * @param[in] arr_value Auto Reload Value
- */
-void update_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value);
+	// Direction Selection
+	GP_TIMx->CR1.BIT.DIR = direction;
+}
 
 /**
  * @brief Gets the GP Timer Clock Frequency
@@ -170,6 +228,36 @@ void update_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value);
  * @note Refer the formula mentioned in .c file  & clock tree to get clear understanding
  */
 uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx);
+
+/**
+ * @brief Updates the frequency of already configured General Purpose Timer
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @param[in] freq_Hz Timer Frequency (in Hz)
+ */
+inline __attribute__((always_inline)) void set_GPT_freq(GPT_REG_STRUCT* GP_TIMx, uint32_t freq_Hz){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return; 
+
+	// Calculate updated PSC Value
+	GP_TIMx->PSC = calc_GPT_PSC(freq_Hz, GP_TIMx->ARR);
+}
+
+/**
+ * @brief Updates the frequency of already configured General Purpose Timer
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @param[in] arr_value Auto Reload Value
+ */
+inline __attribute__((always_inline)) void set_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Calculate updated PSC Value
+	GP_TIMx->ARR = arr_value;
+}
 
 /**
  * @brief General Purpose Timer Delay

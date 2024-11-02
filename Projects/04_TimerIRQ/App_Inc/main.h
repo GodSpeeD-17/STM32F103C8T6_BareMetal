@@ -13,8 +13,12 @@
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
 #define DELAY_MS                        ((uint32_t) 1000)  
 #define GP_TIMER                        (TIM2)
+#define TIMER_CHANNEL                   (TIMx_CHANNEL_3)
 #define TIMER_PORT                      (GPIOA)     
-#define TIMER_PIN                       (GPIO_PIN_1)     
+#define TIMER_PIN                       (GPIO_PIN_2)     
+#define TIMER_FREQ                      (FREQ_10kHz)
+#define TIMER_ARR                       (DEFAULT_ARR_VALUE)
+#define TIMER_CNT                       (BIT_RESET)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;
