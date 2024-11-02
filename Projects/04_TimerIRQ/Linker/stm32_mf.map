@@ -1,0 +1,228 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+FLASH            0x0000000008000000 0x0000000000010000 xr
+SRAM             0x0000000020000000 0x0000000000005000 xrw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD ../../BareMetal/Src/gpio.o
+LOAD ../../BareMetal/Src/pwm.o
+LOAD ../../BareMetal/Src/rcc.o
+LOAD ../../BareMetal/Src/systick.o
+LOAD ../../BareMetal/Src/timer.o
+LOAD ./Startup/stm32_startup.o
+LOAD ./App_Src/main.o
+                0x0000000020005000                __estack = (ORIGIN (SRAM) + LENGTH (SRAM))
+                0x0000000000000200                __max_heap_size = 0x200
+                0x0000000000000400                __max_stack_size = 0x400
+
+.isr_vector     0x0000000008000000      0x130
+                0x0000000008000000                . = ALIGN (0x4)
+                0x0000000008000000                _svector = .
+ *(.isr_vector)
+ .isr_vector    0x0000000008000000      0x130 ./Startup/stm32_startup.o
+                0x0000000008000000                vector_table
+                0x0000000008000130                . = ALIGN (0x4)
+                0x0000000008000130                _evector = .
+
+.text           0x0000000008000130      0x930
+                0x0000000008000130                . = ALIGN (0x4)
+                0x0000000008000130                _stext = .
+ *(.text*)
+ .text          0x0000000008000130      0x110 ../../BareMetal/Src/gpio.o
+                0x0000000008000130                config_GPIO
+                0x00000000080001d0                set_GPIO
+                0x00000000080001d8                reset_GPIO
+                0x00000000080001e0                toggle_GPIO
+                0x00000000080001ee                config_OB_LED
+                0x0000000008000210                set_OB_LED
+                0x0000000008000220                reset_OB_LED
+                0x0000000008000230                toggle_OB_LED
+ .text          0x0000000008000240      0x254 ../../BareMetal/Src/pwm.o
+                0x0000000008000240                config_PWM_mode
+                0x000000000800031c                set_PWM_polarity
+                0x00000000080003a8                set_PWM_duty_cycle
+ .text          0x0000000008000494      0x370 ../../BareMetal/Src/rcc.o
+                0x0000000008000494                get_clock_source
+                0x00000000080004a4                get_clock_freq
+                0x0000000008000570                get_AHB_freq
+                0x00000000080005b4                get_APB1_freq
+                0x00000000080005e4                get_APB2_freq
+                0x0000000008000614                config_SYSCLK_MHz
+ .text          0x0000000008000804       0x90 ../../BareMetal/Src/systick.o
+                0x0000000008000804                config_SysTick
+                0x0000000008000840                SysTick_delay_ms
+                0x0000000008000854                get_curr_ticks
+                0x0000000008000860                set_curr_ticks
+                0x000000000800086c                SysTick_Handler
+ .text          0x0000000008000894       0xfc ../../BareMetal/Src/timer.o
+                0x0000000008000894                config_GPT
+                0x00000000080008e0                get_GPT_freq
+                0x0000000008000914                GPT_delay_ms
+ .text          0x0000000008000990       0x64 ./Startup/stm32_startup.o
+                0x0000000008000990                RTC_Alarm_IRQHandler
+                0x0000000008000990                EXTI2_IRQHandler
+                0x0000000008000990                TIM8_TRG_COM_IRQHandler
+                0x0000000008000990                TIM8_CC_IRQHandler
+                0x0000000008000990                DebugMon_Handler
+                0x0000000008000990                TIM1_CC_IRQHandler
+                0x0000000008000990                HardFault_Handler
+                0x0000000008000990                TIM6_IRQHandler
+                0x0000000008000990                PVD_IRQHandler
+                0x0000000008000990                SDIO_IRQHandler
+                0x0000000008000990                PendSV_Handler
+                0x0000000008000990                NMI_Handler
+                0x0000000008000990                EXTI3_IRQHandler
+                0x0000000008000990                USB_HP_CAN_TX_IRQHandler
+                0x0000000008000990                EXTI0_IRQHandler
+                0x0000000008000990                I2C2_EV_IRQHandler
+                0x0000000008000990                UsageFault_Handler
+                0x0000000008000990                ADC1_2_IRQHandler
+                0x0000000008000990                SPI1_IRQHandler
+                0x0000000008000990                CAN_SCE_IRQHandler
+                0x0000000008000990                TAMPER_IRQHandler
+                0x0000000008000990                TIM8_UP_IRQHandler
+                0x0000000008000990                DMA2_Channel2_IRQHandler
+                0x0000000008000990                DMA1_Channel4_IRQHandler
+                0x0000000008000990                USART3_IRQHandler
+                0x0000000008000990                RTC_IRQHandler
+                0x0000000008000990                DMA1_Channel7_IRQHandler
+                0x0000000008000990                UART5_IRQHandler
+                0x0000000008000990                ADC3_IRQHandler
+                0x0000000008000990                TIM4_IRQHandler
+                0x0000000008000990                CAN_RX1_IRQHandler
+                0x0000000008000990                DMA2_Channel1_IRQHandler
+                0x0000000008000990                I2C1_EV_IRQHandler
+                0x0000000008000990                DMA1_Channel6_IRQHandler
+                0x0000000008000990                UART4_IRQHandler
+                0x0000000008000990                TIM3_IRQHandler
+                0x0000000008000990                RCC_IRQHandler
+                0x0000000008000990                TIM1_TRG_COM_IRQHandler
+                0x0000000008000990                DMA1_Channel1_IRQHandler
+                0x0000000008000990                Default_Handler
+                0x0000000008000990                EXTI15_10_IRQHandler
+                0x0000000008000990                TIM7_IRQHandler
+                0x0000000008000990                TIM5_IRQHandler
+                0x0000000008000990                EXTI9_5_IRQHandler
+                0x0000000008000990                SPI2_IRQHandler
+                0x0000000008000990                USB_LP_CAN_RX0_IRQHandler
+                0x0000000008000990                MemManage_Handler
+                0x0000000008000990                SVC_Handler
+                0x0000000008000990                DMA1_Channel5_IRQHandler
+                0x0000000008000990                EXTI4_IRQHandler
+                0x0000000008000990                DMA1_Channel3_IRQHandler
+                0x0000000008000990                FSMC_IRQHandler
+                0x0000000008000990                TIM1_UP_IRQHandler
+                0x0000000008000990                WWDG_IRQHandler
+                0x0000000008000990                TIM1_BRK_IRQHandler
+                0x0000000008000990                EXTI1_IRQHandler
+                0x0000000008000990                DMA2_Channel4_5_IRQHandler
+                0x0000000008000990                USART2_IRQHandler
+                0x0000000008000990                I2C2_ER_IRQHandler
+                0x0000000008000990                DMA1_Channel2_IRQHandler
+                0x0000000008000990                TIM8_BRK_IRQHandler
+                0x0000000008000990                FLASH_IRQHandler
+                0x0000000008000990                BusFault_Handler
+                0x0000000008000990                USART1_IRQHandler
+                0x0000000008000990                SPI3_IRQHandler
+                0x0000000008000990                I2C1_ER_IRQHandler
+                0x0000000008000990                DMA2_Channel3_IRQHandler
+                0x0000000008000992                Reset_Handler
+ .text          0x00000000080009f4       0x6c ./App_Src/main.o
+                0x00000000080009f4                main
+                0x0000000008000a34                TIM2_IRQHandler
+                0x0000000008000a60                . = ALIGN (0x4)
+                0x0000000008000a60                _etext = .
+
+.glue_7         0x0000000008000a60        0x0
+ .glue_7        0x0000000008000a60        0x0 linker stubs
+
+.glue_7t        0x0000000008000a60        0x0
+ .glue_7t       0x0000000008000a60        0x0 linker stubs
+
+.vfp11_veneer   0x0000000008000a60        0x0
+ .vfp11_veneer  0x0000000008000a60        0x0 linker stubs
+
+.v4_bx          0x0000000008000a60        0x0
+ .v4_bx         0x0000000008000a60        0x0 linker stubs
+
+.iplt           0x0000000008000a60        0x0
+ .iplt          0x0000000008000a60        0x0 ../../BareMetal/Src/rcc.o
+
+.rel.dyn        0x0000000008000a60        0x0
+ .rel.iplt      0x0000000008000a60        0x0 ../../BareMetal/Src/rcc.o
+
+.rodata         0x0000000008000a60        0x0
+                0x0000000008000a60                . = ALIGN (0x4)
+                0x0000000008000a60                _srodata = .
+ *(.rodata*)
+                0x0000000008000a60                . = ALIGN (0x4)
+                0x0000000008000a60                _erodata = .
+
+.data           0x0000000020000000        0x0 load address 0x0000000008000a60
+                0x0000000020000000                . = ALIGN (0x4)
+                0x0000000020000000                _sdata = .
+ *(.data*)
+ .data          0x0000000020000000        0x0 ../../BareMetal/Src/gpio.o
+ .data          0x0000000020000000        0x0 ../../BareMetal/Src/pwm.o
+ .data          0x0000000020000000        0x0 ../../BareMetal/Src/rcc.o
+ .data          0x0000000020000000        0x0 ../../BareMetal/Src/systick.o
+ .data          0x0000000020000000        0x0 ../../BareMetal/Src/timer.o
+ .data          0x0000000020000000        0x0 ./Startup/stm32_startup.o
+ .data          0x0000000020000000        0x0 ./App_Src/main.o
+                0x0000000020000000                . = ALIGN (0x4)
+                0x0000000020000000                _edata = .
+                0x0000000008000a60                _sidata = LOADADDR (.data)
+
+.igot.plt       0x0000000020000000        0x0 load address 0x0000000008000a60
+ .igot.plt      0x0000000020000000        0x0 ../../BareMetal/Src/rcc.o
+
+.bss            0x0000000020000000       0x20 load address 0x0000000008000a60
+                0x0000000020000000                . = ALIGN (0x4)
+                0x0000000020000000                _sbss = .
+ *(.bss*)
+ .bss           0x0000000020000000        0x0 ../../BareMetal/Src/gpio.o
+ .bss           0x0000000020000000        0x0 ../../BareMetal/Src/pwm.o
+ .bss           0x0000000020000000       0x10 ../../BareMetal/Src/rcc.o
+                0x0000000020000000                CoreClock
+                0x0000000020000004                AHBClock
+                0x0000000020000008                APB1Clock
+                0x000000002000000c                APB2Clock
+ .bss           0x0000000020000010       0x10 ../../BareMetal/Src/systick.o
+ .bss           0x0000000020000020        0x0 ../../BareMetal/Src/timer.o
+ .bss           0x0000000020000020        0x0 ./Startup/stm32_startup.o
+ .bss           0x0000000020000020        0x0 ./App_Src/main.o
+                0x0000000020000020                . = ALIGN (0x4)
+                0x0000000020000020                _ebss = .
+OUTPUT(./Linker/stm32_ls.elf elf32-littlearm)
+LOAD linker stubs
+
+.comment        0x0000000000000000       0x33
+ .comment       0x0000000000000000       0x33 ../../BareMetal/Src/gpio.o
+                                         0x34 (size before relaxing)
+ .comment       0x0000000000000033       0x34 ../../BareMetal/Src/pwm.o
+ .comment       0x0000000000000033       0x34 ../../BareMetal/Src/rcc.o
+ .comment       0x0000000000000033       0x34 ../../BareMetal/Src/systick.o
+ .comment       0x0000000000000033       0x34 ../../BareMetal/Src/timer.o
+ .comment       0x0000000000000033       0x34 ./Startup/stm32_startup.o
+ .comment       0x0000000000000033       0x34 ./App_Src/main.o
+
+.ARM.attributes
+                0x0000000000000000       0x2d
+ .ARM.attributes
+                0x0000000000000000       0x2d ../../BareMetal/Src/gpio.o
+ .ARM.attributes
+                0x000000000000002d       0x2d ../../BareMetal/Src/pwm.o
+ .ARM.attributes
+                0x000000000000005a       0x2d ../../BareMetal/Src/rcc.o
+ .ARM.attributes
+                0x0000000000000087       0x2d ../../BareMetal/Src/systick.o
+ .ARM.attributes
+                0x00000000000000b4       0x2d ../../BareMetal/Src/timer.o
+ .ARM.attributes
+                0x00000000000000e1       0x2d ./Startup/stm32_startup.o
+ .ARM.attributes
+                0x000000000000010e       0x2d ./App_Src/main.o

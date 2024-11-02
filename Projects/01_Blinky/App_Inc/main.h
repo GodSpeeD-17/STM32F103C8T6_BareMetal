@@ -7,6 +7,7 @@
 #include "rcc.h"
 #include "systick.h"
 #include "timer.h"
+#include "nvic.h"
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)

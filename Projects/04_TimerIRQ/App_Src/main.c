@@ -35,6 +35,9 @@ int main(void){
     // Enable Timer
     enable_GPT(GP_TIMER);
 
+    // Enable NVIC Interrupt
+    enable_NVIC_IRQ(TIMER_IRQn);
+
     // Infinite Loop
     while(1){
 

@@ -8,6 +8,7 @@
 #include "systick.h"
 #include "timer.h"
 #include "pwm.h"
+#include "nvic.h"
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
@@ -19,6 +20,7 @@
 #define TIMER_FREQ                      (FREQ_1kHz)
 #define TIMER_ARR                       (DEFAULT_ARR_VALUE)
 #define TIMER_CNT                       (BIT_RESET)
+#define TIMER_IRQn                      (TIM2_IRQn)
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
 
