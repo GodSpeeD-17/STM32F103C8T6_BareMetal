@@ -16,9 +16,11 @@
 #define TIMER_CHANNEL                   (TIMx_CHANNEL_3)
 #define TIMER_PORT                      (GPIOA)     
 #define TIMER_PIN                       (GPIO_PIN_2)     
-#define TIMER_FREQ                      (FREQ_10kHz)
+#define TIMER_FREQ                      (FREQ_1kHz)
 #define TIMER_ARR                       (DEFAULT_ARR_VALUE)
 #define TIMER_CNT                       (BIT_RESET)
+#define LED_PORT                        (GPIOA)
+#define LED_PIN                         (GPIO_PIN_2)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;
@@ -28,5 +30,11 @@ extern volatile uint32_t AHBClock;
 extern volatile uint32_t APB1Clock;
 // Advanced Peripheral Bus 2 (APB2) Frequency
 extern volatile uint32_t APB2Clock;
+
+
+/**
+ * @brief TIM2 IRQ Handler
+ */
+void TIM2_IRQHandler(void);
 
 #endif /* __MAIN_H__ */

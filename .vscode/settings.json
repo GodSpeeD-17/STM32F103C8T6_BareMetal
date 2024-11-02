@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "ADCPRE",
+        "ADVTIM",
         "AFIO",
         "AFIOEN",
         "AFIORST",
@@ -81,7 +82,11 @@
         "HSIRDYF",
         "HSIRDYIE",
         "HSITRIM",
+        "ICER",
+        "ICPR",
+        "ICTR",
         "igot",
+        "INTLINESNUM",
         "IOPAEN",
         "IOPARST",
         "IOPBEN",
@@ -98,6 +103,8 @@
         "IOPGRST",
         "iplt",
         "IREMAP",
+        "ISER",
+        "ISPR",
         "IWDGRSTF",
         "KEYR",
         "LCKK",
@@ -204,6 +211,9 @@
         "reg_map.h": "c",
         "systick.h": "c",
         "timer.h": "c",
-        "pwm.h": "c"
+        "pwm.h": "c",
+        "systick_reg_map.h": "c",
+        "flash_reg_map.h": "c",
+        "wwdg_reg_map.h": "c"
     }
 }

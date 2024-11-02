@@ -83,10 +83,12 @@
 #define TIMx_POL_ACTIVE_LOW     ((uint8_t) 0x01)
 
 // GPT Error Check
-#define IS_TIMx_GPT(GP_TIMx) \
+#define IS_TIMx_GPT(GP_TIMx)                                                    \
     do {                                                                        \
         if (((GP_TIMx) != TIM2) && ((GP_TIMx) != TIM3) && ((GP_TIMx) != TIM4))  \
-            return -1;                                                          \
+            return (uint8_t) 0;                                                 \
+        else                                                                    \
+            return (uint8_t) 1;                                                 \
     }                                                                           \
     while (0)
 
@@ -213,6 +215,26 @@ inline __attribute__((always_inline)) void disable_GPT_CH(GPT_REG_STRUCT* GP_TIM
 }
 
 /**
+ * @brief Resets the General Purpose GP_TIMx
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+inline __attribute((always_inline)) void reset_GPT(GPT_REG_STRUCT* GP_TIMx){
+    // Reset Based on GPT
+    if(GP_TIMx == TIM2){
+        RCC->APB1RSTR.BIT.TIM2RST = BIT_SET;
+        RCC->APB1RSTR.BIT.TIM2RST = BIT_RESET;
+    }
+    else if(GP_TIMx == TIM3){
+        RCC->APB1RSTR.BIT.TIM3RST = BIT_SET;
+        RCC->APB1RSTR.BIT.TIM3RST = BIT_RESET;
+    }
+    else if(GP_TIMx == TIM4){
+        RCC->APB1RSTR.BIT.TIM4RST = BIT_SET;
+        RCC->APB1RSTR.BIT.TIM4RST = BIT_RESET;
+    }
+}
+
+/**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
  * @param[in] freq_Hz Frequency (in Hz)
  * @param[in] arr_value Auto-Reload Register Value
@@ -301,7 +323,7 @@ inline __attribute__((always_inline)) void set_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, 
  * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
  */
 inline __attribute__((always_inline)) void enable_GPT_IRQ(GPT_REG_STRUCT* GP_TIMx){
-    // Enable the interrupt
+    // Enable the Interrupt
     GP_TIMx->DIER.BIT.UIE = BIT_SET;
 }
 
