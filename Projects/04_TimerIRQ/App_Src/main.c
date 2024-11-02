@@ -2,7 +2,7 @@
 #include "main.h"
 
 // Status Flag
-uint16_t toggle_led = DELAY_VALUE, toggle_OB_led = DELAY_VALUE;
+uint16_t toggle_led = EXT_LED_DELAY_MS, toggle_OB_led = OB_LED_DELAY_MS;
 
 // Main Entry Point for User Code
 int main(void){
@@ -45,16 +45,17 @@ int main(void){
     // Infinite Loop
     while(1){
 
+        // External LED Timer Expired
     	if(!toggle_led){
     		toggle_GPIO(LED_PORT, LED_PIN);
-    		toggle_led = DELAY_VALUE;
+    		toggle_led = EXT_LED_DELAY_MS;
     	}
 
+        // On-board LED Timer Expired
     	if(!toggle_OB_led){
     		toggle_OB_LED();
-    		toggle_OB_led = DELAY_VALUE;
+    		toggle_OB_led = OB_LED_DELAY_MS;
     	}
-
     }
     
     // Return Value
@@ -63,6 +64,7 @@ int main(void){
 
 /**
  * @brief TIM2 IRQ Handler
+ * @note Will be called based upon the Timer Frequency
  */
 void TIM2_IRQHandler(void){
     
@@ -72,11 +74,11 @@ void TIM2_IRQHandler(void){
         // Clear the Interrupt Update Flag
         TIM2->SR.BIT.UIF = BIT_RESET;
 
-        // External LED
+        // External LED Timer
         if(toggle_led)
             toggle_led--;
 
-        // On-board LED
+        // On-board LED Timer
         if(toggle_OB_led)    
             toggle_OB_led--;
 

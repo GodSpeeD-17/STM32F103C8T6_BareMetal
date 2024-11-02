@@ -16,7 +16,7 @@
  * @param[in] IRQn  The Interrupt Number
  */
 inline __attribute__((always_inline)) void enable_NVIC_IRQ(uint8_t IRQn){
-	// Clear the IRQn
+	// Clear the Disable IRQn
 	NVIC->ICER[((IRQn) / 32)] &=  ~(BIT_SET << ((IRQn) & (32 - 1)));
     // Enable the IRQn
     NVIC->ISER[((IRQn) / 32)] |=  (BIT_SET << ((IRQn) & (32 - 1)));
@@ -27,7 +27,7 @@ inline __attribute__((always_inline)) void enable_NVIC_IRQ(uint8_t IRQn){
  * @param[in] IRQn  The Interrupt Number
  */
 inline __attribute__((always_inline)) void disable_NVIC_IRQ(uint8_t IRQn){
-	// Clear the IRQn
+	// Clear the Enable IRQn
 	NVIC->ISER[((IRQn) / 32)] &=  ~(BIT_SET << ((IRQn) & (32 - 1)));
     // Disable the IRQn
     NVIC->ICER[((IRQn) / 32)] |=  (BIT_SET << ((IRQn) & (32 - 1)));
