@@ -12,7 +12,7 @@
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000)  
+#define DELAY_MS                        ((uint32_t) 10)  
 #define GP_TIMER                        (TIM2)
 #define TIMER_CHANNEL                   (TIMx_CHANNEL_3)
 #define TIMER_PORT                      (GPIOA)     
@@ -23,6 +23,7 @@
 #define TIMER_IRQn                      (TIM2_IRQn)
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
+#define DELAY_VALUE                     ((uint16_t) 1000)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;
@@ -37,6 +38,6 @@ extern volatile uint32_t APB2Clock;
 /**
  * @brief TIM2 IRQ Handler
  */
-__attribute__((weak)) void TIM2_IRQHandler(void);
+void TIM2_IRQHandler(void);
 
 #endif /* __MAIN_H__ */

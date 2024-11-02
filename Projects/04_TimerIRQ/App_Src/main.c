@@ -2,7 +2,7 @@
 #include "main.h"
 
 // Status Flag
-uint8_t toggle_led = 0xFF, toggle_OB_led = 0x00;
+uint16_t toggle_led = DELAY_VALUE, toggle_OB_led = DELAY_VALUE;
 
 // Main Entry Point for User Code
 int main(void){
@@ -33,11 +33,11 @@ int main(void){
     // Configure Timer
     config_GPT(GP_TIMER, TIMER_ARR, TIMER_FREQ, TIMER_CNT);
 
-    // Enable Timer Interrupt
-    enable_GPT_IRQ(GP_TIMER);
-
     // Enable NVIC Interrupt
     enable_NVIC_IRQ(TIMER_IRQn);
+
+    // Enable Timer Interrupt
+    enable_GPT_IRQ(GP_TIMER);
 
     // Enable Timer
     enable_GPT(GP_TIMER);
@@ -45,15 +45,16 @@ int main(void){
     // Infinite Loop
     while(1){
 
-    	if(toggle_led){
+    	if(!toggle_led){
     		toggle_GPIO(LED_PORT, LED_PIN);
-    		toggle_led = 0x00;
+    		toggle_led = DELAY_VALUE;
     	}
 
-    	if(toggle_OB_led){
+    	if(!toggle_OB_led){
     		toggle_OB_LED();
-    		toggle_OB_led = 0x00;
+    		toggle_OB_led = DELAY_VALUE;
     	}
+
     }
     
     // Return Value
@@ -64,13 +65,20 @@ int main(void){
  * @brief TIM2 IRQ Handler
  */
 void TIM2_IRQHandler(void){
+    
     // Clear the already Set Update Interrupt Flag
     if(TIM2->SR.BIT.UIF){
-        // Clear
+
+        // Clear the Interrupt Update Flag
         TIM2->SR.BIT.UIF = BIT_RESET;
 
-        // Toggle GPIO
-        toggle_led = 0xFF;
-        toggle_OB_led = 0xFF;
+        // External LED
+        if(toggle_led)
+            toggle_led--;
+
+        // On-board LED
+        if(toggle_OB_led)    
+            toggle_OB_led--;
+
     }
 }
