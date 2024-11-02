@@ -1,9 +1,9 @@
 /*
-    Basic Notes:-
-    YT Reference Video: https://youtu.be/zvTd3Zxtiek
-    `uint32_t` inside every BIT struct because of padding alignment
-    `volatile` used for ensuring no optimization by compiler
-    `: x` indicates only x bit(s) to be used from that 32-bit
+	Basic Notes:-
+	YT Reference Video: https://youtu.be/zvTd3Zxtiek
+	`uint32_t` inside every BIT struct because of padding alignment
+	`volatile` used for ensuring no optimization by compiler
+	`: x` indicates only x bit(s) to be used from that 32-bit
 */
 
 // Header Guards
@@ -37,7 +37,9 @@
 // Address Mapping
 #define SYSTICK								((SYSTICK_REG_STRUCT *)(SYSTICK_BASE_ADDR))
 #define NVIC_SET_IRQ						((NVIC_IRQ_SET_REG_STRUCT *)(NVIC_BASE_ADDR))
-#define NVIC_CLEAR_IRQ						((NVIC_IRQ_CLEAR_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t)0x80))
+#define NVIC_CLEAR_IRQ						((NVIC_IRQ_CLEAR_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0080))
+#define NVIC_SET_PEND_IRQ					((NVIC_IRQ_SET_PEND_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0100))
+#define NVIC_CLEAR_PEND_IRQ					((NVIC_IRQ_CLEAR_PEND_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0180))
 #define FLASH                               ((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
 #define WWDG								((WWDG_REG_STRUCT *) (APB1_BASE_ADDR + (uint32_t)0x2C00))
 #define RCC                     			((RCC_REG_STRUCT *)(AHB_BASE_ADDR + (uint32_t)0x9000))
