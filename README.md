@@ -39,15 +39,15 @@
 BareMetal
     |- Inc
     |  |- Core
-    |  |  |-advtim_reg_map.h           # Advanced Timer Structure {TIM1, -TIM8-}
-    |  |  |-afio_reg_map.h             # Alternate Function Input Output (AFIO) Structure
-    |  |  |-flash_reg_map.h            # Flash Structure
-    |  |  |-gpio_reg_map.h             # General Purpose Input Output (GPIO) Structure
-    |  |  |-gpt_reg_map.h              # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
-    |  |  |-nvic_reg_map.h             # Nested Vector Interrupt Control (NVIC) Structure
-    |  |  |-rcc_reg_map.h              # Reset and Clock Control (RCC) Structure
-    |  |  |-systick_reg_map.h          # SysTick Structure
-    |  |  |-wwdg_reg_map.h             # Window Watchdog (WWDG) Structure
+    |  |  |- advtim_reg_map.h          # Advanced Timer Structure {TIM1, -TIM8-}
+    |  |  |- afio_reg_map.h            # Alternate Function Input Output (AFIO) Structure
+    |  |  |- flash_reg_map.h           # Flash Structure
+    |  |  |- gpio_reg_map.h            # General Purpose Input Output (GPIO) Structure
+    |  |  |- gpt_reg_map.h             # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
+    |  |  |- nvic_reg_map.h            # Nested Vector Interrupt Control (NVIC) Structure
+    |  |  |- rcc_reg_map.h             # Reset and Clock Control (RCC) Structure
+    |  |  |- systick_reg_map.h         # SysTick Structure
+    |  |  |- wwdg_reg_map.h            # Window Watchdog (WWDG) Structure
     |  |- gpio.h                       # GPIO Header File
     |  |- nvic.h                       # NVIC Header File
     |  |- pwm.h                        # PWM Header File
