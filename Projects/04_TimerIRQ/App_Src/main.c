@@ -14,9 +14,6 @@ int main(void){
     config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_GP_PP);
     reset_GPIO(LED_PORT, LED_PIN);
 
-    // Error Check
-    IS_TIMx_GPT(GP_TIMER);
-
     // Enable Timer Clock
     enable_GPT_clk(GP_TIMER);
 
