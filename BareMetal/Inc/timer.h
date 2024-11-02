@@ -151,18 +151,81 @@ inline __attribute__((always_inline)) void disable_GPT(GPT_REG_STRUCT* GP_TIMx){
 }
 
 /**
- * @brief Enables the General Purpose TIMx's Channel
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @brief Enables the General Purpose GP_TIMx's Channel
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
-void enable_GPT_CH(GPT_REG_STRUCT* TIMx, uint8_t channel);
+inline __attribute__((always_inline)) void enable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
+
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Enable the General Purpose Timer Channel
+	switch(channel){
+		
+		case TIMx_CHANNEL_1:
+			GP_TIMx->CCER.BIT.CC1E = BIT_SET;
+		break;
+
+		case TIMx_CHANNEL_2:
+			GP_TIMx->CCER.BIT.CC2E = BIT_SET;
+		break;
+		
+		case TIMx_CHANNEL_3:
+			GP_TIMx->CCER.BIT.CC3E = BIT_SET;
+		break;
+		
+		case TIMx_CHANNEL_4:
+			GP_TIMx->CCER.BIT.CC4E = BIT_SET;
+		break;
+
+		case TIMx_CHANNEL_ALL:
+			GP_TIMx->CCER.BIT.CC1E = BIT_SET;
+			GP_TIMx->CCER.BIT.CC2E = BIT_SET;
+			GP_TIMx->CCER.BIT.CC3E = BIT_SET;
+			GP_TIMx->CCER.BIT.CC4E = BIT_SET;
+		break;
+	}
+}
 
 /**
- * @brief Disables the General Purpose TIMx's Channel
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @brief Disables the General Purpose GP_TIMx's Channel
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
-void disable_GPT_CH(GPT_REG_STRUCT* TIMx, uint8_t channel);
+inline __attribute__((always_inline)) void disable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
+	// Error Check
+	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+		return;
+
+	// Enable the General Purpose Timer Channel
+	switch(channel){
+		
+		case TIMx_CHANNEL_1:
+			GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
+		break;
+
+		case TIMx_CHANNEL_2:
+			GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
+		break;
+		
+		case TIMx_CHANNEL_3:
+			GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
+		break;
+		
+		case TIMx_CHANNEL_4:
+			GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
+		break;
+
+		case TIMx_CHANNEL_ALL:
+			GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
+			GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
+			GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
+			GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
+		break;
+	}
+}
 
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
@@ -197,7 +260,6 @@ inline __attribute__((always_inline)) uint16_t calc_GPT_PSC(uint32_t freq_Hz, ui
  * @param[in] arr_value ARR Value
  * @param[in] freq_Hz Timer Frequency (in Hz)
  * @param[in] count_value Timer Counter Value 
- * @note - ERROR HANDLING NOT DONE
  * @note - Assumed DIR is Up Counting
  * @note - Assumed Edge Aligned Mode (Up counting or Down counting)
  */

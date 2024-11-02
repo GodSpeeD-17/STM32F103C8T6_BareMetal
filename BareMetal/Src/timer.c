@@ -54,89 +54,11 @@
 #include "timer.h"
 
 /**
- * @brief Enables the General Purpose GP_TIMx's Channel
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
- * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
- */
-void enable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
-	// Enable the General Purpose Timer Channel
-	switch(channel){
-		
-		case TIMx_CHANNEL_1:
-			GP_TIMx->CCER.BIT.CC1E = BIT_SET;
-		break;
-
-		case TIMx_CHANNEL_2:
-			GP_TIMx->CCER.BIT.CC2E = BIT_SET;
-		break;
-		
-		case TIMx_CHANNEL_3:
-			GP_TIMx->CCER.BIT.CC3E = BIT_SET;
-		break;
-		
-		case TIMx_CHANNEL_4:
-			GP_TIMx->CCER.BIT.CC4E = BIT_SET;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			GP_TIMx->CCER.BIT.CC1E = BIT_SET;
-			GP_TIMx->CCER.BIT.CC2E = BIT_SET;
-			GP_TIMx->CCER.BIT.CC3E = BIT_SET;
-			GP_TIMx->CCER.BIT.CC4E = BIT_SET;
-		break;
-	}
-}
-
-/**
- * @brief Disables the General Purpose GP_TIMx's Channel
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
- * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
- */
-void disable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
-	// Enable the General Purpose Timer Channel
-	switch(channel){
-		
-		case TIMx_CHANNEL_1:
-			GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
-		break;
-
-		case TIMx_CHANNEL_2:
-			GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
-		break;
-		
-		case TIMx_CHANNEL_3:
-			GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
-		break;
-		
-		case TIMx_CHANNEL_4:
-			GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
-			GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
-			GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
-			GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
-		break;
-	}
-}
-
-/**
  * @brief Configure General Purpose GP_TIMx (Clock Source + Frequency)
  * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  * @param[in] arr_value ARR Value
  * @param[in] freq_Hz Timer Frequency (in Hz)
  * @param[in] count_value Timer Counter Value 
- * @note - ERROR HANDLING NOT DONE
  * @note - Configures DIR is Up Counting
  * @note - Configures Edge Aligned Mode (Up counting or Down counting based upon `DIR`)
  */
@@ -182,7 +104,6 @@ uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
 	// Return the Timer Frequency
 	return timer_freq;
 }
-
 
 /**
  * @brief General Purpose Timer Delay
