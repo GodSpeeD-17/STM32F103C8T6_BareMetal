@@ -22,8 +22,8 @@
   - Flash: 64kB (0x08000000)
   - SRAM: 20kB (0x20000000)
   - Vector Table: 76
-    - ARM Cortex M3 IRQ: 11
-    - STM32F103C8T6: 59 
+    - ARM Cortex-M3 IRQ: 11
+    - STM32F103C8T6 IRQ: 59 
     - Reserved: 6
 
 ## Boot Process:
