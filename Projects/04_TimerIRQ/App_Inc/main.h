@@ -22,6 +22,7 @@
 #define TIMER_IRQn                      (TIM2_IRQn)
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
+#define DELAY_MS                        ((uint32_t) 10)
 #define OB_LED_DELAY_MS                 ((uint32_t) 1500)  
 #define EXT_LED_DELAY_MS                ((uint16_t) 500)
 

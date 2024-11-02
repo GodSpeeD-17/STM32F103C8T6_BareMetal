@@ -56,6 +56,9 @@ int main(void){
     		toggle_OB_LED();
     		toggle_OB_led = OB_LED_DELAY_MS;
     	}
+
+        // Infinite Loop Short Delay
+        SysTick_delay_ms(DELAY_MS);
     }
     
     // Return Value
