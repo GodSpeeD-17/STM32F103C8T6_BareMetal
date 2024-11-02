@@ -5,6 +5,12 @@
 // Core C Library
 #include <stdint.h>
 
+// Macros
+#define WWDG_IRQn                       ((uint8_t) 0)
+#define PVD_IRQn                        ((uint8_t) 1)
+#define RTC_IRQn                        ((uint8_t) 3)
+#define TIM2_IRQn                       ((uint8_t) 28)
+
 // NVIC Structures
 typedef struct {
     // Interrupt Set-Enable Registers (ISER)

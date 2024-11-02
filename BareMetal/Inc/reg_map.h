@@ -11,18 +11,18 @@
 #define __REG_MAP_H__
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
-#include "./Reg_Map/systick_reg_map.h"
-#include "./Reg_Map/flash_reg_map.h"
-#include "./Reg_Map/wwdg_reg_map.h"
-#include "./Reg_Map/nvic_reg_map.h"
+#include "./Core/systick_reg_map.h"
+#include "./Core/flash_reg_map.h"
+#include "./Core/wwdg_reg_map.h"
+#include "./Core/nvic_reg_map.h"
 /*********************************************** ARM CORTEX M3 ***********************************************/
 
 /*********************************************** STM32F103C8T6 ***********************************************/
-#include "./Reg_Map/rcc_reg_map.h"
-#include "./Reg_Map/gpio_reg_map.h"
-#include "./Reg_Map/afio_reg_map.h"
-#include "./Reg_Map/advtim_reg_map.h"
-#include "./Reg_Map/gpt_reg_map.h"
+#include "./Core/rcc_reg_map.h"
+#include "./Core/gpio_reg_map.h"
+#include "./Core/afio_reg_map.h"
+#include "./Core/advtim_reg_map.h"
+#include "./Core/gpt_reg_map.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -37,10 +37,6 @@
 // Address Mapping
 #define SYSTICK								((SYSTICK_REG_STRUCT *)(SYSTICK_BASE_ADDR))
 #define NVIC								((NVIC_REG_STRUCT *)(NVIC_BASE_ADDR))
-// #define NVIC_SET_IRQ						((NVIC_IRQ_SET_REG_STRUCT *)(NVIC_BASE_ADDR))
-// #define NVIC_CLEAR_IRQ						((NVIC_IRQ_CLEAR_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0080))
-// #define NVIC_SET_PEND_IRQ					((NVIC_IRQ_SET_PEND_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0100))
-// #define NVIC_CLEAR_PEND_IRQ					((NVIC_IRQ_CLEAR_PEND_REG_STRUCT *)(NVIC_BASE_ADDR + (uint32_t) 0x0180))
 #define FLASH                               ((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
 #define WWDG								((WWDG_REG_STRUCT *) (APB1_BASE_ADDR + (uint32_t)0x2C00))
 #define RCC                     			((RCC_REG_STRUCT *)(AHB_BASE_ADDR + (uint32_t)0x9000))
