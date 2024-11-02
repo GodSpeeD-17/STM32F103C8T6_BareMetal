@@ -82,17 +82,20 @@
 #define TIMx_POL_ACTIVE_HIGH    ((uint8_t) 0x00)
 #define TIMx_POL_ACTIVE_LOW     ((uint8_t) 0x01)
 
+// GPT Error Check
+#define IS_TIMx_GPT(GP_TIMx) \
+    do {                                                                        \
+        if (((GP_TIMx) != TIM2) && ((GP_TIMx) != TIM3) && ((GP_TIMx) != TIM4))  \
+            return;                                                             \
+    }                                                                           \
+    while (0)
+
 /**
  * @brief Enables the Clock for General Purpose Timer
  * @param[in] GP_TIMx General Purpose Timer
  * @note RCC->APB1ENR
  */
 inline __attribute__((always_inline)) void enable_GPT_clk(GPT_REG_STRUCT* GP_TIMx){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-		
 	// Enable the clock for the timer
 	if(GP_TIMx == TIM2)
 		RCC->APB1ENR.BIT.TIM2EN = BIT_SET;
@@ -108,11 +111,6 @@ inline __attribute__((always_inline)) void enable_GPT_clk(GPT_REG_STRUCT* GP_TIM
  * @note RCC->APB1ENR
  */
 inline __attribute__((always_inline)) void disable_GPT_clk(GPT_REG_STRUCT* GP_TIMx){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
 	// Disable the clock for the timer
 	if(GP_TIMx == TIM2)
 		RCC->APB1ENR.BIT.TIM2EN = BIT_RESET;
@@ -127,11 +125,8 @@ inline __attribute__((always_inline)) void disable_GPT_clk(GPT_REG_STRUCT* GP_TI
  * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  */
 inline __attribute__((always_inline)) void enable_GPT(GPT_REG_STRUCT* GP_TIMx){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
+    // Clear Update Interrupt Flag
+    GP_TIMx->SR.BIT.UIF = BIT_RESET;
 	// Enable GP_TIMx
 	GP_TIMx->CR1.BIT.CEN = BIT_SET;
 }
@@ -141,11 +136,8 @@ inline __attribute__((always_inline)) void enable_GPT(GPT_REG_STRUCT* GP_TIMx){
  * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
  */
 inline __attribute__((always_inline)) void disable_GPT(GPT_REG_STRUCT* GP_TIMx){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
+    // Clear Update Interrupt Flag
+    GP_TIMx->SR.BIT.UIF = BIT_RESET;
 	// Disable GP_TIMx
 	GP_TIMx->CR1.BIT.CEN = BIT_RESET;
 }
@@ -156,10 +148,6 @@ inline __attribute__((always_inline)) void disable_GPT(GPT_REG_STRUCT* GP_TIMx){
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
 inline __attribute__((always_inline)) void enable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
 
 	// Enable the General Purpose Timer Channel
 	switch(channel){
@@ -195,9 +183,6 @@ inline __attribute__((always_inline)) void enable_GPT_CH(GPT_REG_STRUCT* GP_TIMx
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
 inline __attribute__((always_inline)) void disable_GPT_CH(GPT_REG_STRUCT* GP_TIMx, uint8_t channel){
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
 
 	// Enable the General Purpose Timer Channel
 	switch(channel){
@@ -272,10 +257,6 @@ void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, u
  * @param[in] direction `TIMx_COUNT_UP`, `TIMx_COUNT_DOWN`
  */
 inline __attribute__((always_inline)) void set_GPT_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t cms_mode, uint8_t direction){
-	
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return; 
 
 	// Centre-Aligned Mode Selection
 	GP_TIMx->CR1.BIT.CMS = cms_mode;
@@ -297,11 +278,6 @@ uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx);
  * @param[in] freq_Hz Timer Frequency (in Hz)
  */
 inline __attribute__((always_inline)) void set_GPT_freq(GPT_REG_STRUCT* GP_TIMx, uint32_t freq_Hz){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return; 
-
 	// Calculate updated PSC Value
 	GP_TIMx->PSC = calc_GPT_PSC(freq_Hz, GP_TIMx->ARR);
 }
@@ -312,11 +288,6 @@ inline __attribute__((always_inline)) void set_GPT_freq(GPT_REG_STRUCT* GP_TIMx,
  * @param[in] arr_value Auto Reload Value
  */
 inline __attribute__((always_inline)) void set_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value){
-
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return;
-
 	// Calculate updated PSC Value
 	GP_TIMx->ARR = arr_value;
 }

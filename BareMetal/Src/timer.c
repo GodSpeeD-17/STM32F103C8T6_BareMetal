@@ -85,10 +85,6 @@ void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, u
  */
 uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
 
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
-		return (uint32_t) 0xFFFFFFFF;
-
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
 

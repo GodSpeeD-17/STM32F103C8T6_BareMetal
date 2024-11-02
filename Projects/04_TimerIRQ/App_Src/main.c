@@ -10,6 +10,9 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
+    // Error Check
+    IS_TIMx_GPT(GP_TIMER);
+
     // Disable Timer
     disable_GPT(GP_TIMER);
 
