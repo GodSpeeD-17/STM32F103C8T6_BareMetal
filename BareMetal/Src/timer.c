@@ -55,7 +55,7 @@
 
 /**
  * @brief Configure General Purpose GP_TIMx (Clock Source + Frequency)
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
  * @param[in] arr_value ARR Value
  * @param[in] freq_Hz Timer Frequency (in Hz)
  * @param[in] count_value Timer Counter Value 
@@ -65,7 +65,7 @@
 void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, uint16_t count_value){
 	
 	// Error Check
-	if ((freq_Hz == 0) || (GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4))
+	if (freq_Hz == 0)
 		return;
 
 	// Set the prescaler value
@@ -76,11 +76,14 @@ void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, u
 
 	// Set the count value
 	GP_TIMx->CNT = count_value;
+
+	// Send an update event to reset the timer and apply settings
+  	GP_TIMx->EGR.BIT.UG = BIT_SET;
 }
 
 /**
  * @brief Gets the GP Timer Clock Frequency
- * @param[in] GP_TIMx  `TIM2`, `TIM3`, `TIM4`, `TIM5`
+ * @param[in] GP_TIMx  `TIM2`, `TIM3`, `TIM4`
  * @note Refer the formula mentioned in .c file  & clock tree to get clear understanding
  */
 uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
@@ -103,7 +106,7 @@ uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] GP_TIMx General Purpose Timer (TIM2, ..., TIM5)
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
  * @param[in] delayMs Number of milliseconds
  */
 void GPT_delay_ms(GPT_REG_STRUCT* GP_TIMx, volatile uint32_t delayMs){
