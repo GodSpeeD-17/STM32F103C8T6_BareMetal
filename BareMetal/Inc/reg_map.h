@@ -23,6 +23,7 @@
 #include "./Core/afio_reg_map.h"
 #include "./Core/advtim_reg_map.h"
 #include "./Core/gpt_reg_map.h"
+#include "./Core/adc_reg_map.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -56,6 +57,8 @@
 #define TIM6								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1000))
 #define TIM7								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1400))
 #define TIM8								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3400))
+#define ADC1								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2400))
+#define ADC2								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2800))
 /*********************************************** Address Mapping ***********************************************/
 
 
