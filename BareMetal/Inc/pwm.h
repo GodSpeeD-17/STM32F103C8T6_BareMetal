@@ -32,9 +32,6 @@
 #define PRELOAD_DISABLE              ((uint8_t) 0x00)
 #define PRELOAD_ENABLE               ((uint8_t) 0x01)
 
-// Enable Alternate Function
-#define RCC_AF_ENABLE()              (RCC->APB2ENR.BIT.AFIOEN = BIT_SET)
-
 // Timer Modes
 typedef enum{
 	TIMx_OCM_FREEZE         = ((uint8_t) 0x00),    // The comparison between the output compare register TIMx_CCRy and the counter TIMx_CNT has no effect on the outputs.

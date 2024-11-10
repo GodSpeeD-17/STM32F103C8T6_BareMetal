@@ -9,14 +9,16 @@
 #include "timer.h"
 #include "pwm.h"
 #include "nvic.h"
+#include "adc.h"
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000) 
+#define DELAY_MS                        ((uint32_t) 1000)
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_0)
 #define POT_PORT                        (GPIOB)      
-#define POT_PIN                         (GPIO_PIN_1)      
+#define POT_PIN                         (GPIO_PIN_1)
+#define POT_ADC                         (ADC1)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

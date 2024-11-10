@@ -1,3 +1,10 @@
+/***************************************************************************************
+ *  File: pwm.c
+ *  Created on: 26/10/2024
+ *  Author: Shrey Shah
+ ***************************************************************************************/
+
+
 /*
 	THEORY:
 	|=> Pulse Width Modulation (PWM) is used to create pseudo Analog Value from Digital Value

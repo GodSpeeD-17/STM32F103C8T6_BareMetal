@@ -100,6 +100,9 @@
 #define USB_DIV_1_5                     ((uint8_t) 0)
 #define USB_DIV_1                       ((uint8_t) 1)
 
+// Enable Alternate Function
+#define RCC_AF_ENABLE()              	(RCC->APB2ENR.BIT.AFIOEN = BIT_SET)
+
 // PLL Clock Source
 typedef enum {
 	HSE_DIV_1 = (uint8_t)0XAA,
