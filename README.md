@@ -37,17 +37,20 @@
 ## BareMetal Structure
 ```
 BareMetal
+    |- Core
+    |  |- adc_reg_map.h                # Analog to Digital Converter Structure {ADC1, ADC2, -ADC3-}
+    |  |- advtim_reg_map.h             # Advanced Timer Structure {TIM1, -TIM8-}
+    |  |- afio_reg_map.h               # Alternate Function Input Output (AFIO) Structure
+    |  |- flash_reg_map.h              # Flash Structure
+    |  |- gpio_reg_map.h               # General Purpose Input Output (GPIO) Structure
+    |  |- gpt_reg_map.h                # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
+    |  |- nvic_reg_map.h               # Nested Vector Interrupt Control (NVIC) Structure
+    |  |- rcc_reg_map.h                # Reset and Clock Control (RCC) Structure
+    |  |- systick_reg_map.h            # SysTick Structure
+    |  |- wwdg_reg_map.h               # Window Watchdog (WWDG) Structure
     |- Inc
-    |  |- Core
-    |  |  |- advtim_reg_map.h          # Advanced Timer Structure {TIM1, -TIM8-}
-    |  |  |- afio_reg_map.h            # Alternate Function Input Output (AFIO) Structure
-    |  |  |- flash_reg_map.h           # Flash Structure
-    |  |  |- gpio_reg_map.h            # General Purpose Input Output (GPIO) Structure
-    |  |  |- gpt_reg_map.h             # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
-    |  |  |- nvic_reg_map.h            # Nested Vector Interrupt Control (NVIC) Structure
-    |  |  |- rcc_reg_map.h             # Reset and Clock Control (RCC) Structure
-    |  |  |- systick_reg_map.h         # SysTick Structure
-    |  |  |- wwdg_reg_map.h            # Window Watchdog (WWDG) Structure
+    |  |- adc.h                        # ADC Header File
+    |  |- bare_metal.h                 # Common Include Header File
     |  |- gpio.h                       # GPIO Header File
     |  |- nvic.h                       # NVIC Header File
     |  |- pwm.h                        # PWM Header File
@@ -57,6 +60,7 @@ BareMetal
     |  |- timer.h                      # Timer Header File
     |
     |- Src
+    |  |- adc.c                        # ADC Source File
     |  |- gpio.c                       # GPIO Source File
     |  |- pwm.c                        # PWM Source File
     |  |- rcc.c                        # Clock Configuration Source File
