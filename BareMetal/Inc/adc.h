@@ -1,5 +1,5 @@
 /***************************************************************************************
- *  File: pwm.h
+ *  File: adc.h
  *  Created on: 09/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
@@ -10,6 +10,12 @@
 
 // Dependency
 #include "reg_map.h"
+#include "systick.h"
+
+// System Clock Frequency (Core)
+extern volatile uint32_t CoreClock;
+
+#define ADC_ON_DELAY_MS			((uint32_t) 100)
 
 /**
  * @brief Enables the Clock for Analog to Digital Converter (ADC)
@@ -42,17 +48,11 @@ inline __attribute__((always_inline)) void disable_ADC_clk(ADC_REG_STRUCT* ADCx)
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
 inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
-    // When the ADON bit is set for the first time, it wakes up the ADC from Power Down mode
+	// Enable ADC
 	if(ADCx == ADC1)
 		ADC1->CR2.BIT.ADON = BIT_SET;
 	else if(ADCx == ADC2)
-		ADC2->CR2.BIT.ADON = BIT_SET;
-        
-    // Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)
-    if(ADCx == ADC1)
-		ADC1->CR2.BIT.ADON = BIT_SET;
-	else if(ADCx == ADC2)
-		ADC2->CR2.BIT.ADON = BIT_SET;   
+		ADC2->CR2.BIT.ADON = BIT_SET;  
 }
 
 /**
@@ -60,7 +60,7 @@ inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
 inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
-	// Disable the clock for the ADC
+	// Disable the ADC
 	if(ADCx == ADC1)
 		ADC1->CR2.BIT.ADON = BIT_RESET;
 	else if(ADCx == ADC2)
@@ -70,7 +70,8 @@ inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
 /**
  * @brief ADC Calibration 
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3` 
- * @note It is recommended to perform a calibration after each power-up
+ * @note - It is recommended to perform a calibration after each power-up
+ * @note - Before starting a calibration, the ADC must have been in power-on state for at least two ADC clock cycles
  */
 inline __attribute__((always_inline)) void cal_ADC(ADC_REG_STRUCT* ADCx){
     // Start the Calibration
@@ -78,5 +79,8 @@ inline __attribute__((always_inline)) void cal_ADC(ADC_REG_STRUCT* ADCx){
     // Reset by Hardware after Calibration is Complete
     while(!(ADCx->CR2.BIT.CAL));
 }
+
+
+
 
 #endif /* __ADC_H__ */
