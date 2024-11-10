@@ -3,12 +3,7 @@
 #define __MAIN_H__
 
 // Bare Metal Libraries
-#include "gpio.h"
-#include "rcc.h"
-#include "systick.h"
-#include "timer.h"
-#include "pwm.h"
-#include "nvic.h"
+#include "bare_metal.h"
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)

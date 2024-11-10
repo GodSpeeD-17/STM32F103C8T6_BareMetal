@@ -244,6 +244,7 @@
         "systick_reg_map.h": "c",
         "flash_reg_map.h": "c",
         "wwdg_reg_map.h": "c",
-        "adc.h": "c"
+        "adc.h": "c",
+        "common.h": "c"
     }
 }
