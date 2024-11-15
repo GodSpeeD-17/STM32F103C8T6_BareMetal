@@ -24,6 +24,7 @@
 #include "../Core/gpio_reg_map.h"
 #include "../Core/gpt_reg_map.h"
 #include "../Core/rcc_reg_map.h"
+#include "../Core/usart_reg_map.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -59,6 +60,9 @@
 #define TIM8								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3400))
 #define ADC1								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2400))
 #define ADC2								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2800))
+#define USART1								((USART_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3800))
+#define USART2								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4400))
+#define USART3								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4800))
 /*********************************************** Address Mapping ***********************************************/
 
 
