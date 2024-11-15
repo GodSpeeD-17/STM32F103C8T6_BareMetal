@@ -98,6 +98,21 @@ void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 }
 
 /**
+ * @brief Gets the status of GPIO Pin
+ * @param[in] GPIOx GPIOA, GPIOB, GPIOC
+ * @param[in] PINx GPIO Pin Number
+ * @returns `BIT_SET`, `BIT_RESET`
+ */
+uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+	// Value
+	uint8_t result = 0xFF;
+	// Retrieve Data
+	result = (uint8_t)((GPIOx->IDR.REG >> PINx) & BIT_SET);
+	// Return the Value
+	return result;
+}
+
+/**
  * @brief Resets a GPIO Pin LOW
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number

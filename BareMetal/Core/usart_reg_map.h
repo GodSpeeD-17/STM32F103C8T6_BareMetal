@@ -109,7 +109,6 @@ typedef struct {
 			volatile uint32_t DMAR: 1;
 			volatile uint32_t DMAT: 1;
 			volatile uint32_t RTSE: 1;
-			volatile uint32_t RTSE: 1;
 			volatile uint32_t CTSE: 1;
 			volatile uint32_t CTSIE: 1;
 			volatile uint32_t reserved: 17;
@@ -126,7 +125,7 @@ typedef struct {
 			volatile uint32_t GT: 8;
 			volatile uint32_t reserved: 16;
 		} BIT;
-	} CR3;
+	} GTPR;
 
 } USART_REG_STRUCT;
 

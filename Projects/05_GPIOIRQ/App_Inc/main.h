@@ -7,7 +7,7 @@
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000)    
+#define DELAY_MS                        ((uint32_t) 10)    
 #define IRQ_PORT                        (GPIOB)   
 #define IRQ_PIN                         (GPIO_PIN_4)   
 #define LED_PORT                        (GPIOA)

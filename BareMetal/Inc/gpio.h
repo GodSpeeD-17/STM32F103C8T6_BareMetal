@@ -84,6 +84,14 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
 
 /**
+ * @brief Gets the status of GPIO Pin
+ * @param[in] GPIOx GPIOA, GPIOB, GPIOC
+ * @param[in] PINx GPIO Pin Number
+ * @returns `BIT_SET`, `BIT_RESET`
+ */
+uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+
+/**
  * @brief Resets a GPIO Pin LOW
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
@@ -117,5 +125,29 @@ void reset_OB_LED(void);
  * @brief Toggles the on-board active low LED (PC13)
  */
 void toggle_OB_LED(void);
+
+/**
+ * @brief Sets the GPIO to be used in Input Pull Up Mode
+ * @param[in] GPIOx GPIOA, GPIOB, GPIOC
+ * @param[in] PINx GPIO Pin Number
+ */
+__attribute__((always_inline)) inline void config_GPIO_IN_PU(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+    // Configure the GPIO as Input Pull Up / Pull Down
+    config_GPIO(GPIOx, PINx, MODE_IN, CNF_IN_PU_PD);
+    // Refer Table 20 (PDF Page 161)
+    GPIOx->ODR.REG |= (BIT_SET << PINx);
+}
+
+/**
+ * @brief Sets the GPIO to be used in Input Pull Down Mode
+ * @param[in] GPIOx GPIOA, GPIOB, GPIOC
+ * @param[in] PINx GPIO Pin Number
+ */
+__attribute__((always_inline)) inline void config_GPIO_IN_PD(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+    // Configure the GPIO as Input Pull Up / Pull Down
+    config_GPIO(GPIOx, PINx, MODE_IN, CNF_IN_PU_PD);
+    // Refer Table 20 (PDF Page 161)
+    GPIOx->ODR.REG &= ~(BIT_SET << PINx);
+} 
 
 #endif /* __GPIO__H__ */

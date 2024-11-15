@@ -10,11 +10,36 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
+    // Configure LED
+    config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_GP_PP);
+    reset_GPIO(LED_PORT, LED_PIN);
+
+    // Configure Push Button as Input
+    config_GPIO_IN_PD(IRQ_PORT, IRQ_PIN);
+    
     // Infinite Loop
     while(1){
 
+        // Push Button Pressed
+        if(get_GPIO(IRQ_PORT, IRQ_PIN)){
+            // LED ON
+            set_GPIO(LED_PORT, LED_PIN);
+        }
+        // Push Button Released
+        else{
+            // LED OFF
+            reset_GPIO(LED_PORT, LED_PIN);
+        }
+
+        // Delay
+        SysTick_delay_ms(DELAY_MS);
     }
     
     // Return Value
     return 0;
+}
+
+
+void IRQHandler(){
+
 }
