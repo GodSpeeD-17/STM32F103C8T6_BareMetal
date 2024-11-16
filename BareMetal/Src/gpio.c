@@ -56,72 +56,56 @@ void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @param[in] MODEx Pin Mode `MODE_..`
  * @param[in] CNFx Pin Configuration `CNF_..`
- * @note Does not configure PC13, PC14, PC15
+ * @note Do not use it to configure PC13, PC14, PC15
  */
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx){
-	
-	// Enable GPIO Clock
-	enable_GPIO_clk(GPIOx);
+    uint32_t reg, shift, mask;
 
-	// PINx >= 8 
-	if(PINx > 7 && PINx < 16){
-		// Return on PC13, PC14, PC15
-		if((GPIOx == GPIOC) && (PINx > (uint8_t)12))
-			return;
-		// Input Mode
-		if(MODEx == MODE_IN){
-			// Pull Up
-			if(CNFx == CNF_IN_PU){
-				// Output Data Register Corresponding Bit Set
-				GPIOx->BSRR.REG |= (BIT_SET << PINx);
-			}
-			// Pull Down
-			else if(CNFx == CNF_IN_PD){
-				// Output Data Register Corresponding Bit Reset
-				GPIOx->BRR.REG |= (BIT_SET << PINx);
-			}
-			// Clear Reset State (0x04 i.e Floating State)
-			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
-			// MODE + CONFIGURATION
-			GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNF_IN_PU_PD << ((4 * (PINx - 8)) + 2)));
-		}
-		else{
-			// Clear Reset State (0x04 i.e Floating State)
-			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
-			// MODE + CONFIGURATION
-			GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNFx << ((4 * (PINx - 8)) + 2)));
-		}
-	}
-	// PINx <= 7
-	else if (PINx <= 7){
-		// Input Mode
-		if(MODEx == MODE_IN){
-			// Pull Up
-			if(CNFx == CNF_IN_PU){
-				// Output Data Register Corresponding Bit Set
-				GPIOx->BSRR.REG |= (BIT_SET << PINx);
-			}
-			// Pull Down
-			else if(CNFx == CNF_IN_PD){
-				// Output Data Register Corresponding Bit Reset
-				GPIOx->BRR.REG |= (BIT_SET << PINx);
-			}
-			// Clear Reset State (0x04 i.e Floating State)
-			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
-			// MODE + CONFIGURATION
-			GPIOx->CRH.REG |= (uint32_t)((MODE_IN << (4 * (PINx - 8))) | (CNF_IN_PU_PD << ((4 * (PINx - 8)) + 2)));
-		}
-		else{
-			// Clear Reset State (0x04 i.e Floating State)
-			GPIOx->CRL.REG &= ~((uint32_t)(0x0F << (4 * PINx)));
-			// MODE + CONFIGURATION
-			GPIOx->CRL.REG |= (uint32_t)((MODEx << (4 * PINx)) | (CNFx << ((4 * PINx) + 2)));
-		}
-	}
-	// Error Condition
-	else{
+    // Enable GPIO Clock
+    enable_GPIO_clk(GPIOx);
+
+    // Determine the register, shift, and mask based on the pin number
+    if (PINx < 8) {
+        reg = GPIOx->CRL.REG;
+        shift = PINx * 4;
+        mask = 0x0F << shift;
+    } 
+	else if (PINx < 16){
+        reg = GPIOx->CRH.REG;
+        shift = (PINx - 8) * 4;
+        mask = 0x0F << shift;
+    }
+	// Error
+	else
 		return;
-	}
+
+    // Handle input mode and configuration (pull-up or pull-down)
+    if (MODEx == MODE_IN) {
+        // Input mode with pull-up or pull-down
+        if (CNFx == CNF_IN_PU) {
+            // Set pin to pull-up
+            GPIOx->BSRR.REG |= (1 << PINx);  // Set the pin high to enable pull-up
+        } 
+        else if (CNFx == CNF_IN_PD) {
+            // Set pin to pull-down
+            GPIOx->BRR.REG |= (1 << PINx);   // Set the pin low to enable pull-down
+        }
+		// Update the Configuration Bits
+		CNFx = CNF_IN_PU_PD;
+    }
+
+    // Clear the current mode and configuration bits
+    reg &= ~mask;
+	// Update the configuration
+	reg |= ((CNFx << (shift + 2) | MODEx << shift));
+
+    // New value Updation
+    if (PINx < 8) {
+        GPIOx->CRL.REG = reg;
+    } 
+	else {
+        GPIOx->CRH.REG = reg;
+    }
 }
 
 /**
