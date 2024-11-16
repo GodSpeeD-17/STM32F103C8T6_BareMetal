@@ -41,6 +41,8 @@
 #define CNF_IN_ANALOG                      ((uint8_t) 0)
 #define CNF_IN_FLOAT                       ((uint8_t) 1)
 #define CNF_IN_PU_PD                       ((uint8_t) 2)
+#define CNF_IN_PD                          ((uint8_t) 3)
+#define CNF_IN_PU                          ((uint8_t) 4)
 #define CNF_OUT_GP_PP                      ((uint8_t) 0)
 #define CNF_OUT_GP_OD                      ((uint8_t) 1)
 #define CNF_OUT_AF_PP                      ((uint8_t) 2)
@@ -59,13 +61,13 @@
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-static inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
+void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
 
 /**
  * @brief Disables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-static inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
+void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
 
 /**
  * @brief Configures GPIO as per input
@@ -73,6 +75,7 @@ static inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @param[in] MODEx Pin Mode `MODE_..`
  * @param[in] CNFx Pin Configuration `CNF_..`
+ * @note Does not configure PC13, PC14, PC15
  */
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx);
 
@@ -81,7 +84,10 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+__attribute__((always_inline)) inline void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+	// Bit Set (Atomicity)
+	GPIOx->BSRR.REG = (BIT_SET << PINx);
+}
 
 /**
  * @brief Gets the status of GPIO Pin
@@ -96,14 +102,20 @@ uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-void reset_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+__attribute__((always_inline)) inline void reset_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx) {
+	// Bit Reset (Atomicity)
+	GPIOx->BRR.REG = (BIT_SET << PINx);
+}
 
 /**
  * @brief Toggles GPIO Pin
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-void toggle_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+__attribute__((always_inline)) inline void toggle_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+	// Toggle the GPIO Pin
+	GPIOx->ODR.REG ^= (BIT_SET << PINx);
+}
 
 /**
  * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
@@ -131,12 +143,15 @@ void toggle_OB_LED(void);
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
+/*
 __attribute__((always_inline)) inline void config_GPIO_IN_PU(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
     // Configure the GPIO as Input Pull Up / Pull Down
     config_GPIO(GPIOx, PINx, MODE_IN, CNF_IN_PU_PD);
     // Refer Table 20 (PDF Page 161)
     GPIOx->ODR.REG |= (BIT_SET << PINx);
 }
+*/
+
 
 /**
  * @brief Sets the GPIO to be used in Input Pull Down Mode
@@ -149,5 +164,39 @@ __attribute__((always_inline)) inline void config_GPIO_IN_PD(GPIO_REG_STRUCT* GP
     // Refer Table 20 (PDF Page 161)
     GPIOx->ODR.REG &= ~(BIT_SET << PINx);
 } 
+
+/*
+__attribute__((always_inline)) inline void config_GPIO_IN_PD(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+    // Enable Clock
+    enable_GPIO_clk(GPIOx);
+    // PINx >= 8 
+    if(PINx > 7 && PINx < 16){
+		// Return on PC13, PC14, PC15
+		if((GPIOx == GPIOC) && (PINx > (uint8_t)12))
+			return;
+        // Configure for pull down mode
+        GPIOx->ODR.REG &= ~(BIT_SET << PINx); 
+		// Clear Reset State (0x04 i.e Floating State)
+		GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
+		// MODE + CONFIGURATION
+		GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNFx << ((4 * (PINx - 8)) + 2)));
+	}
+    // PINx <= 7
+	else if (PINx <= 7){
+        // Configure for pull down mode
+        GPIOx->ODR.REG &= ~(BIT_SET << PINx); 
+		// Clear Reset State (0x04 i.e Floating State)
+		GPIOx->CRL.REG &= ~((uint32_t)(0x0F << (4 * PINx)));
+		// MODE + CONFIGURATION
+		GPIOx->CRL.REG |= (uint32_t)((MODEx << (4 * PINx)) | (CNFx << ((4 * PINx) + 2)));
+	}
+	// Error Condition
+	else{
+		return;
+	}
+
+    
+}
+*/
 
 #endif /* __GPIO__H__ */

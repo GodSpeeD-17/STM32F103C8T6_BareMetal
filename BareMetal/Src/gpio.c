@@ -10,7 +10,7 @@
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-static inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
 
 	// Enable Clock for respective GPIO
 	if(GPIOx == GPIOA){
@@ -32,7 +32,7 @@ static inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
  * @brief Disables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-static inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
 
 	// Enable Clock for respective GPIO
 	if(GPIOx == GPIOA){
@@ -56,7 +56,7 @@ static inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @param[in] MODEx Pin Mode `MODE_..`
  * @param[in] CNFx Pin Configuration `CNF_..`
- * @note Does not configure PC13 (On-board active low LED)
+ * @note Does not configure PC13, PC14, PC15
  */
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx){
 	
@@ -65,36 +65,63 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 
 	// PINx >= 8 
 	if(PINx > 7 && PINx < 16){
-		// Clear Reset State (0x4 i.e Floating State)
-		GPIOx->CRH.REG &= ~(uint32_t)(0xF << (4 * (PINx - 8)));
-		// MODE: CRH
-		GPIOx->CRH.REG |= (uint32_t)(MODEx << (4 * (PINx - 8)));
-		// CONFIGURATION: Set
-		GPIOx->CRH.REG |= ((uint32_t)(CNFx << ((4 * (PINx - 8)) + 2)));
+		// Return on PC13, PC14, PC15
+		if((GPIOx == GPIOC) && (PINx > (uint8_t)12))
+			return;
+		// Input Mode
+		if(MODEx == MODE_IN){
+			// Pull Up
+			if(CNFx == CNF_IN_PU){
+				// Output Data Register Corresponding Bit Set
+				GPIOx->BSRR.REG |= (BIT_SET << PINx);
+			}
+			// Pull Down
+			else if(CNFx == CNF_IN_PD){
+				// Output Data Register Corresponding Bit Reset
+				GPIOx->BRR.REG |= (BIT_SET << PINx);
+			}
+			// Clear Reset State (0x04 i.e Floating State)
+			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
+			// MODE + CONFIGURATION
+			GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNF_IN_PU_PD << ((4 * (PINx - 8)) + 2)));
+		}
+		else{
+			// Clear Reset State (0x04 i.e Floating State)
+			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
+			// MODE + CONFIGURATION
+			GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNFx << ((4 * (PINx - 8)) + 2)));
+		}
 	}
 	// PINx <= 7
 	else if (PINx <= 7){
-		// Clear Reset State (0x4 i.e Floating State)
-		GPIOx->CRL.REG &= ~((uint32_t)(0xF << (4 * PINx)));
-		// MODE: CRL
-		GPIOx->CRL.REG |= (uint32_t)(MODEx << (4 * PINx));
-		// CONFIGURATION: Set
-		GPIOx->CRL.REG |= ((uint32_t)(CNFx << ((4 * PINx) + 2)));
+		// Input Mode
+		if(MODEx == MODE_IN){
+			// Pull Up
+			if(CNFx == CNF_IN_PU){
+				// Output Data Register Corresponding Bit Set
+				GPIOx->BSRR.REG |= (BIT_SET << PINx);
+			}
+			// Pull Down
+			else if(CNFx == CNF_IN_PD){
+				// Output Data Register Corresponding Bit Reset
+				GPIOx->BRR.REG |= (BIT_SET << PINx);
+			}
+			// Clear Reset State (0x04 i.e Floating State)
+			GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
+			// MODE + CONFIGURATION
+			GPIOx->CRH.REG |= (uint32_t)((MODE_IN << (4 * (PINx - 8))) | (CNF_IN_PU_PD << ((4 * (PINx - 8)) + 2)));
+		}
+		else{
+			// Clear Reset State (0x04 i.e Floating State)
+			GPIOx->CRL.REG &= ~((uint32_t)(0x0F << (4 * PINx)));
+			// MODE + CONFIGURATION
+			GPIOx->CRL.REG |= (uint32_t)((MODEx << (4 * PINx)) | (CNFx << ((4 * PINx) + 2)));
+		}
 	}
 	// Error Condition
 	else{
 		return;
 	}
-}
-
-/**
- * @brief Sets a GPIO Pin HIGH
- * @param[in] GPIOx GPIOA, GPIOB, GPIOC
- * @param[in] PINx GPIO Pin Number
- */
-void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-	// Bit Set (Atomicity)
-	GPIOx->BSRR.REG = (1 << PINx);
 }
 
 /**
@@ -110,26 +137,6 @@ uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	result = (uint8_t)((GPIOx->IDR.REG >> PINx) & BIT_SET);
 	// Return the Value
 	return result;
-}
-
-/**
- * @brief Resets a GPIO Pin LOW
- * @param[in] GPIOx GPIOA, GPIOB, GPIOC
- * @param[in] PINx GPIO Pin Number
- */
-void reset_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-	// Bit Reset (Atomicity)
-	GPIOx->BRR.REG = (1 << PINx);
-}
-
-/**
- * @brief Toggles GPIO Pin
- * @param[in] GPIOx GPIOA, GPIOB, GPIOC
- * @param[in] PINx GPIO Pin Number
- */
-void toggle_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-	// Toggle the GPIO Pin
-	GPIOx->ODR.REG ^= (1 << PINx);
 }
 
 /**

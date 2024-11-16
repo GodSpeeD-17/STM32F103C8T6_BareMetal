@@ -15,7 +15,7 @@ int main(void){
     reset_GPIO(LED_PORT, LED_PIN);
 
     // Configure Push Button as Input
-    config_GPIO_IN_PD(IRQ_PORT, IRQ_PIN);
+    config_GPIO(IRQ_PORT, IRQ_PIN, MODE_IN, CNF_IN_PU);
     
     // Infinite Loop
     while(1){
