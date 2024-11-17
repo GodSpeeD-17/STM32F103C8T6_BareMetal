@@ -1,6 +1,6 @@
 /***************************************************************************************
  *  File: nvic.h
- *  Created on: 26/10/2024
+ *  Created on: 17/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
 /*
@@ -38,7 +38,7 @@ volatile uint32_t nvic_irq_enabled[2] = {0};
  * @brief Disables the All the Interrupts Globally
  * @note NVIC->ICER, NVIC->ISER
  */
-__attribute__((always_inline)) inline void __disable_irq(void){
+__attribute__((always_inline)) inline void __disable_IRQ(void){
     for(uint8_t i = 0; i < 2; i++){
         // Store the previous state of the interrupt
         nvic_irq_enabled[i] = NVIC->ISER[i];
@@ -52,7 +52,7 @@ __attribute__((always_inline)) inline void __disable_irq(void){
  * @brief Enables the All the Interrupts Globally
  * @note NVIC->ICER, NVIC->ISER
  */
-__attribute__((always_inline)) inline void __enable_irq(void){
+__attribute__((always_inline)) inline void __enable_IRQ(void){
     // Traverse through all the registers
     for(uint8_t i = 0; i < 2; i++){
         // Restore the previous state of the interrupts
