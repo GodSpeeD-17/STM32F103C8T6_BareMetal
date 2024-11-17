@@ -14,6 +14,8 @@ int main(void){
     config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_GP_PP);
     reset_GPIO(LED_PORT, LED_PIN);
 
+
+
     // Infinite Loop
     while(1){
 

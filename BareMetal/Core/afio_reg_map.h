@@ -100,6 +100,7 @@ typedef struct {
             volatile uint32_t reserved: 16;
         } BIT;
     } EXTICR4;
+    
 } AFIO_REG_STRUCT;
 
 #endif /* __AFIO_REG_MAP_H__ */

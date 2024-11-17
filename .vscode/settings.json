@@ -76,6 +76,7 @@
         "FPEC",
         "FSMC",
         "FSMCEN",
+        "FTSR",
         "GPIOA",
         "GPIOB",
         "GPIOC",
@@ -204,6 +205,7 @@
         "RTCEN",
         "RTCSEL",
         "RTSE",
+        "RTSR",
         "RXNE",
         "RXNIE",
         "sbss",
@@ -222,6 +224,7 @@
         "stlink",
         "STRT",
         "svector",
+        "SWIER",
         "SWSTART",
         "SYSCLK",
         "SYSTICK",
@@ -266,6 +269,9 @@
         "wwdg_reg_map.h": "c",
         "adc.h": "c",
         "common.h": "c",
-        "usart_reg_map.h": "c"
+        "usart_reg_map.h": "c",
+        "nvic.h": "c",
+        "exti_reg_map.h": "c",
+        "afio_reg_map.h": "c"
     }
 }

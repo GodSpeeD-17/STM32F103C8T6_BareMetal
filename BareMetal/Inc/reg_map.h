@@ -21,6 +21,7 @@
 #include "../Core/adc_reg_map.h"
 #include "../Core/advtim_reg_map.h"
 #include "../Core/afio_reg_map.h"
+#include "../Core/exti_reg_map.h"
 #include "../Core/gpio_reg_map.h"
 #include "../Core/gpt_reg_map.h"
 #include "../Core/rcc_reg_map.h"
@@ -63,6 +64,7 @@
 #define USART1								((USART_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3800))
 #define USART2								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4400))
 #define USART3								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4800))
+#define EXTI								((EXTI_REG_STRUCT*)(APB2_BASE_ADDR + (uint32_t)0x0400))
 /*********************************************** Address Mapping ***********************************************/
 
 
