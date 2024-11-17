@@ -6,8 +6,6 @@
 
 #include "gpio.h"
 
-
-
 /**
  * @brief Configures GPIO as per input
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
