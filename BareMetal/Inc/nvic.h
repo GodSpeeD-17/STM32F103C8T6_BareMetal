@@ -30,14 +30,17 @@
 #define TIM2_IRQn                       ((uint8_t) 28)
 #define EXTI15_10_IRQn                  ((uint8_t) 40)
 
+/*
 // Stores the status of Interrupts before disabling it Globally
 volatile uint32_t nvic_irq_enabled[2] = {0};
 // volatile uint32_t nvic_irq_disabled[2] = {0};
+*/
 
 /**
  * @brief Disables the All the Interrupts Globally
  * @note NVIC->ICER, NVIC->ISER
  */
+/*
 __attribute__((always_inline)) inline void __disable_IRQ(void){
     for(uint8_t i = 0; i < 2; i++){
         // Store the previous state of the interrupt
@@ -47,11 +50,13 @@ __attribute__((always_inline)) inline void __disable_IRQ(void){
         NVIC->ICER[i] = 0xFFFFFFFF; 
     }
 }
+*/
 
 /**
  * @brief Enables the All the Interrupts Globally
  * @note NVIC->ICER, NVIC->ISER
  */
+/*
 __attribute__((always_inline)) inline void __enable_IRQ(void){
     // Traverse through all the registers
     for(uint8_t i = 0; i < 2; i++){
@@ -60,6 +65,7 @@ __attribute__((always_inline)) inline void __enable_IRQ(void){
         // NVIC->ICER[i] = nvic_irq_disabled[i] ;
     }
 }
+*/
 
 /**
  * @brief Enables the NVIC Interrupt for the input IRQn
@@ -68,9 +74,9 @@ __attribute__((always_inline)) inline void __enable_IRQ(void){
  */
 __attribute__((always_inline)) inline void enable_NVIC_IRQ(uint8_t IRQn){
 	// Clear the Disable IRQn
-	NVIC->ICER[((IRQn) / 32)] &=  ~(BIT_SET << ((IRQn) & (32 - 1)));
+	NVIC->ICER[((IRQn) / 32)] &=  ~(1 << ((IRQn) & (32 - 1)));
     // Enable the IRQn
-    NVIC->ISER[((IRQn) / 32)] |=  (BIT_SET << ((IRQn) & (32 - 1)));
+    NVIC->ISER[((IRQn) / 32)] |=  (1 << ((IRQn) & (32 - 1)));
 }
 
 /**

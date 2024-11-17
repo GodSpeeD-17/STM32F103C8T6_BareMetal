@@ -10,6 +10,7 @@
 #define DELAY_MS                        ((uint32_t) 10)    
 #define IRQ_PORT                        (GPIOB)   
 #define IRQ_PIN                         (GPIO_PIN_5)   
+#define IRQ_NUM                         (EXTI9_5_IRQn)   
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_4)
 

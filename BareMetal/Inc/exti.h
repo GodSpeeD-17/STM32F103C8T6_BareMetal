@@ -10,6 +10,7 @@
 
 // Main Library
 #include "reg_map.h"
+#include "nvic.h"
 
 // External Trigger Selection
 #define EXTI_TRIG_FALLING               ((uint8_t) 0)
@@ -35,6 +36,29 @@ __attribute__((always_inline)) inline void disable_EXTI_IRQ(uint8_t PINx){
 }
 
 /**
+ * @brief Clears the Pending Bit of External Interrupt
+ * @param[in] PINx Pin Number `GPIO_PIN_x`
+ */
+__attribute__((always_inline)) inline void clear_EXTI_pending(uint8_t PINx){
+    // Acknowledge the Pending Bit
+    EXTI->PR.REG &= ~(1 << PINx);
+}
+
+/**
+ * @brief Returns the Pending Bit of External Interrupt
+ * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @returns Pending Bit Status for Input Pin
+ */
+__attribute__((always_inline)) inline uint8_t get_EXTI_pending(uint8_t PINx){
+    // Get the Pending Register Status
+    uint32_t result = EXTI->PR.REG;
+    // Get the exact bit
+    result = ((result >> PINx) & 0x01);
+    // Return the value
+    return (uint8_t) result;
+}
+
+/**
  * @brief Configures the NVIC EXTI Source
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`
@@ -53,7 +77,7 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx);
  * @brief Configures the GPIO for EXTI
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`
- * @param[in] TRIGx `NVIC_TRIG_FALLING`, `NVIC_TRIG_FALLING`, `NVIC_TRIG_BOTH`
+* @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
  * @param[in] IRQn The Interrupt Number
  */
 void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn);

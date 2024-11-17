@@ -11,12 +11,13 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "adc.h"
+#include "exti.h"
 #include "gpio.h"
+#include "nvic.h"
+#include "pwm.h"
 #include "rcc.h"
 #include "systick.h"
 #include "timer.h"
-#include "pwm.h"
-#include "nvic.h"
-#include "adc.h"
 
 #endif /* __BARE_METAL_H__ */
