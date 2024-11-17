@@ -3,46 +3,8 @@
  *  Created on: 17/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
-/*
-    THEORY: 
-        NVIC: Nested Interrupt Vector Configuration
-            - Global Interrupt Configuration
-            - NVIC is used to configure the priority of interrupts
-        EXTI: External Interrupt Configuration
-*/
 
-#include "nvic.h"
-
-// Stores the status of Interrupts before disabling it Globally
-volatile uint32_t nvic_irq_enabled[2] = {0};
-// volatile uint32_t nvic_irq_disabled[2] = {0};
-
-/**
- * @brief Disables the All the Interrupts Globally
- * @note NVIC->ICER, NVIC->ISER
- */
-void __disable_irq(void){
-    for(uint8_t i = 0; i < 2; i++){
-        // Store the previous state of the interrupt
-        nvic_irq_enabled[i] = NVIC->ISER[i];
-        // nvic_irq_disabled[i] = NVIC->ICER[i];
-        // Disable all the interrupts
-        NVIC->ICER[i] = 0xFFFFFFFF; 
-    }
-}
-
-/**
- * @brief Enables the All the Interrupts Globally
- * @note NVIC->ICER, NVIC->ISER
- */
-void __enable_irq(void){
-    // Traverse through all the registers
-    for(uint8_t i = 0; i < 2; i++){
-        // Restore the previous state of the interrupts
-        NVIC->ISER[i] = nvic_irq_enabled[i]; 
-        // NVIC->ICER[i] = nvic_irq_disabled[i] ;
-    }
-}
+#include "exti.h"
 
 /**
  * @brief Configures the NVIC EXTI Source
@@ -109,7 +71,7 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 /**
  * @brief Configures the External Interrupt Trigger Selection
  * @param[in] PINx Pin Number `GPIO_PIN_x`
- * @param[in] TRIGx `NVIC_TRIG_FALLING`, `NVIC_TRIG_FALLING`, `NVIC_TRIG_BOTH`
+ * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
  * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
  */
 void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
@@ -118,17 +80,17 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
     switch (TRIGx){
     
         // Falling Edge 
-        case NVIC_TRIG_FALLING:
+        case EXTI_TRIG_FALLING:
             EXTI->FTSR.REG |= (1 << PINx);
             break;
 
         // Rising Edge 
-        case NVIC_TRIG_RISING:
+        case EXTI_TRIG_RISING:
             EXTI->RTSR.REG |= (1 << PINx);
             break;
         
         // Both Edge 
-        case NVIC_TRIG_BOTH:
+        case EXTI_TRIG_BOTH:
             EXTI->RTSR.REG |= (1 << PINx);
             EXTI->FTSR.REG |= (1 << PINx);
             break;
@@ -147,7 +109,7 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
  * @param[in] TRIGx `NVIC_TRIG_FALLING`, `NVIC_TRIG_FALLING`, `NVIC_TRIG_BOTH`
  * @param[in] IRQn The Interrupt Number
  */
-void config_NVIC_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
+void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
     
     // Configure the Source of Interrupt (Port Selection)
     config_EXTI_src(GPIOx, PINx);

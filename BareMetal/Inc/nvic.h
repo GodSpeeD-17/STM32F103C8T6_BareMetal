@@ -3,6 +3,12 @@
  *  Created on: 26/10/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
+/*
+    THEORY: 
+        NVIC: Nested Interrupt Vector Configuration
+            - Global Interrupt Configuration
+            - NVIC is used to configure the priority of interrupts
+*/
 
 // Header Guards
 #ifndef __NVIC_H__
@@ -10,11 +16,6 @@
 
 // Main Library
 #include "reg_map.h"
-
-// External Trigger Selection
-#define NVIC_TRIG_FALLING               ((uint8_t) 0)
-#define NVIC_TRIG_RISING                ((uint8_t) 1)
-#define NVIC_TRIG_BOTH                  ((uint8_t) 2)
 
 // IRQn Number
 #define WWDG_IRQn                       ((uint8_t) 0)
@@ -28,6 +29,37 @@
 #define EXTI9_5_IRQn                    ((uint8_t) 23)
 #define TIM2_IRQn                       ((uint8_t) 28)
 #define EXTI15_10_IRQn                  ((uint8_t) 40)
+
+// Stores the status of Interrupts before disabling it Globally
+volatile uint32_t nvic_irq_enabled[2] = {0};
+// volatile uint32_t nvic_irq_disabled[2] = {0};
+
+/**
+ * @brief Disables the All the Interrupts Globally
+ * @note NVIC->ICER, NVIC->ISER
+ */
+__attribute__((always_inline)) inline void __disable_irq(void){
+    for(uint8_t i = 0; i < 2; i++){
+        // Store the previous state of the interrupt
+        nvic_irq_enabled[i] = NVIC->ISER[i];
+        // nvic_irq_disabled[i] = NVIC->ICER[i];
+        // Disable all the interrupts
+        NVIC->ICER[i] = 0xFFFFFFFF; 
+    }
+}
+
+/**
+ * @brief Enables the All the Interrupts Globally
+ * @note NVIC->ICER, NVIC->ISER
+ */
+__attribute__((always_inline)) inline void __enable_irq(void){
+    // Traverse through all the registers
+    for(uint8_t i = 0; i < 2; i++){
+        // Restore the previous state of the interrupts
+        NVIC->ISER[i] = nvic_irq_enabled[i]; 
+        // NVIC->ICER[i] = nvic_irq_disabled[i] ;
+    }
+}
 
 /**
  * @brief Enables the NVIC Interrupt for the input IRQn
@@ -52,47 +84,5 @@ __attribute__((always_inline)) inline void disable_NVIC_IRQ(uint8_t IRQn){
     // Disable the IRQn
     NVIC->ICER[((IRQn) / 32)] |=  (1 << ((IRQn) & (32 - 1)));
 }
-
-/**
- * @brief Enables the External Interrupt Mask
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- */
-__attribute__((always_inline)) inline void enable_EXTI_IRQ(uint8_t PINx){
-    // Enable the IRQ Mask
-    EXTI->IMR.REG |= (1 << PINx);
-}
-
-/**
- * @brief Disables the External Interrupt Mask
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- */
-__attribute__((always_inline)) inline void disable_EXTI_IRQ(uint8_t PINx){
-    // Disable the IRQ Mask
-    EXTI->IMR.REG &= ~(1 << PINx);
-}
-
-/**
- * @brief Configures the NVIC EXTI Source
- * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- */
-void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
-
-/**
- * @brief Configures the External Interrupt Trigger Selection
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- * @param[in] TRIGx `NVIC_TRIG_FALLING`, `NVIC_TRIG_FALLING`, `NVIC_TRIG_BOTH`
- * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
- */
-void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx);
-
-/**
- * @brief Configures the GPIO for EXTI
- * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- * @param[in] TRIGx `NVIC_TRIG_FALLING`, `NVIC_TRIG_FALLING`, `NVIC_TRIG_BOTH`
- * @param[in] IRQn The Interrupt Number
- */
-void config_NVIC_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn);
 
 #endif /* __NVIC_H__ */
