@@ -56,7 +56,7 @@ void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @param[in] MODEx Pin Mode `MODE_..`
  * @param[in] CNFx Pin Configuration `CNF_..`
- * @note Do not use it to configure PC13, PC14, PC15
+ * @note Do not use it to configure PB3, PB4, PC13, PC14, PC15
  */
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx){
     uint32_t reg, shift, mask;
@@ -65,12 +65,12 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
     enable_GPIO_clk(GPIOx);
 
     // Determine the register, shift, and mask based on the pin number
-    if (PINx < 8) {
+    if (PINx < (uint8_t) 8){
         reg = GPIOx->CRL.REG;
         shift = PINx * 4;
         mask = 0x0F << shift;
     } 
-	else if (PINx < 16){
+	else if (PINx < (uint8_t) 16){
         reg = GPIOx->CRH.REG;
         shift = (PINx - 8) * 4;
         mask = 0x0F << shift;
@@ -85,10 +85,14 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
         if (CNFx == CNF_IN_PU) {
             // Set pin to pull-up
             GPIOx->BSRR.REG |= (1 << PINx);  // Set the pin high to enable pull-up
+			// Wait
+			while(!(GPIOx->ODR.REG & (1 << PINx)));
         } 
         else if (CNFx == CNF_IN_PD) {
             // Set pin to pull-down
             GPIOx->BRR.REG |= (1 << PINx);   // Set the pin low to enable pull-down
+			// Wait
+			while((GPIOx->ODR.REG & (1 << PINx)));
         }
 		// Update the Configuration Bits
 		CNFx = CNF_IN_PU_PD;
@@ -100,7 +104,7 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 	reg |= ((CNFx << (shift + 2) | MODEx << shift));
 
     // New value Updation
-    if (PINx < 8) {
+    if (PINx < (uint8_t) 8) {
         GPIOx->CRL.REG = reg;
     } 
 	else {

@@ -75,7 +75,7 @@ void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @param[in] MODEx Pin Mode `MODE_..`
  * @param[in] CNFx Pin Configuration `CNF_..`
- * @note Do not use it to configure PC13, PC14, PC15
+ * @note Do not use it to configure PB3, PB4, PC13, PC14, PC15
  */
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx);
 
