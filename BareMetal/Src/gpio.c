@@ -6,49 +6,7 @@
 
 #include "gpio.h"
 
-/**
- * @brief Enables Clock for respective GPIO
- * @param[in] GPIOx The GPIO Port
- */
-void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
 
-	// Enable Clock for respective GPIO
-	if(GPIOx == GPIOA){
-		RCC->APB2ENR.BIT.IOPAEN = BIT_SET;
-	}
-	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.BIT.IOPBEN = BIT_SET;
-	}
-	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.BIT.IOPCEN = BIT_SET;
-	}
-	// Error
-	else{
-		return;
-	}
-}
-
-/**
- * @brief Disables Clock for respective GPIO
- * @param[in] GPIOx The GPIO Port
- */
-void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
-
-	// Enable Clock for respective GPIO
-	if(GPIOx == GPIOA){
-		RCC->APB2ENR.BIT.IOPAEN = BIT_RESET;
-	}
-	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.BIT.IOPBEN = BIT_RESET;
-	}
-	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.BIT.IOPCEN = BIT_RESET;
-	}
-	// Error
-	else{
-		return;
-	}
-} 
 
 /**
  * @brief Configures GPIO as per input
@@ -94,8 +52,8 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 			// Wait
 			while((GPIOx->ODR.REG & (1 << PINx)));
         }
-		// Update the Configuration Bits
-		CNFx = CNF_IN_PU_PD;
+		// Update the Configuration Bits as Input Push-Pull
+		CNFx = (uint8_t) 0x02;	
     }
 
     // Clear the current mode and configuration bits

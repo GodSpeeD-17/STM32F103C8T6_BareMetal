@@ -40,7 +40,6 @@
 // CNF
 #define CNF_IN_ANALOG                      ((uint8_t) 0)
 #define CNF_IN_FLOAT                       ((uint8_t) 1)
-#define CNF_IN_PU_PD                       ((uint8_t) 2)
 #define CNF_IN_PD                          ((uint8_t) 3)
 #define CNF_IN_PU                          ((uint8_t) 4)
 #define CNF_OUT_GP_PP                      ((uint8_t) 0)
@@ -61,13 +60,45 @@
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
+__attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+
+	// Enable Clock for respective GPIO
+	if(GPIOx == GPIOA){
+		RCC->APB2ENR.BIT.IOPAEN = BIT_SET;
+	}
+	else if (GPIOx == GPIOB){
+		RCC->APB2ENR.BIT.IOPBEN = BIT_SET;
+	}
+	else if (GPIOx == GPIOC){
+		RCC->APB2ENR.BIT.IOPCEN = BIT_SET;
+	}
+	// Error
+	else{
+		return;
+	}
+}
 
 /**
  * @brief Disables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx);
+__attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+
+	// Enable Clock for respective GPIO
+	if(GPIOx == GPIOA){
+		RCC->APB2ENR.BIT.IOPAEN = BIT_RESET;
+	}
+	else if (GPIOx == GPIOB){
+		RCC->APB2ENR.BIT.IOPBEN = BIT_RESET;
+	}
+	else if (GPIOx == GPIOC){
+		RCC->APB2ENR.BIT.IOPCEN = BIT_RESET;
+	}
+	// Error
+	else{
+		return;
+	}
+} 
 
 /**
  * @brief Configures GPIO as per input
@@ -137,66 +168,5 @@ void reset_OB_LED(void);
  * @brief Toggles the on-board active low LED (PC13)
  */
 void toggle_OB_LED(void);
-
-/**
- * @brief Sets the GPIO to be used in Input Pull Up Mode
- * @param[in] GPIOx GPIOA, GPIOB, GPIOC
- * @param[in] PINx GPIO Pin Number
- */
-/*
-__attribute__((always_inline)) inline void config_GPIO_IN_PU(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-    // Configure the GPIO as Input Pull Up / Pull Down
-    config_GPIO(GPIOx, PINx, MODE_IN, CNF_IN_PU_PD);
-    // Refer Table 20 (PDF Page 161)
-    GPIOx->ODR.REG |= (BIT_SET << PINx);
-}
-*/
-
-
-/**
- * @brief Sets the GPIO to be used in Input Pull Down Mode
- * @param[in] GPIOx GPIOA, GPIOB, GPIOC
- * @param[in] PINx GPIO Pin Number
- */
-__attribute__((always_inline)) inline void config_GPIO_IN_PD(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-    // Configure the GPIO as Input Pull Up / Pull Down
-    config_GPIO(GPIOx, PINx, MODE_IN, CNF_IN_PU_PD);
-    // Refer Table 20 (PDF Page 161)
-    GPIOx->ODR.REG &= ~(BIT_SET << PINx);
-} 
-
-/*
-__attribute__((always_inline)) inline void config_GPIO_IN_PD(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
-    // Enable Clock
-    enable_GPIO_clk(GPIOx);
-    // PINx >= 8 
-    if(PINx > 7 && PINx < 16){
-		// Return on PC13, PC14, PC15
-		if((GPIOx == GPIOC) && (PINx > (uint8_t)12))
-			return;
-        // Configure for pull down mode
-        GPIOx->ODR.REG &= ~(BIT_SET << PINx); 
-		// Clear Reset State (0x04 i.e Floating State)
-		GPIOx->CRH.REG &= ~(uint32_t)(0x0F << (4 * (PINx - 8)));
-		// MODE + CONFIGURATION
-		GPIOx->CRH.REG |= (uint32_t)((MODEx << (4 * (PINx - 8))) | (CNFx << ((4 * (PINx - 8)) + 2)));
-	}
-    // PINx <= 7
-	else if (PINx <= 7){
-        // Configure for pull down mode
-        GPIOx->ODR.REG &= ~(BIT_SET << PINx); 
-		// Clear Reset State (0x04 i.e Floating State)
-		GPIOx->CRL.REG &= ~((uint32_t)(0x0F << (4 * PINx)));
-		// MODE + CONFIGURATION
-		GPIOx->CRL.REG |= (uint32_t)((MODEx << (4 * PINx)) | (CNFx << ((4 * PINx) + 2)));
-	}
-	// Error Condition
-	else{
-		return;
-	}
-
-    
-}
-*/
 
 #endif /* __GPIO__H__ */

@@ -10,6 +10,9 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
+    // Configure LED
+    config_GPIO();
+
     // Infinite Loop
     while(1){
 
