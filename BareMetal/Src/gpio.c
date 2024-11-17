@@ -36,22 +36,17 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 		return;
 
     // Handle input mode and configuration (pull-up or pull-down)
-    if (MODEx == MODE_IN) {
-        // Input mode with pull-up or pull-down
-        if (CNFx == CNF_IN_PU) {
-            // Set pin to pull-up
-            GPIOx->BSRR.REG |= (1 << PINx);  // Set the pin high to enable pull-up
-			// Wait
-			while(!(GPIOx->ODR.REG & (1 << PINx)));
-        } 
-        else if (CNFx == CNF_IN_PD) {
-            // Set pin to pull-down
-            GPIOx->BRR.REG |= (1 << PINx);   // Set the pin low to enable pull-down
-			// Wait
-			while((GPIOx->ODR.REG & (1 << PINx)));
-        }
+    if (MODEx == MODE_IN && CNFx == CNF_IN_PU) {
+		// Set the bit high to enable pull-up
+		GPIOx->BSRR.REG |= (1 << PINx);
 		// Update the Configuration Bits as Input Push-Pull
-		CNFx = (uint8_t) 0x02;	
+		CNFx = (uint8_t)0x02;
+	} 
+    else if (CNFx == CNF_IN_PD && CNFx == CNF_IN_PD) {
+		// Set the bit low to enable pull-down
+		GPIOx->BRR.REG |= (1 << PINx);
+		// Update the Configuration Bits as Input Push-Pull
+		CNFx = (uint8_t)0x02;	
     }
 
     // Clear the current mode and configuration bits

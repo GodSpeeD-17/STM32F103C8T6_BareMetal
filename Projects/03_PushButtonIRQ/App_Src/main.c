@@ -11,7 +11,8 @@ int main(void){
     config_SysTick(CoreClock/1000);
 
     // Configure LED
-    config_GPIO();
+    config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_GP_PP);
+    reset_GPIO(LED_PORT, LED_PIN);
 
     // Infinite Loop
     while(1){
