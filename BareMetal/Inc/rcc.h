@@ -126,7 +126,9 @@ typedef enum {
  * @brief Retrieves the System Clock Source
  * @note Possible Return Values: `SYS_CLK_HSI`, `SYS_CLK_HSE`, `SYS_CLK_PLL`
  */
-uint8_t get_clock_source(void);
+__attribute__((always_inline)) inline uint8_t get_clock_source(void){
+	return (uint8_t) RCC->CFGR.BIT.SWS;
+}
 
 /**
  * @brief Retrieves the current System Clock

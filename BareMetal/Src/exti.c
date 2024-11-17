@@ -111,6 +111,9 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
  */
 void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
     
+    // Enable Alternate Function
+    RCC_AF_ENABLE();
+
     // Configure the Source of Interrupt (Port Selection)
     config_EXTI_src(GPIOx, PINx);
 

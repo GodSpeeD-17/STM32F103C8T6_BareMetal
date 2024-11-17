@@ -16,14 +16,6 @@ volatile uint32_t APB1Clock = (uint32_t) 0;
 // Advanced Peripheral Bus 2 (APB2) Frequency (in Hz)
 volatile uint32_t APB2Clock = (uint32_t) 0;
 
-/***
- * @brief Retrieves the System Clock Source
- * @note Possible Return Values: `SYS_CLK_HSI`, `SYS_CLK_HSE`, `SYS_CLK_PLL`
- */
-uint8_t get_clock_source(void){
-	return (uint8_t)RCC->CFGR.BIT.SWS;
-}
-
 /**
  * @brief Retrieves the frequency of System Clock
  * @return SYSCLK Frequency (in Hz)
