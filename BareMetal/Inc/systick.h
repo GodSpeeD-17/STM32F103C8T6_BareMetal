@@ -17,12 +17,18 @@
 /**
  * @brief Enables SysTick Counter
  */
-static inline void enable_SysTick(void);
+__attribute__((always_inline)) inline void enable_SysTick(void){
+	// Enable SysTick
+	SYSTICK->CSR.BIT.EN = BIT_SET;
+}
 
 /**
  * @brief Disables SysTick Counter
  */
-static inline void disable_SysTick(void);
+__attribute__((always_inline)) inline void disable_SysTick(void){
+	// Disable SysTick
+	SYSTICK->CSR.BIT.EN = BIT_RESET;
+}
 
 /**
  * @brief Configures the SysTick Timer based upon the input count value

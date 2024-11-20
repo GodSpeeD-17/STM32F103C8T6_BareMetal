@@ -111,6 +111,16 @@ __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPI
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx);
 
 /**
+ * @brief Configures a GPIO as LED
+ * @param[in] GPIOx GPIOA, GPIOB, GPIOC
+ * @param[in] PINx GPIO Pin Number
+ */
+__attribute__((always_inline)) inline void config_LED(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+	// General Purpose Output @10MHz
+	config_GPIO(GPIOx, PINx, MODE_OUT_10MHz, CNF_OUT_GP_PP);
+}
+
+/**
  * @brief Sets a GPIO Pin HIGH
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number

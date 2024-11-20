@@ -2,8 +2,10 @@
 #include "main.h"
 
 // Global Variables
-volatile uint8_t count = 0x00, configured = 0xFF;
-volatile uint64_t last_ticks = 0x00;
+volatile uint8_t count;
+volatile uint8_t configured;
+volatile uint8_t sync_time;
+volatile uint64_t last_ticks;
 
 // Main Entry Point for User Code
 int main(void){
@@ -16,9 +18,7 @@ int main(void){
 
     // Configure LED
     config_LED(LED_RISING_PORT, LED_RISING_PIN);
-    reset_GPIO(LED_RISING_PORT, LED_RISING_PIN);
     config_LED(LED_FALLING_PORT, LED_FALLING_PIN);
-    reset_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
     config_OB_LED();
     reset_OB_LED();
 
@@ -30,61 +30,40 @@ int main(void){
     config_GPIO(PB_FALLING_PORT, PB_FALLING_PIN, MODE_IN, CNF_IN_PU);
     config_EXTI(PB_FALLING_PORT, PB_FALLING_PIN, EXTI_TRIG_FALLING, PB_FALLING_IRQ_NUM);
 
+    // Initialise Variables
+    count = 0x00;
+    configured = 0x00;
+    last_ticks = 0x00;
+    sync_time = 0x00;
+
     // Infinite Loop
     while(1){
 
         // Updates the LED initial state upon Interrupt
-        // update_configuration();
+        update_configuration();
 
-        // Ensuring only configuration is done
-        if(!configured){
-
-            // Interrupt based Configuration
-            switch (count) {
-
-                // Reset State: NO LED TOGGLE
-                case 0x00:
-                        reset_GPIO(LED_RISING_PORT, LED_RISING_PIN);
-                        reset_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
-                        configured = 0xFF;
-                break;
-
-                // First State: RISING EDGE LED SET & BOTH LED TOGGLE
-                case 0x01:
-                        set_GPIO(LED_RISING_PORT, LED_RISING_PIN);
-                        reset_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
-                        configured = 0xFF;
-                break;
-
-                // Second State: FALLING EDGE LED SET & BOTH LED TOGGLE
-                case 0x02:
-                        set_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
-                        reset_GPIO(LED_RISING_PORT, LED_RISING_PIN);
-                        configured = 0xFF;
-                break;
-
-                // Third State: BOTH LED TOGGLE
-                case 0x03:
-                        set_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
-                        set_GPIO(LED_RISING_PORT, LED_RISING_PIN);
-                        configured = 0xFF;
-                break;
-            }
+        // Synchronize Time for Delay
+        if(sync_time){
+            // Get Current Number of Ticks
+            last_ticks = get_curr_ticks();
+            // Update Variable
+            sync_time = 0x00;
         }
-        
-        // Customized Delay
+
+        // Customized Delay for LED Blinking
         if(get_curr_ticks() - last_ticks >= LED_DELAY_MS){
 
-            // No toggle
-            if(configured && count == 0x00)
-                return;
-            else if(configured){
-                // GPIO Toggle
-                toggle_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
-                toggle_GPIO(LED_RISING_PORT, LED_RISING_PIN);
+            // Already reference configured
+            if(configured){
+                // Toggle Decision
+                if(count){
+                    // GPIO Toggle
+                    toggle_GPIO(LED_FALLING_PORT, LED_FALLING_PIN);
+                    toggle_GPIO(LED_RISING_PORT, LED_RISING_PIN);
+                }
             }
 
-            // Update the reference for delay
+            // Update the reference
             last_ticks = get_curr_ticks();
         }
         
@@ -101,30 +80,35 @@ int main(void){
  */
 void EXTI9_5_IRQHandler(void){
 
-    // On-board LED ON
-    set_OB_LED();
+    // On-board LED Toggle
+    toggle_OB_LED();
 
     // Push Button Rising Edge Interrupt bit pending
     if(get_EXTI_pend(PB_RISING_PIN)){
-        // Increment Count within Boundaries
-        count = (count + 1) & (uint8_t) 0x03;
+        // Increment Count
+        count++;
+        // Boundary
+        if(count > (uint8_t) 0x03)
+            count = 0x00;
         // Acknowledge EXTI Flag
         clear_EXTI_pend(PB_RISING_PIN);
     } 
 
     // Push Button Falling Edge Interrupt bit pending
     if(get_EXTI_pend(PB_FALLING_PIN)){
-        // Decrement Count within Boundaries
-        count = (count - 1) & (uint8_t) 0x03;
+        // Decrement Count
+        count--;
+        // Boundary
+        if(count > (uint8_t) 0x03)
+            count = 0x03;
         // Acknowledge EXTI Flag
         clear_EXTI_pend(PB_FALLING_PIN);
     }
 
     // Reset Configuration
-    configured = 0x00; 
-
-    // On-board LED OFF
-    reset_OB_LED();
+    configured = 0x00;
+    // Synchronize Time
+    sync_time = 0x01;
 }
 
 /*
