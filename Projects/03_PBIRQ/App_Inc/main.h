@@ -5,9 +5,13 @@
 // Bare Metal Libraries
 #include "bare_metal.h"
 
+// LED Sequence Library
+#include "led_function.h"
+
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000) 
+#define LOOP_DELAY_MS                   ((uint32_t) 10)
+#define LED_DELAY_MS                    ((uint64_t) 1000)
 // Rising Edge   
 #define PB_RISING_PORT                  (GPIOB)   
 #define PB_RISING_PIN                   (GPIO_PIN_5)   
