@@ -19,11 +19,11 @@
 #define EXTI_TRIG_BOTH                  ((uint8_t) 2)
 
 /**
- * @brief Enables the External Interrupt Mask
+ * @brief Enables the External Interrupt
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
 __attribute__((always_inline)) inline void enable_EXTI_IRQ(uint8_t PINx){
-    // Enable the IRQ Mask
+    // Disable the IRQ Mask
     EXTI->IMR.REG |= (1 << PINx);
 }
 
@@ -32,12 +32,12 @@ __attribute__((always_inline)) inline void enable_EXTI_IRQ(uint8_t PINx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
 __attribute__((always_inline)) inline void disable_EXTI_IRQ(uint8_t PINx){
-    // Disable the IRQ Mask
+    // Enable the IRQ Mask
     EXTI->IMR.REG &= ~(1 << PINx);
 }
 
 /**
- * @brief Acknowledge the Pending Bit of EXTI
+ * @brief Clear the EXTI bit
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
 __attribute__((always_inline)) inline void clear_EXTI_pend(uint8_t PINx){

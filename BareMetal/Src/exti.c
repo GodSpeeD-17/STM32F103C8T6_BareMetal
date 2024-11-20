@@ -111,6 +111,10 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
  */
 void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
     
+    // Error Condition
+    if(PINx > (uint8_t) 16)
+        return;
+
     // Enable Alternate Function
     RCC_AF_ENABLE();
 

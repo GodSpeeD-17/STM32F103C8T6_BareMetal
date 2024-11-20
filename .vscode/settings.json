@@ -273,6 +273,7 @@
         "nvic.h": "c",
         "exti_reg_map.h": "c",
         "afio_reg_map.h": "c",
-        "exti.h": "c"
+        "exti.h": "c",
+        "bare_metal.h": "c"
     }
 }
