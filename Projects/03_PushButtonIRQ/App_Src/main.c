@@ -1,9 +1,6 @@
 // Main Header
 #include "main.h"
 
-// Variables
-uint8_t volatile button_pressed = 0x00;
-
 // Main Entry Point for User Code
 int main(void){
     

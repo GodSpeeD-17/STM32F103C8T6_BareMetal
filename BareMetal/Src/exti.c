@@ -117,11 +117,11 @@ void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IR
     // Configure the Source of Interrupt (Port Selection)
     config_EXTI_src(GPIOx, PINx);
 
-    // Enable the IRQ (Remove the Mask)
-    enable_EXTI_IRQ(PINx);
-
     // Configure the External Trigger
     config_EXTI_trig(PINx, TRIGx);
+
+    // Enable the IRQ (Remove the Mask)
+    enable_EXTI_IRQ(PINx);
 
     // Enable the NVIC Global Interrupt
     enable_NVIC_IRQ(IRQn);
