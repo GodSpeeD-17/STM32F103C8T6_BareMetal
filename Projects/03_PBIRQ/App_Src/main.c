@@ -2,10 +2,10 @@
 #include "main.h"
 
 // Global Variables
-volatile uint8_t count;
-volatile uint8_t configured;
-volatile uint8_t sync_time;
-volatile uint64_t last_ticks;
+volatile uint8_t count = 0x00;
+volatile uint8_t configured = 0x00;
+volatile uint8_t sync_time = 0x00;
+volatile uint64_t last_ticks = 0x00;
 
 // Main Entry Point for User Code
 int main(void){
@@ -29,12 +29,6 @@ int main(void){
     // Configure Push Button for Falling Edge Interrupt
     config_GPIO(PB_FALLING_PORT, PB_FALLING_PIN, MODE_IN, CNF_IN_PU);
     config_EXTI(PB_FALLING_PORT, PB_FALLING_PIN, EXTI_TRIG_FALLING, PB_FALLING_IRQ_NUM);
-
-    // Initialise Variables
-    count = 0x00;
-    configured = 0x00;
-    last_ticks = 0x00;
-    sync_time = 0x00;
 
     // Infinite Loop
     while(1){
