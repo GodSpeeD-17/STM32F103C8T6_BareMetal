@@ -84,6 +84,7 @@
         "GPIOE",
         "GPIOF",
         "GPIOG",
+        "gptx",
         "GTPR",
         "HDSEL",
         "HLFCYA",

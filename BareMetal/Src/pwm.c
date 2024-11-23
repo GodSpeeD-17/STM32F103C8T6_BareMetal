@@ -23,7 +23,7 @@
  * @param[in] pwm_mode  `TIMx_OCM_PWM_NORMAL`, `TIMx_OCM_PWM_INVERTED`
  * @param[in] preload_enable `PRELOAD_ENABLE`, `PRELOAD_DISABLE`
  */
-void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm_mode, uint8_t preload_enable){
+static void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm_mode, uint8_t preload_enable){
 	
 	// Error
 	if(!(IS_TIMx_GPT(GP_TIMx)))
@@ -90,7 +90,7 @@ void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  * @param[in] polarity  `TIMx_POL_ACTIVE_LOW`, `TIMx_POL_ACTIVE_HIGH`
  */
-void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity){
+static void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity){
 
 	// Error
 	if(!IS_TIMx_GPT(GP_TIMx))
@@ -135,7 +135,7 @@ void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  * @param[in] duty_cycle Duty Cycle Value in (%) 
  */
-void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle){
+static void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle){
 
 	// Error Check
 	if(!IS_TIMx_GPT(GP_TIMx))
@@ -175,4 +175,11 @@ void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_c
 			GP_TIMx->CCR4.CC4_OUT = (uint16_t)((((GP_TIMx->ARR + 1) * duty_cycle) / 100) - 1);
 		break;
 	}
+}
+
+/**
+ * @brief Configures the parameters necessary for PWM
+ */
+void config_PWM(pwm_config_t* PWMx){
+
 }

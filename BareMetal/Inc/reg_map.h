@@ -331,8 +331,27 @@ typedef enum {
 #define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
 #define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
 
-// GPT Error Check
-#define IS_TIMx_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
+// Error Check MACROS
+#define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
+#define IS_VALID_GPT_CHANNEL(CHx)			((CHx) == TIMx_CHANNEL_1 || (CHx) == TIMx_CHANNEL_2  || \
+											 (CHx) == TIMx_CHANNEL_3 || (CHx) == TIMx_CHANNEL_4 || \
+											 (CHx) == TIMx_CHANNEL_ALL)
+#define IS_VALID_GPT_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
+#define IS_VALID_GPT_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
+#define IS_VALID_GPT_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
+#define IS_VALID_GPT_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
+											 (MODEx) == TIMx_MODE_ALT_IF_UP || (MODEx) == TIMx_MODE_ALT_IF_BOTH)
+#define IS_VALID_GPT_ARR(ARRx)				((ARRx) > (uint16_t)0x00)
+#define IS_VALID_GPT_FREQ(FREQx)			((FREQx) > (uint32_t)0x00)
+#define IS_VALID_GPT_CNT(CNTx)				((CNTx) >= (uint16_t)0x00)
+#define IS_VALID_GPT_CONFIG(GP_TIMx, CHx, ARRx, FREQx, CNTx, MODEx, DIRx) \
+											(IS_VALID_GPT((GP_TIMx)) && \
+											 IS_VALID_GPT_CHANNEL((CHx)) && \
+											 IS_VALID_GPT_ARR((ARRx)) && \
+											 IS_VALID_GPT_FREQ((FREQx)) && \
+											 IS_VALID_GPT_CNT((CNTx)) && \
+											 IS_VALID_GPT_CMS_MODE((MODEx)) && \
+											 IS_VALID_GPT_DIRECTION((DIRx)))
 /*********************************************** GPT MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/

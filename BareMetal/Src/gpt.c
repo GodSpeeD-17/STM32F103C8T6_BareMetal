@@ -1,5 +1,5 @@
 /***************************************************************************************
- *  File: timer.c
+ *  File: gpt.c
  *  Created on: 19/10/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
@@ -60,39 +60,45 @@
 #include "gpt.h"
 
 /**
- * @brief Configure General Purpose GP_TIMx (Clock Source + Frequency)
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] arr_value ARR Value
- * @param[in] freq_Hz Timer Frequency (in Hz)
- * @param[in] count_value Timer Counter Value 
- * @note - Configures DIR is Up Counting
- * @note - Configures Edge Aligned Mode (Up counting or Down counting based upon `DIR`)
+ * @brief Configures the General Purpose Timer (GPT)
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
-void config_GPT(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value, uint32_t freq_Hz, uint16_t count_value){
+void config_GPT(gpt_config_t* GPT_CONFIGx){
 	
-	// Error Check
-	if (freq_Hz == 0)
+	// Error Handling
+	if(!IS_VALID_GPT_CONFIG(GPT_CONFIGx->GP_TIMx, GPT_CONFIGx->channel, GPT_CONFIGx->auto_reload_value, GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->count, GPT_CONFIGx->cms_mode, GPT_CONFIGx->direction))
 		return;
 
-	// Set the prescaler value
-	GP_TIMx->ARR = arr_value;
+	// Enable Clock
+	enable_GPT_clk(GPT_CONFIGx->GP_TIMx);
 
-	// Calculate GP_TIMx Prescaler for desired frequency
-	GP_TIMx->PSC = calc_GPT_PSC(freq_Hz, GP_TIMx->ARR);
+	// Reset the GP_TIMx
+	reset_GPT(GPT_CONFIGx->GP_TIMx);
 
-	// Set the count value
-	GP_TIMx->CNT = count_value;
+	// Centre-Aligned Mode Selection
+	GPT_CONFIGx->GP_TIMx->CR1.BIT.CMS = GPT_CONFIGx->cms_mode;
 
-	// Send an update event to reset the timer and apply settings
-  	GP_TIMx->EGR.BIT.UG = BIT_SET;
+	// Direction Selection
+	GPT_CONFIGx->GP_TIMx->CR1.BIT.DIR = GPT_CONFIGx->direction;
+
+	// Set Auto Reload Value (ARR)
+	GPT_CONFIGx->GP_TIMx->ARR = GPT_CONFIGx->auto_reload_value;
+
+	// Calculate updated PSC Value
+	GPT_CONFIGx->GP_TIMx->PSC = calc_GPT_PSC(GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->GP_TIMx->ARR);
+	
+	// Set Initial Count Value (CNT)
+	GPT_CONFIGx->GP_TIMx->CNT = GPT_CONFIGx->count;
+	
+	// Update the GPT
+	update_GPT_params(GPT_CONFIGx->GP_TIMx);
 }
 
 /**
  * @brief Gets the GP Timer Clock Frequency
- * @param[in] GP_TIMx  `TIM2`, `TIM3`, `TIM4`
- * @note Refer the formula mentioned in .c file  & clock tree to get clear understanding
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
-uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
+uint32_t get_GPT_freq(gpt_config_t* GPT_CONFIGx){
 
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
@@ -101,10 +107,10 @@ uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
 	timer_freq = (uint32_t) ((RCC->CFGR.BIT.PPRE1 == APB1_DIV_1)? (get_APB1_freq()) : (2 * get_APB1_freq()));
 
 	// Consider ARR Value
-	timer_freq /= (GP_TIMx->ARR + 1);
+	timer_freq /= (GPT_CONFIGx->GP_TIMx->ARR + 1);
 
 	// Consider Prescaler Value
-	timer_freq /= (GP_TIMx->PSC + 1);
+	timer_freq /= (GPT_CONFIGx->GP_TIMx->PSC + 1);
 
 	// Return the Timer Frequency
 	return timer_freq;
@@ -112,24 +118,24 @@ uint32_t get_GPT_freq(GPT_REG_STRUCT* GP_TIMx){
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] GPT_CONFIGx
  * @param[in] delayMs Number of milliseconds
  */
-void GPT_delay_ms(GPT_REG_STRUCT* GP_TIMx, volatile uint32_t delayMs){
+void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs){
 
 	// Update the Event Frequency at 1kHz
-	if(get_GPT_freq(GP_TIMx) != FREQ_1kHz){
+	if(get_GPT_freq(GPT_CONFIGx->GP_TIMx) != FREQ_1kHz){
 		// Set update event after 1ms (1kHz)
-		set_GPT_freq(GP_TIMx, FREQ_1kHz);
+		set_GPT_freq(GPT_CONFIGx->GP_TIMx, FREQ_1kHz);
 	}
 
 	// Iteration for Milliseconds
 	while(delayMs--){
 
 		// Wait till Update Flag is Set
-		while(!(GP_TIMx->SR.BIT.UIF));
+		while(!(GPT_CONFIGx->GP_TIMx->SR.BIT.UIF));
 
 		// Clear the update flag
-		GP_TIMx->SR.BIT.UIF = BIT_RESET;
+		GPT_CONFIGx->GP_TIMx->SR.BIT.UIF = BIT_RESET;
 	}
 }
