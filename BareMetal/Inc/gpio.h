@@ -11,51 +11,6 @@
 // Register Address Mapping
 #include "reg_map.h"
 
-// GPIO PIN
-#define GPIO_PIN_0                         ((uint8_t) 0)
-#define GPIO_PIN_1                         ((uint8_t) 1)
-#define GPIO_PIN_2                         ((uint8_t) 2)
-#define GPIO_PIN_3                         ((uint8_t) 3)
-#define GPIO_PIN_4                         ((uint8_t) 4)
-#define GPIO_PIN_5                         ((uint8_t) 5)
-#define GPIO_PIN_6                         ((uint8_t) 6)
-#define GPIO_PIN_7                         ((uint8_t) 7)
-#define GPIO_PIN_8                         ((uint8_t) 8)
-#define GPIO_PIN_9                         ((uint8_t) 9)
-#define GPIO_PIN_10                        ((uint8_t) 10)
-#define GPIO_PIN_11                        ((uint8_t) 11)
-#define GPIO_PIN_12                        ((uint8_t) 12)
-#define GPIO_PIN_13                        ((uint8_t) 13)
-#define GPIO_PIN_14                        ((uint8_t) 14)
-#define GPIO_PIN_15                        ((uint8_t) 15)
-#define OB_LED_PORT                        (GPIOC)
-#define OB_LED_PIN                         (GPIO_PIN_13)
-
-// MODE
-#define MODE_IN                            ((uint8_t) 0)
-#define MODE_OUT_10MHz                     ((uint8_t) 1)
-#define MODE_OUT_2MHz                      ((uint8_t) 2)
-#define MODE_OUT_50MHz                     ((uint8_t) 3)
-
-// CNF
-#define CNF_IN_ANALOG                      ((uint8_t) 0)
-#define CNF_IN_FLOAT                       ((uint8_t) 1)
-#define CNF_IN_PD                          ((uint8_t) 3)
-#define CNF_IN_PU                          ((uint8_t) 4)
-#define CNF_OUT_GP_PP                      ((uint8_t) 0)
-#define CNF_OUT_GP_OD                      ((uint8_t) 1)
-#define CNF_OUT_AF_PP                      ((uint8_t) 2)
-#define CNF_OUT_AF_OD                      ((uint8_t) 3)
-
-// AF EXTI
-#define AF_EXTI_PA                         ((uint8_t) 0x00)
-#define AF_EXTI_PB                         ((uint8_t) 0x01)
-#define AF_EXTI_PC                         ((uint8_t) 0x02)
-#define AF_EXTI_PD                         ((uint8_t) 0x03)
-#define AF_EXTI_PE                         ((uint8_t) 0x04)
-#define AF_EXTI_PF                         ((uint8_t) 0x05)
-#define AF_EXTI_PG                         ((uint8_t) 0x06)
-
 /**
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port

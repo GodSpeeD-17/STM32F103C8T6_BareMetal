@@ -17,13 +17,13 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 
     // Port based selection
     if(GPIOx == GPIOA){
-        temp = 0x0;
+        temp = AF_EXTI_PA;
     }
     else if(GPIOx == GPIOB){
-        temp = 0x1;
+        temp = AF_EXTI_PB;
     }
     else if(GPIOx == GPIOC){
-        temp = 0x2;
+        temp = AF_EXTI_PC;
     }
     else 
         return;

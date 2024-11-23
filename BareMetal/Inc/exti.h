@@ -18,6 +18,15 @@
 #define EXTI_TRIG_RISING                ((uint8_t) 1)
 #define EXTI_TRIG_BOTH                  ((uint8_t) 2)
 
+// AF EXTI
+#define AF_EXTI_PA                      ((uint8_t) 0x00)
+#define AF_EXTI_PB                      ((uint8_t) 0x01)
+#define AF_EXTI_PC                      ((uint8_t) 0x02)
+#define AF_EXTI_PD                      ((uint8_t) 0x03)
+#define AF_EXTI_PE                      ((uint8_t) 0x04)
+#define AF_EXTI_PF                      ((uint8_t) 0x05)
+#define AF_EXTI_PG                      ((uint8_t) 0x06)
+
 /**
  * @brief Enables the External Interrupt
  * @param[in] PINx Pin Number `GPIO_PIN_x`
