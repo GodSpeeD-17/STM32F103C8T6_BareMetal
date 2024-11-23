@@ -86,36 +86,3 @@ uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// Return the Value
 	return result;
 }
-
-/**
- * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
- * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
- */
-void config_OB_LED(void){
-	// Set the GPIO Pin as an Output
-	config_GPIO(OB_LED_PORT, OB_LED_PIN, MODE_OUT_2MHz, CNF_OUT_GP_PP);
-}
-
-/**
- * @brief Turns on-board active low LED (PC13) ON
- */
-void set_OB_LED(void){
-	// Reset the on-board active low LED GPIO
-	reset_GPIO(OB_LED_PORT, OB_LED_PIN);
-}
-
-/**
- * @brief Turns on-board active low LED (PC13) OFF
- */
-void reset_OB_LED(void){
-	// Reset the on-board active low LED GPIO
-	set_GPIO(OB_LED_PORT, OB_LED_PIN);
-}
-
-/**
- * @brief Toggles the on-board active low LED (PC13)
- */
-void toggle_OB_LED(void){
-	// Toggle the on-board active low LED GPIO
-	toggle_GPIO(OB_LED_PORT, OB_LED_PIN);
-}

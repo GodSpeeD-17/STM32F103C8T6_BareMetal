@@ -229,7 +229,7 @@ all_ref: ref_bin_file
 clean_ref: clean_ref_linker clean_ref_startup clean_ref_user
 
 # Erase the flash
-erase_flash: ref_bin_file
+erase_flash: ref_bin_file clean
 	st-flash --reset write $(REF_LINKER_FILE).bin $(FLASH_ADDR)
 	rm -f $(REF_LINKER_DIR)/*.elf
 	rm -f $(REF_LINKER_DIR)/*.map
