@@ -75,12 +75,17 @@ void set_curr_ticks(uint64_t tick_value){
  * @brief ISR for SysTick
  */
 __attribute__((weak)) void SysTick_Handler(void){
+	
+	/*********************************************** USER CODE ***********************************************/
 
-	// Delay (!!! DO NOT COMMENT !!!)
+	/*********************************************** USER CODE ***********************************************/
+
+	/*********************************************** DO NOT COMMENT ***********************************************/
+	// Delay (Blocking)
 	if(delayMs){
 		delayMs--;
 	}
-
-	// Increment Ticks Counter (!!! DO NOT COMMENT !!!)
+	// Delay (Non-blocking)
 	curr_ticks++;
+	/*********************************************** DO NOT COMMENT ***********************************************/
 }

@@ -5,10 +5,6 @@
 // Core C Library
 #include <stdint.h>
 
-// Generic
-#define BIT_SET                            ((uint8_t) 0x01)
-#define BIT_RESET                          ((uint8_t) 0x00)
-
 // GPIO Main Structure
 typedef struct {
     // Control Register Low (CRL)

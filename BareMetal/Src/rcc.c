@@ -21,30 +21,32 @@ volatile uint32_t APB2Clock = (uint32_t) 0;
  * @return SYSCLK Frequency (in Hz)
  */
 uint32_t get_clock_freq(void){
+	
 	// Final Value
 	uint32_t clk_freq = 0;
 
-	// Return Value Based upon Clock Source
+	// Clock Source
 	switch (get_clock_source()){
 
 		// HSI
 		case SW_CLK_HSI:
-			clk_freq = (uint32_t)HSI_FREQ;
+			clk_freq = HSI_FREQ;
 		break;
 
 		// HSE
 		case SW_CLK_HSE:
-			clk_freq = (uint32_t)HSE_FREQ;
+			clk_freq = HSE_FREQ;
 		break;
 
 		// PLL
 		case SW_CLK_PLL:
+
 			// PLL Clock Source
 			switch(RCC->CFGR.BIT.PLLSRC){
 
 				// HSE
 				case PLL_SRC_HSE:
-					clk_freq = (uint32_t)HSE_FREQ;
+					clk_freq = HSE_FREQ;
 					// PLL Input Clock Prescaler
 					if(RCC->CFGR.BIT.PLLXTPRE == PLL_HSE_DIV_2){
 						clk_freq /= 2;
@@ -129,7 +131,7 @@ uint32_t get_clock_freq(void){
 	}
 	
 	// Final Value
-	return (uint32_t)clk_freq;
+	return (uint32_t) clk_freq;
 } 
 
 /**
@@ -137,6 +139,7 @@ uint32_t get_clock_freq(void){
  * @return AHB Frequency (in Hz)
  */
 uint32_t get_AHB_freq(void){
+	
 	// Current SYSCLK
 	uint32_t clk_freq = get_clock_freq();
 
@@ -180,7 +183,7 @@ uint32_t get_AHB_freq(void){
 		break;
 	}
 	
-	return (uint32_t)clk_freq;
+	return (uint32_t) clk_freq;
 }
 
 /**
@@ -192,6 +195,7 @@ uint32_t get_APB1_freq(void){
 	// AHB Frequency
 	uint32_t clk_freq = get_AHB_freq();
 
+	// APB1 Prescaler
 	switch(RCC->CFGR.BIT.PPRE1){
 		case APB1_DIV_1:
 			clk_freq /= 1;
@@ -214,7 +218,7 @@ uint32_t get_APB1_freq(void){
 		break;
 	}
 
-	return (uint32_t)clk_freq;
+	return (uint32_t) clk_freq;
 }
 
 /**
@@ -225,7 +229,9 @@ uint32_t get_APB2_freq(void){
 	// AHB Frequency
 	uint32_t clk_freq = get_AHB_freq();
 
+	// APB2 Prescaler
 	switch(RCC->CFGR.BIT.PPRE2){
+
 		case APB2_DIV_1:
 			clk_freq /= 1;
 		break;
@@ -247,7 +253,7 @@ uint32_t get_APB2_freq(void){
 		break;
 	}
 
-	return (uint32_t)clk_freq;
+	return (uint32_t) clk_freq;
 }
 
 /**
@@ -256,6 +262,7 @@ uint32_t get_APB2_freq(void){
  * @param[in] PLL_MUL PLL Multiplication Factor
  */
 static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
+	
 	// PLL Multiplication Factor
 	RCC->CFGR.BIT.PLLMUL = PLL_MUL;
 
@@ -289,24 +296,6 @@ static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
 			return;
 		break;
 	}
-}
-
-/**
- * @brief Updates the Peripheral Bus Prescaler
- * @param[in] AHB_PRE  AHB Prescaler `AHB_DIV_X`
- * @param[in] APB1_PRE APB1 Prescaler `APB1_DIV_X`
- * @param[in] APB2_PRE APB2 Prescaler `APB2_DIV_X`
- */
-static void config_BUS(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PRE){
-
-	// AHB Prescaler
-	RCC->CFGR.BIT.HPRE = AHB_PRE;
-
-	// APB2 Prescaler (Faster Bus)
-	RCC->CFGR.BIT.PPRE2 = APB2_PRE;
-
-	// APB1 Prescaler (Slower Bus)
-	RCC->CFGR.BIT.PPRE1 = APB1_PRE;
 }
 
 /**
@@ -453,7 +442,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 	// Wait for PLL to stabilize
 	while(RCC->CR.BIT.PLLRDY == BIT_RESET);
 
-	// Configure BUS parameters (APB1)
+	// Configure BUS parameters (APB1 max 36MHz)
 	if(CLK_FREQ > SYSCLK_32MHz){
 		config_BUS(AHB_DIV_1, APB1_DIV_2, APB2_DIV_1);
 	}

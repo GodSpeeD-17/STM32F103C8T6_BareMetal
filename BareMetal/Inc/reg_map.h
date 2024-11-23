@@ -31,11 +31,11 @@
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
 #define SYSTICK_BASE_ADDR					((uint32_t) 0xE000E010)
-#define NVIC_BASE_ADDR                      ((uint32_t) 0xE000E100)
-#define APB1_BASE_ADDR          			((uint32_t) 0x40000000)
-#define APB2_BASE_ADDR          			((uint32_t) 0x40010000)
-#define AHB_BASE_ADDR           			((uint32_t) 0x40018000)
-#define FLASH_BASE_ADDR                     ((uint32_t) 0x40022000)
+#define NVIC_BASE_ADDR						((uint32_t) 0xE000E100)
+#define APB1_BASE_ADDR						((uint32_t) 0x40000000)
+#define APB2_BASE_ADDR						((uint32_t) 0x40010000)
+#define AHB_BASE_ADDR						((uint32_t) 0x40018000)
+#define FLASH_BASE_ADDR						((uint32_t) 0x40022000)
 
 // Address Mapping
 #define SYSTICK								((SYSTICK_REG_STRUCT *)(SYSTICK_BASE_ADDR))
@@ -68,6 +68,10 @@
 /*********************************************** Address Mapping ***********************************************/
 
 /*********************************************** GPIO MACROS ***********************************************/
+// Generic
+#define BIT_SET								((uint8_t) 0x01)
+#define BIT_RESET							((uint8_t) 0x00)
+
 // GPIO PIN
 #define GPIO_PIN_0							((uint8_t) 0)
 #define GPIO_PIN_1							((uint8_t) 1)
@@ -123,8 +127,246 @@
 /*********************************************** GPIO MACROS ***********************************************/
 
 /*********************************************** RCC MACROS ***********************************************/
+// Generic Frequencies
+#define FREQ_12Hz							((uint32_t) (12))   
+#define FREQ_25Hz							((uint32_t) ((2 * FREQ_12Hz) + (uint32_t) 1))   
+#define FREQ_50Hz							((uint32_t) (2 * FREQ_25Hz))   
+#define FREQ_100Hz							((uint32_t) (2 * FREQ_50Hz))   
+#define FREQ_500Hz							((uint32_t) (5 * FREQ_100Hz))   
+#define FREQ_1kHz							((uint32_t) (10 * FREQ_100Hz))   
+#define FREQ_2kHz							((uint32_t) (2 * FREQ_1kHz))   
+#define FREQ_5kHz							((uint32_t) (5 * FREQ_1kHz))   
+#define FREQ_10kHz							((uint32_t) (10 * FREQ_1kHz))   
+#define FREQ_50kHz							((uint32_t) (50 * FREQ_1kHz))   
+#define FREQ_72kHz							((uint32_t) (72 * FREQ_1kHz))   
+#define FREQ_100kHz							((uint32_t) (100 * FREQ_1kHz))   
+#define FREQ_200kHz							((uint32_t) (2 * FREQ_100kHz)) 
+#define FREQ_1MHz							((uint32_t) (FREQ_1kHz * FREQ_1kHz))
+#define FREQ_10MHz							((uint32_t) (10 * FREQ_1MHz))
 
+// Clock Speed
+#define HSI_FREQ							((uint32_t) (8 * FREQ_1MHz))
+#define HSE_FREQ							((uint32_t) (8 * FREQ_1MHz))
+#define PLL_MIN_FREQ						((uint32_t) (16 * FREQ_1MHz))
+#define PLL_MAX_FREQ						((uint32_t) (72 * FREQ_1MHz))
+
+// Clock Source
+#define SW_CLK_HSI							((uint8_t) 0)
+#define SW_CLK_HSE							((uint8_t) 1)
+#define SW_CLK_PLL							((uint8_t) 2)
+
+// AHB Prescaler
+#define AHB_DIV_1							((uint8_t) 0x0)
+#define AHB_DIV_2							((uint8_t) 0x8)
+#define AHB_DIV_4							((uint8_t) 0x9)
+#define AHB_DIV_8							((uint8_t) 0xA)
+#define AHB_DIV_16							((uint8_t) 0xB)
+#define AHB_DIV_64							((uint8_t) 0xC)
+#define AHB_DIV_128							((uint8_t) 0xD)
+#define AHB_DIV_256							((uint8_t) 0xE)
+#define AHB_DIV_512							((uint8_t) 0xF)
+
+// APB1 Prescaler
+#define APB1_DIV_1							((uint8_t) 0x3)
+#define APB1_DIV_2							((uint8_t) 0x4)
+#define APB1_DIV_4							((uint8_t) 0x5)
+#define APB1_DIV_8							((uint8_t) 0x6)
+#define APB1_DIV_16							((uint8_t) 0x7)
+
+// APB2 Prescaler
+#define APB2_DIV_1							((uint8_t) 0x3)
+#define APB2_DIV_2							((uint8_t) 0x4)
+#define APB2_DIV_4							((uint8_t) 0x5)
+#define APB2_DIV_8							((uint8_t) 0x6)
+#define APB2_DIV_16							((uint8_t) 0x7)
+
+// ADC Prescaler
+#define ADC_DIV_2							((uint8_t) 0x0)
+#define ADC_DIV_4							((uint8_t) 0x1)
+#define ADC_DIV_6							((uint8_t) 0x2)
+#define ADC_DIV_8							((uint8_t) 0x3)
+
+// PLL Clock Source
+#define PLL_SRC_HSI_DIV_2					((uint8_t) 0)
+#define PLL_SRC_HSE							((uint8_t) 1)
+
+// PLL Clock Source Prescaler
+#define PLL_HSE_DIV_1						((uint8_t) 0)
+#define PLL_HSE_DIV_2						((uint8_t) 1)
+
+// PLL Multiplication Factor
+#define PLL_MUL_2							((uint8_t) 0x0)
+#define PLL_MUL_3							((uint8_t) 0x1)
+#define PLL_MUL_4							((uint8_t) 0x2)
+#define PLL_MUL_5							((uint8_t) 0x3)
+#define PLL_MUL_6							((uint8_t) 0x4)
+#define PLL_MUL_7							((uint8_t) 0x5)
+#define PLL_MUL_8							((uint8_t) 0x6)
+#define PLL_MUL_9							((uint8_t) 0x7)
+#define PLL_MUL_10							((uint8_t) 0x8)
+#define PLL_MUL_11							((uint8_t) 0x9)
+#define PLL_MUL_12							((uint8_t) 0xA)
+#define PLL_MUL_13							((uint8_t) 0xB)
+#define PLL_MUL_14							((uint8_t) 0xC)
+#define PLL_MUL_15							((uint8_t) 0xD)
+#define PLL_MUL_16_0						((uint8_t) 0xE)
+#define PLL_MUL_16_1						((uint8_t) 0xF)
+
+// USB Prescaler
+#define USB_DIV_1_5							((uint8_t) 0)
+#define USB_DIV_1							((uint8_t) 1)
+
+// Enable Alternate Function
+#define RCC_AF_ENABLE()              		(RCC->APB2ENR.BIT.AFIOEN = BIT_SET)
+
+// PLL Clock Source
+typedef enum {
+	HSE_DIV_1 = (uint8_t)0XAA,
+	HSE_DIV_2 = (uint8_t)0XBB,
+	HSI_DIV_2 = (uint8_t)0XCC,
+} PLL_CLK_SRC_ENUM;
+
+// System Clock Frequency
+typedef enum {
+	SYSCLK_16MHz = (uint8_t) 1,
+	SYSCLK_24MHz,
+	SYSCLK_32MHz,
+	SYSCLK_40MHz,
+	SYSCLK_48MHz,
+	SYSCLK_56MHz,
+	SYSCLK_64MHz,
+	SYSCLK_72MHz,
+} SYSCLK_FREQ;
 /*********************************************** RCC MACROS ***********************************************/
 
+/*********************************************** NVIC MACROS ***********************************************/
+// IRQn Number
+#define WWDG_IRQn							((uint8_t) 0)
+#define PVD_IRQn							((uint8_t) 1)
+#define RTC_IRQn							((uint8_t) 3)
+#define EXTI0_IRQn							((uint8_t) 6)
+#define EXTI1_IRQn							((uint8_t) 7)
+#define EXTI2_IRQn							((uint8_t) 8)
+#define EXTI3_IRQn							((uint8_t) 9)
+#define EXTI4_IRQn							((uint8_t) 10)
+#define EXTI9_5_IRQn						((uint8_t) 23)
+#define TIM2_IRQn							((uint8_t) 28)
+#define EXTI15_10_IRQn						((uint8_t) 40)
+/*********************************************** NVIC MACROS ***********************************************/
+
+/*********************************************** SYSTICK MACROS ***********************************************/
+// SysTick
+#define SYSTICK_CLK_EXT						((uint8_t) 0)
+#define SYSTICK_CLK_CORE					((uint8_t) 1)
+/*********************************************** SYSTICK MACROS ***********************************************/
+
+/*********************************************** GPT MACROS ***********************************************/
+// Centre-align Mode Selection
+#define CMS_EDGE							((uint8_t) 0x00)
+#define CMS_IF_DOWN							((uint8_t) 0x01)
+#define CMS_IF_UP							((uint8_t) 0x02)
+#define CMS_IF_BOTH							((uint8_t) 0x03)
+
+// Clock Division
+#define CKD_CLK_FREQ						((uint8_t) 0x00)
+#define CKD_CLK_2_FREQ						((uint8_t) 0x01)
+#define CKD_CLK_4_FREQ						((uint8_t) 0x02)
+
+// Master Mode Selection
+#define MMS_RESET							((uint8_t) 0x00)
+#define MMS_ENABLE							((uint8_t) 0x01)
+#define MMS_UPDATE							((uint8_t) 0x02)
+#define MMS_CMP_PULSE						((uint8_t) 0x03)
+#define MMS_CMP_OC1REF						((uint8_t) 0x04)
+#define MMS_CMP_OC2REF						((uint8_t) 0x05)
+#define MMS_CMP_OC3REF						((uint8_t) 0x06)
+#define MMS_CMP_OC4REF						((uint8_t) 0x07)
+
+// Slave Mode Selection
+#define SMS_DISABLE							((uint8_t) 0x00)
+#define SMS_ENC_MODE1						((uint8_t) 0x01)
+#define SMS_ENC_MODE2						((uint8_t) 0x02)
+#define SMS_ENC_MODE3						((uint8_t) 0x03)
+
+// TIM1 REMAP
+#define TIM1_NO_REMAP						((uint8_t) 0x00)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
+#define TIM1_PARTIAL_REMAP					((uint8_t) 0x01)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
+#define TIM1_NOT_USED_REMAP					((uint8_t) 0x02)    // Not Used
+#define TIM1_FULL_REMAP						((uint8_t) 0x03)    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
+
+// TIM2 REMAP
+#define TIM2_NO_REMAP						((uint8_t) 0x00)    // (CH1/ETR/PA0, CH2/PA1, CH3/PA2, CH4/PA3)
+#define TIM2_PARTIAL1_REMAP					((uint8_t) 0x01)    // (CH1/ETR/PA15, CH2/PB3, CH3/PA2, CH4/PA3)
+#define TIM2_PARTIAL2_REMAP					((uint8_t) 0x02)    // (CH1/ETR/PA0, CH2/PA1, CH3/PB10, CH4/PB11)
+#define TIM2_FULL_REMAP						((uint8_t) 0x03)    // (CH1/ETR/PA15, CH2/PB3, CH3/PB10, CH4/PB11) 
+
+// TIM3 REMAP
+#define TIM3_NO_REMAP						((uint8_t) 0x00)    // (CH1/PA6, CH2/PA7, CH3/PB0, CH4/PB1)
+#define TIM3_NOT_USED_REMAP					((uint8_t) 0x01)    // Not Used
+#define TIM3_PARTIAL_REMAP					((uint8_t) 0x02)    // (CH1/PB4, CH2/PB5, CH3/PB0, CH4/PB1)
+#define TIM3_FULL_REMAP						((uint8_t) 0x03)    // (CH1/PC6, CH2/PC7, CH3/PC8, CH4/PC9) 
+
+// TIM4 REMAP
+#define TIM4_NO_REMAP						((uint8_t) 0x00)    // (TIM4_CH1/PB6, TIM4_CH2/PB7, TIM4_CH3/PB8, TIM4_CH4/PB9)
+#define TIM4_FULL_REMAP						((uint8_t) 0x01)    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
+
+// Channel
+#define TIMx_CHANNEL_1						((uint8_t) 1)
+#define TIMx_CHANNEL_2						((uint8_t) 2)
+#define TIMx_CHANNEL_3						((uint8_t) 3)
+#define TIMx_CHANNEL_4						((uint8_t) 4)
+#define TIMx_CHANNEL_ALL					((uint8_t) 0xFF)
+
+// Counting Mode
+#define TIMx_MODE_NORMAL					((uint8_t) 0x00)    // Up if DIR = 0 else Down if DIR = 1
+#define TIMx_MODE_ALT_IF_DOWN				((uint8_t) 0x01)
+#define TIMx_MODE_ALT_IF_UP					((uint8_t) 0x02)
+#define TIMx_MODE_ALT_IF_BOTH				((uint8_t) 0x03)
+
+// Direction 
+#define TIMx_COUNT_UP						((uint8_t) 0x00)
+#define TIMx_COUNT_DOWN						((uint8_t) 0x01)
+
+// Polarity (Define what Active means)
+#define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
+#define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
+
+// GPT Error Check
+#define IS_TIMx_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
+/*********************************************** GPT MACROS ***********************************************/
+
+/*********************************************** PWM MACROS ***********************************************/
+// IMP: Store this value in ARR always to simplify the PWM calculation
+#define DEFAULT_ARR_VALUE					((uint16_t) 99)    // (ARR + 1) = (99 + 1) = (100) 
+#define MIN_DUTY_CYCLE						((uint8_t) 1)      // Min Value = 1%
+#define MAX_DUTY_CYCLE						((uint8_t) 100)    // Max Value = 100%
+
+// Timer Remapping
+#define TIM1_NO_REMAP						((uint8_t) 0x00)
+#define TIM1_PARTIAL_REMAP					((uint8_t) 0x01)
+#define TIM2_NO_REMAP						((uint8_t) 0x00)
+#define TIM2_PARTIAL_REMAP_1				((uint8_t) 0x01)
+#define TIM2_PARTIAL_REMAP_2				((uint8_t) 0x02)
+#define TIM2_FULL_REMAP						((uint8_t) 0x03)
+#define TIM3_NO_REMAP						((uint8_t) 0x00)
+#define TIM3_PARTIAL_REMAP					((uint8_t) 0x02)
+#define TIM4_NO_REMAP						((uint8_t) 0x00)
+
+// Preload Enable
+#define PRELOAD_DISABLE						((uint8_t) 0x00)
+#define PRELOAD_ENABLE						((uint8_t) 0x01)
+
+// Timer Modes
+typedef enum{
+	TIMx_OCM_FREEZE         = ((uint8_t) 0x00),    // The comparison between the output compare register TIMx_CCRy and the counter TIMx_CNT has no effect on the outputs.
+	TIMx_OCM_SET_CH         = ((uint8_t) 0x01),    // OCyREF signal is forced high when TIMx_CNT == TIMx_CCRy    
+	TIMx_OCM_RESET_CH       = ((uint8_t) 0x02),    // OCyREF signal is forced low when TIMx_CNT == TIMx_CCRy
+	TIMx_OCM_TOGGLE         = ((uint8_t) 0x03),    // OCyREF toggles when TIMx_CNT == TIMx_CCRy
+	TIMx_OCM_FORCE_RESET    = ((uint8_t) 0x04),    // OCyREF is forced low
+	TIMx_OCM_FORCE_SET      = ((uint8_t) 0x05),    // OCyREF is forced high
+	TIMx_OCM_PWM_NORMAL     = ((uint8_t) 0x06),    // In up counting, CHy is active as long as TIMx_CNT < TIMx_CCRy else inactive. In down counting, CHy is inactive (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
+	TIMx_OCM_PWM_INVERTED   = ((uint8_t) 0x07),    // In up counting, CHy is inactive as long as TIMx_CNT < TIMx_CCRy else active. In down counting, CHy is active (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
+} TIMx_OCM_MODE;
+/*********************************************** PWM MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */

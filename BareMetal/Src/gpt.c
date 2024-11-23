@@ -57,7 +57,7 @@
 */
 
 // Main Library
-#include "timer.h"
+#include "gpt.h"
 
 /**
  * @brief Configure General Purpose GP_TIMx (Clock Source + Frequency)

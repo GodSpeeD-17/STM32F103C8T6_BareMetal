@@ -10,10 +10,6 @@
 
 #include "reg_map.h"
 
-// SysTick
-#define SYSTICK_CLK_EXT					((uint8_t) 0)
-#define SYSTICK_CLK_CORE				((uint8_t) 1)
-
 /**
  * @brief Enables SysTick Counter
  */

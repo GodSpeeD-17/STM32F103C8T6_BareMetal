@@ -12,6 +12,8 @@
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
 void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+
+    // Local Variables
     uint32_t reg = 0, pin = 0;
     uint8_t temp = 0xFF;
 
@@ -25,45 +27,44 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
     else if(GPIOx == GPIOC){
         temp = AF_EXTI_PC;
     }
-    else 
-        return;
 
+    // Enable Alternate Function
+    RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
+    
     // Parameter Determination
-    if(PINx < (uint8_t) 4){
+    if(PINx < GPIO_PIN_4){
         reg = AFIO->EXTICR1.REG;
         pin = PINx * 4;
     }
-    else if(PINx < (uint8_t) 8){
+    else if(PINx < GPIO_PIN_8){
         reg = AFIO->EXTICR2.REG;
         pin = (PINx - 4) * 4;
     }
-    else if(PINx < (uint8_t) 12){
+    else if(PINx < GPIO_PIN_12){
         reg = AFIO->EXTICR3.REG;
         pin = (PINx - 8) * 4;
     }
-    else if(PINx < (uint8_t) 16){
+    else if(PINx <= GPIO_PIN_15){
         reg = AFIO->EXTICR4.REG;
         pin = (PINx - 12) * 4;
     }
-    else 
-        return;
 
     // Clear Register
     reg &= ~(0xF << pin);
     // Set Register
     reg |= (temp << pin);
 
-    // Write to Register 
-    if(PINx < (uint8_t) 4){
+    // Write to Appropriate Register 
+    if(PINx < GPIO_PIN_4){
         AFIO->EXTICR1.REG = reg;
     }
-    else if(PINx < (uint8_t) 8){
+    else if(PINx < GPIO_PIN_8){
         AFIO->EXTICR2.REG = reg;
     }
-    else if(PINx < (uint8_t) 12){
+    else if(PINx < GPIO_PIN_12){
         AFIO->EXTICR3.REG = reg;
     }
-    else if(PINx < (uint8_t) 16){
+    else if(PINx <= GPIO_PIN_15){
         AFIO->EXTICR4.REG = reg;
     }
 }
@@ -111,12 +112,9 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
  */
 void config_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
     
-    // Error Condition
-    if(PINx > (uint8_t) 16)
+    // Error Check
+    if(!IS_VALID_GPIO(GPIOx) || !IS_VALID_PIN(PINx))
         return;
-
-    // Enable Alternate Function
-    RCC_AF_ENABLE();
 
     // Configure the Source of Interrupt (Port Selection)
     config_EXTI_src(GPIOx, PINx);

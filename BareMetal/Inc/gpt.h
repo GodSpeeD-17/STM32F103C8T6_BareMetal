@@ -1,96 +1,16 @@
 /***************************************************************************************
- *  File: timer.h
+ *  File: gpt.h
  *  Created on: 13/10/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
 
 // Header Guards
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef __GPT_H__
+#define __GPT_H__
 
 // Register Mapping
 #include "reg_map.h"
 #include "rcc.h"
-
-// Centre-align Mode Selection
-#define CMS_EDGE			    ((uint8_t) 0x00)
-#define CMS_IF_DOWN			    ((uint8_t) 0x01)
-#define CMS_IF_UP			    ((uint8_t) 0x02)
-#define CMS_IF_BOTH			    ((uint8_t) 0x03)
-
-// Clock Division
-#define CKD_CLK_FREQ		    ((uint8_t) 0x00)
-#define CKD_CLK_2_FREQ		    ((uint8_t) 0x01)
-#define CKD_CLK_4_FREQ		    ((uint8_t) 0x02)
-
-// Master Mode Selection
-#define MMS_RESET			    ((uint8_t) 0x00)
-#define MMS_ENABLE			    ((uint8_t) 0x01)
-#define MMS_UPDATE			    ((uint8_t) 0x02)
-#define MMS_CMP_PULSE		    ((uint8_t) 0x03)
-#define MMS_CMP_OC1REF		    ((uint8_t) 0x04)
-#define MMS_CMP_OC2REF		    ((uint8_t) 0x05)
-#define MMS_CMP_OC3REF		    ((uint8_t) 0x06)
-#define MMS_CMP_OC4REF		    ((uint8_t) 0x07)
-
-// Slave Mode Selection
-#define SMS_DISABLE			    ((uint8_t) 0x00)
-#define SMS_ENC_MODE1		    ((uint8_t) 0x01)
-#define SMS_ENC_MODE2		    ((uint8_t) 0x02)
-#define SMS_ENC_MODE3		    ((uint8_t) 0x03)
-
-// TIM1 REMAP
-#define TIM1_NO_REMAP           ((uint8_t) 0x00)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
-#define TIM1_PARTIAL_REMAP      ((uint8_t) 0x01)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
-#define TIM1_NOT_USED_REMAP     ((uint8_t) 0x02)    // Not Used
-#define TIM1_FULL_REMAP         ((uint8_t) 0x03)    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
-
-// TIM2 REMAP
-#define TIM2_NO_REMAP           ((uint8_t) 0x00)    // (CH1/ETR/PA0, CH2/PA1, CH3/PA2, CH4/PA3)
-#define TIM2_PARTIAL1_REMAP     ((uint8_t) 0x01)    // (CH1/ETR/PA15, CH2/PB3, CH3/PA2, CH4/PA3)
-#define TIM2_PARTIAL2_REMAP     ((uint8_t) 0x02)    // (CH1/ETR/PA0, CH2/PA1, CH3/PB10, CH4/PB11)
-#define TIM2_FULL_REMAP         ((uint8_t) 0x03)    // (CH1/ETR/PA15, CH2/PB3, CH3/PB10, CH4/PB11) 
-
-// TIM3 REMAP
-#define TIM3_NO_REMAP           ((uint8_t) 0x00)    // (CH1/PA6, CH2/PA7, CH3/PB0, CH4/PB1)
-#define TIM3_NOT_USED_REMAP     ((uint8_t) 0x01)    // Not Used
-#define TIM3_PARTIAL_REMAP      ((uint8_t) 0x02)    // (CH1/PB4, CH2/PB5, CH3/PB0, CH4/PB1)
-#define TIM3_FULL_REMAP         ((uint8_t) 0x03)    // (CH1/PC6, CH2/PC7, CH3/PC8, CH4/PC9) 
-
-// TIM4 REMAP
-#define TIM4_NO_REMAP           ((uint8_t) 0x00)    // (TIM4_CH1/PB6, TIM4_CH2/PB7, TIM4_CH3/PB8, TIM4_CH4/PB9)
-#define TIM4_FULL_REMAP         ((uint8_t) 0x01)    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
-
-// Channel
-#define TIMx_CHANNEL_1          ((uint8_t) 1)
-#define TIMx_CHANNEL_2          ((uint8_t) 2)
-#define TIMx_CHANNEL_3          ((uint8_t) 3)
-#define TIMx_CHANNEL_4          ((uint8_t) 4)
-#define TIMx_CHANNEL_ALL        ((uint8_t) 0xFF)
-
-// Counting Mode
-#define TIMx_MODE_NORMAL        ((uint8_t) 0x00)    // Up if DIR = 0 else Down if DIR = 1
-#define TIMx_MODE_ALT_IF_DOWN   ((uint8_t) 0x01)
-#define TIMx_MODE_ALT_IF_UP     ((uint8_t) 0x02)
-#define TIMx_MODE_ALT_IF_BOTH   ((uint8_t) 0x03)
-
-// Direction 
-#define TIMx_COUNT_UP           ((uint8_t) 0x00)
-#define TIMx_COUNT_DOWN         ((uint8_t) 0x01)
-
-// Polarity (Define what Active means)
-#define TIMx_POL_ACTIVE_HIGH    ((uint8_t) 0x00)
-#define TIMx_POL_ACTIVE_LOW     ((uint8_t) 0x01)
-
-// GPT Error Check
-#define IS_TIMx_GPT(GP_TIMx)                                                    \
-    do {                                                                        \
-        if (((GP_TIMx) != TIM2) && ((GP_TIMx) != TIM3) && ((GP_TIMx) != TIM4))  \
-            return (uint8_t) 0;                                                 \
-        else                                                                    \
-            return (uint8_t) 1;                                                 \
-    }                                                                           \
-    while (0)
 
 /**
  * @brief Enables the Clock for General Purpose Timer
@@ -343,4 +263,4 @@ inline __attribute__((always_inline)) void disable_GPT_IRQ(GPT_REG_STRUCT* GP_TI
  */
 void GPT_delay_ms(GPT_REG_STRUCT* GP_TIMx, volatile uint32_t delayMs);
 
-#endif /* __TIMER_H__ */
+#endif /* __GPT_H__ */

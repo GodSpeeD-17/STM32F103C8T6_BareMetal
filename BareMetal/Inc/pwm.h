@@ -10,39 +10,7 @@
 
 // Dependency
 #include "gpio.h"
-#include "timer.h"
-
-// IMP: Store this value in ARR always to simplify the PWM calculation
-#define DEFAULT_ARR_VALUE            ((uint16_t) 99)    // (ARR + 1) = (99 + 1) = (100) 
-#define MIN_DUTY_CYCLE               ((uint8_t) 1)      // Min Value = 1%
-#define MAX_DUTY_CYCLE               ((uint8_t) 100)    // Max Value = 100%
-
-// Timer Remapping
-#define TIM1_NO_REMAP                ((uint8_t) 0x00)
-#define TIM1_PARTIAL_REMAP           ((uint8_t) 0x01)
-#define TIM2_NO_REMAP                ((uint8_t) 0x00)
-#define TIM2_PARTIAL_REMAP_1         ((uint8_t) 0x01)
-#define TIM2_PARTIAL_REMAP_2         ((uint8_t) 0x02)
-#define TIM2_FULL_REMAP              ((uint8_t) 0x03)
-#define TIM3_NO_REMAP                ((uint8_t) 0x00)
-#define TIM3_PARTIAL_REMAP           ((uint8_t) 0x02)
-#define TIM4_NO_REMAP                ((uint8_t) 0x00)
-
-// Preload Enable
-#define PRELOAD_DISABLE              ((uint8_t) 0x00)
-#define PRELOAD_ENABLE               ((uint8_t) 0x01)
-
-// Timer Modes
-typedef enum{
-	TIMx_OCM_FREEZE         = ((uint8_t) 0x00),    // The comparison between the output compare register TIMx_CCRy and the counter TIMx_CNT has no effect on the outputs.
-	TIMx_OCM_SET_CH         = ((uint8_t) 0x01),    // OCyREF signal is forced high when TIMx_CNT == TIMx_CCRy    
-	TIMx_OCM_RESET_CH       = ((uint8_t) 0x02),    // OCyREF signal is forced low when TIMx_CNT == TIMx_CCRy
-	TIMx_OCM_TOGGLE         = ((uint8_t) 0x03),    // OCyREF toggles when TIMx_CNT == TIMx_CCRy
-	TIMx_OCM_FORCE_RESET    = ((uint8_t) 0x04),    // OCyREF is forced low
-	TIMx_OCM_FORCE_SET      = ((uint8_t) 0x05),    // OCyREF is forced high
-	TIMx_OCM_PWM_NORMAL     = ((uint8_t) 0x06),    // In up counting, CHy is active as long as TIMx_CNT < TIMx_CCRy else inactive. In down counting, CHy is inactive (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
-	TIMx_OCM_PWM_INVERTED   = ((uint8_t) 0x07),    // In up counting, CHy is inactive as long as TIMx_CNT < TIMx_CCRy else active. In down counting, CHy is active (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
-} TIMx_OCM_MODE;
+#include "gpt.h"
 
 /**
  * @brief Configure PWM Mode for General Purpose TIMx

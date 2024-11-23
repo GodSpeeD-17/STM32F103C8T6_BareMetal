@@ -17,19 +17,6 @@
 // Main Library
 #include "reg_map.h"
 
-// IRQn Number
-#define WWDG_IRQn                       ((uint8_t) 0)
-#define PVD_IRQn                        ((uint8_t) 1)
-#define RTC_IRQn                        ((uint8_t) 3)
-#define EXTI0_IRQn                      ((uint8_t) 6)
-#define EXTI1_IRQn                      ((uint8_t) 7)
-#define EXTI2_IRQn                      ((uint8_t) 8)
-#define EXTI3_IRQn                      ((uint8_t) 9)
-#define EXTI4_IRQn                      ((uint8_t) 10)
-#define EXTI9_5_IRQn                    ((uint8_t) 23)
-#define TIM2_IRQn                       ((uint8_t) 28)
-#define EXTI15_10_IRQn                  ((uint8_t) 40)
-
 /*
 // Stores the status of Interrupts before disabling it Globally
 volatile uint32_t nvic_irq_enabled[2] = {0};

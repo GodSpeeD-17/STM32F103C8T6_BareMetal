@@ -18,6 +18,6 @@
 #include "pwm.h"
 #include "rcc.h"
 #include "systick.h"
-#include "timer.h"
+#include "gpt.h"
 
 #endif /* __BARE_METAL_H__ */
