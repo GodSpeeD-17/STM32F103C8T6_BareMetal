@@ -51,8 +51,10 @@ int main(void){
 
 		// Increase Brightness
 		for(dutyCycle = MIN_DUTY_CYCLE; dutyCycle <= MAX_DUTY_CYCLE; dutyCycle += 2){
+			// Update PWM Duty Cycle
+			pwm_config.duty_cycle = dutyCycle;
 			// Set Duty Cycle
-			set_PWM_duty_cycle(GP_TIMER, GPT_CHANNEL, dutyCycle);
+			set_PWM_duty_cycle(&pwm_config);
 			// Delay
 			SysTick_delay_ms(DELAY_MS);
 		}
@@ -64,14 +66,13 @@ int main(void){
 
 		// Decrease Brightness
 		for(dutyCycle = MAX_DUTY_CYCLE; dutyCycle >= MIN_DUTY_CYCLE; dutyCycle -= 2){
+			// Update PWM Duty Cycle
+			pwm_config.duty_cycle = dutyCycle;
 			// Set Duty Cycle
-			set_PWM_duty_cycle(GP_TIMER, GPT_CHANNEL, dutyCycle);
+			set_PWM_duty_cycle(&pwm_config);
 			// Delay
 			SysTick_delay_ms(DELAY_MS);
 		}
-		
-		// Reset Pin 
-		// reset_GPIO(LED_PORT, LED_PIN);
 
 		// Indication
 		toggle_OB_LED();

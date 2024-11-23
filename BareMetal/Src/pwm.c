@@ -286,5 +286,4 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 
 	// Enable the Timer
 	enable_GPT(&PWMx->GPT_CONFIGx);
-
 }
