@@ -1,6 +1,6 @@
 /***************************************************************************************
  *  File: pwm.h
- *  Created on: 26/10/2024
+ *  Created on: 23/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
 
@@ -13,16 +13,14 @@
 #include "gpt.h"
 
 // PWM Configuration Structure
-__attribute__((packed)) typedef struct {
+typedef struct {
     // Timer Configuration
-    gpt_config_t gptx;
+    gpt_config_t GPT_CONFIGx;
     // PWM Mode
     TIMx_OCM_MODE pwm_mode;
-    // Enable Shadow Registers
-    uint8_t preload_enable;
     // PWM Active Polarity
     uint8_t polarity;
-    // Duty Cycle
+    // Duty Cycle (%)
     uint16_t duty_cycle;
 } pwm_config_t;
 
@@ -49,8 +47,18 @@ static void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t p
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  * @param[in] duty_cycle Duty Cycle Value in (%) 
  */
-static void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle);
+static void set_PWM_duty(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle);
 
+/**
+ * @brief Configures the parameters necessary for PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+void config_PWM(pwm_config_t* PWMx);
 
+/**
+ * @brief Sets the duty cycle for PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+void set_PWM_duty_cycle(pwm_config_t* PWMx);
 
 #endif // __PWM_H__

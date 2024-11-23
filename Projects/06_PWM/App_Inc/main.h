@@ -10,7 +10,6 @@
 #define DELAY_MS                        ((uint32_t) 100) 
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
-#define LED_MODE                        (MODE_OUT_10MHz)
 #define GP_TIMER                        (TIM2)
 #define GPT_FREQ                        (FREQ_10kHz)   
 #define GPT_ARR                         (DEFAULT_ARR_VALUE)
