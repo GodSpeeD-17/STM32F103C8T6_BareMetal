@@ -86,12 +86,12 @@ int main(void){
             SysTick_delay_ms(DELAY_MS);
         }
         // LED2
-        // for(pwm_led_2.duty_cycle = MIN_DUTY_CYCLE; (pwm_led_2.duty_cycle <= MAX_DUTY_CYCLE && !irq_status); pwm_led_1.duty_cycle += 2){
-        //     // Duty Cycle Updated
-        //     set_PWM_duty_cycle(&pwm_led_2);
-        //     // Delay
-        //     SysTick_delay_ms(DELAY_MS);
-        // }
+        for(pwm_led_2.duty_cycle = MIN_DUTY_CYCLE; (pwm_led_2.duty_cycle <= MAX_DUTY_CYCLE && !irq_status); pwm_led_1.duty_cycle += 2){
+            // Duty Cycle Updated
+            set_PWM_duty_cycle(&pwm_led_2);
+            // Delay
+            SysTick_delay_ms(DELAY_MS);
+        }
 
         // On-board LED Toggle
         toggle_OB_LED();
@@ -104,12 +104,12 @@ int main(void){
             SysTick_delay_ms(DELAY_MS);
         }
         // LED2
-        // for(pwm_led_2.duty_cycle; (pwm_led_2.duty_cycle >= MIN_DUTY_CYCLE && !irq_status); pwm_led_2.duty_cycle -= 2){
-        //     // Duty Cycle Updated
-        //     set_PWM_duty_cycle(&pwm_led_2);
-        //     // Delay
-        //     SysTick_delay_ms(DELAY_MS);
-        // }
+        for(pwm_led_2.duty_cycle; (pwm_led_2.duty_cycle >= MIN_DUTY_CYCLE && !irq_status); pwm_led_2.duty_cycle -= 2){
+            // Duty Cycle Updated
+            set_PWM_duty_cycle(&pwm_led_2);
+            // Delay
+            SysTick_delay_ms(DELAY_MS);
+        }
         
         // On-board LED Toggle
         toggle_OB_LED();
