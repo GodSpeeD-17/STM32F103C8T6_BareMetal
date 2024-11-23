@@ -56,6 +56,22 @@ __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPI
 } 
 
 /**
+ * @brief Enables Clock for Alternate Function (AFIO)
+ */
+__attribute__((always_inline)) inline void enable_AFIO_clk(void){
+	// Enable AFIO Clock in APB2 Enable Register (APB2ENR)
+	RCC->APB2ENR.BIT.AFIOEN = (uint8_t) 0x01;
+}
+
+/**
+ * @brief Disables Clock for Alternate Function (AFIO)
+ */
+__attribute__((always_inline)) inline void disable_AFIO_clk(void){
+	// Enable AFIO Clock in APB2 Enable Register (APB2ENR)
+	RCC->APB2ENR.BIT.AFIOEN = (uint8_t) 0x00;
+}
+
+/**
  * @brief Configures GPIO as per input
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`

@@ -11,7 +11,6 @@ int main(void){
 	config_SysTick(CoreClock/1000);
 
 	// Configure GPIO as AF
-	RCC_AF_ENABLE();
 	config_GPIO(LED_PORT, LED_PIN, LED_MODE, CNF_OUT_AF_PP);
 
 	// Configure On-board LED
@@ -39,7 +38,7 @@ int main(void){
 	while(1){
 
 		// Increase Brightness
-		for(dutyCycle = MIN_DUTY_CYCLE; dutyCycle <= MAX_DUTY_CYCLE; dutyCycle += 1){
+		for(dutyCycle = MIN_DUTY_CYCLE; dutyCycle <= MAX_DUTY_CYCLE; dutyCycle += 2){
 			// Set Duty Cycle
 			set_PWM_duty_cycle(GP_TIMER, GPT_CHANNEL, dutyCycle);
 			// Delay
@@ -48,20 +47,23 @@ int main(void){
 		
 		// Indication
 		toggle_OB_LED();
-		SysTick_delay_ms(27 * DELAY_MS);
+		SysTick_delay_ms(2000);
 		toggle_OB_LED();
 
 		// Decrease Brightness
-		for(dutyCycle = MAX_DUTY_CYCLE; dutyCycle >= MIN_DUTY_CYCLE; dutyCycle -= 1){
+		for(dutyCycle = MAX_DUTY_CYCLE; dutyCycle >= MIN_DUTY_CYCLE; dutyCycle -= 2){
 			// Set Duty Cycle
 			set_PWM_duty_cycle(GP_TIMER, GPT_CHANNEL, dutyCycle);
 			// Delay
 			SysTick_delay_ms(DELAY_MS);
 		}
+		
+		// Reset Pin 
+		// reset_GPIO(LED_PORT, LED_PIN);
 
 		// Indication
 		toggle_OB_LED();
-		SysTick_delay_ms(27 * DELAY_MS);
+		SysTick_delay_ms(2000);
 		toggle_OB_LED();
 	}
 

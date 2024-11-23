@@ -6,8 +6,8 @@
 #include "bare_metal.h"
 
 // MACROS
-#define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000)  
+#define SYSCLK_MHz                  (SYSCLK_72MHz)
+#define DELAY_MS                    ((uint32_t) 1000)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

@@ -4,7 +4,6 @@
  *  Author: Shrey Shah
  ***************************************************************************************/
 
-
 /*
 	THEORY:
 	|=> Pulse Width Modulation (PWM) is used to create pseudo Analog Value from Digital Value
@@ -13,7 +12,6 @@
 	|=> From experience, 10kHz - 100kHz is the best range of frequency where almost all the devices will work
 	|=> From Datasheet and Formula, do not exceed 200kHz and do not go below 100Hz (Toy Servo Motor)
 */
-
 
 // Main Header
 #include "pwm.h"
@@ -28,7 +26,7 @@
 void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm_mode, uint8_t preload_enable){
 	
 	// Error
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4)
+	if(!(IS_TIMx_GPT(GP_TIMx)))
 		return;
 
 	// Preload the value
@@ -94,35 +92,35 @@ void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm
  */
 void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity){
 
-	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4 && GP_TIMx != TIM5)
+	// Error
+	if(!IS_TIMx_GPT(GP_TIMx))
 		return; 
 
 	// Channel based Configuration
 	switch(channel){
 		
 		case TIMx_CHANNEL_1:
-			// Configure Active Polarity
+			// Configure Input Polarity
 			GP_TIMx->CCER.BIT.CC1P = polarity;
 		break;
 		
 		case TIMx_CHANNEL_2:
-			// Configure Active Polarity
+			// Configure Input Polarity
 			GP_TIMx->CCER.BIT.CC2P = polarity;
 		break;
 		
 		case TIMx_CHANNEL_3:
-			// Configure Active Polarity
+			// Configure Input Polarity
 			GP_TIMx->CCER.BIT.CC3P = polarity;
 		break;
 		
 		case TIMx_CHANNEL_4:
-			// Configure Active Polarity
+			// Configure Input Polarity
 			GP_TIMx->CCER.BIT.CC4P = polarity;
 		break;
 
 		case TIMx_CHANNEL_ALL:
-			// Configure Active Polarity
+			// Configure Input Polarity
 			GP_TIMx->CCER.BIT.CC1P = polarity;
 			GP_TIMx->CCER.BIT.CC2P = polarity;
 			GP_TIMx->CCER.BIT.CC3P = polarity;
@@ -140,7 +138,7 @@ void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity
 void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle){
 
 	// Error Check
-	if(GP_TIMx != TIM2 && GP_TIMx != TIM3 && GP_TIMx != TIM4 && GP_TIMx != TIM5)
+	if(!IS_TIMx_GPT(GP_TIMx))
 		return; 
 
 	// Wrap duty cycle    
@@ -178,4 +176,3 @@ void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_c
 		break;
 	}
 }
-

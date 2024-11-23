@@ -275,6 +275,7 @@
         "afio_reg_map.h": "c",
         "exti.h": "c",
         "bare_metal.h": "c",
-        "gpio.h": "c"
+        "gpio.h": "c",
+        "gpt.h": "c"
     }
 }

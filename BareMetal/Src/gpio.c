@@ -17,9 +17,7 @@
 void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx){
     
 	// Error checking for input parameters & mode - configuration mapping
-	if(!ARE_GPIO_PARAMETERS_VALID(GPIOx, PINx, MODEx, CNFx))
-		return;
-	else if(!IS_MODE_CNF_VALID(MODEx, CNFx))
+	if(!ARE_GPIO_PARAMETERS_VALID(GPIOx, PINx, MODEx, CNFx) && !IS_MODE_CNF_VALID(MODEx, CNFx))
 		return;
 
 	// Local Variables
@@ -27,6 +25,10 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 
     // Enable GPIO Clock
     enable_GPIO_clk(GPIOx);
+
+	// Alternate Function
+	if((CNFx == CNF_OUT_AF_OD) || (CNFx == CNF_OUT_AF_PP))
+		enable_AFIO_clk();
 
     // Determine the register, shift, and mask based on the pin number
     if (PINx <= GPIO_PIN_7){
@@ -54,9 +56,6 @@ void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CN
 		// Update the Configuration Bits as Input Push-Pull
 		CNFx = (uint8_t)0x02;	
     }
-	// Alternate Function
-	else if((CNFx == CNF_OUT_AF_OD) || (CNFx == CNF_OUT_AF_PP))
-		RCC->APB2ENR.BIT.AFIOEN = (uint8_t) 0x01;
 
     // Clear the current mode and configuration bits
     reg &= ~mask;
