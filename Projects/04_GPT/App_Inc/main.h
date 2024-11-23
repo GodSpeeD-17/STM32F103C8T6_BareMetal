@@ -11,6 +11,7 @@
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)   
 #define GP_TIMER                        (TIM4)
+#define GPT_CHANNEL                     (TIMx_CHANNEL_ALL)   
 #define GPT_FREQ                        (FREQ_1kHz)   
 #define GPT_ARR                         (DEFAULT_ARR_VALUE)
 #define GPT_CNT                         ((uint16_t) 0x00)

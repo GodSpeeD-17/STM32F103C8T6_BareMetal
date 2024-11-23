@@ -327,9 +327,17 @@ typedef enum {
 #define TIMx_COUNT_UP						((uint8_t) 0x00)
 #define TIMx_COUNT_DOWN						((uint8_t) 0x01)
 
-// Polarity (Define what Active means)
+// Polarity (Defines what Active means)
 #define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
 #define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
+
+// Auto Reload Preload 
+#define TIMx_ARPE_DISABLE					((uint8_t) 0x00)
+#define TIMx_ARPE_ENABLE					((uint8_t) 0x01)
+
+// One Pulse Mode
+#define TIMx_OPM_DISABLE					((uint8_t) 0x00)
+#define TIMx_OPM_ENABLE						((uint8_t) 0x01)
 
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
@@ -341,17 +349,21 @@ typedef enum {
 #define IS_VALID_GPT_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_GPT_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
 											 (MODEx) == TIMx_MODE_ALT_IF_UP || (MODEx) == TIMx_MODE_ALT_IF_BOTH)
-#define IS_VALID_GPT_ARR(ARRx)				((ARRx) > (uint16_t)0x00)
-#define IS_VALID_GPT_FREQ(FREQx)			((FREQx) > (uint32_t)0x00)
-#define IS_VALID_GPT_CNT(CNTx)				((CNTx) >= (uint16_t)0x00)
-#define IS_VALID_GPT_CONFIG(GP_TIMx, CHx, ARRx, FREQx, CNTx, MODEx, DIRx) \
-											(IS_VALID_GPT((GP_TIMx)) && \
-											 IS_VALID_GPT_CHANNEL((CHx)) && \
-											 IS_VALID_GPT_ARR((ARRx)) && \
-											 IS_VALID_GPT_FREQ((FREQx)) && \
-											 IS_VALID_GPT_CNT((CNTx)) && \
-											 IS_VALID_GPT_CMS_MODE((MODEx)) && \
-											 IS_VALID_GPT_DIRECTION((DIRx)))
+#define IS_VALID_GPT_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
+#define IS_VALID_GPT_FREQ(FREQx)			(((FREQx) > (uint32_t)0x00) && ((FREQx) <= PLL_MAX_FREQ))
+#define IS_VALID_GPT_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
+#define IS_VALID_GPT_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
+#define IS_VALID_GPT_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
+#define IS_VALID_GPT_CONFIG_STRUCT(GPT_CONFIGx) \
+											(IS_VALID_GPT((GPT_CONFIGx->GP_TIMx)) && \
+											 IS_VALID_GPT_CHANNEL((GPT_CONFIGx->channel)) && \
+											 IS_VALID_GPT_ARR((GPT_CONFIGx->auto_reload_value)) && \
+											 IS_VALID_GPT_FREQ((GPT_CONFIGx->frequency_Hz)) && \
+											 IS_VALID_GPT_CNT((GPT_CONFIGx->count)) && \
+											 IS_VALID_GPT_CMS_MODE((GPT_CONFIGx->cms_mode)) && \
+											 IS_VALID_GPT_DIRECTION((GPT_CONFIGx->direction)) && \
+											 IS_VALID_GPT_ARPE((GPT_CONFIGx->auto_reload_preload)) && \
+											 IS_VALID_GPT_OPM((GPT_CONFIGx->one_pulse)))									 
 /*********************************************** GPT MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/

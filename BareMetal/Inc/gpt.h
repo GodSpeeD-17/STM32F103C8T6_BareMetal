@@ -10,10 +10,9 @@
 
 // Register Mapping
 #include "reg_map.h"
-#include "rcc.h"
 
 // Timer Configuration Structure
-__attribute__((packed)) typedef struct {
+typedef struct {
     // General Purpose Timer
     GPT_REG_STRUCT* GP_TIMx;
 	// General Purpose Timer Channel
@@ -28,85 +27,11 @@ __attribute__((packed)) typedef struct {
 	uint8_t cms_mode;
     // Count Direction
 	uint8_t direction;
+	// Auto-Reload Preload Enable
+	uint8_t auto_reload_preload;
+	// One-Pulse Mode
+	uint8_t one_pulse;
 } gpt_config_t;
-
-/*********************************************** Private ***********************************************/
-
-/**
- * @brief Configures GP Timer Counting Mode along with Direction
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] cms_mode Center-Aligned Mode Selection `TIMx_MODE_...`
- */
-__attribute__((always_inline)) static inline void set_GPT_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t cms_mode){
-	// Centre-Aligned Mode Selection
-	GP_TIMx->CR1.BIT.CMS = cms_mode;
-}
-
-/**
- * @brief Configures GP Timer Counting Mode along with Direction
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] direction `TIMx_COUNT_UP`, `TIMx_COUNT_DOWN`
- */
-__attribute__((always_inline)) static inline void set_GPT_direction(GPT_REG_STRUCT* GP_TIMx, uint8_t direction){
-	// Direction Selection
-	GP_TIMx->CR1.BIT.DIR = direction;
-}
-
-/**
- * @brief Updates the frequency of already configured General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] freq_Hz Timer Frequency (in Hz)
- */
-__attribute__((always_inline)) static inline void set_GPT_frequency(GPT_REG_STRUCT* GP_TIMx, uint32_t freq_Hz){
-	// Error
-	if(freq_Hz == 0)
-		return;
-	// Calculate updated PSC Value
-	GP_TIMx->PSC = calc_GPT_PSC(freq_Hz, GP_TIMx->ARR);
-}
-
-/**
- * @brief Updates the frequency of already configured General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] arr_value Auto Reload Value
- */
-__attribute__((always_inline)) static inline void set_GPT_ARR(GPT_REG_STRUCT* GP_TIMx, uint16_t arr_value){
-	// Calculate updated PSC Value
-	GP_TIMx->ARR = arr_value;
-}
-
-/**
- * @brief Configures GP Timer Counting Mode along with Direction
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] cms_mode Center-Aligned Mode Selection `TIMx_MODE_...`
- * @param[in] direction `TIMx_COUNT_UP`, `TIMx_COUNT_DOWN`
- */
-__attribute__((always_inline)) static inline void set_GPT_count(GPT_REG_STRUCT* GP_TIMx, uint8_t count_value){
-	// Set the count value
-	GP_TIMx->CNT = count_value;
-}
-
-/**
- * @brief Enables the Interrupt Generation for General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- */
-__attribute__((always_inline)) static inline void enable_GPT_IRQ(GPT_REG_STRUCT* GP_TIMx){
-    // Enable the Interrupt
-    GP_TIMx->DIER.BIT.UIE = BIT_SET;
-}
-
-/**
- * @brief Disables the Interrupt Generation for General Purpose Timer
- * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
- */
-__attribute__((always_inline)) static inline void disable_GPT_IRQ(GPT_REG_STRUCT* GP_TIMx){
-    // Disable the interrupt
-    GP_TIMx->DIER.BIT.UIE = BIT_RESET;
-}
-
-/*********************************************** Private ***********************************************/
-
-/*********************************************** Public ***********************************************/
 
 /**
  * @brief Enables the Clock for General Purpose Timer
@@ -143,9 +68,9 @@ __attribute__((always_inline)) inline void disable_GPT_clk(gpt_config_t* GPT_CON
  */
 __attribute__((always_inline)) inline void enable_GPT(gpt_config_t* GPT_CONFIGx){
     // Clear Update Interrupt Flag
-    GPT_CONFIGx->GP_TIMx->SR.BIT.UIF = BIT_RESET;
+    GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 	// Enable GP_TIMx
-	GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN = BIT_SET;
+	GPT_CONFIGx->GP_TIMx->CR1.REG |= BIT_SET;
 }
 
 /**
@@ -154,9 +79,9 @@ __attribute__((always_inline)) inline void enable_GPT(gpt_config_t* GPT_CONFIGx)
  */
 __attribute__((always_inline)) inline void disable_GPT(gpt_config_t* GPT_CONFIGx){
 	// Disable GP_TIMx
-	GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN = BIT_RESET;
+	GPT_CONFIGx->GP_TIMx->CR1.REG &= ~BIT_SET;
     // Clear Update Interrupt Flag
-    GPT_CONFIGx->GP_TIMx->SR.BIT.UIF = BIT_RESET;
+    GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 }
 
 /**
@@ -195,7 +120,7 @@ __attribute__((always_inline)) inline void enable_GPT_CH(gpt_config_t* GPT_CONFI
 
 /**
  * @brief Disables the General Purpose GP_TIMx's Channel
- * @param[in] GPT_CONFIGx 
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
 __attribute__((always_inline)) inline void disable_GPT_CH(gpt_config_t* GPT_CONFIGx){
 
@@ -229,7 +154,7 @@ __attribute__((always_inline)) inline void disable_GPT_CH(gpt_config_t* GPT_CONF
 
 /**
  * @brief Resets the General Purpose GP_TIMx
- * @param[in] GPT_CONFIGx
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
 __attribute__((always_inline)) inline void reset_GPT(gpt_config_t* GPT_CONFIGx){
     // Reset Based on GPT
@@ -249,11 +174,15 @@ __attribute__((always_inline)) inline void reset_GPT(gpt_config_t* GPT_CONFIGx){
 
 /**
  * @brief Triggers an update event to apply the settings
- * @param[in] GPT_CONFIGx
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
 __attribute__((always_inline)) inline void update_GPT_params(gpt_config_t* GPT_CONFIGx){
 	// Send an update event to reset the timer and apply settings
-  	GPT_CONFIGx->GP_TIMx->EGR.BIT.UG = BIT_SET;
+  	GPT_CONFIGx->GP_TIMx->EGR.REG |= BIT_SET;
+	// Wait until confirmation by Hardware
+	while(GPT_CONFIGx->GP_TIMx->EGR.REG & 0x01);
+	// Clear the update flag
+	GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET; 
 }
 
 /**
@@ -297,11 +226,9 @@ uint32_t get_GPT_freq(gpt_config_t* GPT_CONFIGx);
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] GPT_CONFIGx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
 void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs);
-
-/*********************************************** Private ***********************************************/
 
 #endif /* __GPT_H__ */

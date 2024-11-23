@@ -59,6 +59,9 @@
 // Main Library
 #include "gpt.h"
 
+
+#include "gpio.h"
+
 /**
  * @brief Configures the General Purpose Timer (GPT)
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
@@ -66,32 +69,41 @@
 void config_GPT(gpt_config_t* GPT_CONFIGx){
 	
 	// Error Handling
-	if(!IS_VALID_GPT_CONFIG(GPT_CONFIGx->GP_TIMx, GPT_CONFIGx->channel, GPT_CONFIGx->auto_reload_value, GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->count, GPT_CONFIGx->cms_mode, GPT_CONFIGx->direction))
+	if(!IS_VALID_GPT_CONFIG_STRUCT(GPT_CONFIGx))
 		return;
 
 	// Enable Clock
-	enable_GPT_clk(GPT_CONFIGx->GP_TIMx);
+	enable_GPT_clk(GPT_CONFIGx);
 
 	// Reset the GP_TIMx
-	reset_GPT(GPT_CONFIGx->GP_TIMx);
+	reset_GPT(GPT_CONFIGx);
 
-	// Centre-Aligned Mode Selection
-	GPT_CONFIGx->GP_TIMx->CR1.BIT.CMS = GPT_CONFIGx->cms_mode;
+	// Disable the Timer
+	disable_GPT(GPT_CONFIGx);
 
-	// Direction Selection
-	GPT_CONFIGx->GP_TIMx->CR1.BIT.DIR = GPT_CONFIGx->direction;
+	// Clear the update flag
+	GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
+
+	// Update disable
+	GPT_CONFIGx->GP_TIMx->CR1.REG |= (1 << 1);
 
 	// Set Auto Reload Value (ARR)
 	GPT_CONFIGx->GP_TIMx->ARR = GPT_CONFIGx->auto_reload_value;
 
 	// Calculate updated PSC Value
-	GPT_CONFIGx->GP_TIMx->PSC = calc_GPT_PSC(GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->GP_TIMx->ARR);
+	GPT_CONFIGx->GP_TIMx->PSC = calc_GPT_PSC(GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->auto_reload_value);
 	
 	// Set Initial Count Value (CNT)
 	GPT_CONFIGx->GP_TIMx->CNT = GPT_CONFIGx->count;
+
+	// Centre-Aligned Mode + Direction + Auto Reload Preload Selection
+	GPT_CONFIGx->GP_TIMx->CR1.REG |= (uint32_t)(((GPT_CONFIGx->auto_reload_preload & 0x01)<< 7) | ((GPT_CONFIGx->cms_mode & 0x03) << 5) | ((GPT_CONFIGx->direction & 0x01)<< 4) | ((GPT_CONFIGx->one_pulse & 0x01) << 3));
 	
+	// Update enable
+	GPT_CONFIGx->GP_TIMx->CR1.REG &= ~(1 << 1);
+
 	// Update the GPT
-	update_GPT_params(GPT_CONFIGx->GP_TIMx);
+	update_GPT_params(GPT_CONFIGx);
 }
 
 /**
@@ -117,25 +129,43 @@ uint32_t get_GPT_freq(gpt_config_t* GPT_CONFIGx){
 }
 
 /**
+ * @brief Updates the GP Timer Clock Frequency
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @param[in] freq_Hz Updated Timer Frequency
+ */
+__attribute__((always_inline)) inline void update_GPT_freq(gpt_config_t* GPT_CONFIGx, uint32_t freq_Hz){
+	// Error Check
+	if(!IS_VALID_GPT_FREQ(freq_Hz))
+		return;
+	// Calculate updated PSC Value
+	GPT_CONFIGx->GP_TIMx->PSC = calc_GPT_PSC(freq_Hz, GPT_CONFIGx->GP_TIMx->ARR);
+}
+
+/**
  * @brief General Purpose Timer Delay
- * @param[in] GPT_CONFIGx
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
 void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs){
 
 	// Update the Event Frequency at 1kHz
-	if(get_GPT_freq(GPT_CONFIGx->GP_TIMx) != FREQ_1kHz){
+	if(get_GPT_freq(GPT_CONFIGx) != FREQ_1kHz){
+		// Disable Timer
+		disable_GPT(GPT_CONFIGx);
 		// Set update event after 1ms (1kHz)
-		set_GPT_freq(GPT_CONFIGx->GP_TIMx, FREQ_1kHz);
+		update_GPT_freq(GPT_CONFIGx, FREQ_1kHz);
+		// Update the Parameters
+		update_GPT_params(GPT_CONFIGx);
+		
+		// Enable Timer
+		enable_GPT(GPT_CONFIGx);
 	}
 
 	// Iteration for Milliseconds
 	while(delayMs--){
-
 		// Wait till Update Flag is Set
-		while(!(GPT_CONFIGx->GP_TIMx->SR.BIT.UIF));
-
+		while(!(GPT_CONFIGx->GP_TIMx->SR.REG & 0x01));
 		// Clear the update flag
-		GPT_CONFIGx->GP_TIMx->SR.BIT.UIF = BIT_RESET;
+		GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 	}
 }

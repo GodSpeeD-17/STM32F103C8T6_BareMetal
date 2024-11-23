@@ -24,10 +24,6 @@
  * @param[in] preload_enable `PRELOAD_ENABLE`, `PRELOAD_DISABLE`
  */
 static void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_MODE pwm_mode, uint8_t preload_enable){
-	
-	// Error
-	if(!(IS_TIMx_GPT(GP_TIMx)))
-		return;
 
 	// Preload the value
 	if(preload_enable == PRELOAD_ENABLE){
@@ -92,10 +88,6 @@ static void config_PWM_mode(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, TIMx_OCM_M
  */
 static void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t polarity){
 
-	// Error
-	if(!IS_TIMx_GPT(GP_TIMx))
-		return; 
-
 	// Channel based Configuration
 	switch(channel){
 		
@@ -136,10 +128,6 @@ static void set_PWM_polarity(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t p
  * @param[in] duty_cycle Duty Cycle Value in (%) 
  */
 static void set_PWM_duty_cycle(GPT_REG_STRUCT* GP_TIMx, uint8_t channel, uint8_t duty_cycle){
-
-	// Error Check
-	if(!IS_TIMx_GPT(GP_TIMx))
-		return; 
 
 	// Wrap duty cycle    
 	duty_cycle = (duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : duty_cycle;
