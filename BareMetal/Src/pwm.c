@@ -23,74 +23,104 @@
 void config_PWM(pwm_config_t* PWMx){
 	
 	// Error Handling
-	
+
 	// Configure Timer
-	config_GPT(&PWMx->GPT_CONFIGx);
+	config_GPT(PWMx->GPT_CONFIGx);
 
 	// Wrap duty cycle    
 	PWMx->duty_cycle = (PWMx->duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : PWMx->duty_cycle;
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = ((((PWMx->GPT_CONFIGx.GP_TIMx->ARR + 1) * PWMx->duty_cycle) / 100) - 1);
+	uint16_t CCRx_VALUE = (uint16_t)((((PWMx->GPT_CONFIGx->GP_TIMx->ARR + 1) * PWMx->duty_cycle) / 100) - 1);
 
-	// Channel based Configuration
-	switch(PWMx->GPT_CONFIGx.channel){
-		
-		case TIMx_CHANNEL_1:
-			// PWM Mode + Enable Channel Preload
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR1.REG |= (uint32_t)(((PWMx->pwm_mode) << 4) | (1 << 3));
-			// Polarity Configuration
-			PWMx->GPT_CONFIGx.GP_TIMx->CCER.BIT.CC1P = PWMx->polarity;
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
-		break;
-		
-		case TIMx_CHANNEL_2:
-			// PWM Mode + Enable Channel Preload
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR1.REG |= (uint32_t)(((PWMx->pwm_mode) << 12) | (1 << 11));
-			// Polarity Configuration
-			PWMx->GPT_CONFIGx.GP_TIMx->CCER.BIT.CC2P = PWMx->polarity;
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
-		break;
-		
-		case TIMx_CHANNEL_3:
-			// PWM Mode + Enable Channel Preload
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR2.REG |= (uint32_t)(((PWMx->pwm_mode) << 4) | (1 << 3));
-			// Polarity Configuration
-			PWMx->GPT_CONFIGx.GP_TIMx->CCER.BIT.CC3P = PWMx->polarity;
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
-		break;
-		
-		case TIMx_CHANNEL_4:
-			// PWM Mode + Enable Channel Preload
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR2.REG |= (uint32_t)(((PWMx->pwm_mode) << 12) | (1 << 11));
-			// Polarity Configuration
-			PWMx->GPT_CONFIGx.GP_TIMx->CCER.BIT.CC4P = PWMx->polarity;
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			// PWM Mode + Enable Channel Preload
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR1.REG |= (uint32_t)((((PWMx->pwm_mode) << 12) | (1 << 11)) | (((PWMx->pwm_mode) << 4) | (1 << 3)));
-			PWMx->GPT_CONFIGx.GP_TIMx->CCMR2.REG |= (uint32_t)((((PWMx->pwm_mode) << 12) | (1 << 11)) | (((PWMx->pwm_mode) << 4) | (1 << 3)));
-			// Polarity Configuration
-			PWMx->GPT_CONFIGx.GP_TIMx->CCER.REG |=  (uint32_t)((PWMx->polarity << 13) | (PWMx->polarity << 9) | (PWMx->polarity << 5) | (PWMx->polarity << 1));
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
-		break;
+	// Channel 1
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_1){
+		// PWM Mode + Enable Channel Preload for Channel 1
+		PWMx->GPT_CONFIGx->GP_TIMx->CCMR1.REG |= (uint32_t)(((PWMx->pwm_mode) << 4) | (1 << 3));
+		// Polarity Configuration
+		PWMx->GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1P = PWMx->polarity;
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
+	}
+	// Channel 2
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_2){
+		// PWM Mode + Enable Channel Preload for Channel 2
+		PWMx->GPT_CONFIGx->GP_TIMx->CCMR1.REG |= (uint32_t)(((PWMx->pwm_mode) << 12) | (1 << 11));
+		// Polarity Configuration
+		PWMx->GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2P = PWMx->polarity;
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
+	}
+	// Channel 3
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_3){
+		// PWM Mode + Enable Channel Preload for Channel 3
+		PWMx->GPT_CONFIGx->GP_TIMx->CCMR2.REG |= (uint32_t)(((PWMx->pwm_mode) << 4) | (1 << 3));
+		// Polarity Configuration
+		PWMx->GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3P = PWMx->polarity;
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
+	}
+	// Channel 4
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_4){
+		// PWM Mode + Enable Channel Preload for Channel 4
+		PWMx->GPT_CONFIGx->GP_TIMx->CCMR2.REG |= (uint32_t)(((PWMx->pwm_mode) << 12) | (1 << 11));
+		// Polarity Configuration
+		PWMx->GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4P = PWMx->polarity;
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
 	}
 }
 
 /**
  * @brief Sets the duty cycle for PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ * @note Use this function only when single channel is used for PWM configuration
  */
 void set_PWM_duty_cycle(pwm_config_t* PWMx){
+
+	// Disable the Timer
+	disable_GPT(PWMx->GPT_CONFIGx);
+
+	// Wrap duty cycle    
+	PWMx->duty_cycle = (PWMx->duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : PWMx->duty_cycle;
+	// Store the CCRx Value
+	uint16_t CCRx_VALUE = (uint16_t)(((((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle) / 100) - 1);
+
+	// Channel 1
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_1){
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
+	}
+	// Channel 2
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_2){
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
+	}
+	// Channel 3
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_3){
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
+	}
+	// Channel 4
+	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_4){
+		// Store the Duty Cycle Value
+		PWMx->GPT_CONFIGx->GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
+	}
+
+	// Update Event
+	update_GPT_params(PWMx->GPT_CONFIGx);
+
+	// Enable the Timer
+	enable_GPT(PWMx->GPT_CONFIGx);
+}
+
+/**
+ * @brief Sets the duty cycle for PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ * @note Use this function when multiple channel is used for PWM configuration
+ */
+void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel){
+
+	// Check if channel is valid
 
 	// Disable the Timer
 	disable_GPT(&PWMx->GPT_CONFIGx);
@@ -98,37 +128,29 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 	// Wrap duty cycle    
 	PWMx->duty_cycle = (PWMx->duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : PWMx->duty_cycle;
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = ((((PWMx->GPT_CONFIGx.GP_TIMx->ARR + 1) * PWMx->duty_cycle) / 100) - 1);
+	uint16_t CCRx_VALUE = (uint16_t)((((PWMx->GPT_CONFIGx->GP_TIMx->ARR + 1) * PWMx->duty_cycle) / 100) - 1);
 
-	// Channel based Configuration
-	switch(PWMx->GPT_CONFIGx.channel){
-		
+	// Channel based configuration
+	switch(channel){
+		// Channel 1
 		case TIMx_CHANNEL_1:
 			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
+			PWMx->GPT_CONFIGx->GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
 		break;
-		
+		// Channel 2
 		case TIMx_CHANNEL_2:
 			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
+			PWMx->GPT_CONFIGx->GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
 		break;
-		
+		// Channel 3
 		case TIMx_CHANNEL_3:
 			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
+			PWMx->GPT_CONFIGx->GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
 		break;
-		
+		// Channel 4
 		case TIMx_CHANNEL_4:
 			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			// Store the Duty Cycle Value
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
-			PWMx->GPT_CONFIGx.GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
+			PWMx->GPT_CONFIGx->GP_TIMx->CCR4.CC4_OUT = CCRx_VALUE;
 		break;
 	}
 

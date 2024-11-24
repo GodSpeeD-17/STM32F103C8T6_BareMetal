@@ -313,9 +313,9 @@ typedef enum {
 // Channel
 #define TIMx_CHANNEL_1						((uint8_t) 1)
 #define TIMx_CHANNEL_2						((uint8_t) 2)
-#define TIMx_CHANNEL_3						((uint8_t) 3)
-#define TIMx_CHANNEL_4						((uint8_t) 4)
-#define TIMx_CHANNEL_ALL					((uint8_t) 0xFF)
+#define TIMx_CHANNEL_3						((uint8_t) 4)
+#define TIMx_CHANNEL_4						((uint8_t) 8)
+#define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
 
 // Counting Mode
 #define TIMx_MODE_NORMAL					((uint8_t) 0x00)    // Up if DIR = 0 else Down if DIR = 1
@@ -326,10 +326,6 @@ typedef enum {
 // Direction 
 #define TIMx_COUNT_UP						((uint8_t) 0x00)
 #define TIMx_COUNT_DOWN						((uint8_t) 0x01)
-
-// Polarity (Defines what Active means)
-#define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
-#define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
 
 // Auto Reload Preload 
 #define TIMx_ARPE_DISABLE					((uint8_t) 0x00)
@@ -346,7 +342,6 @@ typedef enum {
 											 (CHx) == TIMx_CHANNEL_ALL)
 #define IS_VALID_GPT_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
 #define IS_VALID_GPT_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
-#define IS_VALID_GPT_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_GPT_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
 											 (MODEx) == TIMx_MODE_ALT_IF_UP || (MODEx) == TIMx_MODE_ALT_IF_BOTH)
 #define IS_VALID_GPT_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
@@ -387,6 +382,10 @@ typedef enum {
 #define PRELOAD_DISABLE						((uint8_t) 0x00)
 #define PRELOAD_ENABLE						((uint8_t) 0x01)
 
+// Polarity (Defines what Active means)
+#define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
+#define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
+
 // Timer Modes
 typedef enum{
 	TIMx_OCM_FREEZE         = ((uint8_t) 0x00),    // The comparison between the output compare register TIMx_CCRy and the counter TIMx_CNT has no effect on the outputs.
@@ -398,6 +397,27 @@ typedef enum{
 	TIMx_OCM_PWM_NORMAL     = ((uint8_t) 0x06),    // In up counting, CHy is active as long as TIMx_CNT < TIMx_CCRy else inactive. In down counting, CHy is inactive (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
 	TIMx_OCM_PWM_INVERTED   = ((uint8_t) 0x07),    // In up counting, CHy is inactive as long as TIMx_CNT < TIMx_CCRy else active. In down counting, CHy is active (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
 } TIMx_OCM_MODE;
+
+// Error Checking MACROS
+#define IS_VALID_PWM_CHANNEL(CHx)			(((CHx) & TIMx_CHANNEL_1) || ((CHx) & TIMx_CHANNEL_2) || \
+											 ((CHx) & TIMx_CHANNEL_3) || ((CHx) & TIMx_CHANNEL_4))
+#define IS_VALID_PWM_MODE(MODEx)			((MODEx) == TIMx_OCM_FREEZE || (MODEx) == TIMx_OCM_SET_CH || \
+											 (MODEx) == TIMx_OCM_RESET_CH || (MODEx) == TIMx_OCM_TOGGLE || \
+											 (MODEx) == TIMx_OCM_FORCE_RESET || (MODEx) == TIMx_OCM_FORCE_SET || \
+											 (MODEx) == TIMx_OCM_PWM_NORMAL || (MODEx) == TIMx_OCM_PWM_INVERTED)
+#define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
+#define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
+#define IS_VALID_CHANNEL_STRUCTURE(PWM_CONFIGx, channel) \
+											(((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
+											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
+											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
+											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)))
+#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIGx) \	
+											(IS_VALID_GPT_CONFIG_STRUCT(PWM_CONFIGx->GPT_CONFIGx) && \
+											 IS_VALID_PWM_CHANNEL(PWM_CONFIGx->GPT_CONFIGx->channel) && \
+											 IS_VALID_PWM_MODE(PWM_CONFIGx->pwm_mode) && \
+											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
+											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle))
 /*********************************************** PWM MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */

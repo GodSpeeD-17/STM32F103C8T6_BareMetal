@@ -10,6 +10,7 @@
 
 // Register Mapping
 #include "reg_map.h"
+#include "rcc.h"		// Required for get_APB1_freq()
 
 // Timer Configuration Structure
 typedef struct {

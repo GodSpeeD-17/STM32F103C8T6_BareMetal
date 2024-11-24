@@ -11,10 +11,10 @@
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
 #define GP_TIMER                        (TIM2)
+#define GPT_CHANNEL                     (TIMx_CHANNEL_3)
 #define GPT_FREQ                        (FREQ_10kHz)   
 #define GPT_ARR                         (DEFAULT_ARR_VALUE)
 #define GPT_CNT                         ((uint16_t) 0x00)
-#define GPT_CHANNEL                     (TIMx_CHANNEL_3)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

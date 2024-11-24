@@ -9,19 +9,18 @@
 #define __PWM_H__
 
 // Dependency
-#include "gpio.h"
 #include "gpt.h"
 
 // PWM Configuration Structure
 typedef struct {
-    // Timer Configuration
-    gpt_config_t GPT_CONFIGx;
+    // Timer Configuration Structure
+    gpt_config_t* GPT_CONFIGx;
     // PWM Mode
     TIMx_OCM_MODE pwm_mode;
     // PWM Active Polarity
     uint8_t polarity;
     // Duty Cycle (%)
-    uint16_t duty_cycle;
+    uint8_t duty_cycle;
 } pwm_config_t;
 
 /**
@@ -36,4 +35,11 @@ void config_PWM(pwm_config_t* PWMx);
  */
 void set_PWM_duty_cycle(pwm_config_t* PWMx);
 
-#endif // __PWM_H__
+/**
+ * @brief Sets the duty cycle for PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ * @note Use this function when multiple channel is used for PWM configuration
+ */
+void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel);
+
+#endif /* __PWM_H__ */ 
