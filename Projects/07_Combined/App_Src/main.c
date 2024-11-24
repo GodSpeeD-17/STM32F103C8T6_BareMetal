@@ -28,19 +28,35 @@ int main(void){
     // Generic LED for status display
     config_LED(LED_PORT, LED_PIN);
 
+    // Timer1 Configuration Structure
+    gpt_config_t tim1_config = {
+        .GP_TIMx = GP_TIMER1,
+        .channel = GPT_CHANNEL1,
+        .auto_reload_value = GPT_ARR1,
+        .frequency_Hz = GPT_FREQ1,
+        .count = GPT_CNT1,
+        .cms_mode = CMS_EDGE,
+        .direction = TIMx_COUNT_UP,
+        .auto_reload_preload = TIMx_ARPE_ENABLE,
+        .one_pulse = TIMx_OPM_DISABLE,
+    };
+
+    // Timer2 Configuration Structure
+    gpt_config_t tim2_config = {
+        .GP_TIMx = GP_TIMER2,
+        .channel = GPT_CHANNEL2,
+        .auto_reload_value = GPT_ARR2,
+        .frequency_Hz = GPT_FREQ2,
+        .count = GPT_CNT2,
+        .cms_mode = CMS_EDGE,
+        .direction = TIMx_COUNT_UP,
+        .auto_reload_preload = TIMx_ARPE_ENABLE,
+        .one_pulse = TIMx_OPM_DISABLE,
+    };
+
     // PWM Configuration Structure for LED1
 	pwm_config_t pwm_led_1 = {
-		.GPT_CONFIGx = {
-			.GP_TIMx = GP_TIMER1,
-			.channel = GPT_CHANNEL1,
-			.auto_reload_value = GPT_ARR1,
-			.frequency_Hz = GPT_FREQ1,
-			.count = GPT_CNT1,
-			.cms_mode = CMS_EDGE,
-			.direction = TIMx_COUNT_UP,
-			.auto_reload_preload = TIMx_ARPE_ENABLE,
-			.one_pulse = TIMx_OPM_DISABLE,
-		},
+		.GPT_CONFIGx = &tim1_config,
 		.pwm_mode = TIMx_OCM_PWM_NORMAL,
 		.duty_cycle = MIN_DUTY_CYCLE,
 		.polarity = TIMx_POL_ACTIVE_HIGH,
@@ -48,17 +64,7 @@ int main(void){
 
     // PWM Configuration Structure for LED2
 	pwm_config_t pwm_led_2 = {
-		.GPT_CONFIGx = {
-			.GP_TIMx = GP_TIMER2,
-			.channel = GPT_CHANNEL2,
-			.auto_reload_value = GPT_ARR2,
-			.frequency_Hz = GPT_FREQ2,
-			.count = GPT_CNT2,
-			.cms_mode = CMS_EDGE,
-			.direction = TIMx_COUNT_UP,
-			.auto_reload_preload = TIMx_ARPE_ENABLE,
-			.one_pulse = TIMx_OPM_DISABLE,
-		},
+		.GPT_CONFIGx = &tim2_config,
 		.pwm_mode = TIMx_OCM_PWM_NORMAL,
 		.duty_cycle = MIN_DUTY_CYCLE,
 		.polarity = TIMx_POL_ACTIVE_HIGH,
@@ -69,12 +75,12 @@ int main(void){
     config_PWM(&pwm_led_2);
 
     // Enable Channel
-    enable_GPT_CH(&pwm_led_1.GPT_CONFIGx);
-    enable_GPT_CH(&pwm_led_2.GPT_CONFIGx);
+    enable_GPT_CH(pwm_led_1.GPT_CONFIGx);
+    enable_GPT_CH(pwm_led_2.GPT_CONFIGx);
 
     // Timer Enable
-	enable_GPT(&pwm_led_1.GPT_CONFIGx);
-	enable_GPT(&pwm_led_2.GPT_CONFIGx);
+	enable_GPT(pwm_led_1.GPT_CONFIGx);
+	enable_GPT(pwm_led_2.GPT_CONFIGx);
 
     // Infinite Loop
     while(1){
