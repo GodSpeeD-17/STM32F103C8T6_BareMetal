@@ -28,7 +28,7 @@ int main(void){
     // Generic LED for status display
     config_LED(LED_PORT, LED_PIN);
 
-    // PWM Configuration Structure
+    // PWM Configuration Structure for LED1
 	pwm_config_t pwm_led_1 = {
 		.GPT_CONFIGx = {
 			.GP_TIMx = GP_TIMER1,
@@ -46,6 +46,7 @@ int main(void){
 		.polarity = TIMx_POL_ACTIVE_HIGH,
 	};
 
+    // PWM Configuration Structure for LED2
 	pwm_config_t pwm_led_2 = {
 		.GPT_CONFIGx = {
 			.GP_TIMx = GP_TIMER2,

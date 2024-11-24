@@ -29,7 +29,7 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
     }
 
     // Enable Alternate Function
-    RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
+    // RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
     
     // Parameter Determination
     if(PINx < GPIO_PIN_4){
@@ -50,9 +50,12 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
     }
 
     // Clear Register
-    reg &= ~(0xF << pin);
+    reg &= ~(0x0F << pin);
     // Set Register
     reg |= (temp << pin);
+
+    // Enable Alternate Function
+    RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
 
     // Write to Appropriate Register 
     if(PINx < GPIO_PIN_4){
