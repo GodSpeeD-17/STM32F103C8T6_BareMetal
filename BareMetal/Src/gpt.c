@@ -59,9 +59,6 @@
 // Main Library
 #include "gpt.h"
 
-
-#include "gpio.h"
-
 /**
  * @brief Configures the General Purpose Timer (GPT)
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
@@ -80,9 +77,6 @@ void config_GPT(gpt_config_t* GPT_CONFIGx){
 
 	// Disable the Timer
 	disable_GPT(GPT_CONFIGx);
-
-	// Clear the update flag
-	GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 
 	// Update disable
 	GPT_CONFIGx->GP_TIMx->CR1.REG |= (1 << 1);

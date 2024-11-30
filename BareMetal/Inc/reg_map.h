@@ -337,9 +337,7 @@ typedef enum {
 
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
-#define IS_VALID_GPT_CHANNEL(CHx)			((CHx) == TIMx_CHANNEL_1 || (CHx) == TIMx_CHANNEL_2  || \
-											 (CHx) == TIMx_CHANNEL_3 || (CHx) == TIMx_CHANNEL_4 || \
-											 (CHx) == TIMx_CHANNEL_ALL)
+#define IS_VALID_GPT_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
 #define IS_VALID_GPT_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
 #define IS_VALID_GPT_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
 #define IS_VALID_GPT_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
@@ -398,27 +396,25 @@ typedef enum{
 	TIMx_OCM_PWM_INVERTED   = ((uint8_t) 0x07),    // In up counting, CHy is inactive as long as TIMx_CNT < TIMx_CCRy else active. In down counting, CHy is active (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
 } TIMx_OCM_MODE;
 
+// PWM Channel Preload Enable
+#define PWM_CHx_PRELOAD_DISABLE				((uint8_t) 0x00)
+#define PWM_CHx_PRELOAD_ENABLE				((uint8_t) 0x01)
+
+
 // Error Checking MACROS
-#define IS_VALID_PWM_CHANNEL(CHx)			(((CHx) & TIMx_CHANNEL_1) || ((CHx) & TIMx_CHANNEL_2) || \
-											 ((CHx) & TIMx_CHANNEL_3) || ((CHx) & TIMx_CHANNEL_4))
 #define IS_VALID_PWM_MODE(MODEx)			((MODEx) == TIMx_OCM_FREEZE || (MODEx) == TIMx_OCM_SET_CH || \
 											 (MODEx) == TIMx_OCM_RESET_CH || (MODEx) == TIMx_OCM_TOGGLE || \
 											 (MODEx) == TIMx_OCM_FORCE_RESET || (MODEx) == TIMx_OCM_FORCE_SET || \
 											 (MODEx) == TIMx_OCM_PWM_NORMAL || (MODEx) == TIMx_OCM_PWM_INVERTED)
 #define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
-#define IS_VALID_CHANNEL_STRUCTURE(PWM_CONFIGx, channel) \
-											(((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
-											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
-											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)) || \
-											 ((PWM_CONFIGx->GPT_CONFIGx.channel) & (channel)))
-#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIGx) \	
+#define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))
+#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIGx) \
 											(IS_VALID_GPT_CONFIG_STRUCT(PWM_CONFIGx->GPT_CONFIGx) && \
-											 IS_VALID_PWM_CHANNEL(PWM_CONFIGx->GPT_CONFIGx->channel) && \
 											 IS_VALID_PWM_MODE(PWM_CONFIGx->pwm_mode) && \
 											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
-											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle))
-
+											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle) && \
+											 IS_VALID_PWM_CHANNEL_PRELOAD(PWM_CONFIGx->pwm_channel_preload))
 #define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (DUTYx)))
 #define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
 

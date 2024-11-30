@@ -27,9 +27,6 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
     else if(GPIOx == GPIOC){
         temp = AF_EXTI_PC;
     }
-
-    // Enable Alternate Function
-    // RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
     
     // Parameter Determination
     if(PINx < GPIO_PIN_4){

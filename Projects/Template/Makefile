@@ -65,12 +65,15 @@ CFLAGS = -mcpu=$(MACHINE) -mthumb $(OPT_LEVEL) -std=$(C_STD)
 
 # Compiles all the files to generate .o/.elf files
 all: bin_file
+	@echo "Compilation Complete"
 
 # Cleans all the .elf/.o/.s files
 clean: clean_src clean_user clean_startup clean_linker
+	@echo "Cleaning Complete"
 
 # Cleans the project
 clean_project: clean_user clean_startup clean_linker
+	@echo "Project Cleaning Complete"
 
 #*******************************************************************************
 # Source Section
@@ -115,7 +118,6 @@ startup:
 clean_startup:
 	rm -f $(STARTUP_DIR)/*.o
 	rm -f $(STARTUP_DIR)/*.s
-
 #*******************************************************************************
 # Linker Section
 LINKER_FILE = $(LINKER_DIR)/stm32_ls
@@ -156,13 +158,15 @@ flash: bin_file
 	st-flash --reset write $(LINKER_FILE).bin $(FLASH_ADDR)
 
 #*******************************************************************************
-# Flash (OpenOCD)
+# !!!DO NOT USE!!!
+# Flash (OpenOCD) 
 OPENOCD_DIR = /usr/share/openocd/scripts
 ocd_flash:
 	openocd -f $(OPENOCD_DIR)/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/target/stm32f1x.cfg
 
 gdb:
 	gdb-multiarch /home/shrey_shah/Desktop/Blue_Pill_Ubuntu/Projects/LED_Project/Linker/stm32_ls.elf
+# !!!DO NOT USE!!!
 #*******************************************************************************
 # Reference Directory
 REF_DIR = ../Template

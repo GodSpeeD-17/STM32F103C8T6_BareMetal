@@ -88,69 +88,69 @@ __attribute__((always_inline)) inline void disable_GPT(gpt_config_t* GPT_CONFIGx
 /**
  * @brief Enables the General Purpose GP_TIMx's Channel
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @note Use this for single channel configuration
  */
 __attribute__((always_inline)) inline void enable_GPT_CH(gpt_config_t* GPT_CONFIGx){
-
 	// Enable the General Purpose Timer Channel
-	switch(GPT_CONFIGx->channel){
-		
-		case TIMx_CHANNEL_1:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_SET;
-		break;
-
-		case TIMx_CHANNEL_2:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_SET;
-		break;
-		
-		case TIMx_CHANNEL_3:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_SET;
-		break;
-		
-		case TIMx_CHANNEL_4:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_SET;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_SET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_SET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_SET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_SET;
-		break;
-	}
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_1)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_SET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_2)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_SET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_3)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_SET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_4)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_SET;
 }
 
 /**
  * @brief Disables the General Purpose GP_TIMx's Channel
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @note Use this for single channel configuration
  */
 __attribute__((always_inline)) inline void disable_GPT_CH(gpt_config_t* GPT_CONFIGx){
+	// Disable the General Purpose Timer Channel
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_1)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_2)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_3)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
+	if(GPT_CONFIGx->channel & TIMx_CHANNEL_4)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
+}
 
+/**
+ * @brief Enables the General Purpose GP_TIMx's Multiple Channel
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
+ */
+__attribute__((always_inline)) inline void enable_GPT_multi_CH(gpt_config_t* GPT_CONFIGx, uint8_t channel){
 	// Enable the General Purpose Timer Channel
-	switch(GPT_CONFIGx->channel){
-		
-		case TIMx_CHANNEL_1:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
-		break;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_1)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_SET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_2)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_SET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_3)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_SET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_4)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_SET;
+}
 
-		case TIMx_CHANNEL_2:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
-		break;
-		
-		case TIMx_CHANNEL_3:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
-		break;
-		
-		case TIMx_CHANNEL_4:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
-		break;
-
-		case TIMx_CHANNEL_ALL:
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
-			GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
-		break;
-	}
+/**
+ * @brief Disables the General Purpose GP_TIMx's Multiple Channel
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
+ */
+__attribute__((always_inline)) inline void disable_GPT_multi_CH(gpt_config_t* GPT_CONFIGx, uint8_t channel){
+	// Disable the General Purpose Timer Channel
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_1)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC1E = BIT_RESET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_2)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC2E = BIT_RESET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_3)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC3E = BIT_RESET;
+	if((GPT_CONFIGx->channel & channel) == TIMx_CHANNEL_4)
+		GPT_CONFIGx->GP_TIMx->CCER.BIT.CC4E = BIT_RESET;
 }
 
 /**
@@ -158,17 +158,23 @@ __attribute__((always_inline)) inline void disable_GPT_CH(gpt_config_t* GPT_CONF
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
 __attribute__((always_inline)) inline void reset_GPT(gpt_config_t* GPT_CONFIGx){
+	// Local Variable
+	uint16_t i = 10000;
+
     // Reset Based on GPT
     if(GPT_CONFIGx->GP_TIMx == TIM2){
         RCC->APB1RSTR.BIT.TIM2RST = BIT_SET;
+		while(i--);
         RCC->APB1RSTR.BIT.TIM2RST = BIT_RESET;
     }
     else if(GPT_CONFIGx->GP_TIMx == TIM3){
         RCC->APB1RSTR.BIT.TIM3RST = BIT_SET;
+		while(i--);
         RCC->APB1RSTR.BIT.TIM3RST = BIT_RESET;
     }
     else if(GPT_CONFIGx->GP_TIMx == TIM4){
         RCC->APB1RSTR.BIT.TIM4RST = BIT_SET;
+		while(i--);
         RCC->APB1RSTR.BIT.TIM4RST = BIT_RESET;
     }
 }
