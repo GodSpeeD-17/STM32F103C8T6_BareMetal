@@ -11,7 +11,7 @@
   - `Reference_Docs`: All the Reference Documentation relevant to the topic
 
 ## STM32F103C8T6 Reference Manual
-[STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17596951/STM32F103C_Reference_Manual.pdf)
+[STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17964492/STM32F103C_Reference_Manual.pdf)
 
 ## STM32F103C8T6 Pinout
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
@@ -28,10 +28,11 @@
 
 ## IRQ Details
 
-- **Vector Table**: 76
-  - **ARM Cortex-M3 IRQ**: 11
-  - **STM32F103C8T6 IRQ**: 59
-  - **Reserved**: 6
+| **Vector Table**        | 76 |
+|-------------------------|----|
+|**ARM Cortex-M3 IRQ**    | 11 |
+| **STM32F103C8T6 IRQ**   | 59 |
+| **Reserved**            | 6  |
 
 ## Boot Process
   - Power ON
