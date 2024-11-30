@@ -17,7 +17,7 @@
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ## STM32F103C8T6 Features
-------------------------------|------------------------------
+
 | Specification               | Details                     |
 ------------------------------|------------------------------
 | Processor                   | ARM Cortex-M3 (Single Core) |
