@@ -1,32 +1,37 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
+
+---
+## ***Description***
 ---
 
-## Description
   - Basic Repository for understanding the Registers present in Blue Pill Development Module
   - Created basic source files to use Registers for controlling purpose
   - `Projects/Template` is the template which can be used as reference while creating New Project
 
 ---
+## ***Repository Structure***
+---
 
-## Repository Structure
   - `BareMetal`: Consists of all the Register Address Mapping along with basic functionality Source Code
   - `Projects`: Consists of User Specific Application
   - `Reference_Docs`: All the Reference Documentation relevant to the topic
 
 ---
+## ***STM32F103C8T6 Reference Manual***
+---
 
-## STM32F103C8T6 Reference Manual
 [STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17964492/STM32F103C_Reference_Manual.pdf)
 
 ---
+## ***STM32F103C8T6 Pinout***
+---
 
-## STM32F103C8T6 Pinout
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ---
-
-## STM32F103C8T6 Features
+## ***STM32F103C8T6 Features***
+---
 
 |    **Specification**   |   **Details**   |  **Comments**     |
 -------------------------|-----------------|-------------------|
@@ -36,8 +41,8 @@
 |       ***SRAM***       |     20kB        | SRAM: 0x20000000  |
 
 ---
-
-## IRQ Details
+## ***IRQ Details***
+---
 
 |     **Vector Table**      | 76 |
 |---------------------------|----|
@@ -46,8 +51,8 @@
 | ***Reserved***            | 6  |
 
 ---
-
-## Boot Process
+## ***Boot Process***
+---
 
 1. **Power ON**
 2. **Stack Pointer (SP)** 
@@ -62,8 +67,9 @@
      3. Call the **Main function**
 
 ---
+## ***BareMetal Structure***
+---
 
-## BareMetal Structure
 ```
 BareMetal
     |- Core
@@ -100,9 +106,11 @@ BareMetal
     |  |- rcc.c                        # Clock Configuration Source File
     |  |- systick.c                    # SysTick Source File (ARM Cortex-M3)
 ```
+
+---
+## ***Project Structure***
 ---
 
-## Project Structure
 ```
 <Project_Name>
       |- App_Inc
@@ -119,9 +127,11 @@ BareMetal
       |
       |- Makefile                       # Automation File (Used for compilation and flashing)
 ```
+
+---
+## ***Makefile Basic Commands***
 ---
 
-## Makefile Basic Commands
   - `make all`: Compiles all the .c files including "BareMetal" directory
   - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - `make user`: Compiles all the .c files present in the folder
@@ -130,8 +140,8 @@ BareMetal
   - `make erase_flash`: Flashes Template Project's .bin file (Infinite loop)
 
 ---
-
-## Project Overview
+## ***Project Overview***
+---
 
 | Projects     | Description                                                  |
 |--------------|--------------------------------------------------------------|
