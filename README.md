@@ -1,10 +1,7 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
-
-
 ---
 ## ***Description***
 ---
-
   - Basic Repository for understanding the Registers present in Blue Pill Development Module
   - Created basic source files to use Registers for controlling purpose
   - `Projects/Template` is the template which can be used as reference while creating New Project
@@ -20,19 +17,16 @@
 ---
 ## ***STM32F103C8T6 Reference Manual***
 ---
-
 [STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17964492/STM32F103C_Reference_Manual.pdf)
 
 ---
 ## ***STM32F103C8T6 Pinout***
 ---
-
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ---
 ## ***STM32F103C8T6 Features***
 ---
-
 |    **Specification**   |   **Details**   |  **Comments**     |
 -------------------------|-----------------|-------------------|
 |     ***Processor***    | ARM Cortex-M3   |  Single Core      |
@@ -43,7 +37,6 @@
 ---
 ## ***IRQ Details***
 ---
-
 |     **Vector Table**      | 76 |
 |---------------------------|----|
 | ***ARM Cortex-M3 IRQ***   | 11 |
@@ -53,11 +46,10 @@
 ---
 ## ***Boot Process***
 ---
-
 1. **Power ON**
 2. **Stack Pointer (SP)** 
    - Points to the top of SRAM (Vector Table Offset: `0x00`)
-3. **Reset_Handler() is called** 
+3. **`Reset_Handler()` is called** 
    - Vector Table Offset: `0x01`
    - **Initialization Steps:**
      1. Copy the **`.data`** section from FLASH to SRAM 
@@ -69,7 +61,6 @@
 ---
 ## ***BareMetal Structure***
 ---
-
 ```
 BareMetal
     |
@@ -114,7 +105,6 @@ BareMetal
 ---
 ## ***Project Structure***
 ---
-
 ```
 <Project_Name>
       |
@@ -136,7 +126,6 @@ BareMetal
 ---
 ## ***Makefile Basic Commands***
 ---
-
   - `make all`: Compiles all the .c files including "BareMetal" directory
   - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - `make user`: Compiles all the .c files present in the folder
@@ -147,7 +136,6 @@ BareMetal
 ---
 ## ***Project Overview***
 ---
-
 | Projects     | Description                                                  |
 |--------------|--------------------------------------------------------------|
 | ***01_Blinky***    | A simple LED blinking                                        |
