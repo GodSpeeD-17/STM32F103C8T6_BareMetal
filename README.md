@@ -1,4 +1,4 @@
-# **STM32F103C8T6 (Blue Pill) Bare Metal Repository**
+# ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
 ## Description
   - Basic Repository for understanding the Registers present in Blue Pill Development Module
@@ -33,7 +33,7 @@
   - **STM32F103C8T6 IRQ**: 59
   - **Reserved**: 6
 
-## Boot Process:
+## Boot Process
   - Power ON
   - Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
   - Reset_Handler is called (Vector Table Offset: 0x01)
