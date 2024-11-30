@@ -24,7 +24,7 @@
 | Clock Frequency             | 8MHz (HSI/HSE) - 72MHz (PLL)|
 | Flash                       | 64kB (0x08000000)           |
 | SRAM                        | 20kB (0x20000000)           |
-------------------------------|------------------------------
+
 
 ## IRQ Details
 
