@@ -418,6 +418,10 @@ typedef enum{
 											 IS_VALID_PWM_MODE(PWM_CONFIGx->pwm_mode) && \
 											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
 											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle))
+
+#define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (DUTYx)))
+#define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
+
 /*********************************************** PWM MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */

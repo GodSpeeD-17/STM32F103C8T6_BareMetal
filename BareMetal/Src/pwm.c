@@ -41,6 +41,7 @@ void config_PWM(pwm_config_t* PWMx){
 		// Store the Duty Cycle Value
 		PWMx->GPT_CONFIGx->GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
 	}
+
 	// Channel 2
 	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_2){
 		// PWM Mode + Enable Channel Preload for Channel 2
@@ -50,6 +51,7 @@ void config_PWM(pwm_config_t* PWMx){
 		// Store the Duty Cycle Value
 		PWMx->GPT_CONFIGx->GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
 	}
+
 	// Channel 3
 	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_3){
 		// PWM Mode + Enable Channel Preload for Channel 3
@@ -59,6 +61,7 @@ void config_PWM(pwm_config_t* PWMx){
 		// Store the Duty Cycle Value
 		PWMx->GPT_CONFIGx->GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
 	}
+
 	// Channel 4
 	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_4){
 		// PWM Mode + Enable Channel Preload for Channel 4
@@ -77,13 +80,13 @@ void config_PWM(pwm_config_t* PWMx){
  */
 void set_PWM_duty_cycle(pwm_config_t* PWMx){
 
-	// Disable the Timer
-	disable_GPT(PWMx->GPT_CONFIGx);
+	// Stop the PWM
+	stop_PWM(PWMx);
 
 	// Wrap duty cycle    
 	PWMx->duty_cycle = (PWMx->duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : PWMx->duty_cycle;
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = (uint16_t)(((((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle) / 100) - 1);
+	uint16_t CCRx_VALUE = calc_PWM_CCRx(PWMx);
 
 	// Channel 1
 	if (PWMx->GPT_CONFIGx->channel & TIMx_CHANNEL_1){
@@ -109,8 +112,8 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 	// Update Event
 	update_GPT_params(PWMx->GPT_CONFIGx);
 
-	// Enable the Timer
-	enable_GPT(PWMx->GPT_CONFIGx);
+	// Start the PWM
+	start_PWM(PWMx);
 }
 
 /**
@@ -122,31 +125,35 @@ void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel){
 
 	// Check if channel is valid
 
-	// Disable the Timer
-	disable_GPT(&PWMx->GPT_CONFIGx);
+	// Stop the PWM
+	stop_PWM(PWMx);
 
-	// Wrap duty cycle    
-	PWMx->duty_cycle = (PWMx->duty_cycle > MAX_DUTY_CYCLE) ? MAX_DUTY_CYCLE : PWMx->duty_cycle;
+	// Wrap duty cycle
+	PWM_DUTY_CYCLE_WRAP(PWMx);
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = (uint16_t)((((PWMx->GPT_CONFIGx->GP_TIMx->ARR + 1) * PWMx->duty_cycle) / 100) - 1);
+	uint16_t CCRx_VALUE = calc_PWM_CCRx(PWMx);
 
 	// Channel based configuration
 	switch(channel){
+
 		// Channel 1
 		case TIMx_CHANNEL_1:
 			// Store the Duty Cycle Value
 			PWMx->GPT_CONFIGx->GP_TIMx->CCR1.CC1_OUT = CCRx_VALUE;
 		break;
+
 		// Channel 2
 		case TIMx_CHANNEL_2:
 			// Store the Duty Cycle Value
 			PWMx->GPT_CONFIGx->GP_TIMx->CCR2.CC2_OUT = CCRx_VALUE;
 		break;
+
 		// Channel 3
 		case TIMx_CHANNEL_3:
 			// Store the Duty Cycle Value
 			PWMx->GPT_CONFIGx->GP_TIMx->CCR3.CC3_OUT = CCRx_VALUE;
 		break;
+
 		// Channel 4
 		case TIMx_CHANNEL_4:
 			// Store the Duty Cycle Value
@@ -155,8 +162,8 @@ void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel){
 	}
 
 	// Update Event
-	update_GPT_params(&PWMx->GPT_CONFIGx);
+	update_GPT_params(PWMx->GPT_CONFIGx);
 
-	// Enable the Timer
-	enable_GPT(&PWMx->GPT_CONFIGx);
+	// Start the PWM
+	start_PWM(PWMx);
 }

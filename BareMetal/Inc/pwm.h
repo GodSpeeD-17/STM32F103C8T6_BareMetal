@@ -38,8 +38,46 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx);
 /**
  * @brief Sets the duty cycle for PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ * @param[in] channel `TIMx_CHANNEL_1`
  * @note Use this function when multiple channel is used for PWM configuration
  */
 void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel);
+
+/**
+ * @brief Starts the PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
+    // Enable Timer
+    enable_GPT(PWMx->GPT_CONFIGx);
+    // Enable Channel
+    enable_GPT_CH(PWMx->GPT_CONFIGx);
+}
+
+/**
+ * @brief Stops the PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+__attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
+    // Disable Channel
+	disable_GPT_CH(PWMx->GPT_CONFIGx);
+	// Disable Timer
+	disable_GPT(PWMx->GPT_CONFIGx);
+}
+
+/**
+ * @brief Stops the PWM
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+__attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx){
+    // Final Result
+    uint16_t result;
+    // Store the Value
+    result = (((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle);
+    result /= 100;
+    result -= 1;
+    // Return the final Calculated Value
+    return result;
+}
 
 #endif /* __PWM_H__ */ 
