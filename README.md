@@ -72,6 +72,7 @@
 
 ```
 BareMetal
+    |
     |- Core
     |  |- adc_reg_map.h                # Analog to Digital Converter Structure {ADC1, ADC2, -ADC3-}
     |  |- advtim_reg_map.h             # Advanced Timer Structure {TIM1, -TIM8-}
@@ -85,6 +86,8 @@ BareMetal
     |  |- systick_reg_map.h            # SysTick Structure
     |  |- usart_reg_map.h              # Universal Synchronous Asynchronous Receiver Transmitter (USART) Structure
     |  |- wwdg_reg_map.h               # Window Watchdog (WWDG) Structure
+    |
+    |
     |- Inc
     |  |- adc.h                        # ADC Header File
     |  |- bare_metal.h                 # Common Include Header File
@@ -96,6 +99,7 @@ BareMetal
     |  |- rcc.h                        # Clock Configuration Header File
     |  |- reg_map.h                    # Main Register Mapping Header File
     |  |- systick.h                    # SysTick Header File (ARM Cortex-M3)                 
+    |
     |
     |- Src
     |  |- adc.c                        # ADC Source File
@@ -113,6 +117,7 @@ BareMetal
 
 ```
 <Project_Name>
+      |
       |- App_Inc
       |    |- main.h                    # Application Header File
       |
