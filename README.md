@@ -1,7 +1,7 @@
 # **STM32F103C8T6 (Blue Pill) Bare Metal Repository**
 
 ## Description
-  - Basic Repository for understanding the Registers present in Blue Pill Module
+  - Basic Repository for understanding the Registers present in Blue Pill Development Module
   - Created basic source files to use Registers for controlling purpose
   - `Projects/Template` is the template which can be used as reference while creating New Project
 
@@ -17,14 +17,21 @@
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ## STM32F103C8T6 Features
-  - Processor: ARM Cortex-M3 (Single Core)
-  - Clock Frequency: 8MHz - 72MHz
-  - Flash: 64kB (0x08000000)
-  - SRAM: 20kB (0x20000000)
-  - Vector Table: 76
-    - ARM Cortex-M3 IRQ: 11
-    - STM32F103C8T6 IRQ: 59
-    - Reserved: 6
+------------------------------|------------------------------
+| Specification               | Details                     |
+------------------------------|------------------------------
+| Processor                   | ARM Cortex-M3 (Single Core) |
+| Clock Frequency             | 8MHz (HSI/HSE) - 72MHz (PLL)|
+| Flash                       | 64kB (0x08000000)           |
+| SRAM                        | 20kB (0x20000000)           |
+------------------------------|------------------------------
+
+## IRQ Details
+
+- **Vector Table**: 76
+  - **ARM Cortex-M3 IRQ**: 11
+  - **STM32F103C8T6 IRQ**: 59
+  - **Reserved**: 6
 
 ## Boot Process:
   - Power ON
@@ -55,21 +62,21 @@ BareMetal
     |  |- bare_metal.h                 # Common Include Header File
     |  |- exti.h                       # EXTI Header File
     |  |- gpio.h                       # GPIO Header File
+    |  |- gpt.h                        # General Purpose Timer (GPT) Header File
     |  |- nvic.h                       # NVIC Header File
     |  |- pwm.h                        # PWM Header File
     |  |- rcc.h                        # Clock Configuration Header File
     |  |- reg_map.h                    # Main Register Mapping Header File
-    |  |- systick.h                    # SysTick Header File (ARM Cortex-M3)
-    |  |- timer.h                      # Timer Header File
+    |  |- systick.h                    # SysTick Header File (ARM Cortex-M3)                 
     |
     |- Src
     |  |- adc.c                        # ADC Source File
     |  |- exti.c                       # EXTI Source File
     |  |- gpio.c                       # GPIO Source File
+    |  |- gpt.c                        # General Purpose Timer Source File    
     |  |- pwm.c                        # PWM Source File
     |  |- rcc.c                        # Clock Configuration Source File
     |  |- systick.c                    # SysTick Source File (ARM Cortex-M3)
-    |  |- timer.c                      # Timer Source File
 ```
 
 ## Project Structure
