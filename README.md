@@ -18,26 +18,27 @@
 
 ## STM32F103C8T6 Features
 
-| Specification               | Details                     |
-------------------------------|------------------------------
-| Processor                   | ARM Cortex-M3 (Single Core) |
-| Clock Frequency             | 8MHz (HSI/HSE) - 72MHz (PLL)|
-| Flash                       | 64kB (0x08000000)           |
-| SRAM                        | 20kB (0x20000000)           |
+|    **Specification**   |   **Details**   |  **Comments**     |
+-------------------------|-----------------|-------------------|
+|     ***Processor***    | ARM Cortex-M3   |  Single Core      |
+| ***Clock Frequency***  |  8MHz - 72MHz   |  HSI/HSE: 8MHz    |
+|       ***Flash***      |     64kB        | SRAM: 0x08000000  |
+|       ***SRAM***       |     20kB        | SRAM: 0x20000000  |
 
 
 ## IRQ Details
 
-| **Vector Table**        | 76 |
-|-------------------------|----|
-|**ARM Cortex-M3 IRQ**    | 11 |
-| **STM32F103C8T6 IRQ**   | 59 |
-| **Reserved**            | 6  |
+|     **Vector Table**      | 76 |
+|---------------------------|----|
+| ***ARM Cortex-M3 IRQ***   | 11 |
+| ***STM32F103C8T6 IRQ***   | 59 |
+| ***Reserved***            | 6  |
+
 
 ## Boot Process
-  - Power ON
-  - Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
-  - Reset_Handler is called (Vector Table Offset: 0x01)
+  -> Power ON
+  -> Stack Pointer (SP) points to the top of SRAM (Vector Table Offset: 0x00)
+  -> Reset_Handler is called (Vector Table Offset: 0x01)
     1. Copy ".data" section from FLASH to SRAM (.data refers to initialized variables)
     2. Initialize ".bss" section to 0 (.bss refers to uninitialized variables)
     3. Main function is called
