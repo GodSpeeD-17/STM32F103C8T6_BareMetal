@@ -421,7 +421,8 @@ typedef enum{
 /*********************************************** PWM MACROS ***********************************************/
 
 /*********************************************** ADC MACROS ***********************************************/
-
+// ADC Max Value
+#define ADC_RAW_MAX_VALUE					((uint16_t) 0x0FFF)
 
 // ADC Channel
 #define ADC_CHANNEL_0						((uint8_t) 0)
@@ -435,6 +436,7 @@ typedef enum{
 #define ADC_CHANNEL_8						((uint8_t) 8)
 #define ADC_CHANNEL_9						((uint8_t) 9)
 
+// ADC Continuous Conversion
 #define ADC_CONT_CONV_OFF					((uint8_t) 0)
 #define ADC_CONT_CONV_ON					((uint8_t) 1)
 /*********************************************** ADC MACROS ***********************************************/

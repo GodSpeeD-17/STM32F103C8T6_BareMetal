@@ -35,7 +35,7 @@ void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc){
  * @note - Assumed that ADC data is right aligned
  * @note - Conversion starts when this bit holds a value of 1 and a 1 is written to it.
  */
-uint16_t get_ADC_data(ADC_REG_STRUCT* ADCx){
+uint16_t get_ADC_raw_data(ADC_REG_STRUCT* ADCx){
 	// Final Result
 	uint16_t result;
 	// Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)

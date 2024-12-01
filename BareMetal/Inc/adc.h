@@ -85,8 +85,9 @@ void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
 
 /**
  * @brief Retrieves the 12-bit ADC Data
- * @returns ADC Data (uint16_t)
+ * @returns ADC Data
  */
-uint16_t get_ADC_data(ADC_REG_STRUCT* ADCx);
+uint16_t get_ADC_raw_data(ADC_REG_STRUCT* ADCx);
+
 
 #endif /* __ADC_H__ */
