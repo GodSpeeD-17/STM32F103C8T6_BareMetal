@@ -26,7 +26,7 @@ void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc){
     // When the ADON bit is set for the first time, it wakes up the ADC from Power Down mode
 	enable_ADC(ADCx);
     // Calibration of ADC
-    cal_ADC(ADCx);
+    calibrate_ADC(ADCx);
 }
 
 /**

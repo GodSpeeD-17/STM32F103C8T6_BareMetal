@@ -46,7 +46,7 @@ inline __attribute__((always_inline)) void disable_ADC_clk(ADC_REG_STRUCT* ADCx)
  */
 inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
 	// Enable ADC
-	ADCx->CR2.BIT.ADON = BIT_SET;  
+	ADCx->CR2.REG |= BIT_SET;  
 }
 
 /**
@@ -55,7 +55,7 @@ inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
  */
 inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
 	// Disable the ADC
-	ADCx->CR2.BIT.ADON = BIT_RESET;
+	ADCx->CR2.REG &= ~BIT_SET;
 }
 
 /**
@@ -64,15 +64,15 @@ inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
  * @note - It is recommended to perform a calibration after each power-up
  * @note - Before starting a calibration, the ADC must have been in power-on state for at least two ADC clock cycles
  */
-inline __attribute__((always_inline)) void cal_ADC(ADC_REG_STRUCT* ADCx){
+inline __attribute__((always_inline)) void calibrate_ADC(ADC_REG_STRUCT* ADCx){
 	// Initialise Calibration Registers
-	ADCx->CR2.BIT.RSTCAL = BIT_SET;
+	ADCx->CR2.REG |= (1 << 3);
 	// Cleared after the Calibration Registers are Initialized
-	while(ADCx->CR2.BIT.RSTCAL);
+	while((ADCx->CR2.REG & (1 << 3)));
     // Start the Calibration
-    ADCx->CR2.BIT.CAL = BIT_SET;
+    ADCx->CR2.REG |= (1 << 2);
     // Reset by Hardware after Calibration is Complete
-    while(ADCx->CR2.BIT.CAL);
+	while((ADCx->CR2.REG & (1 << 2)));
 }
 
 /**
