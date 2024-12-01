@@ -3,7 +3,7 @@
  *  Created on: 12/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
-
+// Header File
 #include "adc.h"
 
 /**
@@ -13,7 +13,6 @@
  * @param[in] cc `ADC_CONT_CONV_ON`, `ADC_CONT_CONV_OFF`
  */
 void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc){
-
     // Enable Clock for ADC
     enable_ADC_clk(ADCx);
     // Clear the Control Register
