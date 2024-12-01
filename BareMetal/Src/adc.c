@@ -43,7 +43,10 @@ uint16_t get_ADC_data(ADC_REG_STRUCT* ADCx){
 	enable_ADC(ADCx);
     // Wait for End of Conversion
     while(!ADCx->SR.BIT.EOC);
+    // Read the ADC Data (Generally, It is cleared by software or by reading the ADC_DR)
 	result = (ADCx->DR.REG & 0x0FFF);
-    // ADC 12-bit Data
+    // Just for backup
+    ADCx->SR.BIT.EOC = BIT_RESET;
+    // 12-bit ADC Data
     return result;
 }
