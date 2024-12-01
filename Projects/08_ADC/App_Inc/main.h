@@ -7,12 +7,12 @@
 
 // MACROS
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
-#define DELAY_MS                        ((uint32_t) 1000)
-#define LED_PORT                        (GPIOA)
-#define LED_PIN                         (GPIO_PIN_0)
-#define POT_PORT                        (GPIOB)      
-#define POT_PIN                         (GPIO_PIN_1)
+#define DELAY_MS                        ((uint32_t) 100)
+#define POT_PORT                        (GPIOA)      
+#define POT_PIN                         (GPIO_PIN_0)
 #define POT_ADC                         (ADC1)
+#define LED_PORT                        (GPIOB)
+#define LED_PIN                         (GPIO_PIN_12)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

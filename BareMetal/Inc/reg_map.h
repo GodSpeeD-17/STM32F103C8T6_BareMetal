@@ -420,4 +420,23 @@ typedef enum{
 
 /*********************************************** PWM MACROS ***********************************************/
 
+/*********************************************** ADC MACROS ***********************************************/
+
+
+// ADC Channel
+#define ADC_CHANNEL_0						((uint8_t) 0)
+#define ADC_CHANNEL_1						((uint8_t) 1)
+#define ADC_CHANNEL_2						((uint8_t) 2)
+#define ADC_CHANNEL_3						((uint8_t) 3)
+#define ADC_CHANNEL_4						((uint8_t) 4)
+#define ADC_CHANNEL_5						((uint8_t) 5)
+#define ADC_CHANNEL_6						((uint8_t) 6)
+#define ADC_CHANNEL_7						((uint8_t) 7)
+#define ADC_CHANNEL_8						((uint8_t) 8)
+#define ADC_CHANNEL_9						((uint8_t) 9)
+
+#define ADC_CONT_CONV_OFF					((uint8_t) 0)
+#define ADC_CONT_CONV_ON					((uint8_t) 1)
+/*********************************************** ADC MACROS ***********************************************/
+
 #endif  /* __REG_MAP_H__ */

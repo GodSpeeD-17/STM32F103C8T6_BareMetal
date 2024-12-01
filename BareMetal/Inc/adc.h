@@ -11,21 +11,8 @@
 // Dependency
 #include "reg_map.h"
 
-// MACROS
-#define ADC_ON_DELAY			((uint16_t) 2000)
-#define ADC_CH0   				((uint8_t) 0)
-#define ADC_CH1   				((uint8_t) 1)
-#define ADC_CH2   				((uint8_t) 2)
-#define ADC_CH3   				((uint8_t) 3)
-#define ADC_CH4   				((uint8_t) 4)
-#define ADC_CH5   				((uint8_t) 5)
-#define ADC_CH6   				((uint8_t) 6)
-#define ADC_CH7   				((uint8_t) 7)
-#define ADC_CH8   				((uint8_t) 8)
-#define ADC_CH9   				((uint8_t) 9)
-
-#define ADC_CONT_CONV_OFF		((uint8_t) 0)
-#define ADC_CONT_CONV_ON		((uint8_t) 1)
+// Wait time for stabilize (tSTAB)
+#define ADC_ON_DELAY						((uint16_t) 500)
 
 /**
  * @brief Enables the Clock for Analog to Digital Converter (ADC)
@@ -59,10 +46,7 @@ inline __attribute__((always_inline)) void disable_ADC_clk(ADC_REG_STRUCT* ADCx)
  */
 inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
 	// Enable ADC
-	if(ADCx == ADC1)
-		ADC1->CR2.BIT.ADON = BIT_SET;
-	else if(ADCx == ADC2)
-		ADC2->CR2.BIT.ADON = BIT_SET;  
+	ADCx->CR2.BIT.ADON = BIT_SET;  
 }
 
 /**
@@ -71,10 +55,7 @@ inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
  */
 inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
 	// Disable the ADC
-	if(ADCx == ADC1)
-		ADC1->CR2.BIT.ADON = BIT_RESET;
-	else if(ADCx == ADC2)
-		ADC2->CR2.BIT.ADON = BIT_RESET;
+	ADCx->CR2.BIT.ADON = BIT_RESET;
 }
 
 /**
@@ -103,12 +84,9 @@ inline __attribute__((always_inline)) void cal_ADC(ADC_REG_STRUCT* ADCx){
 void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
 
 /**
- * @brief Retrieves the ADC data
+ * @brief Retrieves the 12-bit ADC Data
  * @returns ADC Data (uint16_t)
  */
-inline __attribute__((always_inline)) uint16_t get_ADC_data(ADC_REG_STRUCT* ADCx){
-    // Data
-    return ((uint16_t)(ADCx->DR.REG & 0x0FFF));
-}
+uint16_t get_ADC_data(ADC_REG_STRUCT* ADCx);
 
 #endif /* __ADC_H__ */
