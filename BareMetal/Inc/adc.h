@@ -10,9 +10,57 @@
 
 // Dependency
 #include "reg_map.h"
+#include "gpio.h"
 
 // Wait time for stabilize (tSTAB)
-#define ADC_ON_DELAY						((uint16_t) 500)
+#define ADC_ON_DELAY						((uint16_t) 10)
+
+// ADC Channel Sequence
+typedef struct {
+	// Channel Sequence 1
+	uint8_t channel_seq_1;
+	// Channel Sequence 2
+	uint8_t channel_seq_2;
+	// Channel Sequence 3
+	uint8_t channel_seq_3;
+	// Channel Sequence 4
+	uint8_t channel_seq_4;
+	// Channel Sequence 5
+	uint8_t channel_seq_5;
+	// Channel Sequence 6
+	uint8_t channel_seq_6;
+	// Channel Sequence 7
+	uint8_t channel_seq_7;
+	// Channel Sequence 8
+	uint8_t channel_seq_8;
+	// Channel Sequence 9
+	uint8_t channel_seq_9;
+	// Channel Sequence 10
+	uint8_t channel_seq_10;
+	// Channel Sequence 11
+	uint8_t channel_seq_11;
+	// Channel Sequence 12
+	uint8_t channel_seq_12;
+} adc_sequence_t;
+
+// ADC Configuration Structure
+typedef struct {
+	// GPIOx
+	GPIO_REG_STRUCT* GPIOx;
+	// PIN
+	uint8_t PINx;
+	// ADC Number
+	ADC_REG_STRUCT* ADCx;
+	// ADC Channel
+	uint8_t channel;
+	// Number of Channels
+	uint8_t num_channels;
+	// Sample Time
+	uint8_t sample_time;
+	// Continuous Conversion Mode
+	uint8_t cc;
+
+} adc_config_t;
 
 /**
  * @brief Enables the Clock for Analog to Digital Converter (ADC)
@@ -81,7 +129,10 @@ inline __attribute__((always_inline)) void calibrate_ADC(ADC_REG_STRUCT* ADCx){
  * @param[in] channel `ADC_CHANNEL_x`
  * @param[in] cc `ADC_CONT_CONV_ON`, `ADC_CONT_CONV_OFF`
  */
-void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
+void init_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
+
+
+void config_ADC(adc_config_t* ADC_CONFIGx);
 
 /**
  * @brief Retrieves the 12-bit ADC Data

@@ -185,7 +185,7 @@ typedef struct {
             volatile uint32_t SQ15: 5;
             volatile uint32_t SQ16: 5;
             volatile uint32_t L: 5;
-            volatile uint32_t reserved: 8;
+            volatile uint32_t reserved: 7;
         } BIT;
 	} SQR1;
 

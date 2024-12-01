@@ -436,6 +436,118 @@ typedef enum{
 #define ADC_CHANNEL_8						((uint8_t) 8)
 #define ADC_CHANNEL_9						((uint8_t) 9)
 
+// ADC Sample Time
+#define ADC_SAMPLE_1_5						((uint8_t) 0)
+#define ADC_SAMPLE_7_5						((uint8_t) 1)
+#define ADC_SAMPLE_13_5						((uint8_t) 2)
+#define ADC_SAMPLE_28_5						((uint8_t) 3)
+#define ADC_SAMPLE_41_5						((uint8_t) 4)
+#define ADC_SAMPLE_55_5						((uint8_t) 5)
+#define ADC_SAMPLE_71_5						((uint8_t) 6)
+#define ADC_SAMPLE_239_5					((uint8_t) 7)
+
+// ADC Final Sample Time
+
+// Channel 0
+#define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH0_SMP_7_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH0_SMP_13_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH0_SMP_28_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH0_SMP_41_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH0_SMP_55_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH0_SMP_71_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH0_SMP_239_5			((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 1
+#define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH0_SMP_7_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH0_SMP_13_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH0_SMP_28_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH0_SMP_41_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH0_SMP_55_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH0_SMP_71_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH0_SMP_239_5			((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 2
+#define ADC_SAMPLE_CH2_SMP_1_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH2_SMP_7_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH2_SMP_13_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH2_SMP_28_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH2_SMP_41_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH2_SMP_55_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH2_SMP_71_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH2_SMP_239_5			((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 3
+#define ADC_SAMPLE_CH3_SMP_1_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH3_SMP_7_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH3_SMP_13_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH3_SMP_28_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH3_SMP_41_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH3_SMP_55_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH3_SMP_71_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH3_SMP_239_5			((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 4
+#define ADC_SAMPLE_CH4_SMP_1_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH4_SMP_7_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH4_SMP_13_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH4_SMP_28_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH4_SMP_41_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH4_SMP_55_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH4_SMP_71_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH4_SMP_239_5			((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 5
+#define ADC_SAMPLE_CH5_SMP_1_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH5_SMP_7_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH5_SMP_13_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH5_SMP_28_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH5_SMP_41_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH5_SMP_55_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH5_SMP_71_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH5_SMP_239_5			((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 6
+#define ADC_SAMPLE_CH6_SMP_1_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH6_SMP_7_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH6_SMP_13_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH6_SMP_28_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH6_SMP_41_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH6_SMP_55_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH6_SMP_71_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH6_SMP_239_5			((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 7
+#define ADC_SAMPLE_CH7_SMP_1_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH7_SMP_7_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH7_SMP_13_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH7_SMP_28_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH7_SMP_41_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH7_SMP_55_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH7_SMP_71_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH7_SMP_239_5			((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 8
+#define ADC_SAMPLE_CH8_SMP_1_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH8_SMP_7_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH8_SMP_13_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH8_SMP_28_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH8_SMP_41_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH8_SMP_55_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH8_SMP_71_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH8_SMP_239_5			((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_239_5))
+
+// Channel 9
+#define ADC_SAMPLE_CH9_SMP_1_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_1_5))
+#define ADC_SAMPLE_CH9_SMP_7_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_7_5))
+#define ADC_SAMPLE_CH9_SMP_13_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_13_5))
+#define ADC_SAMPLE_CH9_SMP_28_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_28_5))
+#define ADC_SAMPLE_CH9_SMP_41_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_41_5))
+#define ADC_SAMPLE_CH9_SMP_55_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_55_5))
+#define ADC_SAMPLE_CH9_SMP_71_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_71_5))
+#define ADC_SAMPLE_CH9_SMP_239_5			((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_239_5))
+
 // ADC Continuous Conversion
 #define ADC_CONT_CONV_OFF					((uint8_t) 0)
 #define ADC_CONT_CONV_ON					((uint8_t) 1)

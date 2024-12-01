@@ -9,9 +9,9 @@
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
 #define DELAY_MS                        ((uint32_t) 100)
 #define POT_PORT                        (GPIOA)      
-#define POT_PIN                         (GPIO_PIN_0)
+#define POT_PIN                         (GPIO_PIN_4)
 #define POT_ADC                         (ADC1)
-#define POT_ADC_CHANNEL                 (ADC_CHANNEL_0)
+#define POT_ADC_CHANNEL                 (ADC_CHANNEL_4)
 #define LED_PORT                        (GPIOB)
 #define LED_PIN                         (GPIO_PIN_12)
 
