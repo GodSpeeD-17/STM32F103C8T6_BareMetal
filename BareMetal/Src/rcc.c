@@ -350,6 +350,8 @@ static void config_SYS_72MHz(void){
  * @param[in] CLK_FREQ Core Clock Frequency `SYSCLK_FREQ`
  * @note - PLL as System Clock Source 
  * @note - HSE is used for PLL Clock Source
+ * @note - ADC Max Clock Frequency is 14MHz
+ * @note - USB Max Clock Frequency is 48MHz
  */
 void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 
@@ -372,6 +374,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_ZERO_WAIT;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_2);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_2 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1 & 0x01) << 22);
         break;
 
         // 24MHz
@@ -380,6 +386,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_ZERO_WAIT;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_3);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_2 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1 & 0x01) << 22);
         break;
 
         // 32MHz
@@ -388,6 +398,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_4);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1 & 0x01) << 22);
         break;
 
         // 40MHz
@@ -396,6 +410,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_5);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1 & 0x01) << 22);
         break;
 
         // 48MHz
@@ -404,6 +422,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
 			// Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_6);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1 & 0x01) << 22);
         break;
 
         // 56MHz
@@ -412,6 +434,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
 			// Configure PLL parameters
             config_PLL(HSE_DIV_1, PLL_MUL_7);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1_5 & 0x01) << 22);
         break;
 
         // 64MHz
@@ -420,6 +446,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
 			// Configure PLL parameters
             config_PLL(HSE_DIV_1, PLL_MUL_8);
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_6 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1_5 & 0x01) << 22);
         break;
 
         // 72MHz
@@ -428,7 +458,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_9);
-			
+			// ADC Prescaler
+			RCC->CFGR.REG |= ((ADC_DIV_6 & 0x03) << 14);
+			// USB Prescaler
+			RCC->CFGR.REG |= ((USB_DIV_1_5 & 0x01) << 22);
         break;
 
 		// Error Handling
