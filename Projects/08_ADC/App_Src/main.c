@@ -34,9 +34,13 @@ int main(void){
     while(1){
         // Data Ready
         if(ready_ADC_data(&adc_config)){
-            adc_data[0] = get_ADC_data(&adc_config);
-            if(adc_data[1] != adc_data[0]){
+            // Read ADC Data
+            adc_data[0] = get_ADC_raw_data(&adc_config);
+            // Range +- 10
+            if((adc_data[1] > adc_data[0] + ADC_ERROR_RANGE) || (adc_data[1] < adc_data[0] - ADC_ERROR_RANGE)){
+                // Shift the new data
                 adc_data[1] = adc_data[0];
+                // Status
                 toggle_GPIO(LED_PORT, LED_PIN);
             }
         }

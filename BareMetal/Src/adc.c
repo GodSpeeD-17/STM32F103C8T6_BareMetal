@@ -40,6 +40,28 @@ void init_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc){
 }
 
 /**
+ * @brief Retrieves the 12-bit ADC Data
+ * @returns ADC Data
+ * @note - Assumed that ADC data is right aligned
+ * @note - Conversion starts when this bit holds a value of 1 and a 1 is written to it.
+ */
+uint16_t got_ADC_raw_data(ADC_REG_STRUCT* ADCx){
+	// Final Result
+	uint16_t result = 0xFFFF;
+    // Start the conversion using Software as Trigger
+    ADCx->CR2.REG |= (1 << 22);
+    // Wait for End of Conversion
+    while(!ADCx->SR.BIT.EOC);
+    // Read the ADC Data (Generally, It is cleared by software or by reading the ADC_DR)
+	result = (ADCx->DR.REG & 0x0FFF);
+    // Just for backup
+    ADCx->CR2.REG &= ~(1 << 22);
+    ADCx->SR.BIT.EOC = BIT_RESET;
+    // 12-bit ADC Data
+    return (result & 0x0FFF);
+}
+
+/**
  * @brief Enables the ADC Clock
  */
 void config_ADC(adc_config_t* ADC_CONFIGx){
@@ -61,45 +83,22 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
     }
     // ADC Data Alignment
     ADC_CONFIGx->ADCx->CR2.REG |= ((ADC_CONFIGx->data_alignment & 0x01) << 11);
-    // Starts the ADC
-    start_ADC(ADC_CONFIGx->ADCx);
     // Continuous Conversion
     ADC_CONFIGx->ADCx->CR2.REG |= ((ADC_CONFIGx->cc & 0x01) << 1);
+    // Starts the ADC
+    start_ADC(ADC_CONFIGx->ADCx);
 }
-
-
 
 /**
  * @brief Retrieves the 12-bit ADC Data
  * @returns ADC Data
  */
-uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx){
+uint16_t get_ADC_raw_data(adc_config_t* ADC_CONFIGx){
     // Result
     uint16_t result = 0;
     result = ADC_CONFIGx->ADCx->DR.REG;
-    result *= 1000;
-    result /= 0xFFF;
+    result &= 0x0FFF;
     return result; 
 }
 
-/**
- * @brief Retrieves the 12-bit ADC Data
- * @returns ADC Data
- * @note - Assumed that ADC data is right aligned
- * @note - Conversion starts when this bit holds a value of 1 and a 1 is written to it.
- */
-uint16_t get_ADC_raw_data(ADC_REG_STRUCT* ADCx){
-	// Final Result
-	uint16_t result = 0xFFFF;
-    // Start the conversion using Software as Trigger
-    ADCx->CR2.REG |= (1 << 22);
-    // Wait for End of Conversion
-    while(!ADCx->SR.BIT.EOC);
-    // Read the ADC Data (Generally, It is cleared by software or by reading the ADC_DR)
-	result = (ADCx->DR.REG & 0x0FFF);
-    // Just for backup
-    ADCx->CR2.REG &= ~(1 << 22);
-    ADCx->SR.BIT.EOC = BIT_RESET;
-    // 12-bit ADC Data
-    return (result & 0x0FFF);
-}
+
