@@ -78,7 +78,7 @@ inline __attribute__((always_inline)) void calibrate_ADC(ADC_REG_STRUCT* ADCx){
 /**
  * @brief Starts the ADC
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
- * @param[in] channel `ADC_CHx`
+ * @param[in] channel `ADC_CHANNEL_x`
  * @param[in] cc `ADC_CONT_CONV_ON`, `ADC_CONT_CONV_OFF`
  */
 void config_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
