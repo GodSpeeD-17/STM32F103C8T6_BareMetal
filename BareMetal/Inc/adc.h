@@ -1,6 +1,6 @@
 /***************************************************************************************
  *  File: adc.h
- *  Created on: 09/11/2024
+ *  Created on: 01/12/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
 
@@ -13,7 +13,7 @@
 #include "gpio.h"
 
 // Wait time for stabilize (tSTAB)
-#define ADC_ON_DELAY						((uint16_t) 10)
+#define ADC_ON_DELAY						((uint16_t) 100)
 
 // ADC Channel Sequence
 typedef struct {
@@ -140,20 +140,6 @@ __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
 }
 
 /**
- * @brief Starts the ADC
- * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
- * @param[in] channel `ADC_CHANNEL_x`
- * @param[in] cc `ADC_CONT_CONV_ON`, `ADC_CONT_CONV_OFF`
- */
-void init_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
-
-/**
- * @brief Retrieves the 12-bit ADC Data
- * @returns ADC Data
- */
-uint16_t got_ADC_raw_data(ADC_REG_STRUCT* ADCx);
-
-/**
  * @brief Enables the ADC Clock
  */
 void config_ADC(adc_config_t* ADC_CONFIGx);
@@ -172,9 +158,9 @@ __attribute__((always_inline)) inline uint8_t ready_ADC_data(adc_config_t* ADC_C
 }
 
 /**
- * @brief Retrieves the 12-bit ADC Data
- * @returns ADC Data
+ * @brief Retrieves the 12-bit ADC Raw Data
+ * @returns ADC Raw Data
  */
-uint16_t get_ADC_raw_data(adc_config_t* ADC_CONFIGx);
+uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx);
 
 #endif /* __ADC_H__ */

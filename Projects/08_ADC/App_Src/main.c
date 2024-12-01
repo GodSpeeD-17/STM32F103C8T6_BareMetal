@@ -1,11 +1,12 @@
 // Main Header
 #include "main.h"
 
+// Global Variables
+uint16_t adc_data[2] = {0};
+
 // Main Entry Point for User Code
 int main(void){
-	// Global Variables
-	uint16_t adc_data[2] = {0};
-
+	
     // Configure Clock
     config_SYSCLK_MHz(SYSCLK_MHz);
 
@@ -35,8 +36,8 @@ int main(void){
         // Data Ready
         if(ready_ADC_data(&adc_config)){
             // Read ADC Data
-            adc_data[0] = get_ADC_raw_data(&adc_config);
-            // Range +- 10
+            adc_data[0] = get_ADC_data(&adc_config);
+            // ADC Data exceeds the Error Range
             if((adc_data[1] > adc_data[0] + ADC_ERROR_RANGE) || (adc_data[1] < adc_data[0] - ADC_ERROR_RANGE)){
                 // Shift the new data
                 adc_data[1] = adc_data[0];
