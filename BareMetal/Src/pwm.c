@@ -83,7 +83,6 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 
 	// Stop the PWM
 	stop_PWM(PWMx);
-
 	// Wrap duty cycle
 	PWM_DUTY_CYCLE_WRAP(PWMx);
 	// Store the CCRx Value
@@ -101,7 +100,6 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 	
 	// Update Event
 	update_GPT_params(PWMx->GPT_CONFIGx);
-
 	// Start the PWM
 	start_PWM(PWMx);
 }

@@ -41,11 +41,11 @@ int main(void){
 	// Configure PWM
 	config_PWM(&pwm_config);
 
-	// Channel Enable
-	enable_GPT_CH(pwm_config.GPT_CONFIGx);
-
 	// Timer Enable
 	enable_GPT(pwm_config.GPT_CONFIGx);
+
+	// Channel Enable
+	enable_GPT_CH(pwm_config.GPT_CONFIGx);
 
 	while(1){
 

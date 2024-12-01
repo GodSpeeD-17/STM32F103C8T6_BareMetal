@@ -422,7 +422,7 @@ typedef enum{
 
 /*********************************************** ADC MACROS ***********************************************/
 // ADC Max Value
-#define ADC_RAW_MAX_VALUE					((uint16_t) 0x0FFF)
+#define MAX_ADC_VALUE						((uint16_t) 0x0FFF)
 
 // ADC Channel
 #define ADC_CHANNEL_0						((uint8_t) 0)
