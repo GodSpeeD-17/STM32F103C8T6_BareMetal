@@ -59,7 +59,8 @@ typedef struct {
 	uint8_t sample_time;
 	// Continuous Conversion Mode
 	uint8_t cc;
-
+	// ADC Data Alignment
+	uint8_t data_alignment;
 } adc_config_t;
 
 /**
@@ -67,7 +68,7 @@ typedef struct {
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  * @note RCC->APB2ENR
  */
-inline __attribute__((always_inline)) void enable_ADC_clk(ADC_REG_STRUCT* ADCx){
+__attribute__((always_inline)) inline void enable_ADC_clk(ADC_REG_STRUCT* ADCx){
 	// Enable the clock for the ADC
 	if(ADCx == ADC1)
 		RCC->APB2ENR.BIT.ADC1EN = BIT_SET;
@@ -80,7 +81,7 @@ inline __attribute__((always_inline)) void enable_ADC_clk(ADC_REG_STRUCT* ADCx){
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  * @note RCC->APB2ENR
  */
-inline __attribute__((always_inline)) void disable_ADC_clk(ADC_REG_STRUCT* ADCx){
+__attribute__((always_inline)) inline void disable_ADC_clk(ADC_REG_STRUCT* ADCx){
 	// Disable the clock for the ADC
 	if(ADCx == ADC1)
 		RCC->APB2ENR.BIT.ADC1EN = BIT_RESET;
@@ -92,7 +93,7 @@ inline __attribute__((always_inline)) void disable_ADC_clk(ADC_REG_STRUCT* ADCx)
  * @brief Enables the Analog to Digital Converter (ADC)
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
+__attribute__((always_inline)) inline void enable_ADC(ADC_REG_STRUCT* ADCx){
 	// Enable ADC
 	ADCx->CR2.REG |= BIT_SET;  
 }
@@ -101,7 +102,7 @@ inline __attribute__((always_inline)) void enable_ADC(ADC_REG_STRUCT* ADCx){
  * @brief Disables the Analog to Digital Converter (ADC)
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
+__attribute__((always_inline)) inline void disable_ADC(ADC_REG_STRUCT* ADCx){
 	// Disable the ADC
 	ADCx->CR2.REG &= ~BIT_SET;
 }
@@ -112,7 +113,7 @@ inline __attribute__((always_inline)) void disable_ADC(ADC_REG_STRUCT* ADCx){
  * @note - It is recommended to perform a calibration after each power-up
  * @note - Before starting a calibration, the ADC must have been in power-on state for at least two ADC clock cycles
  */
-inline __attribute__((always_inline)) void calibrate_ADC(ADC_REG_STRUCT* ADCx){
+__attribute__((always_inline)) inline void calibrate_ADC(ADC_REG_STRUCT* ADCx){
 	// Initialise Calibration Registers
 	ADCx->CR2.REG |= (1 << 3);
 	// Cleared after the Calibration Registers are Initialized
@@ -121,6 +122,21 @@ inline __attribute__((always_inline)) void calibrate_ADC(ADC_REG_STRUCT* ADCx){
     ADCx->CR2.REG |= (1 << 2);
     // Reset by Hardware after Calibration is Complete
 	while((ADCx->CR2.REG & (1 << 2)));
+}
+
+/**
+ * @brief Starts the ADC based upon the sequence
+ * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
+ */
+__attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
+	// When the ADON bit is set for the first time, it wakes up the ADC from Power Down mode
+	// If this bit holds a value of 0 and a 1 is written to it then it wakes up the ADC from Power Down state
+    enable_ADC(ADCx);
+	// Wait for for time (tSTAB)
+	for(volatile uint16_t tSTAB_delay = 0; tSTAB_delay <= ADC_ON_DELAY; tSTAB_delay++);
+    // Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)
+	// Conversion starts when this bit holds a value of 1 and a 1 is written to it
+    enable_ADC(ADCx);
 }
 
 /**

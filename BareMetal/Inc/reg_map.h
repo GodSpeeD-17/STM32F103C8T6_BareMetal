@@ -551,6 +551,15 @@ typedef enum{
 // ADC Continuous Conversion
 #define ADC_CONT_CONV_OFF					((uint8_t) 0)
 #define ADC_CONT_CONV_ON					((uint8_t) 1)
+
+// ADC Data Alignment
+#define ADC_DATA_ALIGN_RIGHT				((uint8_t) 0)
+#define ADC_DATA_ALIGN_LEFT					((uint8_t) 1)
+
+// ADC Sample Time Channel Decoding
+#define ADC_SAMPLE_CHANNEL(ADC_SAMPLEx)		((uint8_t)(((ADC_SAMPLEx) & 0xF0) >> 4))
+// ADC Sample Time Decoding
+#define ADC_SAMPLE_TIME(ADC_SAMPLEx)		((uint8_t)((ADC_SAMPLEx) & 0x0F))
 /*********************************************** ADC MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */
