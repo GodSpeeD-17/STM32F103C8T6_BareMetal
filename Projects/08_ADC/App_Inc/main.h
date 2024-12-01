@@ -12,6 +12,7 @@
 #define POT_PIN                         (GPIO_PIN_4)
 #define POT_ADC                         (ADC1)
 #define POT_ADC_CHANNEL                 (ADC_CHANNEL_4)
+#define POT_ADC_SAMPLE_TIME             (ADC_SAMPLE_CH4_SMP_239_5)
 #define LED_PORT                        (GPIOB)
 #define LED_PIN                         (GPIO_PIN_12)
 

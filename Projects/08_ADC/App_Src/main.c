@@ -12,12 +12,34 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
-
     // Configure GPIO as LED
     config_LED(LED_PORT, LED_PIN);
 
+    // ADC Configuration Structure
+    adc_config_t adc_config = {
+        .GPIOx = POT_PORT,
+        .PINx = POT_PIN,
+        .ADCx = POT_ADC,
+        .channel = POT_ADC_CHANNEL,
+        .num_channels = 1,
+        .sample_time = POT_ADC_SAMPLE_TIME,
+        .cc = ADC_CONT_CONV_ON,
+        .data_alignment = ADC_DATA_ALIGN_RIGHT,
+    };
+
+    // Configure ADC
+    config_ADC(&adc_config);
+
     // Infinite Loop
     while(1){
+        // Data Ready
+        if(ready_ADC_data(&adc_config)){
+            adc_data[0] = get_ADC_data(&adc_config);
+            if(adc_data[1] != adc_data[0]){
+                adc_data[1] = adc_data[0];
+                toggle_GPIO(LED_PORT, LED_PIN);
+            }
+        }
         // Loop Delay
         SysTick_delay_ms(DELAY_MS);
     }

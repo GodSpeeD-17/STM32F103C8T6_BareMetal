@@ -147,14 +147,35 @@ __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
  */
 void init_ADC(ADC_REG_STRUCT* ADCx, uint8_t channel, uint8_t cc);
 
-
-void config_ADC(adc_config_t* ADC_CONFIGx);
-
 /**
  * @brief Retrieves the 12-bit ADC Data
  * @returns ADC Data
  */
 uint16_t get_ADC_raw_data(ADC_REG_STRUCT* ADCx);
 
+
+/**
+ * @brief Enables the ADC Clock
+ */
+void config_ADC(adc_config_t* ADC_CONFIGx);
+
+/**
+ * @brief Status of ADC
+ */
+__attribute__((always_inline)) inline uint8_t ready_ADC_data(adc_config_t* ADC_CONFIGx){
+    // Result
+    uint8_t result = 0xFF;
+    // Check if ADC is ready
+    result = ADC_CONFIGx->ADCx->SR.REG & 0x02;
+    result = result >> 1;
+    // Return the value
+    return result;
+}
+
+/**
+ * @brief Retrieves the 12-bit ADC Data
+ * @returns ADC Data
+ */
+uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx);
 
 #endif /* __ADC_H__ */

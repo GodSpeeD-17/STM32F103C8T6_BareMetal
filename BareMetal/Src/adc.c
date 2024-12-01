@@ -67,14 +67,19 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
     ADC_CONFIGx->ADCx->CR2.REG |= ((ADC_CONFIGx->cc & 0x01) << 1);
 }
 
+
+
 /**
  * @brief Retrieves the 12-bit ADC Data
  * @returns ADC Data
- * @note - Assumed that ADC data is right aligned
- * @note - Conversion starts when this bit holds a value of 1 and a 1 is written to it.
  */
 uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx){
-
+    // Result
+    uint16_t result = 0;
+    result = ADC_CONFIGx->ADCx->DR.REG;
+    result *= 1000;
+    result /= 0xFFF;
+    return result; 
 }
 
 /**
