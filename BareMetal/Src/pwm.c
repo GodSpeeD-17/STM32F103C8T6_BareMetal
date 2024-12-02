@@ -23,7 +23,8 @@
 void config_PWM(pwm_config_t* PWMx){
 	
 	// Error Handling
-	IS_VALID_PWM_CONFIG_STRUCT(PWMx);
+	if(!IS_VALID_PWM_CONFIG_STRUCT(PWMx))
+		return;
 	
 	// Configure Timer
 	config_GPT(PWMx->GPT_CONFIGx);

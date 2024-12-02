@@ -35,6 +35,8 @@ __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
     enable_GPT(PWMx->GPT_CONFIGx);
     // Enable Channel
     enable_GPT_CH(PWMx->GPT_CONFIGx);
+    // Clear the update flag
+	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 }
 
 /**
@@ -47,6 +49,8 @@ __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
 	disable_GPT_CH(PWMx->GPT_CONFIGx);
 	// Disable Timer
 	disable_GPT(PWMx->GPT_CONFIGx);
+    // Clear the update flag
+	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 }
 
 /**
