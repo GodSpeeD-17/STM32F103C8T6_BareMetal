@@ -77,12 +77,10 @@ int main(void){
 				// Toggle OB LED
 				toggle_OB_LED();
             }
-
 			// Loop Delay
 			SysTick_delay_ms(DELAY_MS);
 		}
 	}
-
 	// Return Value
 	return 0;
 }
