@@ -36,16 +36,13 @@ int main(void){
 		.pwm_mode = TIMx_OCM_PWM_NORMAL,
 		.duty_cycle = MIN_DUTY_CYCLE,
 		.polarity = TIMx_POL_ACTIVE_HIGH,
+		.pwm_channel_preload = PWM_CHx_PRELOAD_ENABLE,
 	};
 
 	// Configure PWM
 	config_PWM(&pwm_config);
-
-	// Timer Enable
-	enable_GPT(pwm_config.GPT_CONFIGx);
-
-	// Channel Enable
-	enable_GPT_CH(pwm_config.GPT_CONFIGx);
+	// Start PWM
+	start_PWM(&pwm_config);
 
 	while(1){
 
