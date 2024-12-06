@@ -13,8 +13,8 @@ __attribute__((always_inline)) inline uint8_t calc_PWM_ADC(uint16_t adc_value){
 	adc_value &= 0x0FFF;
 	// Calculate Duty Cycle
 	uint32_t result = (((uint32_t)adc_value * MAX_DUTY_CYCLE) / MAX_ADC_VALUE);
-	// Return the result
-	return (uint8_t)result;
+	// Return the result except when it is 0 (0 causes the LED to be always ON)
+	return (uint8_t)((result < MIN_DUTY_CYCLE)? MIN_DUTY_CYCLE : result);
 }
 
 #endif /* __ADC_PWM_H__ */
