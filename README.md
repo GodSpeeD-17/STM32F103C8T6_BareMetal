@@ -146,7 +146,7 @@ BareMetal
 | ***06_PWM***       | Pulse Width Modulation (PWM) generation using General Purpose Timer (GPT) |
 | ***07_PWM_PB_IRQ*** | Use the Interrupt generated using Push Button in order to change the PWM Duty Cycle for External LEDs |
 | ***08_ADC***       | Read Potentiometer data using Analog to Digital Converter (ADC) |
-| ***09_ADC_PWM***   | Control the duty cycle of external LED based upon the ADC value obtained from Potentiometer |
+| ***09_ADC_PWM***   | Control the Duty Cycle value (%) of PWM for external LED based upon the ADC value obtained from Potentiometer |
 | ***Template***     | Reference Project Structure (Used when `make erase_flash`) |
 
 ---
