@@ -81,12 +81,12 @@ int main(void){
             }
 
 			// Increase Brightness
-			for(pwm_config.duty_cycle = MIN_DUTY_CYCLE; pwm_config.duty_cycle <= MAX_DUTY_CYCLE; pwm_config.duty_cycle += 2){
-				// Set Duty Cycle
-				set_PWM_duty_cycle(&pwm_config);
-				// Delay
-				SysTick_delay_ms(DELAY_MS);
-			}
+			// for(pwm_config.duty_cycle = MIN_DUTY_CYCLE; pwm_config.duty_cycle <= MAX_DUTY_CYCLE; pwm_config.duty_cycle += 2){
+			// 	// Set Duty Cycle
+			// 	set_PWM_duty_cycle(&pwm_config);
+			// 	// Delay
+			// 	SysTick_delay_ms(DELAY_MS);
+			// }
 
             // Loop Delay
             SysTick_delay_ms(DELAY_MS);

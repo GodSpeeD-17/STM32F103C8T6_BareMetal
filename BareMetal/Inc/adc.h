@@ -13,7 +13,7 @@
 #include "gpio.h"
 
 // Wait time for stabilize (tSTAB)
-#define ADC_ON_DELAY						((uint16_t) 100)
+#define ADC_ON_DELAY						((uint16_t) 10)
 
 // ADC Channel Sequence
 typedef struct {
@@ -134,6 +134,8 @@ __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
     enable_ADC(ADCx);
 	// Wait for for time (tSTAB)
 	for(volatile uint16_t tSTAB_delay = 0; tSTAB_delay <= ADC_ON_DELAY; tSTAB_delay++);
+	// Calibrate the ADC
+	calibrate_ADC(ADCx);
     // Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)
 	// Conversion starts when this bit holds a value of 1 and a 1 is written to it
     enable_ADC(ADCx);
@@ -141,24 +143,26 @@ __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
 
 /**
  * @brief Enables the ADC Clock
+ * @param[in] ADC_CONFIGx ADC configuration structure
  */
 void config_ADC(adc_config_t* ADC_CONFIGx);
 
 /**
  * @brief Status of ADC
+ * @param[in] ADC_CONFIGx ADC configuration structure
  */
 __attribute__((always_inline)) inline uint8_t ready_ADC_data(adc_config_t* ADC_CONFIGx){
     // Result
     uint8_t result = 0xFF;
     // Check if ADC is ready
-    result = ADC_CONFIGx->ADCx->SR.REG & 0x02;
-    result = result >> 1;
+    result = (uint8_t)(ADC_CONFIGx->ADCx->SR.REG & 0x02);
     // Return the value
     return result;
 }
 
 /**
  * @brief Retrieves the 12-bit ADC Raw Data
+ * @param[in] ADC_CONFIGx ADC configuration structure
  * @returns ADC Raw Data
  */
 uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx);
