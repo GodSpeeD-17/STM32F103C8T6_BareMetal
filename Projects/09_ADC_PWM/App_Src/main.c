@@ -54,7 +54,6 @@ int main(void){
 
 	// Configure PWM
 	config_PWM(&pwm_config);
-
 	// Start PWM
 	start_PWM(&pwm_config);
 
@@ -73,20 +72,12 @@ int main(void){
 				// Shift the new data
 				adc_data[1] = adc_data[0];
 				// Update PWM duty cycle
-				// pwm_config.duty_cycle = calc_PWM_ADC(adc_data[1]);
+				pwm_config.duty_cycle = calc_PWM_ADC(adc_data[1]);
 				// PWM Indication
-				// set_PWM_duty_cycle(&pwm_config);
+				set_PWM_duty_cycle(&pwm_config);
 				// Toggle OB LED
 				toggle_OB_LED();
             }
-
-			// Increase Brightness
-			// for(pwm_config.duty_cycle = MIN_DUTY_CYCLE; pwm_config.duty_cycle <= MAX_DUTY_CYCLE; pwm_config.duty_cycle += 2){
-			// 	// Set Duty Cycle
-			// 	set_PWM_duty_cycle(&pwm_config);
-			// 	// Delay
-			// 	SysTick_delay_ms(DELAY_MS);
-			// }
 
             // Loop Delay
             SysTick_delay_ms(DELAY_MS);

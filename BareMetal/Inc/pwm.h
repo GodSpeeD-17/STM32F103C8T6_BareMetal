@@ -30,7 +30,7 @@ typedef struct {
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
+__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){ 
     // Disable the Update Event
 	PWMx->GPT_CONFIGx->GP_TIMx->CR1.REG |= (1 << 1);
     // Clear the update flag
