@@ -104,33 +104,6 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
 }
 
 /**
- * @brief Configures the NVIC for GPIO EXTI
- * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
- * @param[in] PINx Pin Number `GPIO_PIN_x`
- * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
- * @param[in] IRQn The Interrupt Number
- */
-void init_EXTI(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t TRIGx, uint8_t IRQn){
-	
-	// Error Check
-	if(!IS_VALID_GPIO(GPIOx) || !IS_VALID_PIN(PINx))
-		return;
-
-	// Configure the Source of Interrupt (Port Selection)
-	config_EXTI_src(GPIOx, PINx);
-
-	// Configure the External Trigger
-	config_EXTI_trig(PINx, TRIGx);
-
-	// Enable the IRQ (Remove the Mask)
-	enable_EXTI_IRQ(PINx);
-
-	// Enable the NVIC Global Interrupt
-	enable_NVIC_IRQ(IRQn);
-
-}
-
-/**
  * @brief Configures the EXTI Parameters Based Upon EXTI Configuration Structure
  * @param[in] EXTI_CONFIGx External Interrupt Configuration Structure 
  */
