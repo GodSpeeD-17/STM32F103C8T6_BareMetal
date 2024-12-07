@@ -25,7 +25,10 @@ void config_PWM(pwm_config_t* PWMx){
 	// Error Handling
 	if(!IS_VALID_PWM_CONFIG_STRUCT(PWMx))
 		return;
-	
+
+	// Configure GPIO 
+	config_GPIO(PWMx->GPT_CONFIGx->GPIO_CONFIGx);
+
 	// Configure Timer
 	config_GPT(PWMx->GPT_CONFIGx);
 

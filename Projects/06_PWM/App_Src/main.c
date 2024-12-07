@@ -10,15 +10,21 @@ int main(void){
 	// SysTick Timer (1ms)
 	config_SysTick(CoreClock/1000);
 
-	// Configure GPIO as AF
-	config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_AF_PP);
-
 	// Configure On-board LED
 	config_OB_LED();
 	reset_OB_LED();
 
+	// GPIO Configuration Structure
+	gpio_config_t gpio_config = {
+		.GPIOx = LED_PORT,
+		.PINx = LED_PIN,
+		.MODEx = MODE_OUT_10MHz,
+		.CNFx = CNF_OUT_AF_PP,
+	};
+
 	// Timer Configuration Structure
 	gpt_config_t tim_config = {
+		.GPIO_CONFIGx = &gpio_config,
 		.GP_TIMx = GP_TIMER,
 		.channel = GPT_CHANNEL,
 		.auto_reload_value = GPT_ARR,
@@ -28,6 +34,7 @@ int main(void){
 		.direction = TIMx_COUNT_UP,
 		.auto_reload_preload = TIMx_ARPE_ENABLE,
 		.one_pulse = TIMx_OPM_DISABLE,
+		.enable_IRQ = TIMx_IRQ_DISABLE,
 	};
 
 	// PWM Configuration Structure

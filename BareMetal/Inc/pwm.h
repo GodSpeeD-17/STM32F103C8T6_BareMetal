@@ -13,16 +13,16 @@
 
 // PWM Configuration Structure
 typedef struct {
-    // Timer Configuration Structure
-    gpt_config_t* GPT_CONFIGx;
-    // PWM Mode
-    TIMx_OCM_MODE pwm_mode;
-    // PWM Active Polarity
-    uint8_t polarity;
-    // Duty Cycle (%)
-    uint8_t duty_cycle;
-    // PWM Channel Preload
-    uint8_t pwm_channel_preload;
+	// Timer Configuration Structure
+	gpt_config_t* GPT_CONFIGx;
+	// PWM Mode
+	TIMx_OCM_MODE pwm_mode;
+	// PWM Active Polarity
+	uint8_t polarity;
+	// Duty Cycle (%)
+	uint8_t duty_cycle;
+	// PWM Channel Preload
+	uint8_t pwm_channel_preload;
 } pwm_config_t;
 
 /**
@@ -30,13 +30,13 @@ typedef struct {
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){ 
-    // Clear the update flag
+__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
+	// Clear the update flag
 	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
-    // Enable Timer
-    enable_GPT(PWMx->GPT_CONFIGx);
-    // Enable Channel
-    enable_GPT_CH(PWMx->GPT_CONFIGx);
+	// Enable Channel
+	enable_GPT_CH(PWMx->GPT_CONFIGx);
+	// Enable Timer
+	enable_GPT(PWMx->GPT_CONFIGx);
 }
 
 /**
@@ -47,9 +47,9 @@ __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
 __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
 	// Disable Timer
 	disable_GPT(PWMx->GPT_CONFIGx);
-    // Disable Channel
+	// Disable Channel
 	disable_GPT_CH(PWMx->GPT_CONFIGx);
-    // Clear the update flag
+	// Clear the update flag
 	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 }
 
@@ -58,14 +58,14 @@ __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
 __attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx){
-    // Final Result
-    uint16_t result;
-    // Store the Value
-    result = (((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle);
-    result /= 100;
-    result -= 1;
-    // Return the final Calculated Value
-    return result;
+	// Final Result
+	uint16_t result;
+	// Store the Value
+	result = (((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle);
+	result /= 100;
+	result -= 1;
+	// Return the final Calculated Value
+	return result;
 }
 
 /**
@@ -73,10 +73,10 @@ __attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx)
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
 __attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
-    // Enable Timer
-    enable_GPT(PWMx->GPT_CONFIGx);
-    // Enable Channel
-    enable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
+	// Enable Timer
+	enable_GPT(PWMx->GPT_CONFIGx);
+	// Enable Channel
+	enable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
 }
 
 /**
@@ -84,10 +84,10 @@ __attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t*
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
 __attribute__((always_inline)) inline void stop_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
-    // Disable Channel
-    disable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
-    // Disable Timer
-    disable_GPT(PWMx->GPT_CONFIGx);
+	// Disable Channel
+	disable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
+	// Disable Timer
+	disable_GPT(PWMx->GPT_CONFIGx);
 }
 
 /**
