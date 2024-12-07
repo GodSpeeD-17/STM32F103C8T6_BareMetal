@@ -11,10 +11,6 @@
 #define LED_STATE_2                     ((uint8_t) 0x02)
 #define LED_STATE_BOTH_TOGGLE           ((uint8_t) 0x03)
 #define LED_DEFAULT_STATE               ((uint8_t) 0xFF)
-#define LED_RISING_PORT                 (GPIOA)
-#define LED_RISING_PIN                  (GPIO_PIN_4)
-#define LED_FALLING_PORT                (GPIOA)
-#define LED_FALLING_PIN                 (GPIO_PIN_9)
 
 /**
  * @brief Updates the LED Configuration based upon count value

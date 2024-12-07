@@ -12,18 +12,20 @@
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
 #define LOOP_DELAY_MS                   ((uint32_t) 10)
 #define LED_DELAY_MS                    ((uint64_t) 1000)
+
 // Rising Edge   
-#define PB_RISING_PORT                  (GPIOB)   
+#define PB_RISING_PORT                  (GPIOB)
 #define PB_RISING_PIN                   (GPIO_PIN_5)   
 #define PB_RISING_IRQ_NUM               (EXTI9_5_IRQn)  
 #define LED_RISING_PORT                 (GPIOA)
-#define LED_RISING_PIN                  (GPIO_PIN_4)
+#define LED_RISING_PIN                  (GPIO_PIN_2)
+
 // Falling Edge 
 #define PB_FALLING_PORT                 (GPIOB)   
 #define PB_FALLING_PIN                  (GPIO_PIN_8)
 #define PB_FALLING_IRQ_NUM              (EXTI9_5_IRQn)   
 #define LED_FALLING_PORT                (GPIOA)
-#define LED_FALLING_PIN                 (GPIO_PIN_9)
+#define LED_FALLING_PIN                 (GPIO_PIN_3)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

@@ -14,6 +14,7 @@ static volatile uint64_t curr_ticks = 0x00;
 
 /**
  * @brief Configures the SysTick Timer based upon the input count value
+ * @param[in] reloadValue Number of Ticks
  * @note Value should be within the range of 24-bit unsigned integer
  */
 void config_SysTick(uint32_t reloadValue){
@@ -39,6 +40,7 @@ void config_SysTick(uint32_t reloadValue){
 
 /***
  * @brief Accurate delay generation
+ * @param[in] delayTime Delay in Milliseconds
  * @note Based upon SysTick Timer
  */
 void SysTick_delay_ms(uint32_t delayTime){
@@ -73,6 +75,7 @@ void set_curr_ticks(uint64_t tick_value){
 
 /***
  * @brief ISR for SysTick
+ * @note Used for Delay Generation and Getting the total Number of Ticks
  */
 __attribute__((weak)) void SysTick_Handler(void){
 	

@@ -223,9 +223,6 @@
 #define USB_DIV_1_5							((uint8_t) 0)
 #define USB_DIV_1							((uint8_t) 1)
 
-// Enable Alternate Function
-#define RCC_AF_ENABLE()              		(RCC->APB2ENR.BIT.AFIOEN = BIT_SET)
-
 // PLL Clock Source
 typedef enum {
 	HSE_DIV_1 = (uint8_t)0XAA,
@@ -259,7 +256,37 @@ typedef enum {
 #define EXTI9_5_IRQn						((uint8_t) 23)
 #define TIM2_IRQn							((uint8_t) 28)
 #define EXTI15_10_IRQn						((uint8_t) 40)
+
 /*********************************************** NVIC MACROS ***********************************************/
+
+/*********************************************** EXTI MACROS ***********************************************/
+// External Trigger Selection
+#define EXTI_TRIG_FALLING               ((uint8_t) 0)
+#define EXTI_TRIG_RISING                ((uint8_t) 1)
+#define EXTI_TRIG_BOTH                  ((uint8_t) 2)
+
+// AF EXTI
+#define AF_EXTI_PA						((uint8_t) 0x00)
+#define AF_EXTI_PB                      ((uint8_t) 0x01)
+#define AF_EXTI_PC                      ((uint8_t) 0x02)
+#define AF_EXTI_PD                      ((uint8_t) 0x03)
+#define AF_EXTI_PE                      ((uint8_t) 0x04)
+#define AF_EXTI_PF                      ((uint8_t) 0x05)
+#define AF_EXTI_PG                      ((uint8_t) 0x06)
+
+// Error Checking MACROs
+#define IS_EXTI_TRIG_VALID(TRIGx)            (((TRIGx) == EXTI_TRIG_FALLING) \
+											 || ((TRIGx) == EXTI_TRIG_RISING) \
+											 || ((TRIGx) == EXTI_TRIG_BOTH))
+#define IS_EXTI_IRQn_VALID(IRQn)			((IRQn) < 60)
+#define IS_EXTI_STRUCTURE_VALID(EXTI_CONFIGx)	\
+											((IS_GPIO_STRUCTURE_VALID(EXTI_CONFIGx->GPIO_CONFIGx) )&& \
+											 (IS_EXTI_TRIG_VALID(EXTI_CONFIGx->TRIGx)) && \
+											 (IS_EXTI_IRQn_VALID(EXTI_CONFIGx->IRQn)) && \
+											 (EXTI_CONFIGx->GPIO_CONFIGx->MODEx == MODE_IN))
+								 
+/*********************************************** EXTI MACROS ***********************************************/
+
 
 /*********************************************** SYSTICK MACROS ***********************************************/
 // SysTick
