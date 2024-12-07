@@ -71,10 +71,8 @@ void config_GPT(gpt_config_t* GPT_CONFIGx){
 
 	// Enable Clock
 	enable_GPT_clk(GPT_CONFIGx);
-
 	// Reset the GP_TIMx
 	reset_GPT(GPT_CONFIGx);
-
 	// Disable the Timer
 	disable_GPT(GPT_CONFIGx);
 
@@ -83,18 +81,23 @@ void config_GPT(gpt_config_t* GPT_CONFIGx){
 
 	// Set Auto Reload Value (ARR)
 	GPT_CONFIGx->GP_TIMx->ARR = GPT_CONFIGx->auto_reload_value;
-
 	// Calculate updated PSC Value
 	GPT_CONFIGx->GP_TIMx->PSC = calc_GPT_PSC(GPT_CONFIGx->frequency_Hz, GPT_CONFIGx->auto_reload_value);
-	
 	// Set Initial Count Value (CNT)
 	GPT_CONFIGx->GP_TIMx->CNT = GPT_CONFIGx->count;
-
 	// Centre-Aligned Mode + Direction + Auto Reload Preload Selection
 	GPT_CONFIGx->GP_TIMx->CR1.REG |= (uint32_t)(((GPT_CONFIGx->auto_reload_preload & 0x01)<< 7) | ((GPT_CONFIGx->cms_mode & 0x03) << 5) | ((GPT_CONFIGx->direction & 0x01)<< 4) | ((GPT_CONFIGx->one_pulse & 0x01) << 3));
 	
 	// Update enable
 	GPT_CONFIGx->GP_TIMx->CR1.REG &= ~(1 << 1);
+
+	// IRQ Configuration
+	if(GPT_CONFIGx->enable_IRQ == TIMx_IRQ_ENABLE){
+		// Enable NVIC Interrupt
+    	enable_NVIC_IRQ(get_TIMx_IRQn(GPT_CONFIGx->GP_TIMx));
+    	// Enable Timer Interrupt
+    	GPT_CONFIGx->GP_TIMx->DIER.REG |= (1 << 0);
+	}
 
 	// Update the GPT
 	update_GPT_params(GPT_CONFIGx);
@@ -105,19 +108,14 @@ void config_GPT(gpt_config_t* GPT_CONFIGx){
  * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
  */
 uint32_t get_GPT_freq(gpt_config_t* GPT_CONFIGx){
-
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
-
 	// Retrieve Timer Source Clock Frequency
 	timer_freq = (uint32_t) ((RCC->CFGR.BIT.PPRE1 == APB1_DIV_1)? (get_APB1_freq()) : (2 * get_APB1_freq()));
-
 	// Consider ARR Value
 	timer_freq /= (GPT_CONFIGx->GP_TIMx->ARR + 1);
-
 	// Consider Prescaler Value
 	timer_freq /= (GPT_CONFIGx->GP_TIMx->PSC + 1);
-
 	// Return the Timer Frequency
 	return timer_freq;
 }
@@ -141,7 +139,6 @@ __attribute__((always_inline)) inline void update_GPT_freq(gpt_config_t* GPT_CON
  * @param[in] delayMs Number of milliseconds
  */
 void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs){
-
 	// Update the Event Frequency at 1kHz
 	if(get_GPT_freq(GPT_CONFIGx) != FREQ_1kHz){
 		// Disable Timer
@@ -150,7 +147,6 @@ void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs){
 		update_GPT_freq(GPT_CONFIGx, FREQ_1kHz);
 		// Update the Parameters
 		update_GPT_params(GPT_CONFIGx);
-		
 		// Enable Timer
 		enable_GPT(GPT_CONFIGx);
 	}

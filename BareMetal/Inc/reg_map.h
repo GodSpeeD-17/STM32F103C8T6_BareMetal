@@ -10,6 +10,9 @@
 #ifndef __REG_MAP_H__
 #define __REG_MAP_H__
 
+// Custom Declaration
+#define NULL            					((void *) 0)
+
 /*********************************************** ARM CORTEX M3 ***********************************************/
 #include "../Core/flash_reg_map.h"
 #include "../Core/nvic_reg_map.h"
@@ -109,7 +112,7 @@
 #define CNF_OUT_AF_OD						((uint8_t) 3)
 
 // Error Checking MACROS
-#define IS_VALID_GPIO(GPIOx) 				((GPIOx) == GPIOA || (GPIOx) == GPIOB || (GPIOx) == GPIOC)
+#define IS_VALID_GPIO(GPIOx) 				((GPIOx) == GPIOA || (GPIOx) == GPIOB || (GPIOx) == GPIOC || (GPIOx) == NULL)
 #define IS_VALID_PIN(PINx) 					((PINx) <= GPIO_PIN_15)
 #define IS_MODE_VALID(MODEx)				((MODEx) == MODE_IN || (MODEx) == MODE_OUT_10MHz || (MODEx) == MODE_OUT_2MHz || (MODEx) == MODE_OUT_50MHz)
 #define IS_CNF_VALID(CNFx)					((CNFx) == CNF_IN_ANALOG || (CNFx) == CNF_IN_FLOAT || (CNFx) == CNF_IN_PD || (CNFx) == CNF_IN_PU || \
@@ -125,11 +128,12 @@
 											 ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_PP) || ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_OD))
 #define IS_MODE_CNF_VALID(MODEx, CNFx)		(IS_MODE_IN_VALID((MODEx), (CNFx)) || IS_MODE_OUT_VALID((MODEx), (CNFx)))
 #define IS_GPIO_STRUCTURE_VALID(GPIO_CONFIGx)	\	
-											(IS_VALID_GPIO(GPIO_CONFIGx->GPIOx) && \
+											(((GPIO_CONFIGx) == NULL) || (\
+											 IS_VALID_GPIO(GPIO_CONFIGx->GPIOx) && \
 											 IS_VALID_PIN(GPIO_CONFIGx->PINx) && \
 											 IS_MODE_VALID(GPIO_CONFIGx->MODEx) && \
 											 IS_CNF_VALID(GPIO_CONFIGx->CNFx) && \
-											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODEx, GPIO_CONFIGx->CNFx))
+											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODEx, GPIO_CONFIGx->CNFx)))
 
 /*********************************************** GPIO MACROS ***********************************************/
 
@@ -158,48 +162,48 @@
 #define PLL_MAX_FREQ						((uint32_t) (72 * FREQ_1MHz))
 
 // Clock Source
-#define SW_CLK_HSI							((uint8_t) 0)
-#define SW_CLK_HSE							((uint8_t) 1)
-#define SW_CLK_PLL							((uint8_t) 2)
+#define SW_CLK_HSI							((uint8_t) 0x00)
+#define SW_CLK_HSE							((uint8_t) 0x01)
+#define SW_CLK_PLL							((uint8_t) 0x02)
 
 // AHB Prescaler
-#define AHB_DIV_1							((uint8_t) 0x0)
-#define AHB_DIV_2							((uint8_t) 0x8)
-#define AHB_DIV_4							((uint8_t) 0x9)
-#define AHB_DIV_8							((uint8_t) 0xA)
-#define AHB_DIV_16							((uint8_t) 0xB)
-#define AHB_DIV_64							((uint8_t) 0xC)
-#define AHB_DIV_128							((uint8_t) 0xD)
-#define AHB_DIV_256							((uint8_t) 0xE)
-#define AHB_DIV_512							((uint8_t) 0xF)
+#define AHB_DIV_1							((uint8_t) 0x00)
+#define AHB_DIV_2							((uint8_t) 0x08)
+#define AHB_DIV_4							((uint8_t) 0x09)
+#define AHB_DIV_8							((uint8_t) 0x0A)
+#define AHB_DIV_16							((uint8_t) 0x0B)
+#define AHB_DIV_64							((uint8_t) 0x0C)
+#define AHB_DIV_128							((uint8_t) 0x0D)
+#define AHB_DIV_256							((uint8_t) 0x0E)
+#define AHB_DIV_512							((uint8_t) 0x0F)
 
 // APB1 Prescaler
-#define APB1_DIV_1							((uint8_t) 0x3)
-#define APB1_DIV_2							((uint8_t) 0x4)
-#define APB1_DIV_4							((uint8_t) 0x5)
-#define APB1_DIV_8							((uint8_t) 0x6)
-#define APB1_DIV_16							((uint8_t) 0x7)
+#define APB1_DIV_1							((uint8_t) 0x03)
+#define APB1_DIV_2							((uint8_t) 0x04)
+#define APB1_DIV_4							((uint8_t) 0x05)
+#define APB1_DIV_8							((uint8_t) 0x06)
+#define APB1_DIV_16							((uint8_t) 0x07)
 
 // APB2 Prescaler
-#define APB2_DIV_1							((uint8_t) 0x3)
-#define APB2_DIV_2							((uint8_t) 0x4)
-#define APB2_DIV_4							((uint8_t) 0x5)
-#define APB2_DIV_8							((uint8_t) 0x6)
-#define APB2_DIV_16							((uint8_t) 0x7)
+#define APB2_DIV_1							((uint8_t) 0x03)
+#define APB2_DIV_2							((uint8_t) 0x04)
+#define APB2_DIV_4							((uint8_t) 0x05)
+#define APB2_DIV_8							((uint8_t) 0x06)
+#define APB2_DIV_16							((uint8_t) 0x07)
 
 // ADC Prescaler
-#define ADC_DIV_2							((uint8_t) 0x0)
-#define ADC_DIV_4							((uint8_t) 0x1)
-#define ADC_DIV_6							((uint8_t) 0x2)
-#define ADC_DIV_8							((uint8_t) 0x3)
+#define ADC_DIV_2							((uint8_t) 0x00)
+#define ADC_DIV_4							((uint8_t) 0x01)
+#define ADC_DIV_6							((uint8_t) 0x02)
+#define ADC_DIV_8							((uint8_t) 0x03)
 
 // PLL Clock Source
-#define PLL_SRC_HSI_DIV_2					((uint8_t) 0)
-#define PLL_SRC_HSE							((uint8_t) 1)
+#define PLL_SRC_HSI_DIV_2					((uint8_t) 0x00)
+#define PLL_SRC_HSE							((uint8_t) 0x01)
 
 // PLL Clock Source Prescaler
-#define PLL_HSE_DIV_1						((uint8_t) 0)
-#define PLL_HSE_DIV_2						((uint8_t) 1)
+#define PLL_HSE_DIV_1						((uint8_t) 0x00)
+#define PLL_HSE_DIV_2						((uint8_t) 0x01)
 
 // PLL Multiplication Factor
 #define PLL_MUL_2							((uint8_t) 0x00)
@@ -220,8 +224,8 @@
 #define PLL_MUL_16_1						((uint8_t) 0x0F)
 
 // USB Prescaler
-#define USB_DIV_1_5							((uint8_t) 0)
-#define USB_DIV_1							((uint8_t) 1)
+#define USB_DIV_1_5							((uint8_t) 0x00)
+#define USB_DIV_1							((uint8_t) 0x01)
 
 // PLL Clock Source
 typedef enum {
@@ -232,7 +236,7 @@ typedef enum {
 
 // System Clock Frequency
 typedef enum {
-	SYSCLK_16MHz = (uint8_t) 1,
+	SYSCLK_16MHz = (uint8_t) 0x01,
 	SYSCLK_24MHz,
 	SYSCLK_32MHz,
 	SYSCLK_40MHz,
@@ -247,7 +251,9 @@ typedef enum {
 // IRQn Number
 #define WWDG_IRQn							((uint8_t) 0)
 #define PVD_IRQn							((uint8_t) 1)
+#define TAMPER_IRQn							((uint8_t) 2)
 #define RTC_IRQn							((uint8_t) 3)
+#define RCC_IRQn							((uint8_t) 5)
 #define EXTI0_IRQn							((uint8_t) 6)
 #define EXTI1_IRQn							((uint8_t) 7)
 #define EXTI2_IRQn							((uint8_t) 8)
@@ -255,15 +261,22 @@ typedef enum {
 #define EXTI4_IRQn							((uint8_t) 10)
 #define EXTI9_5_IRQn						((uint8_t) 23)
 #define TIM2_IRQn							((uint8_t) 28)
+#define TIM3_IRQn							((uint8_t) 29)
+#define TIM4_IRQn							((uint8_t) 30)
+#define SPI1_IRQn							((uint8_t) 35)
+#define SPI2_IRQn							((uint8_t) 36)
+#define USART1_IRQn							((uint8_t) 37)
+#define USART2_IRQn							((uint8_t) 38)
+#define USART3_IRQn							((uint8_t) 39)
 #define EXTI15_10_IRQn						((uint8_t) 40)
 
 /*********************************************** NVIC MACROS ***********************************************/
 
 /*********************************************** EXTI MACROS ***********************************************/
 // External Trigger Selection
-#define EXTI_TRIG_FALLING               ((uint8_t) 0)
-#define EXTI_TRIG_RISING                ((uint8_t) 1)
-#define EXTI_TRIG_BOTH                  ((uint8_t) 2)
+#define EXTI_TRIG_FALLING               ((uint8_t) 0x00)
+#define EXTI_TRIG_RISING                ((uint8_t) 0x01)
+#define EXTI_TRIG_BOTH                  ((uint8_t) 0x02)
 
 // AF EXTI
 #define AF_EXTI_PA						((uint8_t) 0x00)
@@ -290,8 +303,8 @@ typedef enum {
 
 /*********************************************** SYSTICK MACROS ***********************************************/
 // SysTick
-#define SYSTICK_CLK_EXT						((uint8_t) 0)
-#define SYSTICK_CLK_CORE					((uint8_t) 1)
+#define SYSTICK_CLK_EXT						((uint8_t) 0x00)
+#define SYSTICK_CLK_CORE					((uint8_t) 0x01)
 /*********************************************** SYSTICK MACROS ***********************************************/
 
 /*********************************************** GPT MACROS ***********************************************/
@@ -345,10 +358,10 @@ typedef enum {
 #define TIM4_FULL_REMAP						((uint8_t) 0x01)    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
 
 // Channel
-#define TIMx_CHANNEL_1						((uint8_t) 1)
-#define TIMx_CHANNEL_2						((uint8_t) 2)
-#define TIMx_CHANNEL_3						((uint8_t) 4)
-#define TIMx_CHANNEL_4						((uint8_t) 8)
+#define TIMx_CHANNEL_1						((uint8_t) 0x01)
+#define TIMx_CHANNEL_2						((uint8_t) 0x02)
+#define TIMx_CHANNEL_3						((uint8_t) 0x04)
+#define TIMx_CHANNEL_4						((uint8_t) 0x08)
 #define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
 
 // Counting Mode
@@ -369,6 +382,10 @@ typedef enum {
 #define TIMx_OPM_DISABLE					((uint8_t) 0x00)
 #define TIMx_OPM_ENABLE						((uint8_t) 0x01)
 
+// IRQ Enable
+#define TIMx_IRQ_DISABLE					((uint8_t) 0x00)
+#define TIMx_IRQ_ENABLE						((uint8_t) 0x01)
+
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
 #define IS_VALID_GPT_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
@@ -381,8 +398,10 @@ typedef enum {
 #define IS_VALID_GPT_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
 #define IS_VALID_GPT_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
 #define IS_VALID_GPT_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
+#define IS_VALID_GPT_IRQ(IRQx)				(((IRQx) == TIMx_IRQ_ENABLE) || ((IRQx) == TIMx_IRQ_DISABLE))
 #define IS_VALID_GPT_CONFIG_STRUCT(GPT_CONFIGx) \
-											(IS_VALID_GPT((GPT_CONFIGx->GP_TIMx)) && \
+											(IS_GPIO_STRUCTURE_VALID(GPT_CONFIGx->GPIO_CONFIGx) && \
+											 IS_VALID_GPT((GPT_CONFIGx->GP_TIMx)) && \
 											 IS_VALID_GPT_CHANNEL((GPT_CONFIGx->channel)) && \
 											 IS_VALID_GPT_ARR((GPT_CONFIGx->auto_reload_value)) && \
 											 IS_VALID_GPT_FREQ((GPT_CONFIGx->frequency_Hz)) && \

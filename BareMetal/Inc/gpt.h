@@ -11,9 +11,13 @@
 // Register Mapping
 #include "reg_map.h"
 #include "rcc.h"		// Required for get_APB1_freq()
+#include "gpio.h"		// Required for Configuration
+#include "nvic.h"		// IRQ Configuration
 
 // Timer Configuration Structure
 typedef struct {
+	// GPIO Structure
+	gpio_config_t* GPIO_CONFIGx;
     // General Purpose Timer
     GPT_REG_STRUCT* GP_TIMx;
 	// General Purpose Timer Channel
@@ -32,6 +36,8 @@ typedef struct {
 	uint8_t auto_reload_preload;
 	// One-Pulse Mode
 	uint8_t one_pulse;
+	// IRQ Enable
+	uint8_t enable_IRQ;
 } gpt_config_t;
 
 /**
@@ -218,6 +224,41 @@ __attribute__((always_inline)) inline uint16_t calc_GPT_PSC(uint32_t freq_Hz, ui
 	// Final Calculated Value
 	return (uint16_t)(prescaler_value - 1);
 } 
+
+/**
+ * @brief Retrieves the GP_TIMx Interrupt Status
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @returns UIF Flag Status
+ */
+__attribute__((always_inline)) inline uint8_t get_TIMx_IRQ_status(gpt_config_t* GPT_CONFIGx){
+	// Update Interrupt Flag (UIF) Status
+	return (uint8_t)(GPT_CONFIGx->GP_TIMx->SR.REG & 0x00000001);
+}
+
+/**
+ * @brief Clears the pending interrupt of GP_TIMx 
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ * @returns UIF Flag Status
+ */
+__attribute__((always_inline)) inline void clear_TIMx_IRQ_status(gpt_config_t* GPT_CONFIGx){
+	// Clear Update Interrupt Flag (UIF)
+	GPT_CONFIGx->GP_TIMx->SR.REG &=  ~(1 << 0);
+}
+
+/**
+ * @brief Retrieves the IRQn based upon TIMx
+ * @param[in] GP_TIMx `TIM2`, `TIM3`, `TIM4`
+ * @returns IRQn (0 - 59)
+ */
+__attribute__((always_inline)) inline uint8_t get_TIMx_IRQn(GPT_REG_STRUCT* GP_TIMx){
+	// Return IRQn based upon TIMx
+	if(GP_TIMx == TIM2)	
+		return TIM2_IRQn;	
+	else if(GP_TIMx == TIM3)	
+		return TIM3_IRQn;		
+	else if(GP_TIMx == TIM4)	
+		return TIM4_IRQn;		
+}
 
 /**
  * @brief Configures the General Purpose Timer (GPT)

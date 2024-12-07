@@ -14,12 +14,11 @@
 #define TIMER_FREQ                      (FREQ_1kHz)
 #define TIMER_ARR                       (DEFAULT_ARR_VALUE)
 #define TIMER_CNT                       (BIT_RESET)
-#define TIMER_IRQn                      (TIM2_IRQn)
 #define LED_PORT                        (GPIOA)
 #define LED_PIN                         (GPIO_PIN_2)
 #define DELAY_MS                        ((uint32_t) 10)
-#define OB_LED_DELAY_MS                 ((uint32_t) 1500)  
-#define EXT_LED_DELAY_MS                ((uint16_t) 500)
+#define OB_LED_DELAY_MS                 ((uint32_t) 5000)  
+#define EXT_LED_DELAY_MS                ((uint16_t) 300)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;
