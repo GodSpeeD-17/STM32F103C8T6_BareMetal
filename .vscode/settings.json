@@ -278,6 +278,7 @@
         "exti.h": "c",
         "bare_metal.h": "c",
         "gpio.h": "c",
-        "gpt.h": "c"
+        "gpt.h": "c",
+        "led_function.h": "c"
     }
 }
