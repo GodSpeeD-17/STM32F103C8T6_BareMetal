@@ -9,7 +9,7 @@
 #define SYSCLK_MHz                      (SYSCLK_72MHz)
 #define DELAY_MS                        ((uint32_t) 1000)         
 #define LED_PORT                        (GPIOB)
-#define LED_PIN                         (GPIO_PIN_0)
+#define LED_PIN                         (GPIO_PIN_12)
 
 // System Clock Frequency (Core)
 extern volatile uint32_t CoreClock;

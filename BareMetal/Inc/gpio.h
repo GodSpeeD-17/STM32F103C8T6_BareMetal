@@ -11,6 +11,26 @@
 // Register Address Mapping
 #include "reg_map.h"
 
+// GPIO Configuration Structure
+typedef struct {
+	// Port
+	GPIO_REG_STRUCT* GPIOx;
+	// Pin
+	uint8_t PINx;
+	// Mode
+	uint8_t MODEx;
+	// Configuration
+	uint8_t CNFx;
+} gpio_config_t;
+
+// On-board LED Configuration
+static gpio_config_t OB_LED_config = {
+	.GPIOx = OB_LED_PORT,
+	.PINx = OB_LED_PIN,
+	.MODEx = MODE_OUT_2MHz,
+	.CNFx = CNF_OUT_GP_PP,
+};
+
 /**
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
@@ -59,16 +79,16 @@ __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPI
  * @brief Enables Clock for Alternate Function (AFIO)
  */
 __attribute__((always_inline)) inline void enable_AFIO_clk(void){
-	// Enable AFIO Clock in APB2 Enable Register (APB2ENR)
-	RCC->APB2ENR.BIT.AFIOEN = (uint8_t) 0x01;
+	// Enable AFIO Clock
+	RCC->APB2ENR.REG |= (1 << 0);
 }
 
 /**
  * @brief Disables Clock for Alternate Function (AFIO)
  */
 __attribute__((always_inline)) inline void disable_AFIO_clk(void){
-	// Enable AFIO Clock in APB2 Enable Register (APB2ENR)
-	RCC->APB2ENR.BIT.AFIOEN = (uint8_t) 0x00;
+	// Disable AFIO Clock
+	RCC->APB2ENR.REG &= ~(1 << 0);
 }
 
 /**
@@ -79,16 +99,16 @@ __attribute__((always_inline)) inline void disable_AFIO_clk(void){
  * @param[in] CNFx Pin Configuration `CNF_..`
  * @note Do not use it to configure PB3, PB4, PC13, PC14, PC15
  */
-void config_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx);
+void init_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx, uint8_t MODEx, uint8_t CNFx);
 
 /**
  * @brief Configures a GPIO as LED
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-__attribute__((always_inline)) inline void config_LED(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+__attribute__((always_inline)) inline void init_LED(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// General Purpose Output @10MHz
-	config_GPIO(GPIOx, PINx, MODE_OUT_10MHz, CNF_OUT_GP_PP);
+	init_GPIO(GPIOx, PINx, MODE_OUT_10MHz, CNF_OUT_GP_PP);
 }
 
 /**
@@ -96,7 +116,7 @@ __attribute__((always_inline)) inline void config_LED(GPIO_REG_STRUCT* GPIOx, ui
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-__attribute__((always_inline)) inline void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+__attribute__((always_inline)) inline void set_init_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// Bit Set (Atomicity)
 	GPIOx->BSRR.REG = (BIT_SET << PINx);
 }
@@ -106,7 +126,7 @@ __attribute__((always_inline)) inline void set_GPIO(GPIO_REG_STRUCT* GPIOx, uint
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-__attribute__((always_inline)) inline void reset_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx) {
+__attribute__((always_inline)) inline void reset_init_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx) {
 	// Bit Reset (Atomicity)
 	GPIOx->BRR.REG = (BIT_SET << PINx);
 }
@@ -116,7 +136,7 @@ __attribute__((always_inline)) inline void reset_GPIO(GPIO_REG_STRUCT* GPIOx, ui
  * @param[in] GPIOx GPIOA, GPIOB, GPIOC
  * @param[in] PINx GPIO Pin Number
  */
-__attribute__((always_inline)) inline void toggle_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+__attribute__((always_inline)) inline void toggle_init_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// Toggle the GPIO Pin
 	GPIOx->ODR.REG ^= (BIT_SET << PINx);
 }
@@ -127,15 +147,87 @@ __attribute__((always_inline)) inline void toggle_GPIO(GPIO_REG_STRUCT* GPIOx, u
  * @param[in] PINx GPIO Pin Number
  * @returns `BIT_SET`, `BIT_RESET`
  */
-uint8_t get_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+uint8_t get_init_GPIO(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+
+/**
+ * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
+ * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
+ */
+__attribute__((always_inline)) inline void init_OB_LED(void){
+	// Set the GPIO Pin as an Output
+	init_GPIO(OB_LED_PORT, OB_LED_PIN, MODE_OUT_2MHz, CNF_OUT_GP_PP);
+}
+
+/**
+ * @brief Turns on-board active low LED (PC13) ON
+ */
+__attribute__((always_inline)) inline void set_init_OB_LED(void){
+	// Reset the on-board active low LED GPIO
+	reset_init_GPIO(OB_LED_PORT, OB_LED_PIN);
+}
+
+/**
+ * @brief Turns on-board active low LED (PC13) OFF
+ */
+__attribute__((always_inline)) inline void reset_init_OB_LED(void){
+	// Reset the on-board active low LED GPIO
+	set_init_GPIO(OB_LED_PORT, OB_LED_PIN);
+}
+
+/**
+ * @brief Toggles the on-board active low LED (PC13)
+ */
+__attribute__((always_inline)) inline void toggle_init_OB_LED(void){
+	// Toggle the on-board active low LED GPIO
+	toggle_init_GPIO(OB_LED_PORT, OB_LED_PIN);
+}
+
+/**
+ * @brief Configures the GPIO based upon gpio structure
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+void config_GPIO(gpio_config_t* GPIO_CONFIGx);
+
+/**
+ * @brief Sets the state of GPIO Pin to HIGH
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+__attribute__((always_inline)) inline void set_GPIO(gpio_config_t* GPIO_CONFIGx){
+	// Bit Set (Atomicity)
+	GPIO_CONFIGx->GPIOx->BSRR.REG |= (1 << GPIO_CONFIGx->PINx);
+}
+
+/**
+ * @brief Sets the state of GPIO Pin to LOW
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+__attribute__((always_inline)) inline void reset_GPIO(gpio_config_t* GPIO_CONFIGx){
+	// Bit Reset (Atomicity)
+	GPIO_CONFIGx->GPIOx->BRR.REG |= (1 << GPIO_CONFIGx->PINx);
+}
+
+/**
+ * @brief Toggles the state of GPIO Pin
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+__attribute__((always_inline)) inline void toggle_GPIO(gpio_config_t* GPIO_CONFIGx){
+	// Bit Reset (Atomicity)
+	GPIO_CONFIGx->GPIOx->ODR.REG ^= (1 << GPIO_CONFIGx->PINx);
+}
+
+/**
+ * @brief Retrieves the state of GPIO Pin
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+uint8_t get_GPIO(gpio_config_t* GPIO_CONFIGx);
 
 /**
  * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
  * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
  */
 __attribute__((always_inline)) inline void config_OB_LED(void){
-	// Set the GPIO Pin as an Output
-	config_GPIO(OB_LED_PORT, OB_LED_PIN, MODE_OUT_2MHz, CNF_OUT_GP_PP);
+	// Configure the OB LED
+	config_GPIO(&OB_LED_config); 
 }
 
 /**
@@ -143,15 +235,15 @@ __attribute__((always_inline)) inline void config_OB_LED(void){
  */
 __attribute__((always_inline)) inline void set_OB_LED(void){
 	// Reset the on-board active low LED GPIO
-	reset_GPIO(OB_LED_PORT, OB_LED_PIN);
+	reset_GPIO(&OB_LED_config);
 }
 
 /**
  * @brief Turns on-board active low LED (PC13) OFF
  */
 __attribute__((always_inline)) inline void reset_OB_LED(void){
-	// Reset the on-board active low LED GPIO
-	set_GPIO(OB_LED_PORT, OB_LED_PIN);
+	// Set the on-board active low LED GPIO
+	set_GPIO(&OB_LED_config);
 }
 
 /**
@@ -159,7 +251,8 @@ __attribute__((always_inline)) inline void reset_OB_LED(void){
  */
 __attribute__((always_inline)) inline void toggle_OB_LED(void){
 	// Toggle the on-board active low LED GPIO
-	toggle_GPIO(OB_LED_PORT, OB_LED_PIN);
+	toggle_GPIO(&OB_LED_config);
 }
+
 
 #endif /* __GPIO__H__ */

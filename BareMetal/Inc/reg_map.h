@@ -124,6 +124,13 @@
 #define IS_MODE_OUT_VALID(MODEx, CNFx)		(((MODEx) != MODE_IN && (CNFx) == CNF_OUT_GP_PP) || ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_GP_OD) || \
 											 ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_PP) || ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_OD))
 #define IS_MODE_CNF_VALID(MODEx, CNFx)		(IS_MODE_IN_VALID((MODEx), (CNFx)) || IS_MODE_OUT_VALID((MODEx), (CNFx)))
+#define IS_GPIO_STRUCTURE_VALID(GPIO_CONFIGx)	\	
+											(IS_VALID_GPIO(GPIO_CONFIGx->GPIOx) && \
+											 IS_VALID_PIN(GPIO_CONFIGx->PINx) && \
+											 IS_MODE_VALID(GPIO_CONFIGx->MODEx) && \
+											 IS_CNF_VALID(GPIO_CONFIGx->CNFx) && \
+											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODEx, GPIO_CONFIGx->CNFx))
+
 /*********************************************** GPIO MACROS ***********************************************/
 
 /*********************************************** RCC MACROS ***********************************************/

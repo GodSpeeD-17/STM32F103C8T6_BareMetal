@@ -10,9 +10,17 @@ int main(void){
     // SysTick Timer (1ms)
     config_SysTick(CoreClock/1000);
 
+    // GPIO Configuration Structure
+    gpio_config_t GPIO_CONFIGx = {
+    .GPIOx = LED_PORT,
+	.PINx = LED_PIN,
+	.MODEx = MODE_OUT_10MHz,
+	.CNFx = CNF_OUT_GP_PP,
+    };
+
     // Initialize External LED
-    config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_GP_PP);
-    reset_GPIO(LED_PORT, LED_PIN);
+    config_GPIO(&GPIO_CONFIGx);
+    reset_GPIO(&GPIO_CONFIGx);
 
     // Initialise On-board LED
     config_OB_LED();
@@ -22,7 +30,7 @@ int main(void){
     while(1){
 
         // Toggle external LED
-        toggle_GPIO(LED_PORT, LED_PIN);
+        toggle_GPIO(&GPIO_CONFIGx);
 
         // Delay using SysTick
         SysTick_delay_ms(DELAY_MS);
