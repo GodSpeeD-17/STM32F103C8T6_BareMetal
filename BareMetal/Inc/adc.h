@@ -10,7 +10,7 @@
 
 // Dependency
 #include "reg_map.h"
-#include "gpio.h"
+#include "gpio.h"			// For Configuration
 
 // Wait time for stabilize (tSTAB)
 #define ADC_ON_DELAY						((uint16_t) 10)
@@ -45,10 +45,8 @@ typedef struct {
 
 // ADC Configuration Structure
 typedef struct {
-	// GPIOx
-	GPIO_REG_STRUCT* GPIOx;
-	// PIN
-	uint8_t PINx;
+	// GPIO Configuration
+	gpio_config_t* GPIO_CONFIGx;
 	// ADC Number
 	ADC_REG_STRUCT* ADCx;
 	// ADC Channel
@@ -118,9 +116,9 @@ __attribute__((always_inline)) inline void calibrate_ADC(ADC_REG_STRUCT* ADCx){
 	ADCx->CR2.REG |= (1 << 3);
 	// Cleared after the Calibration Registers are Initialized
 	while((ADCx->CR2.REG & (1 << 3)));
-    // Start the Calibration
-    ADCx->CR2.REG |= (1 << 2);
-    // Reset by Hardware after Calibration is Complete
+	// Start the Calibration
+	ADCx->CR2.REG |= (1 << 2);
+	// Reset by Hardware after Calibration is Complete
 	while((ADCx->CR2.REG & (1 << 2)));
 }
 
@@ -131,14 +129,14 @@ __attribute__((always_inline)) inline void calibrate_ADC(ADC_REG_STRUCT* ADCx){
 __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
 	// When the ADON bit is set for the first time, it wakes up the ADC from Power Down mode
 	// If this bit holds a value of 0 and a 1 is written to it then it wakes up the ADC from Power Down state
-    enable_ADC(ADCx);
+	enable_ADC(ADCx);
 	// Wait for for time (tSTAB)
 	for(volatile uint16_t tSTAB_delay = 0; tSTAB_delay <= ADC_ON_DELAY; tSTAB_delay++);
 	// Calibrate the ADC
 	calibrate_ADC(ADCx);
-    // Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)
+	// Conversion starts when ADON bit is set for a second time by software after ADC power-up time (tSTAB)
 	// Conversion starts when this bit holds a value of 1 and a 1 is written to it
-    enable_ADC(ADCx);
+	enable_ADC(ADCx);
 }
 
 /**
@@ -152,12 +150,12 @@ void config_ADC(adc_config_t* ADC_CONFIGx);
  * @param[in] ADC_CONFIGx ADC configuration structure
  */
 __attribute__((always_inline)) inline uint8_t ready_ADC_data(adc_config_t* ADC_CONFIGx){
-    // Result
-    uint8_t result = 0xFF;
-    // Check if ADC is ready
-    result = (uint8_t)(ADC_CONFIGx->ADCx->SR.REG & 0x02);
-    // Return the value
-    return result;
+	// Result
+	uint8_t result = 0xFF;
+	// Check if ADC is ready
+	result = (uint8_t)(ADC_CONFIGx->ADCx->SR.REG & 0x02);
+	// Return the value
+	return result;
 }
 
 /**
