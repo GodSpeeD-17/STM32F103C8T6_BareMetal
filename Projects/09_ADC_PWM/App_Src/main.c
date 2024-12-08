@@ -17,8 +17,15 @@ int main(void){
 	config_OB_LED();
 	reset_OB_LED();
 
-	// Timer Configuration Structure
+	// PWM Configuration Structure
+	gpio_config_t led_config = {
+		.GPIOx = LED_PORT, 
+		.PINx = LED_PIN, 
+		.MODEx = MODE_OUT_10MHz, 
+		.CNFx = CNF_OUT_AF_PP,
+	};
 	gpt_config_t tim_config = {
+		.GPIO_CONFIGx = &led_config,
 		.GP_TIMx = GP_TIMER,
 		.channel = GPT_CHANNEL,
 		.auto_reload_value = GPT_ARR,
@@ -28,9 +35,8 @@ int main(void){
 		.direction = TIMx_COUNT_UP,
 		.auto_reload_preload = TIMx_ARPE_ENABLE,
 		.one_pulse = TIMx_OPM_DISABLE,
+		.enable_IRQ = TIMx_IRQ_DISABLE,
 	};
-
-	// PWM Configuration Structure
 	pwm_config_t pwm_config = {
 		.GPT_CONFIGx = &tim_config,
 		.pwm_mode = TIMx_OCM_PWM_NORMAL,
@@ -38,27 +44,27 @@ int main(void){
 		.polarity = TIMx_POL_ACTIVE_HIGH,
 		.pwm_channel_preload = PWM_CHx_PRELOAD_ENABLE,
 	};
-	
-	// Configure GPIO as Alternate Function
-	config_GPIO(LED_PORT, LED_PIN, MODE_OUT_10MHz, CNF_OUT_AF_PP);
-	// Configure PWM
 	config_PWM(&pwm_config);
-	// Start PWM
 	start_PWM(&pwm_config);
 
 	// ADC Configuration Structure
-    adc_config_t adc_config = {
-        .GPIOx = POT_PORT,
-        .PINx = POT_PIN,
-        .ADCx = POT_ADC,
-        .channel = POT_ADC_CHANNEL,
-        .num_channels = 1,
-        .sample_time = POT_ADC_SAMPLE_TIME,
-        .cc = ADC_CONT_CONV_ON,
-        .data_alignment = ADC_DATA_ALIGN_RIGHT,
-    };
-    // Configure ADC
-    config_ADC(&adc_config);
+	gpio_config_t pot_config = {
+		.GPIOx = POT_PORT,
+		.PINx = POT_PIN,
+		.MODEx = MODE_IN,
+		.CNFx = CNF_IN_ANALOG,
+	};
+	adc_config_t adc_config = {
+		.GPIO_CONFIGx = &pot_config,
+		.ADCx = POT_ADC,
+		.channel = POT_ADC_CHANNEL,
+		.num_channels = 1,
+		.sample_time = POT_ADC_SAMPLE_TIME,
+		.cc = ADC_CONT_CONV_ON,
+		.data_alignment = ADC_DATA_ALIGN_RIGHT,
+	};
+	// Configure ADC
+	config_ADC(&adc_config);
 
 	// Infinite Loop
 	while(1){
@@ -76,7 +82,7 @@ int main(void){
 				set_PWM_duty_cycle(&pwm_config);
 				// Toggle OB LED
 				toggle_OB_LED();
-            }
+			}
 			// Loop Delay
 			SysTick_delay_ms(DELAY_MS);
 		}
