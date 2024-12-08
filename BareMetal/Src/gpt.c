@@ -96,7 +96,7 @@ void config_GPT(gpt_config_t* GPT_CONFIGx){
 		// Enable NVIC Interrupt
     	enable_NVIC_IRQ(get_TIMx_IRQn(GPT_CONFIGx->GP_TIMx));
     	// Enable Timer Interrupt
-    	GPT_CONFIGx->GP_TIMx->DIER.REG |= (1 << 0);
+    	GPT_CONFIGx->GP_TIMx->DIER.REG |= (uint32_t)(1 << 0);
 	}
 
 	// Update the GPT

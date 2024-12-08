@@ -2,7 +2,8 @@
 #include "main.h"
 
 // Global Variables
-uint8_t irq_status = 0x00;
+volatile uint8_t irq_status = 0x00;
+volatile uint8_t pwm_increment = 0x01;
 
 // LED Configuration
 gpio_config_t led_config = {
@@ -61,7 +62,7 @@ gpio_config_t led2_config = {
 	.CNFx = CNF_OUT_AF_PP,
 };
 gpt_config_t tim_led2_config = {
-	.GPIO_CONFIGx = &tim_led1_config,
+	.GPIO_CONFIGx = &led2_config,
 	.GP_TIMx = GP_TIMER,
 	.channel = GPT_CHANNEL2,
 	.auto_reload_value = GPT_ARR,
@@ -102,54 +103,35 @@ int main(void){
 
 	// PWM Configuration
 	config_PWM(&pwm_led1_config);
-	enable_GPT_CH(&tim_led1_config);
-	config_PWM(&pwm_led2_config);
-	enable_GPT_CH(&tim_led2_config);
-
 	// Start PWM
-	enable_GPT(&tim_led2_config);
+	start_PWM(&pwm_led1_config);
 
 	// Infinite Loop
 	while(1){
-
-		// LED1
-		for(pwm_led1_config.duty_cycle = MIN_DUTY_CYCLE; (pwm_led1_config.duty_cycle <= MAX_DUTY_CYCLE && irq_status); pwm_led1_config.duty_cycle += 2){
-			// Duty Cycle Updated
-			set_PWM_duty_cycle_multi_channel(&pwm_led1_config, pwm_led1_config.GPT_CONFIGx->channel);
-			// Delay
-			SysTick_delay_ms(DELAY_MS);
+		// PWM Duty Cycle Increment
+		if(pwm_increment){
+			for(pwm_led1_config.duty_cycle; (pwm_led1_config.duty_cycle <= MAX_DUTY_CYCLE && irq_status); pwm_led1_config.duty_cycle += 2){
+				// Duty Cycle Updated
+				set_PWM_duty_cycle(&pwm_led1_config);
+				// Delay
+				SysTick_delay_ms(DELAY_MS);
+			}
+			// Toggle the PWM duty cycle state
+			pwm_increment = 0x00;
 		}
-		// LED2
-		for(pwm_led2_config.duty_cycle = MIN_DUTY_CYCLE; (pwm_led2_config.duty_cycle <= MAX_DUTY_CYCLE && !irq_status); pwm_led2_config.duty_cycle += 2){
-			// Duty Cycle Updated
-			set_PWM_duty_cycle_multi_channel(&pwm_led2_config, pwm_led2_config.GPT_CONFIGx->channel);
-			// Delay
-			SysTick_delay_ms(DELAY_MS);
+		// PWM Duty Cycle Decrement
+		else{
+			for(pwm_led1_config.duty_cycle; (pwm_led1_config.duty_cycle >= MIN_DUTY_CYCLE && irq_status); pwm_led1_config.duty_cycle -= 2){
+				// Duty Cycle Updated
+				set_PWM_duty_cycle(&pwm_led1_config);
+				// Delay
+				SysTick_delay_ms(DELAY_MS);
+			}
+			// Toggle the PWM duty cycle state
+			pwm_increment = 0x01;
 		}
-
-		// On-board LED Toggle
-		toggle_OB_LED();
-		
-		// LED1
-		for(pwm_led1_config.duty_cycle = MAX_DUTY_CYCLE; (pwm_led1_config.duty_cycle >= MIN_DUTY_CYCLE && irq_status); pwm_led1_config.duty_cycle -= 2){
-			// Duty Cycle Updated
-			set_PWM_duty_cycle_multi_channel(&pwm_led1_config, pwm_led1_config.GPT_CONFIGx->channel);
-			// Delay
-			SysTick_delay_ms(DELAY_MS);
-		}
-		// LED2
-		for(pwm_led2_config.duty_cycle = MAX_DUTY_CYCLE; (pwm_led2_config.duty_cycle >= MIN_DUTY_CYCLE && !irq_status); pwm_led2_config.duty_cycle -= 2){
-			// Duty Cycle Updated
-			set_PWM_duty_cycle_multi_channel(&pwm_led2_config, pwm_led2_config.GPT_CONFIGx->channel);
-			// Delay
-			SysTick_delay_ms(DELAY_MS);
-		}
-
-		// On-board LED Toggle
-		toggle_OB_LED();
-
 		// Loop Delay
-		SysTick_delay_ms(DELAY_MS);
+		SysTick_delay_ms(LOOP_DELAY_MS);
 	}
 	
 	// Return Value

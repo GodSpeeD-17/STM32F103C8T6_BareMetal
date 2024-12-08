@@ -468,7 +468,7 @@ typedef enum{
 											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
 											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle) && \
 											 IS_VALID_PWM_CHANNEL_PRELOAD(PWM_CONFIGx->pwm_channel_preload))
-#define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (DUTYx)))
+#define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (((DUTYx) < MIN_DUTY_CYCLE) ? (MIN_DUTY_CYCLE) : (DUTYx))))
 #define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
 
 /*********************************************** PWM MACROS ***********************************************/

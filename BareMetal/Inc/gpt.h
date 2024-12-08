@@ -192,10 +192,10 @@ __attribute__((always_inline)) inline void reset_GPT(gpt_config_t* GPT_CONFIGx){
 __attribute__((always_inline)) inline void update_GPT_params(gpt_config_t* GPT_CONFIGx){
 	// Send an update event to reset the timer and apply settings
   	GPT_CONFIGx->GP_TIMx->EGR.REG |= BIT_SET;
-	// Wait until confirmation by Hardware
+	// Wait until bit reset by Hardware
 	while(GPT_CONFIGx->GP_TIMx->EGR.REG & 0x01);
 	// Clear the update flag
-	GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET; 
+	GPT_CONFIGx->GP_TIMx->SR.REG &= ~(1 << 0); 
 }
 
 /**

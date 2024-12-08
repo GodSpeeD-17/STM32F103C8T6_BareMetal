@@ -31,6 +31,10 @@ typedef struct {
  * @note Use this only for single channel configuration
  */
 __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
+	// Stop if already running
+	if(PWMx->GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN){
+		PWMx->GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN = 0;
+	}
 	// Clear the update flag
 	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
 	// Enable Channel
@@ -50,7 +54,7 @@ __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
 	// Disable Channel
 	disable_GPT_CH(PWMx->GPT_CONFIGx);
 	// Clear the update flag
-	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
+	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= (uint32_t)~(1 << 0);
 }
 
 /**
