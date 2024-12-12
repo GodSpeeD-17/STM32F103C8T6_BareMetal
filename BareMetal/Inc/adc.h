@@ -11,6 +11,7 @@
 // Dependency
 #include "reg_map.h"
 #include "gpio.h"			// For Configuration
+#include "nvic.h"			// For IRQ Handling
 
 // Wait time for stabilize (tSTAB)
 #define ADC_ON_DELAY						((uint16_t) 10)
@@ -59,6 +60,8 @@ typedef struct {
 	uint8_t cc;
 	// ADC Data Alignment
 	uint8_t data_alignment;
+	// IRQ Enable/Disable
+	uint8_t enable_IRQ;
 } adc_config_t;
 
 /**
@@ -156,6 +159,18 @@ __attribute__((always_inline)) inline uint8_t ready_ADC_data(adc_config_t* ADC_C
 	result = (uint8_t)(ADC_CONFIGx->ADCx->SR.REG & 0x02);
 	// Return the value
 	return result;
+}
+
+/**
+ * @brief Returns the IRQn of ADCx 
+ * @param[in] ADC_CONFIGx ADC configuration structure
+ */
+__attribute__((always_inline)) inline uint8_t get_ADC_IRQn(adc_config_t* ADC_CONFIGx){
+	// Return the value based upon the ADC Number
+	if((ADC_CONFIGx->ADCx == ADC1) || (ADC_CONFIGx->ADCx == ADC2))
+		return ADC1_2_IRQn;
+	else if(ADC_CONFIGx->ADCx == ADC3)
+		return ADC3_IRQn;
 }
 
 /**

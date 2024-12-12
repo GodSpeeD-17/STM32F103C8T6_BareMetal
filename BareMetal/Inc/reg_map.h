@@ -64,6 +64,7 @@
 #define TIM8								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3400))
 #define ADC1								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2400))
 #define ADC2								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2800))
+#define ADC3								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3C00))
 #define USART1								((USART_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3800))
 #define USART2								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4400))
 #define USART3								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4800))
@@ -259,6 +260,7 @@ typedef enum {
 #define EXTI2_IRQn							((uint8_t) 8)
 #define EXTI3_IRQn							((uint8_t) 9)
 #define EXTI4_IRQn							((uint8_t) 10)
+#define ADC1_2_IRQn							((uint8_t) 18)
 #define EXTI9_5_IRQn						((uint8_t) 23)
 #define TIM2_IRQn							((uint8_t) 28)
 #define TIM3_IRQn							((uint8_t) 29)
@@ -269,6 +271,7 @@ typedef enum {
 #define USART2_IRQn							((uint8_t) 38)
 #define USART3_IRQn							((uint8_t) 39)
 #define EXTI15_10_IRQn						((uint8_t) 40)
+#define ADC3_IRQn							((uint8_t) 47)
 
 /*********************************************** NVIC MACROS ***********************************************/
 
@@ -500,7 +503,6 @@ typedef enum{
 #define ADC_SAMPLE_239_5					((uint8_t) 7)
 
 // ADC Final Sample Time
-
 // Channel 0
 #define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_1_5))
 #define ADC_SAMPLE_CH0_SMP_7_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_7_5))
@@ -609,10 +611,21 @@ typedef enum{
 #define ADC_DATA_ALIGN_RIGHT				((uint8_t) 0)
 #define ADC_DATA_ALIGN_LEFT					((uint8_t) 1)
 
+// ADC IRQ
+#define ADCx_IRQ_DISABLE					((uint8_t) 0)
+#define ADCx_IRQ_ENABLE						((uint8_t) 1)
+
 // ADC Sample Time Channel Decoding
 #define ADC_SAMPLE_CHANNEL(ADC_SAMPLEx)		((uint8_t)(((ADC_SAMPLEx) & 0xF0) >> 4))
 // ADC Sample Time Decoding
 #define ADC_SAMPLE_TIME(ADC_SAMPLEx)		((uint8_t)((ADC_SAMPLEx) & 0x0F))
+
+// Error Checking MACROS
+#define IS_VALID_ADC_CHANNEL(CHx)			(((CHx) == ADC_CHANNEL_0) || ((CHx) == ADC_CHANNEL_1) || \
+											 ((CHx) == ADC_CHANNEL_2) || ((CHx) == ADC_CHANNEL_3) || \
+											 ((CHx) == ADC_CHANNEL_4) || ((CHx) == ADC_CHANNEL_5) || \
+											 ((CHx) == ADC_CHANNEL_6) || ((CHx) == ADC_CHANNEL_7) || \
+											 ((CHx) == ADC_CHANNEL_8) || ((CHx) == ADC_CHANNEL_9))		
 /*********************************************** ADC MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */

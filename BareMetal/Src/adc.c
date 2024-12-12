@@ -16,7 +16,8 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 	
 	// Enable Clock for ADC
 	enable_ADC_clk(ADC_CONFIGx->ADCx);
-
+	// Disable the ADC if already ON
+	disable_ADC(ADC_CONFIGx->ADCx);
 	// Configure GPIO
 	config_GPIO(ADC_CONFIGx->GPIO_CONFIGx);
 
@@ -26,6 +27,7 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 	ADC_CONFIGx->ADCx->SQR1.REG = (uint32_t) 0x000000;
 	ADC_CONFIGx->ADCx->SQR2.REG = (uint32_t) 0x000000;
 	ADC_CONFIGx->ADCx->SQR3.REG = (uint32_t) 0x000000;
+
 	// Sampling Time
 	ADC_CONFIGx->ADCx->SMPR2.REG |= ((ADC_SAMPLE_TIME(ADC_CONFIGx->sample_time) & 0x07) << (ADC_SAMPLE_CHANNEL(ADC_CONFIGx->sample_time) * 3));
 	// Number of Channel for Conversion
@@ -38,6 +40,13 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 	ADC_CONFIGx->ADCx->CR2.REG |= ((ADC_CONFIGx->data_alignment & 0x01) << 11);
 	// Continuous Conversion
 	ADC_CONFIGx->ADCx->CR2.REG |= ((ADC_CONFIGx->cc & 0x01) << 1);
+	// IRQ Configuration
+	if(ADC_CONFIGx->enable_IRQ == (ADCx_IRQ_ENABLE)){
+		// Enable the IQR Bit
+		ADC_CONFIGx->ADCx->CR1.REG |= (1 << 5);
+		// Enable NVIC IRQ
+		enable_NVIC_IRQ(get_ADC_IRQn(ADC_CONFIGx));
+	}
 	// Starts the ADC
 	start_ADC(ADC_CONFIGx->ADCx);
 }
