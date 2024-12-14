@@ -115,7 +115,7 @@ __attribute__((always_inline)) inline void disable_ADC(ADC_REG_STRUCT* ADCx){
  * @note - Before starting a calibration, the ADC must have been in power-on state for at least two ADC clock cycles
  */
 __attribute__((always_inline)) inline void calibrate_ADC(ADC_REG_STRUCT* ADCx){
-	// Initialise Calibration Registers
+	// Reset Calibration Registers
 	ADCx->CR2.REG |= (1 << 3);
 	// Cleared after the Calibration Registers are Initialized
 	while((ADCx->CR2.REG & (1 << 3)));
@@ -179,5 +179,28 @@ __attribute__((always_inline)) inline uint8_t get_ADC_IRQn(adc_config_t* ADC_CON
  * @returns ADC Raw Data
  */
 uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx);
+
+/**
+ * @brief Retrieves the ADC End Of Conversion (EOC) Flag
+ * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
+ */
+__attribute__((always_inline)) inline uint8_t get_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
+	// Return the value based upon the ADC Number
+	return (uint8_t)(ADCx->SR.REG & (1 << 1));
+}
+
+/**
+ * @brief Clears the ADC End Of Conversion (EOC) Flag
+ * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
+ */
+__attribute__((always_inline)) inline void clear_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
+	// Clear the EOC Flag
+	ADCx->SR.REG &= ~(1 << 1);
+ }
+
+/**
+ * @brief ADC1/ADC2 IRQ Handler
+ */
+void ADC1_2_IRQHandler(void);
 
 #endif /* __ADC_H__ */

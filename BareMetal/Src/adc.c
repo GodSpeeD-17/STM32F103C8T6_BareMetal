@@ -13,7 +13,6 @@
  * @param[in] ADC_CONFIGx ADC Configuration Structure
  */
 void config_ADC(adc_config_t* ADC_CONFIGx){
-	
 	// Enable Clock for ADC
 	enable_ADC_clk(ADC_CONFIGx->ADCx);
 	// Disable the ADC if already ON
@@ -22,6 +21,8 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 	config_GPIO(ADC_CONFIGx->GPIO_CONFIGx);
 
 	// Reset Registers
+	ADC_CONFIGx->ADCx->SR.REG = (uint32_t) 0x00000000;
+	ADC_CONFIGx->ADCx->CR1.REG = (uint32_t) 0x00000000;
 	ADC_CONFIGx->ADCx->CR2.REG = (uint32_t) 0x00000000;
 	ADC_CONFIGx->ADCx->SMPR2.REG = (uint32_t) 0x000000;
 	ADC_CONFIGx->ADCx->SQR1.REG = (uint32_t) 0x000000;
