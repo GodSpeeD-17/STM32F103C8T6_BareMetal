@@ -417,6 +417,7 @@ typedef enum {
 
 /*********************************************** PWM MACROS ***********************************************/
 // IMP: Store this value in ARR always to simplify the PWM calculation
+#define DEFAULT_CNT_VALUE					((uint16_t) 0)
 #define DEFAULT_ARR_VALUE					((uint16_t) 99)    // (ARR + 1) = (99 + 1) = (100) 
 #define MIN_DUTY_CYCLE						((uint8_t) 1)      // Min Value = 1%
 #define MAX_DUTY_CYCLE						((uint8_t) 100)    // Max Value = 100%

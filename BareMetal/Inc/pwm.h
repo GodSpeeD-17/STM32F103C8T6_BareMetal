@@ -114,4 +114,24 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx);
  */
 void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel);
 
+/**
+ * @brief Configures the PWM Structure to default values
+ * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
+ */
+__attribute__((always_inline)) inline void load_PWM_default(pwm_config_t* PWM_CONFIGx){
+	// Load Default Timer Value
+	load_GPT_default(PWM_CONFIGx->GPT_CONFIGx);
+	// Update the GPIO Configuration
+	PWM_CONFIGx->GPT_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
+	PWM_CONFIGx->GPT_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
+	// PWM Mode (Normal Mode)
+	PWM_CONFIGx->pwm_mode = TIMx_OCM_PWM_NORMAL;
+	// Duty Cycle (Minimum)
+	PWM_CONFIGx->duty_cycle = MIN_DUTY_CYCLE,
+	// Polarity (Active High)
+	PWM_CONFIGx->polarity = TIMx_POL_ACTIVE_HIGH;
+	// PWM Channel Preload Enable
+	PWM_CONFIGx->pwm_channel_preload = PWM_CHx_PRELOAD_ENABLE;
+}
+
 #endif /* __PWM_H__ */ 

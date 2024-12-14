@@ -1,22 +1,29 @@
 // Main Header
 #include "main.h"
 
+// PWM Configuration Structure
+gpio_config_t led_config = {
+	.GPIOx = LED_PORT,
+	.PINx = LED_PIN,
+};
+gpt_config_t tim_config = {
+	.GPIO_CONFIGx = &led_config,
+	.GP_TIMx = GP_TIMER,
+	.channel = GPT_CHANNEL,
+};
+pwm_config_t pwm_config = {
+	.GPT_CONFIGx = &tim_config,
+};
+
 // ADC Configuration Structure
 gpio_config_t pot_config = {
 	.GPIOx = POT_PORT,
 	.PINx = POT_PIN,
-	.MODEx = MODE_IN,
-	.CNFx = CNF_IN_ANALOG,
 };
 adc_config_t adc_config = {
 	.GPIO_CONFIGx = &pot_config,
 	.ADCx = POT_ADC,
 	.channel = POT_ADC_CHANNEL,
-	.num_channels = 1,
-	.sample_time = POT_ADC_SAMPLE_TIME,
-	.cc = ADC_CONT_CONV_ON,
-	.data_alignment = ADC_DATA_ALIGN_RIGHT,
-	.enable_IRQ = ADCx_IRQ_ENABLE,
 };
 
 // Global Variables
@@ -28,12 +35,17 @@ int main(void){
 	
 	// Configure Clock
 	config_SYSCLK_MHz(SYSCLK_MHz);
-
 	// SysTick Timer (1ms)
 	config_SysTick(CoreClock/1000);
 
-	
+	// Configure PWM
+	load_PWM_default(&pwm_config);
+	config_PWM(&pwm_config);
+	start_PWM(&pwm_config);
+
 	// Configure ADC
+	load_ADC_default(&adc_config);
+	adc_config.enable_IRQ = ADCx_IRQ_ENABLE;
 	config_ADC(&adc_config);
 
 	// On-board LED Configuration
@@ -51,6 +63,9 @@ int main(void){
 			if ((adc_data[0] > (adc_data[1] + ADC_ERROR_RANGE)) || (adc_data[0] < (adc_data[1] - ADC_ERROR_RANGE))){
 				// Shift the new data
 				adc_data[1] = adc_data[0];
+				// Update the PWM Duty Cycle
+				pwm_config.duty_cycle = calc_PWM_ADC(adc_data[1]);
+				set_PWM_duty_cycle(&pwm_config);
 				// Toggle OB LED
 				toggle_OB_LED();
 			}
@@ -62,6 +77,20 @@ int main(void){
 		
 	// Return Value
 	return 0;
+}
+
+/**
+ * @brief Duty Cycle Calculation based upon ADCx Value
+ * @param[in] adc_value
+ * @returns Duty Cycle Value (%)
+ */
+uint8_t calc_PWM_ADC(uint16_t adc_value){
+	// Result
+	uint8_t result = 0x00;
+	// Calculate Duty Cycle
+	result = (uint8_t) ((adc_value * MAX_DUTY_CYCLE) / MAX_ADC_VALUE);
+	// Return the result
+	return result;
 }
 
 /**

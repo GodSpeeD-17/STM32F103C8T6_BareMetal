@@ -279,4 +279,28 @@ uint32_t get_GPT_freq(gpt_config_t* GPT_CONFIGx);
  */
 void GPT_delay_ms(gpt_config_t* GPT_CONFIGx, volatile uint32_t delayMs);
 
+/**
+ * @brief Configures the default parameters for GPT_CONFIGx
+ * @param[in] GPT_CONFIGx `gpt_config_t *` structure containing the configuration
+ */
+__attribute__((always_inline)) inline void load_GPT_default(gpt_config_t* GPT_CONFIGx){
+	// Configure Mode and Configuration for GPIO
+	GPT_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
+	GPT_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_GP_PP;
+	// Configure ARR, Frequency & Count
+	GPT_CONFIGx->auto_reload_value = DEFAULT_ARR_VALUE;
+	GPT_CONFIGx->frequency_Hz = FREQ_10kHz;
+	GPT_CONFIGx->count = DEFAULT_CNT_VALUE;
+	// CMS Mode Selection (Edge Mode Selection)
+	GPT_CONFIGx->cms_mode = CMS_EDGE;
+	// Counting Direction (Up Counting)
+	GPT_CONFIGx->direction = TIMx_COUNT_UP;
+	// ARPE
+	GPT_CONFIGx->auto_reload_preload = TIMx_ARPE_ENABLE;
+	// One Pulse Mode (OFF)
+	GPT_CONFIGx->one_pulse = TIMx_OPM_DISABLE;
+	// IRQ Disable
+	GPT_CONFIGx->enable_IRQ = TIMx_IRQ_DISABLE;
+}
+
 #endif /* __GPT_H__ */

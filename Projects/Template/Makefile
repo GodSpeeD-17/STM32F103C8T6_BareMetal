@@ -41,9 +41,11 @@ LC = arm-none-eabi-objcopy
 # ARM Machine Architecture
 MACHINE = cortex-m3
 # Include Directory
-INC_DIR = ../../BareMetal/Inc
+INC_DIR = /home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Inc
 # Source Directory
-SRC_DIR = ../../BareMetal/Src
+SRC_DIR = /home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Src
+# Reference Directory (Template)
+REF_DIR = /home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/Template
 # Startup Directory
 STARTUP_DIR = ./Startup
 # Linker Directory
@@ -52,28 +54,71 @@ LINKER_DIR = ./Linker
 USER_INC_DIR = ./App_Inc
 # User Source Directory
 USER_SRC_DIR = ./App_Src
-# Include Path Updation
-INCLUDES = -I $(INC_DIR)
-# Optimization Level
+# Reference App_Inc Directory
+REF_USER_INC_DIR = $(REF_DIR)/App_Inc
+# Reference App_Src Directory
+REF_USER_SRC_DIR = $(REF_DIR)/App_Src
+# Reference Startup Directory
+REF_STARTUP_DIR = $(REF_DIR)/Startup
+# Reference Linker Directory
+REF_LINKER_DIR = $(REF_DIR)/Linker
+# Reference Bin File
+REF_LINKER_FILE = $(REF_LINKER_DIR)/stm32_ls
+# Reference Startup File
+REF_STARTUP_FILE = $(REF_STARTUP_DIR)/stm32_startup
+# Optimization Level (No Optimization)
 OPT_LEVEL = -O0
 # C Standard
 C_STD = gnu11
 # CC Modified Flags (DO NOT ADD SPACE)
 CFLAGS = -mcpu=$(MACHINE) -mthumb $(OPT_LEVEL) -std=$(C_STD)
+# .bin file flags
+BIN_FILE_FLAGS = -O binary
+# Flash Address 
+FLASH_ADDR = 0x8000000
+# Reference User Inc Files
+REF_USER_INCLUDES = -I $(REF_USER_INC_DIR)
+# Reference Includes
+REF_INCLUDES = -I $(REF_USER_INC_DIR) -I $(INC_DIR) -I $(REF_STARTUP_DIR)
+REF_LFLAGS = -I $(REF_STARTUP_DIR) -nostdlib -T
+REF_MAP_FILE = $(REF_LINKER_DIR)/stm32_mf
+REF_MAPFLAG = -Wl,-Map=$(REF_MAP_FILE).map
+REF_LFLAGS_INC_DIR = $(SRC_DIR)/*.o $(REF_STARTUP_DIR)/*.o $(REF_USER_SRC_DIR)/*.o
 #*******************************************************************************
 # All Section
 
 # Compiles all the files to generate .o/.elf files
 all: bin_file
+	@echo "**********************************************************************************************************************************"
 	@echo "Compilation Complete"
+	@echo "**********************************************************************************************************************************"
 
 # Cleans all the .elf/.o/.s files
 clean: clean_src clean_user clean_startup clean_linker
+	@echo "**********************************************************************************************************************************"
 	@echo "Cleaning Complete"
+	@echo "**********************************************************************************************************************************"
 
 # Cleans the project
 clean_project: clean_user clean_startup clean_linker
+	@echo "**********************************************************************************************************************************"
 	@echo "Project Cleaning Complete"
+	@echo "**********************************************************************************************************************************"
+
+# Information about ST-LINK Chip (STM32F103C8T6)
+get_info:
+	st-info --probe
+
+# Creates .bin file in the Linker Folder
+bin_file: linker
+	$(LC) $(BIN_FILE_FLAGS) $(LINKER_FILE).elf $(LINKER_FILE).bin
+
+# Flash the .bin file
+flash: bin_file
+	st-flash --reset write $(LINKER_FILE).bin $(FLASH_ADDR)
+	@echo "**********************************************************************************************************************************"
+	@echo "Project Flashed Successfully"
+	@echo "**********************************************************************************************************************************"
 
 #*******************************************************************************
 # Source Section
@@ -85,7 +130,7 @@ src: $(patsubst %.c, %.o, $(wildcard $(SRC_DIR)/*.c))
 # Source File Compilation Rule
 # Target: C_file.o, Dependency: C_file.c (% => Variable)
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(INCLUDES) -I $(STARTUP_DIR) $(CFLAGS) -c $< -o $@
+	$(CC) -I $(INC_DIR) -I $(STARTUP_DIR) $(CFLAGS) -c $< -o $@
 
 # Cleans the Source Directory
 clean_src: 
@@ -93,11 +138,10 @@ clean_src:
 	rm -f $(SRC_DIR)/*.s
 #*******************************************************************************
 # User Application Section
-USER_INCLUDES = -I $(USER_INC_DIR)
 
 # Individual .c file to .o file
 $(USER_SRC_DIR)/%.o: $(USER_SRC_DIR)/%.c
-	$(CC) $(INCLUDES) $(USER_INCLUDES) $(CFLAGS) -c $< -o $@
+	$(CC) -I $(INC_DIR) -I $(USER_INC_DIR) $(CFLAGS) -c $< -o $@
 
 # Compiles the User Source Code
 user: $(patsubst %.c, %.o, $(wildcard $(USER_SRC_DIR)/*.c))
@@ -112,7 +156,7 @@ STARTUP_FILE = $(STARTUP_DIR)/stm32_startup
 
 # Compiles the startup file
 startup:
-	$(CC) $(CFLAGS) $(INCLUDES) $(USER_INCLUDES) -I $(LINKER_DIR) -c $(STARTUP_FILE).c -o $(STARTUP_FILE).o
+	$(CC) $(CFLAGS) -I $(INC_DIR) -I $(USER_INC_DIR) -I $(LINKER_DIR) -c $(STARTUP_FILE).c -o $(STARTUP_FILE).o
 
 # Cleans the Startup Folder
 clean_startup:
@@ -141,66 +185,21 @@ linker_dump: linker
 	$(LD) -h $(LINKER_FILE).elf	
 
 #*******************************************************************************
-# Flash (st-link)
-BIN_FILE_FLAGS = -O binary 
-FLASH_ADDR = 0x8000000
 
-# Information about ST-LINK Chip (STM32F103)
-get_info:
-	st-info --probe
-
-# Creates .bin file in the Linker Folder
-bin_file: linker
-	$(LC) $(BIN_FILE_FLAGS) $(LINKER_FILE).elf $(LINKER_FILE).bin
-
-# Flash the .bin file
-flash: bin_file
-	st-flash --reset write $(LINKER_FILE).bin $(FLASH_ADDR)
 
 #*******************************************************************************
-# !!!DO NOT USE!!!
-# Flash (OpenOCD) 
-OPENOCD_DIR = /usr/share/openocd/scripts
-ocd_flash:
-	openocd -f $(OPENOCD_DIR)/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/target/stm32f1x.cfg
 
-gdb:
-	gdb-multiarch /home/shrey_shah/Desktop/Blue_Pill_Ubuntu/Projects/LED_Project/Linker/stm32_ls.elf
-# !!!DO NOT USE!!!
-#*******************************************************************************
-# Reference Directory
-REF_DIR = ../Template
-# Reference App_Inc Directory
-REF_USER_INC_DIR = $(REF_DIR)/App_Inc
-# Reference App_Src Directory
-REF_USER_SRC_DIR = $(REF_DIR)/App_Src
-# Reference Startup Directory
-REF_STARTUP_DIR = $(REF_DIR)/Startup
-# Reference Linker Directory
-REF_LINKER_DIR = $(REF_DIR)/Linker
-# Reference Bin File
-REF_LINKER_FILE = $(REF_LINKER_DIR)/stm32_ls
-# Reference Startup File
-REF_STARTUP_FILE = $(REF_STARTUP_DIR)/stm32_startup
-# Reference User Inc Files
-REF_USER_INCLUDES = -I $(REF_USER_INC_DIR)
-# Reference Includes
-REF_INCLUDES = $(REF_USER_INCLUDES) -I $(INC_DIR) -I $(REF_STARTUP_DIR)
-REF_LFLAGS = -I $(REF_STARTUP_DIR) -nostdlib -T
-REF_MAP_FILE = $(REF_LINKER_DIR)/stm32_mf
-REF_MAPFLAG = -Wl,-Map=$(REF_MAP_FILE).map
-REF_LFLAGS_INC_DIR = $(SRC_DIR)/*.o $(REF_STARTUP_DIR)/*.o $(REF_USER_SRC_DIR)/*.o
 
 # Individual .c file to .o file
 $(REF_USER_SRC_DIR)/%.o: $(REF_USER_SRC_DIR)/%.c
-	$(CC) $(REF_INCLUDES) $(REF_USER_INCLUDES) $(CFLAGS) -c $< -o $@
+	$(CC) $(REF_INCLUDES) -I $(REF_USER_INC_DIR) $(CFLAGS) -c $< -o $@
 
 # Compiles the User Source Code
 ref_user: $(patsubst %.c, %.o, $(wildcard $(REF_USER_SRC_DIR)/*.c))
 
 # Compiles the startup file
 ref_startup:
-	$(CC) $(CFLAGS) $(INCLUDES) $(REF_USER_INCLUDES) -I $(REF_LINKER_DIR) -c $(REF_STARTUP_FILE).c -o $(REF_STARTUP_FILE).o
+	$(CC) $(CFLAGS) -I $(INC_DIR) -I $(REF_USER_INC_DIR) -I $(REF_LINKER_DIR) -c $(REF_STARTUP_FILE).c -o $(REF_STARTUP_FILE).o
 
 # Creates '.elf' file in ../Reference/Linker
 ref_linker: src ref_startup ref_user

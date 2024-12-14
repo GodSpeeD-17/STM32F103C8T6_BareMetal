@@ -68,6 +68,7 @@ int main(void){
  * @brief ADC1/ADC2 IRQ Handler
  */
 void ADC1_2_IRQHandler(void){
+	// EOC Flag Set
 	if(get_ADC_EOC_flag(adc_config.ADCx)){
 		// Flag
 		adc_conversion_complete = 0x01;

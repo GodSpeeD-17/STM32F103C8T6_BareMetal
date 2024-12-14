@@ -30,7 +30,8 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 	ADC_CONFIGx->ADCx->SQR3.REG = (uint32_t) 0x000000;
 
 	// Sampling Time
-	ADC_CONFIGx->ADCx->SMPR2.REG |= ((ADC_SAMPLE_TIME(ADC_CONFIGx->sample_time) & 0x07) << (ADC_SAMPLE_CHANNEL(ADC_CONFIGx->sample_time) * 3));
+	// ADC_CONFIGx->ADCx->SMPR2.REG |= ((ADC_SAMPLE_TIME(ADC_CONFIGx->sample_time) & 0x07) << (ADC_SAMPLE_CHANNEL(ADC_CONFIGx->sample_time) * 3));
+	ADC_CONFIGx->ADCx->SMPR2.REG |= ((ADC_CONFIGx->sample_time & 0x07) << (ADC_CONFIGx->channel * 3));
 	// Number of Channel for Conversion
 	ADC_CONFIGx->ADCx->SQR1.REG |= ((ADC_CONFIGx->num_channels - 1) << 20);
 	// Configure Channel Sequence

@@ -143,6 +143,24 @@ __attribute__((always_inline)) inline void start_ADC(ADC_REG_STRUCT* ADCx){
 }
 
 /**
+ * @brief Retrieves the ADC End Of Conversion (EOC) Flag
+ * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
+ */
+__attribute__((always_inline)) inline uint8_t get_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
+	// Return the value based upon the ADC Number
+	return (uint8_t)(ADCx->SR.REG & (1 << 1));
+}
+
+/**
+ * @brief Clears the ADC End Of Conversion (EOC) Flag
+ * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
+ */
+__attribute__((always_inline)) inline void clear_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
+	// Clear the EOC Flag
+	ADCx->SR.REG &= ~(1 << 1);
+ }
+
+/**
  * @brief Enables the ADC Clock
  * @param[in] ADC_CONFIGx ADC configuration structure
  */
@@ -181,26 +199,34 @@ __attribute__((always_inline)) inline uint8_t get_ADC_IRQn(adc_config_t* ADC_CON
 uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx);
 
 /**
- * @brief Retrieves the ADC End Of Conversion (EOC) Flag
- * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
- */
-__attribute__((always_inline)) inline uint8_t get_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
-	// Return the value based upon the ADC Number
-	return (uint8_t)(ADCx->SR.REG & (1 << 1));
-}
-
-/**
- * @brief Clears the ADC End Of Conversion (EOC) Flag
- * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
- */
-__attribute__((always_inline)) inline void clear_ADC_EOC_flag(ADC_REG_STRUCT* ADCx){
-	// Clear the EOC Flag
-	ADCx->SR.REG &= ~(1 << 1);
- }
-
-/**
  * @brief ADC1/ADC2 IRQ Handler
  */
 void ADC1_2_IRQHandler(void);
+
+/**
+ * @brief ADC3 IRQ Handler
+ */
+void ADC3_IRQHandler(void);
+
+/**
+ * @brief Configures the default parameters for ADC
+ * @param[in] ADC_CONFIGx ADC configuration structure
+ * @note Only suitable for Single Channel Configuration
+ */
+__attribute__((always_inline)) inline void load_ADC_default(adc_config_t* ADC_CONFIGx){
+	// Configure GPIO Mode and Configuration
+	ADC_CONFIGx->GPIO_CONFIGx->MODEx = MODE_IN;
+	ADC_CONFIGx->GPIO_CONFIGx->CNFx = CNF_IN_ANALOG;
+	// Number of Channels as 1
+	ADC_CONFIGx->num_channels = 1;
+	// Sample Time as 239.5 cycles
+	ADC_CONFIGx->sample_time = ADC_SAMPLE_239_5;
+	// Continuous Conversion as ON
+	ADC_CONFIGx->cc = ADC_CONT_CONV_ON;
+	// Data Alignment
+	ADC_CONFIGx->data_alignment = ADC_DATA_ALIGN_RIGHT;
+	// Disable IRQ
+	ADC_CONFIGx->enable_IRQ = ADCx_IRQ_DISABLE;
+}
 
 #endif /* __ADC_H__ */
