@@ -21,7 +21,8 @@
 		# make clean_linker: Only Linker
 		# make get_info: Blue Pill Specifications Descriptions on connection
 		# make bin_file: Creates a .bin file from .elf file 
-		# make flash: Uploads the .bin file at 0x08000000 
+		# make flash: Uploads the .bin file at 0x08000000
+		# make erase_flash: Uploads the Template Project and clears the .o/.elf/.map/.bin files
 	
 	# Reference STM32F103 Blue Pill Description
 	# shrey_shah@Shrey:~$ st-info --probe
@@ -37,6 +38,7 @@
 CC = arm-none-eabi-gcc 
 # ARM .o Dump (LD)
 LD = arm-none-eabi-objdump
+# ARM .o Copy (LC)
 LC = arm-none-eabi-objcopy
 # ARM Machine Architecture
 MACHINE = cortex-m3
@@ -85,24 +87,24 @@ REF_MAP_FILE = $(REF_LINKER_DIR)/stm32_mf
 REF_MAPFLAG = -Wl,-Map=$(REF_MAP_FILE).map
 REF_LFLAGS_INC_DIR = $(SRC_DIR)/*.o $(REF_STARTUP_DIR)/*.o $(REF_USER_SRC_DIR)/*.o
 #*******************************************************************************
-# All Section
+# Important Section
 
 # Compiles all the files to generate .o/.elf files
 all: bin_file
 	@echo "**********************************************************************************************************************************"
-	@echo "Compilation Complete"
+	@echo "Compilation Completed Successfully!"
 	@echo "**********************************************************************************************************************************"
 
 # Cleans all the .elf/.o/.s files
 clean: clean_src clean_user clean_startup clean_linker
 	@echo "**********************************************************************************************************************************"
-	@echo "Cleaning Complete"
+	@echo "Cleaning Completed Successfully!"
 	@echo "**********************************************************************************************************************************"
 
 # Cleans the project
 clean_project: clean_user clean_startup clean_linker
 	@echo "**********************************************************************************************************************************"
-	@echo "Project Cleaning Complete"
+	@echo "Project Cleaning Completed Successfully!"
 	@echo "**********************************************************************************************************************************"
 
 # Information about ST-LINK Chip (STM32F103C8T6)
@@ -117,14 +119,31 @@ bin_file: linker
 flash: bin_file
 	st-flash --reset write $(LINKER_FILE).bin $(FLASH_ADDR)
 	@echo "**********************************************************************************************************************************"
-	@echo "Project Flashed Successfully"
+	@echo "Project Flashed Successfully!"
 	@echo "**********************************************************************************************************************************"
 
+# Erase the flash
+erase_flash: ref_bin_file
+	st-flash --reset write $(REF_LINKER_FILE).bin $(FLASH_ADDR)
+	rm -f $(REF_LINKER_DIR)/*.elf
+	rm -f $(REF_LINKER_DIR)/*.map
+	rm -f $(REF_LINKER_DIR)/*.bin
+	rm -f $(REF_STARTUP_DIR)/*.o
+	rm -f $(REF_USER_SRC_DIR)/*.o
+	rm -f $(LINKER_DIR)/*.elf
+	rm -f $(LINKER_DIR)/*.map
+	rm -f $(LINKER_DIR)/*.bin
+	rm -f $(STARTUP_DIR)/*.o
+	rm -f $(USER_SRC_DIR)/*.o
+	rm -f $(SRC_DIR)/*.o
+	@echo "**********************************************************************************************************************************"
+	@echo "Flash Erased Successfully!"
+	@echo "**********************************************************************************************************************************"
 #*******************************************************************************
 # Source Section
 
 # Compiles all the Source Files
-# Sequential Substitution of each .c found (wildcard()) in $(SRC_DIR) to .o (patsubst()), * => All
+# Sequential Substitution of each .c file found (wildcard()) in $(SRC_DIR) to .o file (patsubst()), * => All
 src: $(patsubst %.c, %.o, $(wildcard $(SRC_DIR)/*.c))
 
 # Source File Compilation Rule
@@ -139,12 +158,12 @@ clean_src:
 #*******************************************************************************
 # User Application Section
 
+# Compiles the User Source Code
+user: $(patsubst %.c, %.o, $(wildcard $(USER_SRC_DIR)/*.c))
+
 # Individual .c file to .o file
 $(USER_SRC_DIR)/%.o: $(USER_SRC_DIR)/%.c
 	$(CC) -I $(INC_DIR) -I $(USER_INC_DIR) $(CFLAGS) -c $< -o $@
-
-# Compiles the User Source Code
-user: $(patsubst %.c, %.o, $(wildcard $(USER_SRC_DIR)/*.c))
 
 # Cleans the User Files
 clean_user:
@@ -168,11 +187,10 @@ LINKER_FILE = $(LINKER_DIR)/stm32_ls
 LFLAGS = -I $(STARTUP_DIR) -nostdlib -T
 MAP_FILE = $(LINKER_DIR)/stm32_mf
 MAPFLAG = -Wl,-Map=$(MAP_FILE).map
-LFLAGS_INC_DIR = $(SRC_DIR)/*.o $(STARTUP_DIR)/*.o $(USER_SRC_DIR)/*.o
 
 # Creates '.elf' file in Linker Directory
 linker: clean src startup user
-	$(CC) $(LFLAGS) $(LINKER_FILE).ld $(MAPFLAG) $(LFLAGS_INC_DIR) -o $(LINKER_FILE).elf
+	$(CC) $(LFLAGS) $(LINKER_FILE).ld $(MAPFLAG) $(SRC_DIR)/*.o $(STARTUP_DIR)/*.o $(USER_SRC_DIR)/*.o -o $(LINKER_FILE).elf
 
 # Clears the .elf,.map,.bin files
 clean_linker:
@@ -185,10 +203,7 @@ linker_dump: linker
 	$(LD) -h $(LINKER_FILE).elf	
 
 #*******************************************************************************
-
-
-#*******************************************************************************
-
+# Template Section
 
 # Individual .c file to .o file
 $(REF_USER_SRC_DIR)/%.o: $(REF_USER_SRC_DIR)/%.c
@@ -230,14 +245,3 @@ all_ref: ref_bin_file
 
 # Clears all files in Reference
 clean_ref: clean_ref_linker clean_ref_startup clean_ref_user
-
-# Erase the flash
-erase_flash: ref_bin_file clean
-	st-flash --reset write $(REF_LINKER_FILE).bin $(FLASH_ADDR)
-	rm -f $(REF_LINKER_DIR)/*.elf
-	rm -f $(REF_LINKER_DIR)/*.map
-	rm -f $(REF_LINKER_DIR)/*.bin
-	rm -f $(REF_STARTUP_DIR)/*.o
-	rm -f $(REF_STARTUP_DIR)/*.s
-	rm -f $(REF_USER_SRC_DIR)/*.o
-	rm -f $(REF_USER_SRC_DIR)/*.s
