@@ -8,13 +8,13 @@
 #include "rcc.h"
 
 // System Clock (SYSCLK) Frequency (in Hz)
-volatile uint32_t CoreClock = (uint32_t) 0;
+volatile uint32_t CoreClock = HSI_FREQ;
 // Advanced High Performance Bus (AHB) Frequency (in Hz)
-volatile uint32_t AHBClock = (uint32_t) 0;
+volatile uint32_t AHBClock = HSI_FREQ;
 // Advanced Peripheral Bus 1 (APB1) Frequency (in Hz)
-volatile uint32_t APB1Clock = (uint32_t) 0;
+volatile uint32_t APB1Clock = HSI_FREQ;
 // Advanced Peripheral Bus 2 (APB2) Frequency (in Hz)
-volatile uint32_t APB2Clock = (uint32_t) 0;
+volatile uint32_t APB2Clock = HSI_FREQ;
 
 /**
  * @brief Retrieves the frequency of System Clock
@@ -354,7 +354,6 @@ static void config_SYS_72MHz(void){
  * @note - USB Max Clock Frequency is 48MHz
  */
 void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
-
 	// Reset CR
 	RCC->CR.REG &= 0xFEF2FFFE;
 	// Reset CFGR

@@ -209,6 +209,7 @@
         "RTSE",
         "RTSR",
         "RXNE",
+        "RXNEIE",
         "RXNIE",
         "sbss",
         "SCEN",

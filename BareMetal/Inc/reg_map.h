@@ -29,6 +29,15 @@
 #include "../Core/gpt_reg_map.h"
 #include "../Core/rcc_reg_map.h"
 #include "../Core/usart_reg_map.h"
+
+// System Clock Frequency (Core)
+extern volatile uint32_t CoreClock;
+// Advanced High Performance Bus (AHB) Frequency
+extern volatile uint32_t AHBClock;
+// Advanced Peripheral Bus 1 (APB1) Frequency
+extern volatile uint32_t APB1Clock;
+// Advanced Peripheral Bus 2 (APB2) Frequency
+extern volatile uint32_t APB2Clock;
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -272,26 +281,25 @@ typedef enum {
 #define USART3_IRQn							((uint8_t) 39)
 #define EXTI15_10_IRQn						((uint8_t) 40)
 #define ADC3_IRQn							((uint8_t) 47)
-
 /*********************************************** NVIC MACROS ***********************************************/
 
 /*********************************************** EXTI MACROS ***********************************************/
 // External Trigger Selection
-#define EXTI_TRIG_FALLING               ((uint8_t) 0x00)
-#define EXTI_TRIG_RISING                ((uint8_t) 0x01)
-#define EXTI_TRIG_BOTH                  ((uint8_t) 0x02)
+#define EXTI_TRIG_FALLING					((uint8_t) 0x00)
+#define EXTI_TRIG_RISING					((uint8_t) 0x01)
+#define EXTI_TRIG_BOTH						((uint8_t) 0x02)
 
 // AF EXTI
-#define AF_EXTI_PA						((uint8_t) 0x00)
-#define AF_EXTI_PB                      ((uint8_t) 0x01)
-#define AF_EXTI_PC                      ((uint8_t) 0x02)
-#define AF_EXTI_PD                      ((uint8_t) 0x03)
-#define AF_EXTI_PE                      ((uint8_t) 0x04)
-#define AF_EXTI_PF                      ((uint8_t) 0x05)
-#define AF_EXTI_PG                      ((uint8_t) 0x06)
+#define AF_EXTI_PA							((uint8_t) 0x00)
+#define AF_EXTI_PB							((uint8_t) 0x01)
+#define AF_EXTI_PC							((uint8_t) 0x02)
+#define AF_EXTI_PD							((uint8_t) 0x03)
+#define AF_EXTI_PE							((uint8_t) 0x04)
+#define AF_EXTI_PF							((uint8_t) 0x05)
+#define AF_EXTI_PG							((uint8_t) 0x06)
 
 // Error Checking MACROs
-#define IS_EXTI_TRIG_VALID(TRIGx)            (((TRIGx) == EXTI_TRIG_FALLING) \
+#define IS_EXTI_TRIG_VALID(TRIGx)			(((TRIGx) == EXTI_TRIG_FALLING) \
 											 || ((TRIGx) == EXTI_TRIG_RISING) \
 											 || ((TRIGx) == EXTI_TRIG_BOTH))
 #define IS_EXTI_IRQn_VALID(IRQn)			((IRQn) < 60)
@@ -303,11 +311,14 @@ typedef enum {
 								 
 /*********************************************** EXTI MACROS ***********************************************/
 
-
 /*********************************************** SYSTICK MACROS ***********************************************/
-// SysTick
+// SysTick Clock Selection
 #define SYSTICK_CLK_EXT						((uint8_t) 0x00)
 #define SYSTICK_CLK_CORE					((uint8_t) 0x01)
+
+// SysTick Delay
+#define SYSTICK_DELAY_1_MS					((uint32_t)(CoreClock/1000))
+#define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
 /*********************************************** SYSTICK MACROS ***********************************************/
 
 /*********************************************** GPT MACROS ***********************************************/
@@ -628,5 +639,50 @@ typedef enum{
 											 ((CHx) == ADC_CHANNEL_6) || ((CHx) == ADC_CHANNEL_7) || \
 											 ((CHx) == ADC_CHANNEL_8) || ((CHx) == ADC_CHANNEL_9))		
 /*********************************************** ADC MACROS ***********************************************/
+
+/*********************************************** USART MACROS ***********************************************/
+// TX
+#define USARTx_TX_DISABLE					((uint8_t) 0x00)
+#define USARTx_TX_ENABLE					((uint8_t) 0x01)
+
+// RX
+#define USARTx_RX_DISABLE					((uint8_t) 0x00)
+#define USARTx_RX_ENABLE					((uint8_t) 0x01)
+
+// TX Empty IRQ
+#define USARTx_TXEIE_DISABLE				((uint8_t) 0x00) 
+#define USARTx_TXEIE_ENABLE					((uint8_t) 0x01)
+
+// RX Not Empty IRQ
+#define USARTx_RXNEIE_DISABLE				((uint8_t) 0x00) 
+#define USARTx_RXNEIE_ENABLE				((uint8_t) 0x01)
+
+// TX Complete IRQ
+#define USARTx_TCIE_DISABLE					((uint8_t) 0x00)
+#define USARTx_TCIE_ENABLE					((uint8_t) 0x01)
+
+// Parity Control
+#define USARTx_PARITY_DISABLE				((uint8_t) 0x00)
+#define USARTx_PARITY_ENABLE				((uint8_t) 0x01)
+
+// Word Length
+#define USARTx_WORD_8_BITS					((uint8_t) 0x00)
+#define USARTx_WORD_9_BITS					((uint8_t) 0x01)
+
+// Stop Bits
+#define USARTx_STOP_1_BIT					((uint8_t) 0x00)
+#define USARTx_STOP_0_5_BITS				((uint8_t) 0x01)
+#define USARTx_STOP_2_BITS					((uint8_t) 0x02)
+#define USARTx_STOP_1_5_BITS				((uint8_t) 0x03)
+
+// Parity Mode
+#define USARTx_PARITY_EVEN					((uint8_t) 0x00)
+#define USARTx_PARITY_ODD					((uint8_t) 0x01)
+
+// Baud Rate
+#define USARTx_BAUD_4800					((uint16_t) (CoreClock/4800UL))
+#define USARTx_BAUD_9600					((uint16_t) (CoreClock/9600UL))
+#define USARTx_BAUD_115200					((uint16_t) (CoreClock/115200UL))
+/*********************************************** USART MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */

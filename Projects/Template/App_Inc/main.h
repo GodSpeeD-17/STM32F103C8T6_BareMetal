@@ -6,16 +6,7 @@
 #include "bare_metal.h"
 
 // MACROS
-#define SYSCLK_MHz                  (SYSCLK_72MHz)
-#define DELAY_MS                    ((uint32_t) 1000)
-
-// System Clock Frequency (Core)
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
-extern volatile uint32_t APB2Clock;
+#define SYSCLK_MHz					(SYSCLK_72MHz)
+#define LOOP_DELAY_MS				((uint32_t) 1000)
 
 #endif /* __MAIN_H__ */

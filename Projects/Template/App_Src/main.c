@@ -6,18 +6,16 @@ int main(void){
     
 	// Configure Clock
 	config_SYSCLK_MHz(SYSCLK_MHz);
-
 	// SysTick Timer (1ms)
-	config_SysTick(CoreClock/1000);
+	config_SysTick(SYSTICK_DELAY_1_MS);
+
+	
 
 	// Infinite Loop
 	while(1){
-		// User Code Start
-
-		// User Code End
 		
 		// Loop Delay
-		SysTick_delay_ms(DELAY_MS);
+		SysTick_delay_ms(LOOP_DELAY_MS);
 	}
 		
 	// Return Value
