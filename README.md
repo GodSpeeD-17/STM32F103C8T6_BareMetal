@@ -31,8 +31,8 @@
 -------------------------|-----------------|-------------------|
 |     ***Processor***    | ARM Cortex-M3   |  Single Core      |
 | ***Clock Frequency***  |  8MHz - 72MHz   |  HSI/HSE: 8MHz    |
-|       ***Flash***      |     64kB        | SRAM: 0x08000000  |
-|       ***SRAM***       |     20kB        | SRAM: 0x20000000  |
+|       ***Flash***      |     64kB        | 0x08000000  |
+|       ***SRAM***       |     20kB        | 0x20000000  |
 
 ---
 ## ***IRQ Details***
