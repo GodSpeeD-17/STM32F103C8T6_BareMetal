@@ -33,10 +33,10 @@ void config_USART(usart_config_t* USART_CONFIGx){
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] c The character to be transmitted
  */
-void USART_putc(usart_config_t* USART_CONFIGx, char c){
+void USART_putc(usart_config_t* USART_CONFIGx, const char c){
     // Wait for TX to be Empty
     while (!(USART_CONFIGx->USARTx->SR.REG & (1 << 7)));
     // Transfer the data 
-    USART_CONFIGx->USARTx->DR.REG = c & 0x000000FF;
+    USART_CONFIGx->USARTx->DR.REG = (c & 0x000000FF);
 }
 

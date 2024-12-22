@@ -23,7 +23,7 @@ typedef struct {
 	// Stop Bits
 	uint8_t stop_bits;
 	// Word Length
-	uint8_t word_length : 1;
+	uint8_t word_length: 1;
 	// Enable Parity Control
 	uint8_t enable_parity: 1;
 	// Parity Mode
@@ -112,7 +112,7 @@ void config_USART(usart_config_t* USART_CONFIGx);
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] c The character to be transmitted
  */
-void USART_putc(usart_config_t* USART_CONFIGx, char c);
+void USART_putc(usart_config_t* USART_CONFIGx, const char c);
 
 /**
  * @brief Loads the default value for USART Struct

@@ -19,5 +19,6 @@
 #include "rcc.h"
 #include "systick.h"
 #include "gpt.h"
+#include "usart.h"
 
 #endif /* __BARE_METAL_H__ */
