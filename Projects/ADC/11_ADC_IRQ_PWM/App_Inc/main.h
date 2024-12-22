@@ -19,9 +19,9 @@
 
 // PWM Definitions
 #define LED_PORT						(GPIOA)
-#define LED_PIN                         (GPIO_PIN_2)
-#define GP_TIMER                        (TIM2)
-#define GPT_CHANNEL                     (TIMx_CHANNEL_3)
+#define LED_PIN							(GPIO_PIN_2)
+#define GP_TIMER						(TIM2)
+#define GPT_CHANNEL					    (TIMx_CHANNEL_3)
 #define GPT_FREQ                        (FREQ_10kHz)   
 #define GPT_ARR                         (DEFAULT_ARR_VALUE)
 #define GPT_CNT                         ((uint16_t) 0x00)
@@ -29,15 +29,6 @@
 // Debugging LED
 #define DEBUG_LED_PORT                  (GPIOB)
 #define DEBUG_LED_PIN                   (GPIO_PIN_12)
-
-// System Clock Frequency (Core)
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
-extern volatile uint32_t APB2Clock;
 
 /**
  * @brief Duty Cycle Calculation based upon ADCx Value
