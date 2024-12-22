@@ -30,13 +30,4 @@
 #define DEBUG_LED_PORT					(GPIOB)
 #define DEBUG_LED_PIN					(GPIO_PIN_12)
 
-// System Clock Frequency (Core)
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
-extern volatile uint32_t APB2Clock;
-
 #endif /* __MAIN_H__ */

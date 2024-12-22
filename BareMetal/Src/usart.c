@@ -92,7 +92,7 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
 					// Transmit the character & Update the pointer to next position
 					USART_putc(USART_CONFIGx, *str++);
 					// Small Delay
-					for(volatile uint16_t local_delay = 0; local_delay < (USARTx_STRING_TX_DELAY / 5); local_delay++);
+					for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
 				}
 			} 
 			// Integer
@@ -128,7 +128,7 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
 				while (i > 0) {
 					USART_putc(USART_CONFIGx, buffer[--i]);
 					// Small Delay
-					for(volatile uint16_t local_delay = 0; local_delay < (USARTx_STRING_TX_DELAY / 5); local_delay++);
+					for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
 				}
 			}
 			// TO DO: Add more format specifiers as needed (e.g., %x for hex, %c for char)
@@ -141,6 +141,7 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
 		// Go to next character
 		format++;
 	}
+
 	// Ends the VA
 	va_end(args);
 }

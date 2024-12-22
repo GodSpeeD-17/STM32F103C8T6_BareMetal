@@ -18,7 +18,7 @@ usart_config_t usart_config = {
 };
 
 // Variable
-int8_t count = 0xFF;
+int8_t count = -10;
 // String
 const char* string = "This message is populated using printf()!\r";
 
@@ -47,7 +47,7 @@ int main(void){
 		
 		// Send String
 		set_OB_LED();
-		USART_printf(&usart_config, "%d: %s\n", ++count, string);
+		USART_printf(&usart_config, "%d: %s\n", count++, string);
 
 		// Loop Delay
 		SysTick_delay_ms(LOOP_DELAY_MS);

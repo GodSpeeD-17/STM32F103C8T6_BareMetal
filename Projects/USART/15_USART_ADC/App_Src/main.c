@@ -1,22 +1,31 @@
 // Main Header
 #include "main.h"
 
+// GPIO Configuration Structure
+gpio_config_t usart_tx_config = {
+	.GPIOx = USART_PORT,
+	.PINx = USART_TX_PIN,
+};
+gpio_config_t usart_rx_config = {
+	.GPIOx = USART_PORT,
+	.PINx = USART_RX_PIN,
+};
+// USART Configuration Structure
+usart_config_t usart_config = {
+	.TX_GPIO_CONFIGx = &usart_tx_config,
+	.RX_GPIO_CONFIGx = &usart_rx_config,
+	.USARTx = USART,
+};
+
 // ADC Configuration Structure
 gpio_config_t pot_config = {
 	.GPIOx = POT_PORT,
 	.PINx = POT_PIN,
-	.MODEx = MODE_IN,
-	.CNFx = CNF_IN_ANALOG,
 };
 adc_config_t adc_config = {
 	.GPIO_CONFIGx = &pot_config,
 	.ADCx = POT_ADC,
 	.channel = POT_ADC_CHANNEL,
-	.num_channels = 1,
-	.sample_time = POT_ADC_SAMPLE_TIME,
-	.cc = ADC_CONT_CONV_ON,
-	.data_alignment = ADC_DATA_ALIGN_RIGHT,
-	.enable_IRQ = ADCx_IRQ_ENABLE,
 };
 
 // Global Variables
@@ -29,11 +38,17 @@ int main(void){
 	// Configure Clock
 	config_SYSCLK_MHz(SYSCLK_MHz);
 	// SysTick Timer (1ms)
-	config_SysTick(CoreClock/1000);
+	config_SysTick(SYSTICK_DELAY_1_MS);
 
-	
-	// Configure ADC
+	// ADC Configuration
+	load_ADC_default(&adc_config);
+	adc_config.enable_IRQ = ADCx_IRQ_ENABLE;
 	config_ADC(&adc_config);
+
+	// USART Configuration 
+	load_USART_default(&usart_config);
+	config_USART(&usart_config);
+	enable_USART(&usart_config);
 
 	// On-board LED Configuration
 	config_OB_LED();
@@ -50,13 +65,17 @@ int main(void){
 			if ((adc_data[0] > (adc_data[1] + ADC_ERROR_RANGE)) || (adc_data[0] < (adc_data[1] - ADC_ERROR_RANGE))){
 				// Shift the new data
 				adc_data[1] = adc_data[0];
+				// Separate Function (Visually Pleasing) 
+				// DEFAULT_SEP(&usart_config); // Causes more delay while printing in real-time
+				// Print the data on USART
+				USART_printf(&usart_config, "ADC Data: %d\r\n", adc_data[1]);
 				// Toggle OB LED
 				toggle_OB_LED();
 			}
 		}
 		
 		// Loop Delay
-		SysTick_delay_ms(DELAY_MS);
+		SysTick_delay_ms(LOOP_DELAY_MS);
 	}
 		
 	// Return Value

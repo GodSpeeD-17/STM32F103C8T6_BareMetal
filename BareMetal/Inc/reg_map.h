@@ -685,7 +685,7 @@ typedef enum{
 #define USARTx_BAUD_115200					((uint16_t) 115200)
 
 // Local Delay
-#define USARTx_STRING_TX_DELAY				((uint16_t) 65000)
+#define USARTx_STRING_TX_DELAY				((uint16_t) 3000)
 /*********************************************** USART MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */
