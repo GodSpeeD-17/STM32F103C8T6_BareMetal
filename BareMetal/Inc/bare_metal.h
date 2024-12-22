@@ -1,5 +1,5 @@
 /***************************************************************************************
- *  File: common.h
+ *  File: bare_metal.h
  *  Created on: 10/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
@@ -8,9 +8,7 @@
 #ifndef __BARE_METAL_H__
 #define __BARE_METAL_H__
 
-#include <stdio.h>
-#include <stdint.h>
-
+// STM32F103C8T6 Specific Libraries
 #include "adc.h"
 #include "exti.h"
 #include "gpio.h"

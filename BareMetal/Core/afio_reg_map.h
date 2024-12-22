@@ -2,8 +2,7 @@
 #ifndef __AFIO_REG_MAP_H__
 #define __AFIO_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // Alternate Function Input Output
 typedef struct {

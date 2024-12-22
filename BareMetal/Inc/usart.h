@@ -174,4 +174,9 @@ __attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, ui
 	USART_putc(USART_CONFIGx, '\n');
 }
 
+/**
+ * @brief Modifying the printf()
+ */
+int fputc(int ch, FILE *f);
+
 #endif /* __UART_H__ */

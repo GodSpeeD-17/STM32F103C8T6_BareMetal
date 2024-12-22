@@ -2,7 +2,7 @@
 #ifndef __USART_REG_MAP_H__
 #define __USART_REG_MAP_H__
 
-#include <stdint.h>
+#include "common.h"
 
 // USART Structure
 typedef struct {

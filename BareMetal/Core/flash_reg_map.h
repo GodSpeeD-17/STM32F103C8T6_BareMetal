@@ -2,8 +2,7 @@
 #ifndef __FLASH_REG_MAP_H__
 #define __FLASH_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // Basic MACROS
 #define FLASH_ZERO_WAIT                     ((uint8_t) 0x00)    //  0 < SYSCLK ≤ 24 MHz

@@ -2,8 +2,7 @@
 #ifndef __GPT_REG_MAP_H__
 #define __GPT_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // General Purpose Timers (TIM2 to TIM5)
 typedef struct {

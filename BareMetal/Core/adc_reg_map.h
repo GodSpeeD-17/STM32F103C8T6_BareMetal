@@ -2,7 +2,7 @@
 #ifndef __ADC_REG_MAP_H__
 #define __ADC_REG_MAP_H__
 
-#include <stdint.h>
+#include "common.h"
 
 typedef struct {
 

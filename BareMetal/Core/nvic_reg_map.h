@@ -2,8 +2,7 @@
 #ifndef __NVIC_REG_MAP_H__
 #define __NVIC_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // NVIC Structures
 typedef struct {

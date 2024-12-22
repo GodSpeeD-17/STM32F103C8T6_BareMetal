@@ -2,8 +2,7 @@
 #ifndef __ADVTIM_REG_MAP_H__
 #define __ADVTIM_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // Advanced Timers (TIM1, TIM8)
 typedef struct {

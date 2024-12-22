@@ -2,8 +2,7 @@
 #ifndef __SYSTICK_REG_MAP_H__
 #define __SYSTICK_REG_MAP_H__
 
-// Core C Library
-#include <stdint.h>
+#include "common.h"
 
 // SysTick Structure
 typedef struct {

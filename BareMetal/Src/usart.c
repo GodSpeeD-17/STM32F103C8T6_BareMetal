@@ -62,3 +62,17 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str){
 		for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
 	}
 }
+
+/**
+ * @brief Override the fputc() the printf()
+ */
+int fputc(int ch, FILE *f) {
+	// Extract the USART config from the file pointer
+	usart_config_t* my_usart_config = (usart_config_t*)f;  
+	// Wait for the USART TX Register to be empty
+	while (!(my_usart_config->USARTx->SR.REG & (1 << 7)));
+	// Write the character to the USART Data Register
+	my_usart_config->USARTx->DR.REG = (ch & 0xFF);
+	// Return the character written to USART
+	return ch;
+}
