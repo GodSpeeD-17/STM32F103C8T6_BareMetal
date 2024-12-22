@@ -6,5 +6,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <float.h>
 
 #endif /* __COMMON_H__ */ 

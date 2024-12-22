@@ -175,8 +175,10 @@ __attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, ui
 }
 
 /**
- * @brief Modifying the printf()
+ * @brief Transmits formatted data on USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] format The format string
  */
-int fputc(int ch, FILE *f);
+void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...);
 
 #endif /* __UART_H__ */

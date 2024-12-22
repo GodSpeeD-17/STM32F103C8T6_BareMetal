@@ -283,6 +283,8 @@
         "gpio.h": "c",
         "gpt.h": "c",
         "led_function.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdarg.h": "c",
+        "float.h": "c"
     }
 }

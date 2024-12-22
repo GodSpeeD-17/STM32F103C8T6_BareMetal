@@ -17,8 +17,10 @@ usart_config_t usart_config = {
 	.USARTx = USART,
 };
 
+// Variable
+int8_t count = 0xFF;
 // String
-const char* string = "This message is populated using printf()!\r\n		~ STM32F103C8T6";
+const char* string = "This message is populated using printf()!\r";
 
 // Main Entry Point for User Code
 int main(void){
@@ -34,7 +36,7 @@ int main(void){
 	enable_USART(&usart_config);	
 
 	// Configure OB LED
-	config_OB_LED();	
+	config_OB_LED();
 
 	// Infinite Loop
 	while(1){
@@ -45,7 +47,7 @@ int main(void){
 		
 		// Send String
 		set_OB_LED();
-		printf(&usart_config, "%s\r\n", string);
+		USART_printf(&usart_config, "%d: %s\n", ++count, string);
 
 		// Loop Delay
 		SysTick_delay_ms(LOOP_DELAY_MS);
