@@ -33,6 +33,7 @@
 │ ***Clock Frequency***  │  8MHz - 72MHz   │  HSI/HSE: 8MHz    │
 │       ***Flash***      │     64kB        │ 0x08000000  │
 │       ***SRAM***       │     20kB        │ 0x20000000  │
+
 ---
 ## ***IRQ Details***
 ---
@@ -41,6 +42,7 @@
 │ ***ARM Cortex-M3 IRQ***   │ 11 │
 │ ***STM32F103C8T6 IRQ***   │ 59 │
 │ ***Reserved***            │ 6  │
+
 ---
 ## ***Boot Process***
 ---
@@ -188,4 +190,5 @@
 │ ***14_printf*** │ Customized printf function for USART │
 │ ***15_USART_ADC_PWM*** │ Same as 11_ADC_IRQ_PWM along with transmitting the data over USART │
 │ ***Template*** │ Reference Project Structure (Used when `stm32-create-project <>`) │
+
 ---
