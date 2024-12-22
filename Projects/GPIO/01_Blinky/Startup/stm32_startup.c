@@ -1,6 +1,8 @@
 // Reference: https://maldus512.medium.com/bare-metal-programming-on-an-stm32f103-3a0f4e50ca29
 
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #define ARM_IRQ                     ((uint8_t) 11)
 #define RESERVED                    ((uint8_t) 6)
