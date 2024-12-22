@@ -27,12 +27,12 @@
 ---
 ## ***STM32F103C8T6 Features***
 ---
-│    **Specification**   │   **Details**   │  **Comments**     │
--------------------------│-----------------│-------------------│
-│     ***Processor***    │ ARM Cortex-M3   │  Single Core      │
-│ ***Clock Frequency***  │  8MHz - 72MHz   │  HSI/HSE: 8MHz    │
-│       ***Flash***      │     64kB        │ 0x08000000  │
-│       ***SRAM***       │     20kB        │ 0x20000000  │
+| Specification      | Details        | Comments           |
+|--------------------|----------------|--------------------|
+| Processor          | ARM Cortex-M3  | Single Core        |
+| Clock Frequency    | 8MHz - 72MHz   | HSI/HSE: 8MHz      |
+| Flash              | 64kB           | 0x08000000         |
+| SRAM               | 20kB           | 0x20000000         |
 
 ---
 ## ***IRQ Details***
