@@ -33,7 +33,6 @@
 | ***Clock Frequency***  |  8MHz - 72MHz   |  HSI/HSE: 8MHz    |
 |       ***Flash***      |     64kB        | 0x08000000  |
 |       ***SRAM***       |     20kB        | 0x20000000  |
-
 ---
 ## ***IRQ Details***
 ---
@@ -42,7 +41,6 @@
 | ***ARM Cortex-M3 IRQ***   | 11 |
 | ***STM32F103C8T6 IRQ***   | 59 |
 | ***Reserved***            | 6  |
-
 ---
 ## ***Boot Process***
 ---
@@ -58,6 +56,73 @@
         - **Note:** `.bss` refers to uninitialized variables.
      3. Call the **Main function**
 
+---
+## ***Overall Repository Structure***
+```
+<STM32F103C8T6>
+├── BareMetal
+│   ├── Core
+│   │   ├── adc_reg_map.h
+│   │   ├── advtim_reg_map.h
+│   │   ├── afio_reg_map.h
+│   │   ├── exti_reg_map.h
+│   │   ├── flash_reg_map.h
+│   │   ├── gpio_reg_map.h
+│   │   ├── gpt_reg_map.h
+│   │   ├── nvic_reg_map.h
+│   │   ├── rcc_reg_map.h
+│   │   ├── systick_reg_map.h
+│   │   ├── usart_reg_map.h
+│   │   ├── wwdg_reg_map.h
+│   ├── Inc
+│   │   ├── adc.h
+│   │   ├── bare_metal.h
+│   │   ├── exti.h
+│   │   ├── gpio.h
+│   │   ├── gpt.h
+│   │   ├── nvic.h
+│   │   ├── pwm.h
+│   │   ├── rcc.h
+│   │   ├── reg_map.h
+│   │   ├── systick.h
+│   ├── Src
+│   │   ├── adc.c
+│   │   ├── exti.c
+│   │   ├── gpio.c
+│   │   ├── gpt.c
+│   │   ├── pwm.c
+│   │   ├── rcc.c
+│   │   ├── systick.c
+│   │   ├── usart.c
+├── Projects
+│   ├── ADC
+│   │   ├── 08_ADC_Polling
+│   │   ├── 09_ADC_IRQ
+│   │   ├── 10_ADC_PWM_Polling
+│   │   ├── 11_ADC_PWM_IRQ
+│   ├── GPIO
+│   │   ├── 01_Blinky
+│   │   ├── 02_PB_Polling
+│   │   ├── 03_PB_IRQ
+│   ├── PWM
+│   │   ├── 06_PWM_Polling
+│   │   ├── 07_PWM_PB_IRQ
+│   ├── Timer
+│   │   ├── 04_GPT
+│   │   ├── 05_Timer_IRQ
+│   ├── USART
+│   │   ├── 12_char_TX
+│   │   ├── 13_string_TX
+│   │   ├── 14_printf
+│   ├── Template
+│   │   ├── App_Inc
+│   │   ├── App_Src
+│   │   ├── Linker
+│   │   ├── Makefile
+│   │   ├── Startup
+├── README.md
+└── Reference_Docs
+```
 ---
 ## ***BareMetal Structure***
 ---
