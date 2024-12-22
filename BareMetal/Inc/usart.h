@@ -72,7 +72,7 @@ __attribute__((always_inline)) inline void disable_USART_clk(usart_config_t* USA
  * @brief Starts USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void start_USART(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void enable_USART(usart_config_t* USART_CONFIGx) {
 	// Enable USART
 	USART_CONFIGx->USARTx->CR1.REG |= (1 << 13);
 }
@@ -81,7 +81,7 @@ __attribute__((always_inline)) inline void start_USART(usart_config_t* USART_CON
  * @brief Stops USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void stop_USART(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void disable_USART(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~(1 << 13);
 }

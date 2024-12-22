@@ -29,15 +29,6 @@
 #include "../Core/gpt_reg_map.h"
 #include "../Core/rcc_reg_map.h"
 #include "../Core/usart_reg_map.h"
-
-// System Clock Frequency (Core)
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
-extern volatile uint32_t APB2Clock;
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -255,6 +246,15 @@ typedef enum {
 	SYSCLK_64MHz,
 	SYSCLK_72MHz,
 } SYSCLK_FREQ;
+
+// System Clock Frequency (Core)
+extern volatile uint32_t CoreClock;
+// Advanced High Performance Bus (AHB) Frequency
+extern volatile uint32_t AHBClock;
+// Advanced Peripheral Bus 1 (APB1) Frequency
+extern volatile uint32_t APB1Clock;
+// Advanced Peripheral Bus 2 (APB2) Frequency
+extern volatile uint32_t APB2Clock;
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/
@@ -680,9 +680,9 @@ typedef enum{
 #define USARTx_PARITY_ODD					((uint8_t) 0x01)
 
 // Baud Rate
-#define USARTx_BAUD_4800					((uint16_t) (CoreClock/4800UL))
-#define USARTx_BAUD_9600					((uint16_t) (CoreClock/9600UL))
-#define USARTx_BAUD_115200					((uint16_t) (CoreClock/115200UL))
+#define USARTx_BAUD_4800					((uint16_t) 4800)
+#define USARTx_BAUD_9600					((uint16_t) 9600)
+#define USARTx_BAUD_115200					((uint16_t) 115200)
 /*********************************************** USART MACROS ***********************************************/
 
 #endif  /* __REG_MAP_H__ */
