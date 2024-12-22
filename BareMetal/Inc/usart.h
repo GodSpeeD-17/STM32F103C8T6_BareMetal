@@ -11,6 +11,10 @@
 #include "gpio.h"   // GPIO Struct
 #include "nvic.h"   // NVIC Enable
 
+// Local Separation Function
+#define DEFAULT_SEP_LEN					((uint8_t) 50)
+#define DEFAULT_SEP(X)					(sep((X), DEFAULT_SEP_LEN)) 
+
 // UART Configuration Structure
 typedef struct {
 	// GPIO Configuration Structure
@@ -115,6 +119,13 @@ void config_USART(usart_config_t* USART_CONFIGx);
 void USART_putc(usart_config_t* USART_CONFIGx, const char c);
 
 /**
+ * @brief Transmits a string on USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] str The character to be transmitted
+ */
+void USART_puts(usart_config_t* USART_CONFIGx, const char* str);
+
+/**
  * @brief Loads the default value for USART Struct
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
@@ -142,6 +153,25 @@ __attribute__((always_inline)) inline void load_USART_default(usart_config_t* US
 	USART_CONFIGx->TXE = USARTx_TX_ENABLE;
 	// Enable RX
 	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
+}
+
+/**
+ * @brief Prints '*' on USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] length The length of '*'
+ */
+__attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, uint8_t length){
+	// Print '*'
+	while(length--){
+		// Print character
+		USART_putc(USART_CONFIGx, '*');
+		// Delay
+		for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
+	}
+	// Send CR
+	USART_putc(USART_CONFIGx, '\r');
+	// Send NL
+	USART_putc(USART_CONFIGx, '\n');
 }
 
 #endif /* __UART_H__ */

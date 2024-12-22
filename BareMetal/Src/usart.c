@@ -45,3 +45,20 @@ void USART_putc(usart_config_t* USART_CONFIGx, const char c){
 	USART_CONFIGx->USARTx->DR.REG = (c & 0x000000FF);
 }
 
+/**
+ * @brief Transmits a string on USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] str The character to be transmitted
+ * @note '\0' is required for terminating sequence
+ */
+void USART_puts(usart_config_t* USART_CONFIGx, const char* str){
+	// Termination Condition
+	while(*str != '\0'){
+		// Transmit the character
+		USART_putc(USART_CONFIGx, *str);
+		// Update the pointer to next position
+		str++;
+		// Delay
+		for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
+	}
+}
