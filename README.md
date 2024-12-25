@@ -1,10 +1,11 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
 ---
-### ***Hi, I am a beginner and trying to code using Register Programming***
-### ***This repository is only meant for learning purpose***
-### ***Please let me know if there is any mistake and if possible how to resolve it***
-### ***For any suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)***
+Hi! I am a beginner and trying to program the Blue Pill Module using Bare Metal (Register Programming). This repository is only meant for learning purpose. Please let me know if there is any mistake and if possible how to resolve it. For any suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)
+
+Few GitHub Repositories that I referred to during development phase:
+- [stm32f1-baremetal](https://github.com/csrohit/stm32f1-baremetal/tree/main)
+- [stm32f103-1](https://github.com/freesources/stm32f103-1)
 ---
 
 ---
