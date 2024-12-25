@@ -19,6 +19,7 @@ usart_config_t usart_config = {
 
 // Variable
 int8_t count = -10;
+float fcount = 10.1234f;
 // String
 const char* string = "This message is populated using printf()!\r";
 
@@ -47,7 +48,9 @@ int main(void){
 		
 		// Send String
 		set_OB_LED();
-		USART_printf(&usart_config, "%d: %s\n", count++, string);
+		// fcount += 0.1f;	// TO DO: Fix this
+		USART_printf(&usart_config, "%d: %s\r\n", count++, string);
+		// USART_printf(&usart_config, "%d: %s -> %.5f\n", count++, string, fcount+= 0.1);
 
 		// Loop Delay
 		SysTick_delay_ms(LOOP_DELAY_MS);

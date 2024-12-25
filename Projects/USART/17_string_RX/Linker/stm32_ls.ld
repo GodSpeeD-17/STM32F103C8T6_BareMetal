@@ -107,7 +107,6 @@ SECTIONS {
         . = ALIGN(4);
         /* Storing the start of .bss VMA section */
         _sbss = .;
-        __bss_start__ = .;
 
         /* Uninitialized Section of all the input files */
         *(.bss*)
@@ -116,6 +115,5 @@ SECTIONS {
         . = ALIGN(4);
         /* Storing the end of .bss VMA section */
         _ebss = .;
-        __bss_end__ = .;
     } > SRAM 
 }

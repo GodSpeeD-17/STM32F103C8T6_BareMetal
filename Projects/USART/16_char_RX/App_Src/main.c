@@ -24,7 +24,7 @@ gpio_config_t led_config = {
 	.CNFx = CNF_OUT_GP_PP,
 };
 
-// Lookup Table Index
+// Character Information
 char received_character = '\0';
 
 // Main Entry Point for User Code

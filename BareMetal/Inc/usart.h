@@ -197,4 +197,14 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...);
  */
 uint16_t USART_receive(usart_config_t* USART_CONFIGx);
 
+/**
+ * @brief Echos the character on Serial Console
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] rx_char Character to be displayed on Screen
+ */
+__attribute__((always_inline)) inline void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
+	// Print on Serial Console
+	USART_printf(USART_CONFIGx, "%c", rx_char);
+}
+
 #endif /* __USART_H__ */

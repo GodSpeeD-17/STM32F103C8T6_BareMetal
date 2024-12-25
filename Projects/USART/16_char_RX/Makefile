@@ -26,7 +26,7 @@ CORE_REG_DIR = $(BAREMETAL_DIR)/Core
 # Project-Specific Flags
 MACHINE = cortex-m3
 CFLAGS = -mcpu=$(MACHINE) -mthumb -O0 -std=gnu11 -g -mfloat-abi=softfp -mfpu=fpv4-sp-d16
-LDFLAGS = -nostdlib -T $(LINKER_DIR)/stm32_ls.ld
+LDFLAGS = -T $(LINKER_DIR)/stm32_ls.ld
 MAPFLAG = -Wl,-Map=$(LINKER_DIR)/stm32_mapfile.map
 
 # File Targets

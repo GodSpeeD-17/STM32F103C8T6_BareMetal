@@ -90,6 +90,7 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel1_IRQHandler(vo
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel3_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(void);
+__attribute__((weak, alias("Default_Handler"))) void _exit(int);
 
 // Vector Table (Placed in .isr_vector section)
 __attribute__((section(".isr_vector"))) void (*const vector_table[ARM_IRQ + RESERVED + STM32F103C8_IRQ])(void) = {
