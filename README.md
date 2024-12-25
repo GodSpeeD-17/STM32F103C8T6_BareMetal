@@ -1,8 +1,8 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
 ---
-##***Hi, I am a beginner and trying to code using Register Programming. Please let me know if there is any mistake and if possible how to resolve it.
-##You can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)***
+## ***Hi, I am a beginner and trying to code using Register Programming. Please let me know if there is any mistake and if possible how to resolve it.
+## You can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)***
 ---
 
 ---
