@@ -1,4 +1,6 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
+Hi, I am a beginner and trying to code using Register Programming. Please let me know if there is any mistake and if possible how to resolve it.
+You can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/) 
 ---
 ## ***Description***
 ---
@@ -87,6 +89,8 @@
       │     │   ├── 12_char_TX
       │     │   ├── 13_string_TX
       │     │   ├── 14_printf
+      │     │   ├── 15_USART_ADC_PWM
+      │     │   ├── 16_char_RX
       │     ├── Template                        # Reference Template
       │      
       ├── README.md                             # README File
@@ -189,6 +193,7 @@
 | ***13_string_TX***     | Transmit a string using USART                                                                         |
 | ***14_printf***        | Customized printf function for USART                                                                  |
 | ***15_USART_ADC_PWM*** | Same as 11_ADC_IRQ_PWM along with transmitting the data over USART                                   |
+| ***16_char_RX***       | Receive a character using Polling on USART peripheral and toggle LED based upon received character   |
 | ***Template***         | Reference Project Structure (Used when `stm32-create-project <>`)                                    |
 
 ---
