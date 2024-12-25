@@ -4,8 +4,8 @@
  *  Author: Shrey Shah
  ***************************************************************************************/
 // Header Guards
-#ifndef __UART_H__
-#define __UART_H__
+#ifndef __USART_H__
+#define __USART_H__
 
 #include "rcc.h"    // USART Clock
 #include "gpio.h"   // GPIO Struct
@@ -119,6 +119,13 @@ void config_USART(usart_config_t* USART_CONFIGx);
 void USART_putc(usart_config_t* USART_CONFIGx, const char c);
 
 /**
+ * @brief Reads the USART DR
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @returns The value of the USART DR
+ */
+uint16_t USART_getc(usart_config_t* USART_CONFIGx);
+
+/**
  * @brief Transmits a string on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] str The character to be transmitted
@@ -177,8 +184,17 @@ __attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, ui
 /**
  * @brief Transmits formatted data on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
- * @param[in] format The format string
+ * @param[in] format The formatted string
+ * @note 'float' is not yet supported
  */
 void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...);
 
-#endif /* __UART_H__ */
+/**
+ * @brief Receives data using USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @returns Data present in USARTx->DR
+ * @note Polling Based Approach
+ */
+uint16_t USART_receive(usart_config_t* USART_CONFIGx);
+
+#endif /* __USART_H__ */

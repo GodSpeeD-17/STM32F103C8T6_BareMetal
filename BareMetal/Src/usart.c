@@ -7,10 +7,6 @@
 // Dependency
 #include "usart.h"
 
-static usart_config_t my_usart_config = {
-	.USARTx = USART1,
-};
-
 /**
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
@@ -50,6 +46,20 @@ void USART_putc(usart_config_t* USART_CONFIGx, const char c){
 }
 
 /**
+ * @brief Reads the USART DR
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @returns The value of the USART DR
+ */
+uint16_t USART_getc(usart_config_t* USART_CONFIGx){
+	// Result
+	uint16_t result = 0;
+	// Read the Data Register
+	result = USART_CONFIGx->USARTx->DR.REG;
+	// Return Result
+	return result;
+}
+
+/**
  * @brief Transmits a string on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] str The character to be transmitted
@@ -70,9 +80,10 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str){
 /**
  * @brief Transmits formatted data on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
- * @param[in] format The format string
+ * @param[in] format The formatted string
+ * @note 'float' is not yet supported
  */
-void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
+void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...) {
 	// Starts VA
 	va_list args;
 	va_start(args, format);
@@ -80,62 +91,70 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
 	// Data Present
 	while (*format) {
 		// Format Specifier Encountered
-		if (*format == '%') {
-			// Get the exact format specifier
+		if (*format == '%'){
+			// Move to the next character
 			format++;
-			// String
-			if (*format == 's') {
+			// Handle escape sequences
+			if(*format == '%'){
+				// Print a literal '%'
+				USART_putc(USART_CONFIGx, '%');
+			} 
+			else if(*format == 'c'){
+				// Handle character
+				char c = (char)va_arg(args, int);
+				USART_putc(USART_CONFIGx, c);
+			} 
+			else if(*format == 's'){
 				// Handle string
 				char* str = va_arg(args, char*);
-				// Null-Character not encountered
-				while(*str != '\0'){
-					// Transmit the character & Update the pointer to next position
+				while (*str) {
 					USART_putc(USART_CONFIGx, *str++);
-					// Small Delay
-					for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
 				}
 			} 
-			// Integer
-			else if (*format == 'd') {
+			else if(*format == 'd'){
 				// Handle integer
 				int num = va_arg(args, int);
-				// Buffer to hold the string representation of the number
+				// Storing the integer value after converting it to character
 				char buffer[10];
 				// Buffer Index
 				uint8_t i = 0;
-				// Boolean to indicate if a negative number is encountered
+				// Negative Number Indicator
 				char isNegative = 0;
-
-				// Handle negative numbers
+				// Negative Number
 				if (num < 0) {
 					isNegative = 1;
-					num = -1 * num;
+					num = -num;
 				}
-
-				// Convert integer to string
+				// `int` to `char` (Reverse Storing)
 				do {
-					// Get last digit
 					buffer[i++] = (num % 10) + '0';
-					// Remove last digit
 					num /= 10;
 				} while (num > 0);
-
-				// Add negative sign
-				if (isNegative)
-					buffer[i++] = '-';
-
-				// Send the string in reverse order
+				// Add negative sign if required
+				if (isNegative) buffer[i++] = '-';
+				// Print it in reverse order
 				while (i > 0) {
 					USART_putc(USART_CONFIGx, buffer[--i]);
-					// Small Delay
-					for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
+				}
+			} 
+			// Unsupported format specifier
+			else if (*format == 'f') {
+				// Handle unsupported float
+				const char* unsupported_msg = "Unsupported float\n";
+				while (*unsupported_msg) {
+					USART_putc(USART_CONFIGx, *unsupported_msg++);
+				}
+			} 
+			// Handle unknown format specifier
+			else {
+				const char* unknown_msg = "Unknown format specifier\n";
+				while (*unknown_msg) {
+					USART_putc(USART_CONFIGx, *unknown_msg++);
 				}
 			}
-			// TO DO: Add more format specifiers as needed (e.g., %x for hex, %c for char)
-		} 
+		}
 		// Non-format specifier character
 		else {
-			// Send regular characters
 			USART_putc(USART_CONFIGx, *format);
 		}
 		// Go to next character
@@ -144,4 +163,21 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...){
 
 	// Ends the VA
 	va_end(args);
+}
+
+/**
+ * @brief Receives data using USART
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ * @returns Data present in USARTx->DR
+ * @note Polling Based Approach
+ */
+uint16_t USART_receive(usart_config_t* USART_CONFIGx){
+	// Result
+	uint16_t result = 0;
+	// RXNE (Received data is ready to be read)
+	while(!(USART_CONFIGx->USARTx->SR.REG & (1 << 5)));
+	// Read received data
+	result = USART_getc(USART_CONFIGx);
+	// Return Result
+	return result;
 }
