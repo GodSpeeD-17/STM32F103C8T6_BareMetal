@@ -1,38 +1,34 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
 ---
-### ***Hi, I am a beginner and trying to code using Register Programming. Please let me know if there is any mistake and if possible how to resolve it.***
-### ***You can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)***
+### *** - Hi, I am a beginner and trying to code using Register Programming***
+### *** - This repository is only meant for learning purpose***
+### *** - Please let me know if there is any mistake and if possible how to resolve it***
+### *** - For any suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)***
 ---
 
 ---
 ## ***Description***
----
   - Basic Repository for understanding the Registers present in Blue Pill Development Module
   - Created basic source files to use Registers for controlling purpose
   - `Projects/Template` is the template which can be used as reference while creating New Project
 
 ---
 ## ***Repository Structure***
----
-
   - `BareMetal`: Consists of all the Register Address Mapping along with basic functionality Source Code
   - `Projects`: Consists of User Specific Application
   - `Reference_Docs`: All the Reference Documentation relevant to the topic
 
 ---
 ## ***STM32F103C8T6 Reference Manual***
----
 [STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17964492/STM32F103C_Reference_Manual.pdf)
 
 ---
 ## ***STM32F103C8T6 Pinout***
----
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ---
 ## ***STM32F103C8T6 Features***
----
 | Specification      | Details        | Comments           |
 |--------------------|----------------|--------------------|
 | Processor          | ARM Cortex-M3  | Single Core        |
@@ -42,7 +38,6 @@
 
 ---
 ## ***IRQ Details***
----
 | **Vector Table**         | 76 |
 |---------------------------|----|
 | ***ARM Cortex-M3 IRQ***   | 11 |
@@ -51,7 +46,6 @@
 
 ---
 ## ***Boot Process***
----
 1. **Power ON**
 2. **Stack Pointer (SP)** 
    - Points to the top of SRAM (Vector Table Offset: `0x00`)
@@ -95,6 +89,7 @@
       │     │   ├── 14_printf
       │     │   ├── 15_USART_ADC_PWM
       │     │   ├── 16_char_RX
+      │     │   ├── 17_string_RX
       │     ├── Template                        # Reference Template
       │      
       ├── README.md                             # README File
@@ -103,7 +98,6 @@
 ```
 
 ## ***BareMetal Structure***
----
 ```
 <BareMetal>
     │
@@ -171,7 +165,6 @@
 
 ---
 ## ***Makefile Basic Commands***
----
   - `make all`: Compiles all the .c files including "BareMetal" directory
   - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - `make flash`: Flashes Current Project's .bin file at Flash Address (0x080000000)
@@ -179,7 +172,6 @@
 
 ---
 ## ***Project Overview***
----
 | **Projects**            | **Description**                                                                                      |
 |-------------------------|------------------------------------------------------------------------------------------------------|
 | ***01_Blinky***        | A simple LED blinking                                                                                |
@@ -198,6 +190,7 @@
 | ***14_printf***        | Customized printf function for USART                                                                  |
 | ***15_USART_ADC_PWM*** | Same as 11_ADC_IRQ_PWM along with transmitting the data over USART                                   |
 | ***16_char_RX***       | Receive a character using Polling on USART peripheral and toggle LED based upon received character   |
+| ***17_string_RX***     | Receive a string using USART                                                                         |
 | ***Template***         | Reference Project Structure (Used when `stm32-create-project <>`)                                    |
 
 ---
