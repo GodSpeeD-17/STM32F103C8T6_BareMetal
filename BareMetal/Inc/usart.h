@@ -207,4 +207,17 @@ __attribute__((always_inline)) inline void USART_echo(usart_config_t* USART_CONF
 	USART_printf(USART_CONFIGx, "%c", rx_char);
 }
 
+/**
+ * @brief USART1 IRQ Handler
+ */
+void USART1_IRQHandler(void);
+/**
+ * @brief USART2 IRQ Handler
+ */
+void USART2_IRQHandler(void);
+/**
+ * @brief USART3 IRQ Handler
+ */
+void USART3_IRQHandler(void);
+
 #endif /* __USART_H__ */
