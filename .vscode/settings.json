@@ -288,6 +288,7 @@
         "stdio.h": "c",
         "stdarg.h": "c",
         "float.h": "c",
-        "usart.h": "c"
+        "usart.h": "c",
+        "adc_reg_map.h": "c"
     }
 }

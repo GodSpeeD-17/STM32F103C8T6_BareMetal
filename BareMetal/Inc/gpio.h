@@ -36,16 +36,21 @@ static gpio_config_t OB_LED_config = {
  * @param[in] GPIOx The GPIO Port
  */
 __attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
-
 	// Enable Clock for respective GPIO
 	if(GPIOx == GPIOA){
-		RCC->APB2ENR.BIT.IOPAEN = BIT_SET;
+		RCC->APB2ENR.REG |= (1 << 2);
 	}
 	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.BIT.IOPBEN = BIT_SET;
+		RCC->APB2ENR.REG |= (1 << 3);
 	}
 	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.BIT.IOPCEN = BIT_SET;
+		RCC->APB2ENR.REG |= (1 << 4);
+	}
+	else if (GPIOx == GPIOD){
+		RCC->APB2ENR.REG |= (1 << 5);
+	}
+	else if (GPIOx == GPIOE){
+		RCC->APB2ENR.REG |= (1 << 6);
 	}
 	// Error
 	else{
@@ -58,16 +63,21 @@ __attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIO
  * @param[in] GPIOx The GPIO Port
  */
 __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
-
-	// Enable Clock for respective GPIO
+	// Disable Clock for respective GPIO
 	if(GPIOx == GPIOA){
-		RCC->APB2ENR.BIT.IOPAEN = BIT_RESET;
+		RCC->APB2ENR.REG &= ~(1 << 2);
 	}
 	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.BIT.IOPBEN = BIT_RESET;
+		RCC->APB2ENR.REG &= ~(1 << 3);
 	}
 	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.BIT.IOPCEN = BIT_RESET;
+		RCC->APB2ENR.REG &= ~(1 << 4);
+	}
+	else if (GPIOx == GPIOD){
+		RCC->APB2ENR.REG &= ~(1 << 5);
+	}
+	else if (GPIOx == GPIOE){
+		RCC->APB2ENR.REG &= ~(1 << 6);
 	}
 	// Error
 	else{
