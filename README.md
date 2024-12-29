@@ -91,6 +91,7 @@ Few GitHub Repositories that I referred to during development phase:
       │     │   ├── 15_USART_ADC_PWM
       │     │   ├── 16_char_RX
       │     │   ├── 17_string_RX
+      │     │   ├── 18_USART_IRQ
       │     ├── Template                        # Reference Template
       │      
       ├── README.md                             # README File
@@ -192,6 +193,7 @@ Few GitHub Repositories that I referred to during development phase:
 | ***15_USART_ADC_PWM*** | Same as 11_ADC_IRQ_PWM along with transmitting the data over USART                                   |
 | ***16_char_RX***       | Receive a character using Polling on USART peripheral and toggle LED based upon received character   |
 | ***17_string_RX***     | Receive a string using USART                                                                         |
+| ***18_USART_IRQ***     | Receive a character using USART IRQ -> 3 Methods Demo Code Provided                                  |
 | ***Template***         | Reference Project Structure (Used when `stm32-create-project <>`)                                    |
 
 ---
