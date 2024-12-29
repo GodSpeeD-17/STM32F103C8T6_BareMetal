@@ -27,14 +27,14 @@ typedef struct {
 ```
 #### GPIO
 ```
-#define APB2_BASE_ADDR						((uint32_t) 0x40010000)
-#define GPIOA                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x0800))
-#define GPIOB                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x0C00))
-#define GPIOC                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1000))
-#define GPIOD                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1400))
-#define GPIOE                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1800))
-#define GPIOF                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1C00))
-#define GPIOG                   			((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2000))
+#define APB2_BASE_ADDR							((uint32_t) 0x40010000)
+#define GPIOA                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x0800))
+#define GPIOB                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x0C00))
+#define GPIOC                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1000))
+#define GPIOD                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1400))
+#define GPIOE                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1800))
+#define GPIOF                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x1C00))
+#define GPIOG                   					((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2000))
 #define OB_LED_PORT							(GPIOC)
 ```
 
@@ -62,28 +62,28 @@ typedef struct {
 #### GPIO Mode
 ```
 #define MODE_IN								((uint8_t) 0)
-#define MODE_OUT_10MHz						((uint8_t) 1)
-#define MODE_OUT_2MHz						((uint8_t) 2)
-#define MODE_OUT_50MHz						((uint8_t) 3)
+#define MODE_OUT_10MHz							((uint8_t) 1)
+#define MODE_OUT_2MHz							((uint8_t) 2)
+#define MODE_OUT_50MHz							((uint8_t) 3)
 ```
 
 #### GPIO Configuration
 ```
-#define CNF_IN_ANALOG						((uint8_t) 0)
-#define CNF_IN_FLOAT						((uint8_t) 1)
+#define CNF_IN_ANALOG							((uint8_t) 0)
+#define CNF_IN_FLOAT							((uint8_t) 1)
 #define CNF_IN_PD							((uint8_t) 3)
 #define CNF_IN_PU							((uint8_t) 4)
-#define CNF_OUT_GP_PP						((uint8_t) 0)
-#define CNF_OUT_GP_OD						((uint8_t) 1)
-#define CNF_OUT_AF_PP						((uint8_t) 2)
-#define CNF_OUT_AF_OD						((uint8_t) 3)
+#define CNF_OUT_GP_PP							((uint8_t) 0)
+#define CNF_OUT_GP_OD							((uint8_t) 1)
+#define CNF_OUT_AF_PP							((uint8_t) 2)
+#define CNF_OUT_AF_OD							((uint8_t) 3)
 ```
 ---
 ### Configuration Steps
-Step 1: Enable respective Peripheral Clock `IOPAEN`/`IOPBEN`/`IOPCEN`/`IOPDEN`/`IOPEEN` using `RCC->APB2ENR`
-Step 2: Based upon configuration, enable Alternate Function Clock `AFIOEN` using `RCC->APB2ENR`
-Step 3: Read & Store Current Data: 
-    - `GPIO_PIN_X` <= `GPIO_PIN_7` => `GPIOx->CRL`
-    - `GPIO_PIN_X` > `GPIO_PIN_7` => `GPIOx->CRH`
-Step 4: Configure the `MODEx` & `CNFx` bits in `GPIOx->CRH`/`GPIOx->CRL` as per requirement
-Step 5: Write the Register Value back to `GPIOx->CRH`/`GPIOx->CRL`
+- Step 1: Enable respective Peripheral Clock `IOPAEN`/`IOPBEN`/`IOPCEN`/`IOPDEN`/`IOPEEN` using `RCC->APB2ENR`
+- Step 2: Based upon configuration, enable Alternate Function Clock `AFIOEN` using `RCC->APB2ENR`
+- Step 3: Read & Store Current Data: 
+    - `GPIO_PIN_x` <= `GPIO_PIN_7` => `GPIOx->CRL`
+    - `GPIO_PIN_x` > `GPIO_PIN_7` => `GPIOx->CRH`
+- Step 4: Configure the `MODEx` & `CNFx` bits in `GPIOx->CRx` as per requirement
+- Step 5: Write the Register Value back to `GPIOx->CRx`
