@@ -75,7 +75,8 @@ usart_config_t usart_config = {
 
 // Reference Tick Count
 uint64_t reference_ticks = 0x00;
-uint64_t tick_difference = 0x00;
+uint32_t tick_difference = 0x00;
+static int8_t time_left = (BUFFER_FETCH_DELAY_MS / 1000);
 
 	// Main Entry Point
 	int main(void){
@@ -101,7 +102,7 @@ uint64_t tick_difference = 0x00;
 		// Infinite Loop
 		while(1){
 			// Take tick difference
-			tick_difference = (uint64_t)(get_curr_ticks() - reference_ticks);
+			tick_difference = (uint32_t)(get_curr_ticks() - reference_ticks);
 			// Wait for Buffer Fetch Period
 			if(tick_difference >= BUFFER_FETCH_DELAY_MS){
 				// Default Separation
@@ -123,15 +124,18 @@ uint64_t tick_difference = 0x00;
 				// Update Reference Ticks
 				reference_ticks = get_curr_ticks();
 			}
-			// Multiple of 1s
-			else if(tick_difference % 1000 == 0){
-				// Toggle OB LED
-				toggle_OB_LED();
-				// Custom Separation
-				sep(&usart_config, '-', DEF_SEP_LEN);
-				// Counting
-				USART_printf("Time Left: %d (s)\r\n", (BUFFER_FETCH_DELAY_MS - tick_difference) / 1000);
-			}
+			// Countdown Time
+			// else if(tick_difference & (1 << 10)){
+			// 	// Toggle OB LED
+			// 	toggle_OB_LED();
+			// 	// Custom Separation
+			// 	sep(&usart_config, '-', DEF_SEP_LEN);
+			// 	// Counting
+			// 	USART_printf("Time Left: %d (s)\r\n", time_left);
+			// 	// Variable Updation
+			// 	time_left--;
+			// 	time_left = (time_left <= 0)? (BUFFER_FETCH_DELAY_MS / 1000): time_left;
+			// }
 			// Loop Delay
 			SysTick_delay_ms(LOOP_DELAY_MS);
 		}
@@ -146,7 +150,8 @@ uint64_t tick_difference = 0x00;
 		// RXNE Flag
 		if(USART->SR.BIT.RXNE){
 			// Read & Store Data 
-			buffer[buffer_head++] = (USART->DR.REG & 0xFF);
+			buffer[buffer_head] = (USART->DR.REG & 0xFF);
+			USART_echo(&usart_config, buffer[buffer_head++]);
 			// Circular Buffer
 			buffer_head = (buffer_head == BUFFER_SIZE)? 0 : buffer_head;
 		}
