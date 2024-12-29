@@ -17,7 +17,7 @@
 #define USART_RX_PIN				((uint8_t) 10)
 
 // Buffer
-#define BUFFER_SIZE					((uint8_t) 8)
+#define BUFFER_SIZE					((uint8_t) 128)
 char buffer[BUFFER_SIZE] = {0};
 char curr_value = 0x00;
 uint8_t buffer_head = 0;

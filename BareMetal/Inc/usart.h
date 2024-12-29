@@ -12,8 +12,8 @@
 #include "nvic.h"   // NVIC Enable
 
 // Local Separation Function
-#define DEFAULT_SEP_LEN					((uint8_t) 50)
-#define DEFAULT_SEP(X)					(sep((X), DEFAULT_SEP_LEN)) 
+#define DEF_SEP_LEN						((uint8_t) 50)
+#define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN)) 
 
 // UART Configuration Structure
 typedef struct {
@@ -165,13 +165,14 @@ __attribute__((always_inline)) inline void load_USART_default(usart_config_t* US
 /**
  * @brief Prints '*' on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
- * @param[in] length The length of '*'
+ * @param[in] c Character to be printed
+ * @param[in] length The length of character to be printed
  */
-__attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, uint8_t length){
-	// Print '*'
+__attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, char c, uint8_t length){
+	// Print character
 	while(length--){
 		// Print character
-		USART_putc(USART_CONFIGx, '*');
+		USART_putc(USART_CONFIGx, c);
 		// Delay
 		for(volatile uint16_t local_delay = 0; local_delay < USARTx_STRING_TX_DELAY; local_delay++);
 	}
