@@ -14,21 +14,21 @@
 #define NULL            					((void *) 0)
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
-#include "../Core/flash_reg_map.h"
-#include "../Core/nvic_reg_map.h"
-#include "../Core/systick_reg_map.h"
-#include "../Core/wwdg_reg_map.h"
+#include "flash_reg_map.h"
+#include "nvic_reg_map.h"
+#include "systick_reg_map.h"
+#include "wwdg_reg_map.h"
 /*********************************************** ARM CORTEX M3 ***********************************************/
 
 /*********************************************** STM32F103C8T6 ***********************************************/
-#include "../Core/adc_reg_map.h"
-#include "../Core/advtim_reg_map.h"
-#include "../Core/afio_reg_map.h"
-#include "../Core/exti_reg_map.h"
-#include "../Core/gpio_reg_map.h"
-#include "../Core/gpt_reg_map.h"
-#include "../Core/rcc_reg_map.h"
-#include "../Core/usart_reg_map.h"
+#include "adc_reg_map.h"
+#include "advtim_reg_map.h"
+#include "afio_reg_map.h"
+#include "exti_reg_map.h"
+#include "gpio_reg_map.h"
+#include "gpt_reg_map.h"
+#include "rcc_reg_map.h"
+#include "usart_reg_map.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
