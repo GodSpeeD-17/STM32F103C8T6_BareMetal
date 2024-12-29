@@ -83,7 +83,7 @@ typedef struct {
 - Step 1: Enable respective Peripheral Clock `IOPAEN`/`IOPBEN`/`IOPCEN`/`IOPDEN`/`IOPEEN` using `RCC->APB2ENR`
 - Step 2: Based upon configuration, enable Alternate Function Clock `AFIOEN` using `RCC->APB2ENR`
 - Step 3: Read & Store Current Data: 
-    - `GPIO_PIN_x` <= `GPIO_PIN_7` => `GPIOx->CRL`
-    - `GPIO_PIN_x` > `GPIO_PIN_7` => `GPIOx->CRH`
+    - `GPIO_PIN_x` <= `GPIO_PIN_7` -> `GPIOx->CRL`
+    - `GPIO_PIN_x` > `GPIO_PIN_7` -> `GPIOx->CRH`
 - Step 4: Configure the `MODEx` & `CNFx` bits in `GPIOx->CRx` as per requirement
 - Step 5: Write the Register Value back to `GPIOx->CRx`
