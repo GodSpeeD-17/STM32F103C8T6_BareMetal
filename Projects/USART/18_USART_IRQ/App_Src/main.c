@@ -75,7 +75,7 @@ usart_config_t usart_config = {
 
 // Reference Tick Count
 uint64_t reference_ticks = 0x00;
-uint64_t current_ticks = 0x00;
+uint64_t tick_difference = 0x00;
 
 	// Main Entry Point
 	int main(void){
@@ -100,8 +100,10 @@ uint64_t current_ticks = 0x00;
 
 		// Infinite Loop
 		while(1){
+			// Take tick difference
+			tick_difference = (uint64_t)(get_curr_ticks() - reference_ticks);
 			// Wait for Buffer Fetch Period
-			if(get_curr_ticks() - reference_ticks >= BUFFER_FETCH_DELAY_MS){
+			if(tick_difference >= BUFFER_FETCH_DELAY_MS){
 				// Default Separation
 				DEF_SEP(&usart_config);
 				// If head & Tail are at different index
@@ -122,14 +124,14 @@ uint64_t current_ticks = 0x00;
 				reference_ticks = get_curr_ticks();
 			}
 			// Multiple of 1s
-			// else if((get_curr_ticks() - reference_ticks) % 1000 == 0){
-			// 	// Toggle OB LED
-			// 	toggle_OB_LED();
-			// 	// Custom Separation
-			// 	sep(&usart_config, '-', DEF_SEP_LEN);
-			// 	// Counting
-			// 	// USART_printf("Time Left: %d (s)\r\n", ((BUFFER_FETCH_DELAY_MS - (get_curr_ticks() - reference_ticks)) / 1000));
-			// }
+			else if(tick_difference % 1000 == 0){
+				// Toggle OB LED
+				toggle_OB_LED();
+				// Custom Separation
+				sep(&usart_config, '-', DEF_SEP_LEN);
+				// Counting
+				USART_printf("Time Left: %d (s)\r\n", (BUFFER_FETCH_DELAY_MS - tick_difference) / 1000);
+			}
 			// Loop Delay
 			SysTick_delay_ms(LOOP_DELAY_MS);
 		}
