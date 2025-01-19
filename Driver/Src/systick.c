@@ -1,3 +1,7 @@
 #include "systick.h"
 
-SysTick->CTRL |= 
+
+
+void config_SysTick(uint32_t msTicks){
+    SysTick->
+}

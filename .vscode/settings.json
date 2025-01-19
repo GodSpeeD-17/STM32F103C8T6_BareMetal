@@ -289,6 +289,8 @@
         "stdarg.h": "c",
         "float.h": "c",
         "usart.h": "c",
-        "adc_reg_map.h": "c"
+        "adc_reg_map.h": "c",
+        "core_cm3.h": "c",
+        "stm32f103x6.h": "c"
     }
 }
