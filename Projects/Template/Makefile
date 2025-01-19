@@ -1,7 +1,7 @@
 # Makefile for STM32F103C8T6 Baremetal Programming
 
 # Root directory
-PROJECT_DIR := /home/shrey_shah/Desktop/STM32/Blue_Pill
+PROJECT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 
 # Target name
 TARGET := main
@@ -88,19 +88,19 @@ erase_flash: clean
 	@echo "***********************************************************************"
 
 # All target
-all: $(BUILD_DIR)/$(TARGET).elf
+all: $(BUILD_DIR)/$(TARGET).bin
 	@echo "***********************************************************************"
 	@echo "Build Successful"
 	@echo "***********************************************************************"
 
 # Clean target
 clean:
-	rm -r $(BUILD_DIR)
+	rm -r $(BUILD_DIR) || true
 	@echo "***********************************************************************"
 	@echo "Cleaned Project"
 	@echo "***********************************************************************"
 
 # Include dependency files
-# -include $(OBJS:.o=.d)
+-include $(OBJS:.o=.d)
 
 .PHONY: all clean flash
