@@ -1,2 +1,0 @@
-Startup/stm32f1_startup.c:175:45:Reset_Handler	0	static
-Startup/stm32f1_startup.c:199:28:Default_Handler	4	static
