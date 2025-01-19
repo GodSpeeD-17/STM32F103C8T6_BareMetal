@@ -74,7 +74,7 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(STARTUP_DIR)/stm32f1_ls.ld
 	$(CC) $(ASFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
 
 # Flashing command (adjust as necessary)
-flash: $(BUILD_DIR)/$(TARGET).bin
+flash: all
 	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
 	@echo "***********************************************************************"
 	@echo "Flashed!"
@@ -85,6 +85,12 @@ erase_flash: clean
 	st-flash erase
 	@echo "***********************************************************************"
 	@echo "Flashed Erased!"
+	@echo "***********************************************************************"
+
+# ST-Link Information
+info:
+	@echo "***********************************************************************"
+	st-info --probe
 	@echo "***********************************************************************"
 
 # All target
@@ -103,4 +109,4 @@ clean:
 # Include dependency files
 -include $(OBJS:.o=.d)
 
-.PHONY: all clean flash
+.PHONY: clean all flash erase_flash
