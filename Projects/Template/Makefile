@@ -1,115 +1,112 @@
-#******************************************************************************
-# - STM32 Makefile for STM32F103C8T6 Project Template
-# - Author: Shrey Shah
-# - Date: 06/10/2024
-#******************************************************************************
-# Compiler/Tools Setup
-CC = arm-none-eabi-gcc
-LD = arm-none-eabi-objdump
-LC = arm-none-eabi-objcopy
+# Makefile for STM32F103C8T6 Baremetal Programming
 
-# Directories
-ROOT_DIR = ~/Desktop/STM32/STM32F103C8T6
-BAREMETAL_DIR = $(ROOT_DIR)/BareMetal
-PROJECTS_DIR = $(ROOT_DIR)/Projects
+# Root directory
+PROJECT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 
-APP_INC_DIR = $(shell pwd)/App_Inc
-APP_SRC_DIR = $(shell pwd)/App_Src
-STARTUP_DIR = $(shell pwd)/Startup
-LINKER_DIR = $(shell pwd)/Linker
+# Target name
+TARGET := main
 
-# Source and Include Directories
-CORE_INC_DIR = $(BAREMETAL_DIR)/Inc
-CORE_SRC_DIR = $(BAREMETAL_DIR)/Src
-CORE_REG_DIR = $(BAREMETAL_DIR)/Core
+# Build type: Debug or Release
+BUILD_TYPE := Debug
+BUILD_DIR := $(shell pwd)/Build
 
-# Project-Specific Flags
-MACHINE = cortex-m3
-CFLAGS = -mcpu=$(MACHINE) -mthumb -O0 -std=gnu11 -g
-LDFLAGS = -nostdlib -T $(LINKER_DIR)/stm32_ls.ld
-MAPFLAG = -Wl,-Map=$(LINKER_DIR)/stm32_mapfile.map
+# Toolchain
+TRIPLE  = arm-none-eabi
+CC      = $(TRIPLE)-gcc
+LD      = $(TRIPLE)-ld
+AS      = $(TRIPLE)-as
+OBJCOPY = $(TRIPLE)-objcopy
 
-# File Targets
-ELF_FILE = $(LINKER_DIR)/stm32_project.elf
-BIN_FILE = $(LINKER_DIR)/stm32_project.bin
-HEX_FILE = $(LINKER_DIR)/stm32_project.hex
+# Include directories
+INCFLAGS := -I$(PROJECT_DIR)/Core/Inc \
+            -I$(PROJECT_DIR)/Driver/Inc \
+            -I$(shell pwd)/Inc
 
-# Source Files
-C_SOURCES = $(wildcard $(APP_SRC_DIR)/*.c) \
-            $(wildcard $(CORE_SRC_DIR)/*.c) \
-            $(wildcard $(STARTUP_DIR)/*.c)
+# Compiler flags
+CFLAGS := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCFLAGS) -std=gnu11 -O0 -Wall -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103xB
+# Assembler flags
+ASFLAGS := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCFLAGS) -x assembler-with-cpp
+# Linker flags
+LDFLAGS := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nosys.specs $(INCFLAGS)
 
-C_OBJECTS = $(C_SOURCES:%.c=%.o)
+# Add debug flags if build type is debug
+ifeq ($(BUILD_TYPE), Debug)
+CFLAGS += -g -gdwarf-2
+endif
 
-# Include Paths
-INC_DIRS = -I $(CORE_REG_DIR) -I $(CORE_INC_DIR) -I $(APP_INC_DIR) -I $(STARTUP_DIR) -I $(LINKER_DIR)
+# Generate dependency information
+CFLAGS += -MMD -MP
+ASFLAGS += -MMD -MP
 
-# Default Target
-all: $(BIN_FILE)
+# Source and startup files
+SRC_DIR := $(shell pwd)/Src
+STARTUP_DIR := $(shell pwd)/Startup
+
+# Use wildcard to gather all .c/.s files from the directories
+SRCS := $(wildcard $(PROJECT_DIR)/Core/Src/*.c) \
+        $(wildcard $(PROJECT_DIR)/Driver/Src/*.c) \
+        $(wildcard $(SRC_DIR)/*.c) \
+        $(wildcard $(STARTUP_DIR)/*.c)
+
+# Object files
+OBJS := $(SRCS:.c=.o)
+# Add the Build directory prefix, keeping only the file names (no paths)
+BUILD_OBJ := $(patsubst %.o, $(BUILD_DIR)/%.o, $(notdir $(OBJS)))
+
+# Ensure the build directory exists
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
+
+# '.bin' file rules
+$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
+	$(OBJCOPY) -O binary $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).bin
+
+# '.elf' rules
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(STARTUP_DIR)/stm32f1_ls.ld
+	$(CC) $(LDFLAGS) -o $@ $(BUILD_OBJ) -T $(STARTUP_DIR)/stm32f1_ls.ld -Wl,-Map="$(BUILD_DIR)/$(TARGET).map" -Wl,--gc-sections -static
+
+# Compile C source files
+%.o: %.c $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
+
+# Compile assembly source files
+%.o: %.s $(BUILD_DIR)
+	$(CC) $(ASFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
+
+# Flashing command (adjust as necessary)
+flash: all
+	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
 	@echo "***********************************************************************"
-	@echo "Build Successful!"
-	@echo "***********************************************************************"
-
-# Clean target - Removes build artifacts
-clean:
-	rm -f $(C_OBJECTS)
-	rm -f $(ELF_FILE) $(BIN_FILE) $(HEX_FILE)
-	rm -f $(LINKER_DIR)/*.map
-	rm -f $(LINKER_DIR)/*.bin
-	rm -f $(LINKER_DIR)/*.hex
-	rm -f $(LINKER_DIR)/*.elf
-	@echo "***********************************************************************"
-	@echo "Clean Successful!"
-	@echo "***********************************************************************"
-
-# Clean specific directories
-clean_src:
-	rm -f $(CORE_SRC_DIR)/*.o $(CORE_INC_DIR)/*.o
-
-clean_user:
-	rm -f $(APP_SRC_DIR)/*.o $(APP_INC_DIR)/*.o
-
-clean_startup:
-	rm -f $(STARTUP_DIR)/*.o
-
-clean_linker:
-	rm -f $(LINKER_DIR)/*.map
-
-# Flash with the generated BIN file
-flash: $(BIN_FILE)
-	st-flash --reset write $(BIN_FILE) 0x08000000
-	@echo "***********************************************************************"
-	@echo "Flashing Completed Successfully!"
+	@echo "Flashed!"
 	@echo "***********************************************************************"
 
-# Convert ELF to BIN file
-$(BIN_FILE): $(ELF_FILE)
-	$(LC) -O binary $(ELF_FILE) $(BIN_FILE)
-
-# Convert ELF to HEX file
-$(HEX_FILE): $(ELF_FILE)
-	$(LC) -O ihex $(ELF_FILE) $(HEX_FILE)
-
-# Link object files to create ELF file
-$(ELF_FILE): $(C_OBJECTS)
-	$(CC) $(C_OBJECTS) $(LDFLAGS) $(MAPFLAG) -o $(ELF_FILE)
-
-# Compile C files to object files
-%.o: %.c
-	$(CC) $(CFLAGS) $(INC_DIRS) -c $< -o $@
-
-# Flash file erase (optional: for cleaning the flash before writing)
+# Flash Clean Project
 erase_flash: clean
 	st-flash erase
 	@echo "***********************************************************************"
-	@echo "Flash erased successfully!"
+	@echo "Flashed Erased!"
 	@echo "***********************************************************************"
 
-# Debugging: Dump ELF contents
-linker_dump: $(ELF_FILE)
-	$(LD) -h $(ELF_FILE)
-
-# Print Blue Pill Specifications
-get_info:
+# ST-Link Information
+info:
+	@echo "***********************************************************************"
 	st-info --probe
-#******************************************************************************
+	@echo "***********************************************************************"
+
+# All target
+all: $(BUILD_DIR)/$(TARGET).bin
+	@echo "***********************************************************************"
+	@echo "Build Successful"
+	@echo "***********************************************************************"
+
+# Clean target
+clean:
+	rm -r $(BUILD_DIR) || true
+	@echo "***********************************************************************"
+	@echo "Cleaned Project"
+	@echo "***********************************************************************"
+
+# Include dependency files
+-include $(OBJS:.o=.d)
+
+.PHONY: clean all flash erase_flash
