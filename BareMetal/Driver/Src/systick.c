@@ -8,7 +8,7 @@
 #include "systick.h"
 
 // Delay Variable
-static volatile uint64_t delayMs = 0x00;
+static volatile uint64_t future_ticks = 0x00;
 // Ticks Counter
 static volatile uint64_t curr_ticks = 0x00;
 
@@ -35,9 +35,9 @@ void config_SysTick(uint32_t reloadValue){
  */
 void delay_ms(uint32_t delayTime){
 	// Calculate the delay time
-	delayMs = curr_ticks + delayTime;
+	future_ticks = curr_ticks + delayTime;
 	// Wait for delay
-	while(curr_ticks <= delayMs);
+	while(curr_ticks <= future_ticks);
 }
 
 /**

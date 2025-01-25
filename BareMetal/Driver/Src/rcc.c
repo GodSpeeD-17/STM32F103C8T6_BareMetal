@@ -37,7 +37,7 @@ uint32_t get_clock_freq(void){
 		// PLL
 		case SW_CLK_PLL:
 			// PLL Clock Source
-			switch((RCC->CFGR.REG & RCC_CFGR_SWS_Msk) >> 2){
+			switch((RCC->CFGR.REG & RCC_CFGR_PLLSRC_Msk) >> RCC_CFGR_PLLSRC_Pos){
 				// HSE
 				case PLL_SRC_HSE:
 					clk_freq = HSE_FREQ;
@@ -383,8 +383,7 @@ void config_RCC(rcc_config_t* configX){
 	// Local Variable
 	uint32_t reg = 0x00000000;
 	// Flash Configuration
-	FLASH->ACR.REG = (uint32_t)((configX->flash.latency << FLASH_ACR_LATENCY_Pos) | (configX->flash.prefetch << FLASH_ACR_PRFTBE_Pos));
-	while(!(FLASH->ACR.REG & FLASH_ACR_PRFTBS_Msk));
+	FLASH->ACR.REG |= (uint32_t)(configX->flash.latency << FLASH_ACR_LATENCY_Pos);
 	// HSE ON
 	RCC->CR.REG |= RCC_CR_HSEON;
 	while(!(RCC->CR.REG & RCC_CR_HSERDY_Msk));

@@ -11,6 +11,9 @@
 // Register Address Mapping
 #include "reg_map.h"
 
+// Shortcut Macro
+#define config_RCC_72MHz()							(config_RCC(&config_RCC_72MHz))
+
 // Bus Prescaler Configuration
 typedef struct {
 	// APB1 Bus Prescaler 
@@ -59,6 +62,34 @@ typedef struct {
 	// System Clock Source
 	uint8_t sys_clk_src;
 } rcc_config_t;
+
+// Configuration: 72MHz
+static const rcc_config_t config_RCC_72MHz = {
+	// System Clock Source
+	.sys_clk_src = SW_CLK_PLL,
+	// Flash Configuration
+	.flash = {
+		.latency = FLASH_ACR_LATENCY_2,
+		.prefetch = FLASH_ACR_PRFTBE_Msk,
+	},
+	// PLL Configuration
+	.pll = {
+		.ext_src = PLL_SRC_HSE,
+		.ext_src_pre = PLL_HSE_DIV_1,
+		.mul_fact = PLL_MUL_9,
+	},
+	// Bus Configuration
+	.bus = {
+		.APB1_pre = APB1_DIV_2,
+		.APB2_pre = APB2_DIV_1,
+		.AHB_pre = AHB_DIV_1
+	},
+	// Components Configuration
+	.component = {
+		.ADC_pre = ADC_DIV_6,
+		.USB_pre = USB_DIV_1_5,
+	},
+};
 
 /***
  * @brief Retrieves the System Clock Source

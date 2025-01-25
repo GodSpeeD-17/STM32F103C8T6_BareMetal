@@ -62,41 +62,63 @@ Few GitHub Repositories that I referred to during development phase:
 ---
 ## ***Overall Repository Structure***
 ```
-<STM32F103C8T6>
-      ├── BareMetal                             # Bare Metal Code
-      │     ├── Core                            # Register Mapping
-      │     ├── Inc                             # Driver Header File
-      │     ├── Src                             # Driver Source Code
-      │
-      ├── Projects
-      │     ├── ADC                             # ADC Related Projects
-      │     │   ├── 08_ADC_Polling
-      │     │   ├── 09_ADC_IRQ
-      │     │   ├── 10_ADC_PWM_Polling
-      │     │   ├── 11_ADC_PWM_IRQ
-      │     ├── GPIO                            # GPIO Related Projects
-      │     │   ├── 01_Blinky
-      │     │   ├── 02_PB_Polling
-      │     │   ├── 03_PB_IRQ
-      │     ├── PWM                             # PWM Related Projects
-      │     │   ├── 06_PWM_Polling
-      │     │   ├── 07_PWM_PB_IRQ
-      │     ├── Timer                           # Timer Related Projects
-      │     │   ├── 04_GPT
-      │     │   ├── 05_Timer_IRQ
-      │     ├── USART                           # USART Related Projects
-      │     │   ├── 12_char_TX
-      │     │   ├── 13_string_TX
-      │     │   ├── 14_printf
-      │     │   ├── 15_USART_ADC_PWM
-      │     │   ├── 16_char_RX
-      │     │   ├── 17_string_RX
-      │     │   ├── 18_USART_IRQ
-      │     ├── Template                        # Reference Template
-      │      
-      ├── README.md                             # README File
-      │      
-      └── Reference_Docs                        # Reference Documentations
+STM32F103C8T6
+├── BareMetal
+│   ├── Core  # CMSIS Mapping
+│   │   ├── Inc
+│   │   │   ├── adc_reg_map.h
+│   │   │   ├── advtim_reg_map.h
+│   │   │   ├── afio_reg_map.h
+│   │   │   ├── common.h  # Contains CMSIS definitions
+│   │   │   ├── exti_reg_map.h
+│   │   │   ├── flash_reg_map.h
+│   │   │   ├── gpio_reg_map.h
+│   │   │   ├── gpt_reg_map.h
+│   │   │   ├── nvic_reg_map.h
+│   │   │   ├── rcc_reg_map.h
+│   │   │   ├── systick_reg_map.h
+│   │   │   ├── usart_reg_map.h
+│   │   │   └── wwdg_reg_map.h
+│   │   └── Src
+│   └── Driver  # Making Drivers based upon "../Core/**"
+│       ├── Inc
+│       │   ├── adc.h
+│       │   ├── bare_metal.h
+│       │   ├── exti.h
+│       │   ├── gpio.h
+│       │   ├── gpt.h
+│       │   ├── nvic.h
+│       │   ├── pwm.h
+│       │   ├── rcc.h
+│       │   ├── reg_map.h # Contains Register Address Mapping
+│       │   ├── systick.h
+│       │   └── usart.h
+│       └── Src
+│           ├── adc.c
+│           ├── exti.c
+│           ├── gpio.c
+│           ├── gpt.c
+│           ├── pwm.c
+│           ├── rcc.c
+│           └── systick.c
+├── Projects
+│   └── Template  # Reference Code
+│       ├── Inc
+│       │   └── main.h
+│       ├── Makefile
+│       ├── Src
+│       │   └── main.c
+│       └── Startup
+│           ├── stm32f1_ls.ld
+│           └── stm32f1_startup.c # CoreClock(72MHz) + SysTick(1ms)
+├── README.md
+├── Reference_Docs
+│   ├── Arm Cortex M3 Reference.pdf
+│   ├── Blue_PIll_Pinout.gif
+│   ├── STM32F103C_Flash_Programming_Manual.pdf
+│   ├── STM32F103C_Reference_Manual.pdf
+│   └── STM32F103xx_Flash_Reference_Manual.pdf
+└── usart.c # Error
 ```
 
 ## ***BareMetal Structure***
