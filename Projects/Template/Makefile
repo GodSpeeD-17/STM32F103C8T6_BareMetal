@@ -18,8 +18,8 @@ AS      = $(TRIPLE)-as
 OBJCOPY = $(TRIPLE)-objcopy
 
 # Include directories
-INCFLAGS := -I$(PROJECT_DIR)/Core/Inc \
-            -I$(PROJECT_DIR)/Driver/Inc \
+INCFLAGS := -I$(PROJECT_DIR)/BareMetal/Core/Inc \
+            -I$(PROJECT_DIR)/BareMetal/Driver/Inc \
             -I$(shell pwd)/Inc
 
 # Compiler flags
