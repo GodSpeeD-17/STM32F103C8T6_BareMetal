@@ -36,8 +36,11 @@ int main(void){
 	// Infinite Loop
 	while(1){
 		// 
-		toggle_OB_LED();
+		// toggle_OB_LED();
+		set_OB_LED();
 		// 1s
+		delay_ms(1000);
+		reset_OB_LED();
 		delay_ms(1000);
 	}
 	

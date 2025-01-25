@@ -43,8 +43,8 @@ SRC_DIR := $(shell pwd)/Src
 STARTUP_DIR := $(shell pwd)/Startup
 
 # Use wildcard to gather all .c/.s files from the directories
-SRCS := $(wildcard $(PROJECT_DIR)/Core/Src/*.c) \
-        $(wildcard $(PROJECT_DIR)/Driver/Src/*.c) \
+SRCS := $(wildcard $(PROJECT_DIR)/BareMetal/Core/Src/*.c) \
+        $(wildcard $(PROJECT_DIR)/BareMetal/Driver/Src/*.c) \
         $(wildcard $(SRC_DIR)/*.c) \
         $(wildcard $(STARTUP_DIR)/*.c)
 
