@@ -1,6 +1,8 @@
 // Reference: https://maldus512.medium.com/bare-metal-programming-on-an-stm32f103-3a0f4e50ca29
 
 #include <stdint.h>
+#include "rcc.h"		// For 72MHz & SysTick Configuration
+#include "systick.h"	// SysTick Configuration
 
 #define ARM_IRQ                     ((uint8_t) 11)
 #define RESERVED                    ((uint8_t) 6)
@@ -187,10 +189,16 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 		*pDst++ = 0;
 	}
 
-	// Step 3: Call main()
+	// Step 3: Configure SysClock @72MHz
+	config_RCC_72MHz();
+
+	// Step 4: Configure SysTick
+	config_SysTick(CoreClock/1000);
+
+	// Step 5: Call main()
 	main();
 
-	// Step 4: Infinite Loop (In case main() returns)
+	// Step 6: Infinite Loop (In case main() returns)
 	while(1) 
 		(void) 0;
 }
