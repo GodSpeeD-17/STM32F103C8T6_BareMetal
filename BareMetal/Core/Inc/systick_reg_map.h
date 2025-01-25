@@ -6,7 +6,7 @@
 
 // SysTick Structure
 typedef struct {
-	// Control and Status Register (CSR)
+	// Control and Status Register (CTRL)
 	union{
 		// Full 32-bit Register Access
 		uint32_t REG;
@@ -19,13 +19,13 @@ typedef struct {
 			volatile uint32_t CNTFLAG: 1;
 			volatile uint32_t reserved_2: 15;
 		} BIT;
-	} CSR;
+	} CTRL;
 
 	// Reload Value Register (RELOAD)
-	uint32_t RELOAD_VALUE: 24;					// 24-bit used only (From LSB)
+	uint32_t LOAD: 24;					// 24-bit used only (From LSB)
 
 	// Current Value Register (CURRENT)
-	uint32_t CURR_VALUE: 24;					// 24-bit used only (From LSB)
+	uint32_t VAL: 24;					// 24-bit used only (From LSB)
 
 	// Calibration Value Register (CAL)
 	union {
@@ -38,7 +38,7 @@ typedef struct {
 			volatile uint32_t SKEW: 1;
 			volatile uint32_t NOREF: 1;
 		} BIT;
-	} CAL;
+	} CALIB;
 } SYSTICK_REG_STRUCT;
 
 #endif /* __SYSTICK_REG_MAP_H__ */ 

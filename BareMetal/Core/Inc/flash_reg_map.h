@@ -2,12 +2,18 @@
 #ifndef __FLASH_REG_MAP_H__
 #define __FLASH_REG_MAP_H__
 
+// MACROS
 #include "common.h"
 
-// Basic MACROS
-#define FLASH_ZERO_WAIT                     ((uint8_t) 0x00)    //  0 < SYSCLK ≤ 24 MHz
-#define FLASH_ONE_WAIT                      ((uint8_t) 0x01)    // 24 MHz < SYSCLK ≤ 48 MHz
-#define FLASH_TWO_WAIT                      ((uint8_t) 0x02)    // 48 MHz < SYSCLK ≤ 72 MHz
+typedef struct {
+    // 0 < SYSCLK <= 24MHz -> Zero wait state
+    // 24MHz < SYSCLK <= 48MHz -> One wait state
+    // 48MHz < SYSCLK <= 72MHz -> Two wait states
+	uint8_t latency;
+    // 0: Prefetch is disabled
+    // 1: Prefetch is enabled
+    uint8_t prefetch;
+} flash_config_t;
 
 // Flash Structure
 typedef struct {

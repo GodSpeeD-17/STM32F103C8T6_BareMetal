@@ -33,7 +33,7 @@
 
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
-#define SYSTICK_BASE_ADDR					((uint32_t) 0xE000E010)
+#define SysTick_BASE_ADDR					((uint32_t) 0xE000E010)
 #define NVIC_BASE_ADDR						((uint32_t) 0xE000E100)
 #define APB1_BASE_ADDR						((uint32_t) 0x40000000)
 #define APB2_BASE_ADDR						((uint32_t) 0x40010000)
@@ -41,7 +41,7 @@
 #define FLASH_BASE_ADDR						((uint32_t) 0x40022000)
 
 // Address Mapping
-#define SYSTICK								((SYSTICK_REG_STRUCT *)(SYSTICK_BASE_ADDR))
+#define SysTick								((SYSTICK_REG_STRUCT *)(SysTick_BASE_ADDR))
 #define NVIC								((NVIC_REG_STRUCT *)(NVIC_BASE_ADDR))
 #define FLASH								((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
 #define WWDG								((WWDG_REG_STRUCT *) (APB1_BASE_ADDR + (uint32_t)0x2C00))
@@ -247,13 +247,13 @@ typedef enum {
 	SYSCLK_72MHz,
 } SYSCLK_FREQ;
 
-// System Clock Frequency (Core)
+// System Clock (SYSCLK) Frequency (in Hz)
 extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
+// Advanced High Performance Bus (AHB) Frequency (in Hz)
 extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
+// Advanced Peripheral Bus 1 (APB1) Frequency (in Hz)
 extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
+// Advanced Peripheral Bus 2 (APB2) Frequency (in Hz)
 extern volatile uint32_t APB2Clock;
 /*********************************************** RCC MACROS ***********************************************/
 
@@ -311,7 +311,7 @@ extern volatile uint32_t APB2Clock;
 								 
 /*********************************************** EXTI MACROS ***********************************************/
 
-/*********************************************** SYSTICK MACROS ***********************************************/
+/*********************************************** SysTick MACROS ***********************************************/
 // SysTick Clock Selection
 #define SYSTICK_CLK_EXT						((uint8_t) 0x00)
 #define SYSTICK_CLK_CORE					((uint8_t) 0x01)
@@ -319,7 +319,7 @@ extern volatile uint32_t APB2Clock;
 // SysTick Delay
 #define SYSTICK_DELAY_1_MS					((uint32_t)(CoreClock/1000))
 #define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
-/*********************************************** SYSTICK MACROS ***********************************************/
+/*********************************************** SysTick MACROS ***********************************************/
 
 /*********************************************** GPT MACROS ***********************************************/
 // Centre-align Mode Selection

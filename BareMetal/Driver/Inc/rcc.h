@@ -11,6 +11,53 @@
 // Register Address Mapping
 #include "reg_map.h"
 
+// Bus Prescaler Configuration
+typedef struct {
+	// APB1 Bus Prescaler 
+	// Max 36MHz
+	uint16_t APB1_pre: 3;
+	// APB2 Bus Prescaler 
+	// Max 72MHz
+	uint16_t APB2_pre: 3;
+	// AHB Bus Prescaler 
+	// Max 72MHz
+	uint16_t AHB_pre: 4;
+} bus_config_t;
+
+// PLL Configuration
+typedef struct {
+	// External Source
+	uint8_t ext_src;
+	// External Source Prescaler
+	uint8_t ext_src_pre;
+	// Multiplication Factor
+	uint8_t mul_fact;
+} pll_config_t;
+
+// Internal Components Clock Configuration
+typedef struct {
+	// USB Prescaler
+	// Max 48MHz
+	// Clock Source: PLL
+	uint8_t USB_pre: 1;
+	// ADC Prescaler
+	// Max 14MHz
+	// Clock Source: APB2
+	uint8_t ADC_pre: 2;
+} component_config_t;
+
+// RCC Configuration Structure
+typedef struct {
+	// Flash Configuration
+	flash_config_t flash;
+	// PLL Configuration
+	pll_config_t pll;
+	// Bus Prescaler Configuration
+	bus_config_t bus;
+	// Components Prescaler
+	component_config_t component;
+} rcc_config_t;
+
 /***
  * @brief Retrieves the System Clock Source
  * @note Return Values: `SYS_CLK_HSI`, `SYS_CLK_HSE`, `SYS_CLK_PLL`
@@ -19,9 +66,9 @@ __attribute__((always_inline)) inline uint8_t get_clock_source(void){
 	// Final Value
 	uint8_t value = 0xFF;
 	// Read the Clock Source
-	value = (uint8_t) RCC->CFGR.BIT.SWS;
+	value = (uint8_t)(RCC->CFGR.REG & RCC_CFGR_SWS_Msk);
 	// Return the value
-	return value;
+	return (value >> 2);
 }
 
 /**

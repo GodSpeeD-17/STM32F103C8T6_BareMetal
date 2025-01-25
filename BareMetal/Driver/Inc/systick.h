@@ -15,7 +15,7 @@
  */
 __attribute__((always_inline)) inline void enable_SysTick(void){
 	// Enable SysTick
-	SYSTICK->CSR.BIT.EN = BIT_SET;
+	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
 }
 
 /**
@@ -23,7 +23,7 @@ __attribute__((always_inline)) inline void enable_SysTick(void){
  */
 __attribute__((always_inline)) inline void disable_SysTick(void){
 	// Disable SysTick
-	SYSTICK->CSR.BIT.EN = BIT_RESET;
+	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
 }
 
 /**
@@ -38,7 +38,7 @@ void config_SysTick(uint32_t reloadValue);
  * @param[in] delayTime Delay in Milliseconds
  * @note Based upon SysTick Timer
  */
-void SysTick_delay_ms(uint32_t delayTime);
+void delay_ms(uint32_t delayTime);
 
 /**
  * @brief Returns the current number of ticks

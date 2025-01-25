@@ -7,14 +7,15 @@
 // Header File
 #include "rcc.h"
 
-// System Clock (SYSCLK) Frequency (in Hz)
 volatile uint32_t CoreClock = HSI_FREQ;
-// Advanced High Performance Bus (AHB) Frequency (in Hz)
+// Advanced High Performance Bus (AHB) Frequency
 volatile uint32_t AHBClock = HSI_FREQ;
-// Advanced Peripheral Bus 1 (APB1) Frequency (in Hz)
+// Advanced Peripheral Bus 1 (APB1) Frequency
 volatile uint32_t APB1Clock = HSI_FREQ;
-// Advanced Peripheral Bus 2 (APB2) Frequency (in Hz)
+// Advanced Peripheral Bus 2 (APB2) Frequency
 volatile uint32_t APB2Clock = HSI_FREQ;
+
+
 
 /**
  * @brief Retrieves the frequency of System Clock
@@ -370,7 +371,8 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 16MHz
         case SYSCLK_16MHz:
 			// Zero wait state, if SYSCLK <= 24 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_ZERO_WAIT;
+			FLASH->ACR.REG |= FLASH_ACR_LATENCY_0;
+			
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_2);
 			// ADC Prescaler
@@ -382,7 +384,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 24MHz
         case SYSCLK_24MHz:
 			// Zero wait state, if SYSCLK <= 24 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_ZERO_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_0;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_3);
 			// ADC Prescaler
@@ -394,7 +396,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 32MHz
         case SYSCLK_32MHz:
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_4);
 			// ADC Prescaler
@@ -406,7 +408,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 40MHz
         case SYSCLK_40MHz:
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_5);
 			// ADC Prescaler
@@ -418,7 +420,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 48MHz
         case SYSCLK_48MHz:
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_ONE_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
 			// Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_6);
 			// ADC Prescaler
@@ -430,7 +432,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 56MHz
         case SYSCLK_56MHz:
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
 			// Configure PLL parameters
             config_PLL(HSE_DIV_1, PLL_MUL_7);
 			// ADC Prescaler
@@ -442,7 +444,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 64MHz
         case SYSCLK_64MHz:
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
 			// Configure PLL parameters
             config_PLL(HSE_DIV_1, PLL_MUL_8);
 			// ADC Prescaler
@@ -454,7 +456,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
         // 72MHz
         case SYSCLK_72MHz:
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
-			FLASH->ACR.REG |= (uint32_t) FLASH_TWO_WAIT;
+			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
             // Configure PLL parameters
 			config_PLL(HSE_DIV_1, PLL_MUL_9);
 			// ADC Prescaler

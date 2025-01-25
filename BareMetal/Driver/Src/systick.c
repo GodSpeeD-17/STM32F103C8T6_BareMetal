@@ -8,7 +8,7 @@
 #include "systick.h"
 
 // Delay Variable
-static volatile uint32_t delayMs = 0x00;
+static volatile uint64_t delayMs = 0x00;
 // Ticks Counter
 static volatile uint64_t curr_ticks = 0x00;
 
@@ -18,24 +18,14 @@ static volatile uint64_t curr_ticks = 0x00;
  * @note Value should be within the range of 24-bit unsigned integer
  */
 void config_SysTick(uint32_t reloadValue){
-    
-	// Infinite Interrupts or Reload Value beyond register scope
-    if((!reloadValue) || (reloadValue > 0x00FFFFFF)){
-        return;
-    }
-
-    // Reset Value
-	SYSTICK->CSR.REG = (uint32_t) 0x00;
+	// Reset Value
+	SysTick->CTRL.REG = (uint32_t) 0x00;
 	// Reload Value (24-bit)
-	SYSTICK->RELOAD_VALUE = reloadValue - 1;
+	SysTick->LOAD = (reloadValue - 1) & 0x00FFFFFF;
 	// Update Current Value
-	SYSTICK->CURR_VALUE = (uint32_t) 0x00;
-    // Set Core as Reference Clock
-	SYSTICK->CSR.BIT.CLKSRC = SYSTICK_CLK_CORE;
-    // Enable Interrupt
-	SYSTICK->CSR.BIT.TICKINT = BIT_SET;
-	// Enable the SysTick
-	SYSTICK->CSR.BIT.EN = BIT_SET;
+	SysTick->VAL = (uint32_t) 0x00;
+	// Set Core as Reference Clock
+	SysTick->CTRL.REG |= SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
 }
 
 /***
@@ -43,11 +33,11 @@ void config_SysTick(uint32_t reloadValue){
  * @param[in] delayTime Delay in Milliseconds
  * @note Based upon SysTick Timer
  */
-void SysTick_delay_ms(uint32_t delayTime){
-	// Update the delay time
-	delayMs = delayTime;
-	// Wait (delayMs != 0)
-	while(delayMs);
+void delay_ms(uint32_t delayTime){
+	// Calculate the delay time
+	delayMs = curr_ticks + delayTime;
+	// Wait for delay
+	while(curr_ticks <= delayMs);
 }
 
 /**
@@ -84,10 +74,6 @@ __attribute__((weak)) void SysTick_Handler(void){
 	/*********************************************** USER CODE ***********************************************/
 
 	/*********************************************** DO NOT COMMENT ***********************************************/
-	// Delay (Blocking)
-	if(delayMs){
-		delayMs--;
-	}
 	// Delay (Non-blocking)
 	curr_ticks++;
 	/*********************************************** DO NOT COMMENT ***********************************************/
