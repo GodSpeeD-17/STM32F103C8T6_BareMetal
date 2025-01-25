@@ -1,5 +1,61 @@
 #include "main.h"
 
+// #define HARD_CODED
+
+#ifndef HARD_CODED
+// Configuration: 72MHz
+rcc_config_t rcc_config = {
+	// System Clock Source
+	.sys_clk_src = SW_CLK_PLL,
+	// Flash Configuration
+	.flash = {
+		.latency = FLASH_ACR_LATENCY_2,
+		.prefetch = FLASH_ACR_PRFTBE_Msk,
+	},
+	// PLL Configuration
+	.pll = {
+		.ext_src = PLL_SRC_HSE,
+		.ext_src_pre = PLL_HSE_DIV_1,
+		.mul_fact = PLL_MUL_9,
+	},
+	// Bus Configuration
+	.bus = {
+		.APB1_pre = APB1_DIV_2,
+		.APB2_pre = APB2_DIV_1,
+		.AHB_pre = AHB_DIV_1
+	},
+	// Components Configuration
+	.component = {
+		.ADC_pre = ADC_DIV_6,
+		.USB_pre = USB_DIV_1_5,
+	},
+};
+
+int main(void){
+	// RCC Configuration
+	config_RCC(&rcc_config);
+	// 1ms
+	config_SysTick(CoreClock/1000);
+	
+	// OB LED
+	config_OB_LED();
+	reset_OB_LED();
+
+	// Infinite Loop
+	while(1){
+		// Set
+		set_OB_LED();
+		// 1s
+		delay_ms(1000);
+		// Reset
+		reset_OB_LED();
+		// 1s
+		delay_ms(1000);
+	}
+	
+	return 0;
+}
+#else
 int main(void){
 	
 	// PLL
@@ -46,3 +102,4 @@ int main(void){
 	
 	return 0;
 }
+#endif

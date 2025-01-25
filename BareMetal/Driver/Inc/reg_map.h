@@ -221,8 +221,7 @@
 #define PLL_MUL_13							((uint8_t) 0x0B)
 #define PLL_MUL_14							((uint8_t) 0x0C)
 #define PLL_MUL_15							((uint8_t) 0x0D)
-#define PLL_MUL_16_0						((uint8_t) 0x0E)
-#define PLL_MUL_16_1						((uint8_t) 0x0F)
+#define PLL_MUL_16							((uint8_t) 0x0E)
 
 // USB Prescaler
 #define USB_DIV_1_5							((uint8_t) 0x00)

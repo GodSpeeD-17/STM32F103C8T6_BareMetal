@@ -56,6 +56,8 @@ typedef struct {
 	bus_config_t bus;
 	// Components Prescaler
 	component_config_t component;
+	// System Clock Source
+	uint8_t sys_clk_src;
 } rcc_config_t;
 
 /***
@@ -133,5 +135,11 @@ static void config_SYS_72MHz(void);
  * @note - HSE is used for PLL Clock Source
  */
 void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ);
+
+/**
+ * @brief Configures RCC
+ * @param configX RCC Configuration Structure
+ */
+void config_RCC(rcc_config_t* configX);
 
 #endif /* __RCC_H__ */
