@@ -38,19 +38,19 @@ static gpio_config_t OB_LED_config = {
 __attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
 	// Enable Clock for respective GPIO
 	if(GPIOx == GPIOA){
-		RCC->APB2ENR.REG |= (1 << 2);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPAEN;
 	}
 	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.REG |= (1 << 3);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPBEN;
 	}
 	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.REG |= (1 << 4);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPCEN;
 	}
 	else if (GPIOx == GPIOD){
-		RCC->APB2ENR.REG |= (1 << 5);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPDEN;
 	}
 	else if (GPIOx == GPIOE){
-		RCC->APB2ENR.REG |= (1 << 6);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPEEN;
 	}
 	// Error
 	else{
@@ -60,24 +60,24 @@ __attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIO
 
 /**
  * @brief Disables Clock for respective GPIO
- * @param[in] GPIOx The GPIO Port
+ * @param[in] GPIOx The GPIO Configuration Structure
  */
 __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
 	// Disable Clock for respective GPIO
 	if(GPIOx == GPIOA){
-		RCC->APB2ENR.REG &= ~(1 << 2);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;
 	}
 	else if (GPIOx == GPIOB){
-		RCC->APB2ENR.REG &= ~(1 << 3);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPBEN;
 	}
 	else if (GPIOx == GPIOC){
-		RCC->APB2ENR.REG &= ~(1 << 4);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPCEN;
 	}
 	else if (GPIOx == GPIOD){
-		RCC->APB2ENR.REG &= ~(1 << 5);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPDEN;
 	}
 	else if (GPIOx == GPIOE){
-		RCC->APB2ENR.REG &= ~(1 << 6);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPEEN;
 	}
 	// Error
 	else{
@@ -90,7 +90,7 @@ __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPI
  */
 __attribute__((always_inline)) inline void enable_AFIO_clk(void){
 	// Enable AFIO Clock
-	RCC->APB2ENR.REG |= (1 << 0);
+	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 }
 
 /**
@@ -98,7 +98,7 @@ __attribute__((always_inline)) inline void enable_AFIO_clk(void){
  */
 __attribute__((always_inline)) inline void disable_AFIO_clk(void){
 	// Disable AFIO Clock
-	RCC->APB2ENR.REG &= ~(1 << 0);
+	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 }
 
 /**

@@ -7,9 +7,12 @@
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
+	// Initialisation
+
 	// Infinite Loop
 	while(1){
-
+		// Loop Delay
+		delay_ms(LOOP_DELAY_MS);
 	}
 	// Return Value
 	return 0;

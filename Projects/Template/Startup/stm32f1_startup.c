@@ -1,28 +1,34 @@
-// Reference: https://maldus512.medium.com/bare-metal-programming-on-an-stm32f103-3a0f4e50ca29
-
-#include <stdint.h>
-#include "rcc.h"		// For 72MHz & SysTick Configuration
-#include "systick.h"	// SysTick Configuration
-
-#define ARM_IRQ                     ((uint8_t) 11)
-#define RESERVED                    ((uint8_t) 6)
-#define STM32F103C8_IRQ             ((uint8_t) 59)
-
-// Extern from Linker Script
-extern uint32_t _svector, _evector, _stext, _etext, _srodata, _erodata, _sidata, _sdata, _edata, _sbss, _ebss;
-extern void __estack(void); //  External end of stack pointer in SRAM
-
-// External Main Function (../App_Inc/main.h)
-__attribute__((weak, naked)) extern int main(void);    
-
-// Default Handler Function Prototype
-__attribute__((weak)) void Default_Handler(void);
-
 /*
+	Reference: https://maldus512.medium.com/bare-metal-programming-on-an-stm32f103-3a0f4e50ca29
 	weak: Allows to overwrite a function
 	alias: Calls the Function Name defined when addressed
-	section: Stores the code in the input partition
+	section: Stores the code in the partition declared in Linker Script
 */
+/*-------------------------------------------------------------------------------*/
+// Dependencies
+#include <stdint.h>
+// For System Clock Configuration (72MHz)
+#include "rcc.h"
+// SysTick Configuration
+#include "systick.h"
+// GPIO Configuration
+#include "gpio.h"
+/*-------------------------------------------------------------------------------*/
+// MACROS
+#define ARM_IRQ						((uint8_t) 11)
+#define RESERVED					((uint8_t) 6)
+#define STM32F103C8_IRQ				((uint8_t) 59)
+/*-------------------------------------------------------------------------------*/
+// Extern from Linker Script
+extern uint32_t _svector, _evector, _stext, _etext, _srodata, _erodata, _sidata, _sdata, _edata, _sbss, _ebss;
+//  External end of stack pointer in SRAM
+extern void __estack(void);
+/*-------------------------------------------------------------------------------*/
+// External Main Function
+__attribute__((weak, naked)) extern int main(void);    
+/*-------------------------------------------------------------------------------*/
+// Function Prototypes
+__attribute__((weak)) void Default_Handler(void);
 __attribute__((weak, naked, noreturn))          void Reset_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void NMI_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void HardFault_Handler(void);
@@ -92,120 +98,121 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel1_IRQHandler(vo
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel3_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(void);
-
-// Vector Table (Placed in .isr_vector section)
-__attribute__((section(".isr_vector"))) void (*const vector_table[ARM_IRQ + RESERVED + STM32F103C8_IRQ])(void) = {
-	__estack,
-	Reset_Handler,
-	NMI_Handler,
-	HardFault_Handler,
-	MemManage_Handler,
-	BusFault_Handler,
-	UsageFault_Handler,
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	SVC_Handler,
-	DebugMon_Handler,
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	PendSV_Handler,
-	SysTick_Handler,
-	WWDG_IRQHandler,
-	PVD_IRQHandler,
-	TAMPER_IRQHandler,
-	RTC_IRQHandler,
-	FLASH_IRQHandler,
-	RCC_IRQHandler, 
-	EXTI0_IRQHandler,
-	EXTI1_IRQHandler,
-	EXTI2_IRQHandler,
-	EXTI3_IRQHandler,
-	EXTI4_IRQHandler,
-	DMA1_Channel1_IRQHandler,
-	DMA1_Channel2_IRQHandler,
-	DMA1_Channel3_IRQHandler,
-	DMA1_Channel4_IRQHandler,
-	DMA1_Channel5_IRQHandler,
-	DMA1_Channel6_IRQHandler,
-	DMA1_Channel7_IRQHandler,
-	ADC1_2_IRQHandler,
-	USB_HP_CAN_TX_IRQHandler,
-	USB_LP_CAN_RX0_IRQHandler,
-	CAN_RX1_IRQHandler,
-	CAN_SCE_IRQHandler,
-	EXTI9_5_IRQHandler,
-	TIM1_BRK_IRQHandler,
-	TIM1_UP_IRQHandler,
-	TIM1_TRG_COM_IRQHandler,
-	TIM1_CC_IRQHandler,
-	TIM2_IRQHandler,
-	TIM3_IRQHandler,
-	TIM4_IRQHandler,
-	I2C1_EV_IRQHandler,
-	I2C1_ER_IRQHandler,
-	I2C2_EV_IRQHandler,
-	I2C2_ER_IRQHandler,
-	SPI1_IRQHandler,
-	SPI2_IRQHandler,
-	USART1_IRQHandler,
-	USART2_IRQHandler,
-	USART3_IRQHandler,
-	EXTI15_10_IRQHandler,
-	RTC_Alarm_IRQHandler,
-	0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
-	TIM8_BRK_IRQHandler,
-	TIM8_UP_IRQHandler,
-	TIM8_TRG_COM_IRQHandler,
-	TIM8_CC_IRQHandler,
-	ADC3_IRQHandler,
-	FSMC_IRQHandler,
-	SDIO_IRQHandler,
-	TIM5_IRQHandler,
-	SPI3_IRQHandler,
-	UART4_IRQHandler,
-	UART5_IRQHandler,
-	TIM6_IRQHandler,
-	TIM7_IRQHandler,
-	DMA2_Channel1_IRQHandler,
-	DMA2_Channel2_IRQHandler,
-	DMA2_Channel3_IRQHandler,
-	DMA2_Channel4_5_IRQHandler
+/*-------------------------------------------------------------------------------*/
+// Vector Table (Placed in ".isr_vector" section)
+__attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RESERVED + STM32F103C8_IRQ] = {
+	(uint32_t) __estack,
+	(uint32_t) Reset_Handler,
+	(uint32_t) NMI_Handler,
+	(uint32_t) HardFault_Handler,
+	(uint32_t) MemManage_Handler,
+	(uint32_t) BusFault_Handler,
+	(uint32_t) UsageFault_Handler,
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) SVC_Handler,
+	(uint32_t) DebugMon_Handler,
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) PendSV_Handler,
+	(uint32_t) SysTick_Handler,
+	(uint32_t) WWDG_IRQHandler,
+	(uint32_t) PVD_IRQHandler,
+	(uint32_t) TAMPER_IRQHandler,
+	(uint32_t) RTC_IRQHandler,
+	(uint32_t) FLASH_IRQHandler,
+	(uint32_t) RCC_IRQHandler, 
+	(uint32_t) EXTI0_IRQHandler,
+	(uint32_t) EXTI1_IRQHandler,
+	(uint32_t) EXTI2_IRQHandler,
+	(uint32_t) EXTI3_IRQHandler,
+	(uint32_t) EXTI4_IRQHandler,
+	(uint32_t) DMA1_Channel1_IRQHandler,
+	(uint32_t) DMA1_Channel2_IRQHandler,
+	(uint32_t) DMA1_Channel3_IRQHandler,
+	(uint32_t) DMA1_Channel4_IRQHandler,
+	(uint32_t) DMA1_Channel5_IRQHandler,
+	(uint32_t) DMA1_Channel6_IRQHandler,
+	(uint32_t) DMA1_Channel7_IRQHandler,
+	(uint32_t) ADC1_2_IRQHandler,
+	(uint32_t) USB_HP_CAN_TX_IRQHandler,
+	(uint32_t) USB_LP_CAN_RX0_IRQHandler,
+	(uint32_t) CAN_RX1_IRQHandler,
+	(uint32_t) CAN_SCE_IRQHandler,
+	(uint32_t) EXTI9_5_IRQHandler,
+	(uint32_t) TIM1_BRK_IRQHandler,
+	(uint32_t) TIM1_UP_IRQHandler,
+	(uint32_t) TIM1_TRG_COM_IRQHandler,
+	(uint32_t) TIM1_CC_IRQHandler,
+	(uint32_t) TIM2_IRQHandler,
+	(uint32_t) TIM3_IRQHandler,
+	(uint32_t) TIM4_IRQHandler,
+	(uint32_t) I2C1_EV_IRQHandler,
+	(uint32_t) I2C1_ER_IRQHandler,
+	(uint32_t) I2C2_EV_IRQHandler,
+	(uint32_t) I2C2_ER_IRQHandler,
+	(uint32_t) SPI1_IRQHandler,
+	(uint32_t) SPI2_IRQHandler,
+	(uint32_t) USART1_IRQHandler,
+	(uint32_t) USART2_IRQHandler,
+	(uint32_t) USART3_IRQHandler,
+	(uint32_t) EXTI15_10_IRQHandler,
+	(uint32_t) RTC_Alarm_IRQHandler,
+	(uint32_t) 0,	// Reserved (STM32F103C8 Datasheet NVIC Section)
+	(uint32_t) TIM8_BRK_IRQHandler,
+	(uint32_t) TIM8_UP_IRQHandler,
+	(uint32_t) TIM8_TRG_COM_IRQHandler,
+	(uint32_t) TIM8_CC_IRQHandler,
+	(uint32_t) ADC3_IRQHandler,
+	(uint32_t) FSMC_IRQHandler,
+	(uint32_t) SDIO_IRQHandler,
+	(uint32_t) TIM5_IRQHandler,
+	(uint32_t) SPI3_IRQHandler,
+	(uint32_t) UART4_IRQHandler,
+	(uint32_t) UART5_IRQHandler,
+	(uint32_t) TIM6_IRQHandler,
+	(uint32_t) TIM7_IRQHandler,
+	(uint32_t) DMA2_Channel1_IRQHandler,
+	(uint32_t) DMA2_Channel2_IRQHandler,
+	(uint32_t) DMA2_Channel3_IRQHandler,
+	(uint32_t) DMA2_Channel4_5_IRQHandler
 };
-
-// Reset Handler
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Function executed upon Reset 
+ * @note This function is called only when the processor is reset
+ */ 
 __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
-
 	// Step 1: Copy ".data" section from FLASH (pSrc) to ".data" section in SRAM (pDst)
 	uint32_t* pSrc = (uint32_t *) &_sidata;
 	uint32_t* pDst = (uint32_t *) &_sdata;
 	while(pDst < &_edata){
 		*pDst++ = *pSrc++;
 	}
-
 	// Step 2: Initialise .bss to 0 in SRAM (pDst)
 	pDst = (uint32_t *)&_sbss;
 	while(pDst < &_ebss){
 		*pDst++ = 0;
 	}
-
 	// Step 3: Configure SysClock @72MHz
 	config_RCC_72MHz();
-
 	// Step 4: Configure SysTick
 	config_SysTick(CoreClock/1000);
-
-	// Step 5: Call main()
+	// Step 5: Configure OB LED
+	config_OB_LED();
+	reset_OB_LED();
+	// Step 6: Call main()
 	main();
-
-	// Step 6: Infinite Loop (In case main() returns)
+	// Step 7: Infinite Loop (Backup)
 	while(1) 
 		(void) 0;
 }
-
+/*-------------------------------------------------------------------------------*/
 // Default Handler (Overwrite This)
 __attribute__((weak)) void Default_Handler(void){
 	// Infinite Loop
 	while(1) 
 		(void) 0;
 }
+/*-------------------------------------------------------------------------------*/
