@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+	  {
+		"label": "build",
+		"type": "shell",
+		"command": "make",
+		"args": ["flash"],  // This will build the target specified in your Makefile
+		"group": {
+		  "kind": "build",
+		  "isDefault": true
+		},
+		"problemMatcher": ["$gcc"],
+		"detail": "Build STM32F1 project"
+	  }
+	]
+  }
+  
