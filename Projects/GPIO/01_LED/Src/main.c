@@ -7,9 +7,11 @@
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
+	__disable_irq();
 	// GPIO Configuration
 	config_GPIO(&gpio_LED_config);
 	set_OB_LED();
+	__enable_irq();
 	// Infinite Loop
 	while(1){
 		// Toggle LED
