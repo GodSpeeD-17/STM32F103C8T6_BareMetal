@@ -7,15 +7,29 @@
 #ifndef __USART_H__
 #define __USART_H__
 
+/*************************************** Dependency ********************************************/
+#include "reg_map.h"
 #include "rcc.h"    // USART Clock
 #include "gpio.h"   // GPIO Struct
 #include "nvic.h"   // NVIC Enable
+#include <stdarg.h> // va_list
+/*************************************** Dependency ********************************************/
 
-// Local Separation Function
+/*************************************** MACROs ********************************************/
+#define USART1_TX_GPIO					(GPIOA)
+#define USART1_TX_PIN					(GPIO_PIN_9)
+#define USART1_RX_GPIO					(GPIOA)
+#define USART1_RX_PIN					(GPIO_PIN_10)
+#define config_USART1()					(config_USART(&USART1_Config))
+#define USART1_putc(X)					(USART_putc(&USART1_Config, ((char)(X))))
+#define USART1_puts(X)					(USART_puts(&USART1_Config, ((const char *)(X))))
 #define DEF_SEP_LEN						((uint8_t) 50)
-#define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN)) 
+#define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN))
+#define USART1_DEF_SEP()				(DEF_SEP(&USART1_Config))
+/*************************************** MACROs ********************************************/
 
-// UART Configuration Structure
+/*************************************** USART Configuration Structure ********************************************/
+// USART Configuration Structure
 typedef struct {
 	// GPIO Configuration Structure
 	gpio_config_t* TX_GPIO_CONFIGx;
@@ -43,6 +57,39 @@ typedef struct {
 	// Enable RX Register Not Empty (RXNE) Interrupt
 	uint8_t RXNEIE: 1; 
 } usart_config_t;
+/*************************************** USART Configuration Structure ********************************************/
+
+/*************************************** USART1 ********************************************/
+// TX GPIO Configuration Structure
+static gpio_config_t USART1_TX_GPIO_Config = {
+	.GPIOx = USART1_TX_GPIO,
+	.PINx = USART1_TX_PIN,
+	.MODEx = MODE_OUT_50MHz,
+	.CNFx = CNF_OUT_AF_PP,
+};
+// RX GPIO Configuration Structure
+static gpio_config_t USART1_RX_GPIO_Config = {
+	.GPIOx = USART1_RX_GPIO,
+	.PINx = USART1_RX_PIN,
+	.MODEx = MODE_IN,
+	.CNFx = CNF_IN_FLOAT,
+};
+// Configuration Structure (Interrupt Disabled)
+usart_config_t USART1_Config = {
+	.USARTx = USART1,
+	.TX_GPIO_CONFIGx = &USART1_TX_GPIO_Config,
+	.RX_GPIO_CONFIGx = &USART1_RX_GPIO_Config,
+	.word_length = USARTx_WORD_8_BITS,
+	.baud_rate = USARTx_BAUD_9600,
+	.stop_bits = USARTx_STOP_1_BIT,
+	.RXE = USARTx_RX_ENABLE,
+	.TXE = USARTx_TX_ENABLE,
+	.enable_parity = USARTx_PARITY_DISABLE,
+	.parity_selection = USARTx_PARITY_EVEN,
+	.RXNEIE = USARTx_RXNEIE_DISABLE,
+	.TCIE = USARTx_TCIE_DISABLE,
+};
+/*************************************** USART1 ********************************************/
 
 /**
  * @brief Enables the Clock to USART Module

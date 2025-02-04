@@ -25,9 +25,9 @@ void config_USART(usart_config_t* USART_CONFIGx){
 	if(USART_CONFIGx->USARTx == USART3)
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB1Clock/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
-	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << 12);
+	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
 	// Configure Rest of the Parameters
-	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << 12) | ((USART_CONFIGx->enable_parity & 0x01) << 10) | ((USART_CONFIGx->parity_selection & 0x01) << 9) | ((USART_CONFIGx->TXEIE & 0x01) << 7) | ((USART_CONFIGx->TCIE & 0x01) << 6) | ((USART_CONFIGx->RXNEIE & 0x01) << 5) | ((USART_CONFIGx->TXE & 0x01) << 3) | ((USART_CONFIGx->RXE & 0x01) << 2));
+	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << USART_CR1_M_Pos) | ((USART_CONFIGx->enable_parity & 0x01) << USART_CR1_PCE_Pos) | ((USART_CONFIGx->parity_selection & 0x01) << USART_CR1_PS_Pos) | ((USART_CONFIGx->TXEIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->TCIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
 	// IRQ Enable
 	if(USART_CONFIGx->TCIE || USART_CONFIGx->TXEIE || USART_CONFIGx->RXNEIE)
 		enable_NVIC_IRQ(get_USARTx_IRQn(USART_CONFIGx));
@@ -40,7 +40,7 @@ void config_USART(usart_config_t* USART_CONFIGx){
  */
 void USART_putc(usart_config_t* USART_CONFIGx, const char c){
 	// Wait for TX to be Empty
-	while (!(USART_CONFIGx->USARTx->SR.REG & (1 << 7)));
+	while (!(USART_CONFIGx->USARTx->SR.REG & USART_SR_TXE_Msk));
 	// Transfer the data 
 	USART_CONFIGx->USARTx->DR.REG = (c & 0x000000FF);
 }
@@ -52,11 +52,11 @@ void USART_putc(usart_config_t* USART_CONFIGx, const char c){
  */
 uint16_t USART_getc(usart_config_t* USART_CONFIGx){
 	// Result
-	uint16_t result = 0;
+	uint16_t data = 0;
 	// Read the Data Register
-	result = USART_CONFIGx->USARTx->DR.REG;
+	data = USART_CONFIGx->USARTx->DR.REG;
 	// Return Result
-	return result;
+	return data;
 }
 
 /**
