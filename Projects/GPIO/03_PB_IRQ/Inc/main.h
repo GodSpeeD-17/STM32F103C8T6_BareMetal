@@ -28,6 +28,7 @@ exti_config_t PB_EXTI_Config = {
 };
 /*-------------------------------------------------------------------------------*/
 // MACROS
+#define BOTH_TRIGGER	// Trigger both rising and falling edge; Comment it out for only rising edge
 #define LOOP_DELAY_MS						((uint32_t) 1000)
 /*-------------------------------------------------------------------------------*/
 
