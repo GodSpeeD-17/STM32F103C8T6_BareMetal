@@ -17,24 +17,21 @@ void config_GPIO(gpio_config_t* GPIO_CONFIGx){
 		return;
 	
 	// Local Variables
-	uint32_t reg, shift, mask;
+	uint32_t reg = 0x00, shift = 0x00;
     // Enable GPIO Clock
     enable_GPIO_clk(GPIO_CONFIGx->GPIOx);
-
-	// Alternate Function
+	// Alternate Function Clock
 	if((GPIO_CONFIGx->CNFx == CNF_OUT_AF_OD) || (GPIO_CONFIGx->CNFx == CNF_OUT_AF_PP))
 		enable_AFIO_clk();
 
-    // Determine the register, shift, and mask based on the pin number
+    // Determine the register, shift based on the pin number
     if (GPIO_CONFIGx->PINx <= GPIO_PIN_7){
         reg = GPIO_CONFIGx->GPIOx->CRL.REG;
         shift = GPIO_CONFIGx->PINx * 4;
-        mask = 0x0F << shift;
     } 
 	else if (GPIO_CONFIGx->PINx <= GPIO_PIN_15){
         reg = GPIO_CONFIGx->GPIOx->CRH.REG;
         shift = (GPIO_CONFIGx->PINx - (uint8_t)8) * 4;
-        mask = 0x0F << shift;
     }
 
 	// Pull Up
@@ -53,7 +50,7 @@ void config_GPIO(gpio_config_t* GPIO_CONFIGx){
     }
 
     // Clear the current mode and configuration bits
-    reg &= ~mask;
+    reg &= ~(0x0F << shift);
 	// Update the configuration
 	reg |= (uint32_t)((GPIO_CONFIGx->CNFx << (shift + 2) | GPIO_CONFIGx->MODEx << shift));
 
@@ -69,12 +66,13 @@ void config_GPIO(gpio_config_t* GPIO_CONFIGx){
 /**
  * @brief Retrieves the state of GPIO Pin
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[out] pin_state Pin State
  */
 uint8_t get_GPIO(gpio_config_t* GPIO_CONFIGx){
 	// Result
-	uint32_t result = 0xFFFFFFFF;
+	uint32_t pin_state = 0xFFFFFFFF;
 	// Get State
-	result = (uint32_t)(GPIO_CONFIGx->GPIOx->IDR.REG & (1 << GPIO_CONFIGx->PINx));
+	pin_state = (uint32_t)(GPIO_CONFIGx->GPIOx->IDR.REG & (1 << GPIO_CONFIGx->PINx));
 	// Return Result
-	return (uint8_t)(result >> GPIO_CONFIGx->PINx);
+	return (uint8_t)(pin_state >> GPIO_CONFIGx->PINx);
 }

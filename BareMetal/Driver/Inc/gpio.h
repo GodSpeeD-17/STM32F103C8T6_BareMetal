@@ -137,6 +137,7 @@ __attribute__((always_inline)) inline void toggle_GPIO(gpio_config_t* GPIO_CONFI
 /**
  * @brief Retrieves the state of GPIO Pin
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[out] pin_state Pin State
  */
 uint8_t get_GPIO(gpio_config_t* GPIO_CONFIGx);
 
