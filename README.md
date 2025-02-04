@@ -64,12 +64,13 @@ Few GitHub Repositories that I referred to during development phase:
 ```
 STM32F103C8T6
 ├── BareMetal
-│   ├── Core  # CMSIS Mapping
+│   ├── Core
 │   │   ├── Inc
 │   │   │   ├── adc_reg_map.h
 │   │   │   ├── advtim_reg_map.h
 │   │   │   ├── afio_reg_map.h
-│   │   │   ├── common.h  # Contains CMSIS definitions
+│   │   │   ├── cmsis_gcc.h
+│   │   │   ├── common.h
 │   │   │   ├── exti_reg_map.h
 │   │   │   ├── flash_reg_map.h
 │   │   │   ├── gpio_reg_map.h
@@ -80,7 +81,7 @@ STM32F103C8T6
 │   │   │   ├── usart_reg_map.h
 │   │   │   └── wwdg_reg_map.h
 │   │   └── Src
-│   └── Driver  # Making Drivers based upon "../Core/**"
+│   └── Driver
 │       ├── Inc
 │       │   ├── adc.h
 │       │   ├── bare_metal.h
@@ -90,7 +91,7 @@ STM32F103C8T6
 │       │   ├── nvic.h
 │       │   ├── pwm.h
 │       │   ├── rcc.h
-│       │   ├── reg_map.h # Contains Register Address Mapping
+│       │   ├── reg_map.h
 │       │   ├── systick.h
 │       │   └── usart.h
 │       └── Src
@@ -102,7 +103,35 @@ STM32F103C8T6
 │           ├── rcc.c
 │           └── systick.c
 ├── Projects
-│   └── Template  # Reference Code
+│   ├── GPIO
+│   │   ├── 01_LED
+│   │   │   ├── Inc
+│   │   │   │   └── main.h
+│   │   │   ├── Makefile
+│   │   │   ├── Src
+│   │   │   │   └── main.c
+│   │   │   └── Startup
+│   │   │       ├── stm32f1_ls.ld
+│   │   │       └── stm32f1_startup.c
+│   │   ├── 02_PB_Poll
+│   │   │   ├── Inc
+│   │   │   │   └── main.h
+│   │   │   ├── Makefile
+│   │   │   ├── Src
+│   │   │   │   └── main.c
+│   │   │   └── Startup
+│   │   │       ├── stm32f1_ls.ld
+│   │   │       └── stm32f1_startup.c
+│   │   └── 03_PB_IRQ
+│   │       ├── Inc
+│   │       │   └── main.h
+│   │       ├── Makefile
+│   │       ├── Src
+│   │       │   └── main.c
+│   │       └── Startup
+│   │           ├── stm32f1_ls.ld
+│   │           └── stm32f1_startup.c
+│   └── Template
 │       ├── Inc
 │       │   └── main.h
 │       ├── Makefile
@@ -110,7 +139,7 @@ STM32F103C8T6
 │       │   └── main.c
 │       └── Startup
 │           ├── stm32f1_ls.ld
-│           └── stm32f1_startup.c # CoreClock(72MHz) + SysTick(1ms)
+│           └── stm32f1_startup.c
 ├── README.md
 ├── Reference_Docs
 │   ├── Arm Cortex M3 Reference.pdf
