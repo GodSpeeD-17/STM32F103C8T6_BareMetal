@@ -3,7 +3,7 @@
  *  Created on: 17/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
-
+// Dependency
 #include "exti.h"
 
 /**
@@ -52,7 +52,7 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	reg |= (temp << pin);
 
 	// Enable Alternate Function
-	RCC->APB2ENR.BIT.AFIOEN = BIT_SET;
+	enable_AFIO_clk();
 
 	// Write to Appropriate Register 
 	if(PINx < GPIO_PIN_4){
@@ -76,26 +76,21 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
  * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
  */
 void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
-
 	// Trigger Selection
 	switch (TRIGx){
-	
 		// Falling Edge 
 		case EXTI_TRIG_FALLING:
 			EXTI->FTSR.REG |= (1 << PINx);
 		break;
-
 		// Rising Edge 
 		case EXTI_TRIG_RISING:
 			EXTI->RTSR.REG |= (1 << PINx);
 		break;
-		
 		// Both Edge 
 		case EXTI_TRIG_BOTH:
 			EXTI->RTSR.REG |= (1 << PINx);
 			EXTI->FTSR.REG |= (1 << PINx);
 		break;
-		
 		// Error
 		default:
 			return;
