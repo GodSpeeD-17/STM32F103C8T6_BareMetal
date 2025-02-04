@@ -10,7 +10,7 @@ int main(){
 	// Initialisation
 	config_GPIO(&PB_GPIO_Config);
 	// Infinite Loop
-	while(NEW_STATUS){
+	while(1){
 		// Button Pressed
 		if(get_GPIO(&PB_GPIO_Config)){
 			// Set OB LED
@@ -24,6 +24,6 @@ int main(){
 		delay_ms(LOOP_DELAY_MS);
 	}
 	// Return Value
-	return OLD_STATUS;
+	return 0;
 }
 /*-------------------------------------------------------------------------------*/
