@@ -1,0 +1,2 @@
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/adc.c:15:6:config_ADC	64	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/adc.c:61:10:get_ADC_data	24	static

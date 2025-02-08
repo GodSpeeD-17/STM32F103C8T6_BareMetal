@@ -2,17 +2,25 @@
 	"version": "2.0.0",
 	"tasks": [
 	  {
-		"label": "build",
+		"label": "Build Project",
 		"type": "shell",
 		"command": "make",
-		"args": ["flash"],  // This will build the target specified in your Makefile
+		"args": ["all"],
 		"group": {
 		  "kind": "build",
 		  "isDefault": true
 		},
 		"problemMatcher": ["$gcc"],
-		"detail": "Build STM32F1 project"
+		"detail": "Build the current project using Makefile"
+	  },
+	  {
+		"label": "Clean Project",
+		"type": "shell",
+		"command": "make",
+		"args": ["clean"],
+		"group": "build",
+		"problemMatcher": [],
+		"detail": "Clean the build directory"
 	  }
 	]
   }
-  
