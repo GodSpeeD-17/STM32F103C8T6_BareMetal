@@ -19,8 +19,8 @@ OBJCOPY = $(TRIPLE)-objcopy
 
 # Include directories
 INCFLAGS := -I$(PROJECT_DIR)/BareMetal/Core/Inc \
-            -I$(PROJECT_DIR)/BareMetal/Driver/Inc \
-            -I$(shell pwd)/Inc
+			-I$(PROJECT_DIR)/BareMetal/Driver/Inc \
+			-I$(shell pwd)/Inc
 
 # Compiler flags
 CFLAGS := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCFLAGS) -std=gnu11 -O0 -Wall -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103xB
@@ -43,10 +43,9 @@ SRC_DIR := $(shell pwd)/Src
 STARTUP_DIR := $(shell pwd)/Startup
 
 # Use wildcard to gather all .c/.s files from the directories
-SRCS := $(wildcard $(PROJECT_DIR)/BareMetal/Core/Src/*.c) \
-        $(wildcard $(PROJECT_DIR)/BareMetal/Driver/Src/*.c) \
-        $(wildcard $(SRC_DIR)/*.c) \
-        $(wildcard $(STARTUP_DIR)/*.c)
+SRCS := $(wildcard $(PROJECT_DIR)/BareMetal/Driver/Src/*.c) \
+		$(wildcard $(SRC_DIR)/*.c) \
+		$(wildcard $(STARTUP_DIR)/*.c)
 
 # Object files
 OBJS := $(SRCS:.c=.o)
@@ -96,15 +95,88 @@ info:
 # All target
 all: $(BUILD_DIR)/$(TARGET).bin
 	@echo "***********************************************************************"
-	@echo "Build Successful"
+	@echo "Build Successful!"
 	@echo "***********************************************************************"
 
 # Clean target
 clean:
-	rm -r $(BUILD_DIR) || true
+	@rm -r $(BUILD_DIR) || true
+	@rm -r ./.vscode || true
 	@echo "***********************************************************************"
 	@echo "Cleaned Project"
 	@echo "***********************************************************************"
+
+
+# # Debug
+debug: $(BUILD_DIR)/$(TARGET).elf vscode generate_launch_json generate_settings_json generate_tasks_json
+	@echo "***********************************************************************"
+	@echo "Debug Configurations Ready!"
+	@echo "***********************************************************************"
+
+# Ensure the .vscode directory exists
+vscode:
+	@mkdir -p ./.vscode
+
+# launch.json
+generate_launch_json:
+	@echo '{' > .vscode/launch.json
+	@echo '  "version": "0.2.0",' >> .vscode/launch.json
+	@echo '  "configurations": [' >> .vscode/launch.json
+	@echo '    {' >> .vscode/launch.json
+	@echo '      "name": "Cortex-M3 Debug (STM32F103C8)",' >> .vscode/launch.json
+	@echo '      "executable": "$(BUILD_DIR)/$(TARGET).elf",' >> .vscode/launch.json
+	@echo '      "request": "launch",' >> .vscode/launch.json
+	@echo '      "type": "cortex-debug",' >> .vscode/launch.json
+	@echo '      "servertype": "openocd",' >> .vscode/launch.json
+	@echo '      "device": "STM32F103C8",' >> .vscode/launch.json
+	@echo '      "configFiles": [' >> .vscode/launch.json
+	@echo '        "$(PROJECT_DIR)/BareMetal/Core/Src/stlink.cfg",' >> .vscode/launch.json
+	@echo '        "$(PROJECT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"' >> .vscode/launch.json
+	@echo '      ],' >> .vscode/launch.json
+	@echo '      "svdFile": "$(PROJECT_DIR)/BareMetal/Core/Src/STM32F103.svd",' >> .vscode/launch.json
+	@echo '      "runToEntryPoint": "main",' >> .vscode/launch.json
+	@echo '    }' >> .vscode/launch.json
+	@echo '  ]' >> .vscode/launch.json
+	@echo '}' >> .vscode/launch.json
+
+# settings.json
+generate_settings_json:
+	@echo '{' > .vscode/settings.json
+	@echo '    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",' >> .vscode/settings.json
+	@echo '    "cortex-debug.openocdPath": "/usr/local/bin/openocd",' >> .vscode/settings.json
+	@echo '    "cortex-debug.stutilPath": "/usr/bin/st-util",' >> .vscode/settings.json
+	@echo '    "cortex-debug.variableUseNaturalFormat": false' >> .vscode/settings.json
+	@echo '}' >> .vscode/settings.json
+
+# tasks.json
+generate_tasks_json:
+	@mkdir -p .vscode
+	@echo '{' > .vscode/tasks.json
+	@echo '    "version": "2.0.0",' >> .vscode/tasks.json
+	@echo '    "tasks": [' >> .vscode/tasks.json
+	@echo '        {' >> .vscode/tasks.json
+	@echo '            "label": "Build Project",' >> .vscode/tasks.json
+	@echo '            "type": "shell",' >> .vscode/tasks.json
+	@echo '            "command": "make",' >> .vscode/tasks.json
+	@echo '            "args": ["all"],' >> .vscode/tasks.json
+	@echo '            "group": {' >> .vscode/tasks.json
+	@echo '                "kind": "build",' >> .vscode/tasks.json
+	@echo '                "isDefault": true' >> .vscode/tasks.json
+	@echo '            },' >> .vscode/tasks.json
+	@echo '            "problemMatcher": ["$$gcc"],' >> .vscode/tasks.json
+	@echo '            "detail": "Build the current project using Makefile"' >> .vscode/tasks.json
+	@echo '        },' >> .vscode/tasks.json
+	@echo '        {' >> .vscode/tasks.json
+	@echo '            "label": "Clean Project",' >> .vscode/tasks.json
+	@echo '            "type": "shell",' >> .vscode/tasks.json
+	@echo '            "command": "make",' >> .vscode/tasks.json
+	@echo '            "args": ["clean"],' >> .vscode/tasks.json
+	@echo '            "group": "build",' >> .vscode/tasks.json
+	@echo '            "problemMatcher": [],' >> .vscode/tasks.json
+	@echo '            "detail": "Clean the build directory"' >> .vscode/tasks.json
+	@echo '        }' >> .vscode/tasks.json
+	@echo '    ]' >> .vscode/tasks.json
+	@echo '}' >> .vscode/tasks.json
 
 # Include dependency files
 -include $(OBJS:.o=.d)
