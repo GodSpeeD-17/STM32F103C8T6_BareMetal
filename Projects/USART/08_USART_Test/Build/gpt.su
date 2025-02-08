@@ -1,3 +1,0 @@
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/gpt.c:66:6:config_GPT	64	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/gpt.c:110:10:get_GPT_freq	24	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/gpt.c:141:6:GPT_delay_ms	48	static

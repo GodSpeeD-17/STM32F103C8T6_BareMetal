@@ -1,5 +1,0 @@
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/systick.c:20:6:config_SysTick	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/systick.c:36:6:delay_ms	32	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/systick.c:47:10:get_curr_ticks	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/systick.c:61:6:set_curr_ticks	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/systick.c:70:28:SysTick_Handler	4	static
