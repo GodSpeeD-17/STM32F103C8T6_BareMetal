@@ -1,23 +1,22 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-		{
-			"name": "Debug STM32F1",
-			"type": "cortex-debug",
-			"request": "launch",
-			"executable": "../Build/main.elf",
-			"servertype": "openocd",
-			"cwd": "${workspaceFolder}",
-			"configFiles": [
-				"/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Core/openocd.cfg"
-			],
-			"device": "STM32F103xB",
-			"interface": "stlink",
-			"runToMain": true,
-			"preLaunchTask": "build",
-			"postRestartCommands": [
-				"monitor reset halt"
-			]
-		}
+	  {
+		"name": "Cortex-M3 Debug (STM32F103C8)",
+		"cwd": "${workspaceFolder}",
+		// Change this as per project
+		"executable": "/Build/main.elf",
+		"request": "launch",
+		"type": "cortex-debug",
+		"servertype": "openocd",
+		"device": "STM32F103C8",
+		"configFiles": [
+		  "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Core/Src/stlink.cfg",
+		  "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Core/Src/stm32f1x.cfg"
+		],
+		"svdFile": "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Core/Src/STM32F103.svd",
+		"runToEntryPoint": "main",
+		"preLaunchTask": "Build Project"
+	  }
 	]
 }
