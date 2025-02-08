@@ -16,7 +16,7 @@
 #include "pwm.h"
 #include "rcc.h"
 #include "systick.h"
-#include "gpt.h"
+#include "timer.h"
 #include "usart.h"
 
 #endif /* __BARE_METAL_H__ */

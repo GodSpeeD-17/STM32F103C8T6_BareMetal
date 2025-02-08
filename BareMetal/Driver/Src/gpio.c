@@ -11,11 +11,6 @@
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
 void config_GPIO(gpio_config_t* GPIO_CONFIGx){
-	
-	// Error Check
-	if(!IS_GPIO_STRUCTURE_VALID(GPIO_CONFIGx)) 
-		return;
-	
 	// Local Variables
 	uint32_t reg = 0x00, shift = 0x00;
     // Enable GPIO Clock

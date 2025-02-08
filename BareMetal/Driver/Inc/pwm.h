@@ -9,12 +9,12 @@
 #define __PWM_H__
 
 // Dependency
-#include "gpt.h"
+#include "timer.h"
 
 // PWM Configuration Structure
 typedef struct {
 	// Timer Configuration Structure
-	gpt_config_t* GPT_CONFIGx;
+	timer_config_t* TIM_CONFIGx;
 	// PWM Mode
 	TIMx_OCM_MODE pwm_mode;
 	// PWM Active Polarity
@@ -32,15 +32,15 @@ typedef struct {
  */
 __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
 	// Stop if already running
-	if(PWMx->GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN){
-		PWMx->GPT_CONFIGx->GP_TIMx->CR1.BIT.CEN = 0;
+	if(PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN){
+		PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN = 0;
 	}
 	// Clear the update flag
-	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= ~BIT_SET;
+	PWMx->TIM_CONFIGx->TIMx->SR.REG &= ~BIT_SET;
 	// Enable Channel
-	enable_GPT_CH(PWMx->GPT_CONFIGx);
+	enable_GPT_CH(PWMx->TIM_CONFIGx);
 	// Enable Timer
-	enable_GPT(PWMx->GPT_CONFIGx);
+	enable_GPT(PWMx->TIM_CONFIGx);
 }
 
 /**
@@ -50,11 +50,11 @@ __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
  */
 __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
 	// Disable Timer
-	disable_GPT(PWMx->GPT_CONFIGx);
+	disable_GPT(PWMx->TIM_CONFIGx);
 	// Disable Channel
-	disable_GPT_CH(PWMx->GPT_CONFIGx);
+	disable_GPT_CH(PWMx->TIM_CONFIGx);
 	// Clear the update flag
-	PWMx->GPT_CONFIGx->GP_TIMx->SR.REG &= (uint32_t)~(1 << 0);
+	PWMx->TIM_CONFIGx->TIMx->SR.REG &= (uint32_t)~(1 << 0);
 }
 
 /**
@@ -65,7 +65,7 @@ __attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx)
 	// Final Result
 	uint16_t result;
 	// Store the Value
-	result = (((PWMx->GPT_CONFIGx->GP_TIMx->ARR) + 1) * PWMx->duty_cycle);
+	result = (((PWMx->TIM_CONFIGx->TIMx->ARR) + 1) * PWMx->duty_cycle);
 	result /= 100;
 	result -= 1;
 	// Return the final Calculated Value
@@ -78,9 +78,9 @@ __attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx)
  */
 __attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
 	// Enable Timer
-	enable_GPT(PWMx->GPT_CONFIGx);
+	enable_GPT(PWMx->TIM_CONFIGx);
 	// Enable Channel
-	enable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
+	enable_GPT_multi_CH(PWMx->TIM_CONFIGx, channel);
 }
 
 /**
@@ -89,9 +89,9 @@ __attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t*
  */
 __attribute__((always_inline)) inline void stop_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
 	// Disable Channel
-	disable_GPT_multi_CH(PWMx->GPT_CONFIGx, channel);
+	disable_GPT_multi_CH(PWMx->TIM_CONFIGx, channel);
 	// Disable Timer
-	disable_GPT(PWMx->GPT_CONFIGx);
+	disable_GPT(PWMx->TIM_CONFIGx);
 }
 
 /**
@@ -120,10 +120,10 @@ void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel);
  */
 __attribute__((always_inline)) inline void load_PWM_default(pwm_config_t* PWM_CONFIGx){
 	// Load Default Timer Value
-	load_GPT_default(PWM_CONFIGx->GPT_CONFIGx);
+	load_GPT_default(PWM_CONFIGx->TIM_CONFIGx);
 	// Update the GPIO Configuration
-	PWM_CONFIGx->GPT_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
-	PWM_CONFIGx->GPT_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
+	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
+	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
 	// PWM Mode (Normal Mode)
 	PWM_CONFIGx->pwm_mode = TIMx_OCM_PWM_NORMAL;
 	// Duty Cycle (Minimum)
