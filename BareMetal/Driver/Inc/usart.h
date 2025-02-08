@@ -20,12 +20,12 @@
 #define USART1_TX_PIN					(GPIO_PIN_9)
 #define USART1_RX_GPIO					(GPIOA)
 #define USART1_RX_PIN					(GPIO_PIN_10)
-#define config_USART1()					(config_USART(&USART1_Config))
 #define USART1_putc(X)					(USART_putc(&USART1_Config, ((char)(X))))
 #define USART1_puts(X)					(USART_puts(&USART1_Config, ((const char *)(X))))
 #define DEF_SEP_LEN						((uint8_t) 50)
 #define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN))
 #define USART1_DEF_SEP()				(DEF_SEP(&USART1_Config))
+#define config_USART1()					(config_USART(&USART1_Config))
 #define enable_USART1()					(enable_USART(&USART1_Config))
 /*************************************** MACROs ********************************************/
 
@@ -202,7 +202,7 @@ __attribute__((always_inline)) inline void sep(usart_config_t* USART_CONFIGx, ch
  * @brief Transmits formatted data on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] format The formatted string
- * @note 'float' is not yet supported
+ * @note `float` decimal restricted max to 6 places
  */
 void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...);
 

@@ -6,11 +6,11 @@
 // Headers
 #include "bare_metal.h"
 /*-------------------------------------------------------------------------------*/
-char* msg = "Hello World!\r\n";
-extern usart_config_t USART1_Config;
+
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
+extern usart_config_t USART1_Config;
 /*-------------------------------------------------------------------------------*/
 
 #endif /* __MAIN_H__ */ 

@@ -111,13 +111,12 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str){
  * @brief Transmits formatted data on USART
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] format The formatted string
- * @note 'float' is not yet supported
+ * @note `float` decimal restricted max to 6 places
  */
 void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...) {
 	// Starts VA
 	va_list args;
 	va_start(args, format);
-
 	// Data Present
 	while (*format) {
 		// Format Specifier Encountered
@@ -141,7 +140,7 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...) {
 			// Integer
 			else if(*format == 'd'){
 				// Handle integer
-				int num = va_arg(args, int);
+				int32_t num = va_arg(args, int);
 				// Storing the integer value after converting it to character
 				char buffer[10];
 				// Buffer Index
@@ -165,75 +164,67 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...) {
 					USART_putc(USART_CONFIGx, buffer[--i]);
 				}
 			}
-			/*
-			// Float
-			else if (*format == 'f') {
+			// Float Handling
+			else if(*format == '.' || *format == 'f'){
 				// Default precision
-				uint8_t precision = 4; // Default to 4 decimal places
-				format++; // Move to the next character
-
-				// Check for a precision specifier
-				if (*format == '.') {
-					format++; // Move past the '.'
-					// Read the precision value
-					if (*format >= '0' && *format <= '9') {
-						precision = 0; // Reset precision
-						while (*format >= '0' && *format <= '9') {
-							precision = precision * 10 + (*format - '0');
-							format++;
-						}
+				uint8_t precision = 4;
+				// Update Precision
+				if(*format == '.'){
+					// Go to next position
+					format++;
+					precision = (*format - '0');
+					// Wrap precision if greater than 6 
+					precision = (precision > 6)? 6 : precision;
+					// Go to next position
+					format++;
+				}
+				// Confirmation for float
+				if(*format == 'f'){
+					// Get float value
+					float f = (float)va_arg(args, double);
+					// Handle negative numbers
+					uint8_t is_negative = 0;
+					if(f < 0) {
+						is_negative = 1;
+						f = -f;
+					}
+					// Split into integer and fractional parts
+					int32_t int_part = (int32_t)f;
+					float frac_part = f - int_part;
+					// Convert fractional part to fixed-point integer
+					uint32_t frac_fixed = 0;
+					for(uint8_t i = 0; i < precision; i++) {
+						frac_part *= 10.0f;
+						frac_fixed = frac_fixed * 10 + (uint32_t)frac_part;
+						frac_part -= (uint32_t)frac_part;
+					}
+					// Print sign
+					if(is_negative) 
+						USART_putc(USART_CONFIGx, '-');
+					// Print integer part
+					char int_buf[12] = {'\0'};
+					uint8_t idx = 0;
+					do {
+						int_buf[idx++] = (int_part % 10) + '0';
+						int_part /= 10;
+					} while(int_part > 0);
+					// Print on the console
+					while(idx > 0) {
+						USART_putc(USART_CONFIGx, int_buf[--idx]);
+					}
+					// Print decimal point
+					USART_putc(USART_CONFIGx, '.');
+					// Print fractional part using fixed-point math
+					char frac_buf[6] = {'\0'};
+					for(uint8_t i = 0; i < precision; i++) {
+						frac_buf[i] = (frac_fixed % 10) + '0';
+						frac_fixed /= 10;
+					}
+					for(int8_t i = precision - 1; i >= 0; i--) {
+						USART_putc(USART_CONFIGx, frac_buf[i]);
 					}
 				}
-
-				// Handle float
-				float f = (float)va_arg(args, double); // float is promoted to double in variadic functions
-				char buffer[30]; // Buffer to hold the string representation of the float
-				int intPart = (int)f; // Get the integer part
-				float fracPart = f - intPart; // Get the fractional part
-				uint8_t i = 0; // Buffer Index
-
-				// Handle negative float
-				if (f < 0) {
-					USART_putc(USART_CONFIGx, '-');
-					intPart = -intPart;
-					fracPart = -fracPart;
-				}
-
-				// Convert integer part to string
-				do {
-					buffer[i++] = (intPart % 10) + '0';
-					intPart /= 10;
-				} while (intPart > 0);
-
-				// Print integer part in reverse order
-				while (i > 0) {
-					USART_putc(USART_CONFIGx, buffer[--i]);
-				}
-
-				// Print decimal point
-				USART_putc(USART_CONFIGx, '.');
-
-				// Convert fractional part to string based on specified precision
-				for (uint8_t j = 0; j < precision; j++) {
-					fracPart *= 10; // Shift left by one decimal place
-				}
-				int fracInt = (int)fracPart; // Get the integer part of the fraction
-
-				// Print the fractional part
-				for (uint8_t j = 0; j < precision; j++) {
-					USART_putc(USART_CONFIGx, ((fracInt / (int)(1 * (10 ^ (precision - j - 1)))) + '0')); // Print each digit
-					fracInt %= (int)(1 * (10 ^ (precision - j - 1))); // Remove the printed digit
-				}
 			}
-			*/
-			// Float
-			else if (*format == 'f') {
-				// Handle unsupported float
-				const char* unsupported_msg = "Unsupported float\n";
-				while (*unsupported_msg) {
-					USART_putc(USART_CONFIGx, *unsupported_msg++);
-				}
-			} 
 			// Handle unknown format specifier
 			else {
 				const char* unknown_msg = "Unknown format specifier\n";
@@ -249,7 +240,6 @@ void USART_printf(usart_config_t* USART_CONFIGx, const char* format, ...) {
 		// Go to next character
 		format++;
 	}
-
 	// Ends the VA
 	va_end(args);
 }
