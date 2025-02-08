@@ -19,8 +19,16 @@ typedef struct {
 	// GPIO Configuration Structure
 	gpio_config_t* GPIO_CONFIGx;
 	// Timer
+	// - `TIM2`
+	// - `TIM3`
+	// - `TIM4`
 	GPT_REG_STRUCT* TIMx;
 	// Timer Channel
+	// - `TIMx_CHANNEL_1`
+	// - `TIMx_CHANNEL_2`
+	// - `TIMx_CHANNEL_3`
+	// - `TIMx_CHANNEL_4`
+	// - `TIMx_CHANNEL_ALL`
 	uint8_t channel;
 	// Auto Reload Value
 	uint16_t auto_reload;
@@ -31,14 +39,26 @@ typedef struct {
 	// Initial Count Value
 	uint16_t count;
 	// Centre-Aligned Mode Selection
-	uint8_t cms_mode: 1;
+	// - `TIMx_CMS_EDGE`
+	// - `TIMx_CMS_IF_DOWN`
+	// - `TIMx_CMS_IF_UP`
+	// - `TIMx_CMS_IF_BOTH`
+	uint8_t cms_mode: 2;
 	// Count Direction
+	// - `TIMx_DIR_COUNT_UP`
+	// - `TIMx_DIR_COUNT_DOWN`
 	uint8_t direction: 1;
 	// Auto-Reload Preload Enable
+	// - `TIMx_ARPE_DISABLE`
+	// - `TIMx_ARPE_ENABLE`
 	uint8_t arpe: 1;
 	// One-Pulse Mode Enable
+	// - `TIMx_OPM_DISABLE`
+	// - `TIMx_OPM_ENABLE`
 	uint8_t one_pulse: 1;
 	// IRQ Enable
+	// - `TIMx_IRQ_DISABLE`
+	// - `TIMx_IRQ_ENABLE`
 	uint8_t enable_IRQ: 1;
 } timer_config_t;
 
@@ -313,9 +333,9 @@ __attribute__((always_inline)) inline void load_GPT_default(timer_config_t* TIM_
 	TIM_CONFIGx->frequency_Hz = FREQ_10kHz;
 	TIM_CONFIGx->count = DEFAULT_CNT_VALUE;
 	// CMS Mode Selection (Edge Mode Selection)
-	TIM_CONFIGx->cms_mode = CMS_EDGE;
+	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
 	// Counting Direction (Up Counting)
-	TIM_CONFIGx->direction = TIMx_COUNT_UP;
+	TIM_CONFIGx->direction = TIMx_DIR_COUNT_UP;
 	// ARPE
 	TIM_CONFIGx->arpe = TIMx_ARPE_ENABLE;
 	// One Pulse Mode (OFF)

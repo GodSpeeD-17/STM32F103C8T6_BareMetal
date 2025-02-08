@@ -320,33 +320,33 @@ extern volatile uint32_t APB2Clock;
 #define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
 /*********************************************** SysTick MACROS ***********************************************/
 
-/*********************************************** GPT MACROS ***********************************************/
+/*********************************************** TIMER MACROS ***********************************************/
 // Centre-align Mode Selection
-#define CMS_EDGE							((uint8_t) 0x00)
-#define CMS_IF_DOWN							((uint8_t) 0x01)
-#define CMS_IF_UP							((uint8_t) 0x02)
-#define CMS_IF_BOTH							((uint8_t) 0x03)
+#define TIMx_CMS_EDGE						((uint8_t) 0x00)
+#define TIMx_CMS_IF_DOWN					((uint8_t) 0x01)
+#define TIMx_CMS_IF_UP						((uint8_t) 0x02)
+#define TIMx_CMS_IF_BOTH					((uint8_t) 0x03)
 
 // Clock Division
-#define CKD_CLK_FREQ						((uint8_t) 0x00)
-#define CKD_CLK_2_FREQ						((uint8_t) 0x01)
-#define CKD_CLK_4_FREQ						((uint8_t) 0x02)
+#define TIMx_CKD_CLK_FREQ					((uint8_t) 0x00)
+#define TIMx_CKD_CLK_2_FREQ					((uint8_t) 0x01)
+#define TIMx_CKD_CLK_4_FREQ					((uint8_t) 0x02)
 
 // Master Mode Selection
-#define MMS_RESET							((uint8_t) 0x00)
-#define MMS_ENABLE							((uint8_t) 0x01)
-#define MMS_UPDATE							((uint8_t) 0x02)
-#define MMS_CMP_PULSE						((uint8_t) 0x03)
-#define MMS_CMP_OC1REF						((uint8_t) 0x04)
-#define MMS_CMP_OC2REF						((uint8_t) 0x05)
-#define MMS_CMP_OC3REF						((uint8_t) 0x06)
-#define MMS_CMP_OC4REF						((uint8_t) 0x07)
+#define TIMx_MMS_RESET						((uint8_t) 0x00)
+#define TIMx_MMS_ENABLE						((uint8_t) 0x01)
+#define TIMx_MMS_UPDATE						((uint8_t) 0x02)
+#define TIMx_MMS_CMP_PULSE					((uint8_t) 0x03)
+#define TIMx_MMS_CMP_OC1REF					((uint8_t) 0x04)
+#define TIMx_MMS_CMP_OC2REF					((uint8_t) 0x05)
+#define TIMx_MMS_CMP_OC3REF					((uint8_t) 0x06)
+#define TIMx_MMS_CMP_OC4REF					((uint8_t) 0x07)
 
 // Slave Mode Selection
-#define SMS_DISABLE							((uint8_t) 0x00)
-#define SMS_ENC_MODE1						((uint8_t) 0x01)
-#define SMS_ENC_MODE2						((uint8_t) 0x02)
-#define SMS_ENC_MODE3						((uint8_t) 0x03)
+#define TIMx_SMS_DISABLE					((uint8_t) 0x00)
+#define TIMx_SMS_ENC_MODE1					((uint8_t) 0x01)
+#define TIMx_SMS_ENC_MODE2					((uint8_t) 0x02)
+#define TIMx_SMS_ENC_MODE3					((uint8_t) 0x03)
 
 // TIM1 REMAP
 #define TIM1_NO_REMAP						((uint8_t) 0x00)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
@@ -378,16 +378,17 @@ extern volatile uint32_t APB2Clock;
 #define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
 
 // Counting Mode
-#define TIMx_MODE_NORMAL					((uint8_t) 0x00)    // Up if DIR = 0 else Down if DIR = 1
+// "Up" if DIR = 0; "Down" if DIR = 1
+#define TIMx_MODE_NORMAL					((uint8_t) 0x00)
 #define TIMx_MODE_ALT_IF_DOWN				((uint8_t) 0x01)
 #define TIMx_MODE_ALT_IF_UP					((uint8_t) 0x02)
 #define TIMx_MODE_ALT_IF_BOTH				((uint8_t) 0x03)
 
 // Direction 
-#define TIMx_COUNT_UP						((uint8_t) 0x00)
-#define TIMx_COUNT_DOWN						((uint8_t) 0x01)
+#define TIMx_DIR_COUNT_UP					((uint8_t) 0x00)
+#define TIMx_DIR_COUNT_DOWN					((uint8_t) 0x01)
 
-// Auto Reload Preload 
+// Auto Reload Preload Enable
 #define TIMx_ARPE_DISABLE					((uint8_t) 0x00)
 #define TIMx_ARPE_ENABLE					((uint8_t) 0x01)
 
@@ -423,7 +424,7 @@ extern volatile uint32_t APB2Clock;
 											 IS_VALID_GPT_DIRECTION((GPT_CONFIGx->direction)) && \
 											 IS_VALID_GPT_ARPE((GPT_CONFIGx->auto_reload_preload)) && \
 											 IS_VALID_GPT_OPM((GPT_CONFIGx->one_pulse)))									 
-/*********************************************** GPT MACROS ***********************************************/
+/*********************************************** TIMER MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
 // IMP: Store this value in ARR always to simplify the PWM calculation
