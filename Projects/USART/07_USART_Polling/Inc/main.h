@@ -6,7 +6,7 @@
 // Headers
 #include "bare_metal.h"
 /*-------------------------------------------------------------------------------*/
-char* msg = "Hello World!";
+char* msg = "Hello World!\r\n";
 extern usart_config_t USART1_Config;
 /*-------------------------------------------------------------------------------*/
 // MACROS

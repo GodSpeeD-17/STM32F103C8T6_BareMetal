@@ -9,7 +9,7 @@
 
 /*************************************** Dependency ********************************************/
 #include "reg_map.h"
-#include "rcc.h"    // USART Clock
+#include "rcc.h"    // Clocks (APB1/APB2)
 #include "gpio.h"   // GPIO Struct
 #include "nvic.h"   // NVIC Enable
 #include <stdarg.h> // va_list
@@ -26,6 +26,7 @@
 #define DEF_SEP_LEN						((uint8_t) 50)
 #define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN))
 #define USART1_DEF_SEP()				(DEF_SEP(&USART1_Config))
+#define enable_USART1()					(enable_USART(&USART1_Config))
 /*************************************** MACROs ********************************************/
 
 /*************************************** USART Configuration Structure ********************************************/
@@ -66,11 +67,11 @@ typedef struct {
 __attribute__((always_inline)) inline void enable_USART_clk(usart_config_t* USART_CONFIGx) {
 	// Enable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
-		RCC->APB2ENR.REG |= (1 << 14);
+		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
 	if(USART_CONFIGx->USARTx == USART2)
-		RCC->APB1ENR.REG |= (1 << 17);
+		RCC->APB1ENR.REG |= RCC_APB1ENR_USART2EN;
 	if(USART_CONFIGx->USARTx == USART3)
-		RCC->APB1ENR.REG |= (1 << 18);
+		RCC->APB1ENR.REG |= RCC_APB1ENR_USART3EN;
 }
 
 /**
@@ -80,11 +81,11 @@ __attribute__((always_inline)) inline void enable_USART_clk(usart_config_t* USAR
 __attribute__((always_inline)) inline void disable_USART_clk(usart_config_t* USART_CONFIGx) {
 	// Disable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
-		RCC->APB2ENR.REG &= ~(1 << 14);
+		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
 	if(USART_CONFIGx->USARTx == USART2)
-		RCC->APB1ENR.REG &= ~(1 << 17);
+		RCC->APB1ENR.REG &= ~RCC_APB1ENR_USART2EN;
 	if(USART_CONFIGx->USARTx == USART3)
-		RCC->APB1ENR.REG &= ~(1 << 18);
+		RCC->APB1ENR.REG &= ~RCC_APB1ENR_USART3EN;
 }
 
 /**
@@ -93,7 +94,7 @@ __attribute__((always_inline)) inline void disable_USART_clk(usart_config_t* USA
  */
 __attribute__((always_inline)) inline void enable_USART(usart_config_t* USART_CONFIGx) {
 	// Enable USART
-	USART_CONFIGx->USARTx->CR1.REG |= (1 << 13);
+	USART_CONFIGx->USARTx->CR1.REG |= USART_CR1_UE;
 }
 
 /**
@@ -102,7 +103,7 @@ __attribute__((always_inline)) inline void enable_USART(usart_config_t* USART_CO
  */
 __attribute__((always_inline)) inline void disable_USART(usart_config_t* USART_CONFIGx) {
 	// Disable USART
-	USART_CONFIGx->USARTx->CR1.REG &= ~(1 << 13);
+	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
 }
 
 /**
@@ -134,9 +135,9 @@ void config_USART(usart_config_t* USART_CONFIGx);
 void USART_putc(usart_config_t* USART_CONFIGx, const char c);
 
 /**
- * @brief Reads the USART DR
+ * @brief Reads the USARTx->DR
  * @param[in] USART_CONFIGx USART Configuration Structure
- * @returns The value of the USART DR
+ * @returns The value of the USARTx->DR
  */
 uint16_t USART_getc(usart_config_t* USART_CONFIGx);
 

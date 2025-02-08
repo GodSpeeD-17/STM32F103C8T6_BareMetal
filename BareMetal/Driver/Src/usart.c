@@ -52,9 +52,7 @@ void config_USART(usart_config_t* USART_CONFIGx){
 	// Configure Baud Rate
 	if(USART_CONFIGx->USARTx == USART1)
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB2Clock/(USART_CONFIGx->baud_rate));
-	if(USART_CONFIGx->USARTx == USART2)
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB1Clock/(USART_CONFIGx->baud_rate));
-	if(USART_CONFIGx->USARTx == USART3)
+	else
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB1Clock/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
 	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
@@ -78,9 +76,9 @@ void USART_putc(usart_config_t* USART_CONFIGx, const char c){
 }
 
 /**
- * @brief Reads the USART DR
+ * @brief Reads the USARTx->DR
  * @param[in] USART_CONFIGx USART Configuration Structure
- * @returns The value of the USART DR
+ * @returns The value of the USARTx->DR
  */
 uint16_t USART_getc(usart_config_t* USART_CONFIGx){
 	// Result

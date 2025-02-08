@@ -9,6 +9,7 @@
 int main(){
 	// Initialisation
 	config_USART1();
+	enable_USART1();
 	// Infinite Loop
 	while(1){
 		// Default Separate Function
