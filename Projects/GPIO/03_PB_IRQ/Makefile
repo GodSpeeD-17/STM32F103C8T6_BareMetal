@@ -108,7 +108,7 @@ clean:
 
 
 # # Debug
-debug: $(BUILD_DIR)/$(TARGET).elf vscode generate_launch_json generate_settings_json generate_tasks_json
+debug: $(BUILD_DIR)/$(TARGET).elf vscode generate_launch_json generate_settings_json generate_tasks_json generate_c_cpp_properties_json
 	@echo "***********************************************************************"
 	@echo "Debug Configurations Ready!"
 	@echo "***********************************************************************"
@@ -177,6 +177,27 @@ generate_tasks_json:
 	@echo '        }' >> .vscode/tasks.json
 	@echo '    ]' >> .vscode/tasks.json
 	@echo '}' >> .vscode/tasks.json
+
+# c_cpp_properties.json
+generate_c_cpp_properties_json:
+	@echo '{' > .vscode/c_cpp_properties.json
+	@echo '    "configurations": [' >> .vscode/c_cpp_properties.json
+	@echo '        {' >> .vscode/c_cpp_properties.json
+	@echo '            "name": "Linux",' >> .vscode/c_cpp_properties.json
+	@echo '            "includePath": [' >> .vscode/c_cpp_properties.json
+	@echo '                "$(PROJECT_DIR)/BareMetal/Core/Inc/**",' >> .vscode/c_cpp_properties.json
+	@echo '                "$(PROJECT_DIR)/BareMetal/Driver/Inc/**",' >> .vscode/c_cpp_properties.json
+	@echo '                "../Inc/**"' >> .vscode/c_cpp_properties.json
+	@echo '            ],' >> .vscode/c_cpp_properties.json
+	@echo '            "defines": [],' >> .vscode/c_cpp_properties.json
+	@echo '            "compilerPath": "/usr/bin/arm-none-eabi-gcc",' >> .vscode/c_cpp_properties.json
+	@echo '            "cStandard": "c11",' >> .vscode/c_cpp_properties.json
+	@echo '            "cppStandard": "gnu++17",' >> .vscode/c_cpp_properties.json
+	@echo '            "intelliSenseMode": "linux-gcc-arm"' >> .vscode/c_cpp_properties.json
+	@echo '        }' >> .vscode/c_cpp_properties.json
+	@echo '    ],' >> .vscode/c_cpp_properties.json
+	@echo '    "version": 4' >> .vscode/c_cpp_properties.json
+	@echo '}' >> .vscode/c_cpp_properties.json	
 
 # Include dependency files
 -include $(OBJS:.o=.d)

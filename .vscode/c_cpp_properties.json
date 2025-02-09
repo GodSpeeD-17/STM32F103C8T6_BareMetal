@@ -3,13 +3,16 @@
         {
             "name": "Linux",
             "includePath": [
+                "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Core/Inc/**",
+                "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Inc/**",
+                "../Inc/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c17",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-arm"
         }
     ],
     "version": 4
