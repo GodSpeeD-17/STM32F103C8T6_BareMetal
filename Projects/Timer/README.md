@@ -1,4 +1,4 @@
-# Timer
+# General Purpose Timer (TIM2 - TIM5)
 
 - Reference Manual (RM-008 Rev 21) 
 - Start Page: 365/1116
