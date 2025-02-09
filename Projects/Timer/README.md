@@ -1,6 +1,8 @@
 # Timer
 
-Reference Manual (RM-008 Rev 21): Page 365/1116
+Reference Manual (RM-008 Rev 21) 
+Start Page: 365/1116
+End Page: 424/1116
 General Purpose Timer: TIM2, TIM3, TIM4, TIM5 (APB1 Bus)
 
 ## Features
