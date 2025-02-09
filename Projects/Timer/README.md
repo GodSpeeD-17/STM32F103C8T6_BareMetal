@@ -20,7 +20,7 @@ General Purpose Timer: TIM2, TIM3, TIM4, TIM5 (APB1 Bus)
 
 
 ## Block Diagram:
-	![General Purpose Timer Block Diagram](images/Block%20Diagram.png)
+	![General Purpose Timer Block Diagram]([images/Block%20Diagram.png](https://github.com/GodSpeeD-17/STM32F103C8T6_BareMetal/blob/integration/Projects/Timer/images/Block%20Diagram.png))
 
 ## Basic Units
 
