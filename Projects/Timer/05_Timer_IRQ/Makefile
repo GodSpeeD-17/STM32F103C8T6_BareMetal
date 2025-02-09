@@ -1,7 +1,7 @@
 # Makefile for STM32F103C8T6 Baremetal Programming
 
 # Root directory
-PROJECT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
+ROOT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 
 # Target name
 TARGET := main
@@ -18,8 +18,8 @@ AS      = $(TRIPLE)-as
 OBJCOPY = $(TRIPLE)-objcopy
 
 # Include directories
-INCFLAGS := -I$(PROJECT_DIR)/BareMetal/Core/Inc \
-			-I$(PROJECT_DIR)/BareMetal/Driver/Inc \
+INCFLAGS := -I$(ROOT_DIR)/BareMetal/Core/Inc \
+			-I$(ROOT_DIR)/BareMetal/Driver/Inc \
 			-I$(shell pwd)/Inc
 
 # Compiler flags
@@ -43,7 +43,7 @@ SRC_DIR := $(shell pwd)/Src
 STARTUP_DIR := $(shell pwd)/Startup
 
 # Use wildcard to gather all .c/.s files from the directories
-SRCS := $(wildcard $(PROJECT_DIR)/BareMetal/Driver/Src/*.c) \
+SRCS := $(wildcard $(ROOT_DIR)/BareMetal/Driver/Src/*.c) \
 		$(wildcard $(SRC_DIR)/*.c) \
 		$(wildcard $(STARTUP_DIR)/*.c)
 
@@ -125,7 +125,7 @@ vscode_files: .vscode
 
 # launch.json
 generate_launch_json:
-	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(PROJECT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(PROJECT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(PROJECT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main"\n    }\n  ]\n}' > .vscode/launch.json
+	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main"\n    }\n  ]\n}' > .vscode/launch.json
 
 # settings.json
 generate_settings_json:
@@ -137,8 +137,15 @@ generate_tasks_json:
 
 # c_cpp_properties.json
 generate_c_cpp_properties_json:
-	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(PROJECT_DIR)/BareMetal/Core/Inc/**",\n                "$(PROJECT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json	
+	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(ROOT_DIR)/BareMetal/Core/Inc/**",\n                "$(ROOT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json	
 
+# Define the target for replacing Makefiles within $(ROOT_DIR)/Projects
+replace_makefiles:
+	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))" && \
+	echo "The Makefiles present in the following directory will be replaced:" && \
+	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec sh -c 'for f; do echo "Relative Path: $$(dirname $$f | sed "s|^$(ROOT_DIR)/Projects/||")/"; done' _ {} + && \
+	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec cp $$(pwd)/Makefile {} \;
+	@echo "All Makefiles inside Projects/**, except the one in $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd)), have been replaced!"
 
 # Include dependency files
 -include $(OBJS:.o=.d)
