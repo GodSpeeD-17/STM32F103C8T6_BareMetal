@@ -141,14 +141,6 @@ generate_c_cpp_properties_json:
 
 # Define the target for replacing Makefiles within $(ROOT_DIR)/Projects
 replace_makefiles:
-	@echo "Current directory: $$(pwd)" && \
-	echo "The following Makefiles will be replaced:" && \
-	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec echo "Would replace: {}" \; && \
-	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec cp $$(pwd)/Makefile {} \; && \
-	@echo "All Makefiles inside $(ROOT_DIR)/Projects, except the one in $$(pwd), have been replaced!"
-
-# Define the target for replacing Makefiles within $(ROOT_DIR)/Projects
-print_and_replace_makefiles:
 	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))" && \
 	echo "The Makefiles present in the following directory will be replaced:" && \
 	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec sh -c 'for f; do echo "Relative Path: $$(dirname $$f | sed "s|^$(ROOT_DIR)/Projects/||")/"; done' _ {} + && \
