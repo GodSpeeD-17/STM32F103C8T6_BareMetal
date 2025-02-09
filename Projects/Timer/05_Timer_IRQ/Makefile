@@ -106,98 +106,39 @@ clean:
 	@echo "Cleaned Project"
 	@echo "***********************************************************************"
 
-
-# # Debug
-debug: $(BUILD_DIR)/$(TARGET).elf vscode generate_launch_json generate_settings_json generate_tasks_json generate_c_cpp_properties_json
+# Debug
+debug: $(BUILD_DIR)/$(TARGET).elf vscode_files
 	@echo "***********************************************************************"
 	@echo "Debug Configurations Ready!"
 	@echo "***********************************************************************"
 
+# Generate all necessary files in .vscode directory
+vscode_files: .vscode
+	$(MAKE) generate_launch_json
+	$(MAKE) generate_settings_json
+	$(MAKE) generate_tasks_json
+	$(MAKE) generate_c_cpp_properties_json
+
 # Ensure the .vscode directory exists
-vscode:
+.vscode:
 	@mkdir -p ./.vscode
 
 # launch.json
 generate_launch_json:
-	@echo '{' > .vscode/launch.json
-	@echo '  "version": "0.2.0",' >> .vscode/launch.json
-	@echo '  "configurations": [' >> .vscode/launch.json
-	@echo '    {' >> .vscode/launch.json
-	@echo '      "name": "Cortex-M3 Debug (STM32F103C8)",' >> .vscode/launch.json
-	@echo '      "executable": "$(BUILD_DIR)/$(TARGET).elf",' >> .vscode/launch.json
-	@echo '      "request": "launch",' >> .vscode/launch.json
-	@echo '      "type": "cortex-debug",' >> .vscode/launch.json
-	@echo '      "servertype": "openocd",' >> .vscode/launch.json
-	@echo '      "device": "STM32F103C8",' >> .vscode/launch.json
-	@echo '      "configFiles": [' >> .vscode/launch.json
-	@echo '        "$(PROJECT_DIR)/BareMetal/Core/Src/stlink.cfg",' >> .vscode/launch.json
-	@echo '        "$(PROJECT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"' >> .vscode/launch.json
-	@echo '      ],' >> .vscode/launch.json
-	@echo '      "svdFile": "$(PROJECT_DIR)/BareMetal/Core/Src/STM32F103.svd",' >> .vscode/launch.json
-	@echo '      "runToEntryPoint": "main",' >> .vscode/launch.json
-	@echo '    }' >> .vscode/launch.json
-	@echo '  ]' >> .vscode/launch.json
-	@echo '}' >> .vscode/launch.json
+	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(PROJECT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(PROJECT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(PROJECT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main"\n    }\n  ]\n}' > .vscode/launch.json
 
 # settings.json
 generate_settings_json:
-	@echo '{' > .vscode/settings.json
-	@echo '    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",' >> .vscode/settings.json
-	@echo '    "cortex-debug.openocdPath": "/usr/local/bin/openocd",' >> .vscode/settings.json
-	@echo '    "cortex-debug.stutilPath": "/usr/bin/st-util",' >> .vscode/settings.json
-	@echo '    "cortex-debug.variableUseNaturalFormat": false' >> .vscode/settings.json
-	@echo '}' >> .vscode/settings.json
+	@printf '{\n    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",\n    "cortex-debug.openocdPath": "/usr/local/bin/openocd",\n    "cortex-debug.stutilPath": "/usr/bin/st-util",\n    "cortex-debug.variableUseNaturalFormat": false\n}' > .vscode/settings.json
 
 # tasks.json
 generate_tasks_json:
-	@mkdir -p .vscode
-	@echo '{' > .vscode/tasks.json
-	@echo '    "version": "2.0.0",' >> .vscode/tasks.json
-	@echo '    "tasks": [' >> .vscode/tasks.json
-	@echo '        {' >> .vscode/tasks.json
-	@echo '            "label": "Build Project",' >> .vscode/tasks.json
-	@echo '            "type": "shell",' >> .vscode/tasks.json
-	@echo '            "command": "make",' >> .vscode/tasks.json
-	@echo '            "args": ["all"],' >> .vscode/tasks.json
-	@echo '            "group": {' >> .vscode/tasks.json
-	@echo '                "kind": "build",' >> .vscode/tasks.json
-	@echo '                "isDefault": true' >> .vscode/tasks.json
-	@echo '            },' >> .vscode/tasks.json
-	@echo '            "problemMatcher": ["$$gcc"],' >> .vscode/tasks.json
-	@echo '            "detail": "Build the current project using Makefile"' >> .vscode/tasks.json
-	@echo '        },' >> .vscode/tasks.json
-	@echo '        {' >> .vscode/tasks.json
-	@echo '            "label": "Clean Project",' >> .vscode/tasks.json
-	@echo '            "type": "shell",' >> .vscode/tasks.json
-	@echo '            "command": "make",' >> .vscode/tasks.json
-	@echo '            "args": ["clean"],' >> .vscode/tasks.json
-	@echo '            "group": "build",' >> .vscode/tasks.json
-	@echo '            "problemMatcher": [],' >> .vscode/tasks.json
-	@echo '            "detail": "Clean the build directory"' >> .vscode/tasks.json
-	@echo '        }' >> .vscode/tasks.json
-	@echo '    ]' >> .vscode/tasks.json
-	@echo '}' >> .vscode/tasks.json
+	@printf '{\n    "version": "2.0.0",\n    "tasks": [\n        {\n            "label": "Build Project",\n            "type": "shell",\n            "command": "make",\n            "args": ["all"],\n            "group": {\n                "kind": "build",\n                "isDefault": true\n            },\n            "problemMatcher": ["$$gcc"],\n            "detail": "Build the current project using Makefile"\n        },\n        {\n            "label": "Clean Project",\n            "type": "shell",\n            "command": "make",\n            "args": ["clean"],\n            "group": "build",\n            "problemMatcher": [],\n            "detail": "Clean the build directory"\n        }\n    ]\n}' > .vscode/tasks.json
 
 # c_cpp_properties.json
 generate_c_cpp_properties_json:
-	@echo '{' > .vscode/c_cpp_properties.json
-	@echo '    "configurations": [' >> .vscode/c_cpp_properties.json
-	@echo '        {' >> .vscode/c_cpp_properties.json
-	@echo '            "name": "Linux",' >> .vscode/c_cpp_properties.json
-	@echo '            "includePath": [' >> .vscode/c_cpp_properties.json
-	@echo '                "$(PROJECT_DIR)/BareMetal/Core/Inc/**",' >> .vscode/c_cpp_properties.json
-	@echo '                "$(PROJECT_DIR)/BareMetal/Driver/Inc/**",' >> .vscode/c_cpp_properties.json
-	@echo '                "../Inc/**"' >> .vscode/c_cpp_properties.json
-	@echo '            ],' >> .vscode/c_cpp_properties.json
-	@echo '            "defines": [],' >> .vscode/c_cpp_properties.json
-	@echo '            "compilerPath": "/usr/bin/arm-none-eabi-gcc",' >> .vscode/c_cpp_properties.json
-	@echo '            "cStandard": "c11",' >> .vscode/c_cpp_properties.json
-	@echo '            "cppStandard": "gnu++17",' >> .vscode/c_cpp_properties.json
-	@echo '            "intelliSenseMode": "linux-gcc-arm"' >> .vscode/c_cpp_properties.json
-	@echo '        }' >> .vscode/c_cpp_properties.json
-	@echo '    ],' >> .vscode/c_cpp_properties.json
-	@echo '    "version": 4' >> .vscode/c_cpp_properties.json
-	@echo '}' >> .vscode/c_cpp_properties.json	
+	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(PROJECT_DIR)/BareMetal/Core/Inc/**",\n                "$(PROJECT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json	
+
 
 # Include dependency files
 -include $(OBJS:.o=.d)
