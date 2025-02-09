@@ -18,11 +18,12 @@
 
 - **Supports incremental (quadrature) encoder** and hall-sensor circuitry for positioning purposes
 
----
-## Block Diagram:
-	![General Purpose Timer Block Diagram](https://github.com/GodSpeeD-17/STM32F103C8T6_BareMetal/blob/integration/Projects/Timer/images/Block%20Diagram.png)
 
-## Basic Units
+## Block Diagram:
+![General Purpose Timer Block Diagram](images/Block%20Diagram.png)
+
+
+## TIMx Basic Units
 
 | Units               | Register  | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|
