@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef __GPT_REG_MAP_H__
-#define __GPT_REG_MAP_H__
+#ifndef __TIMER_REG_MAP_H__
+#define __TIMER_REG_MAP_H__
 
 #include "common.h"
 
@@ -238,7 +238,7 @@ typedef struct {
 	} DCR;
 	// TIMx DMA Address for full transfer register (DMAR)
     volatile uint32_t DMAR;
-} GPT_REG_STRUCT;
+} TIM_REG_STRUCT;
 
 
-#endif /* __GPT_REG_MAP_H__ */
+#endif /* __TIMER_REG_MAP_H__ */

@@ -18,11 +18,11 @@
 typedef struct {
 	// GPIO Configuration Structure
 	gpio_config_t* GPIO_CONFIGx;
-	// Timer
+	// General Purpose Timer
 	// - `TIM2`
 	// - `TIM3`
 	// - `TIM4`
-	GPT_REG_STRUCT* TIMx;
+	TIM_REG_STRUCT* TIMx;
 	// Timer Channel
 	// - `TIMx_CHANNEL_1`
 	// - `TIMx_CHANNEL_2`
@@ -30,13 +30,15 @@ typedef struct {
 	// - `TIMx_CHANNEL_4`
 	// - `TIMx_CHANNEL_ALL`
 	uint8_t channel;
-	// Auto Reload Value
+	// Auto Reload Register Value
+	// Max Value upto which the timer 
+	// 1. Can count up to (Up Counting: `TIMx_DIR_COUNT_UP`) 
+	// 2. Start from (Down Counting: `TIMx_DIR_COUNT_DOWN`)
 	uint16_t auto_reload;
 	// Prescaler Value
+	// Division from APB1 Clock Frequency
 	uint16_t prescaler;
-	// Frequency (in Hz)
-	// uint32_t frequency_Hz;
-	// Initial Count Value
+	// Start Count Value
 	uint16_t count;
 	// Centre-Aligned Mode Selection
 	// - `TIMx_CMS_EDGE`
@@ -49,8 +51,8 @@ typedef struct {
 	// - `TIMx_DIR_COUNT_DOWN`
 	uint8_t direction: 1;
 	// Auto-Reload Preload Enable
-	// - `TIMx_ARPE_DISABLE`
-	// - `TIMx_ARPE_ENABLE`
+	// - `TIMx_ARPE_DISABLE` (Buffers the ARR Value permanently)
+	// - `TIMx_ARPE_ENABLE` (Buffers the ARR Value temporarily)
 	uint8_t arpe: 1;
 	// One-Pulse Mode Enable
 	// - `TIMx_OPM_DISABLE`
@@ -66,7 +68,7 @@ typedef struct {
  * @brief Enables the Clock for General Purpose Timer
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void enable_GPT_clk(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void enable_TIM_clk(timer_config_t* TIM_CONFIGx){
 	// Enable the clock for the timer
 	if(TIM_CONFIGx->TIMx == TIM2)
 		RCC->APB1ENR.REG |= RCC_APB1ENR_TIM2EN;
@@ -80,7 +82,7 @@ __attribute__((always_inline)) inline void enable_GPT_clk(timer_config_t* TIM_CO
  * @brief Disables the Clock for General Purpose Timer
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void disable_GPT_clk(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void disable_TIM_clk(timer_config_t* TIM_CONFIGx){
 	// Disable the clock for the timer
 	if(TIM_CONFIGx->TIMx == TIM2)
 		RCC->APB1ENR.REG &= ~RCC_APB1ENR_TIM2EN;
@@ -94,7 +96,7 @@ __attribute__((always_inline)) inline void disable_GPT_clk(timer_config_t* TIM_C
  * @brief Enables the General Purpose TIMx
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void enable_GPT(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void enable_TIM(timer_config_t* TIM_CONFIGx){
 	// Clear Update Interrupt Flag
 	TIM_CONFIGx->TIMx->SR.REG &= ~TIM_SR_UIF;
 	// Enable TIMx
@@ -105,7 +107,7 @@ __attribute__((always_inline)) inline void enable_GPT(timer_config_t* TIM_CONFIG
  * @brief Disables the General Purpose TIMx
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void disable_GPT(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void disable_TIM(timer_config_t* TIM_CONFIGx){
 	// Disable TIMx
 	TIM_CONFIGx->TIMx->CR1.REG &= ~TIM_CR1_CEN;
 	// Clear Update Interrupt Flag
@@ -117,7 +119,7 @@ __attribute__((always_inline)) inline void disable_GPT(timer_config_t* TIM_CONFI
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @note Use this for single channel configuration
  */
-__attribute__((always_inline)) inline void enable_GPT_CH(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void enable_TIM_CH(timer_config_t* TIM_CONFIGx){
 	// Local Variable
 	uint32_t reg = TIM_CONFIGx->TIMx->CCER.REG; 
 	// Enable the General Purpose Timer Channel
@@ -138,7 +140,7 @@ __attribute__((always_inline)) inline void enable_GPT_CH(timer_config_t* TIM_CON
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @note Use this for single channel configuration
  */
-__attribute__((always_inline)) inline void disable_GPT_CH(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void disable_TIM_CH(timer_config_t* TIM_CONFIGx){
 	// Local Variable
 	uint32_t reg = TIM_CONFIGx->TIMx->CCER.REG; 
 	// Disable the General Purpose Timer Channel
@@ -159,7 +161,7 @@ __attribute__((always_inline)) inline void disable_GPT_CH(timer_config_t* TIM_CO
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
 
-__attribute__((always_inline)) inline void enable_GPT_multi_CH(timer_config_t* TIM_CONFIGx, uint8_t channel){
+__attribute__((always_inline)) inline void enable_TIM_multi_CH(timer_config_t* TIM_CONFIGx, uint8_t channel){
 	// Enable the General Purpose Timer Channel
 	if((TIM_CONFIGx->channel & channel) == TIMx_CHANNEL_1)
 		TIM_CONFIGx->TIMx->CCER.BIT.CC1E = BIT_SET;
@@ -176,7 +178,7 @@ __attribute__((always_inline)) inline void enable_GPT_multi_CH(timer_config_t* T
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
 
-__attribute__((always_inline)) inline void disable_GPT_multi_CH(timer_config_t* TIM_CONFIGx, uint8_t channel){
+__attribute__((always_inline)) inline void disable_TIM_multi_CH(timer_config_t* TIM_CONFIGx, uint8_t channel){
 	// Disable the General Purpose Timer Channel
 	if((TIM_CONFIGx->channel & channel) == TIMx_CHANNEL_1)
 		TIM_CONFIGx->TIMx->CCER.BIT.CC1E = BIT_RESET;
@@ -193,9 +195,9 @@ __attribute__((always_inline)) inline void disable_GPT_multi_CH(timer_config_t* 
  * @brief Resets the General Purpose TIMx
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void reset_GPT(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void reset_TIM(timer_config_t* TIM_CONFIGx){
 	// Local Variable
-	uint16_t i = 10 * 1000;
+	volatile uint16_t i = 10 * 1000;
 	uint32_t reg = RCC->APB1RSTR.REG;
 	// Set Based on Timer
 	if(TIM_CONFIGx->TIMx == TIM2){
@@ -229,7 +231,7 @@ __attribute__((always_inline)) inline void reset_GPT(timer_config_t* TIM_CONFIGx
  * @brief Triggers an update event to apply the settings
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void update_GPT_params(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void update_TIM_params(timer_config_t* TIM_CONFIGx){
 	// Send an update event to reset the timer and apply settings
   	TIM_CONFIGx->TIMx->EGR.REG |= TIM_EGR_UG;
 	// Wait until bit reset by Hardware
@@ -244,7 +246,7 @@ __attribute__((always_inline)) inline void update_GPT_params(timer_config_t* TIM
  * @param[in] arr_value Auto-Reload Register Value
  * @return Prescaler Value
  */
-__attribute__((always_inline)) inline uint16_t calc_GPT_PSC(uint32_t freq_Hz, uint16_t arr_value){
+__attribute__((always_inline)) inline uint16_t calc_TIM_PSC(uint32_t freq_Hz, uint16_t arr_value){
 	
 	// Final Value
 	uint32_t prescaler_value = 0x00;
@@ -270,7 +272,7 @@ __attribute__((always_inline)) inline uint16_t calc_GPT_PSC(uint32_t freq_Hz, ui
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @returns UIF Flag Status
  */
-__attribute__((always_inline)) inline uint8_t get_TIMx_IRQ_status(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline uint8_t get_TIM_IRQ_status(timer_config_t* TIM_CONFIGx){
 	// Update Interrupt Flag (UIF) Status
 	return (uint8_t)(TIM_CONFIGx->TIMx->SR.REG & TIM_SR_UIF);
 }
@@ -280,7 +282,7 @@ __attribute__((always_inline)) inline uint8_t get_TIMx_IRQ_status(timer_config_t
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @returns UIF Flag Status
  */
-__attribute__((always_inline)) inline void clear_TIMx_IRQ_status(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void clear_TIM_IRQ_status(timer_config_t* TIM_CONFIGx){
 	// Clear Update Interrupt Flag (UIF)
 	TIM_CONFIGx->TIMx->SR.REG &= ~TIM_SR_UIF;
 }
@@ -290,7 +292,7 @@ __attribute__((always_inline)) inline void clear_TIMx_IRQ_status(timer_config_t*
  * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns IRQn (0 - 59)
  */
-__attribute__((always_inline)) inline uint8_t get_TIMx_IRQn(GPT_REG_STRUCT* TIMx){
+__attribute__((always_inline)) inline uint8_t get_TIM_IRQn(TIM_REG_STRUCT* TIMx){
 	// Return IRQn based upon TIMx
 	if(TIMx == TIM2)	
 		return TIM2_IRQn;	
@@ -301,30 +303,30 @@ __attribute__((always_inline)) inline uint8_t get_TIMx_IRQn(GPT_REG_STRUCT* TIMx
 }
 
 /**
- * @brief Configures the General Purpose Timer (GPT)
+ * @brief Configures the General Purpose Timer (TIMx)
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-void config_GPT(timer_config_t* TIM_CONFIGx);
+void config_TIM(timer_config_t* TIM_CONFIGx);
 
 /**
  * @brief Gets the GP Timer Clock Frequency
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @returns Timer Frequency	
  */
-uint32_t get_GPT_freq(timer_config_t* TIM_CONFIGx);
+uint32_t get_TIM_freq(timer_config_t* TIM_CONFIGx);
 
 /**
  * @brief General Purpose Timer Delay
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
-void GPT_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs);
+void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs);
 
 /**
  * @brief Configures the default parameters for TIM_CONFIGx
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-__attribute__((always_inline)) inline void load_GPT_default(timer_config_t* TIM_CONFIGx){
+__attribute__((always_inline)) inline void load_TIM_default(timer_config_t* TIM_CONFIGx){
 	// Configure Mode and Configuration for GPIO
 	TIM_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
 	TIM_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_GP_PP;
@@ -343,5 +345,21 @@ __attribute__((always_inline)) inline void load_GPT_default(timer_config_t* TIM_
 	// IRQ Disable
 	TIM_CONFIGx->enable_IRQ = TIMx_IRQ_DISABLE;
 }
+
+/**
+ * @brief Creates a delay using Timer
+ * @param[in] TIM_CONFIGx Timer Configuration Structure
+ * @param[in] delayUs Number of microseconds to delay
+ * @note Assuming, Timer is already configured for 1MHz
+ */
+void TIM_delay_us(timer_config_t* TIM_CONFIGx, volatile uint32_t delayUs);
+
+/**
+ * @brief Creates a delay using Timer
+ * @param[in] TIM_CONFIGx Timer Configuration Structure 
+ * @param[in] delayMs Number of milliseconds to delay
+ * @note Depends upon `TIM_delay_us()`
+ */
+void TIM_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs);
 
 #endif /* __TIMER_H__ */

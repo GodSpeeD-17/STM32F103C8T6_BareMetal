@@ -26,7 +26,7 @@
 #include "afio_reg_map.h"
 #include "exti_reg_map.h"
 #include "gpio_reg_map.h"
-#include "gpt_reg_map.h"
+#include "timer_reg_map.h"
 #include "rcc_reg_map.h"
 #include "usart_reg_map.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
@@ -55,12 +55,12 @@
 #define GPIOG								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2000))
 #define AFIO								((AFIO_REG_STRUCT *)(APB2_BASE_ADDR))
 #define TIM1								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2C00))
-#define TIM2								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0000))
-#define TIM3								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0400))
-#define TIM4								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0800))
-#define TIM5								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0C00))
-#define TIM6								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1000))
-#define TIM7								((GPT_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1400))
+#define TIM2								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0000))
+#define TIM3								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0400))
+#define TIM4								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0800))
+#define TIM5								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x0C00))
+#define TIM6								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1000))
+#define TIM7								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x1400))
 #define TIM8								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x3400))
 #define ADC1								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2400))
 #define ADC2								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + (uint32_t)0x2800))
@@ -402,28 +402,28 @@ extern volatile uint32_t APB2Clock;
 
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
-#define IS_VALID_GPT_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
-#define IS_VALID_GPT_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
-#define IS_VALID_GPT_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
-#define IS_VALID_GPT_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
+#define IS_VALID_TIM_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
+#define IS_VALID_TIM_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
+#define IS_VALID_TIM_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
+#define IS_VALID_TIM_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
 											 (MODEx) == TIMx_MODE_ALT_IF_UP || (MODEx) == TIMx_MODE_ALT_IF_BOTH)
-#define IS_VALID_GPT_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
-#define IS_VALID_GPT_FREQ(FREQx)			(((FREQx) > (uint32_t)0x00) && ((FREQx) <= PLL_MAX_FREQ))
-#define IS_VALID_GPT_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
-#define IS_VALID_GPT_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
-#define IS_VALID_GPT_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
-#define IS_VALID_GPT_IRQ(IRQx)				(((IRQx) == TIMx_IRQ_ENABLE) || ((IRQx) == TIMx_IRQ_DISABLE))
-#define IS_VALID_GPT_CONFIG_STRUCT(GPT_CONFIGx) \
-											(IS_GPIO_STRUCTURE_VALID(GPT_CONFIGx->GPIO_CONFIGx) && \
-											 IS_VALID_GPT((GPT_CONFIGx->GP_TIMx)) && \
-											 IS_VALID_GPT_CHANNEL((GPT_CONFIGx->channel)) && \
-											 IS_VALID_GPT_ARR((GPT_CONFIGx->auto_reload_value)) && \
-											 IS_VALID_GPT_FREQ((GPT_CONFIGx->frequency_Hz)) && \
-											 IS_VALID_GPT_CNT((GPT_CONFIGx->count)) && \
-											 IS_VALID_GPT_CMS_MODE((GPT_CONFIGx->cms_mode)) && \
-											 IS_VALID_GPT_DIRECTION((GPT_CONFIGx->direction)) && \
-											 IS_VALID_GPT_ARPE((GPT_CONFIGx->auto_reload_preload)) && \
-											 IS_VALID_GPT_OPM((GPT_CONFIGx->one_pulse)))									 
+#define IS_VALID_TIM_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
+#define IS_VALID_TIM_FREQ(FREQx)			(((FREQx) > (uint32_t)0x00) && ((FREQx) <= PLL_MAX_FREQ))
+#define IS_VALID_TIM_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
+#define IS_VALID_TIM_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
+#define IS_VALID_TIM_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
+#define IS_VALID_TIM_IRQ(IRQx)				(((IRQx) == TIMx_IRQ_ENABLE) || ((IRQx) == TIMx_IRQ_DISABLE))
+#define IS_VALID_TIM_CONFIG_STRUCT(TIM_CONFIGx) \
+											(IS_GPIO_STRUCTURE_VALID(TIM_CONFIGx->GPIO_CONFIGx) && \
+											 IS_VALID_GPT((TIM_CONFIGx->GP_TIMx)) && \
+											 IS_VALID_TIM_CHANNEL((TIM_CONFIGx->channel)) && \
+											 IS_VALID_TIM_ARR((TIM_CONFIGx->auto_reload_value)) && \
+											 IS_VALID_TIM_FREQ((TIM_CONFIGx->frequency_Hz)) && \
+											 IS_VALID_TIM_CNT((TIM_CONFIGx->count)) && \
+											 IS_VALID_TIM_CMS_MODE((TIM_CONFIGx->cms_mode)) && \
+											 IS_VALID_TIM_DIRECTION((TIM_CONFIGx->direction)) && \
+											 IS_VALID_TIM_ARPE((TIM_CONFIGx->auto_reload_preload)) && \
+											 IS_VALID_TIM_OPM((TIM_CONFIGx->one_pulse)))									 
 /*********************************************** TIMER MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
@@ -478,7 +478,7 @@ typedef enum{
 #define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
 #define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))
 #define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIGx) \
-											(IS_VALID_GPT_CONFIG_STRUCT(PWM_CONFIGx->GPT_CONFIGx) && \
+											(IS_VALID_TIM_CONFIG_STRUCT(PWM_CONFIGx->TIM_CONFIGx) && \
 											 IS_VALID_PWM_MODE(PWM_CONFIGx->pwm_mode) && \
 											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
 											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle) && \
@@ -514,6 +514,7 @@ typedef enum{
 #define ADC_SAMPLE_71_5						((uint8_t) 6)
 #define ADC_SAMPLE_239_5					((uint8_t) 7)
 
+/*
 // ADC Final Sample Time
 // Channel 0
 #define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_1_5))
@@ -614,6 +615,7 @@ typedef enum{
 #define ADC_SAMPLE_CH9_SMP_55_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_55_5))
 #define ADC_SAMPLE_CH9_SMP_71_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_71_5))
 #define ADC_SAMPLE_CH9_SMP_239_5			((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_239_5))
+*/
 
 // ADC Continuous Conversion
 #define ADC_CONT_CONV_OFF					((uint8_t) 0)

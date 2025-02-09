@@ -53,7 +53,7 @@
 	|                    (PWM Frequency) * (ARR + 1)
 	|
 	|
-	|--> GPT === General Purpose Timer
+	|--> TIMx === General Purpose Timer
 	|--> TO DO: Error Handling Uniformity for TIMx
 */
 
@@ -61,16 +61,16 @@
 #include "timer.h"
 
 /**
- * @brief Configures the General Purpose Timer (GPT)
+ * @brief Configures the General Purpose Timer (TIMx)
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-void config_GPT(timer_config_t* TIM_CONFIGx){
+void config_TIM(timer_config_t* TIM_CONFIGx){
 	// Enable APBx Clock for Timer
-	enable_GPT_clk(TIM_CONFIGx);
+	enable_TIM_clk(TIM_CONFIGx);
 	// Reset the Timer
-	reset_GPT(TIM_CONFIGx);
+	reset_TIM(TIM_CONFIGx);
 	// Disable the Timer
-	disable_GPT(TIM_CONFIGx);
+	disable_TIM(TIM_CONFIGx);
 	// Disable Update Event
 	TIM_CONFIGx->TIMx->CR1.REG |= TIM_CR1_UDIS;
 	// Auto Reload Value
@@ -79,7 +79,7 @@ void config_GPT(timer_config_t* TIM_CONFIGx){
 	TIM_CONFIGx->TIMx->PSC = TIM_CONFIGx->prescaler;
 	// Initial Count Value
 	TIM_CONFIGx->TIMx->CNT = TIM_CONFIGx->count;
-	// Auto Reload Preload
+	// Auto Reload Preload Enable
 	TIM_CONFIGx->TIMx->CR1.REG |= (((TIM_CONFIGx->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
 									// Centre-Aligned Mode 
 								   ((TIM_CONFIGx->cms_mode & 0x03) << TIM_CR1_CMS_Pos) | \
@@ -91,13 +91,17 @@ void config_GPT(timer_config_t* TIM_CONFIGx){
 	TIM_CONFIGx->TIMx->CR1.REG &= ~TIM_CR1_UDIS;
 	// IRQ Configuration
 	if(TIM_CONFIGx->enable_IRQ == TIMx_IRQ_ENABLE){
+		// Global Interrupt Disable
+		__disable_irq();
 		// Enable NVIC Interrupt
-    	enable_NVIC_IRQ(get_TIMx_IRQn(TIM_CONFIGx->TIMx));
+    	enable_NVIC_IRQ(get_TIM_IRQn(TIM_CONFIGx->TIMx));
     	// Enable Timer Interrupt
     	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
+		// Global Interrupt Enable
+		__enable_irq();
 	}
 	// Update the Timer
-	update_GPT_params(TIM_CONFIGx);
+	update_TIM_params(TIM_CONFIGx);
 }
 
 /**
@@ -105,11 +109,11 @@ void config_GPT(timer_config_t* TIM_CONFIGx){
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @returns Timer Frequency	
  */
-uint32_t get_GPT_freq(timer_config_t* TIM_CONFIGx){
+uint32_t get_TIM_freq(timer_config_t* TIM_CONFIGx){
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
 	// Retrieve Timer Source Clock Frequency
-	timer_freq = (uint32_t) ((RCC->CFGR.BIT.PPRE1 == APB1_DIV_1)? (APB1Clock) : (2 * APB1Clock));
+	timer_freq = (uint32_t) (((RCC->CFGR.REG & RCC_CFGR_PPRE1)== RCC_CFGR_PPRE1_DIV1)? (APB1Clock) : (2 * APB1Clock));
 	// Consider ARR Value
 	timer_freq /= (TIM_CONFIGx->TIMx->ARR + 1);
 	// Consider Prescaler Value
@@ -123,9 +127,9 @@ uint32_t get_GPT_freq(timer_config_t* TIM_CONFIGx){
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] freq_Hz Updated Timer Frequency
  */
-__attribute__((always_inline)) inline void update_GPT_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
+__attribute__((always_inline)) inline void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
 	// Calculate updated PSC Value
-	TIM_CONFIGx->TIMx->PSC = calc_GPT_PSC(freq_Hz, TIM_CONFIGx->TIMx->ARR);
+	TIM_CONFIGx->TIMx->PSC = calc_TIM_PSC(freq_Hz, TIM_CONFIGx->TIMx->ARR);
 }
 
 /**
@@ -133,17 +137,17 @@ __attribute__((always_inline)) inline void update_GPT_freq(timer_config_t* TIM_C
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
-void GPT_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
+void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
-	if(get_GPT_freq(TIM_CONFIGx) != FREQ_1kHz){
+	if(get_TIM_freq(TIM_CONFIGx) != FREQ_1kHz){
 		// Disable Timer
-		disable_GPT(TIM_CONFIGx);
+		disable_TIM(TIM_CONFIGx);
 		// Set update event after 1ms (1kHz)
-		update_GPT_freq(TIM_CONFIGx, FREQ_1kHz);
+		update_TIM_freq(TIM_CONFIGx, FREQ_1kHz);
 		// Update the Parameters
-		update_GPT_params(TIM_CONFIGx);
+		update_TIM_params(TIM_CONFIGx);
 		// Enable Timer
-		enable_GPT(TIM_CONFIGx);
+		enable_TIM(TIM_CONFIGx);
 	}
 	// Iteration for Milliseconds
 	while(delayMs--){
@@ -151,5 +155,33 @@ void GPT_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 		while(!(TIM_CONFIGx->TIMx->SR.REG & TIM_SR_UIF));
 		// Clear the update flag
 		TIM_CONFIGx->TIMx->SR.REG &= ~TIM_SR_UIF;
+	}
+}
+
+/**
+ * @brief Creates a delay using Timer
+ * @param[in] TIM_CONFIGx Timer Configuration Structure
+ * @param[in] delayUs Number of microseconds to delay
+ * @note Assuming, Timer is already configured for 1MHz
+ */
+void TIM_delay_us(timer_config_t* TIM_CONFIGx, volatile uint32_t delayUs){
+	// Configure Delay Time
+	TIM_CONFIGx->TIMx->ARR = delayUs - 1;
+	// Enable One Pulse Mode + Timer
+	TIM_CONFIGx->TIMx->CR1.REG |= (TIM_CR1_OPM | TIM_CR1_CEN);
+	// Wait until Timer is Enabled
+	while(TIM_CONFIGx->TIMx->CR1.REG & TIM_CR1_CEN);
+}
+
+/**
+ * @brief Creates a delay using Timer
+ * @param[in] TIM_CONFIGx Timer Configuration Structure 
+ * @param[in] delayMs Number of milliseconds to delay
+ * @note Depends upon `TIM_delay_us()`
+ */
+void TIM_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
+	// Iteration for each number of milliseconds
+	while(delayMs--){
+		TIM_delay_us(TIM_CONFIGx, 1000);
 	}
 }
