@@ -15,9 +15,10 @@
 	|       |-> TIMx_CLK == SYSCLK == 72MHz
 	|
 	|=> Capture/Compare Register (CCR): 
-	|    |-> Each timer channel has its own CCR (e.g., CCR1 for OC1, CCR2 for OC2, etc.) 
+	|    |-> Each timer channel has its own CCRx (e.g., CCR1 for OC1, CCR2 for OC2, etc.) 
 	|    |-> This register holds the value against which the timer counter is compared 
-	|    |-> The value in the CCR determines when the timer output changes state
+	|    |-> The value in the CCRx determines when the timer output changes OCx state
+	|    |-> The active CCRx contains the value to be compared to the TIMx_CNT and signaled on OCx output
 	|
 	|=> PWM Mode 1 (TIMx_OCM_PWM_NORMAL): 
 	|    |-> The output is high as long as the timer counter is less than the CCR value

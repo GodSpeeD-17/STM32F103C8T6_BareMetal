@@ -35,7 +35,7 @@ typedef struct {
 	// Prescaler Value
 	uint16_t prescaler;
 	// Frequency (in Hz)
-	uint32_t frequency_Hz;
+	// uint32_t frequency_Hz;
 	// Initial Count Value
 	uint16_t count;
 	// Centre-Aligned Mode Selection
@@ -330,7 +330,7 @@ __attribute__((always_inline)) inline void load_GPT_default(timer_config_t* TIM_
 	TIM_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_GP_PP;
 	// Configure ARR, Frequency & Count
 	TIM_CONFIGx->auto_reload = DEFAULT_ARR_VALUE;
-	TIM_CONFIGx->frequency_Hz = FREQ_10kHz;
+	// TIM_CONFIGx->frequency_Hz = FREQ_10kHz;
 	TIM_CONFIGx->count = DEFAULT_CNT_VALUE;
 	// CMS Mode Selection (Edge Mode Selection)
 	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
