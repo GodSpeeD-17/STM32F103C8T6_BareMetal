@@ -29,13 +29,14 @@ Few GitHub Repositories that I referred to during development phase:
 ![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
 
 ---
-## ***STM32F103C8T6 Features***
-| Specification      | Details        | Comments           |
-|--------------------|----------------|--------------------|
-| Processor          | ARM Cortex-M3  | Single Core        |
-| Clock Frequency    | 8MHz - 72MHz   | HSI/HSE: 8MHz      |
-| Flash              | 64kB           | 0x08000000         |
-| SRAM               | 20kB           | 0x20000000         |
+## ***STM32F103C8T6 Features (Medium Density Device)***
+| Specification      | Details        | Comments            |
+|--------------------|----------------|---------------------|
+| Processor          | ARM Cortex-M3  | Single Core         |
+| Clock Frequency    | Min: 8MHz      | HSI: 8MHz           |
+|                    | Max: 72MHz     | HSE: 8MHz           |
+| Flash              | Size: 64kB     | Address: 0x08000000 |
+| SRAM               | Size: 20kB     | Address: 0x20000000 |
 
 ---
 ## ***IRQ Details***
@@ -63,136 +64,191 @@ Few GitHub Repositories that I referred to during development phase:
 ## ***Overall Repository Structure***
 ```
 STM32F103C8T6
-├── BareMetal
-│   ├── Core
-│   │   ├── Inc
-│   │   │   ├── adc_reg_map.h
-│   │   │   ├── advtim_reg_map.h
-│   │   │   ├── afio_reg_map.h
-│   │   │   ├── cmsis_gcc.h
-│   │   │   ├── common.h
-│   │   │   ├── exti_reg_map.h
-│   │   │   ├── flash_reg_map.h
-│   │   │   ├── gpio_reg_map.h
-│   │   │   ├── gpt_reg_map.h
-│   │   │   ├── nvic_reg_map.h
-│   │   │   ├── rcc_reg_map.h
-│   │   │   ├── systick_reg_map.h
-│   │   │   ├── usart_reg_map.h
-│   │   │   └── wwdg_reg_map.h
-│   │   └── Src
-│   └── Driver
-│       ├── Inc
-│       │   ├── adc.h
-│       │   ├── bare_metal.h
-│       │   ├── exti.h
-│       │   ├── gpio.h
-│       │   ├── gpt.h
-│       │   ├── nvic.h
-│       │   ├── pwm.h
-│       │   ├── rcc.h
-│       │   ├── reg_map.h
-│       │   ├── systick.h
-│       │   └── usart.h
-│       └── Src
-│           ├── adc.c
-│           ├── exti.c
-│           ├── gpio.c
-│           ├── gpt.c
-│           ├── pwm.c
-│           ├── rcc.c
-│           └── systick.c
-├── Projects
-│   ├── GPIO
-│   │   ├── 01_LED
-│   │   │   ├── Inc
-│   │   │   │   └── main.h
-│   │   │   ├── Makefile
-│   │   │   ├── Src
-│   │   │   │   └── main.c
-│   │   │   └── Startup
-│   │   │       ├── stm32f1_ls.ld
-│   │   │       └── stm32f1_startup.c
-│   │   ├── 02_PB_Poll
-│   │   │   ├── Inc
-│   │   │   │   └── main.h
-│   │   │   ├── Makefile
-│   │   │   ├── Src
-│   │   │   │   └── main.c
-│   │   │   └── Startup
-│   │   │       ├── stm32f1_ls.ld
-│   │   │       └── stm32f1_startup.c
-│   │   └── 03_PB_IRQ
-│   │       ├── Inc
-│   │       │   └── main.h
-│   │       ├── Makefile
-│   │       ├── Src
-│   │       │   └── main.c
-│   │       └── Startup
-│   │           ├── stm32f1_ls.ld
-│   │           └── stm32f1_startup.c
-│   └── Template
-│       ├── Inc
-│       │   └── main.h
-│       ├── Makefile
-│       ├── Src
-│       │   └── main.c
-│       └── Startup
-│           ├── stm32f1_ls.ld
-│           └── stm32f1_startup.c
-├── README.md
-├── Reference_Docs
-│   ├── Arm Cortex M3 Reference.pdf
-│   ├── Blue_PIll_Pinout.gif
-│   ├── STM32F103C_Flash_Programming_Manual.pdf
-│   ├── STM32F103C_Reference_Manual.pdf
-│   └── STM32F103xx_Flash_Reference_Manual.pdf
-└── usart.c # Error
+      ├── BareMetal                         # Main Baremetal Programming Library
+      │   ├── Core                          # Core Cortex-M3 Functions & Register Mapping
+      │   │   ├── Inc                       # Register along with bits Mapping
+      │   │   │   ├── adc_reg_map.h         # ADC Register Mapping
+      │   │   │   ├── advtim_reg_map.h      # Advanced Timer Register Mapping
+      │   │   │   ├── afio_reg_map.h        # Alternate Function I/O Register Mapping
+      │   │   │   ├── cmsis_gcc.h           # Core Cortex-M3 Functions
+      │   │   │   ├── common.h
+      │   │   │   ├── exti_reg_map.h        # External Interrupt Register Mapping
+      │   │   │   ├── flash_reg_map.h       # Flash Register Mapping
+      │   │   │   ├── gpio_reg_map.h        # Flash Register Mapping
+      │   │   │   ├── nvic_reg_map.h        # Nested Vector Interrupt Controller Register Mapping
+      │   │   │   ├── rcc_reg_map.h         # Reset and Clock Control Register Mapping
+      │   │   │   ├── systick_reg_map.h     # SysTick Register Mapping (Cortex-M3 24-bit down counter)
+      │   │   │   ├── timer_reg_map.h       # General Purpose Timer Register Mapping
+      │   │   │   ├── usart_reg_map.h       # Universal Synchronous Asynchronous Receiver Transmitter Register Mapping
+      │   │   │   └── wwdg_reg_map.h        # Window Watchdog Register Mapping
+      │   │   └── Src                       # Debugging Configuration Files Requirement
+      │   │       ├── stlink.cfg
+      │   │       ├── STM32F103.svd
+      │   │       └── stm32f1x.cfg
+      │   └── Driver                        # Actual BareMetal Codes
+      │       ├── Inc                       # Header Files
+      │       │   ├── adc.h
+      │       │   ├── bare_metal.h
+      │       │   ├── exti.h
+      │       │   ├── gpio.h
+      │       │   ├── nvic.h
+      │       │   ├── pwm.h
+      │       │   ├── rcc.h
+      │       │   ├── reg_map.h
+      │       │   ├── systick.h
+      │       │   ├── timer.h
+      │       │   └── usart.h
+      │       └── Src                       # Source Files
+      │           ├── adc.c
+      │           ├── exti.c
+      │           ├── gpio.c
+      │           ├── pwm.c
+      │           ├── rcc.c
+      │           ├── systick.c
+      │           ├── timer.c
+      │           └── usart.c
+      ├── Projects                          # Project Specific Codes
+      │   ├── GPIO                          # General Purpose I/O Programming
+      │   │   ├── 01_LED
+      │   │   │   ├── Inc
+      │   │   │   │   └── main.h
+      │   │   │   ├── Makefile
+      │   │   │   ├── Src
+      │   │   │   │   └── main.c
+      │   │   │   └── Startup
+      │   │   │       ├── stm32f1_ls.ld
+      │   │   │       └── stm32f1_startup.c
+      │   │   ├── 02_PB_Poll
+      │   │   │   ├── Inc
+      │   │   │   │   └── main.h
+      │   │   │   ├── Makefile
+      │   │   │   ├── Src
+      │   │   │   │   └── main.c
+      │   │   │   └── Startup
+      │   │   │       ├── stm32f1_ls.ld
+      │   │   │       └── stm32f1_startup.c
+      │   │   └── 03_PB_IRQ
+      │   │       ├── Inc
+      │   │       │   └── main.h
+      │   │       ├── Makefile
+      │   │       ├── Src
+      │   │       │   └── main.c
+      │   │       └── Startup
+      │   │           ├── stm32f1_ls.ld
+      │   │           └── stm32f1_startup.c
+      │   ├── Template                          # Template for New Projects
+      │   │   ├── Inc
+      │   │   │   └── main.h
+      │   │   ├── Makefile
+      │   │   ├── Src
+      │   │   │   └── main.c
+      │   │   └── Startup
+      │   │       ├── stm32f1_ls.ld
+      │   │       └── stm32f1_startup.c
+      │   ├── Timer                             # Timer Programming
+      │   │   ├── 04_Timer_Poll
+      │   │   │   ├── Inc
+      │   │   │   │   └── main.h
+      │   │   │   ├── Makefile
+      │   │   │   ├── Src
+      │   │   │   │   └── main.c
+      │   │   │   └── Startup
+      │   │   │       ├── stm32f1_ls.ld
+      │   │   │       └── stm32f1_startup.c
+      │   │   ├── 05_Timer_IRQ
+      │   │   │   ├── Inc
+      │   │   │   │   └── main.h
+      │   │   │   ├── Makefile
+      │   │   │   ├── Src
+      │   │   │   │   └── main.c
+      │   │   │   └── Startup
+      │   │   │       ├── stm32f1_ls.ld
+      │   │   │       └── stm32f1_startup.c
+      │   │   ├── images
+      │   │   │   └── Block Diagram.png
+      │   │   └── README.md
+      │   └── USART                             # USART Programming
+      │       ├── 12_char_TX
+      │       │   ├── Inc
+      │       │   │   └── main.h
+      │       │   ├── Makefile
+      │       │   ├── Src
+      │       │   │   └── main.c
+      │       │   └── Startup
+      │       │       ├── stm32f1_ls.ld
+      │       │       └── stm32f1_startup.c
+      │       ├── 13_string_TX
+      │       │   ├── Inc
+      │       │   │   └── main.h
+      │       │   ├── Makefile
+      │       │   ├── Src
+      │       │   │   └── main.c
+      │       │   └── Startup
+      │       │       ├── stm32f1_ls.ld
+      │       │       └── stm32f1_startup.c
+      │       └── 14_printf
+      │           ├── Inc
+      │           │   └── main.h
+      │           ├── Makefile
+      │           ├── Src
+      │           │   └── main.c
+      │           └── Startup
+      │               ├── stm32f1_ls.ld
+      │               └── stm32f1_startup.c
+      ├── README.md
+      └── Reference_Docs
+          ├── Arm Cortex M3 Reference.pdf
+          ├── Blue_PIll_Pinout.gif
+          ├── STM32F103C_Flash_Programming_Manual.pdf
+          ├── STM32F103C_Reference_Manual.pdf
+          └── STM32F103xx_Flash_Reference_Manual.pdf
 ```
 
 ## ***BareMetal Structure***
 ```
-<BareMetal>
-    │
+BareMetal
     ├── Core
-    │  ├── adc_reg_map.h                # Analog to Digital Converter Structure {ADC1, ADC2, -ADC3-}
-    │  ├── advtim_reg_map.h             # Advanced Timer Structure {TIM1, -TIM8-}
-    │  ├── afio_reg_map.h               # Alternate Function Input Output (AFIO) Structure
-    │  ├── common.h                     # Core C Libraries Dependency
-    │  ├── exti_reg_map.h               # External Interrupt (EXTI) Structure
-    │  ├── flash_reg_map.h              # Flash Structure
-    │  ├── gpio_reg_map.h               # General Purpose Input Output (GPIO) Structure
-    │  ├── gpt_reg_map.h                # General Purpose Timer (GPT) Structure {TIM2, TIM3, TIM4, -TIM5-}
-    │  ├── nvic_reg_map.h               # Nested Vector Interrupt Control (NVIC) Structure
-    │  ├── rcc_reg_map.h                # Reset and Clock Control (RCC) Structure
-    │  ├── systick_reg_map.h            # SysTick Structure
-    │  ├── usart_reg_map.h              # Universal Synchronous Asynchronous Receiver Transmitter (USART) Structure
-    │  └── wwdg_reg_map.h               # Window Watchdog (WWDG) Structure
-    │
-    │
-    ├── Inc
-    │  ├── adc.h                        # ADC Header File
-    │  ├── bare_metal.h                 # Common Include Header File
-    │  ├── exti.h                       # EXTI Header File
-    │  ├── gpio.h                       # GPIO Header File
-    │  ├── gpt.h                        # General Purpose Timer (GPT) Header File
-    │  ├── nvic.h                       # NVIC Header File
-    │  ├── pwm.h                        # PWM Header File
-    │  ├── rcc.h                        # Clock Configuration Header File
-    │  ├── reg_map.h                    # Main Register Mapping Header File
-    │  ├── systick.h                    # SysTick Header File (ARM Cortex-M3)                 
-    │  └── usart.h                      # USART Header File                 
-    │
-    │
-    ├── Src
-    │  ├── adc.c                        # ADC Source File
-    │  ├── exti.c                       # EXTI Source File
-    │  ├── gpio.c                       # GPIO Source File
-    │  ├── gpt.c                        # General Purpose Timer Source File    
-    │  ├── pwm.c                        # PWM Source File
-    │  ├── rcc.c                        # Clock Configuration Source File
-    │  ├── systick.c                    # SysTick Source File (ARM Cortex-M3)
-    └──└── usart.c                      # USART Source File
+    │   ├── Inc
+    │   │   ├── adc_reg_map.h
+    │   │   ├── advtim_reg_map.h
+    │   │   ├── afio_reg_map.h
+    │   │   ├── cmsis_gcc.h
+    │   │   ├── common.h
+    │   │   ├── exti_reg_map.h
+    │   │   ├── flash_reg_map.h
+    │   │   ├── gpio_reg_map.h
+    │   │   ├── nvic_reg_map.h
+    │   │   ├── rcc_reg_map.h
+    │   │   ├── systick_reg_map.h
+    │   │   ├── timer_reg_map.h
+    │   │   ├── usart_reg_map.h
+    │   │   └── wwdg_reg_map.h
+    │   └── Src
+    │       ├── stlink.cfg
+    │       ├── STM32F103.svd
+    │       └── stm32f1x.cfg
+    └── Driver
+        ├── Inc
+        │   ├── adc.h
+        │   ├── bare_metal.h
+        │   ├── exti.h
+        │   ├── gpio.h
+        │   ├── nvic.h
+        │   ├── pwm.h
+        │   ├── rcc.h
+        │   ├── reg_map.h
+        │   ├── systick.h
+        │   ├── timer.h
+        │   └── usart.h
+        └── Src
+            ├── adc.c
+            ├── exti.c
+            ├── gpio.c
+            ├── pwm.c
+            ├── rcc.c
+            ├── systick.c
+            ├── timer.c
+            └── usart.c
 ```
 
 ---
@@ -200,51 +256,47 @@ STM32F103C8T6
 ---
 ```
 <Project_Name>
-      │
-      ├── App_Inc
-      │    ├── main.h                    # Application Header File
-      │
-      ├── App_Src
-      │    ├── main.c                    # Application Source File
-      │
-      ├── Linker
-      │    ├── stm32_ls.ld               # Linker Script (Contains the mapping of sections to the address)
-      │
-      ├── Startup
-      │    ├── stm32_startup.c           # Startup File (Contains Vector Table Mapping)
-      │
-      └── Makefile                       # Automation File (Used for compilation and flashing)
+      ├── Inc
+      │   └── main.h
+      ├── Makefile
+      ├── Src
+      │   └── main.c
+      └── Startup
+          ├── stm32f1_ls.ld
+          └── stm32f1_startup.c
 ```
 
 ---
 ## ***Makefile Basic Commands***
-  - `make all`: Compiles all the .c files including "BareMetal" directory
+  - `make all`: Compiles all the .c files including "BareMetal" directory into a "Build" Directory
   - `make clean`: Cleans all the extra intermediate files used for compiling including "BareMetal" Directory
   - `make flash`: Flashes Current Project's .bin file at Flash Address (0x080000000)
   - `make erase_flash`: Erases the Flash Memory of Blue Pill Module
+  - `make debug`: Creates the .json debug related files for Arm-Cortex Debug (VS Code) inside a .vscode directory
+  - `make replace_makefiles`: Updates all Makefiles inside "Project" directory with current Makefile
 
 ---
 ## ***Project Overview***
 | **Projects**            | **Description**                                                                                      |
 |-------------------------|------------------------------------------------------------------------------------------------------|
-| ***01_Blinky***        | A simple LED blinking                                                                                |
-| ***02_PB_Polling***    | A simple LED blinking based on polling the status of Push Button                                    |
-| ***03_PB_IRQ***        | A simple LED blinking based on Interrupt generated by Push Button                                   |
-| ***04_GPT***           | Delay generation based upon General Purpose Timer (GPT)                                            |
-| ***05_Timer_IRQ***     | Interrupt generation using General Purpose Timer (GPT)                                              |
+| ***01_LED***            | A simple LED blinking                                                                                |
+| ***02_PB_Poll***        | A simple LED blinking based on polling the status of Push Button                                    |
+| ***03_PB_IRQ***         | A simple LED blinking based on Interrupt generated by Push Button                                   |
+| ***04_Timer_Poll***     | Delay generation based upon General Purpose Timer (GPT)                                            |
+| ***05_Timer_IRQ***      | Interrupt generation using General Purpose Timer (GPT)                                              |
 | ***06_PWM_Polling***    | Pulse Width Modulation (PWM) generation using General Purpose Timer (GPT)                           |
-| ***07_PWM_PB_IRQ***    | Use the Interrupt generated using Push Button in order to change the PWM Duty Cycle for External LEDs |
+| ***07_PWM_PB_IRQ***     | Use the Interrupt generated using Push Button in order to change the PWM Duty Cycle for External LEDs |
 | ***08_ADC_Polling***    | Read Potentiometer data using Analog to Digital Converter (ADC)                                     |
-| ***09_ADC_IRQ***       | Read Potentiometer data using Analog to Digital Converter (ADC) using Interrupts                     |
+| ***09_ADC_IRQ***        | Read Potentiometer data using Analog to Digital Converter (ADC) using Interrupts                     |
 | ***10_ADC_PWM_Polling***| Control the Duty Cycle value (%) of PWM for external LED based upon the ADC value obtained from Potentiometer |
-| ***11_ADC_IRQ_PWM***   | Control the Duty Cycle value (%) of PWM for external LED based upon Interrupts generated by ADC value obtained from Potentiometer |
-| ***12_char_TX***       | Transmit a single character using USART                                                               |
-| ***13_string_TX***     | Transmit a string using USART                                                                         |
-| ***14_printf***        | Customized printf function for USART                                                                  |
-| ***15_USART_ADC_PWM*** | Same as 11_ADC_IRQ_PWM along with transmitting the data over USART                                   |
-| ***16_char_RX***       | Receive a character using Polling on USART peripheral and toggle LED based upon received character   |
-| ***17_string_RX***     | Receive a string using USART                                                                         |
-| ***18_USART_IRQ***     | Receive a character using USART IRQ -> 3 Methods Demo Code Provided                                  |
-| ***Template***         | Reference Project Structure (Used when `stm32-create-project <>`)                                    |
+| ***11_ADC_IRQ_PWM***    | Control the Duty Cycle value (%) of PWM for external LED based upon Interrupts generated by ADC value obtained from Potentiometer |
+| ***12_char_TX***        | Transmit a single character using USART                                                               |
+| ***13_string_TX***      | Transmit a string using USART                                                                         |
+| ***14_printf***         | Customized printf function for USART                                                                  |
+| ***15_USART_ADC_PWM***  | Same as 11_ADC_IRQ_PWM along with transmitting the data over USART                                   |
+| ***16_char_RX***        | Receive a character using Polling on USART peripheral and toggle LED based upon received character   |
+| ***17_string_RX***      | Receive a string using USART                                                                         |
+| ***18_USART_IRQ***      | Receive a character using USART IRQ -> 3 Methods Demo Code Provided                                  |
+| ***Template***          | Reference Project Structure (Used when `stm32-create-project <>`)                                    |
 
 ---
