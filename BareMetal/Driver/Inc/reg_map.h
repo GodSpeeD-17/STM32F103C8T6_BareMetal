@@ -26,6 +26,7 @@
 #include "afio_reg_map.h"
 #include "exti_reg_map.h"
 #include "gpio_reg_map.h"
+#include "i2c_reg_map.h"
 #include "timer_reg_map.h"
 #include "rcc_reg_map.h"
 #include "usart_reg_map.h"
@@ -69,6 +70,8 @@
 #define USART2								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4400))
 #define USART3								((USART_REG_STRUCT *)(APB1_BASE_ADDR + (uint32_t)0x4800))
 #define EXTI								((EXTI_REG_STRUCT*)(APB2_BASE_ADDR + (uint32_t)0x0400))
+#define I2C1								((I2C_REG_STRUCT*)(APB1_BASE_ADDR + (uint32_t)0x5400))
+#define I2C2								((I2C_REG_STRUCT*)(APB1_BASE_ADDR + (uint32_t)0x5800))
 /*********************************************** Address Mapping ***********************************************/
 
 /*********************************************** GPIO MACROS ***********************************************/
@@ -309,6 +312,23 @@ extern volatile uint32_t APB2Clock;
 											 (EXTI_CONFIGx->GPIO_CONFIGx->MODEx == MODE_IN))
 								 
 /*********************************************** EXTI MACROS ***********************************************/
+
+/*********************************************** I2C MACROS ***********************************************/
+// I2C Configuration Structure SCL Clock Freq
+#define I2Cx_SCL_FREQ_4MHz					((uint8_t) 0x04)
+#define I2Cx_SCL_FREQ_8MHz					((uint8_t) 0x08)
+#define I2Cx_SCL_FREQ_16MHz					((uint8_t) 0x10)
+#define I2Cx_SCL_FREQ_32MHz					((uint8_t) 0x20)
+// I2C Configuration Structure Mode
+#define I2Cx_MODE_FAST						((uint8_t) 0x00)
+#define I2Cx_MODE_STD						((uint8_t) 0x01)
+// I2C Configuration Structure Fast Mode Duty
+#define I2Cx_DUTY_NORMAL					((uint8_t) 0x00)
+#define I2Cx_DUTY_FAST						((uint8_t) 0x01)
+// I2C Read/Write
+#define I2Cx_WRITE							((uint8_t) 0x00)
+#define I2Cx_READ							((uint8_t) 0x01)
+/*********************************************** I2C MACROS ***********************************************/
 
 /*********************************************** SysTick MACROS ***********************************************/
 // SysTick Clock Selection
