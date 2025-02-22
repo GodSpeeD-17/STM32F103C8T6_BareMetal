@@ -7,6 +7,42 @@
 #include "rcc.h"	// Clock Configuration
 #include "gpio.h"   // For GPIO pin configuration
 
+/**
+ * I2Cx->CR2.BIT.FREQ: I2C Clock Frequency 
+	Generally same as APBx Clock Frequency
+	APB1 Clock = 36MHz -> I2C Clock = 36MHz i.e (0x24)
+ * I2Cx->CCR.BIT.CCR: In I2C protocol, the transistors of master devices pull down the lines and the pull-up resistors pull
+	the lines up. Since the internal resistance of transistors are much less than the pull-up resistors, the fall
+	time is much less than the rise time. Using the I2C_TRISE, we mention the amount of time that the rise
+	time might take
+ * I2C Duty Cycle and Baud Rate Configuration
+ * |--------------|------|-------------------|-------------|-------------|-------------------|--------------------------|
+ * | 	F/S 	  | DUTY |Duty Cycle for SCL |    Tlow     |    Thigh    | TI2C (Tlow+Thigh) |  **Baud Rate (1/TI2C)**	|
+ * |--------------|------|-------------------|-------------|-------------|-------------------|--------------------------|
+ * | 0 (Standard) |  X   |       50%    	 | CCR × TPCLK | CCR × TPCLK | 2×CCR×TPCLK       |  (APB1 Clock)/(2×CCR)    |
+ * | 1 (Fast)     |  0   |		33.3%  		 | CCR × TPCLK | 2×CCR×TPCLK | 3×CCR×TPCLK       |  (APB1 Clock)/(3×CCR)    |
+ * | 1 (Fast)X    |  1   |		 36%    	 | 9×CCR×TPCLK | 16×CCR×TPCLK| 25×CCR×TPCLK      |  (APB1 Clock)/(25×CCR)   |
+ * ----------------------------------------------------------------------------------------------------------------------
+ * 
+ * Thus;
+ * For Standard Mode:
+ * 	DUTY = x:
+ * 		CCR = (APB1 Clock)/(100kHz * 2) = (APB1 Clock)/(200kHz);
+ * For Fast Mode:
+ * 	DUTY = 0:
+ * 		CCR = (APB1 Clock)/(400kHz * 3) = (APB1 Clock)/(1200kHz);
+ * 	DUTY = 1:
+ * 		CCR = (APB1 Clock)/(400kHz * 25) = (APB1 Clock)/(10MHz);
+ * 
+ * TRISE:
+ - For Standard Mode: 100kHz
+	I2C_TRISE = (APB1 Clock/1MHz) + 1
+	I2C_TRISE = (36MHz/1MHz) + 1 = 36 + 1 = 37
+ - For Fast Mode: 400kHz
+	I2C_TRISE = (0.3 * (APB1 Clock/1MHz)) + 1
+	I2C_TRISE = (0.3 * (36MHz/1MHz)) + 1 = (0.3 * 36) + 1 = (10.8) + 1 = 11.8 ~ 12
+ */
+
 // 100kHz
 #define I2C_MODE_STD_FREQ					((uint32_t) (1 * FREQ_100kHz))
 // 400kHz
@@ -217,5 +253,55 @@ void stop_I2C(I2C_REG_STRUCT* I2Cx);
  * @param[in] I2C_DATAx I2C Data Structure
  */
 void I2C_master_TX(i2c_data_t* I2C_DATAx);
+
+/**
+ * @brief I2C Bus Ready
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__attribute__((always_inline)) inline void I2C_busReady(I2C_REG_STRUCT* I2Cx){
+	// Check Bus is free
+	while((I2Cx->SR2.REG & I2C_SR2_BUSY));
+}
+
+/**
+ * @brief I2C Send START Sequence
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__attribute__((always_inline)) inline void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
+	// Send START condition
+	I2Cx->CR1.REG |= I2C_CR1_START;
+	// Check START bit successful
+	while(!(I2Cx->SR1.REG & I2C_SR1_SB));
+	// Read status
+	uint8_t status = I2Cx->SR2.REG;
+}
+
+/**
+ * @brief I2C Send STOP Sequence
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
+	// Send START condition
+	I2Cx->CR1.REG |= I2C_CR1_STOP;
+	// Check STOP bit successful
+	while(!(I2Cx->SR2.REG & I2C_SR2_MSL));
+}
+
+/**
+ * @brief I2C Slave Address Send
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address to be TX
+ * @returns 0: Failure; 1: Success
+ */
+uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
+
+/**
+ * @brief I2C Slave Address Send
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] data Data to be TX
+ */
+void I2C_sendData(I2C_REG_STRUCT* I2Cx, uint8_t data);
+
+
 
 #endif /* __I2C_H__ */ 

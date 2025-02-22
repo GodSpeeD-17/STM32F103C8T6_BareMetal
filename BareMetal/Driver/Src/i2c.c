@@ -117,3 +117,38 @@ void I2C_master_TX(i2c_data_t* I2C_DATAx){
 	// STOP Condition
 	stop_I2C(I2C_DATAx->I2Cx);
 }
+
+/**
+ * @brief I2C Slave Address Send
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address to be TX
+ * @returns 0: Failure; 1: Success
+ */
+uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
+	// Transmit Slave Address
+	I2Cx->DR.REG = slaveAddress;
+	uint32_t status = I2Cx->SR1.REG;
+	// Arbitration Lost
+	if(status & I2C_SR1_ARLO)
+		return (uint8_t) 0x00;
+	// Address Sent
+	if(status & I2C_SR1_ADDR){
+		// Read SR2 to clear ADDR flag
+		status = I2Cx->SR2.REG;
+		return (uint8_t) 0x01;
+	}
+}
+
+/**
+ * @brief I2C Slave Address Send
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] data Data to be TX
+ */
+void I2C_sendData(I2C_REG_STRUCT* I2Cx, uint8_t data){
+	// Send data
+	I2Cx->DR.REG = data;
+	uint32_t status = 0x00;
+	// Transmission Success
+	while(!(status & I2C_SR1_TXE));
+}
+
