@@ -18,5 +18,6 @@
 #include "systick.h"
 #include "timer.h"
 #include "usart.h"
+#include "i2c.h"
 
 #endif /* __BARE_METAL_H__ */

@@ -328,6 +328,24 @@ extern volatile uint32_t APB2Clock;
 // I2C Read/Write
 #define I2Cx_WRITE							((uint8_t) 0x00)
 #define I2Cx_READ							((uint8_t) 0x01)
+
+/**
+ * @brief Read from I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns - 0: Failure
+ * @returns - 1: Success
+ */
+#define I2C_readAddress(I2Cx, slaveAddress)			(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
+/**
+ * @brief Write to I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns - 0: Failure
+ * @returns - 1: Success
+ */
+#define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
+
 /*********************************************** I2C MACROS ***********************************************/
 
 /*********************************************** SysTick MACROS ***********************************************/
