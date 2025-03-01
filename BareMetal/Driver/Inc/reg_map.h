@@ -314,11 +314,15 @@ extern volatile uint32_t APB2Clock;
 /*********************************************** EXTI MACROS ***********************************************/
 
 /*********************************************** I2C MACROS ***********************************************/
+// I2C Speed
+#define I2Cx_SPEED_STD						(FREQ_100kHz)		// Sm
+#define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)	// Fm
 // I2C Configuration Structure SCL Clock Freq
 #define I2Cx_SCL_FREQ_4MHz					((uint8_t) 0x04)
 #define I2Cx_SCL_FREQ_8MHz					((uint8_t) 0x08)
 #define I2Cx_SCL_FREQ_16MHz					((uint8_t) 0x10)
 #define I2Cx_SCL_FREQ_32MHz					((uint8_t) 0x20)
+#define I2Cx_SCL_FREQ_DEFAULT				(APB1Clock)
 // I2C Configuration Structure Mode
 #define I2Cx_MODE_FAST						((uint8_t) 0x00)
 #define I2Cx_MODE_STD						((uint8_t) 0x01)
@@ -328,23 +332,6 @@ extern volatile uint32_t APB2Clock;
 // I2C Read/Write
 #define I2Cx_WRITE							((uint8_t) 0x00)
 #define I2Cx_READ							((uint8_t) 0x01)
-
-/**
- * @brief Read from I2C Slave
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @returns - 0: Failure
- * @returns - 1: Success
- */
-#define I2C_readAddress(I2Cx, slaveAddress)			(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
-/**
- * @brief Write to I2C Slave
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @returns - 0: Failure
- * @returns - 1: Success
- */
-#define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
 
 /*********************************************** I2C MACROS ***********************************************/
 

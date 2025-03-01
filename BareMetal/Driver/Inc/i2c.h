@@ -8,10 +8,10 @@
 #include "gpio.h"   // For GPIO pin configuration
 
 /**
- * I2Cx->CR2.BIT.FREQ: I2C Clock Frequency 
+ ** I2Cx->CR2.BIT.FREQ: I2C Clock Frequency 
 	Generally same as APBx Clock Frequency
 	APB1 Clock = 36MHz -> I2C Clock = 36MHz i.e (0x24)
- * I2Cx->CCR.BIT.CCR: In I2C protocol, the transistors of master devices pull down the lines and the pull-up resistors pull
+ ** I2Cx->CCR.BIT.CCR: In I2C protocol, the transistors of master devices pull down the lines and the pull-up resistors pull
 	the lines up. Since the internal resistance of transistors are much less than the pull-up resistors, the fall
 	time is much less than the rise time. Using the I2C_TRISE, we mention the amount of time that the rise
 	time might take
@@ -34,7 +34,7 @@
  * 	DUTY = 1:
  * 		CCR = (APB1 Clock)/(400kHz * 25) = (APB1 Clock)/(10MHz);
  * 
- * TRISE:
+ ** TRISE:
  - For Standard Mode: 100kHz
 	I2C_TRISE = (APB1 Clock/1MHz) + 1
 	I2C_TRISE = (36MHz/1MHz) + 1 = 36 + 1 = 37
@@ -47,6 +47,45 @@
 #define I2C_MODE_STD_TIME_NS						((uint16_t) (10 * 1000))
 // 1/400kHz = 2500ns
 #define I2C_MODE_FAST_TIME_NS						((uint16_t) (2500))
+
+/**
+ * @section[start] I2C Event
+ */
+
+/**
+ * @subsection[start] MASTER TX MODE
+ */
+// START Transmitted (EV5): `0x00030001`
+#define I2Cx_EV_MST_START							(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \
+													 | \
+													  (I2C_SR1_SB))
+
+// ADDRESS Transmitted (EV6): `0x00070082` (Ideal = Actual + I2C_SR1_ADDR)										
+// ADDRESS Transmitted (EV6): `0x00070080` (Actual)												
+#define I2Cx_EV_MST_ADDR							(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+													 | \
+													  (I2C_SR1_TXE))
+
+// Byte Sending (EV8): `0x00070080`											
+#define I2Cx_EV_MST_BYTE_DR							(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+													 | \
+													  (I2C_SR1_TXE ))
+
+// Byte Sent (EV8_1): `0x00070084` 														
+#define I2Cx_EV_MST_BYTE_SENT						(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+													 | \
+													  (I2C_SR1_TXE | I2C_SR1_BTF))
+
+/**
+ * @subsection[end] MASTER TX MODE
+ */
+
+#define I2C_readAddress(I2Cx, slaveAddress)			(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
+#define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_sendAddress((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
+
+/**	
+ * @section[end] I2C Event
+ */ 
 
 
 // I2C Configuration Structure
@@ -159,68 +198,6 @@ __attribute__((always_inline)) inline void I2C_clk_disable(I2C_REG_STRUCT* I2Cx)
 }
 
 /**
- * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
- * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
- * @returns Calculated CCR value
- */
-__attribute__((always_inline)) inline uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequency){
-	// Local Value
-	uint16_t calculated_CCR = 0;
-	// I2C Module Frequency (Tfreq)
-	// Tfreq_us = (1/`freq_MHz`);
-	// Tfreq_ns = 1000 * Tfreq_us -> Tfreq_ns = (1000/`freq_MHz`); .... [1]
-	// I2C Mode
-	switch(i2cMode){
-		// I2C Standard Mode: 100kHz
-		case I2Cx_MODE_STD:
-			// Calculation reference is ns (Simplifies Calculation as it can be completed using `uint16_t`)
-			// Thigh = Tlow -> T = Thigh + Tlow -> T = 2 * Thigh -> Thigh = (T/2)
-			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> CCR = (Thigh_ns/Tfreq_ns) -> CCR = (Tns/(2*Tfreq_ns));
-			// CCR = (Tns * `freq_MHz` / (2 * 1000)); ..... {Refer 1}
-			calculated_CCR = ((I2C_MODE_STD_TIME_NS * i2cClockFrequency)/(2 * 1000));
-		break;
-		// I2C Fast Mode: 400kHz
-		case I2Cx_MODE_FAST:
-			// Tlow/Thigh = 16/9 -> Tlow = (16/9*Thigh) -> T = Tlow + Thigh -> T = Thigh * (1 + 16/9) -> T = Thigh * 25/9 -> Thigh = 9/25 * T -> Thigh_ns = ((9 * Tns)/25));
-			// Thigh = 9 * CCR * Tfreq -> Thigh_ns = (9 * CCR * Tfreq_ns) -> (9 * Tns)/25 = 9 * CCR * Tfreq_ns -> Tns / 25 = CCR * Tfreq_ns -> CCR = Tns / (25 * Tfreq_ns);
-			// CCR = (Tns * `freq_MHz`)/(25 * 1000);
-			if(i2cDuty){
-				calculated_CCR = ((I2C_MODE_FAST_TIME_NS * i2cClockFrequency)/(25 * 1000));
-			}
-			// Tlow/Thigh = 2 -> Tlow = 2 * Thigh -> T = Tlow + Thigh -> T = 3 * Thigh -> Thigh = T/3 -> Thigh_ns = Tns/3;
-			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> (Tns/3) = CCR * Tfreq_ns -> CCR = (Tns/(3*Tfreq_ns));
-			// CCR = ((Tns * `freq_MHz`)/(3 * 1000)); .... {Refer 1}
-			else{
-				calculated_CCR = ((I2C_MODE_FAST_TIME_NS * i2cClockFrequency)/(3 * 1000));
-			}
-		break;
-	}
-	// Template Formula:
-		// CCR = ((I2C_MODE_..._TIME_NS) * (I2C_CONFIGx->freq_MHz)) / (<T_ns/Thigh_ns> * 1000);
-	// Return the value
-	return calculated_CCR;
-}
-
-/**
- * @brief Calculates the value of TRISE (TRISE) for I2C Module
- * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
- * @returns Calculated TRISE value
- */
-__attribute__((always_inline)) inline uint8_t I2C_calc_TRISE(uint8_t i2cMode){
-	// Local Value
-	uint8_t calc_TRISE = 0;
-	// Get APB1 Clock (in MHz)
-	calc_TRISE = (APB1Clock/FREQ_1MHz);
-	// Fast I2C Mode: 400kHz
-	if(i2cMode == I2Cx_MODE_FAST){
-		calc_TRISE *= 3;
-		calc_TRISE /= 10;
-	}
-	// Return the value
-	return (calc_TRISE + 1);
-}
-
-/**
  * @brief Enables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
@@ -263,11 +240,21 @@ __attribute__((always_inline)) inline void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
+ * @brief I2C Byte Send
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] data Data to be TX
+ */
+__attribute__((always_inline)) inline void I2C_writeDR(I2C_REG_STRUCT* I2Cx, uint8_t data){
+	// Send data
+	I2Cx->DR.REG = data;
+}
+
+/**
  * @brief I2C Send STOP Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
 __attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
-	// Send START condition
+	// Send STOP condition
 	I2Cx->CR1.REG |= I2C_CR1_STOP;
 }
 
@@ -278,27 +265,33 @@ __attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
 void I2C_config(i2c_config_t* I2C_CONFIGx);
 
 /**
- * @brief I2C Slave Address Send
+ * @brief I2C Event Check
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address to be TX
- * @returns - 0: Failure
- * @returns - 1: Success
+ * @returns Status of Event
+ */
+uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx);
+
+/**
+ * @brief Read from I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
  */
 uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
 
 /**
- * @brief I2C Slave Address Send
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] data Data to be TX
- * @returns - 0: Failure
- * @returns - 1: Success
+ * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @returns Calculated CCR value
  */
-uint8_t I2C_sendByte(I2C_REG_STRUCT* I2Cx, uint8_t data);
+uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequency);
 
 /**
- * @brief I2C Event Check
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @brief Calculates the value of TRISE (TRISE) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @returns Calculated TRISE value
  */
-uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx);
+uint8_t I2C_calc_TRISE(uint8_t i2cMode);
 
 #endif /* __I2C_H__ */

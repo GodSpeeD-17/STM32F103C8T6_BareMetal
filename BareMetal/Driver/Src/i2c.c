@@ -1,14 +1,13 @@
 // Dependency
 #include "i2c.h"
 
-// I2C2 SCL
+// I2C2 GPIO Configuration
 gpio_config_t I2C2_SCL = {
 	.GPIOx = GPIOB,
 	.PINx = GPIO_PIN_10,
 	.MODEx = MODE_OUT_50MHz,
 	.CNFx = CNF_OUT_AF_OD
 };
-// I2C2 SDA
 gpio_config_t I2C2_SDA = {
 	.GPIOx = GPIOB,
 	.PINx = GPIO_PIN_11,
@@ -40,46 +39,9 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 }
 
 /**
- * @brief I2C Slave Address Send
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address to be TX
- * @returns - 0: Failure
- * @returns - 1: Success
- */
-uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
-	// TODO: Arbitration Logic
-	// Transmit Slave Address
-	I2Cx->DR.REG = slaveAddress; // SB Cleared
-	// Wait till successful transmission of Address
-	if((I2Cx->SR1.REG & I2C_SR1_TXE) || (I2Cx->SR1.REG & I2C_SR1_RXNE))
-		// Success
-		return (uint8_t) 0x01;
-	else
-		// Failure
-		return (uint8_t) 0x00;
-}
-
-/**
- * @brief I2C Byte Send
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] data Data to be TX
- * @returns - 0: Failure
- * @returns - 1: Success
- */
-uint8_t I2C_sendByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
-	// Send data
-	I2Cx->DR.REG = data;
-	// Transmission Success
-	if(I2Cx->SR1.REG & I2C_SR1_TXE)
-		return (uint8_t) 0x01;
-	// Transmission Failure
-	else
-		return (uint8_t) 0x00;
-}
-
-/**
  * @brief I2C Event Check
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @returns Status of Event
  */
 uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx){
 	// Local Variables
@@ -92,6 +54,99 @@ uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx){
 	// Past Event Combination
 	event &= 0xFFFF;
 	event |= ((temp & 0xFFFF) << 16);
+	event &= 0x000FFFFF;
 	// Return the Event Sequence
 	return event;
 }
+
+/**
+ * @brief Read from I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
+ */
+uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
+	// Local Variable
+	uint32_t event = 0x00000000;
+	uint8_t iteration = 10;
+	// Format the address data to be sent
+	I2Cx->DR.REG = slaveAddress;
+	// Status Register 1
+	event = (I2Cx->SR1.REG & 0xFFFF);
+	// Status Register 2
+	event |= ((I2Cx->SR2.REG & 0xFFFF) << 16);
+	// Check
+	while((event != I2Cx_EV_MST_ADDR) && (--iteration));
+	// Return
+	if(iteration && (event == I2Cx_EV_MST_ADDR))
+		return 0x01;
+	else 
+		return 0x00;
+}
+
+/**
+ * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @param[in] i2cDuty I2C Duty: `I2Cx_DUTY_NORMAL`, `I2Cx_DUTY_FAST`
+ * @param[in] i2cClockFrequencyMHz I2C Module Clock Frequency (Recommended APB1Clock)
+ * @returns Calculated CCR value
+ */
+uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz){
+	// Local Value
+	uint16_t calculated_CCR = 0;
+	// I2C Module Frequency (Tfreq)
+	// Tfreq_us = (1/`freq_MHz`);
+	// Tfreq_ns = 1000 * Tfreq_us -> Tfreq_ns = (1000/`freq_MHz`); .... [1]
+	// I2C Mode
+	switch(i2cMode){
+		// I2C Standard Mode: 100kHz
+		case I2Cx_MODE_STD:
+			// Calculation reference is ns (Simplifies Calculation as it can be completed using `uint16_t`)
+			// Thigh = Tlow -> T = Thigh + Tlow -> T = 2 * Thigh -> Thigh = (T/2)
+			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> CCR = (Thigh_ns/Tfreq_ns) -> CCR = (Tns/(2*Tfreq_ns));
+			// CCR = (Tns * `freq_MHz` / (2 * 1000)); ..... {Refer 1}
+			// calculated_CCR = ((I2C_MODE_STD_TIME_NS * i2cClockFrequencyMHz)/(2 * 1000));
+			calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(I2Cx_SPEED_STD << 1));
+		break;
+		// I2C Fast Mode: 400kHz
+		case I2Cx_MODE_FAST:
+			// Tlow/Thigh = 16/9 -> Tlow = (16/9*Thigh) -> T = Tlow + Thigh -> T = Thigh * (1 + 16/9) -> T = Thigh * 25/9 -> Thigh = 9/25 * T -> Thigh_ns = ((9 * Tns)/25));
+			// Thigh = 9 * CCR * Tfreq -> Thigh_ns = (9 * CCR * Tfreq_ns) -> (9 * Tns)/25 = 9 * CCR * Tfreq_ns -> Tns / 25 = CCR * Tfreq_ns -> CCR = Tns / (25 * Tfreq_ns);
+			// CCR = (Tns * `freq_MHz`)/(25 * 1000);
+			if(i2cDuty){
+				calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(25 * I2Cx_SPEED_FAST));
+			}
+			// Tlow/Thigh = 2 -> Tlow = 2 * Thigh -> T = Tlow + Thigh -> T = 3 * Thigh -> Thigh = T/3 -> Thigh_ns = Tns/3;
+			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> (Tns/3) = CCR * Tfreq_ns -> CCR = (Tns/(3*Tfreq_ns));
+			// CCR = ((Tns * `freq_MHz`)/(3 * 1000)); .... {Refer 1}
+			else{
+				calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(3 * I2Cx_SPEED_FAST));
+			}
+		break;
+	}
+	// Template Formula:
+	// CCR = (I2C_CONFIGx->freq_MHz * 1000) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
+	// Return the value
+	return (calculated_CCR & 0xFFFF);
+}
+
+/**
+ * @brief Calculates the value of TRISE (TRISE) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @returns Calculated TRISE value
+ */
+uint8_t I2C_calc_TRISE(uint8_t i2cMode){
+	// Local Value
+	uint8_t calc_TRISE = 0;
+	// Get APB1 Clock (in MHz)
+	calc_TRISE = (APB1Clock/FREQ_1MHz);
+	// Fast I2C Mode: 400kHz
+	if(i2cMode == I2Cx_MODE_FAST){
+		calc_TRISE *= 3;
+		calc_TRISE /= 10;
+	}
+	// Return the value
+	return (calc_TRISE + 1);
+}
+
