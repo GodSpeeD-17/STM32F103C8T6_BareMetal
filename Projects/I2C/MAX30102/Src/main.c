@@ -19,12 +19,12 @@ int main(){
 		while(!(I2C_busReady(I2C_Config.I2Cx)));
 		// Send Start
 		while(!(I2C_sendStart(I2C_Config.I2Cx)));
+		// Small Delay
+		// delay_ms(50);
 	} while(!(I2C_readAddress(I2C_Config.I2Cx, MAX30102_ADDRESS)));
 	
-	// Repeated Start
-	while(!(I2C_sendStart(I2C_Config.I2Cx)));
 	// Send Register Address
-	I2C_sendData(I2C_Config.I2Cx, MAX30102_TEMP_INT);
+	I2C_sendByte(I2C_Config.I2Cx, MAX30102_TEMP_INT);
 	// Send Stop
 	I2C_sendStop(I2C_Config.I2Cx);
 

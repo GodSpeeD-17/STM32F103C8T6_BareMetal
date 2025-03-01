@@ -239,12 +239,6 @@ __attribute__((always_inline)) inline void I2C_disable(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
- * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration Structure
- */
-void I2C_config(i2c_config_t* I2C_CONFIGx);
-
-/**
  * @brief I2C Bus Ready
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns - 0: I2C Bus is not ready
@@ -262,36 +256,26 @@ __attribute__((always_inline)) inline uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx)
 /**
  * @brief I2C Send START Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns - 0: Failure
- * @returns - 1: Success
  */
-__attribute__((always_inline)) inline uint8_t I2C_sendStart(I2C_REG_STRUCT* I2Cx){
+__attribute__((always_inline)) inline void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
 	// Send START condition
 	I2Cx->CR1.REG |= I2C_CR1_START;
-	// START Condition Success
-	if(I2Cx->SR1.REG & I2C_SR1_SB)
-		return (uint8_t) 0x01;
-	// START Condition Failed
-	else
-		return (uint8_t) 0x00;
 }
 
 /**
  * @brief I2C Send STOP Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns - 0: Failure
- * @returns - 1: Success
  */
 __attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
 	// Send START condition
 	I2Cx->CR1.REG |= I2C_CR1_STOP;
-	// STOP Condition Success
-	if(I2Cx->SR2.REG & I2C_SR2_MSL)
-		return (uint8_t) 0x01;
-	// STOP Condition Failed
-	else
-		return (uint8_t) 0x00;
 }
+
+/**
+ * @brief Configures I2C as per the Configuration Structure
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+void I2C_config(i2c_config_t* I2C_CONFIGx);
 
 /**
  * @brief I2C Slave Address Send
@@ -309,6 +293,12 @@ uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
  * @returns - 0: Failure
  * @returns - 1: Success
  */
-uint8_t I2C_sendData(I2C_REG_STRUCT* I2Cx, uint8_t data);
+uint8_t I2C_sendByte(I2C_REG_STRUCT* I2Cx, uint8_t data);
+
+/**
+ * @brief I2C Event Check
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx);
 
 #endif /* __I2C_H__ */
