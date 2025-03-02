@@ -33,12 +33,12 @@ int main(){
 	while((event = I2C_checkEvent(I2C_Config.I2Cx)) != I2Cx_EV_MST_START);
 	
 	// Address Sequence
-	if(I2C_writeAddress(I2C_Config.I2Cx, MAX30102_ADDRESS)){
-		// Send Register Address
-		I2C_writeDR(I2C_Config.I2Cx, MAX30102_TEMP_INT);
-		// Send Stop
-		I2C_sendStop(I2C_Config.I2Cx);
-	}
+	I2C_Config.I2Cx->DR.REG = (MAX30102_ADDRESS << 1);
+	event = I2C_Config.I2Cx->SR2.REG;
+	while (I2C_checkEvent(I2C_Config.I2Cx) != I2Cx_EV_MST_TX_ADDR); // EV6
+	
+	// Generate STOP condition
+    I2C_sendStop(I2C_Config.I2Cx);
 
 	// Infinite Loop
 	while(1){
