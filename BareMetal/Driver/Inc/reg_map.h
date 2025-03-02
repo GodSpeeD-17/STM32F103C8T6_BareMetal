@@ -324,8 +324,8 @@ extern volatile uint32_t APB2Clock;
 #define I2Cx_SCL_FREQ_32MHz					((uint8_t) 0x20)
 #define I2Cx_SCL_FREQ_DEFAULT				(APB1Clock)
 // I2C Configuration Structure Mode
-#define I2Cx_MODE_FAST						((uint8_t) 0x00)
-#define I2Cx_MODE_STD						((uint8_t) 0x01)
+#define I2Cx_MODE_STD						((uint8_t) 0x00)
+#define I2Cx_MODE_FAST						((uint8_t) 0x01)
 // I2C Configuration Structure Fast Mode Duty
 #define I2Cx_DUTY_NORMAL					((uint8_t) 0x00)
 #define I2Cx_DUTY_FAST						((uint8_t) 0x01)

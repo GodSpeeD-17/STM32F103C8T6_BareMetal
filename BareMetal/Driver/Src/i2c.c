@@ -31,7 +31,7 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	// I2C Module Frequency
 	I2C_CONFIGx->I2Cx->CR2.REG |= (I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos;
 	// I2C Mode + I2C Duty + I2C Clock Control Register
-	I2C_CONFIGx->I2Cx->CCR.REG |= (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
+	I2C_CONFIGx->I2Cx->CCR.REG = (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
 									((I2C_CONFIGx->duty & 0x01) << I2C_CCR_DUTY_Pos) | 
 									(I2C_CONFIGx->CCR & 0x0FFF) << I2C_CCR_CCR_Pos);
 	// TRISE Configuration
@@ -60,30 +60,59 @@ uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
- * @brief Read from I2C Slave
+ * @brief Send I2C Slave Address
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] slaveAddress Slave Address
  * @returns 0: Failure
  * @returns 1: Success
  */
 uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
-	// Local Variable
-	uint32_t event = 0x00000000;
-	uint8_t iteration = 10;
-	// Format the address data to be sent
-	I2Cx->DR.REG = slaveAddress;
-	// Status Register 1
-	event = (I2Cx->SR1.REG & 0xFFFF);
-	// Status Register 2
-	event |= ((I2Cx->SR2.REG & 0xFFFF) << 16);
-	// Check
-	while((event != I2Cx_EV_MST_ADDR) && (--iteration));
-	// Return
-	if(iteration && (event == I2Cx_EV_MST_ADDR))
-		return 0x01;
-	else 
-		return 0x00;
+	// Format Slave Address
+	I2Cx->DR.REG = (uint8_t) (slaveAddress & 0xFF);
+	// Check Event
+	if(I2C_checkEvent(I2Cx) == ((slaveAddress & I2Cx_READ)? (I2Cx_EV_MST_RX_ADDR) : (I2Cx_EV_MST_TX_ADDR)))
+		return (uint8_t) 0x01;
+	else
+		return (uint8_t) 0x00;
 }
+
+/**
+ * @brief Read from I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
+ */
+/*
+uint8_t I2C_readAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
+	// Format the address data to be sent
+	I2Cx->DR.REG = (uint8_t) (((slaveAddress << 1) | I2Cx_READ) & 0xFF);
+	// Check Event
+	if(I2C_checkEvent(I2Cx) == I2Cx_EV_MST_RX_ADDR)
+		return (uint8_t) 0x01;
+	else
+		return (uint8_t) 0x00;
+}
+*/
+
+/**
+ * @brief Write to I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
+ */
+/*
+uint8_t I2C_writeAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
+	// Format the address data to be sent
+	I2Cx->DR.REG = (uint8_t) (((slaveAddress << 1) | I2Cx_WRITE) & 0xFF);
+	// Check Event
+	if(I2C_checkEvent(I2Cx) == I2Cx_EV_MST_TX_ADDR)
+		return (uint8_t) 0x01;
+	else
+		return (uint8_t) 0x00;
+}
+*/
 
 /**
  * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
@@ -94,7 +123,7 @@ uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
  */
 uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz){
 	// Local Value
-	uint16_t calculated_CCR = 0;
+	uint32_t calculated_CCR = 0;
 	// I2C Module Frequency (Tfreq)
 	// Tfreq_us = (1/`freq_MHz`);
 	// Tfreq_ns = 1000 * Tfreq_us -> Tfreq_ns = (1000/`freq_MHz`); .... [1]
@@ -107,7 +136,8 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> CCR = (Thigh_ns/Tfreq_ns) -> CCR = (Tns/(2*Tfreq_ns));
 			// CCR = (Tns * `freq_MHz` / (2 * 1000)); ..... {Refer 1}
 			// calculated_CCR = ((I2C_MODE_STD_TIME_NS * i2cClockFrequencyMHz)/(2 * 1000));
-			calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(I2Cx_SPEED_STD << 1));
+// 			calculated_CCR = (i2cClockFrequencyMHz * FREQ_1MHz);
+			calculated_CCR = ((i2cClockFrequencyMHz * FREQ_1MHz)/(I2Cx_SPEED_STD << 1));
 		break;
 		// I2C Fast Mode: 400kHz
 		case I2Cx_MODE_FAST:
@@ -115,20 +145,20 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 			// Thigh = 9 * CCR * Tfreq -> Thigh_ns = (9 * CCR * Tfreq_ns) -> (9 * Tns)/25 = 9 * CCR * Tfreq_ns -> Tns / 25 = CCR * Tfreq_ns -> CCR = Tns / (25 * Tfreq_ns);
 			// CCR = (Tns * `freq_MHz`)/(25 * 1000);
 			if(i2cDuty){
-				calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(25 * I2Cx_SPEED_FAST));
+				calculated_CCR = ((i2cClockFrequencyMHz * FREQ_1MHz)/(25 * I2Cx_SPEED_FAST));
 			}
 			// Tlow/Thigh = 2 -> Tlow = 2 * Thigh -> T = Tlow + Thigh -> T = 3 * Thigh -> Thigh = T/3 -> Thigh_ns = Tns/3;
 			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> (Tns/3) = CCR * Tfreq_ns -> CCR = (Tns/(3*Tfreq_ns));
 			// CCR = ((Tns * `freq_MHz`)/(3 * 1000)); .... {Refer 1}
 			else{
-				calculated_CCR = ((i2cClockFrequencyMHz * 1000)/(3 * I2Cx_SPEED_FAST));
+				calculated_CCR = ((i2cClockFrequencyMHz * FREQ_1MHz)/(3 * I2Cx_SPEED_FAST));
 			}
 		break;
 	}
 	// Template Formula:
-	// CCR = (I2C_CONFIGx->freq_MHz * 1000) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
+	// CCR = (I2C_CONFIGx->freq_MHz * `FREQ_1MHz`) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
 	// Return the value
-	return (calculated_CCR & 0xFFFF);
+	return (uint16_t) (calculated_CCR & 0xFFFF);
 }
 
 /**

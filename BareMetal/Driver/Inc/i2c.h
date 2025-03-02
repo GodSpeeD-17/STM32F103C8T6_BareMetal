@@ -56,25 +56,34 @@
  * @subsection[start] MASTER TX MODE
  */
 // START Transmitted (EV5): `0x00030001`
-#define I2Cx_EV_MST_START							(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \
+#define I2Cx_EV_MST_START							((uint32_t)(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \
 													 | \
-													  (I2C_SR1_SB))
+													  (I2C_SR1_SB)))
 
-// ADDRESS Transmitted (EV6): `0x00070082` (Ideal = Actual + I2C_SR1_ADDR)										
-// ADDRESS Transmitted (EV6): `0x00070080` (Actual)												
-#define I2Cx_EV_MST_ADDR							(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+// Master Tx ADDRESS (EV6): `0x00070082` (Ideal = Actual + I2C_SR1_ADDR)										
+// Master Tx ADDRESS (EV6): `0x00070080` (Actual)												
+#define I2Cx_EV_MST_TX_ADDR							((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
 													 | \
-													  (I2C_SR1_TXE))
+													  (I2C_SR1_TXE)))
+
+// Master Rx ADDRESS (EV6): `0x00030042` (Ideal = Actual + I2C_SR1_ADDR)
+// #define I2Cx_EV_MST_RX_ADDR							((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+// 													 | \
+// 													  (I2C_SR1_RXNE)))
+// Master Rx ADDRESS (EV6): `0x00030044` (Actual)
+#define I2Cx_EV_MST_RX_ADDR							((uint32_t)(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+													 | \
+													  (I2C_SR1_RXNE | I2C_SR1_BTF)))
 
 // Byte Sending (EV8): `0x00070080`											
-#define I2Cx_EV_MST_BYTE_DR							(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+#define I2Cx_EV_MST_BYTE_DR							((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
 													 | \
-													  (I2C_SR1_TXE ))
+													  (I2C_SR1_TXE )))
 
 // Byte Sent (EV8_1): `0x00070084` 														
-#define I2Cx_EV_MST_BYTE_SENT						(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
+#define I2Cx_EV_MST_BYTE_SENT						((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) \ 
 													 | \
-													  (I2C_SR1_TXE | I2C_SR1_BTF))
+													  (I2C_SR1_TXE | I2C_SR1_BTF)))
 
 /**
  * @subsection[end] MASTER TX MODE
@@ -272,13 +281,31 @@ void I2C_config(i2c_config_t* I2C_CONFIGx);
 uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx);
 
 /**
- * @brief Read from I2C Slave
+ * @brief Send I2C Slave Address
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] slaveAddress Slave Address
  * @returns 0: Failure
  * @returns 1: Success
  */
 uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
+
+/**
+ * @brief Read from I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
+ */
+// uint8_t I2C_readAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
+
+/**
+ * @brief Write to I2C Slave
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] slaveAddress Slave Address
+ * @returns 0: Failure
+ * @returns 1: Success
+ */
+// uint8_t I2C_writeAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
 
 /**
  * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
