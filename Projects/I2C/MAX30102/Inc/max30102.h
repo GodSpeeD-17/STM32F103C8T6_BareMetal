@@ -29,7 +29,12 @@
 // FIFO Configuration Register
 #define MAX30102_FIFO_CNF						((uint8_t) 0x08)  
 // Mode Configuration Register
-#define MAX30102_MODE_CNF						((uint8_t) 0x09)  
+#define MAX30102_MODE_CNF						((uint8_t) 0x09)
+#define MAX30102_MODE_CNF_MODE_SHDN				((uint8_t) 0x80)
+#define MAX30102_MODE_CNF_MODE_RESET			((uint8_t) 0x40)
+#define MAX30102_MODE_CNF_MODE_HR				((uint8_t) 0x02)
+#define MAX30102_MODE_CNF_MODE_SpO2				((uint8_t) 0x03)
+#define MAX30102_MODE_CNF_MODE_MULTI_LED		((uint8_t) 0x07)
 // SpO2 Configuration Register
 #define MAX30102_SpO2_CNF						((uint8_t) 0x0A)  
 
@@ -71,5 +76,12 @@ void MAX30102_writeByteAtAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint
  * @returns The read byte
  */
 uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address);
+
+/**
+ * @brief Reads Temperature from MAX30102 Sensor
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @returns Temperature in Celsius (floating-point value)
+ */
+float MAX30102_readTempC(I2C_REG_STRUCT* I2Cx);
 
 #endif /* __MAX30102_H__ */ 

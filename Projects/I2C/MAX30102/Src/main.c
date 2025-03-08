@@ -16,9 +16,6 @@ i2c_config_t I2C_Config = {
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
-	// Local Variable
-	uint8_t partID = 0, revID = 0, data = 0x00;
-
 	// I2C Initialisation
 	I2C_Config.freq_MHz = (APB1Clock/FREQ_1MHz);
 	I2C_Config.TRISE = I2C_calc_TRISE(I2C_Config.mode);
@@ -27,24 +24,13 @@ int main(){
 	I2C_enable(I2C_Config.I2Cx);
 	
 	// Wait for Bus to be Ready
-	while(I2C_Config.I2Cx->SR2.REG & I2C_SR2_BUSY);
+	while(!(I2C_busReady(I2C_Config.I2Cx)));
 
-	// Write
-	MAX30102_writeByteAtAddress(I2C_Config.I2Cx, MAX30102_TEMP_CONFIG, MAX30102_TEMP_CONFIG_TEMP_EN);
-	data = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_TEMP_CONFIG);
 
-	// Demo Function Test
-	revID = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_REV_ID);
-	partID = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_PART_ID);
 	// Infinite Loop
 	while(1){
 		// LED toggle based upon partID value
-		for(uint8_t i = 0; i < partID; i++){
-			// Toggle
-			toggle_OB_LED();
-			// Toggle Delay
-			delay_ms((LOOP_DELAY_MS/100) * 5);
-		}
+		
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
