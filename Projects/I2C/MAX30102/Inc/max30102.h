@@ -51,71 +51,8 @@
 #define MAX30102_TEMP_CONFIG					((uint8_t) 0x21) 
 
 // Revision ID
-#define REV_ID									((uint8_t) 0xFE)
+#define MAX30102_REV_ID							((uint8_t) 0xFE)
 // Part ID
-#define PART_ID									((uint8_t) 0xFF)
-
-/*
-// MAX30102 Register Mapping Structure
-typedef struct {
-	// Interrupt Section
-	struct {
-		// Interrupt Status Register 1
-		uint8_t SR_1;
-		// Interrupt Status Register 2
-		uint8_t SR_2;
-		// Interrupt Enable Register 1
-		uint8_t ER_1;
-		// Interrupt Enable Register 2
-		uint8_t ER_2;
-	} IRQ;
-	// FIFO Section
-	struct {
-		// FIFO Write Pointer 
-		uint8_t W_PTR;
-		// FIFO Overflow Counter
-		uint8_t OVF_CNT;
-		// FIFO Read Pointer 
-		uint8_t R_PTR;
-		// FIFO Data
-		uint8_t DATA;
-	} FIFO;
-	// Configuration Section
-	struct {
-		// FIFO Configuration Register
-		uint8_t FIFO;
-		// Mode Configuration Register
-		uint8_t MODE;
-		// SpO2 Configuration Register
-		uint8_t SpO2;
-	} CONFIG;
-	// Pulse Amplitude Section
-	struct {
-		// LED1 Pulse Amplitude
-		uint8_t LED1;
-		// LED2 Pulse Amplitude
-		uint8_t LED2;
-	} PULSE_AMP;
-	// Reserved Section
-	uint8_t RESERVED1[2];
-	// Multi-LED Mode Control Section
-	struct {
-		// Multi-LED Mode Control Registers
-		uint8_t SLOT1_2;
-		uint8_t SLOT3_4;
-	} MODE_CTRL;
-	// Reserved
-	uint8_t RESERVED2[12];
-	// Temperature Section
-	struct {
-		// Temperature Integer Section
-		uint8_t INT;
-		// Temperature Fractional Section
-		uint8_t FRACT;
-		// Temperature Configuration
-		uint8_t CONFIG;
-	} TEMP;
-} MAX30102_REG;
-*/
+#define MAX30102_PART_ID						((uint8_t) 0xFF)
 
 #endif /* __MAX30102_H__ */ 

@@ -1,6 +1,20 @@
 // Dependency
 #include "i2c.h"
 
+// I2C1 GPIO Configuration
+gpio_config_t I2C1_SCL = {
+	.GPIOx = GPIOB,
+	.PINx = GPIO_PIN_6,
+	.MODEx = MODE_OUT_50MHz,
+	.CNFx = CNF_OUT_AF_OD
+};
+gpio_config_t I2C1_SDA = {
+	.GPIOx = GPIOB,
+	.PINx = GPIO_PIN_7,
+	.MODEx = MODE_OUT_50MHz,
+	.CNFx = CNF_OUT_AF_OD
+};
+
 // I2C2 GPIO Configuration
 gpio_config_t I2C2_SCL = {
 	.GPIOx = GPIOB,
@@ -42,77 +56,23 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
  * @brief I2C Event Check
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns Status of Event
+ * @note `DO NOT USE THIS`
  */
-uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx){
+uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx) {
 	// Local Variables
-	uint16_t temp = 0x0000;
+	uint16_t sr2 = 0x0000;
 	uint32_t event = 0x00000000;
 	// Read SR1
 	event = I2Cx->SR1.REG;
 	// Read SR2
-	temp = I2Cx->SR2.REG;
-	// Past Event Combination
-	event &= 0xFFFF;
-	event |= ((temp & 0xFFFF) << 16);
+	sr2 = I2Cx->SR2.REG;
+	// Combine SR1 and SR2 into a single event value
+	event |= ((sr2 & 0xFFFF) << 16);
+	// Mask out irrelevant bits
 	event &= 0x000FFFFF;
 	// Return the Event Sequence
 	return event;
 }
-
-/**
- * @brief Send I2C Slave Address
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @returns 0: Failure
- * @returns 1: Success
- */
-uint8_t I2C_sendAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
-	// Format Slave Address
-	I2Cx->DR.REG = (uint8_t) (slaveAddress & 0xFF);
-	// Check Event
-	if(I2C_checkEvent(I2Cx) == ((slaveAddress & I2Cx_READ)? (I2Cx_EV_MST_RX_ADDR) : (I2Cx_EV_MST_TX_ADDR)))
-		return (uint8_t) 0x01;
-	else
-		return (uint8_t) 0x00;
-}
-
-/**
- * @brief Read from I2C Slave
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @returns 0: Failure
- * @returns 1: Success
- */
-/*
-uint8_t I2C_readAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
-	// Format the address data to be sent
-	I2Cx->DR.REG = (uint8_t) (((slaveAddress << 1) | I2Cx_READ) & 0xFF);
-	// Check Event
-	if(I2C_checkEvent(I2Cx) == I2Cx_EV_MST_RX_ADDR)
-		return (uint8_t) 0x01;
-	else
-		return (uint8_t) 0x00;
-}
-*/
-
-/**
- * @brief Write to I2C Slave
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @returns 0: Failure
- * @returns 1: Success
- */
-/*
-uint8_t I2C_writeAddress(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
-	// Format the address data to be sent
-	I2Cx->DR.REG = (uint8_t) (((slaveAddress << 1) | I2Cx_WRITE) & 0xFF);
-	// Check Event
-	if(I2C_checkEvent(I2Cx) == I2Cx_EV_MST_TX_ADDR)
-		return (uint8_t) 0x01;
-	else
-		return (uint8_t) 0x00;
-}
-*/
 
 /**
  * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
