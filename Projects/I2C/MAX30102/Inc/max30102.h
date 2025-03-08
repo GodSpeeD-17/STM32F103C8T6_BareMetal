@@ -3,7 +3,7 @@
 #define __MAX30102_H__
 
 // Libraries
-#include <stdint.h>
+#include "bare_metal.h"
 
 // Register Definitions
 #define MAX30102_ADDRESS						((uint8_t) 0x57)
@@ -48,11 +48,28 @@
 // Temperature Fractional Section
 #define MAX30102_TEMP_FRACT						((uint8_t) 0x20)
 // Temperature Configuration
-#define MAX30102_TEMP_CONFIG					((uint8_t) 0x21) 
+#define MAX30102_TEMP_CONFIG					((uint8_t) 0x21)
+#define MAX30102_TEMP_CONFIG_TEMP_EN            ((uint8_t) 0x01)
 
 // Revision ID
 #define MAX30102_REV_ID							((uint8_t) 0xFE)
 // Part ID
 #define MAX30102_PART_ID						((uint8_t) 0xFF)
+
+/**
+ * @brief Writes a Single Byte to Register Address
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] reg_address MAX30102 Register Address
+ * @param[in] data Data to be written
+ */
+void MAX30102_writeByteAtAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t data);
+
+/**
+ * @brief Reads a Single Byte to Register Address
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] reg_address MAX30102 Register Address
+ * @returns The read byte
+ */
+uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address);
 
 #endif /* __MAX30102_H__ */ 

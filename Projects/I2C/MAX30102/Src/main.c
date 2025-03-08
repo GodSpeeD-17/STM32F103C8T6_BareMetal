@@ -17,9 +17,7 @@ i2c_config_t I2C_Config = {
 // Main Entry Point
 int main(){
 	// Local Variable
-	uint8_t partID = 0;
-	// !! Very Important, DO NOT COMMENT THIS LINE !!
-	uint32_t temp = 0;
+	uint8_t partID = 0, revID = 0, data = 0x00;
 
 	// I2C Initialisation
 	I2C_Config.freq_MHz = (APB1Clock/FREQ_1MHz);
@@ -29,41 +27,15 @@ int main(){
 	I2C_enable(I2C_Config.I2Cx);
 	
 	// Wait for Bus to be Ready
-	while (I2C_Config.I2Cx->SR2.REG & I2C_SR2_BUSY);
-	
-	// Start Sequence (Write Mode)
-	I2C_sendStart(I2C_Config.I2Cx);
-	while (!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_SB)); // Wait for START condition (EV5)
-	
-	// Send Slave Address with Write Bit
-	I2C_writeAddress(I2C_Config.I2Cx, MAX30102_ADDRESS);
-	while(!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_ADDR));
-	temp = I2C_Config.I2Cx->SR1.REG; // Clearing ADDR Flag
-	temp = I2C_Config.I2Cx->SR2.REG; // Clears ADDR Flag
-	while(!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_TXE));
-	
-	// Send Register Address (Temperature Integer Register)
-	I2C_writeByte(I2C_Config.I2Cx, MAX30102_PART_ID);
-	while (!(I2C_Config.I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF))); // Wait for TXE flag & BTF flag (EV8_1, EV8_2)
+	while(I2C_Config.I2Cx->SR2.REG & I2C_SR2_BUSY);
 
-	// Repeated START Condition (Switch to Read Mode)
-	I2C_sendStart(I2C_Config.I2Cx);
-	while (!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_SB)); // Wait for START condition (EV5)
-	
-	// Send Slave Address with Read Bit
-	I2C_readAddress(I2C_Config.I2Cx, MAX30102_ADDRESS);
-	while(!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_ADDR));
-	temp = I2C_Config.I2Cx->SR1.REG; // Clearing ADDR Flag
-	temp = I2C_Config.I2Cx->SR2.REG; // Clears ADDR Flag
-	while (!(I2C_Config.I2Cx->SR1.REG & I2C_SR1_RXNE));
+	// Write
+	MAX30102_writeByteAtAddress(I2C_Config.I2Cx, MAX30102_TEMP_CONFIG, MAX30102_TEMP_CONFIG_TEMP_EN);
+	data = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_TEMP_CONFIG);
 
-	// Read Temperature Integer Value
-	partID = I2C_readByte(I2C_Config.I2Cx); // Read data from DR register
-
-	// Generate STOP condition
-	I2C_sendStop(I2C_Config.I2Cx);
-	while (I2C_Config.I2Cx->SR2.REG & I2C_SR2_BUSY); // Wait until BUSY flag is cleared
-
+	// Demo Function Test
+	revID = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_REV_ID);
+	partID = MAX30102_readByteFromAddress(I2C_Config.I2Cx, MAX30102_PART_ID);
 	// Infinite Loop
 	while(1){
 		// LED toggle based upon partID value
@@ -71,7 +43,7 @@ int main(){
 			// Toggle
 			toggle_OB_LED();
 			// Toggle Delay
-			delay_ms((LOOP_DELAY_MS / 100) * 3);
+			delay_ms((LOOP_DELAY_MS/100) * 5);
 		}
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
