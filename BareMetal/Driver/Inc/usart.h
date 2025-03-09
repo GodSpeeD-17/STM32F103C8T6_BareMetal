@@ -25,8 +25,8 @@
 #define DEF_SEP_LEN						((uint8_t) 50)
 #define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN))
 #define USART1_DEF_SEP()				(DEF_SEP(&USART1_Config))
-#define config_USART1()					(config_USART(&USART1_Config))
-#define enable_USART1()					(enable_USART(&USART1_Config))
+#define USART1_config()					(USART_config(&USART1_Config))
+#define USART1_enable()					(USART_enable(&USART1_Config))
 /*************************************** MACROs ********************************************/
 
 /*************************************** USART Configuration Structure ********************************************/
@@ -64,7 +64,7 @@ typedef struct {
  * @brief Enables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void enable_USART_clk(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void USART_clk_enable(usart_config_t* USART_CONFIGx) {
 	// Enable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
@@ -78,7 +78,7 @@ __attribute__((always_inline)) inline void enable_USART_clk(usart_config_t* USAR
  * @brief Disables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void disable_USART_clk(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void USART_clk_disable(usart_config_t* USART_CONFIGx) {
 	// Disable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
@@ -92,7 +92,7 @@ __attribute__((always_inline)) inline void disable_USART_clk(usart_config_t* USA
  * @brief Starts USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void enable_USART(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void USART_enable(usart_config_t* USART_CONFIGx) {
 	// Enable USART
 	USART_CONFIGx->USARTx->CR1.REG |= USART_CR1_UE;
 }
@@ -101,7 +101,7 @@ __attribute__((always_inline)) inline void enable_USART(usart_config_t* USART_CO
  * @brief Stops USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void disable_USART(usart_config_t* USART_CONFIGx) {
+__attribute__((always_inline)) inline void USART_disable(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
 }
@@ -111,7 +111,7 @@ __attribute__((always_inline)) inline void disable_USART(usart_config_t* USART_C
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @return IRQn for the corresponding USART
  */
-__attribute__((always_inline)) inline uint8_t get_USARTx_IRQn(usart_config_t* USART_CONFIGx){
+__attribute__((always_inline)) inline uint8_t USART_get_IRQn(usart_config_t* USART_CONFIGx){
 	// Retrieves the IRQ Number for NVIC
 	if(USART_CONFIGx->USARTx == USART1)
 		return USART1_IRQn;
@@ -125,7 +125,7 @@ __attribute__((always_inline)) inline uint8_t get_USARTx_IRQn(usart_config_t* US
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-void config_USART(usart_config_t* USART_CONFIGx);
+void USART_config(usart_config_t* USART_CONFIGx);
 
 /**
  * @brief Transmits a character on USART
@@ -152,7 +152,7 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str);
  * @brief Loads the default value for USART Struct
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__attribute__((always_inline)) inline void load_USART_default(usart_config_t* USART_CONFIGx){
+__attribute__((always_inline)) inline void USART_load_default(usart_config_t* USART_CONFIGx){
     // Load default GPIO Configuration
     USART_CONFIGx->TX_GPIO_CONFIGx->MODEx = MODE_OUT_50MHz;
     USART_CONFIGx->TX_GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;

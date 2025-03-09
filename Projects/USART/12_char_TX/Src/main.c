@@ -8,8 +8,8 @@
 // Main Entry Point
 int main(){
 	// Initialisation
-	config_USART1();
-	enable_USART1();
+	USART1_config();
+	USART1_enable();
 	uint8_t index = 0x00;
 	// Infinite Loop
 	while(1){

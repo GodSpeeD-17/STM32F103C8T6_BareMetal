@@ -43,12 +43,12 @@ usart_config_t USART1_Config = {
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-void config_USART(usart_config_t* USART_CONFIGx){
+void USART_config(usart_config_t* USART_CONFIGx){
 	// Configure the GPIO
 	config_GPIO(USART_CONFIGx->TX_GPIO_CONFIGx);
 	config_GPIO(USART_CONFIGx->RX_GPIO_CONFIGx);
 	// Enable USART Clock
-	enable_USART_clk(USART_CONFIGx);
+	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate
 	if(USART_CONFIGx->USARTx == USART1)
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB2Clock/(USART_CONFIGx->baud_rate));
@@ -60,7 +60,7 @@ void config_USART(usart_config_t* USART_CONFIGx){
 	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << USART_CR1_M_Pos) | ((USART_CONFIGx->enable_parity & 0x01) << USART_CR1_PCE_Pos) | ((USART_CONFIGx->parity_selection & 0x01) << USART_CR1_PS_Pos) | ((USART_CONFIGx->TXEIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->TCIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
 	// IRQ Enable
 	if(USART_CONFIGx->TCIE || USART_CONFIGx->TXEIE || USART_CONFIGx->RXNEIE)
-		enable_NVIC_IRQ(get_USARTx_IRQn(USART_CONFIGx));
+		enable_NVIC_IRQ(USART_get_IRQn(USART_CONFIGx));
 }
 
 /**

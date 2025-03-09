@@ -9,8 +9,8 @@
 int main(){
 	// Initialisation
 	uint32_t ticks_start = 0x00, ticks_end = 0x00;
-	config_USART1();
-	enable_USART1();
+	USART1_config();
+	USART1_enable();
 	// Infinite Loop
 	while(1){
 		// Default Separate

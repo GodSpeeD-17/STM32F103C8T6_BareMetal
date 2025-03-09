@@ -8,8 +8,8 @@
 // Main Entry Point
 int main(){
 	// Initialisation
-	config_USART1();
-	enable_USART1();
+	USART1_config();
+	USART1_enable();
 	// Infinite Loop
 	while(1){
 		// Default Separate Function
