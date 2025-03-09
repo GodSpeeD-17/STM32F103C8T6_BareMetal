@@ -75,9 +75,12 @@
  * @brief Writes a Single Byte to Register Address
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] reg_address MAX30102 Register Address
- * @param[in] data Data to be written
+ * @param[in] byte Data to be written
  */
-void MAX30102_writeByteAtAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t data);
+__attribute__((always_inline)) inline void MAX30102_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t byte){
+	// I2C Write Byte
+	I2C_writeRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address, byte);
+}
 
 /**
  * @brief Reads a Single Byte to Register Address
@@ -85,12 +88,15 @@ void MAX30102_writeByteAtAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint
  * @param[in] reg_address MAX30102 Register Address
  * @returns The read byte
  */
-uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address);
+__attribute__((always_inline)) inline uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address){
+	// I2C Read Byte
+	return I2C_readRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address);
+}
 
 /**
  * @brief Reads Temperature from MAX30102 Sensor
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns Temperature in Celsius (floating-point value)
+ * @returns Temperature in Celsius
  */
 float MAX30102_readTempC(I2C_REG_STRUCT* I2Cx);
 

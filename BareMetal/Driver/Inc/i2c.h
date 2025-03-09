@@ -296,7 +296,7 @@ uint8_t I2C_calc_TRISE(uint8_t i2cMode);
  * @param[in] register Register Address
  * @param[in] byte Data to be written
  */
-void I2C_setByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
+void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
 
 /**
  * @brief Writes Multiple Consecutive Bytes to Register Address of a given Slave Address
@@ -306,7 +306,7 @@ void I2C_setByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAdd
  * @param[in] data Pointer to the data buffer
  * @param[in] len Number of bytes to write
  */
-void I2C_setMultiBytes(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_writeRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 /**
  * @brief Reads a Single Byte from a Register Address of a given Slave Address
@@ -315,7 +315,7 @@ void I2C_setMultiBytes(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t regis
  * @param[in] registerAddress Register Address to read from
  * @returns The read byte
  */
-uint8_t I2C_getByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
+uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
 
 /**
  * @brief Reads Multiple Consecutive Bytes from a Register Address of a given Slave Address
@@ -325,6 +325,6 @@ uint8_t I2C_getByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t register
  * @param[out] data Pointer to the buffer to store the read data
  * @param[in] len Number of bytes to read
  */
-void I2C_getMultiBytes(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 #endif /* __I2C_H__ */
