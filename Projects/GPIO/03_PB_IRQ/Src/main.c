@@ -10,13 +10,13 @@
 // Main Entry Point
 int main(){
 	// Initialisation
-	config_GPIO(&LED_GPIO_Config);
+	GPIO_config(&LED_GPIO_Config);
 	PB_EXTI_Config.TRIGx = EXTI_TRIG_BOTH;
-	config_EXTI(&PB_EXTI_Config);
+	EXTI_config(&PB_EXTI_Config);
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
-		toggle_OB_LED();
+		OB_LED_toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
@@ -27,17 +27,17 @@ int main(){
 // IRQ Handler
 void EXTI9_5_IRQHandler(void){
 	// Confirm PIN
-	if(get_EXTI_pend(PB_GPIO_Config.PINx)){
+	if(EXTI_getPending(PB_GPIO_Config.PINx)){
 		// Push-Button Pressed
-		if(get_GPIO(&PB_GPIO_Config)){
-			set_GPIO(&LED_GPIO_Config);
+		if(GPIO_get(&PB_GPIO_Config)){
+			GPIO_set(&LED_GPIO_Config);
 		}
 		// Push-Button Released
 		else{
-			reset_GPIO(&LED_GPIO_Config);
+			GPIO_reset(&LED_GPIO_Config);
 		}
 		// Acknowledge the EXTI
-		clear_EXTI_pend(PB_GPIO_Config.PINx);
+		EXTI_clearPending(PB_GPIO_Config.PINx);
 	}
 }
 /*-------------------------------------------------------------------------------*/
@@ -45,12 +45,12 @@ void EXTI9_5_IRQHandler(void){
 // Main Entry Point
 int main(){
 	// Initialisation
-	config_GPIO(&LED_GPIO_Config);
-	config_EXTI(&PB_EXTI_Config);
+	GPIO_config(&LED_GPIO_Config);
+	EXTI_config(&PB_EXTI_Config);
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
-		toggle_OB_LED();
+		OB_LED_toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
@@ -61,11 +61,11 @@ int main(){
 // IRQ Handler
 void EXTI9_5_IRQHandler(void){
 	// Confirm PIN
-	if(get_EXTI_pend(PB_GPIO_Config.PINx)){
+	if(EXTI_getPending(PB_GPIO_Config.PINx)){
 		// Toggle External LED
-		toggle_GPIO(&LED_GPIO_Config);
+		GPIO_toggle(&LED_GPIO_Config);
 		// Acknowledge the EXTI
-		clear_EXTI_pend(PB_GPIO_Config.PINx);
+		EXTI_clearPending(PB_GPIO_Config.PINx);
 	}
 }
 /*-------------------------------------------------------------------------------*/

@@ -45,8 +45,8 @@ usart_config_t USART1_Config = {
  */
 void USART_config(usart_config_t* USART_CONFIGx){
 	// Configure the GPIO
-	config_GPIO(USART_CONFIGx->TX_GPIO_CONFIGx);
-	config_GPIO(USART_CONFIGx->RX_GPIO_CONFIGx);
+	GPIO_config(USART_CONFIGx->TX_GPIO_CONFIGx);
+	GPIO_config(USART_CONFIGx->RX_GPIO_CONFIGx);
 	// Enable USART Clock
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate

@@ -8,17 +8,17 @@
 // Main Entry Point
 int main(){
 	// Initialisation
-	config_GPIO(&PB_GPIO_Config);
+	GPIO_config(&PB_GPIO_Config);
 	// Infinite Loop
 	while(1){
 		// Button Pressed
-		if(get_GPIO(&PB_GPIO_Config)){
+		if(GPIO_get(&PB_GPIO_Config)){
 			// Set OB LED
-			set_OB_LED();
+			OB_LED_set();
 		}
 		else{
 			// Reset OB LED
-			reset_OB_LED();
+			OB_LED_reset();
 		}
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);

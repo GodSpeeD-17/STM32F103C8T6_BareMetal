@@ -37,8 +37,8 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
 	I2C_clk_enable(I2C_CONFIGx->I2Cx);
 	// Configure GPIOs
-	config_GPIO(I2C_CONFIGx->SCL);
-	config_GPIO(I2C_CONFIGx->SDA);
+	GPIO_config(I2C_CONFIGx->SCL);
+	GPIO_config(I2C_CONFIGx->SDA);
 	// Software Reset
 	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
 	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;

@@ -200,8 +200,8 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 4: Configure SysTick
 	config_SysTick(CoreClock/1000);
 	// Step 5: Configure OB LED
-	config_OB_LED();
-	reset_OB_LED();
+	OB_LED_config();
+	OB_LED_reset();
 	// Step 6: Call main()
 	main();
 	// Step 7: Infinite Loop (Backup)

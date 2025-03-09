@@ -24,7 +24,7 @@ typedef struct {
 } gpio_config_t;
 
 // On-board LED Configuration
-static gpio_config_t OB_LED_config = {
+static gpio_config_t OB_LED_Config = {
 	.GPIOx = OB_LED_PORT,
 	.PINx = OB_LED_PIN,
 	.MODEx = MODE_OUT_2MHz,
@@ -35,7 +35,7 @@ static gpio_config_t OB_LED_config = {
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Port
  */
-__attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+__attribute__((always_inline)) inline void GPIO_clk_enable(GPIO_REG_STRUCT* GPIOx){
 	// Enable Clock for respective GPIO
 	if(GPIOx == GPIOA){
 		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPAEN;
@@ -62,7 +62,7 @@ __attribute__((always_inline)) inline void enable_GPIO_clk(GPIO_REG_STRUCT* GPIO
  * @brief Disables Clock for respective GPIO
  * @param[in] GPIOx The GPIO Configuration Structure
  */
-__attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPIOx){
+__attribute__((always_inline)) inline void GPIO_clk_disable(GPIO_REG_STRUCT* GPIOx){
 	// Disable Clock for respective GPIO
 	if(GPIOx == GPIOA){
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;
@@ -88,7 +88,7 @@ __attribute__((always_inline)) inline void disable_GPIO_clk(GPIO_REG_STRUCT* GPI
 /**
  * @brief Enables Clock for Alternate Function (AFIO)
  */
-__attribute__((always_inline)) inline void enable_AFIO_clk(void){
+__attribute__((always_inline)) inline void AFIO_clk_enable(void){
 	// Enable AFIO Clock
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 }
@@ -96,7 +96,7 @@ __attribute__((always_inline)) inline void enable_AFIO_clk(void){
 /**
  * @brief Disables Clock for Alternate Function (AFIO)
  */
-__attribute__((always_inline)) inline void disable_AFIO_clk(void){
+__attribute__((always_inline)) inline void AFIO_clk_disable(void){
 	// Disable AFIO Clock
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 }
@@ -105,13 +105,13 @@ __attribute__((always_inline)) inline void disable_AFIO_clk(void){
  * @brief Configures the GPIO based upon gpio structure
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
-void config_GPIO(gpio_config_t* GPIO_CONFIGx);
+void GPIO_config(gpio_config_t* GPIO_CONFIGx);
 
 /**
  * @brief Sets the state of GPIO Pin to HIGH
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
-__attribute__((always_inline)) inline void set_GPIO(gpio_config_t* GPIO_CONFIGx){
+__attribute__((always_inline)) inline void GPIO_set(gpio_config_t* GPIO_CONFIGx){
 	// Bit Set (Atomicity)
 	GPIO_CONFIGx->GPIOx->BSRR.REG |= (1 << GPIO_CONFIGx->PINx);
 }
@@ -120,7 +120,7 @@ __attribute__((always_inline)) inline void set_GPIO(gpio_config_t* GPIO_CONFIGx)
  * @brief Sets the state of GPIO Pin to LOW
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
-__attribute__((always_inline)) inline void reset_GPIO(gpio_config_t* GPIO_CONFIGx){
+__attribute__((always_inline)) inline void GPIO_reset(gpio_config_t* GPIO_CONFIGx){
 	// Bit Reset (Atomicity)
 	GPIO_CONFIGx->GPIOx->BRR.REG |= (1 << GPIO_CONFIGx->PINx);
 }
@@ -129,7 +129,7 @@ __attribute__((always_inline)) inline void reset_GPIO(gpio_config_t* GPIO_CONFIG
  * @brief Toggles the state of GPIO Pin
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
-__attribute__((always_inline)) inline void toggle_GPIO(gpio_config_t* GPIO_CONFIGx){
+__attribute__((always_inline)) inline void GPIO_toggle(gpio_config_t* GPIO_CONFIGx){
 	// Bit Reset (Atomicity)
 	GPIO_CONFIGx->GPIOx->ODR.REG ^= (1 << GPIO_CONFIGx->PINx);
 }
@@ -139,39 +139,39 @@ __attribute__((always_inline)) inline void toggle_GPIO(gpio_config_t* GPIO_CONFI
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  * @param[out] pin_state Pin State
  */
-uint8_t get_GPIO(gpio_config_t* GPIO_CONFIGx);
+uint8_t GPIO_get(gpio_config_t* GPIO_CONFIGx);
 
 /**
  * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
  * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
  */
-__attribute__((always_inline)) inline void config_OB_LED(void){
+__attribute__((always_inline)) inline void OB_LED_config(void){
 	// Configure the OB LED
-	config_GPIO(&OB_LED_config); 
+	GPIO_config(&OB_LED_Config); 
 }
 
 /**
  * @brief Turns on-board active low LED (PC13) ON
  */
-__attribute__((always_inline)) inline void set_OB_LED(void){
+__attribute__((always_inline)) inline void OB_LED_set(void){
 	// Reset the on-board active low LED GPIO
-	reset_GPIO(&OB_LED_config);
+	GPIO_reset(&OB_LED_Config);
 }
 
 /**
  * @brief Turns on-board active low LED (PC13) OFF
  */
-__attribute__((always_inline)) inline void reset_OB_LED(void){
+__attribute__((always_inline)) inline void OB_LED_reset(void){
 	// Set the on-board active low LED GPIO
-	set_GPIO(&OB_LED_config);
+	GPIO_set(&OB_LED_Config);
 }
 
 /**
  * @brief Toggles the on-board active low LED (PC13)
  */
-__attribute__((always_inline)) inline void toggle_OB_LED(void){
+__attribute__((always_inline)) inline void OB_LED_toggle(void){
 	// Toggle the on-board active low LED GPIO
-	toggle_GPIO(&OB_LED_config);
+	GPIO_toggle(&OB_LED_Config);
 }
 
 

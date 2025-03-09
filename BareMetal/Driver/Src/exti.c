@@ -11,7 +11,7 @@
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+void EXTI_srcConfig(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 
 	// Local Variables
 	uint32_t reg = 0, pin = 0;
@@ -52,7 +52,7 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	reg |= (temp << pin);
 
 	// Enable Alternate Function
-	enable_AFIO_clk();
+	AFIO_clk_enable();
 
 	// Write to Appropriate Register 
 	if(PINx < GPIO_PIN_4){
@@ -75,7 +75,7 @@ void config_EXTI_src(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
  * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
  */
-void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
+void EXTI_trigConfig(uint8_t PINx, uint8_t TRIGx){
 	// Trigger Selection
 	switch (TRIGx){
 		// Falling Edge 
@@ -102,19 +102,19 @@ void config_EXTI_trig(uint8_t PINx, uint8_t TRIGx){
  * @brief Configures the EXTI Parameters Based Upon EXTI Configuration Structure
  * @param[in] EXTI_CONFIGx External Interrupt Configuration Structure 
  */
-void config_EXTI(exti_config_t* EXTI_CONFIGx){
+void EXTI_config(exti_config_t* EXTI_CONFIGx){
 	// Error Check
 	if(!IS_EXTI_STRUCTURE_VALID(EXTI_CONFIGx))
 		return;
 
 	// Configure the GPIO
-	config_GPIO(EXTI_CONFIGx->GPIO_CONFIGx);
+	GPIO_config(EXTI_CONFIGx->GPIO_CONFIGx);
 	// Configure the Source of Interrupt (Port Selection)
-	config_EXTI_src(EXTI_CONFIGx->GPIO_CONFIGx->GPIOx, EXTI_CONFIGx->GPIO_CONFIGx->PINx);
+	EXTI_srcConfig(EXTI_CONFIGx->GPIO_CONFIGx->GPIOx, EXTI_CONFIGx->GPIO_CONFIGx->PINx);
 	// Configure the External Trigger
-	config_EXTI_trig(EXTI_CONFIGx->GPIO_CONFIGx->PINx, EXTI_CONFIGx->TRIGx);
+	EXTI_trigConfig(EXTI_CONFIGx->GPIO_CONFIGx->PINx, EXTI_CONFIGx->TRIGx);
 	// Enable the IRQ (Remove the Mask)
-	enable_EXTI_IRQ(EXTI_CONFIGx->GPIO_CONFIGx->PINx);
+	EXTI_IRQ_enable(EXTI_CONFIGx->GPIO_CONFIGx->PINx);
 	// Enable the NVIC Global Interrupt
 	enable_NVIC_IRQ(EXTI_CONFIGx->IRQn);
 }

@@ -28,7 +28,7 @@ timer_config_t TIM2_Config = {
 // Main Entry Point
 int main(){
 	// GPIO Initialisation
-	config_GPIO(&PA2_Config);
+	GPIO_config(&PA2_Config);
 	// Timer Initialisation
 	config_TIM(&TIM2_Config);
 	// Infinite Loop
@@ -40,7 +40,7 @@ int main(){
 		#else
 			TIM_delay_ms(&TIM2_Config, LOOP_DELAY_MS);
 		#endif
-		toggle_GPIO(&PA2_Config);
+		GPIO_toggle(&PA2_Config);
 	}
 	// Return Value
 	return 0;

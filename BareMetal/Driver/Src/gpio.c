@@ -11,17 +11,17 @@
  * @brief Configures the GPIO based upon gpio structure
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
-void config_GPIO(gpio_config_t* GPIO_CONFIGx){
+void GPIO_config(gpio_config_t* GPIO_CONFIGx){
 	// Just for safety
 	if(GPIO_CONFIGx == NULL)
 		return;
 	// Local Variables
 	uint32_t reg = 0x00, shift = 0x00;
     // Enable GPIO Clock
-    enable_GPIO_clk(GPIO_CONFIGx->GPIOx);
+    GPIO_clk_enable(GPIO_CONFIGx->GPIOx);
 	// Alternate Function Clock
 	if((GPIO_CONFIGx->CNFx == CNF_OUT_AF_OD) || (GPIO_CONFIGx->CNFx == CNF_OUT_AF_PP))
-		enable_AFIO_clk();
+		AFIO_clk_enable();
 
     // Determine the register, shift based on the pin number
     if (GPIO_CONFIGx->PINx <= GPIO_PIN_7){
@@ -67,7 +67,7 @@ void config_GPIO(gpio_config_t* GPIO_CONFIGx){
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  * @param[out] pin_state Pin State
  */
-uint8_t get_GPIO(gpio_config_t* GPIO_CONFIGx){
+uint8_t GPIO_get(gpio_config_t* GPIO_CONFIGx){
 	// Result
 	uint32_t pin_state = 0xFFFFFFFF;
 	// Get State

@@ -12,13 +12,13 @@
  * @brief Configures the ADC based upon ADC Configuration Structure
  * @param[in] ADC_CONFIGx ADC Configuration Structure
  */
-void config_ADC(adc_config_t* ADC_CONFIGx){
+void ADC_config(adc_config_t* ADC_CONFIGx){
 	// Enable Clock for ADC
-	enable_ADC_clk(ADC_CONFIGx->ADCx);
+	ADC_clk_enable(ADC_CONFIGx->ADCx);
 	// Disable the ADC if already ON
-	disable_ADC(ADC_CONFIGx->ADCx);
+	ADC_disable(ADC_CONFIGx->ADCx);
 	// Configure GPIO
-	config_GPIO(ADC_CONFIGx->GPIO_CONFIGx);
+	GPIO_config(ADC_CONFIGx->GPIO_CONFIGx);
 
 	// Reset Registers
 	ADC_CONFIGx->ADCx->SR.REG = (uint32_t) 0x00000000;
@@ -47,10 +47,10 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
 		// Enable the IQR Bit
 		ADC_CONFIGx->ADCx->CR1.REG |= (1 << 5);
 		// Enable NVIC IRQ
-		enable_NVIC_IRQ(get_ADC_IRQn(ADC_CONFIGx));
+		enable_NVIC_IRQ(ADC_get_IRQn(ADC_CONFIGx));
 	}
 	// Starts the ADC
-	start_ADC(ADC_CONFIGx->ADCx);
+	ADC_start(ADC_CONFIGx->ADCx);
 }
 
 /**
@@ -58,7 +58,7 @@ void config_ADC(adc_config_t* ADC_CONFIGx){
  * @param[in] ADC_CONFIGx ADC Configuration Structure
  * @returns ADC Data
  */
-uint16_t get_ADC_data(adc_config_t* ADC_CONFIGx){
+uint16_t ADC_get_data(adc_config_t* ADC_CONFIGx){
 	// Result
 	uint16_t result = 0;
 	// Read the data register
