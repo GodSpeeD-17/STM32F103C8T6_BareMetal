@@ -99,28 +99,18 @@ uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address){
  * @returns Temperature in Celsius (floating-point value)
  */
 float MAX30102_readTempC(I2C_REG_STRUCT* I2Cx){
-    // Local Variables
-    uint8_t temp_int = 0; // Temperature integer part
-    uint8_t temp_frac = 0; // Temperature fractional part
-    float temperature = 0.0f; // Final temperature value
-
-    // Step 1: Enable Temperature Measurement
-    MAX30102_writeByteAtAddress(I2Cx, MAX30102_TEMP_CONFIG, MAX30102_TEMP_CONFIG_TEMP_EN);
-
-    // Step 2: Wait for Temperature Measurement to Complete
-    uint8_t temp_config = 0;
-    do {
-        temp_config = MAX30102_readByteFromAddress(I2Cx, MAX30102_TEMP_CONFIG);
-    } while (temp_config & 0x01);
-
-    // Step 3: Read Temperature Integer and Fractional Values
-    temp_int = MAX30102_readByteFromAddress(I2Cx, MAX30102_TEMP_INT);
-    temp_frac = MAX30102_readByteFromAddress(I2Cx, MAX30102_TEMP_FRACT);
-
-    // Step 4: Combine Integer and Fractional Values
-    temperature = (float)((float) temp_int + ((float) temp_frac * 0.0625));
-
-    // Return the temperature value
-    return temperature;
+	// Local variables
+	uint8_t rawTempC[2] = {0x00};
+	float tempC = 0.0f;
+	// Start Temperature Data Conversion
+	I2C_setByte(I2Cx, MAX30102_ADDRESS, MAX30102_TEMP_CONFIG, MAX30102_TEMP_CONFIG_TEMP_EN);
+	// Wait till EOC (End of Conversion)
+	while(I2C_getByte(I2Cx, MAX30102_ADDRESS, MAX30102_TEMP_CONFIG)); 
+	// Read the data & store
+	I2C_getMultiBytes(I2Cx, MAX30102_ADDRESS, MAX30102_TEMP_INT, rawTempC, 2);
+	// Calibrate the value
+	tempC = (float) rawTempC[1] * 0.0625 + (float) rawTempC[0];
+	// Return the calculated value
+	return tempC;
 }
 
