@@ -20,7 +20,7 @@
  * @brief Configures the parameters necessary for PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-void config_PWM(pwm_config_t* PWMx){
+void PWM_config(pwm_config_t* PWMx){
 
 	// Configure GPIO 
 	GPIO_config(PWMx->TIM_CONFIGx->GPIO_CONFIGx);
@@ -31,7 +31,7 @@ void config_PWM(pwm_config_t* PWMx){
 	// Wrap duty cycle
 	PWM_DUTY_CYCLE_WRAP(PWMx);
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = calc_PWM_CCRx(PWMx);
+	uint16_t CCRx_VALUE = PWM_calc_CCRx(PWMx);
 
 	// Channel 1
 	if (PWMx->TIM_CONFIGx->channel & TIMx_CHANNEL_1){
@@ -79,14 +79,14 @@ void config_PWM(pwm_config_t* PWMx){
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this function only when single channel is used for PWM configuration
  */
-void set_PWM_duty_cycle(pwm_config_t* PWMx){
+void PWM_setDutyCycle(pwm_config_t* PWMx){
 
 	// Stop the PWM
-	stop_PWM(PWMx);
+	PWM_stop(PWMx);
 	// Wrap duty cycle
 	PWM_DUTY_CYCLE_WRAP(PWMx);
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = calc_PWM_CCRx(PWMx);
+	uint16_t CCRx_VALUE = PWM_calc_CCRx(PWMx);
 
 	// Channel based configuration to store duty cycle value
 	if (PWMx->TIM_CONFIGx->channel & TIMx_CHANNEL_1)
@@ -101,7 +101,7 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
 	// Update Event
 	update_GPT_params(PWMx->TIM_CONFIGx);
 	// Start the PWM
-	start_PWM(PWMx);
+	PWM_start(PWMx);
 }
 
 /**
@@ -109,15 +109,15 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx){
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @param[in] channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
-void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel){
+void PWM_setMultiChannelDutyCycle(pwm_config_t* PWMx, uint8_t channel){
 
 	// Stop the PWM
-	stop_multi_channel_PWM(PWMx, channel);
+	PWM_stopMultiChannel(PWMx, channel);
 
 	// Wrap duty cycle
 	PWM_DUTY_CYCLE_WRAP(PWMx);
 	// Store the CCRx Value
-	uint16_t CCRx_VALUE = calc_PWM_CCRx(PWMx);
+	uint16_t CCRx_VALUE = PWM_calc_CCRx(PWMx);
 
 	// Channel based configuration to store duty cycle value
 	if((PWMx->TIM_CONFIGx->channel & channel) == TIMx_CHANNEL_1)
@@ -133,5 +133,5 @@ void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel){
 	update_GPT_params(PWMx->TIM_CONFIGx);
 
 	// Start the PWM
-	start_multi_channel_PWM(PWMx, channel);
+	PWM_startMultiChannel(PWMx, channel);
 }

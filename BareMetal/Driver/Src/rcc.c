@@ -19,11 +19,11 @@ volatile uint32_t APB2Clock = HSI_FREQ;
  * @brief Retrieves the frequency of System Clock
  * @return SYSCLK Frequency (in Hz)
  */
-uint32_t get_clock_freq(void){
+uint32_t RCC_getClkFreq(void){
 	// Final Value
 	uint32_t clk_freq = 0;
 	// Clock Source
-	switch (get_clock_source()){
+	switch (RCC_getClkSrc()){
 		// HSI
 		case SW_CLK_HSI:
 			clk_freq = HSI_FREQ;
@@ -62,9 +62,9 @@ uint32_t get_clock_freq(void){
  * @brief Retrieves the frequency of AHB
  * @return AHB Frequency (in Hz)
  */
-uint32_t get_AHB_freq(void){
+uint32_t RCC_getAHBFreq(void){
 	// Current SYSCLK
-	uint32_t clk_freq = get_clock_freq();
+	uint32_t clk_freq = RCC_getClkFreq();
 	// AHB Prescaler Value
 	switch(RCC->CFGR.REG & RCC_CFGR_HPRE_Msk){
 		case RCC_CFGR_HPRE_DIV2:
@@ -100,9 +100,9 @@ uint32_t get_AHB_freq(void){
  * @return APB1 Frequency (in Hz)
  * @note Max Value should not exceed more than 36MHz
  */
-uint32_t get_APB1_freq(void){
+uint32_t RCC_getAPB1Freq(void){
 	// AHB Frequency
-	uint32_t clk_freq = get_AHB_freq();
+	uint32_t clk_freq = RCC_getAHBFreq();
 	// APB1 Prescaler
 	switch(RCC->CFGR.REG & RCC_CFGR_PPRE1_Msk){
 		case RCC_CFGR_PPRE1_DIV2:
@@ -125,9 +125,9 @@ uint32_t get_APB1_freq(void){
  * @brief Retrieves the frequency of the APB2
  * @return APB2 Frequency (in Hz)
  */
-uint32_t get_APB2_freq(void){
+uint32_t RCC_getAPB2Freq(void){
 	// AHB Frequency
-	uint32_t clk_freq = get_AHB_freq();
+	uint32_t clk_freq = RCC_getAHBFreq();
 	// APB2 Prescaler
 	switch(RCC->CFGR.REG & RCC_CFGR_PPRE2_Msk){
 		case RCC_CFGR_PPRE2_DIV2:
@@ -151,7 +151,7 @@ uint32_t get_APB2_freq(void){
  * @param[in] PLL_SRC PLL Input Source
  * @param[in] PLL_MUL PLL Multiplication Factor
  */
-static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
+static void RCC_PLL_config(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
 	// PLL Multiplication Factor
 	RCC->CFGR.BIT.PLLMUL = PLL_MUL;
 	// PLL Clock Source Configuration
@@ -188,7 +188,7 @@ static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
 /**
  * @brief Reference Working Code
  */
-static void config_SYS_72MHz(void){
+static void RCC_sys72MHz_config(void){
 	// Reset CR
 	RCC->CR.REG &= 0xFEF2FFFE;
 	// HSE ON
@@ -220,10 +220,10 @@ static void config_SYS_72MHz(void){
 	// Wait for H/W Confirmation
 	while(RCC->CFGR.BIT.SWS != RCC->CFGR.BIT.SW);
 	// Store the Frequency
-	CoreClock = get_clock_freq();
-	AHBClock = get_AHB_freq();
-	APB1Clock = get_APB1_freq();
-	APB2Clock = get_APB2_freq();
+	CoreClock = RCC_getClkFreq();
+	AHBClock = RCC_getAHBFreq();
+	APB1Clock = RCC_getAPB1Freq();
+	APB2Clock = RCC_getAPB2Freq();
 }
 
 /**
@@ -234,7 +234,7 @@ static void config_SYS_72MHz(void){
  * @note - ADC Max Clock Frequency is 14MHz
  * @note - USB Max Clock Frequency is 48MHz
  */
-void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
+void RCC_SYSCLK_config(SYSCLK_FREQ CLK_FREQ){
 	// Reset CR
 	RCC->CR.REG &= 0xFEF2FFFE;
 	// Reset CFGR
@@ -253,7 +253,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// Zero wait state, if SYSCLK <= 24 MHz
 			FLASH->ACR.REG |= FLASH_ACR_LATENCY_0;
             // Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_2);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_2);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_2 & 0x03) << 14);
 			// USB Prescaler
@@ -265,7 +265,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// Zero wait state, if SYSCLK <= 24 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_0;
             // Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_3);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_3);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_2 & 0x03) << 14);
 			// USB Prescaler
@@ -277,7 +277,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
             // Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_4);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_4);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
 			// USB Prescaler
@@ -289,7 +289,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
             // Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_5);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_5);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
 			// USB Prescaler
@@ -301,7 +301,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// One wait state, if 24 MHz < SYSCLK <= 48 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_1;
 			// Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_6);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_6);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
 			// USB Prescaler
@@ -313,7 +313,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
 			// Configure PLL parameters
-            config_PLL(HSE_DIV_1, PLL_MUL_7);
+            RCC_PLL_config(HSE_DIV_1, PLL_MUL_7);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_4 & 0x03) << 14);
 			// USB Prescaler
@@ -325,7 +325,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
 			// Configure PLL parameters
-            config_PLL(HSE_DIV_1, PLL_MUL_8);
+            RCC_PLL_config(HSE_DIV_1, PLL_MUL_8);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_6 & 0x03) << 14);
 			// USB Prescaler
@@ -337,7 +337,7 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 			// Two wait states, if 48 MHz < SYSCLK <= 72 MHz
 			FLASH->ACR.REG |= (uint32_t) FLASH_ACR_LATENCY_2;
             // Configure PLL parameters
-			config_PLL(HSE_DIV_1, PLL_MUL_9);
+			RCC_PLL_config(HSE_DIV_1, PLL_MUL_9);
 			// ADC Prescaler
 			RCC->CFGR.REG |= ((ADC_DIV_6 & 0x03) << 14);
 			// USB Prescaler
@@ -357,10 +357,10 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 
 	// Configure BUS parameters (APB1 max 36MHz)
 	if(CLK_FREQ > SYSCLK_32MHz){
-		config_BUS(AHB_DIV_1, APB1_DIV_2, APB2_DIV_1);
+		RCC_busConfig(AHB_DIV_1, APB1_DIV_2, APB2_DIV_1);
 	}
 	else{
-		config_BUS(AHB_DIV_1, APB1_DIV_1, APB2_DIV_1);
+		RCC_busConfig(AHB_DIV_1, APB1_DIV_1, APB2_DIV_1);
 	}
 
 	// Software Selection of PLL
@@ -369,17 +369,17 @@ void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ){
 	while(RCC->CFGR.BIT.SWS != RCC->CFGR.BIT.SW);
 
 	// Store the Frequency
-	CoreClock = get_clock_freq();
-	AHBClock = get_AHB_freq();
-	APB1Clock = get_APB1_freq();
-	APB2Clock = get_APB2_freq();
+	CoreClock = RCC_getClkFreq();
+	AHBClock = RCC_getAHBFreq();
+	APB1Clock = RCC_getAPB1Freq();
+	APB2Clock = RCC_getAPB2Freq();
 }
 
 /**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
  */
-void config_RCC(rcc_config_t* configX){
+void RCC_config(rcc_config_t* configX){
 	// Local Variable
 	uint32_t reg = 0x00000000;
 	// Flash Configuration
@@ -403,8 +403,8 @@ void config_RCC(rcc_config_t* configX){
 	RCC->CFGR.REG |= (uint32_t)((configX->sys_clk_src << RCC_CFGR_SW_Pos));
 	while(((RCC->CFGR.REG & RCC_CFGR_SWS_Msk) != (configX->sys_clk_src << RCC_CFGR_SWS_Pos)));
 	// Store the Frequency
-	CoreClock = get_clock_freq();
-	AHBClock = get_AHB_freq();
-	APB1Clock = get_APB1_freq();
-	APB2Clock = get_APB2_freq();
+	CoreClock = RCC_getClkFreq();
+	AHBClock = RCC_getAHBFreq();
+	APB1Clock = RCC_getAPB1Freq();
+	APB2Clock = RCC_getAPB2Freq();
 }

@@ -116,5 +116,5 @@ void EXTI_config(exti_config_t* EXTI_CONFIGx){
 	// Enable the IRQ (Remove the Mask)
 	EXTI_IRQ_enable(EXTI_CONFIGx->GPIO_CONFIGx->PINx);
 	// Enable the NVIC Global Interrupt
-	enable_NVIC_IRQ(EXTI_CONFIGx->IRQn);
+	NVIC_IRQ_enable(EXTI_CONFIGx->IRQn);
 }

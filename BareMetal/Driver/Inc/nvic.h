@@ -22,7 +22,7 @@
  * @param[in] IRQn  The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__attribute__((always_inline)) inline void enable_NVIC_IRQ(uint8_t IRQn){
+__attribute__((always_inline)) inline void NVIC_IRQ_enable(uint8_t IRQn){
 	// Enable the IRQn
 	NVIC->ISER[(IRQn) >> 5] |=  (1 << ((IRQn) & 0x1F));
 	// >> 5 := Divide the number by 32 [Each register has 32-bits]
@@ -34,7 +34,7 @@ __attribute__((always_inline)) inline void enable_NVIC_IRQ(uint8_t IRQn){
  * @param[in] IRQn  The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__attribute__((always_inline)) inline void disable_NVIC_IRQ(uint8_t IRQn){
+__attribute__((always_inline)) inline void NVIC_IRQ_disable(uint8_t IRQn){
 	// Disable the IRQn
 	NVIC->ICER[(IRQn) >> 5] |=  (1 << ((IRQn) & 0x1F));
 	// >> 5 := Divide the number by 32 [Each register has 32-bits]

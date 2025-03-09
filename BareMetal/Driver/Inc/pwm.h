@@ -30,7 +30,7 @@ typedef struct {
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
+__attribute__((always_inline)) inline void PWM_start(pwm_config_t* PWMx){
 	// Stop if already running
 	if(PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN){
 		PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN = 0;
@@ -48,7 +48,7 @@ __attribute__((always_inline)) inline void start_PWM(pwm_config_t* PWMx){
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
+__attribute__((always_inline)) inline void PWM_stop(pwm_config_t* PWMx){
 	// Disable Timer
 	disable_GPT(PWMx->TIM_CONFIGx);
 	// Disable Channel
@@ -61,7 +61,7 @@ __attribute__((always_inline)) inline void stop_PWM(pwm_config_t* PWMx){
  * @brief Stops the PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx){
+__attribute__((always_inline)) inline uint16_t PWM_calc_CCRx(pwm_config_t* PWMx){
 	// Final Result
 	uint16_t result;
 	// Store the Value
@@ -76,7 +76,7 @@ __attribute__((always_inline)) inline uint16_t calc_PWM_CCRx(pwm_config_t* PWMx)
  * @brief Starts PWM on specific Channel
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
+__attribute__((always_inline)) inline void PWM_startMultiChannel(pwm_config_t* PWMx, uint8_t channel){
 	// Enable Timer
 	enable_GPT(PWMx->TIM_CONFIGx);
 	// Enable Channel
@@ -87,7 +87,7 @@ __attribute__((always_inline)) inline void start_multi_channel_PWM(pwm_config_t*
  * @brief Stops PWM on specific Channel
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__attribute__((always_inline)) inline void stop_multi_channel_PWM(pwm_config_t* PWMx, uint8_t channel){
+__attribute__((always_inline)) inline void PWM_stopMultiChannel(pwm_config_t* PWMx, uint8_t channel){
 	// Disable Channel
 	disable_GPT_multi_CH(PWMx->TIM_CONFIGx, channel);
 	// Disable Timer
@@ -98,13 +98,13 @@ __attribute__((always_inline)) inline void stop_multi_channel_PWM(pwm_config_t* 
  * @brief Configures the parameters necessary for PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-void config_PWM(pwm_config_t* PWMx);
+void PWM_config(pwm_config_t* PWMx);
 
 /**
  * @brief Sets the duty cycle for PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-void set_PWM_duty_cycle(pwm_config_t* PWMx);
+void PWM_setDutyCycle(pwm_config_t* PWMx);
 
 /**
  * @brief Sets the duty cycle for PWM
@@ -112,13 +112,13 @@ void set_PWM_duty_cycle(pwm_config_t* PWMx);
  * @param[in] channel `TIMx_CHANNEL_1`
  * @note Use this function when multiple channel is used for PWM configuration
  */
-void set_PWM_duty_cycle_multi_channel(pwm_config_t* PWMx, uint8_t channel);
+void PWM_setMultiChannelDutyCycle(pwm_config_t* PWMx, uint8_t channel);
 
 /**
  * @brief Configures the PWM Structure to default values
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__attribute__((always_inline)) inline void load_PWM_default(pwm_config_t* PWM_CONFIGx){
+__attribute__((always_inline)) inline void PWM_load_default(pwm_config_t* PWM_CONFIGx){
 	// Load Default Timer Value
 	load_GPT_default(PWM_CONFIGx->TIM_CONFIGx);
 	// Update the GPIO Configuration

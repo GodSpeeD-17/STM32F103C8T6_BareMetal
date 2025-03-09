@@ -12,7 +12,7 @@
 #include "reg_map.h"
 
 // Shortcut Macro
-#define config_RCC_72MHz()							(config_RCC(&config_RCC_72MHz))
+#define RCC_72MHz_config()							(RCC_config(&config_RCC_72MHz))
 
 // Bus Prescaler Configuration
 typedef struct {
@@ -95,7 +95,7 @@ static const rcc_config_t config_RCC_72MHz = {
  * @brief Retrieves the System Clock Source
  * @note Return Values: `SYS_CLK_HSI`, `SYS_CLK_HSE`, `SYS_CLK_PLL`
  */
-__attribute__((always_inline)) inline uint8_t get_clock_source(void){
+__attribute__((always_inline)) inline uint8_t RCC_getClkSrc(void){
 	// Final Value
 	uint8_t value = 0xFF;
 	// Read the Clock Source
@@ -108,33 +108,33 @@ __attribute__((always_inline)) inline uint8_t get_clock_source(void){
  * @brief Retrieves the current System Clock
  * @return SYSCLK Frequency (in Hz)
  */
-uint32_t get_clock_freq(void);
+uint32_t RCC_getClkFreq(void);
 
 /**
  * @brief Retrieves the frequency of AHB
  * @return AHB Frequency (in Hz)
  */
-uint32_t get_AHB_freq(void);
+uint32_t RCC_getAHBFreq(void);
 
 /**
  * @brief Retrieves the frequency of the APB1
  * @return APB1 Frequency (in Hz)
  * @note Max Value should not exceed more than 36MHz
  */
-uint32_t get_APB1_freq(void);
+uint32_t RCC_getAPB1Freq(void);
 
 /**
  * @brief Retrieves the frequency of the APB2
  * @return APB2 Frequency (in Hz)
  */
-uint32_t get_APB2_freq(void);
+uint32_t RCC_getAPB2Freq(void);
 
 /**
  * @brief Configures PLL parameters
  * @param[in] PLL_SRC PLL Input Source
  * @param[in] PLL_MUL PLL Multiplication Factor
  */
-static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL);
+static void RCC_PLL_config(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL);
 
 /**
  * @brief Updates the Peripheral Bus Prescaler
@@ -142,7 +142,7 @@ static void config_PLL(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL);
  * @param[in] APB1_PRE APB1 Prescaler `APB1_DIV_X`
  * @param[in] APB2_PRE APB2 Prescaler `APB2_DIV_X`
  */
-__attribute__((always_inline)) inline void config_BUS(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PRE){
+__attribute__((always_inline)) inline void RCC_busConfig(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PRE){
 
 	// AHB Prescaler
 	RCC->CFGR.BIT.HPRE = AHB_PRE;
@@ -157,7 +157,7 @@ __attribute__((always_inline)) inline void config_BUS(uint8_t AHB_PRE, uint8_t A
 /**
  * @brief Reference Working Code
  */
-static void config_SYS_72MHz(void);
+static void RCC_sys72MHz_config(void);
 
 /**
  * @brief Wrapper Function to create abstraction for System Core Clock Updation
@@ -165,12 +165,12 @@ static void config_SYS_72MHz(void);
  * @note - PLL as System Clock Source 
  * @note - HSE is used for PLL Clock Source
  */
-void config_SYSCLK_MHz(SYSCLK_FREQ CLK_FREQ);
+void RCC_SYSCLK_config(SYSCLK_FREQ CLK_FREQ);
 
 /**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
  */
-void config_RCC(rcc_config_t* configX);
+void RCC_config(rcc_config_t* configX);
 
 #endif /* __RCC_H__ */

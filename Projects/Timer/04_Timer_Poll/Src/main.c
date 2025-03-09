@@ -30,7 +30,7 @@ int main(){
 	// GPIO Initialisation
 	GPIO_config(&PA2_Config);
 	// Timer Initialisation
-	config_TIM(&TIM2_Config);
+	TIM_config(&TIM2_Config);
 	// Infinite Loop
 	while(1){
 		// Conditional Compilation

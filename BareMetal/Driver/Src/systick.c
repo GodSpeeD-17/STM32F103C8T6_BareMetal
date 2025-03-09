@@ -17,7 +17,7 @@ static volatile uint64_t curr_ticks = 0x00;
  * @param[in] reloadValue Number of Ticks
  * @note Value should be within the range of 24-bit unsigned integer
  */
-void config_SysTick(uint32_t reloadValue){
+void SysTick_config(uint32_t reloadValue){
 	// Reset Value
 	SysTick->CTRL.REG = (uint32_t) 0x00;
 	// Reload Value (24-bit)
@@ -44,7 +44,7 @@ void delay_ms(uint32_t delayTime){
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
  */
-uint64_t get_curr_ticks(void){
+uint64_t SysTick_getCurrTicks(void){
 	// Final Value
 	uint64_t return_value = 0x00;
 	// Current number of Ticks
@@ -58,7 +58,7 @@ uint64_t get_curr_ticks(void){
  * @param[in] tick_value The number of ticks to be set
  * @note The ticks are dependent on Core Clock Frequency
  */
-void set_curr_ticks(uint64_t tick_value){
+void SysTick_setCurrTicks(uint64_t tick_value){
 	// Set the Current number of Ticks as `tick_value`
 	curr_ticks = tick_value;
 }

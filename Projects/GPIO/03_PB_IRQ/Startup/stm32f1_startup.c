@@ -196,9 +196,9 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 		*pDst++ = 0;
 	}
 	// Step 3: Configure SysClock @72MHz
-	config_RCC_72MHz();
+	RCC_72MHz_config();
 	// Step 4: Configure SysTick
-	config_SysTick(CoreClock/1000);
+	SysTick_config(CoreClock/1000);
 	// Step 5: Configure OB LED
 	OB_LED_config();
 	OB_LED_reset();

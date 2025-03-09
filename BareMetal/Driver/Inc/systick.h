@@ -13,7 +13,7 @@
 /**
  * @brief Enables SysTick Counter
  */
-__attribute__((always_inline)) inline void enable_SysTick(void){
+__attribute__((always_inline)) inline void SysTick_enable(void){
 	// Enable SysTick
 	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
 }
@@ -21,7 +21,7 @@ __attribute__((always_inline)) inline void enable_SysTick(void){
 /**
  * @brief Disables SysTick Counter
  */
-__attribute__((always_inline)) inline void disable_SysTick(void){
+__attribute__((always_inline)) inline void SysTick_disable(void){
 	// Disable SysTick
 	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
 }
@@ -31,7 +31,7 @@ __attribute__((always_inline)) inline void disable_SysTick(void){
  * @param[in] reloadValue Number of Ticks
  * @note Value should be within the range of 24-bit unsigned integer
  */
-void config_SysTick(uint32_t reloadValue);
+void SysTick_config(uint32_t reloadValue);
 
 /***
  * @brief Accurate delay generation
@@ -44,14 +44,14 @@ void delay_ms(uint32_t delayTime);
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
  */
-uint64_t get_curr_ticks(void);
+uint64_t SysTick_getCurrTicks(void);
 
 /**
  * @brief Sets the current number of ticks
  * @param[in] tick_value The number of ticks to be set
  * @note The ticks are dependent on Core Clock Frequency
  */
-void set_curr_ticks(uint64_t tick_value);
+void SysTick_setCurrTicks(uint64_t tick_value);
 
 /***
  * @brief ISR for SysTick

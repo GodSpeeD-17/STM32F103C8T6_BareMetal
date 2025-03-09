@@ -64,13 +64,13 @@
  * @brief Configures the General Purpose Timer (TIMx)
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-void config_TIM(timer_config_t* TIM_CONFIGx){
+void TIM_config(timer_config_t* TIM_CONFIGx){
 	// Enable APBx Clock for Timer
-	enable_TIM_clk(TIM_CONFIGx);
+	TIM_clk_enable(TIM_CONFIGx);
 	// Reset the Timer
-	reset_TIM(TIM_CONFIGx);
+	TIM_reset(TIM_CONFIGx);
 	// Disable the Timer
-	disable_TIM(TIM_CONFIGx);
+	TIM_disable(TIM_CONFIGx);
 	// Disable Update Event
 	TIM_CONFIGx->TIMx->CR1.REG |= TIM_CR1_UDIS;
 	// Auto Reload Value
@@ -94,14 +94,14 @@ void config_TIM(timer_config_t* TIM_CONFIGx){
 		// Global Interrupt Disable
 		__disable_irq();
 		// Enable NVIC Interrupt
-    	enable_NVIC_IRQ(get_TIM_IRQn(TIM_CONFIGx->TIMx));
+    	NVIC_IRQ_enable(TIM_get_IRQn(TIM_CONFIGx->TIMx));
     	// Enable Timer Interrupt
     	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
 		// Global Interrupt Enable
 		__enable_irq();
 	}
 	// Update the Timer
-	update_TIM_params(TIM_CONFIGx);
+	TIM_updateParams(TIM_CONFIGx);
 }
 
 /**
@@ -109,7 +109,7 @@ void config_TIM(timer_config_t* TIM_CONFIGx){
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @returns Timer Frequency	
  */
-uint32_t get_TIM_freq(timer_config_t* TIM_CONFIGx){
+uint32_t TIM_getFreq(timer_config_t* TIM_CONFIGx){
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
 	// Retrieve Timer Source Clock Frequency
@@ -129,7 +129,7 @@ uint32_t get_TIM_freq(timer_config_t* TIM_CONFIGx){
  */
 __attribute__((always_inline)) inline void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
 	// Calculate updated PSC Value
-	TIM_CONFIGx->TIMx->PSC = calc_TIM_PSC(freq_Hz, TIM_CONFIGx->TIMx->ARR);
+	TIM_CONFIGx->TIMx->PSC = TIM_calcPrescaler(freq_Hz, TIM_CONFIGx->TIMx->ARR);
 }
 
 /**
@@ -139,15 +139,15 @@ __attribute__((always_inline)) inline void update_TIM_freq(timer_config_t* TIM_C
  */
 void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
-	if(get_TIM_freq(TIM_CONFIGx) != FREQ_1kHz){
+	if(TIM_getFreq(TIM_CONFIGx) != FREQ_1kHz){
 		// Disable Timer
-		disable_TIM(TIM_CONFIGx);
+		TIM_disable(TIM_CONFIGx);
 		// Set update event after 1ms (1kHz)
 		update_TIM_freq(TIM_CONFIGx, FREQ_1kHz);
 		// Update the Parameters
-		update_TIM_params(TIM_CONFIGx);
+		TIM_updateParams(TIM_CONFIGx);
 		// Enable Timer
-		enable_TIM(TIM_CONFIGx);
+		TIM_enable(TIM_CONFIGx);
 	}
 	// Iteration for Milliseconds
 	while(delayMs--){

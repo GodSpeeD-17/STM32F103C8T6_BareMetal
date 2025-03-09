@@ -340,7 +340,7 @@ extern volatile uint32_t APB2Clock;
 #define SYSTICK_CLK_CORE					((uint8_t) 0x01)
 
 // SysTick Delay
-#define SYSTICK_DELAY_1_MS					((uint32_t)(CoreClock/1000))
+#define SYSTICK_DELAY_1_MS					((uint32_t)(AHBClock/1000))
 #define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
 /*********************************************** SysTick MACROS ***********************************************/
 
