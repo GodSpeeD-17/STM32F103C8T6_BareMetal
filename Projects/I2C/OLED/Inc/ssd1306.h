@@ -86,10 +86,24 @@
 #define SSD1306_CMD_SET_NORMAL_DISPLAY          (0xA6)
 // Display ON
 #define SSD1306_CMD_DISPLAY_ON                  (0xAF)
-// Set Column Address
+// Set Column Address (`Only for Horizontal or vertical Addressing Mode`)
 #define SSD1306_CMD_SET_COL_ADDR				(0x21)
-// Set Page Address
+// Set Page Address (`Only for Horizontal or vertical Addressing Mode`)
 #define SSD1306_CMD_SET_PAGE_ADDR				(0x22)
+
+// Set Page Address (`Only for Page Addressing Mode`)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR0	(0xB0)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR1	(0xB1)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR2	(0xB2)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR3	(0xB3)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR4	(0xB4)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR5	(0xB5)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR6	(0xB6)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR7	(0xB7)
+
+// Set Column Lower Nibble Address (`Only for Page Addressing Mode`)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_LOW_NIBBLE_ADDR0			(0x00)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE_ADDR0		(0x10)
 
 // Memory Addressing Mode Options
 #define SSD1306_MEM_ADDR_MODE_H					(0x00)
@@ -260,5 +274,24 @@ void SSD1306_I2C_CMD_Array(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmd
  * @note Takes care of complete I2C Sequence as well 
  */
 void SSD1306_I2C_Data_Array(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen);
+
+/**
+ * @brief Sets the Column Range
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] start Starting Column
+ * @param[in] end Ending Column
+ * @note Only valid for Horizontal & Vertical Addressing Mode
+ */
+void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end);
+
+/**
+ * @brief Sets the Page Range
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] start Starting Page
+ * @param[in] end Ending Page
+ * @note Only valid for Horizontal & Vertical Addressing Mode
+ */
+void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end);
+
 
 #endif /* __SSD1306_H__ */ 
