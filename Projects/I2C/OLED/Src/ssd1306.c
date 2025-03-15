@@ -212,14 +212,23 @@ void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, 
 		if(current_page == page_end){
 			// Column Pattern
 			temp = 0x00;
-			for(uint8_t i = 0; i < (Y2 - current_Y); i++){
-				temp |= (0x01 << (current_Y + i));
+			// Page Start Boundary -> Cover Upper Portion
+			if(current_Y & 0x07 == 0){
+				temp = 0xFF >> (7 - (Y2 - current_Y));
+			}
+			// Random Middle Portion
+			else{
+				// Generate Appropriate Mask 
+				for(uint8_t i = 0; i < (Y2 - current_Y); i++){
+					temp |= (0x01 << ((current_Y & 0x07) + i));
+				}
 			}
 		}
 		// Different Pages
 		else{
 			// Column Pattern
-			temp = 0xFF << (((current_page + 1) * 8) - current_Y);
+			temp = ((current_page + 1) * 8) - current_Y;
+			temp = 0xFF << ((temp > 7) ? 0 : temp);
 		}
 
 		// Update Data Array
@@ -234,7 +243,7 @@ void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, 
 		// Update Variables
 		cmdArray[0] += 1; 
 		current_page++;
-		current_Y = (current_page * 8) - 1;
+		current_Y = current_page * 8;
 		temp = 0x00;
 	}
 	while(current_page <= page_end);

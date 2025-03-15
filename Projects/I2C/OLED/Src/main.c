@@ -15,12 +15,16 @@ int main(){
 
 	// SSD1306 Initialisation
 	SSD1306_init(SSD1306_I2Cx);
+
 	// Full display: Black
 	SSD1306_fillFullDisp(SSD1306_I2Cx, 0x00);
-	// Fill Rectangle
-	// SSD1306_fillRect(SSD1306_I2Cx, 20, 3, 107, 5); // Pass
-	SSD1306_fillRect(SSD1306_I2Cx, 50, 3, 87, 6); // Pass
-	// SSD1306_fillRect(SSD1306_I2Cx, 20, 3, 107, 30); // Fail
+	// Loading Animation
+	for(uint8_t column = 0; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column++){
+		// Fill Rectangle
+		SSD1306_fillRect(SSD1306_I2Cx, column, 10, column + RECT_WIDTH, 10 + RECT_HEIGHT);
+		// Wait
+		delay_ms(30);
+	}
 
 	// Infinite Loop
 	while(1){
