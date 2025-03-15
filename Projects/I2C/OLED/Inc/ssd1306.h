@@ -2,6 +2,7 @@
 #ifndef __SSD1306_H__
 #define __SSD1306_H__
 
+// Dependency
 #include "i2c.h"
 
 // SSD1306 I2C Address
@@ -12,34 +13,8 @@
 #endif
 
 // SSD1306 Characteristics
-#define SSD1306_HEIGHT						((uint8_t) 64)
-#define SSD1306_WIDTH						((uint8_t) 128)
-
-/*
-// Double byte command to select 1 out of 256 contrast steps
-#define SSD1306_CMD_SET_CONTRAST					((uint8_t) 0x81)
-// Resume to RAM content display, Output follows RAM content
-#define SSD1306_CMD_ENTIRE_DISP_ON_OUT_RAM			((unit8_t) 0xA4)
-// Entire display ON, Output ignores RAM content
-#define SSD1306_CMD_ENTIRE_DISP_ON					((unit8_t) 0xA5)
-// Normal display
-#define SSD1306_CMD_DISP_NORMAL						((unit8_t) 0xA6)
-// Inverse display
-#define SSD1306_CMD_DISP_INVERSE					((unit8_t) 0xA7)
-// Display OFF
-#define SSD1306_CMD_DISP_OFF						((unit8_t) 0xAE)
-// Display ON
-#define SSD1306_CMD_DISP_ON							((unit8_t) 0xAF)
-// Horizontal Scroll (1 Column)
-#define SSD1306_CMD_RIGHT_HSCROLL					((unit8_t) 0x26)
-#define SSD1306_CMD_LEFT_HSCROLL					((unit8_t) 0x27)
-// Memory Addressing Mode
-#define SSD1306_CMD_MEM_ADDR_MODE					((unit8_t) 0x20)
-// No Operation
-#define SSD1306_CMD_NOP								((uint8_t) 0xE3)
-
-
-*/
+#define SSD1306_HEIGHT							((uint8_t) 64)
+#define SSD1306_WIDTH							((uint8_t) 128)
 
 // Command Table
 // Double byte command to select 1 out of 256 contrast steps
@@ -92,18 +67,11 @@
 #define SSD1306_CMD_SET_PAGE_ADDR				(0x22)
 
 // Set Page Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR0	(0xB0)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR1	(0xB1)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR2	(0xB2)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR3	(0xB3)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR4	(0xB4)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR5	(0xB5)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR6	(0xB6)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_ADDR7	(0xB7)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)					(0xB##VALUE)
 
 // Set Column Lower Nibble Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_LOW_NIBBLE_ADDR0			(0x00)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE_ADDR0		(0x10)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(0x0##VALUE)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(0x1##VALUE)
 
 // Memory Addressing Mode Options
 #define SSD1306_MEM_ADDR_MODE_H					(0x00)
@@ -118,7 +86,7 @@
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] Command Command
  */
-#define SSD1306_SendCMD(I2Cx, Command)							(SSD1306_writeByte((I2Cx), 1, (Command)))
+#define SSD1306_sendCMD(I2Cx, Command)							(SSD1306_writeByte((I2Cx), 1, (Command)))
 
 /**
  * @brief SSD1306 Multiple Command
@@ -126,14 +94,14 @@
  * @param[in] CMDArray Pointer to Command Array
  * @param[in] ArrayLen Length of the Command Array
  */
-#define SSD1306_SendCMDArray(I2Cx, CMDArray, ArrayLen)			(SSD1306_writeBytes((I2Cx), 1, (CMDArray), (ArrayLen)))
+#define SSD1306_sendCMDArray(I2Cx, CMDArray, ArrayLen)			(SSD1306_writeBytes((I2Cx), 1, (CMDArray), (ArrayLen)))
 
 /**
  * @brief Single SSD1306 Data
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] Data Data
  */
-#define SSD1306_SendData(I2Cx, Data)							(SSD1306_writeByte((I2Cx), 0, (Data)))
+#define SSD1306_sendData(I2Cx, Data)							(SSD1306_writeByte((I2Cx), 0, (Data)))
 
 /**
  * @brief SSD1306 Multiple Data
@@ -141,7 +109,7 @@
  * @param[in] DataArray Pointer to Data Array
  * @param[in] ArrayLen Length of the Data Array
  */
-#define SSD1306_SendDataArray(I2Cx, DataArray, ArrayLen)		(SSD1306_writeBytes((I2Cx), 0, (DataArray), (ArrayLen)))
+#define SSD1306_sendDataArray(I2Cx, DataArray, ArrayLen)		(SSD1306_writeBytes((I2Cx), 0, (DataArray), (ArrayLen)))
 
 // Initialization sequence for SSD1306
 static const uint8_t SSD1306_initCmd[] = {
@@ -162,6 +130,14 @@ static const uint8_t SSD1306_initCmd[] = {
     SSD1306_CMD_SET_NORMAL_DISPLAY,							// Set normal display (non-inverted)
     SSD1306_CMD_DISPLAY_ON									// Display ON
 };
+
+// Pixel Co-ordinates Structure
+typedef struct {
+	// X co-ordinate
+	uint8_t X;
+	// Y co-ordinate
+	uint8_t Y;
+} SSD1306_pix_t;
 
 /**
  * @brief Occupies the I2C Bus
@@ -246,16 +222,8 @@ __attribute__((always_inline)) inline void SSD1306_I2C_End(I2C_REG_STRUCT* I2Cx)
 /**
  * @brief Initializes the SSD1306 display
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] cmdArray Command array for initialization
- * @param[in] cmdArrayLen Length of the command array
  */
-static void __SSD1306_Init__(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint8_t cmdArrayLen);
-
-/**
- * @brief Initializes the SSD1306 display
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-void SSD1306_Init(I2C_REG_STRUCT* I2Cx);
+void SSD1306_init(I2C_REG_STRUCT* I2Cx);
 
 /**
  * @brief Transmits the custom commands to SSD1306
@@ -264,7 +232,7 @@ void SSD1306_Init(I2C_REG_STRUCT* I2Cx);
  * @param[in] cmdArrayLen Length of the array storing the SSD1306 Commands
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_CMD_Array(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen);
+void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen);
 
 /**
  * @brief Transmits the data to SSD1306
@@ -273,7 +241,7 @@ void SSD1306_I2C_CMD_Array(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmd
  * @param[in] dataArrayLen Length of the array storing the Data
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_Data_Array(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen);
+void SSD1306_I2C_dataArray(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen);
 
 /**
  * @brief Sets the Column Range
@@ -293,5 +261,41 @@ void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end);
  */
 void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end);
 
+/**
+ * @brief Retrieves the current X-Coordinate
+ * @returns Current X-Coordinate
+ */
+uint8_t SSD1306_getX(void);
+/**
+ * @brief Retrieves the current Y-Coordinate
+ * @returns Current Y-Coordinate
+ */
+uint8_t SSD1306_getY(void);
+
+/**
+ * @brief Directs to the Pixel Pointer
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] X X-Coordinate (Along the Columns)
+ * @param[in] Y Y-Coordinate (Along the Page)
+ * @note Only valid for Page Addressing Mode
+ */
+void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y);
+
+/**
+ * @brief Fills the whole Display with input color
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] color 0x00: Black; 0xFF: White
+ */
+void SSD1306_fillFullDisp(I2C_REG_STRUCT* I2Cx, uint8_t color);
+
+/**
+ * @brief Fills the rectangle
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] X1 Top left X-coordinate
+ * @param[in] Y1 Top left Y-coordinate
+ * @param[in] X2 Bottom right X-coordinate
+ * @param[in] Y2 Bottom right Y-coordinate
+ */
+void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, uint8_t Y2);
 
 #endif /* __SSD1306_H__ */ 
