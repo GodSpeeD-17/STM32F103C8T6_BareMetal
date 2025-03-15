@@ -73,6 +73,18 @@
 #define I2Cx_EV_MST_BYTE_SENT ((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_TXE | I2C_SR1_BTF)))
 
 /**
+ * @brief I2C Direction Initialisation
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+#define I2C_init(I2C_CONFIGx) 			\
+{										\
+	/* I2C Configuration */ 			\
+	I2C_config((I2C_CONFIGx));			\
+	/* I2C Enable */ 					\
+	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
+}
+
+/**
  * @subsection[end] MASTER TX MODE
  */
 
@@ -326,5 +338,17 @@ uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t
  * @param[in] len Number of bytes to read
  */
 void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+
+/**
+ * @brief I2C load default values
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx);
+
+/**
+ * @brief I2C load default values
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx);
 
 #endif /* __I2C_H__ */

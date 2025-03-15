@@ -162,9 +162,9 @@ void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t r
 	while(!(I2Cx->SR1.REG & I2C_SR1_ADDR));
 	temp = I2Cx->SR1.REG; // Clear ADDR flag by reading SR1
 	temp = I2Cx->SR2.REG; // Clear ADDR flag by reading SR2
-
 	// Wait for TXE flag (EV8_1)
 	while(!(I2Cx->SR1.REG & I2C_SR1_TXE));
+
 	// Write Register Address
 	I2C_writeByte(I2Cx, registerAddress);
 	// Wait for TXE and BTF flags (EV8_2)
@@ -345,5 +345,51 @@ void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t r
 	I2C_sendStop(I2Cx);
 	// Wait until STOP condition is generated
 	while (!(I2C_busReady(I2Cx)));
+}
+
+/**
+ * @brief I2C load default values
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx){
+	// I2C SCL GPIO Configuration
+	I2C_CONFIGx->SCL = &I2C1_SCL;
+	// I2C SDA GPIO Configuration
+	I2C_CONFIGx->SDA = &I2C1_SDA;
+	// I2C Instance
+	I2C_CONFIGx->I2Cx = I2C1;
+	// I2C Standard Mode (100kHz)
+	I2C_CONFIGx->mode = I2Cx_MODE_STD;
+	// I2C Fast Mode Duty
+	I2C_CONFIGx->duty = I2Cx_DUTY_NORMAL;
+	// I2C Frequency
+	I2C_CONFIGx->freq_MHz = (APB1Clock/FREQ_1MHz);
+	// I2C Rise Time Configuration
+	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
+	// I2C Clock Control Register
+	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
+}
+
+/**
+ * @brief I2C load default values
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
+ */
+void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx){
+	// I2C SCL Configuration
+	I2C_CONFIGx->SCL = &I2C2_SCL;
+	// I2C SDA Configuration
+	I2C_CONFIGx->SDA = &I2C2_SDA;
+	// I2C Instance
+	I2C_CONFIGx->I2Cx = I2C2;
+	// I2C Standard Mode (100kHz)
+	I2C_CONFIGx->mode = I2Cx_MODE_STD;
+	// I2C Fast Mode Duty
+	I2C_CONFIGx->duty = I2Cx_DUTY_NORMAL;
+	// I2C Frequency
+	I2C_CONFIGx->freq_MHz = (APB1Clock/FREQ_1MHz);
+	// I2C Rise Time Configuration
+	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
+	// I2C Clock Control Register
+	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
 }
 
