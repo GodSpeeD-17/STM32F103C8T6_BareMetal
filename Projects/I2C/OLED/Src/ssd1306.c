@@ -22,7 +22,7 @@ void SSD1306_init(I2C_REG_STRUCT* I2Cx){
  */
 void SSD1306_I2C_CMD(I2C_REG_STRUCT* I2Cx, uint8_t cmd){
 	// Occupy the I2C Bus
-	SSD1306_I2C_Init(I2Cx);
+	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
 	SSD1306_sendCMD(I2Cx, cmd);
 	// Free the I2C Bus
@@ -38,9 +38,24 @@ void SSD1306_I2C_CMD(I2C_REG_STRUCT* I2Cx, uint8_t cmd){
  */
 void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen){
 	// Occupy the I2C Bus
-	SSD1306_I2C_Init(I2Cx);
+	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
 	SSD1306_sendCMDArray(I2Cx, cmdArray, cmdArrayLen);
+	// Free the I2C Bus
+	SSD1306_I2C_End(I2Cx);
+}
+
+/**
+ * @brief Transmits the custom commands to SSD1306
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] data SSD1306 Command
+ * @note Takes care of complete I2C Sequence as well 
+ */
+void SSD1306_I2C_Data(I2C_REG_STRUCT* I2Cx, uint8_t data){
+	// Occupy the I2C Bus
+	SSD1306_I2C_Start(I2Cx);
+	// Send the Command Array
+	SSD1306_sendData(I2Cx, data);
 	// Free the I2C Bus
 	SSD1306_I2C_End(I2Cx);
 }
@@ -54,7 +69,7 @@ void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdA
  */
 void SSD1306_I2C_dataArray(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen){
 	// Occupy the I2C Bus
-	SSD1306_I2C_Init(I2Cx);
+	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
 	SSD1306_sendDataArray(I2Cx, dataArray, dataArrayLen);
 	// Free the I2C Bus
@@ -70,7 +85,7 @@ void SSD1306_I2C_dataArray(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t da
  */
 void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
 	// I2C Start
-	SSD1306_I2C_Init(I2Cx);
+	SSD1306_I2C_Start(I2Cx);
 	// Command
 	I2C_writeByte(I2Cx, SSD1306_CMD_SET_COL_ADDR);
 	// Wait for TXE and BTF flags (EV8_2)
@@ -96,7 +111,7 @@ void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
  */
 void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
 	// I2C Start
-	SSD1306_I2C_Init(I2Cx);
+	SSD1306_I2C_Start(I2Cx);
 	// Command
 	I2C_writeByte(I2Cx, SSD1306_CMD_SET_PAGE_ADDR);
 	// Wait for TXE and BTF flags (EV8_2)
@@ -249,4 +264,79 @@ void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, 
 	while(current_page <= page_end);
 }
 
+/**
+ * @brief Displays a single character
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] c Character to display
+ */
+void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c){
+	// Index
+	uint8_t index = 0;
+	// Uppercase letters
+	if (c >= 'A' && c <= 'Z') {
+		index = c - 'A';
+	}
+	// Lowercase letters 
+	else if (c >= 'a' && c <= 'z') {
+		index = (c - 'a') + 26;
+	} 
+	// Digits
+	else if (c >= '0' && c <= '9') {
+		index = (c - '0') + 52;
+	} 
+	// Space
+	else if (c == 32) {
+		index = 62;
+	} 
+	// Default to space for unsupported characters
+	else {
+		index = 62;
+	}
+	// Send character data
+	SSD1306_I2C_dataArray(I2Cx, font8x8[index], 8);
+}
+
+/**
+ * @brief Displays a string
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] str String to display
+ * @param[in] strLength Length of String
+ */
+void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str){
+	// Local Variable
+	char c = 0xFF; uint8_t index = 0;
+	// Capture I2C Bus
+	SSD1306_I2C_Start(I2Cx);
+	// Data Indicator
+	SSD1306_writeByte(I2Cx, 0xFF, SSD1306_DATA_INDICATOR);
+	// Transmit the Data
+	while(*str != '\0'){
+		// Get Current Value of String
+		c = *str++;
+		// Uppercase letters
+		if (c >= 'A' && c <= 'Z') {
+			index = c - 'A';
+		}
+		// Lowercase letters 
+		else if (c >= 'a' && c <= 'z') {
+			index = (c - 'a') + 26;
+		} 
+		// Digits
+		else if (c >= '0' && c <= '9') {
+			index = (c - '0') + 52;
+		} 
+		// Space
+		else if (c == 32) {
+			index = 62;
+		} 
+		// Default to space for unsupported characters
+		else {
+			index = 62;
+		}
+		// Send character data
+		SSD1306_writeBytes(I2Cx, 0xFF, font8x8[index], 8);
+	}
+	// Free I2C Bus
+	SSD1306_I2C_End(I2Cx);
+}
 

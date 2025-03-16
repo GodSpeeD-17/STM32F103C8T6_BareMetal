@@ -1,0 +1,8 @@
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:22:10:RCC_getClkFreq	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:65:10:RCC_getAHBFreq	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:103:10:RCC_getAPB1Freq	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:128:10:RCC_getAPB2Freq	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:154:13:RCC_PLL_config	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:191:13:RCC_sys72MHz_config	8	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:237:6:RCC_SYSCLK_config	24	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/rcc.c:382:6:RCC_config	24	static

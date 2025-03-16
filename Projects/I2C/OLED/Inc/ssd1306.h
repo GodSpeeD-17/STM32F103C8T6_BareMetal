@@ -4,6 +4,7 @@
 
 // Dependency
 #include "i2c.h"
+#include "font.h"
 
 // SSD1306 I2C Address
 #ifndef SA0
@@ -143,7 +144,7 @@ typedef struct {
  * @brief Occupies the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void SSD1306_I2C_Init(I2C_REG_STRUCT* I2Cx){
+__attribute__((always_inline)) inline void SSD1306_I2C_Start(I2C_REG_STRUCT* I2Cx){
 	// Local Variable
 	uint32_t temp = 0x00;
 	// Start Sequence
@@ -163,18 +164,23 @@ __attribute__((always_inline)) inline void SSD1306_I2C_Init(I2C_REG_STRUCT* I2Cx
 /**
  * @brief Common Implementation for Byte Transfer
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] isCMD 0: Data, 1: Command
+ * @param[in] isCMD 0: Data, 1: Command, else: data
  * @param[in] data Data to be sent
  */
 __attribute__((always_inline)) inline void SSD1306_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t data){
-	// Command transmission
-	if(isCMD)
+	
+	if(isCMD == 1){
+		// Command transmission
 		I2C_writeByte(I2Cx, SSD1306_CMD_INDICATOR);
-	// Data transmission
-	else
+		// Wait for TXE and BTF flags (EV8_2)
+		while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+	}
+	else if (isCMD == 0){
+		// Data transmission
 		I2C_writeByte(I2Cx, SSD1306_DATA_INDICATOR);	
-	// Wait for TXE and BTF flags (EV8_2)
-	while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+		// Wait for TXE and BTF flags (EV8_2)
+		while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+	}
 
 	// Data Transfer
 	I2C_writeByte(I2Cx, data);	
@@ -185,19 +191,26 @@ __attribute__((always_inline)) inline void SSD1306_writeByte(I2C_REG_STRUCT* I2C
 /**
  * @brief Common Implementation for Bytes Transfer
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] isCMD 0: Data, 1: Command
+ * @param[in] isCMD - 0: Data
+ * 					- 1: Command
+ * 					- else: array
  * @param[in] array Pointer to array to be sent 
  * @param[in] arrayLength Length of array to be sent 
  */
 __attribute__((always_inline)) inline void SSD1306_writeBytes(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t* array, uint16_t arrayLength){
-	// Command transmission
-	if(isCMD)
+	
+	if(isCMD == 1){
+		// Command transmission
 		I2C_writeByte(I2Cx, SSD1306_CMD_INDICATOR);
-	// Data transmission
-	else
-		I2C_writeByte(I2Cx, SSD1306_DATA_INDICATOR);
-	// Wait for TXE and BTF flags (EV8_2)
-	while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+		// Wait for TXE and BTF flags (EV8_2)
+		while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+	}
+	else if (isCMD == 0){
+		// Data transmission
+		I2C_writeByte(I2Cx, SSD1306_DATA_INDICATOR);	
+		// Wait for TXE and BTF flags (EV8_2)
+		while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+	}
 
 	// Transmit the whole Array
 	for(uint16_t i = 0; i < arrayLength; i++){
@@ -228,11 +241,27 @@ void SSD1306_init(I2C_REG_STRUCT* I2Cx);
 /**
  * @brief Transmits the custom commands to SSD1306
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] cmd SSD1306 Command
+ * @note Takes care of complete I2C Sequence as well 
+ */
+void SSD1306_I2C_CMD(I2C_REG_STRUCT* I2Cx, uint8_t cmd);
+
+/**
+ * @brief Transmits the custom commands to SSD1306
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] cmdArray Pointer to array storing the SSD1306 Commands
  * @param[in] cmdArrayLen Length of the array storing the SSD1306 Commands
  * @note Takes care of complete I2C Sequence as well 
  */
 void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen);
+
+/**
+ * @brief Transmits the custom commands to SSD1306
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] data SSD1306 Command
+ * @note Takes care of complete I2C Sequence as well 
+ */
+void SSD1306_I2C_Data(I2C_REG_STRUCT* I2Cx, uint8_t data);
 
 /**
  * @brief Transmits the data to SSD1306
@@ -297,5 +326,20 @@ void SSD1306_fillFullDisp(I2C_REG_STRUCT* I2Cx, uint8_t color);
  * @param[in] Y2 Bottom right Y-coordinate
  */
 void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, uint8_t Y2);
+
+/**
+ * @brief Displays a single character
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] c Character to display
+ */
+void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c);
+
+/**
+ * @brief Displays a string
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] str String to display
+ * @param[in] strLength Length of String
+ */
+void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str);
 
 #endif /* __SSD1306_H__ */ 

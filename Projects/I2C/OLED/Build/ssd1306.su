@@ -1,0 +1,14 @@
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:11:6:SSD1306_init	16	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:23:6:SSD1306_I2C_CMD	80	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:39:6:SSD1306_I2C_cmdArray	96	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:54:6:SSD1306_I2C_Data	80	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:70:6:SSD1306_I2C_dataArray	96	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:86:6:SSD1306_setColumnRange	72	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:112:6:SSD1306_setPageRange	72	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:135:9:SSD1306_getX	4	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:143:9:SSD1306_getY	4	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:154:6:SSD1306_gotoXY	24	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:181:6:SSD1306_fillFullDisp	152	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:207:6:SSD1306_fillRect	64	dynamic
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:272:6:SSD1306_I2C_dispChar	24	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Src/ssd1306.c:305:6:SSD1306_I2C_dispString	128	static

@@ -1,0 +1,3 @@
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/pwm.c:23:6:PWM_config	32	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/pwm.c:82:6:PWM_setDutyCycle	40	static
+/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/pwm.c:112:6:PWM_setMultiChannelDutyCycle	48	static
