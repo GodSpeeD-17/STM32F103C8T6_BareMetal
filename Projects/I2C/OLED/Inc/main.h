@@ -12,10 +12,10 @@
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
 #define RECT_WIDTH							((uint8_t) 5)
-#define RECT_HEIGHT							((uint8_t) 10)
+#define RECT_HEIGHT							((uint8_t) 5)
 #define SSD1306_I2Cx						(SSD1306_I2C_Config.I2Cx)
 /*-------------------------------------------------------------------------------*/
 
-void SSD1306_loadScreen(void);
+void SSD1306_loadScreenAnimation(void);
 
 #endif /* __MAIN_H__ */ 

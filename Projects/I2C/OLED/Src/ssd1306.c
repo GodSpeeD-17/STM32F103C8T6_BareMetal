@@ -2,7 +2,10 @@
 #include "ssd1306.h"
 
 // Co-ordinate Storing Structure
-static SSD1306_pix_t SSD1306_coordinates = {0};
+static SSD1306_pix_t SSD1306_coordinates = {
+	.X = 0,
+	.Y = 0,
+};
 
 /**
  * @brief Initializes the SSD1306 display
@@ -152,24 +155,17 @@ uint8_t SSD1306_getY(void){
  * @note Only valid for Page Addressing Mode
  */
 void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y){
-	// Obtaining the Page Number
-	uint8_t page = ((Y >> 3) & 0x07);
-	// Obtaining the Column Number
-	uint8_t column = (X & 0x7F);
-	// Command Array
-	uint8_t cmdArray[3] = {0};
-	// <<-- Mathematical Calculations to obtain the Commands -->> //
-	// Page Command
-	cmdArray[0] = (uint8_t) (SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + page);
-	// Column Lower Nibble Command
-	cmdArray[1] = (uint8_t) (SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0) + (column & 0x0F));
-	// Column Upper Nibble Command
-	cmdArray[2] = (uint8_t) (SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) + ((column & 0xF0) >> 4));
+	// Wrap X, Y
+	X &= 0x7F; Y &= 0x3F; 
+	// Mathematical Calculations to obtain the Commands
+	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + ((Y >> 3) & 0x07), 
+						   SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0) + (X & 0x0F),
+						   SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) + ((X & 0xF0) >> 4)};
 	// Send the Commands
 	SSD1306_I2C_cmdArray(I2Cx, cmdArray, 3);
 	// Update the co-ordinates
-	SSD1306_coordinates.X = X & 0x7F;
-	SSD1306_coordinates.Y = Y & 0x07;
+	SSD1306_coordinates.X = X;
+	SSD1306_coordinates.Y = Y;
 }
 
 /**
@@ -178,7 +174,7 @@ void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y){
  * @param[in] color 0x00: Black; 0xFF: White
  * @note Column Storage: TOP: LSB --> BOTTOM: MSB
  */
-void SSD1306_fillFullDisp(I2C_REG_STRUCT* I2Cx, uint8_t color){
+void SSD1306_fillDisp(I2C_REG_STRUCT* I2Cx, uint8_t color){
 	// Command Array
 	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0), SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0), SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0)};
 	// Data Array
@@ -270,30 +266,8 @@ void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, 
  * @param[in] c Character to display
  */
 void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c){
-	// Index
-	uint8_t index = 0;
-	// Uppercase letters
-	if (c >= 'A' && c <= 'Z') {
-		index = c - 'A';
-	}
-	// Lowercase letters 
-	else if (c >= 'a' && c <= 'z') {
-		index = (c - 'a') + 26;
-	} 
-	// Digits
-	else if (c >= '0' && c <= '9') {
-		index = (c - '0') + 52;
-	} 
-	// Space
-	else if (c == 32) {
-		index = 62;
-	} 
-	// Default to space for unsupported characters
-	else {
-		index = 62;
-	}
 	// Send character data
-	SSD1306_I2C_dataArray(I2Cx, font8x8[index], 8);
+	SSD1306_I2C_dataArray(I2Cx, font8x8[font_get_index(font8x8, c)], 8);
 }
 
 /**
@@ -313,28 +287,8 @@ void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str){
 	while(*str != '\0'){
 		// Get Current Value of String
 		c = *str++;
-		// Uppercase letters
-		if (c >= 'A' && c <= 'Z') {
-			index = c - 'A';
-		}
-		// Lowercase letters 
-		else if (c >= 'a' && c <= 'z') {
-			index = (c - 'a') + 26;
-		} 
-		// Digits
-		else if (c >= '0' && c <= '9') {
-			index = (c - '0') + 52;
-		} 
-		// Space
-		else if (c == 32) {
-			index = 62;
-		} 
-		// Default to space for unsupported characters
-		else {
-			index = 62;
-		}
 		// Send character data
-		SSD1306_writeBytes(I2Cx, 0xFF, font8x8[index], 8);
+		SSD1306_writeBytes(I2Cx, 0xFF, font8x8[font_get_index(font8x8, c)], 8);
 	}
 	// Free I2C Bus
 	SSD1306_I2C_End(I2Cx);

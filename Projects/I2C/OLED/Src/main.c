@@ -15,13 +15,30 @@ int main(){
 
 	// SSD1306 Initialisation
 	SSD1306_init(SSD1306_I2Cx);
+	// Clear Screen
+	SSD1306_clrScreen(SSD1306_I2Cx);
 
-	// Black Screen
-	SSD1306_fillFullDisp(SSD1306_I2Cx, 0x00);
-	// Test
-	SSD1306_gotoXY(SSD1306_I2Cx, 0, 0);
-	// SSD1306_I2C_dispChar(SSD1306_I2Cx, '0'); // TESTED OK
-	SSD1306_I2C_dispString(SSD1306_I2Cx, 'S');
+	SSD1306_gotoXY(SSD1306_I2Cx, 0,0);
+
+
+
+
+	// Traverse Pages
+	for(uint8_t page = 0; page < 8; page++){
+		// Send Page Address
+		SSD1306_I2C_CMD(SSD1306_I2Cx, SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + page);
+		// Send Column Address
+		SSD1306_I2C_Data
+	}	
+	SSD1306_I2C_End(SSD1306_I2Cx);
+
+	// SSD1306_I2C_dataArray(SSD1306_I2Cx, yami_image, (sizeof(yami_image)/sizeof(yami_image[0])));
+
+	
+	// Load Screen Animation
+	// SSD1306_loadScreenAnimation();
+
+	
 
 	// Infinite Loop
 	while(1){
@@ -38,14 +55,22 @@ int main(){
 /**
  * @brief Demo Function for displaying loading screen animation
  */
-void SSD1306_loadScreen(void){
-	// Full display: Black
-	SSD1306_fillFullDisp(SSD1306_I2Cx, 0x00);
+void SSD1306_loadScreenAnimation(void){
+	// Go to X, Y co-ordinates
+	SSD1306_gotoXY(SSD1306_I2Cx, 22, 50);
+	// Display this
+	SSD1306_I2C_dispString(SSD1306_I2Cx, "Loading ...");
+	// Go to previous line
+	SSD1306_gotoXY(SSD1306_I2Cx, 0, (SSD1306_HEIGHT/2));
+	// Get Current Row
+	uint8_t column = 0x00;
+	const uint8_t row = SSD1306_getY();
 	// Loading Animation
-	for(uint8_t column = 0; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column++){
+	for(column; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column += RECT_WIDTH){
 		// Fill Rectangle
-		SSD1306_fillRect(SSD1306_I2Cx, column, 10, column + RECT_WIDTH, 10 + RECT_HEIGHT);
-		// Wait
-		delay_ms(30);
+		SSD1306_fillRect(SSD1306_I2Cx, column, row, column + RECT_WIDTH, row + RECT_HEIGHT);
+		// Wait (Smoother Animation)
+		delay_ms(100);
 	}
 }
+

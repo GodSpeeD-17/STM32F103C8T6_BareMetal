@@ -112,6 +112,12 @@
  */
 #define SSD1306_sendDataArray(I2Cx, DataArray, ArrayLen)		(SSD1306_writeBytes((I2Cx), 0, (DataArray), (ArrayLen)))
 
+/**
+ * @brief Clears the Screen (Black)
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2` 
+ */
+#define SSD1306_clrScreen(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
+
 // Initialization sequence for SSD1306
 static const uint8_t SSD1306_initCmd[] = {
     SSD1306_CMD_DISP_OFF,									// Display OFF
@@ -147,6 +153,8 @@ typedef struct {
 __attribute__((always_inline)) inline void SSD1306_I2C_Start(I2C_REG_STRUCT* I2Cx){
 	// Local Variable
 	uint32_t temp = 0x00;
+	// Wait till bus is ready
+	while(!(I2C_busReady(I2Cx)));
 	// Start Sequence
 	I2C_sendStart(I2Cx);
 	// Wait for Start condition (EV5)
@@ -315,7 +323,7 @@ void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y);
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] color 0x00: Black; 0xFF: White
  */
-void SSD1306_fillFullDisp(I2C_REG_STRUCT* I2Cx, uint8_t color);
+void SSD1306_fillDisp(I2C_REG_STRUCT* I2Cx, uint8_t color);
 
 /**
  * @brief Fills the rectangle
