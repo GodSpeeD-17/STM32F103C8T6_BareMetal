@@ -1,5 +1,0 @@
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/timer.c:67:6:TIM_config	48	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/timer.c:112:10:TIM_getFreq	24	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/timer.c:140:6:TIM__delay_ms	48	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/timer.c:167:6:TIM_delay_us	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/timer.c:182:6:TIM_delay_ms	16	static

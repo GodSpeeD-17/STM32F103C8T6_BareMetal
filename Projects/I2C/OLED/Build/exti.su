@@ -1,3 +1,0 @@
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/exti.c:14:6:EXTI_srcConfig	32	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/exti.c:78:6:EXTI_trigConfig	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/exti.c:105:6:EXTI_config	24	static

@@ -1,6 +1,0 @@
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:46:6:USART_config	40	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:71:6:USART_putc	16	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:83:10:USART_getc	24	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:98:6:USART_puts	24	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:116:6:USART_printf	100	static
-/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/Src/usart.c:253:10:USART_receive	24	static
