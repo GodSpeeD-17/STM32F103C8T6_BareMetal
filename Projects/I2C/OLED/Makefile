@@ -91,7 +91,7 @@ info:
 	@echo "***********************************************************************"
 
 # All target
-all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json check_variable_and_generate_bitmap
+all: check_variable_and_generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
 	@echo "***********************************************************************"
 	@echo "Build Successful!"
 	@echo "***********************************************************************"
@@ -154,11 +154,13 @@ check_variable_and_generate_bitmap:
 	@echo "***********************************************************************"
 	@if grep -q "__YAMI_BITMAP__" $(shell pwd)/Inc/main.h; then \
 		echo "Variable '__YAMI_BITMAP__' found in main.h! Running Python script to generate and update bitmap..."; \
-		source $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image yami; \
+		# Activate the existing virtual environment and run the Python script, passing a flag for the image \
+		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image yami; \
 		echo "Bitmap generated successfully!"; \
 	else \
 		echo "Variable '__YAMI_BITMAP__' not found in main.h. Skipping bitmap generation."; \
-		# source $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image default; \
+		# Optionally pass a different flag to the Python script if variable is not found \
+		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image gojo; \
 	fi
 	@echo "***********************************************************************"
 

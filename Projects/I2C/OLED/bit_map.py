@@ -11,7 +11,7 @@ if args.image == "yami":
     image_path = "./Images/yami.png"
 # Set a default image if no yami bitmap is found
 else:
-    image_path = "./Images/default.png"
+    image_path = "./Images/gojo.png"
 
 # Open and process the image
 try:
