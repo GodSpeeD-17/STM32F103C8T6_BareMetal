@@ -15,15 +15,11 @@
 #define RECT_HEIGHT							((uint8_t) 5)
 #define SSD1306_I2Cx						(SSD1306_I2C_Config.I2Cx)
 /*-------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------*/
-// Function Prototypes
 /**
  * @brief Demo Function for displaying loading screen animation
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-void SSD1306_loadScreenAnimation(void);
-/*-------------------------------------------------------------------------------*/
-
+void SSD1306_loadScrAnim(I2C_REG_STRUCT* I2Cx);
 /*-------------------------------------------------------------------------------*/
 // Image Bitmap
 static const uint8_t image_yami[1024] 

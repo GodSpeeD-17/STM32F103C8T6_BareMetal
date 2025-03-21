@@ -23,16 +23,18 @@ int main(){
 		// 3 Images Display
 		for(uint8_t i = 0; i < 3; i++){
 			// Clear Screen
-			SSD1306_clrScreen(SSD1306_I2Cx);
+			SSD1306_clrScr(SSD1306_I2Cx);
 			// Delay
-			delay_ms(50);
+			delay_ms(LOOP_DELAY_MS/10);
+			// Load Screen Animation
+			SSD1306_loadScrAnim(SSD1306_I2Cx);
+			// Delay
+			delay_ms(LOOP_DELAY_MS/10);
 			// Display the whole Image
 			SSD1306_I2C_dispFullScreen(SSD1306_I2Cx, img_ptr[i]);
 			// Delay
-			delay_ms(LOOP_DELAY_MS);
+			delay_ms(LOOP_DELAY_MS * 2);
 		}
-		// Loop Delay
-		delay_ms(LOOP_DELAY_MS * 5);
 	}
 
 	// Return Value
@@ -41,23 +43,23 @@ int main(){
 /*-------------------------------------------------------------------------------*/
 /**
  * @brief Demo Function for displaying loading screen animation
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-void SSD1306_loadScreenAnimation(void){
+void SSD1306_loadScrAnim(I2C_REG_STRUCT* I2Cx){
 	// Go to X, Y co-ordinates
-	SSD1306_gotoXY(SSD1306_I2Cx, 22, 50);
+	SSD1306_gotoXY(I2Cx, 22, 50);
 	// Display this
-	SSD1306_I2C_dispString(SSD1306_I2Cx, "Loading ...");
+	SSD1306_I2C_dispString(I2Cx, "Loading ...");
 	// Go to previous line
-	SSD1306_gotoXY(SSD1306_I2Cx, 0, (SSD1306_HEIGHT/2));
+	SSD1306_gotoXY(I2Cx, 0, (SSD1306_HEIGHT/2));
 	// Get Current Row
-	uint8_t column = 0x00;
 	const uint8_t row = SSD1306_getY();
 	// Loading Animation
-	for(column; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column += RECT_WIDTH){
+	for(uint8_t column = 0; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column ++){
 		// Fill Rectangle
-		SSD1306_fillRect(SSD1306_I2Cx, column, row, column + RECT_WIDTH, row + RECT_HEIGHT);
+		SSD1306_fillRect(I2Cx, column, row, column + RECT_WIDTH, row + RECT_HEIGHT);
 		// Wait (Smoother Animation)
-		delay_ms(100);
+		delay_ms(20);
 	}
 }
 

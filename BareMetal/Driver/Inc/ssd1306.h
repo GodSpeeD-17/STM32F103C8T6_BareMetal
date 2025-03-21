@@ -116,7 +116,7 @@
  * @brief Clears the Screen (Black)
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2` 
  */
-#define SSD1306_clrScreen(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
+#define SSD1306_clrScr(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
 
 // Initialization sequence for SSD1306
 static const uint8_t SSD1306_initCmd[] = {
