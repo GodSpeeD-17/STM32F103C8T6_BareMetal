@@ -350,4 +350,12 @@ void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c);
  */
 void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str);
 
+/**
+ * @brief Displays input image on the screen
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] dataArray The array of data
+ * @note The data size should be of 1024 bytes
+ */
+void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray);
+
 #endif /* __SSD1306_H__ */ 

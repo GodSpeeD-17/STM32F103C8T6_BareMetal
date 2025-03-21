@@ -1,5 +1,3 @@
-# Makefile for STM32F103C8T6 Baremetal Programming
-
 # Root directory
 ROOT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 
@@ -93,7 +91,7 @@ info:
 	@echo "***********************************************************************"
 
 # All target
-all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
+all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json check_variable_and_generate_bitmap
 	@echo "***********************************************************************"
 	@echo "Build Successful!"
 	@echo "***********************************************************************"
@@ -149,6 +147,19 @@ replace_makefiles:
 	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec cp $$(pwd)/Makefile {} \;
 	@echo "***********************************************************************"
 	@echo "All the above mentioned directories having Makefiles have been replaced!"
+	@echo "***********************************************************************"
+
+# New target for checking and running Python script in your existing virtual environment if the define is found
+check_variable_and_generate_bitmap:
+	@echo "***********************************************************************"
+	@if grep -q "__YAMI_BITMAP__" $(shell pwd)/Inc/main.h; then \
+		echo "Variable '__YAMI_BITMAP__' found in main.h! Running Python script to generate and update bitmap..."; \
+		source $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image yami; \
+		echo "Bitmap generated successfully!"; \
+	else \
+		echo "Variable '__YAMI_BITMAP__' not found in main.h. Skipping bitmap generation."; \
+		# source $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image default; \
+	fi
 	@echo "***********************************************************************"
 
 # Include dependency files

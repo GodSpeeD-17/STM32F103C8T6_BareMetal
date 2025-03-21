@@ -294,3 +294,27 @@ void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str){
 	SSD1306_I2C_End(I2Cx);
 }
 
+/**
+ * @brief Displays input image on the screen
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] dataArray The array of data
+ * @note The data size should be of 1024 bytes
+ */
+void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray){
+	// Command Array
+	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0), 
+		SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),
+		SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0)};
+	// Go to (X,Y) = (0,0)
+	SSD1306_gotoXY(I2Cx, 0, 0);
+	// Traverse Pages
+	for(uint8_t page = 0; page < 8; page++){
+		// Send Page Address
+		SSD1306_I2C_cmdArray(I2Cx, cmdArray, 3);
+		// Update it to next page
+		cmdArray[0] = SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + page + 1;
+		// Send Data for all the 128 columns for a single page
+		SSD1306_I2C_dataArray(I2Cx, (dataArray + (page * 128)), 128);
+	}
+}
+

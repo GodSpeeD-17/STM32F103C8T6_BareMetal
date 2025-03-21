@@ -7,7 +7,8 @@
 #include "bare_metal.h"
 #include "ssd1306.h"
 /*-------------------------------------------------------------------------------*/
-
+// Conditional Compilation
+#define __YAMI_BITMAP__
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
