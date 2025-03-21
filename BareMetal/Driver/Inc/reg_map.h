@@ -276,6 +276,10 @@ extern volatile uint32_t APB2Clock;
 #define TIM2_IRQn							((uint8_t) 28)
 #define TIM3_IRQn							((uint8_t) 29)
 #define TIM4_IRQn							((uint8_t) 30)
+#define I2C1_EV_IRQn						((uint8_t) 31)
+#define I2C1_ER_IRQn						((uint8_t) 32)
+#define I2C2_EV_IRQn						((uint8_t) 33)
+#define I2C2_ER_IRQn						((uint8_t) 34)
 #define SPI1_IRQn							((uint8_t) 35)
 #define SPI2_IRQn							((uint8_t) 36)
 #define USART1_IRQn							((uint8_t) 37)
@@ -326,6 +330,12 @@ extern volatile uint32_t APB2Clock;
 // I2C Configuration Structure Mode
 #define I2Cx_MODE_STD						((uint8_t) 0x00)
 #define I2Cx_MODE_FAST						((uint8_t) 0x01)
+// I2C Configuration Structure Buffer Interrupt
+#define I2Cx_BUFFER_IRQ_DISABLE				((uint8_t) 0x00)
+#define I2Cx_BUFFER_IRQ_ENABLE				((uint8_t) 0x01)
+// I2C Configuration Structure Event Interrupt
+#define I2Cx_EVENT_IRQ_DISABLE				((uint8_t) 0x00)
+#define I2Cx_EVENT_IRQ_ENABLE				((uint8_t) 0x01)
 // I2C Configuration Structure Fast Mode Duty
 #define I2Cx_DUTY_NORMAL					((uint8_t) 0x00)
 #define I2Cx_DUTY_FAST						((uint8_t) 0x01)

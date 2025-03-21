@@ -42,14 +42,19 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	// Software Reset
 	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
 	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
-	// I2C Module Frequency
-	I2C_CONFIGx->I2Cx->CR2.REG |= (I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos;
+	// I2C Buffer IRQ + I2C Event IRQ + I2C Module Frequency
+	I2C_CONFIGx->I2Cx->CR2.REG |= (((I2C_CONFIGx->buffer_IRQ & 0x01) << I2C_CR2_ITBUFEN_Pos) | 
+								   ((I2C_CONFIGx->event_IRQ & 0x01) << I2C_CR2_ITEVTEN_Pos) | 
+								   ((I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos));
 	// I2C Mode + I2C Duty + I2C Clock Control Register
 	I2C_CONFIGx->I2Cx->CCR.REG = (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
 									((I2C_CONFIGx->duty & 0x01) << I2C_CCR_DUTY_Pos) | 
 									(I2C_CONFIGx->CCR & 0x0FFF) << I2C_CCR_CCR_Pos);
 	// TRISE Configuration
 	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
+	// Enable Interrupt
+	if(I2C_CONFIGx->buffer_IRQ || I2C_CONFIGx->event_IRQ)
+		NVIC_IRQ_enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
 }
 
 /**
@@ -368,6 +373,9 @@ void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
 	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
+	// Disable Interrupts
+	I2C_CONFIGx->event_IRQ = I2Cx_EVENT_IRQ_DISABLE;
+	I2C_CONFIGx->buffer_IRQ = I2Cx_BUFFER_IRQ_DISABLE;
 }
 
 /**
@@ -391,5 +399,8 @@ void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
 	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
+	// Disable Interrupts
+	I2C_CONFIGx->event_IRQ = I2Cx_EVENT_IRQ_DISABLE;
+	I2C_CONFIGx->buffer_IRQ = I2Cx_BUFFER_IRQ_DISABLE;
 }
 

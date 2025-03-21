@@ -6,6 +6,7 @@
 #include "reg_map.h"
 #include "rcc.h"	// Clock Configuration
 #include "gpio.h"   // For GPIO pin configuration
+#include "nvic.h"	// For Interrupt Configuration
 
 /**
  ** I2Cx->CR2.BIT.FREQ: I2C Clock Frequency 
@@ -49,11 +50,8 @@
 
 /**
  * @section[start] I2C Event
- */
 
-/**
- * @subsection[start] MASTER TX MODE
- */
+
 // I2C Bus Ready: BUSY=0
 #define I2Cx_EV_BUS_RDY ((uint32_t)0)
 
@@ -71,6 +69,8 @@
 
 // Byte Sent (EV8_2): TxE=1, BTF=1, MSL=1, BUSY=1, TRA=1 (Observation: Same as ADDR)
 #define I2Cx_EV_MST_BYTE_SENT ((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_TXE | I2C_SR1_BTF)))
+*/
+
 
 /**
  * @brief I2C Direction Initialisation
@@ -83,15 +83,6 @@
 	/* I2C Enable */ 					\
 	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
 }
-
-/**
- * @subsection[end] MASTER TX MODE
- */
-
-
-/**	
- * @section[end] I2C Event
- */ 
 
 
 // I2C Configuration Structure
@@ -134,6 +125,18 @@ typedef struct {
 				// |---|--- Thigh = 9 * CCR * `freq_MHz`
 				// |---|--- Tlow = 16 * CCR * `freq_MHz`
 	uint16_t CCR: 12;
+	// Buffer Interrupt Enable
+	// - TxE = 1 || RxNE = 1
+	// - `I2Cx_BUFFER_IRQ_DISABLE`: Disable Buffer Interrupt
+	// - `I2Cx_BUFFER_IRQ_ENABLE`: Enable Buffer Interrupt
+	uint16_t buffer_IRQ: 1;
+	// Event Interrupt Enable
+	// - SB = 1 (Master) || ADDR = 1 (Master/Slave) || ADD10 = 1 (Master) || STOPF = 1 (Slave)
+	// - BTF = 1 with no TxE or RxNE
+	// - TxE = 1 || RxNE = 1 && buffer_IRQ = `I2Cx_BUFFER_IRQ_ENABLE`
+	// - `I2Cx_EVENT_IRQ_DISABLE`: Disable Event Interrupt
+	// - `I2Cx_EVENT_IRQ_ENABLE`: Enable Event Interrupt
+	uint16_t event_IRQ: 1;
 	// Maximum rise time in Fast/Standard Mode (Master mode)
 	// - Provide the maximum duration of the SCL feedback loop in master mode
 	// - `I2Cx_MODE_STD`:
@@ -142,28 +145,6 @@ typedef struct {
 	// |- TRISE = ((0.3 * (APB1Clock/1MHz)) + 1) = ((0.3 * (36MHz/1MHz)) + 1) = ((0.3 * 36)) + 1) = (10.8 + 1) = 11.8 ~ 11 
 	uint8_t TRISE;
 } i2c_config_t;
-
-// I2C Slave Configuration Structure
-typedef struct {
-	// Read-Write
-	// - `I2Cx_WRITE`: Write to the Slave
-	// - `I2Cx_READ`: Read from the Slave
-	uint8_t r_w: 1;
-	// 7-bit Slave Address
-	uint8_t address: 7;
-	// Pointer to the Buffer where data is read from/written to
-	uint8_t* buffer;
-	// Buffer length
-	uint8_t buff_len;
-} i2c_slave_config_t;
-
-// I2C Communication Data Structure
-typedef struct {
-	// I2C Instance: `I2C1`, `I2C2`
-	I2C_REG_STRUCT* I2Cx;
-	// Slave configuration Structure
-	i2c_slave_config_t* slave;
-} i2c_data_t;
 
 /**
  * @brief Enables the Clock for I2C Module
@@ -272,6 +253,20 @@ __attribute__((always_inline)) inline uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx)
 __attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
 	// Send STOP condition
 	I2Cx->CR1.REG |= I2C_CR1_STOP;
+}
+
+/**
+ * @brief Retrieves I2C Event IRQn
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @returns I2C IRQn
+ */
+__attribute__((always_inline)) inline uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
+	// I2C1
+	if(I2Cx == I2C1)
+	return I2C1_EV_IRQn;
+	// I2C2
+	else if (I2Cx == I2C2)
+		return I2C2_EV_IRQn;
 }
 
 /**
