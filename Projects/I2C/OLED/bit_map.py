@@ -1,37 +1,96 @@
 from PIL import Image
 
-# Load the image
-image = Image.open("/home/shrey_shah/Downloads/yami.png").convert('1')  # Convert to 1-bit monochrome
+# Replace with your image path
+image_path = "/home/shrey_shah/Downloads/yami.png"  
+# Adjust threshold (0-255) for black/white conversion
+threshold = 108  
 
-# Resize to 128x64 (SSD1306 resolution)
-image = image.resize((128, 64))
+# Replace with your desired output file path
+output_file = "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Inc/font.h"  
+# The variable name you want to overwrite
+variable_name = "static const uint8_t yami_bitmap[1024]"  
 
 # Function to convert image to SSD1306 bitmap (Page Addressing Mode)
-def image_to_ssd1306_bitmap(image):
+def image_to_ssd1306_bitmap(image, threshold=128):
     width, height = image.size
-    pages = height // 8  # Number of pages (8 rows per page)
+    pages = (height + 7) // 8  # Number of pages (8 rows per page)
+
     bitmap = []
 
     for page in range(pages):
         for x in range(width):
             byte = 0
             for y in range(8):
-                pixel = image.getpixel((x, page * 8 + y))
-                if pixel == 0:  # Assuming black is 0
-                    byte |= 1 << y
+                pixel_y = page * 8 + y
+                if pixel_y < height:  # Check if within image bounds
+                    pixel = image.getpixel((x, pixel_y))
+                    if isinstance(pixel, tuple):  # Convert color to grayscale
+                        pixel = int(0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2])
+                    # Apply threshold to convert grayscale to black/white
+                    if pixel < threshold:  # Black pixel
+                        byte |= (1 << y)
             bitmap.append(byte)
     
     return bitmap
 
-# Get the bitmap
-bitmap = image_to_ssd1306_bitmap(image)
+# Function to overwrite the bitmap array in the file
+def overwrite_variable_in_file(bitmap, file_path, variable_name):
+    with open(file_path, 'r+') as f:
+        lines = f.readlines()
 
-# Print the bitmap in C array format (128x8 pages = 1024 bytes)
-print("const unsigned char bitmap[1024] = {")
-for i, byte in enumerate(bitmap):
-    if i % 16 == 0:
-        print("    ", end="")
-    print(f"0x{byte:02X}, ", end="")
-    if i % 16 == 15:
-        print()
-print("};")
+        # Find the line containing the variable_name and remove the old bitmap data
+        start_index = None
+        end_index = None
+        
+        for i, line in enumerate(lines):
+            if variable_name in line:
+                start_index = i
+                break
+        
+        if start_index is not None:
+            # Find the end of the variable definition
+            for j in range(start_index + 1, len(lines)):
+                if '};' in lines[j]:
+                    end_index = j
+                    break
+
+            # Replace the old variable with the new bitmap data
+            if end_index is not None:
+                new_lines = lines[:start_index + 1]
+                new_lines.append('    = {\n')
+                for i, byte in enumerate(bitmap):
+                    new_lines.append(f"        0x{byte:02X}, ")
+                    if (i + 1) % 16 == 0:
+                        new_lines.append("\n")
+                new_lines.append("\n    };\n")
+                new_lines.extend(lines[end_index + 1:])
+
+                # Rewrite the file with the new bitmap data
+                f.seek(0)
+                f.writelines(new_lines)
+                f.truncate()
+
+# Main function
+def generate_bitmap(image_path, threshold=128, output_file="output.txt", variable_name="static const uint8_t yami_bitmap[1024]"):
+    # Load the image
+    image = Image.open(image_path)
+
+    # Resize the image to fit 128x64 resolution (maintaining aspect ratio)
+    image.thumbnail((128, 64), Image.Resampling.LANCZOS)
+    width, height = image.size
+
+    # Create a new blank image with 128x64 resolution
+    new_image = Image.new("L", (128, 64), 255)  # White background
+    # Paste the resized image onto the center of the blank image
+    new_image.paste(image, ((128 - width) // 2, (64 - height) // 2))
+
+    # Convert the image to SSD1306 bitmap
+    bitmap = image_to_ssd1306_bitmap(new_image, threshold)
+
+    # Overwrite the bitmap array in the specified file
+    overwrite_variable_in_file(bitmap, output_file, variable_name)
+
+    print(f"Bitmap written and variable {variable_name} overwritten in {output_file}")
+
+# Generate the bitmap and overwrite the variable in the file
+generate_bitmap(image_path, threshold, output_file, variable_name)

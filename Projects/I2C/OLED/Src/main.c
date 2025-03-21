@@ -20,17 +20,20 @@ int main(){
 
 	SSD1306_gotoXY(SSD1306_I2Cx, 0,0);
 
-
-
+	// Command Array
+	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0), 
+							SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),
+							SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0)};
 
 	// Traverse Pages
 	for(uint8_t page = 0; page < 8; page++){
 		// Send Page Address
-		SSD1306_I2C_CMD(SSD1306_I2Cx, SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + page);
+		SSD1306_I2C_cmdArray(SSD1306_I2Cx, cmdArray, 3);
+		cmdArray[0] += 1;
 		// Send Column Address
-		SSD1306_I2C_Data
+		SSD1306_I2C_dataArray(SSD1306_I2Cx, (yami_bitmap + (page * 128)), 128);
 	}	
-	SSD1306_I2C_End(SSD1306_I2Cx);
+	// SSD1306_I2C_End(SSD1306_I2Cx);
 
 	// SSD1306_I2C_dataArray(SSD1306_I2Cx, yami_image, (sizeof(yami_image)/sizeof(yami_image[0])));
 
