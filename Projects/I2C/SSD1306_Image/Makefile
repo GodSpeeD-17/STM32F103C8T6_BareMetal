@@ -70,8 +70,15 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(STARTUP_DIR)/stm32f1_ls.ld
 %.o: %.s $(BUILD_DIR)
 	$(CC) $(ASFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
 
-# Flashing command (adjust as necessary)
+# Flashing command
 flash: all
+	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+	@echo "***********************************************************************"
+	@echo "Flashed!"
+	@echo "***********************************************************************"
+
+# Flashing command
+bitmap_flash: bitmap_all
 	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
 	@echo "***********************************************************************"
 	@echo "Flashed!"
@@ -91,7 +98,13 @@ info:
 	@echo "***********************************************************************"
 
 # All target
-all: generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
+all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
+	@echo "***********************************************************************"
+	@echo "Build Successful!"
+	@echo "***********************************************************************"
+
+# All target
+bitmap_all: generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
 	@echo "***********************************************************************"
 	@echo "Build Successful!"
 	@echo "***********************************************************************"

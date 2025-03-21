@@ -14,18 +14,25 @@ int main(){
 
 	// SSD1306 Initialisation
 	SSD1306_init(SSD1306_I2Cx);
-	// Clear Screen
-	SSD1306_clrScreen(SSD1306_I2Cx);
 	
-	// Display the whole Image
-	SSD1306_I2C_dispFullScreen(SSD1306_I2Cx, image_bitmap);
+	// Pointer Array
+	const static uint8_t* img_ptr[3] = {image_yami, image_gojo, image_family};
 
 	// Infinite Loop
 	while(1){
-		// Toggle OB LED
-		OB_LED_toggle();
+		// 3 Images Display
+		for(uint8_t i = 0; i < 3; i++){
+			// Clear Screen
+			SSD1306_clrScreen(SSD1306_I2Cx);
+			// Delay
+			delay_ms(50);
+			// Display the whole Image
+			SSD1306_I2C_dispFullScreen(SSD1306_I2Cx, img_ptr[i]);
+			// Delay
+			delay_ms(LOOP_DELAY_MS);
+		}
 		// Loop Delay
-		delay_ms(LOOP_DELAY_MS);
+		delay_ms(LOOP_DELAY_MS * 5);
 	}
 
 	// Return Value
