@@ -4,7 +4,6 @@
 /*-------------------------------------------------------------------------------*/
 // I2C Configuration Structure
 i2c_config_t SSD1306_I2C_Config = {0};
-const uint8_t Font5x7_A[5] = {0x7C, 0x12, 0x12, 0x7C, 0x00};
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
@@ -19,7 +18,7 @@ int main(){
 	SSD1306_clrScreen(SSD1306_I2Cx);
 	
 	// Display the whole Image
-	SSD1306_I2C_dispFullScreen(SSD1306_I2Cx, yami_bitmap);
+	SSD1306_I2C_dispFullScreen(SSD1306_I2Cx, image_bitmap);
 
 	// Infinite Loop
 	while(1){

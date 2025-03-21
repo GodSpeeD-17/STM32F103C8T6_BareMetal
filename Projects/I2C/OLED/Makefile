@@ -91,7 +91,7 @@ info:
 	@echo "***********************************************************************"
 
 # All target
-all: check_variable_and_generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
+all: generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
 	@echo "***********************************************************************"
 	@echo "Build Successful!"
 	@echo "***********************************************************************"
@@ -149,20 +149,23 @@ replace_makefiles:
 	@echo "All the above mentioned directories having Makefiles have been replaced!"
 	@echo "***********************************************************************"
 
-# New target for checking and running Python script in your existing virtual environment if the define is found
-check_variable_and_generate_bitmap:
+generate_bitmap:
 	@echo "***********************************************************************"
-	@if grep -q "__YAMI_BITMAP__" $(shell pwd)/Inc/main.h; then \
-		echo "Variable '__YAMI_BITMAP__' found in main.h! Running Python script to generate and update bitmap..."; \
-		# Activate the existing virtual environment and run the Python script, passing a flag for the image \
+	@if grep -q "__YAMI__" $(shell pwd)/Inc/main.h; then \
+		echo "Variable '__YAMI__' found in main.h! Running Python script to generate and update bitmap..."; \
 		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image yami; \
-		echo "Bitmap generated successfully!"; \
-	else \
-		echo "Variable '__YAMI_BITMAP__' not found in main.h. Skipping bitmap generation."; \
-		# Optionally pass a different flag to the Python script if variable is not found \
+		echo "Bitmap generated successfully for Yami!"; \
+	elif grep -q "__GOJO__" $(shell pwd)/Inc/main.h; then \
+		echo "Variable '__GOJO__' found in main.h! Running Python script to generate and update bitmap..."; \
 		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image gojo; \
+		echo "Bitmap generated successfully for Gojo!"; \
+	else \
+		echo "Neither '__YAMI__' nor '__GOJO__' found in main.h ..."; \
+		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image family; \
+		echo "Bitmap generated successfully for Family!"; \
 	fi
 	@echo "***********************************************************************"
+
 
 # Include dependency files
 -include $(OBJS:.o=.d)

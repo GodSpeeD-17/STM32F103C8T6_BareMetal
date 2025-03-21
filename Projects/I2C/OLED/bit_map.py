@@ -6,12 +6,19 @@ parser = argparse.ArgumentParser(description="Generate and update bitmap based o
 parser.add_argument('--image', type=str, required=True, help="Specify the image to use.")
 args = parser.parse_args()
 
+print(f"\n{args.image}\n")
+
 # Set the image path based on the command line argument
 if args.image == "yami":
     image_path = "./Images/yami.png"
+    threshold = 70
+elif args.image == "gojo":
+    image_path = "./Images/gojo.png"
+    threshold = 128
 # Set a default image if no yami bitmap is found
 else:
-    image_path = "./Images/gojo.png"
+    image_path = "./Images/family.png"
+    threshold = 158
 
 # Open and process the image
 try:
@@ -21,13 +28,11 @@ try:
 except Exception as e:
     print(f"Error opening image: {e}")
 
-# Adjust threshold (0-255) for black/white conversion
-threshold = 100  
 
 # Replace with your desired output file path
-output_file = "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/I2C/OLED/Inc/font.h"  
+output_file = "./Inc/main.h"  
 # The variable name you want to overwrite
-variable_name = "static const uint8_t yami_bitmap[1024]"  
+variable_name = "static const uint8_t image_bitmap[1024]"
 
 # Function to convert image to SSD1306 bitmap (Page Addressing Mode)
 def image_to_ssd1306_bitmap(image, threshold=128):
