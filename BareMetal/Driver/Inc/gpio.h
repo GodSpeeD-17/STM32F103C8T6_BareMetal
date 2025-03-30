@@ -130,7 +130,7 @@ __attribute__((always_inline)) inline void GPIO_reset(gpio_config_t* GPIO_CONFIG
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
 __attribute__((always_inline)) inline void GPIO_toggle(gpio_config_t* GPIO_CONFIGx){
-	// Bit Reset (Atomicity)
+	// Output Data Register
 	GPIO_CONFIGx->GPIOx->ODR.REG ^= (1 << GPIO_CONFIGx->PINx);
 }
 

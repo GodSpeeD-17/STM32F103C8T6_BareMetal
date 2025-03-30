@@ -14,7 +14,6 @@ static SSD1306_pix_t SSD1306_coordinates = {
 void SSD1306_init(I2C_REG_STRUCT* I2Cx){
 	// Internal Array
 	SSD1306_I2C_cmdArray(I2Cx, SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
-	// __SSD1306_Init__(I2Cx, SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0]))); // Wrong Method
 }
 
 /**

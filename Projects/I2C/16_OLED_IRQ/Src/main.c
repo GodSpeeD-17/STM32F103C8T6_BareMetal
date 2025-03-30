@@ -11,12 +11,15 @@ gpio_config_t LED_Config = {
 	.MODEx = MODE_OUT_10MHz,
 	.CNFx = CNF_OUT_GP_PP
 };
+// LED Status
+uint8_t led_status[2] = {0x00};
+uint32_t temp = 0x00;
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
 	// Initialisation
 	I2C1_loadDefault(&SSD1306_I2C_Config);
-	SSD1306_I2C_Config.buffer_IRQ = I2Cx_BUFFER_IRQ_ENABLE;
+	SSD1306_I2C_Config.buffer_IRQ = I2Cx_BUFFER_IRQ_DISABLE;
 	SSD1306_I2C_Config.event_IRQ = I2Cx_EVENT_IRQ_ENABLE;
 	// Configure I2C
 	I2C_config(&SSD1306_I2C_Config);
@@ -28,8 +31,14 @@ int main(){
 	I2C_sendStart(SSD1306_I2Cx);
 	// Infinite Loop
 	while(1){
-		// Toggle on-board LED
-		OB_LED_toggle();
+		// ISR Executed
+		if(led_status[1] != led_status[0]){
+			// Toggle on-board LED
+			OB_LED_toggle();
+			led_status[1] = led_status[0];
+		}
+		// Toggle LED
+		GPIO_toggle(&LED_Config);
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
@@ -41,23 +50,29 @@ int main(){
  * @brief I2C1 Event Handler
  */
 void I2C1_EV_IRQHandler(void){
-	// Local Variables
-	uint32_t status = SSD1306_I2Cx->CR1.REG;
-	// uint32_t CR2 = SSD1306_I2Cx->CR2.REG;
 	// Start bit
-	if(status & I2C_CR1_START){
-		// Clear Start bit
-		// SSD1306_I2Cx->CR1.REG &= ~I2C_CR1_START;
-		I2C_writeByte(SSD1306_I2Cx, SSD1306_I2C_ADDRESS);
-		// LED ON
-		GPIO_set(&LED_Config);
+	if(SSD1306_I2Cx->SR1.REG & I2C_SR1_SB){
+		// SSD1306 I2C Address with Write Privilege
+		SSD1306_I2Cx->DR.REG = SSD1306_I2C_ADDRESS << 1;
+		// Update the LED status
+		led_status[0] = 0x01;
+		// Stop Interrupt
+		SSD1306_I2Cx->CR2.REG &= ~(I2C_CR2_ITEVTEN);
 	}
-	// Address
-	if (status & I2C_SR1_ADDR) {
-        // Clear Address Flag
-        uint32_t temp = (SSD1306_I2Cx->SR1.REG | SSD1306_I2Cx->SR2.REG);
-		// 
-		I2C_sendStop(SSD1306_I2Cx);
-    } 
+	// Address Sent
+	// else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
+	// 	// Clear ADDR Bit
+	// 	temp = SSD1306_I2Cx->SR1.REG;
+	// 	temp = SSD1306_I2Cx->SR2.REG;
+	// 	// SSD1306 I2C Data
+	// 	SSD1306_I2Cx->DR.REG = SSD1306_CMD_DISP_OFF;
+	// 	// Update the LED status
+	// 	led_status[0] = 0x00;
+	// }
+	// // Byte Transfer Finish
+	// else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
+	// 	// SSD1306 I2C Stop
+	// 	I2C_sendStop(SSD1306_I2Cx);
+	// }
 
 }
