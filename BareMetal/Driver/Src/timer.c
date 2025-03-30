@@ -127,7 +127,7 @@ uint32_t TIM_getFreq(timer_config_t* TIM_CONFIGx){
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] freq_Hz Updated Timer Frequency
  */
-__attribute__((always_inline)) inline void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
+__STATIC_INLINE__ void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
 	// Calculate updated PSC Value
 	TIM_CONFIGx->TIMx->PSC = TIM_calcPrescaler(freq_Hz, TIM_CONFIGx->TIMx->ARR);
 }

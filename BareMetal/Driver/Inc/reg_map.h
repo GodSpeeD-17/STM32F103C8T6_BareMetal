@@ -12,6 +12,7 @@
 
 // Custom Declaration
 #define NULL            					((void *) 0)
+#define __STATIC_INLINE__					((__STATIC_INLINE__))
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
 #include "flash_reg_map.h"

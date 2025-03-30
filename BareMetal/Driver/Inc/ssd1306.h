@@ -150,7 +150,7 @@ typedef struct {
  * @brief Occupies the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void SSD1306_I2C_Start(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void SSD1306_I2C_Start(I2C_REG_STRUCT* I2Cx){
 	// Local Variable
 	uint32_t temp = 0x00;
 	// Wait till bus is ready
@@ -175,7 +175,7 @@ __attribute__((always_inline)) inline void SSD1306_I2C_Start(I2C_REG_STRUCT* I2C
  * @param[in] isCMD 0: Data, 1: Command, else: data
  * @param[in] data Data to be sent
  */
-__attribute__((always_inline)) inline void SSD1306_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t data){
+__STATIC_INLINE__ void SSD1306_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t data){
 	
 	if(isCMD == 1){
 		// Command transmission
@@ -205,7 +205,7 @@ __attribute__((always_inline)) inline void SSD1306_writeByte(I2C_REG_STRUCT* I2C
  * @param[in] array Pointer to array to be sent 
  * @param[in] arrayLength Length of array to be sent 
  */
-__attribute__((always_inline)) inline void SSD1306_writeBytes(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t* array, uint16_t arrayLength){
+__STATIC_INLINE__ void SSD1306_writeBytes(I2C_REG_STRUCT* I2Cx, uint8_t isCMD, uint8_t* array, uint16_t arrayLength){
 	
 	if(isCMD == 1){
 		// Command transmission
@@ -233,7 +233,7 @@ __attribute__((always_inline)) inline void SSD1306_writeBytes(I2C_REG_STRUCT* I2
  * @brief Frees the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void SSD1306_I2C_End(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void SSD1306_I2C_End(I2C_REG_STRUCT* I2Cx){
 	// Generate STOP condition
 	I2C_sendStop(I2Cx);
 	// Wait until STOP condition is generated

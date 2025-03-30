@@ -14,6 +14,8 @@ gpio_config_t LED_Config = {
 // LED Status
 uint8_t led_status[2] = {0x00};
 uint32_t temp = 0x00;
+// 
+static uint8_t buffer[BUFFER_SIZE];
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
@@ -56,23 +58,17 @@ void I2C1_EV_IRQHandler(void){
 		SSD1306_I2Cx->DR.REG = SSD1306_I2C_ADDRESS << 1;
 		// Update the LED status
 		led_status[0] = 0x01;
-		// Stop Interrupt
-		SSD1306_I2Cx->CR2.REG &= ~(I2C_CR2_ITEVTEN);
 	}
 	// Address Sent
-	// else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
-	// 	// Clear ADDR Bit
-	// 	temp = SSD1306_I2Cx->SR1.REG;
-	// 	temp = SSD1306_I2Cx->SR2.REG;
-	// 	// SSD1306 I2C Data
-	// 	SSD1306_I2Cx->DR.REG = SSD1306_CMD_DISP_OFF;
-	// 	// Update the LED status
-	// 	led_status[0] = 0x00;
-	// }
-	// // Byte Transfer Finish
-	// else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
-	// 	// SSD1306 I2C Stop
-	// 	I2C_sendStop(SSD1306_I2Cx);
-	// }
+	else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
+		// Clear ADDR Bit
+		temp = SSD1306_I2Cx->SR1.REG;
+		temp = SSD1306_I2Cx->SR2.REG;
+	}
+	// Byte Transfer Finish
+	else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
+		// SSD1306 I2C Stop
+		I2C_sendStop(SSD1306_I2Cx);
+	}
 
 }

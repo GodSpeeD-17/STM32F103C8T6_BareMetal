@@ -77,7 +77,7 @@
  * @param[in] reg_address MAX30102 Register Address
  * @param[in] byte Data to be written
  */
-__attribute__((always_inline)) inline void MAX30102_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t byte){
+__STATIC_INLINE__ void MAX30102_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t byte){
 	// I2C Write Byte
 	I2C_writeRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address, byte);
 }
@@ -88,7 +88,7 @@ __attribute__((always_inline)) inline void MAX30102_writeByte(I2C_REG_STRUCT* I2
  * @param[in] reg_address MAX30102 Register Address
  * @returns The read byte
  */
-__attribute__((always_inline)) inline uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address){
+__STATIC_INLINE__ uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address){
 	// I2C Read Byte
 	return I2C_readRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address);
 }

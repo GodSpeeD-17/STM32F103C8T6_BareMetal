@@ -150,7 +150,7 @@ typedef struct {
  * @brief Enables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_clk_enable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_clk_enable(I2C_REG_STRUCT* I2Cx){
 	// Enable AFIO
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -169,7 +169,7 @@ __attribute__((always_inline)) inline void I2C_clk_enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_clk_disable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_clk_disable(I2C_REG_STRUCT* I2Cx){
 	// Disable AFIO
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -188,7 +188,7 @@ __attribute__((always_inline)) inline void I2C_clk_disable(I2C_REG_STRUCT* I2Cx)
  * @brief Enables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_enable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_enable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG |= I2C_CR1_PE;
 }
@@ -197,7 +197,7 @@ __attribute__((always_inline)) inline void I2C_enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_disable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_disable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG &= ~I2C_CR1_PE;
 }
@@ -208,7 +208,7 @@ __attribute__((always_inline)) inline void I2C_disable(I2C_REG_STRUCT* I2Cx){
  * @returns - 0: I2C Bus is not ready
  * @returns - 1: I2C Bus is ready
  */
-__attribute__((always_inline)) inline uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
 	// Bus Busy
 	if((I2Cx->SR2.REG & I2C_SR2_BUSY))
 		return (uint8_t)0x00;
@@ -221,7 +221,7 @@ __attribute__((always_inline)) inline uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx)
  * @brief I2C Send START Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
 	// Send START condition
 	I2Cx->CR1.REG |= I2C_CR1_START;
 }
@@ -231,7 +231,7 @@ __attribute__((always_inline)) inline void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] data Data to be TX
  */
-__attribute__((always_inline)) inline void I2C_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
+__STATIC_INLINE__ void I2C_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
 	// Send data
 	I2Cx->DR.REG = data;
 }
@@ -241,7 +241,7 @@ __attribute__((always_inline)) inline void I2C_writeByte(I2C_REG_STRUCT* I2Cx, u
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns Data received from I2C Bus
  */
-__attribute__((always_inline)) inline uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx){
 	// Receive data
 	return (uint8_t) (I2Cx->DR.REG & 0xFF);
 }
@@ -250,7 +250,7 @@ __attribute__((always_inline)) inline uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx)
  * @brief I2C Send STOP Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
 	// Send STOP condition
 	I2Cx->CR1.REG |= I2C_CR1_STOP;
 }
@@ -260,7 +260,7 @@ __attribute__((always_inline)) inline void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__attribute__((always_inline)) inline uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 	return I2C1_EV_IRQn;

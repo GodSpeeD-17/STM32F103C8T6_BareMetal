@@ -28,7 +28,7 @@ typedef struct {
  * @brief Enables the External Interrupt
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__attribute__((always_inline)) inline void EXTI_IRQ_enable(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_IRQ_enable(uint8_t PINx){
 	// Disable the IRQ Mask
 	EXTI->IMR.REG |= (1 << PINx);
 }
@@ -37,7 +37,7 @@ __attribute__((always_inline)) inline void EXTI_IRQ_enable(uint8_t PINx){
  * @brief Disables the External Interrupt Mask
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__attribute__((always_inline)) inline void EXTI_IRQ_disable(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_IRQ_disable(uint8_t PINx){
 	// Enable the IRQ Mask
 	EXTI->IMR.REG &= ~(1 << PINx);
 }
@@ -46,7 +46,7 @@ __attribute__((always_inline)) inline void EXTI_IRQ_disable(uint8_t PINx){
  * @brief Clear the EXTI bit
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__attribute__((always_inline)) inline void EXTI_clearPending(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_clearPending(uint8_t PINx){
 	// Acknowledge the Pending Bit
 	EXTI->PR.REG |= (1 << PINx);
 }
@@ -56,7 +56,7 @@ __attribute__((always_inline)) inline void EXTI_clearPending(uint8_t PINx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @returns Pending Bit Status for Input Pin
  */
-__attribute__((always_inline)) inline uint8_t EXTI_getPending(uint8_t PINx){
+__STATIC_INLINE__ uint8_t EXTI_getPending(uint8_t PINx){
 	// Get the Pending Register Status
 	uint32_t result = EXTI->PR.REG;
 	// Get the exact bit
