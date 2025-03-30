@@ -13,7 +13,7 @@ int main(){
 	I2C_enable(SSD1306_I2Cx);
 
 	// SSD1306 Initialisation
-	SSD1306_init(SSD1306_I2Cx);
+	SSD1306_Init(SSD1306_I2Cx);
 	
 	// Pointer Array
 	const static uint8_t* img_ptr[3] = {image_yami, image_gojo, image_family};

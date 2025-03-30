@@ -8,15 +8,6 @@ static SSD1306_pix_t SSD1306_coordinates = {
 };
 
 /**
- * @brief Initializes the SSD1306 display
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-void SSD1306_init(I2C_REG_STRUCT* I2Cx){
-	// Internal Array
-	SSD1306_I2C_cmdArray(I2Cx, SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
-}
-
-/**
  * @brief Transmits the custom commands to SSD1306
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] cmd SSD1306 Command

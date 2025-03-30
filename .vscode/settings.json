@@ -313,6 +313,8 @@
         "usart.h": "c",
         "adc_reg_map.h": "c",
         "ssd1306.h": "c",
-        "ssd1306_irq.h": "c"
+        "ssd1306_irq.h": "c",
+        "i2c.h": "c",
+        "ssd1306_font.h": "c"
     }
 }

@@ -1,87 +1,12 @@
+/* ------------------------------------------------------------------------------------ */
 // Header Guards
 #ifndef __SSD1306_H__
 #define __SSD1306_H__
-
+/* ------------------------------------------------------------------------------------ */
 // Dependency
 #include "i2c.h"
-#include "font.h"
-
-// SSD1306 I2C Address
-#ifndef SA0
-	#define SSD1306_I2C_ADDRESS					((uint8_t) 0x3C)
-#else
-	#define SSD1306_I2C_ADDRESS					((uint8_t) 0x3D)
-#endif
-
-// SSD1306 Characteristics
-#define SSD1306_HEIGHT							((uint8_t) 64)
-#define SSD1306_WIDTH							((uint8_t) 128)
-
-// Command Table
-// Double byte command to select 1 out of 256 contrast steps
-#define SSD1306_CMD_SET_CONTRAST                (0x81)
-// Resume to RAM content display, Output follows RAM content
-#define SSD1306_CMD_ENTIRE_DISP_ON_OUT_RAM      (0xA4)
-// Entire display ON, Output ignores RAM content
-#define SSD1306_CMD_ENTIRE_DISP_ON              (0xA5)
-// Normal display
-#define SSD1306_CMD_DISP_NORMAL                 (0xA6)
-// Inverse display
-#define SSD1306_CMD_DISP_INVERSE                (0xA7)
-// Display OFF
-#define SSD1306_CMD_DISP_OFF                    (0xAE)
-// Display ON
-#define SSD1306_CMD_DISP_ON                     (0xAF)
-// Set display clock divide ratio/oscillator frequency
-#define SSD1306_CMD_SET_DISPLAY_CLOCK_DIV       (0xD5)
-// Set multiplex ratio (1/64 duty)
-#define SSD1306_CMD_SET_MULTIPLEX               (0xA8)
-// Set display offset
-#define SSD1306_CMD_SET_DISPLAY_OFFSET          (0xD3)
-// Set display start line
-#define SSD1306_CMD_SET_START_LINE              (0x40)
-// Enable charge pump
-#define SSD1306_CMD_CHARGE_PUMP                 (0x8D)
-// Set memory addressing mode
-#define SSD1306_CMD_MEM_ADDR_MODE               (0x20)
-// Set segment re-map (column address 127 is mapped to SEG0)
-#define SSD1306_CMD_SET_SEGMENT_REMAP           (0xA1)
-// Set COM output scan direction (remapped mode, scan from COM[N-1] to COM0)
-#define SSD1306_CMD_SET_COM_SCAN_DIR            (0xC8)
-// Set COM pins hardware configuration
-#define SSD1306_CMD_SET_COM_PINS                (0xDA)
-// Set contrast control
-#define SSD1306_CMD_SET_CONTRAST                (0x81)
-// Set pre-charge period
-#define SSD1306_CMD_SET_PRECHARGE               (0xD9)
-// Set VCOMH deselect level
-#define SSD1306_CMD_SET_VCOMH_DESELECT          (0xDB)
-// Resume to RAM content display
-#define SSD1306_CMD_RESUME_TO_RAM_CONTENT       (0xA4)
-// Set normal display (non-inverted)
-#define SSD1306_CMD_SET_NORMAL_DISPLAY          (0xA6)
-// Display ON
-#define SSD1306_CMD_DISPLAY_ON                  (0xAF)
-// Set Column Address (`Only for Horizontal or vertical Addressing Mode`)
-#define SSD1306_CMD_SET_COL_ADDR				(0x21)
-// Set Page Address (`Only for Horizontal or vertical Addressing Mode`)
-#define SSD1306_CMD_SET_PAGE_ADDR				(0x22)
-
-// Set Page Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)					(0xB##VALUE)
-
-// Set Column Lower Nibble Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(0x0##VALUE)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(0x1##VALUE)
-
-// Memory Addressing Mode Options
-#define SSD1306_MEM_ADDR_MODE_H					(0x00)
-#define SSD1306_MEM_ADDR_MODE_V					(0x01)
-#define SSD1306_MEM_ADDR_MODE_PAGE				(0x02)
-// Indicator regarding the sent bytes
-#define SSD1306_CMD_INDICATOR					(0x00)
-#define SSD1306_DATA_INDICATOR					(0x40)
-
+#include "ssd1306_font.h"
+/* ------------------------------------------------------------------------------------ */
 /**
  * @brief Single SSD1306 Command
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
@@ -117,27 +42,7 @@
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2` 
  */
 #define SSD1306_clrScr(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
-
-// Initialization sequence for SSD1306
-static const uint8_t SSD1306_initCmd[25] = {
-    SSD1306_CMD_DISP_OFF,									// Display OFF
-    SSD1306_CMD_SET_DISPLAY_CLOCK_DIV, 0x80,				// Set display clock divide ratio/oscillator frequency
-    SSD1306_CMD_SET_MULTIPLEX, 0x3F,						// Set multiplex ratio (1/64 duty)
-    SSD1306_CMD_SET_DISPLAY_OFFSET, 0x00,					// Set display offset
-    SSD1306_CMD_SET_START_LINE,								// Set display start line
-    SSD1306_CMD_CHARGE_PUMP, 0x14,							// Enable charge pump
-    SSD1306_CMD_MEM_ADDR_MODE, SSD1306_MEM_ADDR_MODE_PAGE,	// Set memory addressing mode to Page Addressing Mode (0x02)
-    SSD1306_CMD_SET_SEGMENT_REMAP,							// Set segment re-map (column address 127 is mapped to SEG0)
-    SSD1306_CMD_SET_COM_SCAN_DIR,							// Set COM output scan direction (remapped mode, scan from COM[N-1] to COM0)
-    SSD1306_CMD_SET_COM_PINS, 0x12,							// Set COM pins hardware configuration
-    SSD1306_CMD_SET_CONTRAST, 0xCF,							// Set contrast control
-    SSD1306_CMD_SET_PRECHARGE, 0x22,						// Set pre-charge period
-    SSD1306_CMD_SET_VCOMH_DESELECT, 0x20,					// Set VCOMH deselect level
-    SSD1306_CMD_RESUME_TO_RAM_CONTENT,						// Resume to RAM content display
-    SSD1306_CMD_SET_NORMAL_DISPLAY,							// Set normal display (non-inverted)
-    SSD1306_CMD_DISPLAY_ON									// Display ON
-};
-
+/* ------------------------------------------------------------------------------------ */
 // Pixel Co-ordinates Structure
 typedef struct {
 	// X co-ordinate
@@ -145,7 +50,7 @@ typedef struct {
 	// Y co-ordinate
 	uint8_t Y;
 } SSD1306_pix_t;
-
+/* ------------------------------------------------------------------------------------ */
 /**
  * @brief Occupies the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
@@ -244,7 +149,10 @@ __INLINE__ void SSD1306_I2C_End(I2C_REG_STRUCT* I2Cx){
  * @brief Initializes the SSD1306 display
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-void SSD1306_init(I2C_REG_STRUCT* I2Cx);
+__INLINE__ void SSD1306_Init(I2C_REG_STRUCT* I2Cx){
+	// Internal Array
+	SSD1306_I2C_cmdArray(I2Cx, SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
+}
 
 /**
  * @brief Transmits the custom commands to SSD1306
@@ -303,6 +211,7 @@ void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end);
  * @returns Current X-Coordinate
  */
 uint8_t SSD1306_getX(void);
+
 /**
  * @brief Retrieves the current Y-Coordinate
  * @returns Current Y-Coordinate
