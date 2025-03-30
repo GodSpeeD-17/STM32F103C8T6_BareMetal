@@ -13,7 +13,7 @@
 /**
  * @brief Enables SysTick Counter
  */
-__STATIC_INLINE__ void SysTick_enable(void){
+__INLINE__ void SysTick_enable(void){
 	// Enable SysTick
 	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
 }
@@ -21,7 +21,7 @@ __STATIC_INLINE__ void SysTick_enable(void){
 /**
  * @brief Disables SysTick Counter
  */
-__STATIC_INLINE__ void SysTick_disable(void){
+__INLINE__ void SysTick_disable(void){
 	// Disable SysTick
 	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
 }

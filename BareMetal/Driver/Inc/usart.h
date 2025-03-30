@@ -64,7 +64,7 @@ typedef struct {
  * @brief Enables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_clk_enable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_clk_enable(usart_config_t* USART_CONFIGx) {
 	// Enable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
@@ -78,7 +78,7 @@ __STATIC_INLINE__ void USART_clk_enable(usart_config_t* USART_CONFIGx) {
  * @brief Disables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
 	// Disable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
@@ -92,7 +92,7 @@ __STATIC_INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
  * @brief Starts USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_enable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_enable(usart_config_t* USART_CONFIGx) {
 	// Enable USART
 	USART_CONFIGx->USARTx->CR1.REG |= USART_CR1_UE;
 }
@@ -101,7 +101,7 @@ __STATIC_INLINE__ void USART_enable(usart_config_t* USART_CONFIGx) {
  * @brief Stops USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_disable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_disable(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
 }
@@ -111,7 +111,7 @@ __STATIC_INLINE__ void USART_disable(usart_config_t* USART_CONFIGx) {
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @return IRQn for the corresponding USART
  */
-__STATIC_INLINE__ uint8_t USART_get_IRQn(usart_config_t* USART_CONFIGx){
+__INLINE__ uint8_t USART_get_IRQn(usart_config_t* USART_CONFIGx){
 	// Retrieves the IRQ Number for NVIC
 	if(USART_CONFIGx->USARTx == USART1)
 		return USART1_IRQn;
@@ -152,7 +152,7 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str);
  * @brief Loads the default value for USART Struct
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_load_default(usart_config_t* USART_CONFIGx){
+__INLINE__ void USART_load_default(usart_config_t* USART_CONFIGx){
     // Load default GPIO Configuration
     USART_CONFIGx->TX_GPIO_CONFIGx->MODEx = MODE_OUT_50MHz;
     USART_CONFIGx->TX_GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
@@ -184,7 +184,7 @@ __STATIC_INLINE__ void USART_load_default(usart_config_t* USART_CONFIGx){
  * @param[in] c Character to be printed
  * @param[in] length The length of character to be printed
  */
-__STATIC_INLINE__ void sep(usart_config_t* USART_CONFIGx, char c, uint8_t length){
+__INLINE__ void sep(usart_config_t* USART_CONFIGx, char c, uint8_t length){
 	// Print character
 	while(length--){
 		// Print character
@@ -219,7 +219,7 @@ uint16_t USART_receive(usart_config_t* USART_CONFIGx);
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] rx_char Character to be displayed on Screen
  */
-__STATIC_INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
+__INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
 	// Print on Serial Console
 	USART_printf(USART_CONFIGx, "%c", rx_char);
 }

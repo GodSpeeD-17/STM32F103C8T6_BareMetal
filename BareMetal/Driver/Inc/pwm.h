@@ -30,7 +30,7 @@ typedef struct {
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__STATIC_INLINE__ void PWM_start(pwm_config_t* PWMx){
+__INLINE__ void PWM_start(pwm_config_t* PWMx){
 	// Stop if already running
 	if(PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN){
 		PWMx->TIM_CONFIGx->TIMx->CR1.BIT.CEN = 0;
@@ -48,7 +48,7 @@ __STATIC_INLINE__ void PWM_start(pwm_config_t* PWMx){
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  * @note Use this only for single channel configuration
  */
-__STATIC_INLINE__ void PWM_stop(pwm_config_t* PWMx){
+__INLINE__ void PWM_stop(pwm_config_t* PWMx){
 	// Disable Timer
 	disable_GPT(PWMx->TIM_CONFIGx);
 	// Disable Channel
@@ -61,7 +61,7 @@ __STATIC_INLINE__ void PWM_stop(pwm_config_t* PWMx){
  * @brief Stops the PWM
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__STATIC_INLINE__ uint16_t PWM_calc_CCRx(pwm_config_t* PWMx){
+__INLINE__ uint16_t PWM_calc_CCRx(pwm_config_t* PWMx){
 	// Final Result
 	uint16_t result;
 	// Store the Value
@@ -76,7 +76,7 @@ __STATIC_INLINE__ uint16_t PWM_calc_CCRx(pwm_config_t* PWMx){
  * @brief Starts PWM on specific Channel
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__STATIC_INLINE__ void PWM_startMultiChannel(pwm_config_t* PWMx, uint8_t channel){
+__INLINE__ void PWM_startMultiChannel(pwm_config_t* PWMx, uint8_t channel){
 	// Enable Timer
 	enable_GPT(PWMx->TIM_CONFIGx);
 	// Enable Channel
@@ -87,7 +87,7 @@ __STATIC_INLINE__ void PWM_startMultiChannel(pwm_config_t* PWMx, uint8_t channel
  * @brief Stops PWM on specific Channel
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__STATIC_INLINE__ void PWM_stopMultiChannel(pwm_config_t* PWMx, uint8_t channel){
+__INLINE__ void PWM_stopMultiChannel(pwm_config_t* PWMx, uint8_t channel){
 	// Disable Channel
 	disable_GPT_multi_CH(PWMx->TIM_CONFIGx, channel);
 	// Disable Timer
@@ -118,7 +118,7 @@ void PWM_setMultiChannelDutyCycle(pwm_config_t* PWMx, uint8_t channel);
  * @brief Configures the PWM Structure to default values
  * @param[in] PWMx `pwm_config_t` The structure containing PWM Configuration
  */
-__STATIC_INLINE__ void PWM_load_default(pwm_config_t* PWM_CONFIGx){
+__INLINE__ void PWM_load_default(pwm_config_t* PWM_CONFIGx){
 	// Load Default Timer Value
 	load_GPT_default(PWM_CONFIGx->TIM_CONFIGx);
 	// Update the GPIO Configuration

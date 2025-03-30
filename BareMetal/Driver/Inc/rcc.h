@@ -95,7 +95,7 @@ static const rcc_config_t config_RCC_72MHz = {
  * @brief Retrieves the System Clock Source
  * @note Return Values: `SYS_CLK_HSI`, `SYS_CLK_HSE`, `SYS_CLK_PLL`
  */
-__STATIC_INLINE__ uint8_t RCC_getClkSrc(void){
+__INLINE__ uint8_t RCC_getClkSrc(void){
 	// Final Value
 	uint8_t value = 0xFF;
 	// Read the Clock Source
@@ -142,7 +142,7 @@ static void RCC_PLL_config(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL);
  * @param[in] APB1_PRE APB1 Prescaler `APB1_DIV_X`
  * @param[in] APB2_PRE APB2 Prescaler `APB2_DIV_X`
  */
-__STATIC_INLINE__ void RCC_busConfig(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PRE){
+__INLINE__ void RCC_busConfig(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PRE){
 
 	// AHB Prescaler
 	RCC->CFGR.BIT.HPRE = AHB_PRE;
