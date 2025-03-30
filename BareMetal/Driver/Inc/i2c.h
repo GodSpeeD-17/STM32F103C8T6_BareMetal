@@ -270,6 +270,34 @@ __INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
+ * @brief Enables the I2C Event Interrupt
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] buff_IRQ Buffer Interrupt Enable
+ */
+__INLINE__ void I2C_enableEvent_IRQ(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ){
+	// Temporary Register
+	uint32_t temp = I2Cx->CR2.REG;
+	// Enables the I2C Event Interrupt
+	temp |= I2C_CR2_ITEVTEN;
+	// Buffer Interrupt Enable
+	if(buff_IRQ)
+		temp |= I2C_CR2_ITBUFEN;
+	// Write to CR2
+	I2Cx->CR2.REG = temp;
+	// NVIC Enable
+	NVIC_IRQ_enable(I2C_getEV_IRQn(I2Cx));
+}
+
+/**
+ * @brief Disables the I2C Event Interrupt
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__INLINE__ void I2C_disableEvent_IRQ(I2C_REG_STRUCT* I2Cx){
+	// Temporary Register
+	I2Cx->CR2.REG &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
+}
+
+/**
  * @brief Configures I2C as per the Configuration Structure
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
