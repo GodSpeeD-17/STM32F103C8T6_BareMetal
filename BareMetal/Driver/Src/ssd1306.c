@@ -175,7 +175,9 @@ void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y){
  */
 void SSD1306_fillDisp(I2C_REG_STRUCT* I2Cx, uint8_t color){
 	// Command Array
-	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0), SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0), SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0)};
+	uint8_t cmdArray[3] = { SSD1306_CMD_PAGE_MODE_SET_PAGE(0), 
+							SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0), 
+							SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0)};
 	// Data Array
 	uint8_t data[SSD1306_WIDTH];
 	for(uint8_t i = 0; i < SSD1306_WIDTH; i++){

@@ -5,9 +5,9 @@
  * @brief Initialize the SSD1306 Data Buffer
  * @param[in] buffer  The buffer to be copied
  * @param[in] buff_len Length of the Buffer to be copied
- * @param[in] isCMD	The data in the Buffer is CMD/DATA
+ * @param[in] isCMD		The data in the Buffer is CMD/DATA
  */
-void SSD1306_updateBuff(uint8_t *buff, uint8_t buff_len, uint8_t isCMD){
+void SSD1306_IRQ_updateBuff(uint8_t *buff, uint8_t buff_len, uint8_t isCMD){
 	// Is the buffer a command or data?
 	if(isCMD)
 		SSD1306_buffer[SSD1306_buff_last_index++] = SSD1306_CMD_INDICATOR;
@@ -24,6 +24,40 @@ void SSD1306_updateBuff(uint8_t *buff, uint8_t buff_len, uint8_t isCMD){
 		SSD1306_buff_last_index &= (BUFFER_SIZE - 1);
 	}
 }
+
+/**
+ * @brief Clears the Screen
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] color Screen Color: Black(0)/White(1)
+ */
+void SSD1306_IRQ_clrScreen(I2C_REG_STRUCT* I2Cx, uint8_t color){
+	// SSD1306 Commands for setting Page & Column Address
+	uint8_t SSD1306_Screen_Cmd[3] = { SSD1306_CMD_PAGE_MODE_SET_PAGE(0),
+									 SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),
+									 SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) };
+	// Screen Color
+	uint8_t SSD1306_Screen_Color[SSD1306_WIDTH];
+	for(uint8_t i = 0; i < SSD1306_WIDTH; i++)
+		SSD1306_Screen_Color[i] = color;
+	
+	// Traverse through the Page
+	for(uint8_t page = 1; page <= 8; page++){
+		// Copy Command Array
+		SSD1306_IRQ_updateBuff(SSD1306_Screen_Cmd, 3, 1);
+		// Start I2C Communication
+		I2C_sendStart(I2Cx);
+
+		// Update Page
+		SSD1306_Screen_Cmd[0]++;
+
+		// Copy Data Array
+		SSD1306_IRQ_updateBuff(SSD1306_Screen_Color, SSD1306_WIDTH, 0);
+		// Start I2C Communication
+		I2C_sendStart(I2Cx);
+	}
+
+}
+
 
 /**
  * @brief I2C1 Event Handler

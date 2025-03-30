@@ -13,8 +13,7 @@ gpio_config_t LED_Config = {
 	.CNFx = CNF_OUT_GP_PP
 };
 /*-------------------------------------------------------------------------------*/
-// LED Status
-uint8_t buff[64] = {0x00};
+
 /*-------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------*/
@@ -31,11 +30,14 @@ int main(){
 	// Configure external LED
 	GPIO_config(&LED_Config);
 
-	// Update the Buffer
-	SSD1306_updateBuff(SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])), 1);
+	// Initialize the SSD1306 Display
+	SSD1306_IRQ_Init();
 
-	// I2C Send Address
-	I2C_sendStart(SSD1306_I2Cx);
+	// 
+	SSD1306_IRQ_clrScreen(SSD1306_I2Cx, 0);
+
+
+	
 	// Infinite Loop
 	while(1){
 		// Toggle LED

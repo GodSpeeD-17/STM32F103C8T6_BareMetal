@@ -119,7 +119,7 @@
 #define SSD1306_clrScr(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
 
 // Initialization sequence for SSD1306
-static const uint8_t SSD1306_initCmd[] = {
+static const uint8_t SSD1306_initCmd[25] = {
     SSD1306_CMD_DISP_OFF,									// Display OFF
     SSD1306_CMD_SET_DISPLAY_CLOCK_DIV, 0x80,				// Set display clock divide ratio/oscillator frequency
     SSD1306_CMD_SET_MULTIPLEX, 0x3F,						// Set multiplex ratio (1/64 duty)
