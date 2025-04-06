@@ -27,13 +27,14 @@ int main(){
 	I2C1_loadDefault(&SSD1306_I2C_Config);
 	// Configure I2C
 	I2C_config(&SSD1306_I2C_Config);
+	// Enable Interrupt
+	I2C_IRQ_enable(SSD1306_I2Cx, 1, 1);
 	// Enable I2C
 	I2C_enable(SSD1306_I2Cx);
-	// Enable Interrupt
-	I2C_enableEvent_IRQ(SSD1306_I2Cx, 0);
 	
 	// Initialize the SSD1306 Display
 	SSD1306_IRQ_Init(SSD1306_I2Cx);
+
 	// Color Screen (White Color)
 	SSD1306_IRQ_clrScreen(SSD1306_I2Cx, 0xFF);
 
