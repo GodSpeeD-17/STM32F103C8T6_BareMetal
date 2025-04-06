@@ -49,30 +49,6 @@
 #define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
 
 /**
- * @section[start] I2C Event
-
-
-// I2C Bus Ready: BUSY=0
-#define I2Cx_EV_BUS_RDY ((uint32_t)0)
-
-// Start Transmitted (EV5): SB=1, MSL=1, BUSY=1
-#define I2Cx_EV_MST_START ((uint32_t)(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_SB)))
-
-// Master Address Transmitted (EV6): TxE=1, MSL=1, BUSY=1, TRA=1 [Observed: ADDR bit automatically goes low in next clock cycle]
-#define I2Cx_EV_MST_ADDR_TX ((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_TXE)))
-
-// Master Address Received (EV6): RxNE=1, BTF=1, MSL=1, BUSY=1 [[Observed: ADDR bit automatically goes low in next clock cycle]]
-#define I2Cx_EV_MST_ADDR_RX ((uint32_t)(((I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_RXNE | I2C_SR1_BTF)))
-
-// Byte Sending (EV8): TxE=1, MSL=1, BUSY=1, TRA=1
-#define I2Cx_EV_MST_BYTE_DR ((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_TXE)))
-
-// Byte Sent (EV8_2): TxE=1, BTF=1, MSL=1, BUSY=1, TRA=1 (Observation: Same as ADDR)
-#define I2Cx_EV_MST_BYTE_SENT ((uint32_t)(((I2C_SR2_TRA | I2C_SR2_BUSY | I2C_SR2_MSL) << 16) | (I2C_SR1_TXE | I2C_SR1_BTF)))
-*/
-
-
-/**
  * @brief I2C Direction Initialisation
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
@@ -83,7 +59,6 @@
 	/* I2C Enable */ 					\
 	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
 }
-
 
 // I2C Configuration Structure
 typedef struct {
@@ -270,31 +245,52 @@ __INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
+ * @brief Retrieves I2C Event IRQn
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @returns I2C IRQn
+ */
+__INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
+	// I2C1
+	if(I2Cx == I2C1)
+		return I2C1_ER_IRQn;
+	// I2C2
+	else if (I2Cx == I2C2)
+		return I2C2_ER_IRQn;
+}
+
+/**
  * @brief Enables the I2C Event Interrupt
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] buff_IRQ Buffer Interrupt Enable
  */
-__INLINE__ void I2C_enableEvent_IRQ(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ){
+__INLINE__ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ, uint8_t er_IRQ){
 	// Temporary Register
 	uint32_t temp = I2Cx->CR2.REG;
 	// Enables the I2C Event Interrupt
 	temp |= I2C_CR2_ITEVTEN;
 	// Buffer Interrupt Enable
-	if(buff_IRQ)
+	if(buff_IRQ){
 		temp |= I2C_CR2_ITBUFEN;
+	}
+	// Error Interrupt Enable
+	if(er_IRQ){
+		temp |= I2C_CR2_ITERREN;
+		// NVIC Error Interrupt Enable
+		NVIC_IRQ_enable(I2C_getER_IRQn(I2Cx));
+	}
+	// NVIC Event Interrupt Enable
+	NVIC_IRQ_enable(I2C_getEV_IRQn(I2Cx));
 	// Write to CR2
 	I2Cx->CR2.REG = temp;
-	// NVIC Enable
-	NVIC_IRQ_enable(I2C_getEV_IRQn(I2Cx));
 }
 
 /**
  * @brief Disables the I2C Event Interrupt
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_disableEvent_IRQ(I2C_REG_STRUCT* I2Cx){
-	// Temporary Register
-	I2Cx->CR2.REG &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
+__INLINE__ void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx){
+	// Clear Interrupts
+	I2Cx->CR2.REG &= ~(I2C_CR2_ITBUFEN | I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
 }
 
 /**

@@ -53,8 +53,8 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	// TRISE Configuration
 	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
 	// Enable Interrupt
-	if(I2C_CONFIGx->buffer_IRQ || I2C_CONFIGx->event_IRQ)
-		NVIC_IRQ_enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
+	// if(I2C_CONFIGx->buffer_IRQ || I2C_CONFIGx->event_IRQ)
+	// 	NVIC_IRQ_enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
 }
 
 /**

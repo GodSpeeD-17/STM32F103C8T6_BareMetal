@@ -8,6 +8,13 @@
 #ifndef __BARE_METAL_H__
 #define __BARE_METAL_H__
 
+// Core C Libraries
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
 // STM32F103C8T6 Specific Libraries
 #include "adc.h"
 #include "exti.h"

@@ -78,11 +78,20 @@
 #define SSD1306_CMD_SET_PAGE_ADDR				(0x22)
 /* ------------------------------------------------------------------------------------ */
 // Set Page Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)					(0xB##VALUE)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)	(0xB0 + ((VALUE) & 0x07))
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_0		(0xB0)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_1		(0xB1)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_2		(0xB2)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_3		(0xB3)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_4		(0xB4)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_5		(0xB5)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_6		(0xB6)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE_7		(0xB7)
 /* ------------------------------------------------------------------------------------ */
 // Set Column Lower Nibble Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(0x0##VALUE)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(0x1##VALUE)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(0x00 + ((VALUE) & 0x0F))
+// Set Column Upper Nibble Address (`Only for Page Addressing Mode`)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(0x10 + ((VALUE) & 0x0F))
 /* ------------------------------------------------------------------------------------ */
 // Memory Addressing Mode Options
 #define SSD1306_MEM_ADDR_MODE_H					(0x00)
@@ -91,7 +100,7 @@
 /* ------------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------ */
 // Initialization sequence for SSD1306
-static const uint8_t SSD1306_initCmd[25] = {
+static const uint8_t SSD1306_initCmd[] = {
 	SSD1306_CMD_DISP_OFF,									// Display OFF
 	SSD1306_CMD_SET_DISPLAY_CLOCK_DIV, 0x80,				// Set display clock divide ratio/oscillator frequency
 	SSD1306_CMD_SET_MULTIPLEX, 0x3F,						// Set multiplex ratio (1/64 duty)

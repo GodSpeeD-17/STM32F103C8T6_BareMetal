@@ -5,28 +5,27 @@
  * @brief Initialize the SSD1306 I2C Buffer
  * @param[in] buffer  The Buffer to be copied
  * @param[in] buff_len Length of the Buffer to be copied
- * @param[in] isCMD		The data in the Buffer is CMD/DATA
+ * @param[in] isCMD Buffer contains Command(1)/Data(0)
+ * @note Takes care of waiting until end of previous transmission
  */
 void SSD1306_IRQ_updateBuff(uint8_t *buff, uint16_t buff_len, uint8_t isCMD){
 	// Only Update after the data from Buffer is transmitted
-	while(SSD1306_data_sent);
-	// Buffer data is Command
-	if(isCMD)
-		// Add Command Indicator
-		SSD1306_I2C_buffer[SSD1306_buff_last_index++] = SSD1306_CMD_INDICATOR;
-	// Buffer data is Data
+	while((SSD1306_I2C_status != I2C_STATE_READY));
+	// Buffer contains Command
+	if(isCMD == 0x01)
+		SSD1306_I2C_buffer[SSD1306_buff_last_index] = SSD1306_CMD_INDICATOR;
+	// Buffer contains Data [Pixel Values]
 	else
-		// Add Data Indicator
-		SSD1306_I2C_buffer[SSD1306_buff_last_index++] = SSD1306_DATA_INDICATOR;
-	// Wrap the index
-	SSD1306_buff_last_index &= (BUFFER_SIZE - 1);
+		SSD1306_I2C_buffer[SSD1306_buff_last_index] = SSD1306_DATA_INDICATOR;
+	// Update index
+	SSD1306_buff_last_index = ((SSD1306_buff_last_index + 1) & (BUFFER_SIZE - 1));
 	
 	// Update the Buffer
 	for (uint16_t i = 0; i < buff_len; i++) {
 		// Copy the data
-		SSD1306_I2C_buffer[SSD1306_buff_last_index++] = buff[i];
-		// Wrap the index
-		SSD1306_buff_last_index &= (BUFFER_SIZE - 1);
+		SSD1306_I2C_buffer[SSD1306_buff_last_index] = buff[i];
+		// Update index
+		SSD1306_buff_last_index = ((SSD1306_buff_last_index + 1) & (BUFFER_SIZE - 1));
 	}
 }
 
@@ -38,26 +37,26 @@ void SSD1306_IRQ_updateBuff(uint8_t *buff, uint16_t buff_len, uint8_t isCMD){
 void SSD1306_IRQ_clrScreen(I2C_REG_STRUCT* I2Cx, uint8_t color){
 	// SSD1306 Commands for setting Page & Column Address
 	uint8_t SSD1306_scrCmd[3] = { SSD1306_CMD_PAGE_MODE_SET_PAGE(0),
-									  SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),
-									  SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) };
+								  SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),
+								  SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) };
 	// Screen Color
 	uint8_t SSD1306_scrColor[SSD1306_WIDTH];
-	for (uint8_t i = 0; i < SSD1306_WIDTH; i++) {
-		SSD1306_scrColor[i] = color;
-	}
+	memset(SSD1306_scrColor, color, SSD1306_WIDTH);
 	
 	// Traverse through the Page
-	for(uint8_t page = 1; page <= 8; page++){
-		// Copy Command Array
+	for(uint8_t page = 0; page <= 7; page++){
+		// Update Page
+		SSD1306_scrCmd[0] = SSD1306_CMD_PAGE_MODE_SET_PAGE(page);
+		// Command to set position
 		SSD1306_IRQ_updateBuff(SSD1306_scrCmd, 3, 1);
 		// Start I2C Communication
 		SSD1306_IRQ_I2C_Start(I2Cx);
-		// Update Page
-		SSD1306_scrCmd[0] = SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + page;
-		// Copy Data Array
+		delay_ms(1);
+		// Pixel Data
 		SSD1306_IRQ_updateBuff(SSD1306_scrColor, SSD1306_WIDTH, 0);
 		// Start I2C Communication
 		SSD1306_IRQ_I2C_Start(I2Cx);
+		delay_ms(1);
 	}
 }
 
@@ -66,39 +65,77 @@ void SSD1306_IRQ_clrScreen(I2C_REG_STRUCT* I2Cx, uint8_t color){
  * @brief I2C1 Event Handler
  */
 void I2C1_EV_IRQHandler(void){
-	// External Control for Synchronization
-	if(!SSD1306_data_sent){
-		// Start Sent
-		if(SSD1306_I2Cx->SR1.REG & I2C_SR1_SB){
-			// SSD1306 I2C Address with Write Privilege
-			I2C_writeAddress(SSD1306_I2Cx, SSD1306_I2C_ADDRESS);
-		}
-		// Address Sent
-		else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
-			// Clear ADDR Bit
-			uint32_t temp = SSD1306_I2Cx->SR1.REG;
-			temp = SSD1306_I2Cx->SR2.REG;
-			// Send Data
-			I2C_writeByte(SSD1306_I2Cx, SSD1306_I2C_buffer[SSD1306_buff_curr_index++]);
-		}
-		// Byte Transfer Completed
-		else if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
-			// Data Transfer left
-			if(SSD1306_buff_curr_index != SSD1306_buff_last_index){
-				// Send Data
-				I2C_writeByte(SSD1306_I2Cx, SSD1306_I2C_buffer[SSD1306_buff_curr_index++]);
+	// Switch Case Based upon Scenario
+	switch(SSD1306_I2C_status){
+		// Ready State
+		case I2C_STATE_READY:
+			// Success
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_SB){
+				// Send Address
+				SSD1306_I2Cx->DR.REG = ((SSD1306_I2C_ADDRESS << 1) | I2Cx_WRITE);
+				// SSD1306 I2C Address Written
+				SSD1306_I2C_status = I2C_STATE_ADDR_SENT;
 			}
-			// Data Transfer Complete
-			else{
-				// Send Stop Condition
-				I2C_sendStop(SSD1306_I2Cx);
-				// < ! --- LED ON --- !>
-				OB_LED_toggle();
-				// Data Transfer Complete
-				SSD1306_data_sent = 0x01;
+		break;
+
+		// I2C Address Sent 
+		case I2C_STATE_ADDR_SENT:
+			// Slave Acknowledged
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
+				// Clear ADDR
+				temp_data = SSD1306_I2Cx->SR2.REG;
+				// SSD1306 I2C Address Written
+				SSD1306_I2C_status = I2C_STATE_ADDR_CLEARED;
 			}
-		}
-		// Wrap Buffer Index
-		SSD1306_buff_curr_index &= (BUFFER_SIZE - 1);
+		break;
+		
+		// Sending First Byte 
+		case I2C_STATE_ADDR_CLEARED:
+			// Indicator Sent 
+			SSD1306_I2Cx->DR.REG = SSD1306_I2C_buffer[SSD1306_buff_curr_index];
+			// Update Index
+			SSD1306_buff_curr_index = ((SSD1306_buff_curr_index + 1) & (BUFFER_SIZE - 1));
+			// Data Burst
+			SSD1306_I2C_status = I2C_STATE_SENDING;
+		break;
+
+		// Send remaining Data
+		case I2C_STATE_SENDING:
+			// Transmission Buffer Empty (Data Shifted to Shift Register)
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_TXE){
+				// All Bytes Sent
+				if(SSD1306_buff_curr_index == SSD1306_buff_last_index){
+					// Stop Indication
+					SSD1306_I2Cx->CR1.REG |= I2C_CR1_STOP;
+					// Ready for Next Transmission
+					SSD1306_I2C_status = I2C_STATE_READY;
+					// << Demo Indication >>
+					// OB_LED_toggle();
+				}
+				// Transfer the remaining Bytes
+				else{
+					// Bytes Send 
+					SSD1306_I2Cx->DR.REG = SSD1306_I2C_buffer[SSD1306_buff_curr_index];
+					// Update Index
+					SSD1306_buff_curr_index = ((SSD1306_buff_curr_index + 1) & (BUFFER_SIZE - 1));
+				}
+			}
+		break;
 	}
 }
+
+/**
+ * @brief Error Protection
+ */
+void I2C1_ER_IRQHandler(void){
+	// Arbitration Lost Flag
+	if(SSD1306_I2Cx->SR1.REG & I2C_SR1_AF) {
+		// Clear NACK flag
+		SSD1306_I2Cx->SR1.REG &= ~I2C_SR1_AF;
+		// Force stop
+		SSD1306_I2Cx->CR1.REG |= I2C_CR1_STOP;
+		// Reset state machine
+		SSD1306_I2C_status = I2C_STATE_READY;
+	}
+}
+

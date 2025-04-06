@@ -151,6 +151,40 @@ replace_makefiles:
 	@echo "All the above mentioned directories having Makefiles have been replaced!"
 	@echo "***********************************************************************"
 
+# Generic file replacement with numbered folder awareness
+# Usage: make replace FILE=<filename> [TYPE=all|numbered]
+replace:
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: Please specify FILE parameter"; \
+		echo "Usage: make replace FILE=<filename> [TYPE=all|numbered]"; \
+		echo "Default TYPE=numbered (only in ##_* folders)"; \
+		exit 1; \
+	fi
+	@TYPE=${TYPE:-numbered}; \
+	echo "***********************************************************************"; \
+	echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR) $$(pwd))"; \
+	echo "Replacing '$(FILE)' (TYPE=$$TYPE)"; \
+	echo "***********************************************************************"; \
+	if [ "$$TYPE" = "numbered" ]; then \
+		echo "Only replacing in numbered folders (##_*)"; \
+		PATTERN="[0-9][0-9]_*"; \
+	else \
+		echo "Replacing in all project folders"; \
+		PATTERN="*"; \
+	fi; \
+	echo "These files will be replaced:"; \
+	find $(ROOT_DIR)/Projects -type d -name "$$PATTERN" | while read dir; do \
+		find "$$dir" -maxdepth 1 -type f -name "$(FILE)" -not -path "$$(pwd)/*" -exec sh -c '\
+			echo "$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$1")"' _ {} \; ; \
+	done; \
+	find $(ROOT_DIR)/Projects -type d -name "$$PATTERN" | while read dir; do \
+		find "$$dir" -maxdepth 1 -type f -name "$(FILE)" -not -path "$$(pwd)/*" -exec cp -v "$$(pwd)/$(FILE)" {} \; ; \
+	done
+	@echo "***********************************************************************"
+	@echo "Replacement complete!"
+	@echo "***********************************************************************"
+
+
 # Include dependency files
 -include $(OBJS:.o=.d)
 

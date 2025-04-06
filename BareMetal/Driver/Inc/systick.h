@@ -31,11 +31,18 @@ __INLINE__ void SysTick_disable(void){
  * @param[in] reloadValue Number of Ticks
  * @note Value should be within the range of 24-bit unsigned integer
  */
-void SysTick_config(uint32_t reloadValue);
+void SysTick_Config(uint32_t reloadValue);
 
 /***
- * @brief Accurate delay generation
- * @param[in] delayTime Delay in Milliseconds
+ * @brief Accurate us delay generation
+ * @param[in] delayTime Delay in microseconds (us)
+ * @note Based upon SysTick Timer
+ */
+void delay_us(uint32_t delayTime);
+
+/***
+ * @brief Accurate ms delay generation
+ * @param[in] delayTime Delay in milliseconds (ms)
  * @note Based upon SysTick Timer
  */
 void delay_ms(uint32_t delayTime);
