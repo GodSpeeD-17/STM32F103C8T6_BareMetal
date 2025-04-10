@@ -1,3 +1,5 @@
+# Makefile for STM32F103C8T6 Baremetal Programming
+
 # Root directory
 ROOT_DIR := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 
@@ -70,15 +72,8 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(STARTUP_DIR)/stm32f1_ls.ld
 %.o: %.s $(BUILD_DIR)
 	$(CC) $(ASFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
 
-# Flashing command
+# Flashing command (adjust as necessary)
 flash: all
-	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
-	@echo "***********************************************************************"
-	@echo "Flashed!"
-	@echo "***********************************************************************"
-
-# Flashing command
-bitmap_flash: bitmap_all
 	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
 	@echo "***********************************************************************"
 	@echo "Flashed!"
@@ -99,12 +94,6 @@ info:
 
 # All target
 all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
-	@echo "***********************************************************************"
-	@echo "Build Successful!"
-	@echo "***********************************************************************"
-
-# All target
-bitmap_all: generate_bitmap $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
 	@echo "***********************************************************************"
 	@echo "Build Successful!"
 	@echo "***********************************************************************"
@@ -160,23 +149,6 @@ replace_makefiles:
 	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec cp $$(pwd)/Makefile {} \;
 	@echo "***********************************************************************"
 	@echo "All the above mentioned directories having Makefiles have been replaced!"
-	@echo "***********************************************************************"
-
-generate_bitmap:
-	@echo "***********************************************************************"
-	@if grep -q "__YAMI__" $(shell pwd)/Inc/main.h; then \
-		echo "Variable '__YAMI__' found in main.h! Running Python script to generate and update bitmap..."; \
-		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image yami; \
-		echo "Bitmap generated successfully for Yami!"; \
-	elif grep -q "__GOJO__" $(shell pwd)/Inc/main.h; then \
-		echo "Variable '__GOJO__' found in main.h! Running Python script to generate and update bitmap..."; \
-		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image gojo; \
-		echo "Bitmap generated successfully for Gojo!"; \
-	else \
-		echo "Neither '__YAMI__' nor '__GOJO__' found in main.h ..."; \
-		. $(shell pwd)/myenv/bin/activate && python $(shell pwd)/bit_map.py --image family; \
-		echo "Bitmap generated successfully for Family!"; \
-	fi
 	@echo "***********************************************************************"
 
 

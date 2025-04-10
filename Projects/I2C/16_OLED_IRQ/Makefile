@@ -151,19 +151,25 @@ replace_makefiles:
 	@echo "All the above mentioned directories having Makefiles have been replaced!"
 	@echo "***********************************************************************"
 
-# Generic file replacement with numbered folder awareness
-# Usage: make replace FILE=<filename> [TYPE=all|numbered]
+# Enhanced file replacement with folder parameter
+# Usage: make replace FILE=<filename> FOLDER=<foldername> [TYPE=all|numbered]
 replace:
-	@if [ -z "$(FILE)" ]; then \
-		echo "Error: Please specify FILE parameter"; \
-		echo "Usage: make replace FILE=<filename> [TYPE=all|numbered]"; \
-		echo "Default TYPE=numbered (only in ##_* folders)"; \
+	@if [ -z "$(FILE)" ] || [ -z "$(FOLDER)" ]; then \
+		echo "Error: Please specify both FILE and FOLDER parameters"; \
+		echo "Usage: make replace FILE=<filename> FOLDER=<foldername> [TYPE=all|numbered]"; \
+		echo "Example: make replace FILE=stm32f1_startup.c FOLDER=Startup TYPE=numbered"; \
 		exit 1; \
 	fi
 	@TYPE=${TYPE:-numbered}; \
+	SOURCE_FILE="$(FOLDER)/$(FILE)"; \
+	if [ ! -f "$$SOURCE_FILE" ]; then \
+		echo "Error: Source file $$SOURCE_FILE not found in current directory"; \
+		exit 1; \
+	fi; \
 	echo "***********************************************************************"; \
-	echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR) $$(pwd))"; \
-	echo "Replacing '$(FILE)' (TYPE=$$TYPE)"; \
+	echo "Current directory: $$(pwd)"; \
+	echo "Replacing '$(FILE)' from '$(FOLDER)' (TYPE=$$TYPE)"; \
+	echo "Source: $$SOURCE_FILE"; \
 	echo "***********************************************************************"; \
 	if [ "$$TYPE" = "numbered" ]; then \
 		echo "Only replacing in numbered folders (##_*)"; \
@@ -173,19 +179,30 @@ replace:
 		PATTERN="*"; \
 	fi; \
 	echo "These files will be replaced:"; \
-	find $(ROOT_DIR)/Projects -type d -name "$$PATTERN" | while read dir; do \
-		find "$$dir" -maxdepth 1 -type f -name "$(FILE)" -not -path "$$(pwd)/*" -exec sh -c '\
-			echo "$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$1")"' _ {} \; ; \
+	find $(ROOT_DIR)/Projects -type f -path "*/$(FOLDER)/$(FILE)" | while read target; do \
+		dir=$$(dirname $$(dirname $$target)); \
+		if [ "$$TYPE" = "numbered" ] && echo "$$dir" | grep -q "/[0-9][0-9]_[^/]*$$"; then \
+			echo "$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$target")"; \
+		elif [ "$$TYPE" = "all" ]; then \
+			echo "$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$target")"; \
+		fi; \
 	done; \
-	find $(ROOT_DIR)/Projects -type d -name "$$PATTERN" | while read dir; do \
-		find "$$dir" -maxdepth 1 -type f -name "$(FILE)" -not -path "$$(pwd)/*" -exec cp -v "$$(pwd)/$(FILE)" {} \; ; \
-	done
+	echo "***********************************************************************"; \
+	# echo "Starting replacement..."; \
+	# find $(ROOT_DIR)/Projects -type f -path "*/$(FOLDER)/$(FILE)" | while read target; do \
+	# 	dir=$$(dirname $$(dirname $$target)); \
+	# 	if [ "$$TYPE" = "numbered" ] && echo "$$dir" | grep -q "/[0-9][0-9]_[^/]*$$"; then \
+	# 		echo "Replacing: $$(realpath --relative-to=$(ROOT_DIR)/Projects "$$target")"; \
+	# 		cp -v "$$SOURCE_FILE" "$$target"; \
+	# 	elif [ "$$TYPE" = "all" ]; then \
+	# 		echo "Replacing: $$(realpath --relative-to=$(ROOT_DIR)/Projects "$$target")"; \
+	# 		cp -v "$$SOURCE_FILE" "$$target"; \
+	# 	fi; \
+	# done
 	@echo "***********************************************************************"
 	@echo "Replacement complete!"
 	@echo "***********************************************************************"
-
-
 # Include dependency files
 -include $(OBJS:.o=.d)
 
-.PHONY: clean all flash erase_flash
+.PHONY: clean generate_c_cpp_properties_json all flash erase_flash
