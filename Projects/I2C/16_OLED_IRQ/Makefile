@@ -137,34 +137,7 @@ generate_tasks_json: .vscode
 
 # c_cpp_properties.json
 generate_c_cpp_properties_json: .vscode
-	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(ROOT_DIR)/BareMetal/Core/Inc/**",\n                "$(ROOT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json	
-
-# Define the target for replacing Makefiles within $(ROOT_DIR)/Projects
-# replace_makefiles:
-# 	@echo "***********************************************************************"
-# 	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))"
-# 	@echo "***********************************************************************"
-# 	@echo "The Makefiles present in the following directory will be replaced:" && \
-# 	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec sh -c 'for f; do echo "Relative Path: $$(dirname $$f | sed "s|^$(ROOT_DIR)/Projects/||")/"; done' _ {} + && \
-# 	find $(ROOT_DIR)/Projects -type f -name "Makefile" -not -path "$$(pwd)/*" -exec cp $$(pwd)/Makefile {} \;
-# 	@echo "***********************************************************************"
-# 	@echo "All the above mentioned directories having Makefiles have been replaced!"
-# 	@echo "***********************************************************************"
-
-# # Target to list files and count them based on the FILE parameter
-# list_files:
-# 	@if [ -z "$(FILE)" ]; then \
-# 		echo "ERROR: FILE parameter not specified"; \
-# 		echo "Usage: make list_files FILE=<pattern>"; \
-# 		exit 1; \
-# 	fi
-# 	@echo "***********************************************************************"
-# 	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))"
-# 	@echo "***********************************************************************"
-# 	@FILE_PATHS=$$(find $(ROOT_DIR)/Projects -type f -name "$(FILE)" -not -path "$$(pwd)/*"); \
-# 	echo "$$FILE_PATHS" | sed "s|$(ROOT_DIR)/Projects/||"; \
-# 	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)";
-# 	@echo "***********************************************************************"
+	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(ROOT_DIR)/BareMetal/Core/Inc/**",\n                "$(ROOT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json
 
 # Target to list files, count them, and replace them based on the FILE parameter
 replace_files:
