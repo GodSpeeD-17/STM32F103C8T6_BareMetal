@@ -151,11 +151,26 @@ generate_c_cpp_properties_json: .vscode
 # 	@echo "All the above mentioned directories having Makefiles have been replaced!"
 # 	@echo "***********************************************************************"
 
-# Target to list files and count them based on the FILE parameter
-list_files:
+# # Target to list files and count them based on the FILE parameter
+# list_files:
+# 	@if [ -z "$(FILE)" ]; then \
+# 		echo "ERROR: FILE parameter not specified"; \
+# 		echo "Usage: make list_files FILE=<pattern>"; \
+# 		exit 1; \
+# 	fi
+# 	@echo "***********************************************************************"
+# 	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))"
+# 	@echo "***********************************************************************"
+# 	@FILE_PATHS=$$(find $(ROOT_DIR)/Projects -type f -name "$(FILE)" -not -path "$$(pwd)/*"); \
+# 	echo "$$FILE_PATHS" | sed "s|$(ROOT_DIR)/Projects/||"; \
+# 	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)";
+# 	@echo "***********************************************************************"
+
+# Target to list files, count them, and replace them based on the FILE parameter
+replace_files:
 	@if [ -z "$(FILE)" ]; then \
 		echo "ERROR: FILE parameter not specified"; \
-		echo "Usage: make list_files FILE=<pattern>"; \
+		echo "Usage: make replace_files FILE=<pattern>"; \
 		exit 1; \
 	fi
 	@echo "***********************************************************************"
@@ -163,7 +178,17 @@ list_files:
 	@echo "***********************************************************************"
 	@FILE_PATHS=$$(find $(ROOT_DIR)/Projects -type f -name "$(FILE)" -not -path "$$(pwd)/*"); \
 	echo "$$FILE_PATHS" | sed "s|$(ROOT_DIR)/Projects/||"; \
-	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)"
+	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)"; \
+	for dest_file in $$FILE_PATHS; do \
+		rel_path="$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$dest_file")"; \
+		src_file="$$(find $(shell pwd) -type f -name "$$(basename "$$dest_file")" | head -n 1)"; \
+		if [ -n "$$src_file" ]; then \
+			echo "Replacing '$(ROOT_DIR)/Projects/$$rel_path' with '$$src_file'"; \
+			cp "$$src_file" "$(ROOT_DIR)/Projects/$$rel_path"; \
+		else \
+			echo "Source file for '$(ROOT_DIR)/Projects/$$rel_path' not found, skipping."; \
+		fi; \
+	done
 	@echo "***********************************************************************"
 
 # Include dependency files
