@@ -151,112 +151,20 @@ generate_c_cpp_properties_json: .vscode
 # 	@echo "All the above mentioned directories having Makefiles have been replaced!"
 # 	@echo "***********************************************************************"
 
-# Robust cross-platform file replacement
-# Usage: make replace FILE=<filename> FOLDER=<foldername> [TYPE=all|numbered]
-replace:
-	@echo "***********************************************************************"
-	@echo "Starting file replacement process"
-	@echo "***********************************************************************"
-	
-	# Parameter validation
+# Target to list files and count them based on the FILE parameter
+list_files:
 	@if [ -z "$(FILE)" ]; then \
 		echo "ERROR: FILE parameter not specified"; \
-		echo "Usage: make replace FILE=<filename> FOLDER=<foldername> [TYPE=all|numbered]"; \
+		echo "Usage: make list_files FILE=<pattern>"; \
 		exit 1; \
 	fi
-	@if [ -z "$(FOLDER)" ]; then \
-		echo "ERROR: FOLDER parameter not specified"; \
-		echo "Usage: make replace FILE=<filename> FOLDER=<foldername> [TYPE=all|numbered]"; \
-		exit 1; \
-	fi
-	
-	# Set defaults
-	@TYPE=${TYPE:-numbered}
-	@SOURCE_FILE="$(FOLDER)/$(FILE)"
-	
-	# Verify source file exists
-	@if [ ! -f "$$SOURCE_FILE" ]; then \
-		echo "ERROR: Source file $$SOURCE_FILE not found"; \
-		echo "Please run from directory containing the source file"; \
-		exit 1; \
-	fi
-	
-	@echo "Replacing: $(FILE)"
-	@echo "From folder: $(FOLDER)"
-	@echo "Mode: $$TYPE"
-	@echo "Source path: $$SOURCE_FILE"
 	@echo "***********************************************************************"
-	@echo "Files to be replaced:"
-	
-	# Find and display target files
-	@if [ "$$TYPE" = "numbered" ]; then \
-		echo "Searching in numbered folders (##_*)"; \
-		for dir in $(ROOT_DIR)/Projects/*/[0-9][0-9]_*/$(FOLDER)/; do \
-			if [ -f "$$dir/$(FILE)" ]; then \
-				echo "$$dir/$(FILE)" | sed "s|$(ROOT_DIR)/Projects/||"; \
-			fi; \
-		done; \
-	else \
-		echo "Searching in all folders"; \
-		for dir in $(ROOT_DIR)/Projects/*/*/$(FOLDER)/; do \
-			if [ -f "$$dir/$(FILE)" ]; then \
-				echo "$$dir/$(FILE)" | sed "s|$(ROOT_DIR)/Projects/||"; \
-			fi; \
-		done; \
-	fi
-	
+	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))"
 	@echo "***********************************************************************"
-	@echo "Confirm replacement? (y/n)"; \
-	read -r answer; \
-	if [ "$$answer" != "y" ] && [ "$$answer" != "Y" ]; then \
-		echo "Replacement cancelled"; \
-		exit 0; \
-	fi
-	
-	# Perform replacement
-	@echo "Starting replacement..."
-	@if [ "$$TYPE" = "numbered" ]; then \
-		for dir in $(ROOT_DIR)/Projects/*/[0-9][0-9]_*/$(FOLDER)/; do \
-			if [ -f "$$dir/$(FILE)" ]; then \
-				cp -v "$$SOURCE_FILE" "$$dir/$(FILE)"; \
-			fi; \
-		done; \
-	else \
-		for dir in $(ROOT_DIR)/Projects/*/*/$(FOLDER)/; do \
-			if [ -f "$$dir/$(FILE)" ]; then \
-				cp -v "$$SOURCE_FILE" "$$dir/$(FILE)"; \
-			fi; \
-		done; \
-	fi
-	
+	@FILE_PATHS=$$(find $(ROOT_DIR)/Projects -type f -name "$(FILE)" -not -path "$$(pwd)/*"); \
+	echo "$$FILE_PATHS" | sed "s|$(ROOT_DIR)/Projects/||"; \
+	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)"
 	@echo "***********************************************************************"
-	@echo "Replacement complete!"
-	@echo "***********************************************************************"
-
-# Predefined aliases
-replace_makefiles: FILE=Makefile FOLDER=.
-replace_makefiles: replace
-
-replace_startup: FILE=stm32f1_startup.c FOLDER=Startup
-replace_startup: TYPE=numbered
-replace_startup: replace
-
-replace_linkerscript: FILE=stm32f1_ls.ld FOLDER=Startup
-replace_linkerscript: TYPE=numbered
-replace_linkerscript: replace
-
-
-# Alias for replacing Makefiles
-replace_makefiles:
-	make replace FILE=Makefile
-
-# Alias for replacing Startup
-replace_startup:
-	make FILE=stm32f1_startup.c FOLDER=Startup
-
-# Alias for replacing Startup
-replace_linker:
-	make FILE=stm32f1_ls.ld FOLDER=Startup
 
 # Include dependency files
 -include $(OBJS:.o=.d)
