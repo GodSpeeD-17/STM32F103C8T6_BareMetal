@@ -140,7 +140,7 @@ generate_c_cpp_properties_json: .vscode
 	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(ROOT_DIR)/BareMetal/Core/Inc/**",\n                "$(ROOT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json
 
 # Target to list files, count them, and replace them based on the FILE parameter
-replace_files:
+replace:
 	@if [ -z "$(FILE)" ]; then \
 		echo "ERROR: FILE parameter not specified"; \
 		echo "Usage: make replace_files FILE=<pattern>"; \
@@ -163,6 +163,18 @@ replace_files:
 		fi; \
 	done
 	@echo "***********************************************************************"
+
+# Makefile Alias
+replace_makefile:
+	$(MAKE) replace FILE="Makefile"
+
+# Startup Alias
+replace_startup:
+	$(MAKE) replace FILE="stm32f1_startup.c"
+
+# Linker Alias
+replace_linker:
+	$(MAKE) replace FILE="stm32f1_ls.ld"
 
 # Include dependency files
 -include $(OBJS:.o=.d)

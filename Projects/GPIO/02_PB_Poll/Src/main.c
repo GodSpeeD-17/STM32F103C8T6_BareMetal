@@ -18,7 +18,7 @@ int main(){
 		}
 		else{
 			// Reset OB LED
-			OB_LED_reset();
+			OB_LED_Reset();
 		}
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);

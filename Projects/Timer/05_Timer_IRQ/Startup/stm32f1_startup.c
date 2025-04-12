@@ -196,12 +196,12 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 		*pDst++ = 0;
 	}
 	// Step 3: Configure SysClock @72MHz
-	RCC_72MHz_config();
+	RCC_Config_72MHz()();
 	// Step 4: Configure SysTick (Resolution us)
 	SysTick_Config(CoreClock);
 	// Step 5: Configure OB LED
-	OB_LED_config();
-	OB_LED_reset();
+	OB_LED_Config();
+	OB_LED_Reset();
 	// Step 6: Call main()
 	main();
 	// Step 7: Infinite Loop (Backup)

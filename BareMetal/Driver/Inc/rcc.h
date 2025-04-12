@@ -12,7 +12,7 @@
 #include "reg_map.h"
 
 // Shortcut Macro
-#define RCC_72MHz_config()							(RCC_config(&config_RCC_72MHz))
+#define RCC_Config_72MHz()							(RCC_Config(&RCC_Configuration_72MHz))
 
 // Bus Prescaler Configuration
 typedef struct {
@@ -64,7 +64,7 @@ typedef struct {
 } rcc_config_t;
 
 // Configuration: 72MHz
-static const rcc_config_t config_RCC_72MHz = {
+static const rcc_config_t RCC_Configuration_72MHz = {
 	// System Clock Source
 	.sys_clk_src = SW_CLK_PLL,
 	// Flash Configuration
@@ -155,22 +155,9 @@ __INLINE__ void RCC_busConfig(uint8_t AHB_PRE, uint8_t APB1_PRE, uint8_t APB2_PR
 }
 
 /**
- * @brief Reference Working Code
- */
-static void RCC_sys72MHz_config(void);
-
-/**
- * @brief Wrapper Function to create abstraction for System Core Clock Updation
- * @param[in] CLK_FREQ Core Clock Frequency `SYSCLK_FREQ`
- * @note - PLL as System Clock Source 
- * @note - HSE is used for PLL Clock Source
- */
-void RCC_SYSCLK_config(SYSCLK_FREQ CLK_FREQ);
-
-/**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
  */
-void RCC_config(rcc_config_t* configX);
+void RCC_Config(rcc_config_t* configX);
 
 #endif /* __RCC_H__ */

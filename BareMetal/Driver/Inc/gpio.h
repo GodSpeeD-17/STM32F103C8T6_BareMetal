@@ -24,7 +24,7 @@ typedef struct {
 } gpio_config_t;
 
 // On-board LED Configuration
-static gpio_config_t OB_LED_Config = {
+static gpio_config_t OB_LED_Configuration = {
 	.GPIOx = OB_LED_PORT,
 	.PINx = OB_LED_PIN,
 	.MODEx = MODE_OUT_2MHz,
@@ -145,9 +145,9 @@ uint8_t GPIO_get(gpio_config_t* GPIO_CONFIGx);
  * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
  * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
  */
-__INLINE__ void OB_LED_config(void){
+__INLINE__ void OB_LED_Config(void){
 	// Configure the OB LED
-	GPIO_config(&OB_LED_Config); 
+	GPIO_config(&OB_LED_Configuration); 
 }
 
 /**
@@ -155,15 +155,15 @@ __INLINE__ void OB_LED_config(void){
  */
 __INLINE__ void OB_LED_set(void){
 	// Reset the on-board active low LED GPIO
-	GPIO_reset(&OB_LED_Config);
+	GPIO_reset(&OB_LED_Configuration);
 }
 
 /**
  * @brief Turns on-board active low LED (PC13) OFF
  */
-__INLINE__ void OB_LED_reset(void){
+__INLINE__ void OB_LED_Reset(void){
 	// Set the on-board active low LED GPIO
-	GPIO_set(&OB_LED_Config);
+	GPIO_set(&OB_LED_Configuration);
 }
 
 /**
@@ -171,7 +171,7 @@ __INLINE__ void OB_LED_reset(void){
  */
 __INLINE__ void OB_LED_toggle(void){
 	// Toggle the on-board active low LED GPIO
-	GPIO_toggle(&OB_LED_Config);
+	GPIO_toggle(&OB_LED_Configuration);
 }
 
 
