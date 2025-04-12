@@ -834,6 +834,9 @@
 #define RCC_AHBENR_DMA1EN_Pos                (0U)                              
 #define RCC_AHBENR_DMA1EN_Msk                (0x1UL << RCC_AHBENR_DMA1EN_Pos)   /*!< 0x00000001 */
 #define RCC_AHBENR_DMA1EN                    RCC_AHBENR_DMA1EN_Msk             /*!< DMA1 clock enable */
+#define RCC_AHBENR_DMA2EN_Pos                (1U)                              
+#define RCC_AHBENR_DMA2EN_Msk                (0x1UL << RCC_AHBENR_DMA2EN_Pos)   /*!< 0x00000002 */
+#define RCC_AHBENR_DMA2EN                    RCC_AHBENR_DMA2EN_Msk             /*!< DMA2 clock enable */
 #define RCC_AHBENR_SRAMEN_Pos                (2U)                              
 #define RCC_AHBENR_SRAMEN_Msk                (0x1UL << RCC_AHBENR_SRAMEN_Pos)   /*!< 0x00000004 */
 #define RCC_AHBENR_SRAMEN                    RCC_AHBENR_SRAMEN_Msk             /*!< SRAM interface clock enable */

@@ -744,4 +744,52 @@ typedef enum{
 #define USARTx_STRING_TX_DELAY				((uint16_t) 3000)
 /*********************************************** USART MACROS ***********************************************/
 
+/*********************************************** DMA MACROS ***********************************************/
+// Reading Direction
+#define DMAx_DIR_READ_FROM_PER				((uint8_t) 0x00)
+#define DMAx_DIR_READ_FROM_MEM				((uint8_t) 0x01)
+
+// Memory to Memory Transfer
+#define DMAx_MEM2MEM_DISABLE				((uint8_t) 0x00)
+#define DMAx_MEM2MEM_ENABLE					((uint8_t) 0x01)
+
+// Circular Mode
+#define DMAx_CIRC_DISABLE					((uint8_t) 0x00)
+#define DMAx_CIRC_ENABLE					((uint8_t) 0x01)
+
+// Priority Level
+#define DMAx_PRIORITY_LOW 					((uint8_t) 0x00)
+#define DMAx_PRIORITY_MEDIUM 				((uint8_t) 0x01)
+#define DMAx_PRIORITY_HIGH	 				((uint8_t) 0x02)
+#define DMAx_PRIORITY_VERY_HIGH	 			((uint8_t) 0x03)
+
+// Address Increment
+#define DMAx_INC_DISABLE					((uint8_t) 0x00)
+#define DMAx_INC_ENABLE						((uint8_t) 0x01)
+
+// DMA Data Size for Transfer
+#define DMAx_DATA_SIZE_BIT_8				((uint8_t) 0x00)
+#define DMAx_DATA_SIZE_BIT_16				((uint8_t) 0x01)
+#define DMAx_DATA_SIZE_BIT_32				((uint8_t) 0x02)
+
+// Interrupts
+#define DMAx_IRQ_DISABLE					((uint8_t) 0x00)
+#define DMAx_IRQ_ENABLE						((uint8_t) 0x01)
+
+// DMA Channel 6
+#define DMA_USART2_RX						(DMA1_Channel6)
+#define DMA_I2C1_TX							(DMA1_Channel6)
+#define DMA_TIM1_CH3						(DMA1_Channel6)
+#define DMA_TIM3_CH1						(DMA1_Channel6)
+#define DMA_TIM3_TRIG						(DMA1_Channel6)
+
+// DMA Channel 7
+#define DMA_USART2_TX						(DMA1_Channel7)
+#define DMA_I2C1_RX							(DMA1_Channel7)
+#define DMA_TIM2_CH2						(DMA1_Channel7)
+#define DMA_TIM2_CH4						(DMA1_Channel7)
+#define DMA_TIM4_UP							(DMA1_Channel7)
+
+/*********************************************** DMA MACROS ***********************************************/
+
 #endif  /* __REG_MAP_H__ */

@@ -17,6 +17,7 @@
 
 // STM32F103C8T6 Specific Libraries
 #include "adc.h"
+#include "dma.h"
 #include "exti.h"
 #include "gpio.h"
 #include "nvic.h"
