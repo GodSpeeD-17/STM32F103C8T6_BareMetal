@@ -110,7 +110,7 @@ void I2C1_EV_IRQHandler(void){
 					// Ready for Next Transmission
 					SSD1306_I2C_status = I2C_STATE_READY;
 					// << Demo Indication >>
-					// OB_LED_toggle();
+					// OB_LED_Toggle();
 				}
 				// Transfer the remaining Bytes
 				else{

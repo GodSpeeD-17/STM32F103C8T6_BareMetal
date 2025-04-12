@@ -169,7 +169,7 @@ __INLINE__ void OB_LED_Reset(void){
 /**
  * @brief Toggles the on-board active low LED (PC13)
  */
-__INLINE__ void OB_LED_toggle(void){
+__INLINE__ void OB_LED_Toggle(void){
 	// Toggle the on-board active low LED GPIO
 	GPIO_toggle(&OB_LED_Configuration);
 }

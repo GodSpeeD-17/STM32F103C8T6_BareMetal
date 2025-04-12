@@ -16,7 +16,7 @@ int main(){
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
-		OB_LED_toggle();
+		OB_LED_Toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
@@ -50,7 +50,7 @@ int main(){
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
-		OB_LED_toggle();
+		OB_LED_Toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
