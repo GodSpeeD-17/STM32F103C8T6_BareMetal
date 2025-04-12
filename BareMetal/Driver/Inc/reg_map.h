@@ -10,10 +10,11 @@
 #ifndef __REG_MAP_H__
 #define __REG_MAP_H__
 
-// Custom Declaration
+/*********************************************** Custom Declaration ***********************************************/
 #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
 #define __STATIC_INLINE__					static __attribute__((always_inline)) inline
+/*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
 #include "flash_reg_map.h"
@@ -162,27 +163,27 @@
 
 /*********************************************** RCC MACROS ***********************************************/
 // Generic Frequencies
-#define FREQ_12Hz							((uint32_t) (12))   
-#define FREQ_25Hz							((uint32_t) ((2 * FREQ_12Hz) + (uint32_t) 1))   
-#define FREQ_50Hz							((uint32_t) (2 * FREQ_25Hz))   
-#define FREQ_100Hz							((uint32_t) (2 * FREQ_50Hz))   
-#define FREQ_500Hz							((uint32_t) (5 * FREQ_100Hz))   
-#define FREQ_1kHz							((uint32_t) (10 * FREQ_100Hz))   
-#define FREQ_2kHz							((uint32_t) (2 * FREQ_1kHz))   
-#define FREQ_5kHz							((uint32_t) (5 * FREQ_1kHz))   
-#define FREQ_10kHz							((uint32_t) (10 * FREQ_1kHz))   
-#define FREQ_50kHz							((uint32_t) (50 * FREQ_1kHz))   
-#define FREQ_72kHz							((uint32_t) (72 * FREQ_1kHz))   
-#define FREQ_100kHz							((uint32_t) (100 * FREQ_1kHz))   
-#define FREQ_200kHz							((uint32_t) (2 * FREQ_100kHz)) 
-#define FREQ_1MHz							((uint32_t) (FREQ_1kHz * FREQ_1kHz))
-#define FREQ_10MHz							((uint32_t) (10 * FREQ_1MHz))
+#define FREQ_12Hz							((uint32_t) 12)   
+#define FREQ_25Hz							((uint32_t) 25)   
+#define FREQ_50Hz							((uint32_t) 50)   
+#define FREQ_100Hz							((uint32_t) 100)   
+#define FREQ_500Hz							((uint32_t) 500)   
+#define FREQ_1kHz							((uint32_t) 1000)   
+#define FREQ_2kHz							((uint32_t) 2000)   
+#define FREQ_5kHz							((uint32_t) 5000)   
+#define FREQ_10kHz							((uint32_t) 10000)   
+#define FREQ_50kHz							((uint32_t) 50000)   
+#define FREQ_72kHz							((uint32_t) 72000)   
+#define FREQ_100kHz							((uint32_t) 100000)   
+#define FREQ_200kHz							((uint32_t) 200000) 
+#define FREQ_1MHz							((uint32_t) 1000000)
+#define FREQ_10MHz							((uint32_t) 10000000)
 
 // Clock Speed
-#define HSI_FREQ							((uint32_t) (8 * FREQ_1MHz))
-#define HSE_FREQ							((uint32_t) (8 * FREQ_1MHz))
-#define PLL_MIN_FREQ						((uint32_t) (16 * FREQ_1MHz))
-#define PLL_MAX_FREQ						((uint32_t) (72 * FREQ_1MHz))
+#define HSI_FREQ							((uint32_t) 8000000)
+#define HSE_FREQ							((uint32_t) 8000000)
+#define PLL_MIN_FREQ						((uint32_t) 16000000)
+#define PLL_MAX_FREQ						((uint32_t) 72000000)
 
 // Clock Source
 #define SW_CLK_HSI							((uint8_t) 0x00)

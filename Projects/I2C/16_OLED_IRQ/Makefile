@@ -16,6 +16,7 @@ CC      = $(TRIPLE)-gcc
 LD      = $(TRIPLE)-ld
 AS      = $(TRIPLE)-as
 OBJCOPY = $(TRIPLE)-objcopy
+SIZE = $(TRIPLE)-size
 
 # Include directories
 INCFLAGS := -I$(ROOT_DIR)/BareMetal/Core/Inc \
@@ -95,8 +96,24 @@ info:
 # All target
 all: $(BUILD_DIR)/$(TARGET).bin generate_c_cpp_properties_json
 	@echo "***********************************************************************"
-	@echo "Build Successful!"
+	@echo "*                         Build Successful!                           *"
 	@echo "***********************************************************************"
+	@echo "*                         Memory Usage Report                         *"
+	@echo "***********************************************************************"
+	@$(SIZE) ./Build/main.elf | awk 'NR==2 { \
+		text=$$1; data=$$2; bss=$$3; \
+		flash=text+data; ram=data+bss; \
+		printf "|-------------------|-------------------|\n"; \
+		printf("|%19s|%19s|\n", "     Flash     ", "      RAM       "); \
+		printf "|-------------------|-------------------|\n"; \
+		printf "|   (text: %5d)   |   (data: %5d)   |\n", text, data; \
+		printf "|   (data: %5d)   |   (bss : %5d)   |\n", data, bss; \
+		printf "|-------------------|-------------------|\n"; \
+		printf("|%16s   |%16s   |\n", sprintf("%7d bytes", flash), sprintf("%7d bytes", ram)); \
+		printf "|-------------------|-------------------|\n"; \
+	}'
+	@echo "***********************************************************************"
+
 
 # Clean target
 clean:
