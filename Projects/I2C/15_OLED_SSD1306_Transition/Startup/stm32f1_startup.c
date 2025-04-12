@@ -4,8 +4,8 @@
 	alias: Calls the Function Name defined when addressed
 	section: Stores the code in the partition declared in Linker Script
 */
-/*-------------------------------------------------------------------------------*/
-// Dependencies
+/*--------------------------------------------- HEADERS ----------------------------------*/
+// Dependency
 #include <stdint.h>
 // For System Clock Configuration (72MHz)
 #include "rcc.h"
@@ -13,16 +13,23 @@
 #include "systick.h"
 // GPIO Configuration
 #include "gpio.h"
-/*-------------------------------------------------------------------------------*/
-// MACROS
+/*-------------------------------------------- MACROS ----------------------------------*/
 #define ARM_IRQ						((uint8_t) 11)
 #define RESERVED					((uint8_t) 6)
 #define STM32F103C8_IRQ				((uint8_t) 59)
-/*-------------------------------------------------------------------------------*/
-// Extern from Linker Script
-extern uint32_t _svector, _evector, _stext, _etext, _srodata, _erodata, _sidata, _sdata, _edata, _sbss, _ebss;
-//  External end of stack pointer in SRAM
-extern void __estack(void);
+/*----------------------------------- LINKER SCRIPT --------------------------------------------*/
+// Start address of initialized data in FLASH
+extern uint32_t _sidata;
+// Start of .data in RAM
+extern uint32_t _sdata;
+// End of .data in RAM
+extern uint32_t _edata;
+// Start of .bss
+extern uint32_t _sbss;
+// End of .bss
+extern uint32_t _ebss;
+// Top of stack from linker
+extern uint32_t _estack;
 /*-------------------------------------------------------------------------------*/
 // External Main Function
 __attribute__((weak, naked)) extern int main(void);    
@@ -101,7 +108,7 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(
 /*-------------------------------------------------------------------------------*/
 // Vector Table (Placed in ".isr_vector" section)
 __attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RESERVED + STM32F103C8_IRQ] = {
-	(uint32_t) __estack,
+	(uint32_t) (&_estack),
 	(uint32_t) Reset_Handler,
 	(uint32_t) NMI_Handler,
 	(uint32_t) HardFault_Handler,
@@ -184,21 +191,21 @@ __attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RE
  * @note This function is called only when the processor is reset
  */ 
 __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
-	// Step 1: Copy ".data" section from FLASH (pSrc) to ".data" section in SRAM (pDst)
+	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
 	uint32_t* pSrc = (uint32_t *) &_sidata;
 	uint32_t* pDst = (uint32_t *) &_sdata;
 	while(pDst < &_edata){
 		*pDst++ = *pSrc++;
 	}
-	// Step 2: Initialise .bss to 0 in SRAM (pDst)
+	// Step 2: Initialise .bss to 0 in RAM
 	pDst = (uint32_t *)&_sbss;
 	while(pDst < &_ebss){
 		*pDst++ = 0;
 	}
-	// Step 3: Configure SysClock @72MHz
-	RCC_Config_72MHz()();
+	// Step 3: Configure SysClock at 72MHz
+	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
-	SysTick_Config(CoreClock);
+	SysTick_Config(AHBClock);
 	// Step 5: Configure OB LED
 	OB_LED_Config();
 	OB_LED_Reset();

@@ -202,7 +202,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	while(pDst < &_ebss){
 		*pDst++ = 0;
 	}
-	// Step 3: Configure SysClock @72MHz
+	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
 	SysTick_Config(AHBClock);

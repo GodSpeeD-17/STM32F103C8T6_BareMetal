@@ -13,9 +13,9 @@ MEMORY
 /* Set the initial stack pointer to the end of RAM */
 _estack = ORIGIN(RAM) + LENGTH(RAM);
 
-/* Define minimum sizes for heap and stack */
-_Min_Heap_Size = 0x400;       /* 1 KB heap */
-_Min_Stack_Size = 0x400;      /* 1 KB stack */
+/* Define minimum sizes for heap (1kB) and stack (1kB)*/
+_Min_Heap_Size = 0x400;
+_Min_Stack_Size = 0x400;
 
 /* Define all output sections */
 SECTIONS
@@ -24,7 +24,7 @@ SECTIONS
   .text :
   {
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Keep the interrupt vector table (important for startup) */
     KEEP(*(.isr_vector))
@@ -36,7 +36,7 @@ SECTIONS
     *(.rodata*)
 
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark the end of the .text section */
     _etext = .;
@@ -46,7 +46,7 @@ SECTIONS
   .data : 
   {
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark the start of .data in RAM */
     _sdata = .;
@@ -55,7 +55,7 @@ SECTIONS
     *(.data*)
 
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark the end of .data in RAM */
     _edata = .;
@@ -68,7 +68,7 @@ SECTIONS
   .bss :
   {
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark the start of BSS section */
     _sbss = .;
@@ -87,7 +87,7 @@ SECTIONS
   .heap (COPY):
   {
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark start of heap */
     _sheap = .;
@@ -96,7 +96,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
 
     /* Align word to 4-byte boundary */
-    . = ALIGN(4)
+    . = ALIGN(4);
 
     /* Mark end of heap */
     _eheap = .;

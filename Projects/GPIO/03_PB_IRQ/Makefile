@@ -169,9 +169,11 @@ replace_makefile:
 	$(MAKE) replace FILE="Makefile"
 
 # Startup Alias
-	$(MAKE)ake replace FILE="stm32f1_startup.c"
+replace_startup:
+	$(MAKE) replace FILE="stm32f1_startup.c"
 
 # Linker Alias
+replace_linker:
 	$(MAKE) replace FILE="stm32f1_ls.ld"
 
 # Include dependency files

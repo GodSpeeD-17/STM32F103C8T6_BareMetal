@@ -1,119 +1,126 @@
-/* 
-    NOTES: 
-        - '*' is wildcard character used to convey merge of all .text section of all the input files 
-        - '.' is a location counter used to retrieve current VMA location
-        - Virtual Memory Address (VMA): The address at which a piece of code or data will be executed or accessed in memory. It represents the logical address space as perceived by the program.
-        - Load Memory Address (LDA): The physical address where a piece of code or data is stored in memory when the program is loaded. It reflects the actual address in the device's memory where the binary is stored.
-        - Basic Syntax Understanding 
-        SECTIONS{
-            VMA != LMA
-            .section_name{
-            
-            } > VMA AT> LMA
-            VMA == LMA
-            .section_name{
-            
-            } > LMA
-        }
-*/
+/* Define the entry point of the program */
+ENTRY(Reset_Handler)
 
-/* Entry Point */
-ENTRY(Reset_Handler);
-
-/* Memory Arrangement & Address: STM32F103xx_Flash_Reference_Manual.pdf */
-MEMORY {
-    FLASH(rx): ORIGIN = 0x08000000, LENGTH = 64K
-    SRAM(rwx): ORIGIN = 0x20000000, LENGTH = 20K
+/* Define the memory regions of the STM32F103C8T6 */
+MEMORY
+{
+  /* Flash memory: for storing code and read-only data */
+  FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 64K
+  /* SRAM memory: for stack, heap, global/static variables */
+  RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
 }
 
-/* Symbol Declaration: Mapping between Variable Name and Address */
-__estack = ORIGIN(SRAM) + LENGTH(SRAM);
-__max_heap_size = 0x200;
-__max_stack_size = 0x400;
+/* Set the initial stack pointer to the end of RAM */
+_estack = ORIGIN(RAM) + LENGTH(RAM);
 
-/* Partition of Data */
-SECTIONS {
+/* Define minimum sizes for heap (1kB) and stack (1kB)*/
+_Min_Heap_Size = 0x400;
+_Min_Stack_Size = 0x400;
 
-    /* Vector Table */
-    .isr_vector : {
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Start of .isr_vector */
-        _svector = .;
-        
-        /* Vector Table */
-        KEEP(*(.isr_vector))
+/* Define all output sections */
+SECTIONS
+{
+  /* Code and read-only data section (stored in FLASH) */
+  .text :
+  {
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
 
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* End of .isr_vector */
-        _evector = .;
-    }> FLASH
+    /* Keep the interrupt vector table (important for startup) */
+    KEEP(*(.isr_vector))
 
-    /* Code or Instructions */
-    .text : {
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Start of .text */
-        _stext = .;
+    /* Include all executable code sections */
+    *(.text*)
 
-        /* Text Section of all the input files (Code Section) */
-        *(.text*)
+    /* Include all constant read-only data */
+    *(.rodata*)
 
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* End of .text */
-        _etext = .;
-    } > FLASH
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
 
-    /* 'const' data */
-    .rodata : {
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Start of .rodata Section */
-        _srodata = .;
+    /* Mark the end of the .text section */
+    _etext = .;
+  } > FLASH
 
-        /* Read Only Data (const) */
-        *(.rodata*)
+  /* Initialized data section (stored in RAM, loaded from FLASH) */
+  .data : 
+  {
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
 
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Storing the end of .rodata section */
-        _erodata = .;
-    }> FLASH
+    /* Mark the start of .data in RAM */
+    _sdata = .;
 
-    /* SRAM (VMA) & FLASH (LMA) */
-    .data : {
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Storing the start of .data VMA section */
-        _sdata = .;
+    /* Include all initialized global/static variables */
+    *(.data*)
 
-        /* Data Section of all the input files */
-        *(.data*)
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
 
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Storing the end of .data VMA section */
-        _edata = .;
-    } > SRAM AT > FLASH
+    /* Mark the end of .data in RAM */
+    _edata = .;
+  } > RAM AT > FLASH
 
-    /* Storing the start address of .data LMA section */
-    _sidata = LOADADDR(.data);
+  /* Store FLASH load address of .data section */
+  _sidata = LOADADDR(.data);
 
-    /* Uninitialized Data */
-    .bss : {
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Storing the start of .bss VMA section */
-        _sbss = .;
+  /* Uninitialized data section (BSS), stored in RAM */
+  .bss :
+  {
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
 
-        /* Uninitialized Section of all the input files */
-        *(.bss*)
+    /* Mark the start of BSS section */
+    _sbss = .;
 
-        /* Align with word (4 bytes) */
-        . = ALIGN(4);
-        /* Storing the end of .bss VMA section */
-        _ebss = .;
-    } > SRAM 
+    /* Include all uninitialized global/static variables */
+    *(.bss*)
+
+    /* Include any common variables not explicitly in .bss */
+    *(COMMON)
+
+    /* Mark the end of BSS section */
+    _ebss = .;
+  } > RAM
+
+  /* Heap section: required for dynamic allocation */
+  .heap (COPY):
+  {
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
+
+    /* Mark start of heap */
+    _sheap = .;
+
+    /* Reserve minimum heap space */
+    . = . + _Min_Heap_Size;
+
+    /* Align word to 4-byte boundary */
+    . = ALIGN(4);
+
+    /* Mark end of heap */
+    _eheap = .;
+  } > RAM
+
+  /* Stack section: grows downward from end of RAM */
+  .stack (COPY):
+  {
+    /* Align stack to 8 bytes */
+    . = ALIGN(8);
+
+    /* Mark start of stack */
+    _sstack = .;
+
+    /* Reserve minimum stack space */
+    . = . + _Min_Stack_Size;
+
+    /* Align stack to 8 bytes */
+    . = ALIGN(8);
+
+    /* Mark end of stack (top of RAM) */
+    _estack = ORIGIN(RAM) + LENGTH(RAM);
+  } > RAM
+
+  /* Optional symbol marking end of memory layout */
+  _end = .;
 }
