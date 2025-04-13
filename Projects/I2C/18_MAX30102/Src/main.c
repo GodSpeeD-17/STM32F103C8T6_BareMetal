@@ -20,7 +20,7 @@ int main(){
 	I2C_Config.freq_MHz = (APB1Clock/FREQ_1MHz);
 	I2C_Config.TRISE = I2C_calc_TRISE(I2C_Config.mode);
 	I2C_Config.CCR = I2C_calc_CCR(I2C_Config.mode, I2C_Config.duty, I2C_Config.freq_MHz);
-	I2C_config(&I2C_Config);
+	I2C_Config(&I2C_Config);
 	I2C_enable(I2C_Config.I2Cx);
 	
 	// Wait for Bus to be Ready
@@ -32,8 +32,8 @@ int main(){
 	float tempC = 0.0f;
 
 	// Turn ON the LEDs
-	I2C_writeRegisterBlock(I2C_Config.I2Cx, MAX30102_ADDRESS, MAX30102_MODE_CNF, writeConfig, (uint8_t)(sizeof(writeConfig)/sizeof(writeConfig[0])));
-	// I2C_readRegisterBlock(I2C_Config.I2Cx, MAX30102_ADDRESS, MAX30102_MODE_CNF, readConfig, (uint8_t)(sizeof(readConfig)/sizeof(readConfig[0])));
+	I2C_Write_Reg_Block(I2C_Config.I2Cx, MAX30102_ADDRESS, MAX30102_MODE_CNF, writeConfig, (uint8_t)(sizeof(writeConfig)/sizeof(writeConfig[0])));
+	// I2C_Read_Reg_Block(I2C_Config.I2Cx, MAX30102_ADDRESS, MAX30102_MODE_CNF, readConfig, (uint8_t)(sizeof(readConfig)/sizeof(readConfig[0])));
 	
 	// Final Temperature Value
 	tempC = MAX30102_readTempC(I2C_Config.I2Cx);

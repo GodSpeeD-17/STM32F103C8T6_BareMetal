@@ -7,21 +7,28 @@
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
-	// DMA Configuration
-	DMA_CH_Config(DMA1_Channel1, &mem2mem_config);
-	DMA_CH_dataConfig(DMA1_Channel1, &mem2mem_data_config);
-	DMA_CH_IRQ_Config(DMA1_Channel1, &mem2mem_irq_config);
-	DMA_CH_Transfer_Config(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
 	// Configure GPIO
 	GPIO_Config(&LED_Configuration);
 	// Reset GPIO
 	GPIO_Reset(&LED_Configuration);
+	// Default DMA Configuration
+	DMA_Load_Default_MEM2MEM(&DMA_Configuration);
+
+	#ifdef BIT_SIZE_8
+		DMA_Configuration.data->srcDataSize = DMAx_DATA_SIZE_BIT_8;
+		DMA_Configuration.data->dstDataSize = DMAx_DATA_SIZE_BIT_8;
+	#endif
+
+	// DMA Configuration
+	DMA_Config(&DMA_Configuration);
 	// Enable DMA Transfer
-	DMA_CH_enable(DMA1_Channel1);
+	DMA_Transfer(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
+	
 	// Infinite Loop
 	while(1){
 		// Toggle GPIO
 		GPIO_Toggle(&LED_Configuration);
+		// Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
 	// Return Value

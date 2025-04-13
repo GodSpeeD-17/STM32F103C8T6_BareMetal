@@ -8,8 +8,8 @@ i2c_config_t SSD1306_I2C_Config = {0};
 // Main Entry Point
 int main(){
 	// I2C Initialisation
-	I2C1_loadDefault(&SSD1306_I2C_Config);
-	I2C_config(&SSD1306_I2C_Config);
+	I2C1_Load_Default(&SSD1306_I2C_Config);
+	I2C_Config(&SSD1306_I2C_Config);
 	I2C_enable(SSD1306_I2Cx);
 
 	// SSD1306 Initialisation

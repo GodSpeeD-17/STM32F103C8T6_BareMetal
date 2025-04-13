@@ -40,8 +40,8 @@ STM32F103C8T6 DMA is channel-based. Each channel is fixed to specific peripheral
 
 > In `MEM2MEM` mode, the DMA treats **CPAR as source** and **CMAR as destination**, but `DIR` **must still be set to 0** (read from "peripheral").
 > Conclusion:
-    - Within Memory: `DIR` = 0
-    - Outside Memory: `DIR` = 1
+    - Within Memory: `DIR` = `DMAx_DIR_MEM2MEM` (0)
+    - Outside Memory: `DIR` = `DMAx_DIR_PER2MEM` (1)
 
 ---
 
@@ -54,7 +54,7 @@ STM32F103C8T6 DMA is channel-based. Each channel is fixed to specific peripheral
 ```c
 // Define DMA Channel Configuration Structure
 dma_channel_config_t mem2mem_config = {
-    .direction = DMAx_DIR_READ_FROM_PER,   // MUST be 0 for MEM2MEM
+    .direction = DMAx_DIR_MEM2MEM,         // MUST be 0 for MEM2MEM
     .mem2mem = DMAx_MEM2MEM_ENABLE,        // Enable MEM2MEM
     .circular_mode = DMAx_CIRC_DISABLE,    // Disable Circular Mode
     .priority = DMAx_PRIORITY_HIGH         // Keep it at high priority
@@ -83,7 +83,7 @@ The **Peripheral-to-Memory (PER2MEM)** transfer mode is used to receive data fro
 ```c
 // Define DMA Channel Configuration Structure for Peripheral to Memory (e.g., UART RX)
 dma_channel_config_t rx_dma_config = {
-    .direction = DMAx_DIR_READ_FROM_PER,  // Direction: Peripheral to Memory
+    .direction = DMAx_DIR_PER2MEM,        // Direction: Peripheral to Memory
     .mem2mem = DMAx_MEM2MEM_DISABLE,      // Disable MEM2MEM mode
     .circular_mode = DMAx_CIRC_ENABLE,    // Enable Circular Mode (for continuous RX)
     .priority = DMAx_PRIORITY_HIGH        // Set High Priority for the DMA transfer
@@ -112,7 +112,7 @@ dma_channel_intr_t rx_dma_irq_config = {
 ```c
 // Define DMA Channel Configuration Structure for Memory to Peripheral (e.g., UART TX)
 dma_channel_config_t tx_dma_config = {
-    .direction = DMAx_DIR_READ_FROM_PER,  // Direction: Memory to Peripheral
+    .direction = DMAx_DIR_PER2MEM,        // Direction: Memory to Peripheral
     .mem2mem = DMAx_MEM2MEM_DISABLE,      // Disable MEM2MEM mode
     .circular_mode = DMAx_CIRC_DISABLE,   // Disable Circular Mode (used for single-shot transfer)
     .priority = DMAx_PRIORITY_HIGH        // Set High Priority for the DMA transfer

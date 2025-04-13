@@ -24,9 +24,9 @@ int main(){
 	GPIO_Config(&LED_Config);
 
 	// I2C Initialisation
-	I2C1_loadDefault(&SSD1306_I2C_Config);
+	I2C1_Load_Default(&SSD1306_I2C_Config);
 	// Configure I2C
-	I2C_config(&SSD1306_I2C_Config);
+	I2C_Config(&SSD1306_I2C_Config);
 	// Enable Interrupt
 	I2C_IRQ_enable(SSD1306_I2Cx, 1, 1);
 	// Enable I2C

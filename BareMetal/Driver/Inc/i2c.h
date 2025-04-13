@@ -55,7 +55,7 @@
 #define I2C_init(I2C_CONFIGx) 			\
 {										\
 	/* I2C Configuration */ 			\
-	I2C_config((I2C_CONFIGx));			\
+	I2C_Config((I2C_CONFIGx));			\
 	/* I2C Enable */ 					\
 	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
 }
@@ -100,18 +100,6 @@ typedef struct {
 				// |---|--- Thigh = 9 * CCR * `freq_MHz`
 				// |---|--- Tlow = 16 * CCR * `freq_MHz`
 	uint16_t CCR: 12;
-	// Buffer Interrupt Enable
-	// - TxE = 1 || RxNE = 1
-	// - `I2Cx_BUFFER_IRQ_DISABLE`: Disable Buffer Interrupt
-	// - `I2Cx_BUFFER_IRQ_ENABLE`: Enable Buffer Interrupt
-	uint16_t buffer_IRQ: 1;
-	// Event Interrupt Enable
-	// - SB = 1 (Master) || ADDR = 1 (Master/Slave) || ADD10 = 1 (Master) || STOPF = 1 (Slave)
-	// - BTF = 1 with no TxE or RxNE
-	// - TxE = 1 || RxNE = 1 && buffer_IRQ = `I2Cx_BUFFER_IRQ_ENABLE`
-	// - `I2Cx_EVENT_IRQ_DISABLE`: Disable Event Interrupt
-	// - `I2Cx_EVENT_IRQ_ENABLE`: Enable Event Interrupt
-	uint16_t event_IRQ: 1;
 	// Maximum rise time in Fast/Standard Mode (Master mode)
 	// - Provide the maximum duration of the SCL feedback loop in master mode
 	// - `I2Cx_MODE_STD`:
@@ -297,14 +285,7 @@ __INLINE__ void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx){
  * @brief Configures I2C as per the Configuration Structure
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C_config(i2c_config_t* I2C_CONFIGx);
-
-/**
- * @brief I2C Event Check
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns Status of Event
- */
-uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx);
+void I2C_Config(i2c_config_t* I2C_CONFIGx);
 
 /**
  * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
@@ -327,7 +308,7 @@ uint8_t I2C_calc_TRISE(uint8_t i2cMode);
  * @param[in] register Register Address
  * @param[in] byte Data to be written
  */
-void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
+void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
 
 /**
  * @brief Writes Multiple Consecutive Bytes to Register Address of a given Slave Address
@@ -337,7 +318,7 @@ void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t r
  * @param[in] data Pointer to the data buffer
  * @param[in] len Number of bytes to write
  */
-void I2C_writeRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 /**
  * @brief Reads a Single Byte from a Register Address of a given Slave Address
@@ -346,7 +327,7 @@ void I2C_writeRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t 
  * @param[in] registerAddress Register Address to read from
  * @returns The read byte
  */
-uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
+uint8_t I2C_Read_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
 
 /**
  * @brief Reads Multiple Consecutive Bytes from a Register Address of a given Slave Address
@@ -356,18 +337,18 @@ uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t
  * @param[out] data Pointer to the buffer to store the read data
  * @param[in] len Number of bytes to read
  */
-void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_Read_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 /**
  * @brief I2C load default values
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx);
+void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx);
 
 /**
  * @brief I2C load default values
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx);
+void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx);
 
 #endif /* __I2C_H__ */

@@ -6,11 +6,13 @@
 #include "reg_map.h"
 #include "nvic.h"		// IRQ
 
-// DMA Configuration Configuration Structure
+//------------------------------------------------------------------------------
+// DMA Channel Configuration Structure
+//------------------------------------------------------------------------------
 typedef struct {
 	// Direction of data transfer
-	// - `DMAX_DIR_READ_FROM_PER`
-	// - `DMAX_DIR_READ_FROM_MEM`
+	// - `DMAx_DIR_MEM2MEM`
+	// - `DMAx_DIR_PER2MEM`
 	uint8_t direction: 1;
 	// Read from Memory & Store it to Memory
 	// - `DMAx_MEM2MEM_DISABLE`
@@ -28,7 +30,9 @@ typedef struct {
 	uint8_t priority: 2;
 } dma_channel_config_t;
 
+//------------------------------------------------------------------------------
 // DMA Channel Data Configuration Structure
+//------------------------------------------------------------------------------
 typedef struct {
 	// Source Data Size (`PSIZE`)
 	// - `DMAx_DATA_SIZE_BIT_8`
@@ -50,7 +54,9 @@ typedef struct {
 	uint8_t dstInc: 1;
 } dma_channel_data_t;
 
+//------------------------------------------------------------------------------
 // DMA Channel Interrupt Configuration Structure
+//------------------------------------------------------------------------------
 typedef struct {
 	// Transfer Complete Interrupt Enable
 	uint8_t TCIE: 1;
@@ -60,27 +66,45 @@ typedef struct {
 	uint8_t TEIE: 1;
 } dma_channel_intr_t;
 
-// I2C1 TX DMA Configuration Structure
-static dma_channel_config_t I2C1_TX_DMA_Configuration = {
-	.circular_mode = DMAx_CIRC_DISABLE,
-	.direction = DMAx_DIR_READ_FROM_MEM,
-	.priority = DMAx_PRIORITY_VERY_HIGH,
-	.mem2mem = DMAx_MEM2MEM_DISABLE
-};
+// DMA Configuration Structure
+typedef struct {
+	// DMA Channel
+	DMA_CHANNEL_REG_STRUCT *DMA_Channel;
+	// Channel Configuration
+	dma_channel_config_t channel;
+	// Data Configuration Structure
+	dma_channel_data_t data;
+	// Interrupt Configuration Structure
+	dma_channel_intr_t interrupt;
+} dma_config_t;
 
-// I2C1 TX DMA Data Configuration Structure
-static dma_channel_data_t I2C1_TX_DMA_Data_Configuration = {
-	.dstDataSize = DMAx_DATA_SIZE_BIT_8,
-	.dstInc = DMAx_INC_DISABLE,
-	.srcDataSize = DMAx_DATA_SIZE_BIT_8,
-	.srcInc = DMAx_INC_ENABLE,
-};
 
-// I2C1 TX DMA Interrupt Configuration Structure
-static dma_channel_intr_t I2C1_TX_DMA_IRQ_Configuration = {
-	.TEIE = DMAx_IRQ_ENABLE,
-	.TCIE = DMAx_IRQ_ENABLE,
-	.HTIE = DMAx_IRQ_DISABLE
+//------------------------------------------------------------------------------
+// I2C1 TX DMA Channel Configuration Structure
+//------------------------------------------------------------------------------
+static dma_config_t I2C1_TX_DMA_Configuration = {
+	// DMA Channel
+	.DMA_Channel = DMA_I2C1_TX,
+	// Channel Properties
+	.channel = {
+		.direction = DMAx_DIR_PER2MEM,
+		.mem2mem = DMAx_MEM2MEM_DISABLE,
+		.circular_mode = DMAx_CIRC_DISABLE,
+		.priority = DMAx_PRIORITY_VERY_HIGH
+	},
+	// Data Properties
+	.data = {
+		.srcDataSize = DMAx_DATA_SIZE_BIT_8,
+		.dstDataSize = DMAx_DATA_SIZE_BIT_8,
+		.srcInc = DMAx_INC_ENABLE,
+		.dstInc = DMAx_INC_DISABLE
+	},
+	// Interrupt
+	.interrupt = {
+		.TCIE = DMAx_IRQ_ENABLE,
+		.HTIE = DMAx_IRQ_DISABLE,
+		.TEIE = DMAx_IRQ_ENABLE
+	},
 };
 
 // Temporary Register
@@ -194,22 +218,27 @@ __INLINE__ uint8_t DMA_CH_get_IRQn(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  * @brief Configures the DMA
  * @param[in] config DMA Configuration Structure
  */
-void DMA_CH_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_config_t* config);
+static void DMA_CH_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_config_t* config);
 
 /**
  * @brief Configures the data related parameters of the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  * @param[in] config DMA Channel Data Configuration Structure
  */
-void DMA_CH_dataConfig(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_data_t* config);
+static void DMA_CH_Data_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_data_t* config);
 
 /**
  * @brief Configures the Interrupt related parameters of the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  * @param[in] config DMA Channel Data Configuration Structure
  */
-void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t* config);
+static void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t* config);
 
+/**
+ * @brief DMA Configuration
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Config(dma_config_t* instance);
 
 /**
  * @brief Configures the Transfer of the DMA Channel
@@ -218,6 +247,12 @@ void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t*
  * @param[in] dst Pointer to Destination
  * @param[in] size Size of the data to be transferred
  */
-void DMA_CH_Transfer_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, uint16_t size);
+void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, uint16_t size);
+
+/**
+ * @brief Loads the default configuration for Memory to Memory Transfer
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Load_Default_MEM2MEM(dma_config_t* instance);
 
 #endif /* __DMA_H__ */

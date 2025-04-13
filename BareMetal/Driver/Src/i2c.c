@@ -33,7 +33,7 @@ gpio_config_t I2C2_SDA = {
  * @brief Configures I2C as per the Configuration Structure
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C_config(i2c_config_t* I2C_CONFIGx){
+void I2C_Config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
 	I2C_clk_enable(I2C_CONFIGx->I2Cx);
 	// Configure GPIOs
@@ -43,40 +43,13 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
 	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
 	// I2C Buffer IRQ + I2C Event IRQ + I2C Module Frequency
-	I2C_CONFIGx->I2Cx->CR2.REG |= (((I2C_CONFIGx->buffer_IRQ & 0x01) << I2C_CR2_ITBUFEN_Pos) | 
-								   ((I2C_CONFIGx->event_IRQ & 0x01) << I2C_CR2_ITEVTEN_Pos) | 
-								   ((I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos));
+	I2C_CONFIGx->I2Cx->CR2.REG |= (uint32_t)((I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos);
 	// I2C Mode + I2C Duty + I2C Clock Control Register
 	I2C_CONFIGx->I2Cx->CCR.REG = (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
 									((I2C_CONFIGx->duty & 0x01) << I2C_CCR_DUTY_Pos) | 
 									(I2C_CONFIGx->CCR & 0x0FFF) << I2C_CCR_CCR_Pos);
 	// TRISE Configuration
 	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
-	// Enable Interrupt
-	// if(I2C_CONFIGx->buffer_IRQ || I2C_CONFIGx->event_IRQ)
-	// 	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
-}
-
-/**
- * @brief I2C Event Check
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns Status of Event
- * @note `DO NOT USE THIS`
- */
-uint32_t I2C_checkEvent(I2C_REG_STRUCT* I2Cx) {
-	// Local Variables
-	uint16_t sr2 = 0x0000;
-	uint32_t event = 0x00000000;
-	// Read SR1
-	event = I2Cx->SR1.REG;
-	// Read SR2
-	sr2 = I2Cx->SR2.REG;
-	// Combine SR1 and SR2 into a single event value
-	event |= ((sr2 & 0xFFFF) << 16);
-	// Mask out irrelevant bits
-	event &= 0x000FFFFF;
-	// Return the Event Sequence
-	return event;
 }
 
 /**
@@ -101,7 +74,6 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 			// Thigh = CCR * Tfreq -> Thigh_ns = CCR * Tfreq_ns -> CCR = (Thigh_ns/Tfreq_ns) -> CCR = (Tns/(2*Tfreq_ns));
 			// CCR = (Tns * `freq_MHz` / (2 * 1000)); ..... {Refer 1}
 			// calculated_CCR = ((I2C_MODE_STD_TIME_NS * i2cClockFrequencyMHz)/(2 * 1000));
-// 			calculated_CCR = (i2cClockFrequencyMHz * FREQ_1MHz);
 			calculated_CCR = ((i2cClockFrequencyMHz * FREQ_1MHz)/(I2Cx_SPEED_STD << 1));
 		break;
 		// I2C Fast Mode: 400kHz
@@ -152,7 +124,7 @@ uint8_t I2C_calc_TRISE(uint8_t i2cMode){
  * @param[in] register Register Address
  * @param[in] byte Data to be written
  */
-void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte){
+void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte){
 	// Local Variable
 	uint32_t temp = 0x00;
 	
@@ -195,7 +167,7 @@ void I2C_writeRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t r
  * @param[in] data Pointer to the data buffer
  * @param[in] len Number of bytes to write
  */
-void I2C_writeRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len){
+void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len){
 	// Local Variable
 	uint32_t temp = 0x00;
 
@@ -239,7 +211,7 @@ void I2C_writeRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t 
  * @param[in] registerAddress Register Address to read from
  * @returns The read byte
  */
-uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress){
+uint8_t I2C_Read_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress){
 	// Local Variable
 	uint32_t temp = 0x00;
 	uint8_t data = 0x00;
@@ -297,7 +269,7 @@ uint8_t I2C_readRegisterByte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t
  * @param[out] data Pointer to the buffer to store the read data
  * @param[in] len Number of bytes to read
  */
-void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len){
+void I2C_Read_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len){
 	// Local Variable
 	uint32_t temp = 0x00;
 
@@ -356,7 +328,7 @@ void I2C_readRegisterBlock(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t r
  * @brief I2C load default values
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx){
+void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C SCL GPIO Configuration
 	I2C_CONFIGx->SCL = &I2C1_SCL;
 	// I2C SDA GPIO Configuration
@@ -373,16 +345,13 @@ void I2C1_loadDefault(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
 	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
-	// Disable Interrupts
-	I2C_CONFIGx->event_IRQ = I2Cx_EVENT_IRQ_DISABLE;
-	I2C_CONFIGx->buffer_IRQ = I2Cx_BUFFER_IRQ_DISABLE;
 }
 
 /**
  * @brief I2C load default values
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx){
+void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C SCL Configuration
 	I2C_CONFIGx->SCL = &I2C2_SCL;
 	// I2C SDA Configuration
@@ -399,8 +368,4 @@ void I2C2_loadDefault(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
 	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
-	// Disable Interrupts
-	I2C_CONFIGx->event_IRQ = I2Cx_EVENT_IRQ_DISABLE;
-	I2C_CONFIGx->buffer_IRQ = I2Cx_BUFFER_IRQ_DISABLE;
 }
-

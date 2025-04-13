@@ -79,7 +79,7 @@
  */
 __INLINE__ void MAX30102_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, uint8_t byte){
 	// I2C Write Byte
-	I2C_writeRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address, byte);
+	I2C_Write_Reg_Byte(I2Cx, MAX30102_ADDRESS, reg_address, byte);
 }
 
 /**
@@ -90,7 +90,7 @@ __INLINE__ void MAX30102_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t reg_address, ui
  */
 __INLINE__ uint8_t MAX30102_readByteFromAddress(I2C_REG_STRUCT* I2Cx, uint8_t reg_address){
 	// I2C Read Byte
-	return I2C_readRegisterByte(I2Cx, MAX30102_ADDRESS, reg_address);
+	return I2C_Read_Reg_Byte(I2Cx, MAX30102_ADDRESS, reg_address);
 }
 
 /**
