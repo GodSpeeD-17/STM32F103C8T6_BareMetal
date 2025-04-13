@@ -23,7 +23,7 @@
 void PWM_config(pwm_config_t* PWMx){
 
 	// Configure GPIO 
-	GPIO_config(PWMx->TIM_CONFIGx->GPIO_CONFIGx);
+	GPIO_Config(PWMx->TIM_CONFIGx->GPIO_CONFIGx);
 
 	// Configure Timer
 	config_GPT(PWMx->TIM_CONFIGx);

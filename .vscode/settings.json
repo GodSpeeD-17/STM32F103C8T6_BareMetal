@@ -323,6 +323,11 @@
         "ssd1306_irq.h": "c",
         "i2c.h": "c",
         "ssd1306_font.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "string.h": "c",
+        "reent.h": "c",
+        "stddef.h": "c",
+        "cdefs.h": "c",
+        "_ansi.h": "c"
     }
 }

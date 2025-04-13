@@ -7,10 +7,10 @@ i2c_config_t SSD1306_I2C_Config;
 /*-------------------------------------------------------------------------------*/
 // LED Configuration
 gpio_config_t LED_Config = {
-	.GPIOx = GPIOA,
-	.PINx = GPIO_PIN_2,
-	.MODEx = MODE_OUT_10MHz,
-	.CNFx = CNF_OUT_GP_PP
+	.GPIO = GPIOA,
+	.PIN = GPIOx_PIN_2,
+	.MODE = GPIOx_MODE_OUT_10MHz,
+	.CNF = GPIOx_CNF_OUT_GP_PP
 };
 /*-------------------------------------------------------------------------------*/
 
@@ -21,7 +21,7 @@ gpio_config_t LED_Config = {
 int main(){
 
 	// Configure external LED
-	GPIO_config(&LED_Config);
+	GPIO_Config(&LED_Config);
 
 	// I2C Initialisation
 	I2C1_loadDefault(&SSD1306_I2C_Config);
@@ -38,9 +38,9 @@ int main(){
 	// Infinite Loop
 	while(1){
 		// Toggle Screen Color
-		SSD1306_IRQ_clrScreen(SSD1306_I2Cx, GPIO_get(&LED_Config)? 0xFF: 0x00);
+		SSD1306_IRQ_clrScreen(SSD1306_I2Cx, GPIO_Get(&LED_Config)? 0xFF: 0x00);
 		// Toggle LED
-		GPIO_toggle(&LED_Config);
+		GPIO_Toggle(&LED_Config);
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}

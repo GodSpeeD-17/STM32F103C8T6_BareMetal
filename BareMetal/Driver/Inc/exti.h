@@ -26,59 +26,59 @@ typedef struct {
 
 /**
  * @brief Enables the External Interrupt
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_IRQ_enable(uint8_t PINx){
+__INLINE__ void EXTI_IRQ_enable(uint8_t PIN){
 	// Disable the IRQ Mask
-	EXTI->IMR.REG |= (1 << PINx);
+	EXTI->IMR.REG |= (1 << PIN);
 }
 
 /**
  * @brief Disables the External Interrupt Mask
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_IRQ_disable(uint8_t PINx){
+__INLINE__ void EXTI_IRQ_disable(uint8_t PIN){
 	// Enable the IRQ Mask
-	EXTI->IMR.REG &= ~(1 << PINx);
+	EXTI->IMR.REG &= ~(1 << PIN);
 }
 
 /**
  * @brief Clear the EXTI bit
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_clearPending(uint8_t PINx){
+__INLINE__ void EXTI_clearPending(uint8_t PIN){
 	// Acknowledge the Pending Bit
-	EXTI->PR.REG |= (1 << PINx);
+	EXTI->PR.REG |= (1 << PIN);
 }
 
 /**
  * @brief Returns the Pending Bit of External Interrupt
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  * @returns Pending Bit Status for Input Pin
  */
-__INLINE__ uint8_t EXTI_getPending(uint8_t PINx){
+__INLINE__ uint8_t EXTI_getPending(uint8_t PIN){
 	// Get the Pending Register Status
 	uint32_t result = EXTI->PR.REG;
 	// Get the exact bit
-	result = ((result >> PINx) & 0x01);
+	result = ((result >> PIN) & 0x01);
 	// Return the value
 	return (uint8_t) result;
 }
 
 /**
  * @brief Configures the NVIC EXTI Source
- * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] GPIO `GPIOA`, `GPIOB`, `GPIOC`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  */
-void EXTI_srcConfig(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+void EXTI_srcConfig(GPIO_REG_STRUCT* GPIO, uint8_t PIN);
 
 /**
  * @brief Configures the External Interrupt Trigger Selection
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
  * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
  */
-void EXTI_trigConfig(uint8_t PINx, uint8_t TRIGx);
+void EXTI_trigConfig(uint8_t PIN, uint8_t TRIGx);
 
 /**
  * @brief Configures the EXTI Parameters Based Upon EXTI Configuration Structure

@@ -24,6 +24,32 @@ void SysTick_Config(uint32_t reloadValue){
 }
 
 /***
+ * @brief Accurate us delay generation
+ * @param[in] delayTime Delay in microseconds (us)
+ * @note Based upon SysTick Timer
+ */
+void delay_us(uint32_t delayTime){
+	// Calculate the delay time
+	future_ticks = curr_ticks + delayTime;
+	// Wait for delay
+	while(curr_ticks <= future_ticks);
+}
+
+/***
+ * @brief Accurate ms delay generation
+ * @param[in] delayTime Delay in milliseconds (ms)
+ * @note Based upon SysTick Timer
+ */
+void delay_ms(uint32_t delayTime){
+	// Calculate the delay time
+	while(delayTime--){
+		// Wait for 1ms
+		delay_us(1000);
+	}
+}
+
+
+/***
  * @brief ISR for SysTick
  * @note Used for Delay Generation and Getting the total Number of Ticks
  */

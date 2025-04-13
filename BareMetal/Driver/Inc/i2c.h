@@ -276,10 +276,10 @@ __INLINE__ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ, uint8_t e
 	if(er_IRQ){
 		temp |= I2C_CR2_ITERREN;
 		// NVIC Error Interrupt Enable
-		NVIC_IRQ_enable(I2C_getER_IRQn(I2Cx));
+		NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
 	}
 	// NVIC Event Interrupt Enable
-	NVIC_IRQ_enable(I2C_getEV_IRQn(I2Cx));
+	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2Cx));
 	// Write to CR2
 	I2Cx->CR2.REG = temp;
 }

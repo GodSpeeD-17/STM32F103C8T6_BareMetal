@@ -220,8 +220,8 @@ void ADC3_IRQHandler(void);
  */
 __INLINE__ void ADC_load_default(adc_config_t* ADC_CONFIGx){
 	// Configure GPIO Mode and Configuration
-	ADC_CONFIGx->GPIO_CONFIGx->MODEx = MODE_IN;
-	ADC_CONFIGx->GPIO_CONFIGx->CNFx = CNF_IN_ANALOG;
+	ADC_CONFIGx->GPIO_CONFIGx->MODE = GPIOx_MODE_IN;
+	ADC_CONFIGx->GPIO_CONFIGx->CNF = GPIOx_CNF_IN_ANALOG;
 	// Number of Channels as 1
 	ADC_CONFIGx->num_channels = 1;
 	// Sample Time as 239.5 cycles

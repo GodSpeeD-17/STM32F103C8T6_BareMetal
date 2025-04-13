@@ -10,17 +10,17 @@
 /*************************************** USART1 ********************************************/
 // TX GPIO Configuration Structure
 static gpio_config_t USART1_TX_GPIO_Config = {
-	.GPIOx = USART1_TX_GPIO,
-	.PINx = USART1_TX_PIN,
-	.MODEx = MODE_OUT_50MHz,
-	.CNFx = CNF_OUT_AF_PP,
+	.GPIO = USART1_TX_GPIO,
+	.PIN = USART1_TX_PIN,
+	.MODE = GPIOx_MODE_OUT_50MHz,
+	.CNF = GPIOx_CNF_OUT_AF_PP,
 };
 // RX GPIO Configuration Structure
 static gpio_config_t USART1_RX_GPIO_Config = {
-	.GPIOx = USART1_RX_GPIO,
-	.PINx = USART1_RX_PIN,
-	.MODEx = MODE_IN,
-	.CNFx = CNF_IN_FLOAT,
+	.GPIO = USART1_RX_GPIO,
+	.PIN = USART1_RX_PIN,
+	.MODE = GPIOx_MODE_IN,
+	.CNF = GPIOx_CNF_IN_FLOAT,
 };
 // Configuration Structure (Interrupt Disabled)
 usart_config_t USART1_Config = {
@@ -45,8 +45,8 @@ usart_config_t USART1_Config = {
  */
 void USART_config(usart_config_t* USART_CONFIGx){
 	// Configure the GPIO
-	GPIO_config(USART_CONFIGx->TX_GPIO_CONFIGx);
-	GPIO_config(USART_CONFIGx->RX_GPIO_CONFIGx);
+	GPIO_Config(USART_CONFIGx->TX_GPIO_CONFIGx);
+	GPIO_Config(USART_CONFIGx->RX_GPIO_CONFIGx);
 	// Enable USART Clock
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate
@@ -60,7 +60,7 @@ void USART_config(usart_config_t* USART_CONFIGx){
 	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << USART_CR1_M_Pos) | ((USART_CONFIGx->enable_parity & 0x01) << USART_CR1_PCE_Pos) | ((USART_CONFIGx->parity_selection & 0x01) << USART_CR1_PS_Pos) | ((USART_CONFIGx->TXEIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->TCIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
 	// IRQ Enable
 	if(USART_CONFIGx->TCIE || USART_CONFIGx->TXEIE || USART_CONFIGx->RXNEIE)
-		NVIC_IRQ_enable(USART_get_IRQn(USART_CONFIGx));
+		NVIC_IRQ_Enable(USART_get_IRQn(USART_CONFIGx));
 }
 
 /**

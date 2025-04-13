@@ -8,42 +8,42 @@
 
 /**
  * @brief Configures the NVIC EXTI Source
- * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] GPIO `GPIOA`, `GPIOB`, `GPIOC`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  */
-void EXTI_srcConfig(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+void EXTI_srcConfig(GPIO_REG_STRUCT* GPIO, uint8_t PIN){
 
 	// Local Variables
 	uint32_t reg = 0, pin = 0;
 	uint8_t temp = 0xFF;
 
 	// Port based selection
-	if(GPIOx == GPIOA){
+	if(GPIO == GPIOA){
 		temp = AF_EXTI_PA;
 	}
-	else if(GPIOx == GPIOB){
+	else if(GPIO == GPIOB){
 		temp = AF_EXTI_PB;
 	}
-	else if(GPIOx == GPIOC){
+	else if(GPIO == GPIOC){
 		temp = AF_EXTI_PC;
 	}
 	
 	// Parameter Determination
-	if(PINx < GPIO_PIN_4){
+	if(PIN < GPIOx_PIN_4){
 		reg = AFIO->EXTICR1.REG;
-		pin = PINx * 4;
+		pin = PIN * 4;
 	}
-	else if(PINx < GPIO_PIN_8){
+	else if(PIN < GPIOx_PIN_8){
 		reg = AFIO->EXTICR2.REG;
-		pin = (PINx - 4) * 4;
+		pin = (PIN - 4) * 4;
 	}
-	else if(PINx < GPIO_PIN_12){
+	else if(PIN < GPIOx_PIN_12){
 		reg = AFIO->EXTICR3.REG;
-		pin = (PINx - 8) * 4;
+		pin = (PIN - 8) * 4;
 	}
-	else if(PINx <= GPIO_PIN_15){
+	else if(PIN <= GPIOx_PIN_15){
 		reg = AFIO->EXTICR4.REG;
-		pin = (PINx - 12) * 4;
+		pin = (PIN - 12) * 4;
 	}
 
 	// Clear Register
@@ -55,41 +55,41 @@ void EXTI_srcConfig(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	AFIO_clk_enable();
 
 	// Write to Appropriate Register 
-	if(PINx < GPIO_PIN_4){
+	if(PIN < GPIOx_PIN_4){
 		AFIO->EXTICR1.REG = reg;
 	}
-	else if(PINx < GPIO_PIN_8){
+	else if(PIN < GPIOx_PIN_8){
 		AFIO->EXTICR2.REG = reg;
 	}
-	else if(PINx < GPIO_PIN_12){
+	else if(PIN < GPIOx_PIN_12){
 		AFIO->EXTICR3.REG = reg;
 	}
-	else if(PINx <= GPIO_PIN_15){
+	else if(PIN <= GPIOx_PIN_15){
 		AFIO->EXTICR4.REG = reg;
 	}
 }
 
 /**
  * @brief Configures the External Interrupt Trigger Selection
- * @param[in] PINx Pin Number `GPIO_PIN_x`
+ * @param[in] PIN Pin Number `GPIO_PIN_x`
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_FALLING`, `EXTI_TRIG_BOTH`
  * @note The external wakeup lines are edge triggered, no glitches must be generated on these lines
  */
-void EXTI_trigConfig(uint8_t PINx, uint8_t TRIGx){
+void EXTI_trigConfig(uint8_t PIN, uint8_t TRIGx){
 	// Trigger Selection
 	switch (TRIGx){
 		// Falling Edge 
 		case EXTI_TRIG_FALLING:
-			EXTI->FTSR.REG |= (1 << PINx);
+			EXTI->FTSR.REG |= (1 << PIN);
 		break;
 		// Rising Edge 
 		case EXTI_TRIG_RISING:
-			EXTI->RTSR.REG |= (1 << PINx);
+			EXTI->RTSR.REG |= (1 << PIN);
 		break;
 		// Both Edge 
 		case EXTI_TRIG_BOTH:
-			EXTI->RTSR.REG |= (1 << PINx);
-			EXTI->FTSR.REG |= (1 << PINx);
+			EXTI->RTSR.REG |= (1 << PIN);
+			EXTI->FTSR.REG |= (1 << PIN);
 		break;
 		// Error
 		default:
@@ -108,13 +108,13 @@ void EXTI_config(exti_config_t* EXTI_CONFIGx){
 		return;
 
 	// Configure the GPIO
-	GPIO_config(EXTI_CONFIGx->GPIO_CONFIGx);
+	GPIO_Config(EXTI_CONFIGx->GPIO_CONFIGx);
 	// Configure the Source of Interrupt (Port Selection)
-	EXTI_srcConfig(EXTI_CONFIGx->GPIO_CONFIGx->GPIOx, EXTI_CONFIGx->GPIO_CONFIGx->PINx);
+	EXTI_srcConfig(EXTI_CONFIGx->GPIO_CONFIGx->GPIO, EXTI_CONFIGx->GPIO_CONFIGx->PIN);
 	// Configure the External Trigger
-	EXTI_trigConfig(EXTI_CONFIGx->GPIO_CONFIGx->PINx, EXTI_CONFIGx->TRIGx);
+	EXTI_trigConfig(EXTI_CONFIGx->GPIO_CONFIGx->PIN, EXTI_CONFIGx->TRIGx);
 	// Enable the IRQ (Remove the Mask)
-	EXTI_IRQ_enable(EXTI_CONFIGx->GPIO_CONFIGx->PINx);
+	EXTI_IRQ_enable(EXTI_CONFIGx->GPIO_CONFIGx->PIN);
 	// Enable the NVIC Global Interrupt
-	NVIC_IRQ_enable(EXTI_CONFIGx->IRQn);
+	NVIC_IRQ_Enable(EXTI_CONFIGx->IRQn);
 }

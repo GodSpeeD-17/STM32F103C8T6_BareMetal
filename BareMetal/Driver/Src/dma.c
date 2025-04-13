@@ -60,6 +60,11 @@ void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t*
 					  ((config->TCIE) << DMA_CCR_TCIE_Pos));
 	// Update the Register
 	DMA_channelX->CCR.REG = reg;
+
+	// Enable NVIC IRQ
+	if((config->TEIE) || (config->TCIE) || (config->HTIE)){
+		NVIC_IRQ_Enable(DMA_CH_get_IRQn(DMA_channelX));
+	}
 }
 
 /**
@@ -75,7 +80,7 @@ void DMA_CH_Transfer_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, voi
 	// Source Address
 	DMA_channelX->CPAR.REG = (uint32_t)(src);
 	// Destination Address
-	DMA_channelX->CPAR.REG = (uint32_t)(dst);
+	DMA_channelX->CMAR.REG = (uint32_t)(dst);
 	// Size of Data Transfer
 	DMA_channelX->CNDTR.REG = size;
 }

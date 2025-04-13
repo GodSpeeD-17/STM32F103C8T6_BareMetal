@@ -11,16 +11,16 @@
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
 #define LED_GPIO                            (GPIOA)
-#define LED_PIN                             (GPIO_PIN_2)
+#define LED_PIN                             (GPIOx_PIN_2)
 /*-------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------*/
 // Structure
 gpio_config_t gpio_LED_config = {
-    .GPIOx = LED_GPIO,
-    .PINx = LED_PIN,
-    .MODEx = MODE_OUT_10MHz,
-    .CNFx = CNF_OUT_GP_PP,
+    .GPIO = LED_GPIO,
+    .PIN = LED_PIN,
+    .MODE = GPIOx_MODE_OUT_10MHz,
+    .CNF = GPIOx_CNF_OUT_GP_PP,
 };
 /*-------------------------------------------------------------------------------*/
 

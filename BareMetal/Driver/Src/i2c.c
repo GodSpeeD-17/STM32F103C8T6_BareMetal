@@ -3,30 +3,30 @@
 
 // I2C1 GPIO Configuration
 gpio_config_t I2C1_SCL = {
-	.GPIOx = GPIOB,
-	.PINx = GPIO_PIN_6,
-	.MODEx = MODE_OUT_50MHz,
-	.CNFx = CNF_OUT_AF_OD
+	.GPIO = GPIOB,
+	.PIN = GPIOx_PIN_6,
+	.MODE = GPIOx_MODE_OUT_50MHz,
+	.CNF = GPIOx_CNF_OUT_AF_OD
 };
 gpio_config_t I2C1_SDA = {
-	.GPIOx = GPIOB,
-	.PINx = GPIO_PIN_7,
-	.MODEx = MODE_OUT_50MHz,
-	.CNFx = CNF_OUT_AF_OD
+	.GPIO = GPIOB,
+	.PIN = GPIOx_PIN_7,
+	.MODE = GPIOx_MODE_OUT_50MHz,
+	.CNF = GPIOx_CNF_OUT_AF_OD
 };
 
 // I2C2 GPIO Configuration
 gpio_config_t I2C2_SCL = {
-	.GPIOx = GPIOB,
-	.PINx = GPIO_PIN_10,
-	.MODEx = MODE_OUT_50MHz,
-	.CNFx = CNF_OUT_AF_OD
+	.GPIO = GPIOB,
+	.PIN = GPIOx_PIN_10,
+	.MODE = GPIOx_MODE_OUT_50MHz,
+	.CNF = GPIOx_CNF_OUT_AF_OD
 };
 gpio_config_t I2C2_SDA = {
-	.GPIOx = GPIOB,
-	.PINx = GPIO_PIN_11,
-	.MODEx = MODE_OUT_50MHz,
-	.CNFx = CNF_OUT_AF_OD
+	.GPIO = GPIOB,
+	.PIN = GPIOx_PIN_11,
+	.MODE = GPIOx_MODE_OUT_50MHz,
+	.CNF = GPIOx_CNF_OUT_AF_OD
 };
 
 /**
@@ -37,8 +37,8 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
 	I2C_clk_enable(I2C_CONFIGx->I2Cx);
 	// Configure GPIOs
-	GPIO_config(I2C_CONFIGx->SCL);
-	GPIO_config(I2C_CONFIGx->SDA);
+	GPIO_Config(I2C_CONFIGx->SCL);
+	GPIO_Config(I2C_CONFIGx->SDA);
 	// Software Reset
 	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
 	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
@@ -54,7 +54,7 @@ void I2C_config(i2c_config_t* I2C_CONFIGx){
 	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
 	// Enable Interrupt
 	// if(I2C_CONFIGx->buffer_IRQ || I2C_CONFIGx->event_IRQ)
-	// 	NVIC_IRQ_enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
+	// 	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2C_CONFIGx->I2Cx));
 }
 
 /**

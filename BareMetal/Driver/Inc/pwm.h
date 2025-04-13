@@ -122,8 +122,8 @@ __INLINE__ void PWM_load_default(pwm_config_t* PWM_CONFIGx){
 	// Load Default Timer Value
 	load_GPT_default(PWM_CONFIGx->TIM_CONFIGx);
 	// Update the GPIO Configuration
-	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
-	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
+	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->MODE = GPIOx_MODE_OUT_10MHz;
+	PWM_CONFIGx->TIM_CONFIGx->GPIO_CONFIGx->CNF = GPIOx_CNF_OUT_AF_PP;
 	// PWM Mode (Normal Mode)
 	PWM_CONFIGx->pwm_mode = TIMx_OCM_PWM_NORMAL;
 	// Duty Cycle (Minimum)

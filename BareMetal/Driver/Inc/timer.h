@@ -328,8 +328,8 @@ void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs);
  */
 __INLINE__ void TIM_load_default(timer_config_t* TIM_CONFIGx){
 	// Configure Mode and Configuration for GPIO
-	TIM_CONFIGx->GPIO_CONFIGx->MODEx = MODE_OUT_10MHz;
-	TIM_CONFIGx->GPIO_CONFIGx->CNFx = CNF_OUT_GP_PP;
+	TIM_CONFIGx->GPIO_CONFIGx->MODE = GPIOx_MODE_OUT_10MHz;
+	TIM_CONFIGx->GPIO_CONFIGx->CNF = GPIOx_CNF_OUT_GP_PP;
 	// Configure ARR, Frequency & Count
 	TIM_CONFIGx->auto_reload = DEFAULT_ARR_VALUE;
 	// TIM_CONFIGx->frequency_Hz = FREQ_10kHz;

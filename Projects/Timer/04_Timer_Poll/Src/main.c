@@ -4,10 +4,10 @@
 /*-------------------------------------------------------------------------------*/
 // GPIO Configuration Structure
 gpio_config_t PA2_Config = {
-	.GPIOx = GPIOA,
-	.PINx = GPIO_PIN_2,
-	.MODEx = MODE_OUT_10MHz,
-	.CNFx = CNF_OUT_GP_PP
+	.GPIO = GPIOA,
+	.PIN = GPIOx_PIN_2,
+	.MODE = GPIOx_MODE_OUT_10MHz,
+	.CNF = GPIOx_CNF_OUT_GP_PP
 };
 
 // Timer 2 Configuration Structure
@@ -28,7 +28,7 @@ timer_config_t TIM2_Config = {
 // Main Entry Point
 int main(){
 	// GPIO Initialisation
-	GPIO_config(&PA2_Config);
+	GPIO_Config(&PA2_Config);
 	// Timer Initialisation
 	TIM_config(&TIM2_Config);
 	// Infinite Loop
@@ -40,7 +40,7 @@ int main(){
 		#else
 			TIM_delay_ms(&TIM2_Config, LOOP_DELAY_MS);
 		#endif
-		GPIO_toggle(&PA2_Config);
+		GPIO_Toggle(&PA2_Config);
 	}
 	// Return Value
 	return 0;

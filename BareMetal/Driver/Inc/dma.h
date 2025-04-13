@@ -4,6 +4,7 @@
 
 // Dependency
 #include "reg_map.h"
+#include "nvic.h"		// IRQ
 
 // DMA Configuration Configuration Structure
 typedef struct {
@@ -129,7 +130,6 @@ __INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	RCC->AHBENR.REG = reg;
 }
 
-
 /**
  * @brief Disable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
@@ -146,6 +146,48 @@ __INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 __INLINE__ void DMA_CH_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Enable the Channel
 	DMA_channelX->CCR.REG |= DMA_CCR_EN;
+}
+
+/**
+ * @brief Get the DMA Channel IRQ Number
+ * @param[in] DMA_channelX DMA Channel Number
+ * @returns The DMA Channel IRQ Number
+ */
+__INLINE__ uint8_t DMA_CH_get_IRQn(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+	// Return the IRQn
+	if(DMA_channelX == DMA1_Channel1){
+		return DMA1_Channel1_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel2){
+		return DMA1_Channel2_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel3){
+		return DMA1_Channel3_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel4){
+		return DMA1_Channel4_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel5){
+		return DMA1_Channel5_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel6){
+		return DMA1_Channel6_IRQn;
+	}
+	else if(DMA_channelX == DMA1_Channel7){
+		return DMA1_Channel7_IRQn;
+	}
+	else if(DMA_channelX == DMA2_Channel1){
+		return DMA2_Channel1_IRQn;
+	}
+	else if(DMA_channelX == DMA2_Channel2){
+		return DMA2_Channel2_IRQn;
+	}
+	else if(DMA_channelX == DMA2_Channel3){
+		return DMA2_Channel3_IRQn;
+	}
+	else if((DMA_channelX == DMA2_Channel4) || (DMA_channelX == DMA2_Channel5)){
+		return DMA2_Channel4_5_IRQn;
+	}
 }
 
 /**

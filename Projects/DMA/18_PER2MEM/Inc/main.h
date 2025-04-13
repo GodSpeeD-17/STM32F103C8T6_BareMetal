@@ -6,18 +6,10 @@
 // Headers
 #include "bare_metal.h"
 /*-------------------------------------------------------------------------------*/
-// Struct
-gpio_config_t PB_GPIO_Config = {
-    .GPIO = GPIOB,
-    .PIN = GPIOx_PIN_5,
-    .MODE = GPIOx_MODE_IN,
-    .CNF = GPIOx_CNF_IN_PD,
-};
+
 /*-------------------------------------------------------------------------------*/
 // MACROS
-#define LOOP_DELAY_MS						((uint32_t) 50)
-#define OLD_STATUS                          ((uint8_t) 0)
-#define NEW_STATUS                          ((uint8_t) 1)
+#define LOOP_DELAY_MS						((uint32_t) 1000)
 /*-------------------------------------------------------------------------------*/
 
 #endif /* __MAIN_H__ */ 

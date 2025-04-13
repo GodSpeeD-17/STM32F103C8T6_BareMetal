@@ -100,64 +100,64 @@
 #define BIT_RESET							((uint8_t) 0x00)
 
 // GPIO PIN
-#define GPIO_PIN_0							((uint8_t) 0)
-#define GPIO_PIN_1							((uint8_t) 1)
-#define GPIO_PIN_2							((uint8_t) 2)
-#define GPIO_PIN_3							((uint8_t) 3)
-#define GPIO_PIN_4							((uint8_t) 4)
-#define GPIO_PIN_5							((uint8_t) 5)
-#define GPIO_PIN_6							((uint8_t) 6)
-#define GPIO_PIN_7							((uint8_t) 7)
-#define GPIO_PIN_8							((uint8_t) 8)
-#define GPIO_PIN_9							((uint8_t) 9)
-#define GPIO_PIN_10							((uint8_t) 10)
-#define GPIO_PIN_11							((uint8_t) 11)
-#define GPIO_PIN_12							((uint8_t) 12)
-#define GPIO_PIN_13							((uint8_t) 13)
-#define GPIO_PIN_14							((uint8_t) 14)
-#define GPIO_PIN_15							((uint8_t) 15)
+#define GPIOx_PIN_0							((uint8_t) 0)
+#define GPIOx_PIN_1							((uint8_t) 1)
+#define GPIOx_PIN_2							((uint8_t) 2)
+#define GPIOx_PIN_3							((uint8_t) 3)
+#define GPIOx_PIN_4							((uint8_t) 4)
+#define GPIOx_PIN_5							((uint8_t) 5)
+#define GPIOx_PIN_6							((uint8_t) 6)
+#define GPIOx_PIN_7							((uint8_t) 7)
+#define GPIOx_PIN_8							((uint8_t) 8)
+#define GPIOx_PIN_9							((uint8_t) 9)
+#define GPIOx_PIN_10						((uint8_t) 10)
+#define GPIOx_PIN_11						((uint8_t) 11)
+#define GPIOx_PIN_12						((uint8_t) 12)
+#define GPIOx_PIN_13						((uint8_t) 13)
+#define GPIOx_PIN_14						((uint8_t) 14)
+#define GPIOx_PIN_15						((uint8_t) 15)
 #define OB_LED_PORT							(GPIOC)
-#define OB_LED_PIN							(GPIO_PIN_13)
+#define OB_LED_PIN							(GPIOx_PIN_13)
 
 // MODE
-#define MODE_IN								((uint8_t) 0)
-#define MODE_OUT_10MHz						((uint8_t) 1)
-#define MODE_OUT_2MHz						((uint8_t) 2)
-#define MODE_OUT_50MHz						((uint8_t) 3)
+#define GPIOx_MODE_IN						((uint8_t) 0)
+#define GPIOx_MODE_OUT_10MHz				((uint8_t) 1)
+#define GPIOx_MODE_OUT_2MHz					((uint8_t) 2)
+#define GPIOx_MODE_OUT_50MHz				((uint8_t) 3)
 
 // CONFIGURATION
-#define CNF_IN_ANALOG						((uint8_t) 0)
-#define CNF_IN_FLOAT						((uint8_t) 1)
-#define CNF_IN_PD							((uint8_t) 3)
-#define CNF_IN_PU							((uint8_t) 4)
-#define CNF_OUT_GP_PP						((uint8_t) 0)
-#define CNF_OUT_GP_OD						((uint8_t) 1)
-#define CNF_OUT_AF_PP						((uint8_t) 2)
-#define CNF_OUT_AF_OD						((uint8_t) 3)
+#define GPIOx_CNF_IN_ANALOG					((uint8_t) 0)
+#define GPIOx_CNF_IN_FLOAT					((uint8_t) 1)
+#define GPIOx_CNF_IN_PD						((uint8_t) 3)
+#define GPIOx_CNF_IN_PU						((uint8_t) 4)
+#define GPIOx_CNF_OUT_GP_PP					((uint8_t) 0)
+#define GPIOx_CNF_OUT_GP_OD					((uint8_t) 1)
+#define GPIOx_CNF_OUT_AF_PP					((uint8_t) 2)
+#define GPIOx_CNF_OUT_AF_OD					((uint8_t) 3)
 
 // Error Checking MACROS
-#define IS_VALID_GPIO(GPIOx) 				((GPIOx) == GPIOA || (GPIOx) == GPIOB || (GPIOx) == GPIOC || (GPIOx) == NULL)
-#define IS_VALID_PIN(PINx) 					((PINx) <= GPIO_PIN_15)
-#define IS_MODE_VALID(MODEx)				((MODEx) == MODE_IN || (MODEx) == MODE_OUT_10MHz || (MODEx) == MODE_OUT_2MHz || (MODEx) == MODE_OUT_50MHz)
-#define IS_CNF_VALID(CNFx)					((CNFx) == CNF_IN_ANALOG || (CNFx) == CNF_IN_FLOAT || (CNFx) == CNF_IN_PD || (CNFx) == CNF_IN_PU || \
-											 (CNFx) == CNF_OUT_GP_PP || (CNFx) == CNF_OUT_GP_OD || (CNFx) == CNF_OUT_AF_PP || (CNFx) == CNF_OUT_AF_OD)
-#define ARE_GPIO_PARAMETERS_VALID(GPIOx, PINx, MODEx, CNFx)	\
-											(IS_VALID_GPIO((GPIOx)) && \
-											 IS_VALID_PIN((PINx)) && \
-											 IS_MODE_VALID((MODEx)) && \
-											 IS_CNF_VALID((CNFx)))
-#define IS_MODE_IN_VALID(MODEx, CNFx)		(((MODEx) == MODE_IN && (CNFx) == CNF_IN_ANALOG) || ((MODEx) == MODE_IN && (CNFx) == CNF_IN_FLOAT) || \
-											 ((MODEx) == MODE_IN && (CNFx) == CNF_IN_PD) || ((MODEx) == MODE_IN && (CNFx) == CNF_IN_PU))
-#define IS_MODE_OUT_VALID(MODEx, CNFx)		(((MODEx) != MODE_IN && (CNFx) == CNF_OUT_GP_PP) || ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_GP_OD) || \
-											 ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_PP) || ((MODEx) != MODE_IN && (CNFx) == CNF_OUT_AF_OD))
-#define IS_MODE_CNF_VALID(MODEx, CNFx)		(IS_MODE_IN_VALID((MODEx), (CNFx)) || IS_MODE_OUT_VALID((MODEx), (CNFx)))
+#define IS_VALID_GPIO(GPIO) 				((GPIO) == GPIOA || (GPIO) == GPIOB || (GPIO) == GPIOC || (GPIO) == NULL)
+#define IS_VALID_PIN(PIN) 					((PIN) <= GPIOx_PIN_15)
+#define IS_MODE_VALID(MODE)				((MODE) == GPIOx_MODE_IN || (MODE) == GPIOx_MODE_OUT_10MHz || (MODE) == GPIOx_MODE_OUT_2MHz || (MODE) == GPIOx_MODE_OUT_50MHz)
+#define IS_CNF_VALID(CNF)					((CNF) == GPIOx_CNF_IN_ANALOG || (CNF) == GPIOx_CNF_IN_FLOAT || (CNF) == GPIOx_CNF_IN_PD || (CNF) == GPIOx_CNF_IN_PU || \
+											 (CNF) == GPIOx_CNF_OUT_GP_PP || (CNF) == GPIOx_CNF_OUT_GP_OD || (CNF) == GPIOx_CNF_OUT_AF_PP || (CNF) == GPIOx_CNF_OUT_AF_OD)
+#define ARE_GPIO_PARAMETERS_VALID(GPIO, PIN, MODE, CNF)	\
+											(IS_VALID_GPIO((GPIO)) && \
+											 IS_VALID_PIN((PIN)) && \
+											 IS_MODE_VALID((MODE)) && \
+											 IS_CNF_VALID((CNF)))
+#define IS_MODE_IN_VALID(MODE, CNF)		(((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_ANALOG) || ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_FLOAT) || \
+											 ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_PD) || ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_PU))
+#define IS_MODE_OUT_VALID(MODE, CNF)		(((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_GP_PP) || ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_GP_OD) || \
+											 ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_AF_PP) || ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_AF_OD))
+#define IS_MODE_CNF_VALID(MODE, CNF)		(IS_MODE_IN_VALID((MODE), (CNF)) || IS_MODE_OUT_VALID((MODE), (CNF)))
 #define IS_GPIO_STRUCTURE_VALID(GPIO_CONFIGx)	\	
 											(((GPIO_CONFIGx) == NULL) || (\
-											 IS_VALID_GPIO(GPIO_CONFIGx->GPIOx) && \
-											 IS_VALID_PIN(GPIO_CONFIGx->PINx) && \
-											 IS_MODE_VALID(GPIO_CONFIGx->MODEx) && \
-											 IS_CNF_VALID(GPIO_CONFIGx->CNFx) && \
-											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODEx, GPIO_CONFIGx->CNFx)))
+											 IS_VALID_GPIO(GPIO_CONFIGx->GPIO) && \
+											 IS_VALID_PIN(GPIO_CONFIGx->PIN) && \
+											 IS_MODE_VALID(GPIO_CONFIGx->MODE) && \
+											 IS_CNF_VALID(GPIO_CONFIGx->CNF) && \
+											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODE, GPIO_CONFIGx->CNF)))
 
 /*********************************************** GPIO MACROS ***********************************************/
 
@@ -291,6 +291,13 @@ extern volatile uint32_t APB2Clock;
 #define EXTI2_IRQn							((uint8_t) 8)
 #define EXTI3_IRQn							((uint8_t) 9)
 #define EXTI4_IRQn							((uint8_t) 10)
+#define DMA1_Channel1_IRQn					((uint8_t) 11)
+#define DMA1_Channel2_IRQn					((uint8_t) 12)
+#define DMA1_Channel3_IRQn					((uint8_t) 13)
+#define DMA1_Channel4_IRQn					((uint8_t) 14)
+#define DMA1_Channel5_IRQn					((uint8_t) 15)
+#define DMA1_Channel6_IRQn					((uint8_t) 16)
+#define DMA1_Channel7_IRQn					((uint8_t) 17)
 #define ADC1_2_IRQn							((uint8_t) 18)
 #define EXTI9_5_IRQn						((uint8_t) 23)
 #define TIM2_IRQn							((uint8_t) 28)
@@ -307,6 +314,10 @@ extern volatile uint32_t APB2Clock;
 #define USART3_IRQn							((uint8_t) 39)
 #define EXTI15_10_IRQn						((uint8_t) 40)
 #define ADC3_IRQn							((uint8_t) 47)
+#define DMA2_Channel1_IRQn					((uint8_t) 56)
+#define DMA2_Channel2_IRQn					((uint8_t) 57)
+#define DMA2_Channel3_IRQn					((uint8_t) 58)
+#define DMA2_Channel4_5_IRQn				((uint8_t) 59)
 /*********************************************** NVIC MACROS ***********************************************/
 
 /*********************************************** EXTI MACROS ***********************************************/
@@ -333,7 +344,7 @@ extern volatile uint32_t APB2Clock;
 											((IS_GPIO_STRUCTURE_VALID(EXTI_CONFIGx->GPIO_CONFIGx) )&& \
 											 (IS_EXTI_TRIG_VALID(EXTI_CONFIGx->TRIGx)) && \
 											 (IS_EXTI_IRQn_VALID(EXTI_CONFIGx->IRQn)) && \
-											 (EXTI_CONFIGx->GPIO_CONFIGx->MODEx == MODE_IN))
+											 (EXTI_CONFIGx->GPIO_CONFIGx->MODE == GPIOx_MODE_IN))
 								 
 /*********************************************** EXTI MACROS ***********************************************/
 
@@ -457,10 +468,10 @@ extern volatile uint32_t APB2Clock;
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
 #define IS_VALID_TIM_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
-#define IS_VALID_TIM_CMS_MODE(MODEx)		((MODEx) == CMS_EDGE || (MODEx) == CMS_IF_BOTH || (MODEx) == CMS_IF_DOWN || (MODEx) == CMS_IF_UP)
+#define IS_VALID_TIM_CMS_MODE(MODE)		((MODE) == CMS_EDGE || (MODE) == CMS_IF_BOTH || (MODE) == CMS_IF_DOWN || (MODE) == CMS_IF_UP)
 #define IS_VALID_TIM_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
-#define IS_VALID_TIM_COUNT_MODE(MODEx)		((MODEx) == TIMx_MODE_NORMAL || (MODEx) == TIMx_MODE_ALT_IF_DOWN || \
-											 (MODEx) == TIMx_MODE_ALT_IF_UP || (MODEx) == TIMx_MODE_ALT_IF_BOTH)
+#define IS_VALID_TIM_COUNT_MODE(MODE)		((MODE) == TIMx_MODE_NORMAL || (MODE) == TIMx_MODE_ALT_IF_DOWN || \
+											 (MODE) == TIMx_MODE_ALT_IF_UP || (MODE) == TIMx_MODE_ALT_IF_BOTH)
 #define IS_VALID_TIM_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
 #define IS_VALID_TIM_FREQ(FREQx)			(((FREQx) > (uint32_t)0x00) && ((FREQx) <= PLL_MAX_FREQ))
 #define IS_VALID_TIM_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
@@ -524,10 +535,10 @@ typedef enum{
 
 
 // Error Checking MACROS
-#define IS_VALID_PWM_MODE(MODEx)			((MODEx) == TIMx_OCM_FREEZE || (MODEx) == TIMx_OCM_SET_CH || \
-											 (MODEx) == TIMx_OCM_RESET_CH || (MODEx) == TIMx_OCM_TOGGLE || \
-											 (MODEx) == TIMx_OCM_FORCE_RESET || (MODEx) == TIMx_OCM_FORCE_SET || \
-											 (MODEx) == TIMx_OCM_PWM_NORMAL || (MODEx) == TIMx_OCM_PWM_INVERTED)
+#define IS_VALID_PWM_MODE(MODE)			((MODE) == TIMx_OCM_FREEZE || (MODE) == TIMx_OCM_SET_CH || \
+											 (MODE) == TIMx_OCM_RESET_CH || (MODE) == TIMx_OCM_TOGGLE || \
+											 (MODE) == TIMx_OCM_FORCE_RESET || (MODE) == TIMx_OCM_FORCE_SET || \
+											 (MODE) == TIMx_OCM_PWM_NORMAL || (MODE) == TIMx_OCM_PWM_INVERTED)
 #define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
 #define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))

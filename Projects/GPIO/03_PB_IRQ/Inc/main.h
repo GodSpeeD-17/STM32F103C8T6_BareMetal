@@ -8,17 +8,17 @@
 /*-------------------------------------------------------------------------------*/
 // LED Configuration Structure
 gpio_config_t LED_GPIO_Config = {
-	.GPIOx = GPIOA,
-	.PINx = GPIO_PIN_2,
-	.MODEx = MODE_OUT_10MHz,
-	.CNFx = CNF_OUT_GP_PP,
+	.GPIO = GPIOA,
+	.PIN = GPIOx_PIN_2,
+	.MODE = GPIOx_MODE_OUT_10MHz,
+	.CNF = GPIOx_CNF_OUT_GP_PP,
 };
 // Push-button Configuration Structure
 gpio_config_t PB_GPIO_Config = {
-	.GPIOx = GPIOB,
-	.PINx = GPIO_PIN_5,
-	.MODEx = MODE_IN,
-	.CNFx = CNF_IN_PD,
+	.GPIO = GPIOB,
+	.PIN = GPIOx_PIN_5,
+	.MODE = GPIOx_MODE_IN,
+	.CNF = GPIOx_CNF_IN_PD,
 };
 // External Interrupt Configuration Structure
 exti_config_t PB_EXTI_Config = {

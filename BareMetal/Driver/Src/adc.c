@@ -18,7 +18,7 @@ void ADC_config(adc_config_t* ADC_CONFIGx){
 	// Disable the ADC if already ON
 	ADC_disable(ADC_CONFIGx->ADCx);
 	// Configure GPIO
-	GPIO_config(ADC_CONFIGx->GPIO_CONFIGx);
+	GPIO_Config(ADC_CONFIGx->GPIO_CONFIGx);
 
 	// Reset Registers
 	ADC_CONFIGx->ADCx->SR.REG = (uint32_t) 0x00000000;
@@ -47,7 +47,7 @@ void ADC_config(adc_config_t* ADC_CONFIGx){
 		// Enable the IQR Bit
 		ADC_CONFIGx->ADCx->CR1.REG |= (1 << 5);
 		// Enable NVIC IRQ
-		NVIC_IRQ_enable(ADC_get_IRQn(ADC_CONFIGx));
+		NVIC_IRQ_Enable(ADC_get_IRQn(ADC_CONFIGx));
 	}
 	// Starts the ADC
 	ADC_start(ADC_CONFIGx->ADCx);

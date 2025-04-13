@@ -17,9 +17,9 @@
 
 /*************************************** MACROs ********************************************/
 #define USART1_TX_GPIO					(GPIOA)
-#define USART1_TX_PIN					(GPIO_PIN_9)
+#define USART1_TX_PIN					(GPIOx_PIN_9)
 #define USART1_RX_GPIO					(GPIOA)
-#define USART1_RX_PIN					(GPIO_PIN_10)
+#define USART1_RX_PIN					(GPIOx_PIN_10)
 #define USART1_putc(X)					(USART_putc(&USART1_Config, ((char)(X))))
 #define USART1_puts(X)					(USART_puts(&USART1_Config, ((const char *)(X))))
 #define DEF_SEP_LEN						((uint8_t) 50)
@@ -154,10 +154,10 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str);
  */
 __INLINE__ void USART_load_default(usart_config_t* USART_CONFIGx){
     // Load default GPIO Configuration
-    USART_CONFIGx->TX_GPIO_CONFIGx->MODEx = MODE_OUT_50MHz;
-    USART_CONFIGx->TX_GPIO_CONFIGx->CNFx = CNF_OUT_AF_PP;
-    USART_CONFIGx->RX_GPIO_CONFIGx->MODEx = MODE_IN;
-    USART_CONFIGx->RX_GPIO_CONFIGx->CNFx = CNF_IN_FLOAT;
+    USART_CONFIGx->TX_GPIO_CONFIGx->MODE = GPIOx_MODE_OUT_50MHz;
+    USART_CONFIGx->TX_GPIO_CONFIGx->CNF = GPIOx_CNF_OUT_AF_PP;
+    USART_CONFIGx->RX_GPIO_CONFIGx->MODE = GPIOx_MODE_IN;
+    USART_CONFIGx->RX_GPIO_CONFIGx->CNF = GPIOx_CNF_IN_FLOAT;
     // Set Baud Rate to 9600
     USART_CONFIGx->baud_rate = USARTx_BAUD_9600;
     // Set Stop Bit to 1

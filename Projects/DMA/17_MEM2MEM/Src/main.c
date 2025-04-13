@@ -7,38 +7,22 @@
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
-	// Initialisation
-	#ifdef I2C_EXAMPLE
-		DMA_CH_Config(DMA_I2C1_TX, &I2C1_TX_DMA_Configuration);
-		DMA_CH_dataConfig(DMA_I2C1_TX, &I2C1_TX_DMA_Data_Configuration);
-		DMA_CH_IRQ_Config(DMA_I2C1_TX, &I2C1_TX_DMA_IRQ_Configuration);
-		DMA_CH_enable(DMA_I2C1_TX);
-	#else
-		// Set the Source Buffer to Some Value
-		// memset(src_buffer, 0xAD, BUFFER_SIZE);
-		// Set the Destination Buffer to Some Value
-		// memset(dst_buffer, 0x00, BUFFER_SIZE);
-		// DMA Configuration
-		DMA_CH_Config(DMA1_Channel1, &mem2mem_config);
-		DMA_CH_dataConfig(DMA1_Channel1, &mem2mem_data_config);
-		DMA_CH_IRQ_Config(DMA1_Channel1, &mem2mem_irq_config);
-		DMA_CH_Transfer_Config(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
-		// DMA_CH_enable(DMA1_Channel1);
-	#endif
-
+	// DMA Configuration
+	DMA_CH_Config(DMA1_Channel1, &mem2mem_config);
+	DMA_CH_dataConfig(DMA1_Channel1, &mem2mem_data_config);
+	DMA_CH_IRQ_Config(DMA1_Channel1, &mem2mem_irq_config);
+	DMA_CH_Transfer_Config(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
 	// Configure GPIO
 	GPIO_Config(&LED_Configuration);
 	// Reset GPIO
 	GPIO_Reset(&LED_Configuration);
-
 	// Enable DMA Transfer
 	DMA_CH_enable(DMA1_Channel1);
-
 	// Infinite Loop
 	while(1){
 		// Toggle GPIO
 		GPIO_Toggle(&LED_Configuration);
-c		delay_ms(LOOP_DELAY_MS);
+		delay_ms(LOOP_DELAY_MS);
 	}
 	// Return Value
 	return 0;
@@ -54,5 +38,4 @@ void DMA1_Channel1_IRQHandler(void){
 		DMA1->IFCR.REG |= DMA_IFCR_CTCIF1;
 	}
 }
-
 /*-------------------------------------------------------------------------------*/

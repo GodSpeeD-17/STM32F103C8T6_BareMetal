@@ -94,7 +94,7 @@ void TIM_config(timer_config_t* TIM_CONFIGx){
 		// Global Interrupt Disable
 		__disable_irq();
 		// Enable NVIC Interrupt
-    	NVIC_IRQ_enable(TIM_get_IRQn(TIM_CONFIGx->TIMx));
+    	NVIC_IRQ_Enable(TIM_get_IRQn(TIM_CONFIGx->TIMx));
     	// Enable Timer Interrupt
     	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
 		// Global Interrupt Enable
