@@ -269,14 +269,14 @@ typedef enum {
 	SYSCLK_72MHz,
 } SYSCLK_FREQ;
 
-// System Clock (SYSCLK) Frequency (in Hz)
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency (in Hz)
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency (in Hz)
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency (in Hz)
-extern volatile uint32_t APB2Clock;
+// Advanced High Performance Bus (AHB) Frequency
+static volatile uint32_t CoreClock = HSI_FREQ;
+// Advanced High Performance Bus (AHB) Frequency
+static volatile uint32_t AHBClock = HSI_FREQ;
+// Advanced Peripheral Bus 1 (APB1) Frequency
+static volatile uint32_t APB1Clock = HSI_FREQ;
+// Advanced Peripheral Bus 2 (APB2) Frequency
+static volatile uint32_t APB2Clock = HSI_FREQ;
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/

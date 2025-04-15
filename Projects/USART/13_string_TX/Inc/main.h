@@ -7,7 +7,7 @@
 #include "bare_metal.h"
 /*-------------------------------------------------------------------------------*/
 char* msg = "Hello World!\r\n";
-extern usart_config_t USART1_Config;
+extern usart_config_t USART1_Configuration;
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)

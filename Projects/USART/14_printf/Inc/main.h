@@ -10,7 +10,7 @@
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
-extern usart_config_t USART1_Config;
+extern usart_config_t USART1_Configuration;
 /*-------------------------------------------------------------------------------*/
 
 #endif /* __MAIN_H__ */ 

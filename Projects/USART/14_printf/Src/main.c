@@ -18,11 +18,11 @@ int main(){
 		// Update start ticks
 		ticks_start = SysTick_getCurrTicks();
 		// With precision
-		USART_printf(&USART1_Config, "1.2 + 1.3 = %.2f\r\n", 1.2 + 1.3);
+		USART_printf(&USART1_Configuration, "1.2 + 1.3 = %.2f\r\n", 1.2 + 1.3);
 		// Update end ticks
 		ticks_end = SysTick_getCurrTicks();
 		// Calculating Time (Each tick corresponds to 1ms due to SysTick Configuration)
-		USART_printf(&USART1_Config, "Time taken = %d ms\r\n", ticks_end - ticks_start);
+		USART_printf(&USART1_Configuration, "Time taken = %d ms\r\n", ticks_end - ticks_start);
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 		// Default Separate
@@ -30,11 +30,11 @@ int main(){
 		// Update start ticks
 		ticks_start = SysTick_getCurrTicks();
 		// Without precision
-		USART_printf(&USART1_Config, "4.2821 + 6.9347 = %f\r\n", 4.2821 + 6.9347);
+		USART_printf(&USART1_Configuration, "4.2821 + 6.9347 = %f\r\n", 4.2821 + 6.9347);
 		// Update end ticks
 		ticks_end = SysTick_getCurrTicks();
 		// Calculating Time (Each tick corresponds to 1ms due to SysTick Configuration)
-		USART_printf(&USART1_Config, "Time taken = %d ms\r\n", ticks_end - ticks_start);
+		USART_printf(&USART1_Configuration, "Time taken = %d ms\r\n", ticks_end - ticks_start);
 		// Default Separate
 		USART1_DEF_SEP();
 		// Loop Delay

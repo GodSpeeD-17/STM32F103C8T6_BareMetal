@@ -78,7 +78,6 @@ typedef struct {
 	dma_channel_intr_t interrupt;
 } dma_config_t;
 
-
 //------------------------------------------------------------------------------
 // I2C1 TX DMA Channel Configuration Structure
 //------------------------------------------------------------------------------
@@ -254,5 +253,11 @@ void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, ui
  * @param[in] instance DMA Configuration Structure
  */
 void DMA_Load_Default_MEM2MEM(dma_config_t* instance);
+
+/**
+ * @brief Loads the default configuration for Peripheral to Memory Transfer
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Load_Default_PER2MEM(dma_config_t* instance);
 
 #endif /* __DMA_H__ */

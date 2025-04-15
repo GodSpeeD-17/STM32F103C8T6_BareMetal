@@ -7,46 +7,14 @@
 // Dependency
 #include "usart.h"
 
-/*************************************** USART1 ********************************************/
-// TX GPIO Configuration Structure
-static gpio_config_t USART1_TX_GPIO_Config = {
-	.GPIO = USART1_TX_GPIO,
-	.PIN = USART1_TX_PIN,
-	.MODE = GPIOx_MODE_OUT_50MHz,
-	.CNF = GPIOx_CNF_OUT_AF_PP,
-};
-// RX GPIO Configuration Structure
-static gpio_config_t USART1_RX_GPIO_Config = {
-	.GPIO = USART1_RX_GPIO,
-	.PIN = USART1_RX_PIN,
-	.MODE = GPIOx_MODE_IN,
-	.CNF = GPIOx_CNF_IN_FLOAT,
-};
-// Configuration Structure (Interrupt Disabled)
-usart_config_t USART1_Config = {
-	.USARTx = USART1,
-	.TX_GPIO_CONFIGx = &USART1_TX_GPIO_Config,
-	.RX_GPIO_CONFIGx = &USART1_RX_GPIO_Config,
-	.word_length = USARTx_WORD_8_BITS,
-	.baud_rate = USARTx_BAUD_9600,
-	.stop_bits = USARTx_STOP_1_BIT,
-	.RXE = USARTx_RX_ENABLE,
-	.TXE = USARTx_TX_ENABLE,
-	.enable_parity = USARTx_PARITY_DISABLE,
-	.parity_selection = USARTx_PARITY_EVEN,
-	.RXNEIE = USARTx_RXNEIE_DISABLE,
-	.TCIE = USARTx_TCIE_DISABLE,
-};
-/*************************************** USART1 ********************************************/
-
 /**
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
 void USART_config(usart_config_t* USART_CONFIGx){
 	// Configure the GPIO
-	GPIO_Config(USART_CONFIGx->TX_GPIO_CONFIGx);
-	GPIO_Config(USART_CONFIGx->RX_GPIO_CONFIGx);
+	GPIO_Config(&USART_CONFIGx->TX);
+	GPIO_Config(&USART_CONFIGx->RX);
 	// Enable USART Clock
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate

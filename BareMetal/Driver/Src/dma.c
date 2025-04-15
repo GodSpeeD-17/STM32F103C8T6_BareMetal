@@ -52,7 +52,6 @@ static void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_
 	}
 }
 
-
 /**
  * @brief DMA Configuration
  * @param[in] instance DMA Configuration Structure
@@ -115,5 +114,28 @@ void DMA_Load_Default_MEM2MEM(dma_config_t* instance){
 	instance->channel.mem2mem = DMAx_MEM2MEM_ENABLE;
 	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
 	instance->channel.priority = DMAx_PRIORITY_MEDIUM;	
+}
+
+/**
+ * @brief Loads the default configuration for Peripheral to Memory Transfer
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Load_Default_PER2MEM(dma_config_t* instance){
+	// DMA Channel (Default)
+	instance->DMA_Channel = DMA1_Channel1;
+	// DMA Channel Data Configuration
+	instance->data.dstDataSize = DMAx_DATA_SIZE_BIT_8;
+	instance->data.srcDataSize = DMAx_DATA_SIZE_BIT_8;
+	instance->data.dstInc = DMAx_INC_DISABLE;
+	instance->data.srcInc = DMAx_INC_ENABLE;
+	// DMA Interrupt Configuration
+	instance->interrupt.HTIE = DMAx_IRQ_DISABLE;
+	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
+	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
+	// DMA Channel Configuration
+	instance->channel.direction = DMAx_DIR_PER2MEM;
+	instance->channel.mem2mem = DMAx_MEM2MEM_DISABLE;
+	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
+	instance->channel.priority = DMAx_PRIORITY_HIGH;	
 }
 
