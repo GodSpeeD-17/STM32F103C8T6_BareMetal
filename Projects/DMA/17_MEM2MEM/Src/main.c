@@ -41,6 +41,8 @@ void DMA1_Channel1_IRQHandler(void){
 	if(DMA1->ISR.REG & DMA_ISR_TCIF1){
 		// Toggle OB LED
 		OB_LED_Toggle();
+		// Disable the Channel
+		DMA_CH_disable(DMA1_Channel1);
 		// Clear the DMA Transfer Complete Interrupt Flag
 		DMA1->IFCR.REG |= DMA_IFCR_CTCIF1;
 	}
