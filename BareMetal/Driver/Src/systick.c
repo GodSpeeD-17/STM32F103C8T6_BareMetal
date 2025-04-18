@@ -48,7 +48,6 @@ void delay_ms(uint32_t delayTime){
 	}
 }
 
-
 /***
  * @brief ISR for SysTick
  * @note Used for Delay Generation and Getting the total Number of Ticks

@@ -45,7 +45,7 @@ void GPIO_Config(gpio_config_t* GPIO_CONFIGx){
 		// Set the bit low to enable pull-down
 		GPIO_CONFIGx->GPIO->BRR.REG |= (1 << GPIO_CONFIGx->PIN);
 		// Update the Configuration Bits as Input Push-Pull
-		GPIO_CONFIGx->CNF = (uint8_t)0x02;	
+		GPIO_CONFIGx->CNF = 0x02;
     }
 
     // Clear the current mode and configuration bits

@@ -12,7 +12,7 @@ int main(){
 	// Reset GPIO
 	GPIO_Reset(&LED_Configuration);
 	// Default DMA Configuration
-	DMA_Load_Default_MEM2MEM(&DMA_Configuration);
+	// DMA_Load_Default_MEM2MEM(&DMA_Configuration);
 
 	#ifdef BIT_SIZE_8
 		DMA_Configuration.data->srcDataSize = DMAx_DATA_SIZE_BIT_8;
@@ -20,9 +20,9 @@ int main(){
 	#endif
 
 	// DMA Configuration
-	DMA_Config(&DMA_Configuration);
+	// DMA_Config(&DMA_Configuration);
 	// Enable DMA Transfer
-	DMA_Transfer(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
+	// DMA_Transfer(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
 	
 	// Infinite Loop
 	while(1){

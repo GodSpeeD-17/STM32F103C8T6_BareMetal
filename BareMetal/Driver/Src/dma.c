@@ -84,9 +84,25 @@ void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, ui
 	// Disable the DMA Channel
 	DMA_CH_disable(DMA_channelX);
 	// Source Address
-	DMA_channelX->CPAR.REG = (uint32_t)(src);
+	DMA_channelX->CPAR.REG = (uint32_t)src;
 	// Destination Address
-	DMA_channelX->CMAR.REG = (uint32_t)(dst);
+	DMA_channelX->CMAR.REG = (uint32_t)dst;
+	/*
+	// Out of Memory
+	if(DMA_channelX->CCR.REG & DMA_CCR_DIR){
+		// Destination Address
+		DMA_channelX->CPAR.REG = (uint32_t)dst;
+		// Source Address
+		DMA_channelX->CMAR.REG = (uint32_t)src;
+	}
+	// In Memory
+	else{
+		// Source Address
+		DMA_channelX->CPAR.REG = (uint32_t)src;
+		// Destination Address
+		DMA_channelX->CMAR.REG = (uint32_t)dst;
+	}
+	*/
 	// Size of Data Transfer
 	DMA_channelX->CNDTR.REG = size;
 	// Enable the DMA Channel
@@ -110,7 +126,7 @@ void DMA_Load_Default_MEM2MEM(dma_config_t* instance){
 	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
 	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
 	// DMA Channel Configuration
-	instance->channel.direction = DMAx_DIR_MEM2MEM;
+	instance->channel.direction = DMAx_DIR_MEM_IN;
 	instance->channel.mem2mem = DMAx_MEM2MEM_ENABLE;
 	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
 	instance->channel.priority = DMAx_PRIORITY_MEDIUM;	
@@ -133,7 +149,7 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance){
 	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
 	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
 	// DMA Channel Configuration
-	instance->channel.direction = DMAx_DIR_PER2MEM;
+	instance->channel.direction = DMAx_DIR_MEM_OUT;
 	instance->channel.mem2mem = DMAx_MEM2MEM_DISABLE;
 	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
 	instance->channel.priority = DMAx_PRIORITY_HIGH;	

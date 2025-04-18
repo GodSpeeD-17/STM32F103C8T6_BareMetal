@@ -16,7 +16,7 @@
 
 /*-------------------------------------------------------------------------------*/
 // Structure
-gpio_config_t gpio_LED_config = {
+gpio_config_t GPIO_LED_Configuration = {
     .GPIO = LED_GPIO,
     .PIN = LED_PIN,
     .MODE = GPIOx_MODE_OUT_10MHz,

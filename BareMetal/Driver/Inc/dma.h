@@ -86,7 +86,7 @@ static dma_config_t I2C1_TX_DMA_Configuration = {
 	.DMA_Channel = DMA_I2C1_TX,
 	// Channel Properties
 	.channel = {
-		.direction = DMAx_DIR_PER2MEM,
+		.direction = DMAx_DIR_MEM_OUT,
 		.mem2mem = DMAx_MEM2MEM_DISABLE,
 		.circular_mode = DMAx_CIRC_DISABLE,
 		.priority = DMAx_PRIORITY_VERY_HIGH

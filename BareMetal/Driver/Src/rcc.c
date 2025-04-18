@@ -6,6 +6,16 @@
 
 // Header File
 #include "rcc.h"
+
+// Main Clock Source
+volatile uint32_t CoreClock = HSI_FREQ;
+// Advanced High Performance Bus (AHB) Frequency
+volatile uint32_t AHBClock = HSI_FREQ;
+// Advanced Peripheral Bus 1 (APB1) Frequency
+volatile uint32_t APB1Clock = HSI_FREQ;
+// Advanced Peripheral Bus 2 (APB2) Frequency
+volatile uint32_t APB2Clock = HSI_FREQ;
+
 /**
  * @brief Retrieves the frequency of System Clock
  * @return SYSCLK Frequency (in Hz)

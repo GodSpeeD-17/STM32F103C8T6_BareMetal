@@ -254,6 +254,42 @@ __INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
 }
 
 /**
+ * @brief Enables the TX using DMA
+ * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
+ */
+__INLINE__ void USART_DMA_TX_enable(USART_REG_STRUCT* USARTx){
+	// Enable the DMA TX
+	USARTx->CR3.REG |= USART_CR3_DMAT;
+}
+
+/**
+ * @brief Disables the TX using DMA
+ * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
+ */
+__INLINE__ void USART_DMA_TX_disable(USART_REG_STRUCT* USARTx){
+	// Enable the DMA TX
+	USARTx->CR3.REG &= ~USART_CR3_DMAT;
+}
+
+/**
+ * @brief Enables the RX using DMA
+ * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
+ */
+__INLINE__ void USART_DMA_RX_enable(USART_REG_STRUCT* USARTx){
+	// Enable the DMA TX
+	USARTx->CR3.REG |= USART_CR3_DMAR;
+}
+
+/**
+ * @brief Disables the RX using DMA
+ * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
+ */
+__INLINE__ void USART_DMA_RX_disable(USART_REG_STRUCT* USARTx){
+	// Enable the DMA TX
+	USARTx->CR3.REG &= ~USART_CR3_DMAR;
+}
+
+/**
  * @brief USART1 IRQ Handler
  */
 void USART1_IRQHandler(void);

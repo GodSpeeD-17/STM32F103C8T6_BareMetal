@@ -9,13 +9,13 @@
 int main(){
 	// __disable_irq();
 	// GPIO Configuration
-	GPIO_Config(&gpio_LED_config);
+	GPIO_Config(&GPIO_LED_Configuration);
 	OB_LED_Set();
 	// __enable_irq();
 	// Infinite Loop
 	while(1){
 		// Toggle LED
-		GPIO_Toggle(&gpio_LED_config);
+		GPIO_Toggle(&GPIO_LED_Configuration);
 		// Toggle On-board LED
 		OB_LED_Toggle();
 		// Loop Delay

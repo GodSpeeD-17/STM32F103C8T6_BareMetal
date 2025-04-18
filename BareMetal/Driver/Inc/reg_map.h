@@ -269,14 +269,14 @@ typedef enum {
 	SYSCLK_72MHz,
 } SYSCLK_FREQ;
 
+// Main Clock Source
+extern volatile uint32_t CoreClock;
 // Advanced High Performance Bus (AHB) Frequency
-static volatile uint32_t CoreClock = HSI_FREQ;
-// Advanced High Performance Bus (AHB) Frequency
-static volatile uint32_t AHBClock = HSI_FREQ;
+extern volatile uint32_t AHBClock;
 // Advanced Peripheral Bus 1 (APB1) Frequency
-static volatile uint32_t APB1Clock = HSI_FREQ;
+extern volatile uint32_t APB1Clock;
 // Advanced Peripheral Bus 2 (APB2) Frequency
-static volatile uint32_t APB2Clock = HSI_FREQ;
+extern volatile uint32_t APB2Clock;
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/
@@ -756,9 +756,9 @@ typedef enum{
 /*********************************************** USART MACROS ***********************************************/
 
 /*********************************************** DMA MACROS ***********************************************/
-// Reading Direction
-#define DMAx_DIR_MEM2MEM					((uint8_t) 0x00)
-#define DMAx_DIR_PER2MEM					((uint8_t) 0x01)
+// DMA Direction
+#define DMAx_DIR_MEM_IN						((uint8_t) 0x00)
+#define DMAx_DIR_MEM_OUT					((uint8_t) 0x01)
 
 // Memory to Memory Transfer
 #define DMAx_MEM2MEM_DISABLE				((uint8_t) 0x00)
@@ -788,18 +788,18 @@ typedef enum{
 #define DMAx_IRQ_ENABLE						((uint8_t) 0x01)
 
 // DMA Channel 6
-#define DMA_USART2_RX						(DMA1_Channel6)
-#define DMA_I2C1_TX							(DMA1_Channel6)
-#define DMA_TIM1_CH3						(DMA1_Channel6)
-#define DMA_TIM3_CH1						(DMA1_Channel6)
-#define DMA_TIM3_TRIG						(DMA1_Channel6)
+#define DMA_USART2_RX						DMA1_Channel6
+#define DMA_I2C1_TX							DMA1_Channel6
+#define DMA_TIM1_CH3						DMA1_Channel6
+#define DMA_TIM3_CH1						DMA1_Channel6
+#define DMA_TIM3_TRIG						DMA1_Channel6
 
 // DMA Channel 7
-#define DMA_USART2_TX						(DMA1_Channel7)
-#define DMA_I2C1_RX							(DMA1_Channel7)
-#define DMA_TIM2_CH2						(DMA1_Channel7)
-#define DMA_TIM2_CH4						(DMA1_Channel7)
-#define DMA_TIM4_UP							(DMA1_Channel7)
+#define DMA_USART2_TX						DMA1_Channel7
+#define DMA_I2C1_RX							DMA1_Channel7
+#define DMA_TIM2_CH2						DMA1_Channel7
+#define DMA_TIM2_CH4						DMA1_Channel7
+#define DMA_TIM4_UP							DMA1_Channel7
 
 /*********************************************** DMA MACROS ***********************************************/
 
