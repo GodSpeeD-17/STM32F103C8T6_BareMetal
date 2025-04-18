@@ -38,14 +38,14 @@
 
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
-#define SysTick_BASE_ADDR					((uint32_t) 0xE000E010)
-#define NVIC_BASE_ADDR						((uint32_t) 0xE000E100)
-#define APB1_BASE_ADDR						((uint32_t) 0x40000000)
-#define APB2_BASE_ADDR						((uint32_t) 0x40010000)
-#define AHB_BASE_ADDR						((uint32_t) 0x40018000)
-#define FLASH_BASE_ADDR						((uint32_t) 0x40022000)
-#define DMA1_BASE_ADDR						((uint32_t) (AHB_BASE_ADDR + 0x00008000))
-#define DMA2_BASE_ADDR						((uint32_t) (DMA1_BASE_ADDR + 0x00000400))
+#define SysTick_BASE_ADDR					(0xE000E010)
+#define NVIC_BASE_ADDR						(0xE000E100)
+#define APB1_BASE_ADDR						(0x40000000)
+#define APB2_BASE_ADDR						(0x40010000)
+#define AHB_BASE_ADDR						(0x40018000)
+#define FLASH_BASE_ADDR						(0x40022000)
+#define DMA1_BASE_ADDR						(AHB_BASE_ADDR + 0x00008000)
+#define DMA2_BASE_ADDR						(DMA1_BASE_ADDR + 0x00000400)
 
 // Address Mapping
 #define SysTick								((SYSTICK_REG_STRUCT *)(SysTick_BASE_ADDR))
@@ -116,8 +116,8 @@
 #define GPIOx_PIN_13						((uint8_t) 13)
 #define GPIOx_PIN_14						((uint8_t) 14)
 #define GPIOx_PIN_15						((uint8_t) 15)
-#define OB_LED_PORT							(GPIOC)
-#define OB_LED_PIN							(GPIOx_PIN_13)
+#define OB_LED_PORT							GPIOC
+#define OB_LED_PIN							GPIOx_PIN_13
 
 // MODE
 #define GPIOx_MODE_IN						((uint8_t) 0)
@@ -350,14 +350,14 @@ extern volatile uint32_t APB2Clock;
 
 /*********************************************** I2C MACROS ***********************************************/
 // I2C Speed
-#define I2Cx_SPEED_STD						(FREQ_100kHz)		// Sm
+#define I2Cx_SPEED_STD						FREQ_100kHz			// Sm
 #define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)	// Fm
 // I2C Configuration Structure SCL Clock Freq
 #define I2Cx_SCL_FREQ_4MHz					((uint8_t) 0x04)
 #define I2Cx_SCL_FREQ_8MHz					((uint8_t) 0x08)
 #define I2Cx_SCL_FREQ_16MHz					((uint8_t) 0x10)
 #define I2Cx_SCL_FREQ_32MHz					((uint8_t) 0x20)
-#define I2Cx_SCL_FREQ_DEFAULT				(APB1Clock)
+#define I2Cx_SCL_FREQ_DEFAULT				APB1Clock
 // I2C Configuration Structure Mode
 #define I2Cx_MODE_STD						((uint8_t) 0x00)
 #define I2Cx_MODE_FAST						((uint8_t) 0x01)
@@ -381,6 +381,8 @@ extern volatile uint32_t APB2Clock;
 #define SYSTICK_CLK_CORE					((uint8_t) 0x01)
 
 // SysTick Delay
+#define SYSTICK_DELAY_1_US					AHBClock
+#define SYSTICK_DELAY_2_US					((uint32_t)(2 * AHBClock))
 #define SYSTICK_DELAY_1_MS					((uint32_t)(AHBClock/1000))
 #define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
 /*********************************************** SysTick MACROS ***********************************************/
@@ -578,109 +580,6 @@ typedef enum{
 #define ADC_SAMPLE_55_5						((uint8_t) 5)
 #define ADC_SAMPLE_71_5						((uint8_t) 6)
 #define ADC_SAMPLE_239_5					((uint8_t) 7)
-
-/*
-// ADC Final Sample Time
-// Channel 0
-#define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH0_SMP_7_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH0_SMP_13_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH0_SMP_28_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH0_SMP_41_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH0_SMP_55_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH0_SMP_71_5				((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH0_SMP_239_5			((uint8_t)(ADC_CHANNEL_0 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 1
-#define ADC_SAMPLE_CH0_SMP_1_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH0_SMP_7_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH0_SMP_13_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH0_SMP_28_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH0_SMP_41_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH0_SMP_55_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH0_SMP_71_5				((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH0_SMP_239_5			((uint8_t)(ADC_CHANNEL_1 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 2
-#define ADC_SAMPLE_CH2_SMP_1_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH2_SMP_7_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH2_SMP_13_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH2_SMP_28_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH2_SMP_41_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH2_SMP_55_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH2_SMP_71_5				((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH2_SMP_239_5			((uint8_t)(ADC_CHANNEL_2 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 3
-#define ADC_SAMPLE_CH3_SMP_1_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH3_SMP_7_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH3_SMP_13_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH3_SMP_28_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH3_SMP_41_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH3_SMP_55_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH3_SMP_71_5				((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH3_SMP_239_5			((uint8_t)(ADC_CHANNEL_3 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 4
-#define ADC_SAMPLE_CH4_SMP_1_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH4_SMP_7_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH4_SMP_13_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH4_SMP_28_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH4_SMP_41_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH4_SMP_55_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH4_SMP_71_5				((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH4_SMP_239_5			((uint8_t)(ADC_CHANNEL_4 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 5
-#define ADC_SAMPLE_CH5_SMP_1_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH5_SMP_7_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH5_SMP_13_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH5_SMP_28_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH5_SMP_41_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH5_SMP_55_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH5_SMP_71_5				((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH5_SMP_239_5			((uint8_t)(ADC_CHANNEL_5 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 6
-#define ADC_SAMPLE_CH6_SMP_1_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH6_SMP_7_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH6_SMP_13_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH6_SMP_28_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH6_SMP_41_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH6_SMP_55_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH6_SMP_71_5				((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH6_SMP_239_5			((uint8_t)(ADC_CHANNEL_6 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 7
-#define ADC_SAMPLE_CH7_SMP_1_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH7_SMP_7_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH7_SMP_13_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH7_SMP_28_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH7_SMP_41_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH7_SMP_55_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH7_SMP_71_5				((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH7_SMP_239_5			((uint8_t)(ADC_CHANNEL_7 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 8
-#define ADC_SAMPLE_CH8_SMP_1_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH8_SMP_7_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH8_SMP_13_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH8_SMP_28_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH8_SMP_41_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH8_SMP_55_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH8_SMP_71_5				((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH8_SMP_239_5			((uint8_t)(ADC_CHANNEL_8 << 4 | ADC_SAMPLE_239_5))
-
-// Channel 9
-#define ADC_SAMPLE_CH9_SMP_1_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_1_5))
-#define ADC_SAMPLE_CH9_SMP_7_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_7_5))
-#define ADC_SAMPLE_CH9_SMP_13_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_13_5))
-#define ADC_SAMPLE_CH9_SMP_28_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_28_5))
-#define ADC_SAMPLE_CH9_SMP_41_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_41_5))
-#define ADC_SAMPLE_CH9_SMP_55_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_55_5))
-#define ADC_SAMPLE_CH9_SMP_71_5				((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_71_5))
-#define ADC_SAMPLE_CH9_SMP_239_5			((uint8_t)(ADC_CHANNEL_9 << 4 | ADC_SAMPLE_239_5))
-*/
 
 // ADC Continuous Conversion
 #define ADC_CONT_CONV_OFF					((uint8_t) 0)

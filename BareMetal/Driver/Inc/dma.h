@@ -106,16 +106,13 @@ static dma_config_t I2C1_TX_DMA_Configuration = {
 	},
 };
 
-// Temporary Register
-static volatile uint32_t reg = 0x00000000;
-
 /**
  * @brief Enables the main DMA Clock
  * @param[in] DMA_channelX DMA Channel 
  */
 __INLINE__ void DMA_clk_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Use Register
-	reg = RCC->AHBENR.REG;
+	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
 	if((DMA_channelX == DMA1_Channel1) || (DMA_channelX == DMA1_Channel2) ||
 		(DMA_channelX == DMA1_Channel3) || (DMA_channelX == DMA1_Channel4) ||
@@ -137,7 +134,7 @@ __INLINE__ void DMA_clk_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  */
 __INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Use Register
-	reg = RCC->AHBENR.REG;
+	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
 	if((DMA_channelX == DMA1_Channel1) || (DMA_channelX == DMA1_Channel2) ||
 		(DMA_channelX == DMA1_Channel3) || (DMA_channelX == DMA1_Channel4) ||
@@ -212,26 +209,6 @@ __INLINE__ uint8_t DMA_CH_get_IRQn(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 		return DMA2_Channel4_5_IRQn;
 	}
 }
-
-/**
- * @brief Configures the DMA
- * @param[in] config DMA Configuration Structure
- */
-static void DMA_CH_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_config_t* config);
-
-/**
- * @brief Configures the data related parameters of the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- * @param[in] config DMA Channel Data Configuration Structure
- */
-static void DMA_CH_Data_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_data_t* config);
-
-/**
- * @brief Configures the Interrupt related parameters of the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- * @param[in] config DMA Channel Data Configuration Structure
- */
-static void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t* config);
 
 /**
  * @brief DMA Configuration

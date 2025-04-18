@@ -2,61 +2,12 @@
 #include "dma.h"
 
 /**
- * @brief Configures the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- * @param[in] config DMA Channel Configuration Structure
- */
-static void DMA_CH_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_config_t* config){
-	// Update the Register
-	reg = (uint32_t)(((config->mem2mem & 0x01) << DMA_CCR_MEM2MEM_Pos) |
-					((config->priority & 0x03) << DMA_CCR_PL_Pos) |
-					((config->circular_mode & 0x01) << DMA_CCR_CIRC_Pos) |
-					((config->direction & 0x01) << DMA_CCR_DIR_Pos));
-}
-
-/**
- * @brief Configures the data related parameters of the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- * @param[in] config DMA Channel Data Configuration Structure
- */
-static void DMA_CH_Data_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_data_t* config){
-	// Clear the Position
-	reg &= ~((uint32_t)((0x03 << DMA_CCR_MSIZE_Pos) |
-						(0x03 << DMA_CCR_PSIZE_Pos) |
-						(0x01 << DMA_CCR_MINC_Pos) |
-						(0x01 << DMA_CCR_PINC_Pos)));
-	// Update with current values
-	reg |= (uint32_t)(((config->dstDataSize) << DMA_CCR_MSIZE_Pos) |
-					  ((config->srcDataSize) << DMA_CCR_PSIZE_Pos) |
-					  ((config->dstInc) << DMA_CCR_MINC_Pos) |
-					  ((config->srcInc) << DMA_CCR_PINC_Pos));
-}
-
-/**
- * @brief Configures the Interrupt related parameters of the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- * @param[in] config DMA Channel Data Configuration Structure
- */
-static void DMA_CH_IRQ_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_intr_t* config){
-	// Clear the Position
-	reg &= ~((uint32_t)((0x01 << DMA_CCR_TEIE_Pos) |
-						(0x01 << DMA_CCR_HTIE_Pos) | 
-						(0x01 << DMA_CCR_TCIE_Pos)));
-	// Update with current values
-	reg |= (uint32_t)(((config->TEIE) << DMA_CCR_TEIE_Pos) |
-					  ((config->HTIE) << DMA_CCR_HTIE_Pos) |
-					  ((config->TCIE) << DMA_CCR_TCIE_Pos));
-	// Enable NVIC IRQ
-	if((config->TEIE) || (config->TCIE) || (config->HTIE)){
-		NVIC_IRQ_Enable(DMA_CH_get_IRQn(DMA_channelX));
-	}
-}
-
-/**
  * @brief DMA Configuration
  * @param[in] instance DMA Configuration Structure
  */
 void DMA_Config(dma_config_t* instance){
+	// Register
+	uint32_t reg = 0x00;
 	// Enable the DMA Clock
 	DMA_clk_enable(instance->DMA_Channel);
 	// Disable the DMA Channel
@@ -64,11 +15,30 @@ void DMA_Config(dma_config_t* instance){
 	// Initialise Register
 	reg = instance->DMA_Channel->CCR.REG;
 	// DMA Channel Configuration
-	DMA_CH_Config(instance->DMA_Channel, &(instance->channel));
+	reg = (uint32_t)(((instance->channel.mem2mem & 0x01) << DMA_CCR_MEM2MEM_Pos) |
+					((instance->channel.priority & 0x03) << DMA_CCR_PL_Pos) |
+					((instance->channel.circular_mode & 0x01) << DMA_CCR_CIRC_Pos) |
+					((instance->channel.direction & 0x01) << DMA_CCR_DIR_Pos));
 	// DMA Data Configuration
-	DMA_CH_Data_Config(instance->DMA_Channel, &(instance->data));
+	reg &= ~((uint32_t)((0x03 << DMA_CCR_MSIZE_Pos) |
+						(0x03 << DMA_CCR_PSIZE_Pos) |
+						(0x01 << DMA_CCR_MINC_Pos) |
+						(0x01 << DMA_CCR_PINC_Pos)));
+	reg |= (uint32_t)(((instance->data.dstDataSize) << DMA_CCR_MSIZE_Pos) |
+					  ((instance->data.srcDataSize) << DMA_CCR_PSIZE_Pos) |
+					  ((instance->data.dstInc) << DMA_CCR_MINC_Pos) |
+					  ((instance->data.srcInc) << DMA_CCR_PINC_Pos));
 	// DMA Channel Interrupt Configuration
-	DMA_CH_IRQ_Config(instance->DMA_Channel, &(instance->interrupt));
+	reg &= ~((uint32_t)((0x01 << DMA_CCR_TEIE_Pos) |
+						(0x01 << DMA_CCR_HTIE_Pos) | 
+						(0x01 << DMA_CCR_TCIE_Pos)));
+	reg |= (uint32_t)(((instance->interrupt.TEIE) << DMA_CCR_TEIE_Pos) |
+					  ((instance->interrupt.HTIE) << DMA_CCR_HTIE_Pos) |
+					  ((instance->interrupt.TCIE) << DMA_CCR_TCIE_Pos));
+	// Enable NVIC IRQ
+	if((instance->interrupt.TEIE) || (instance->interrupt.TCIE) || (instance->interrupt.HTIE)){
+		NVIC_IRQ_Enable(DMA_CH_get_IRQn(instance->DMA_Channel));
+	}
 	// Update the CCR Register
 	instance->DMA_Channel->CCR.REG = reg;
 }
