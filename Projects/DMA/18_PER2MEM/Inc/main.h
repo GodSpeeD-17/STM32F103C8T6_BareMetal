@@ -7,8 +7,9 @@
 #include "bare_metal.h"
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration Structure
-dma_config_t USART_DMA_Configuration;
-uint8_t usart_buffer = 0xAA;
+dma_config_t I2C_DMA_Configuration;
+i2c_config_t I2C_Configuration;
+uint8_t i2c_buffer = 0x77;
 
 // GPIO Configuration Structure
 gpio_config_t LED_Configuration = {

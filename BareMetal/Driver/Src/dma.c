@@ -9,9 +9,9 @@
 static void DMA_CH_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, dma_channel_config_t* config){
 	// Update the Register
 	reg = (uint32_t)(((config->mem2mem & 0x01) << DMA_CCR_MEM2MEM_Pos) |
-							  ((config->priority & 0x03) << DMA_CCR_PL_Pos) |
-							  ((config->circular_mode & 0x01) << DMA_CCR_CIRC_Pos) |
-							  ((config->direction & 0x01) << DMA_CCR_DIR_Pos));
+					((config->priority & 0x03) << DMA_CCR_PL_Pos) |
+					((config->circular_mode & 0x01) << DMA_CCR_CIRC_Pos) |
+					((config->direction & 0x01) << DMA_CCR_DIR_Pos));
 }
 
 /**
@@ -85,10 +85,10 @@ void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, ui
 	DMA_CH_disable(DMA_channelX);
 	// Out of Memory
 	if(DMA_channelX->CCR.REG & DMA_CCR_DIR){
-		// Destination Address
-		DMA_channelX->CPAR.REG = (uint32_t)dst;
 		// Source Address
 		DMA_channelX->CMAR.REG = (uint32_t)src;
+		// Destination Address
+		DMA_channelX->CPAR.REG = (uint32_t)dst;
 	}
 	// In Memory
 	else{
@@ -135,7 +135,7 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance){
 	instance->data.dstDataSize = DMAx_DATA_SIZE_BIT_8;
 	instance->data.srcDataSize = DMAx_DATA_SIZE_BIT_8;
 	instance->data.dstInc = DMAx_INC_DISABLE;
-	instance->data.srcInc = DMAx_INC_ENABLE;
+	instance->data.srcInc = DMAx_INC_DISABLE;
 	// DMA Interrupt Configuration
 	instance->interrupt.HTIE = DMAx_IRQ_DISABLE;
 	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;

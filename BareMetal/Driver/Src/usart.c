@@ -228,3 +228,33 @@ uint16_t USART_receive(usart_config_t* USART_CONFIGx){
 	// Return Result
 	return result;
 }
+
+/**
+ * @brief Loads the default value for USART Struct
+ * @param[in] USART_CONFIGx USART Configuration Structure
+ */
+void USART_load_default(usart_config_t* USART_CONFIGx){
+    // Load default GPIO Configuration
+    USART_CONFIGx->TX.MODE = GPIOx_MODE_OUT_50MHz;
+    USART_CONFIGx->TX.CNF = GPIOx_CNF_OUT_AF_PP;
+    USART_CONFIGx->RX.MODE = GPIOx_MODE_IN;
+    USART_CONFIGx->RX.CNF = GPIOx_CNF_IN_FLOAT;
+    // Set Baud Rate to 9600
+    USART_CONFIGx->baud_rate = USARTx_BAUD_9600;
+    // Set Stop Bit to 1
+	USART_CONFIGx->stop_bits = USARTx_STOP_1_BIT;
+	// Word Length
+	USART_CONFIGx->word_length = USARTx_WORD_8_BITS;
+	// USART Parity Disable
+	USART_CONFIGx->enable_parity = USARTx_PARITY_DISABLE;
+	// USART Parity Selection
+	USART_CONFIGx->parity_selection = USARTx_PARITY_EVEN;
+	// Disable Interrupts
+	USART_CONFIGx->TXEIE = USARTx_TXEIE_DISABLE;
+	USART_CONFIGx->RXNEIE = USARTx_RXNEIE_DISABLE;
+	USART_CONFIGx->TCIE = USARTx_TCIE_DISABLE;
+	// Enable TX
+	USART_CONFIGx->TXE = USARTx_TX_ENABLE;
+	// Enable RX
+	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
+}

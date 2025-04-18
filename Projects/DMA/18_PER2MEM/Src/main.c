@@ -9,12 +9,20 @@
 int main(){
 	// Initialisation
 	GPIO_Config(&LED_Configuration);
+	
+	// I2C Config Test
+	I2C1_Load_Default(&I2C_Configuration);
+	I2C_Config(&I2C_Configuration);
+	I2C_DMA_enable(I2C1);
+	I2C_enable(I2C1);
+
 	// Demo Test
-	USART1_config();
-	DMA_Load_Default_PER2MEM(&USART_DMA_Configuration);
-	USART_DMA_Configuration.DMA_Channel = DMA1_Channel4;
-	DMA_Config(&USART_DMA_Configuration);
-	DMA_Transfer(DMA1_Channel4, (void*) &usart_buffer, (void*) &USART1->DR.REG, 1);
+	DMA_Load_Default_PER2MEM(&I2C_DMA_Configuration);
+	I2C_DMA_Configuration.DMA_Channel = DMA_I2C1_TX;
+	DMA_Config(&I2C_DMA_Configuration);
+	DMA_Transfer(DMA_I2C1_TX, (void*) &i2c_buffer, (void*) &I2C1->DR.REG, 1);
+	DMA_CH_enable(DMA_I2C1_TX);
+
 	// Infinite Loop
 	while(1){
 		GPIO_Toggle(&LED_Configuration);
@@ -26,15 +34,15 @@ int main(){
 }
 /*-------------------------------------------------------------------------------*/
 // DMA IRQ Handler
-void DMA1_Channel4_IRQHandler(void){
+void DMA1_Channel6_IRQHandler(void){
 	// DMA Transfer Complete
-	if(DMA1->ISR.REG & DMA_ISR_TCIF4){
+	if(DMA1->ISR.REG & DMA_ISR_TCIF6){
 		// Toggle OB LED
 		OB_LED_Toggle();
 		// Disable the Channel
-		DMA_CH_disable(DMA1_Channel4);
+		DMA_CH_disable(DMA_I2C1_TX);
 		// Clear the DMA Transfer Complete Interrupt Flag
-		DMA1->IFCR.REG |= DMA_IFCR_CTCIF4;
+		DMA1->IFCR.REG |= DMA_IFCR_CTCIF6;
 	}
 }
 /*-------------------------------------------------------------------------------*/

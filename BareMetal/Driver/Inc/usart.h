@@ -16,17 +16,17 @@
 /*************************************** Dependency ********************************************/
 
 /*************************************** MACROs ********************************************/
-#define USART1_TX_GPIO					(GPIOA)
-#define USART1_TX_PIN					(GPIOx_PIN_9)
-#define USART1_RX_GPIO					(GPIOA)
-#define USART1_RX_PIN					(GPIOx_PIN_10)
-#define USART1_putc(X)					(USART_putc(&USART1_Configuration, ((char)(X))))
-#define USART1_puts(X)					(USART_puts(&USART1_Configuration, ((const char *)(X))))
+#define USART1_TX_GPIO					GPIOA
+#define USART1_TX_PIN					GPIOx_PIN_9
+#define USART1_RX_GPIO					GPIOA
+#define USART1_RX_PIN					GPIOx_PIN_10
+#define USART1_putc(X)					USART_putc(&USART1_Configuration, ((char)(X)))
+#define USART1_puts(X)					USART_puts(&USART1_Configuration, ((const char *)(X)))
 #define DEF_SEP_LEN						((uint8_t) 50)
-#define DEF_SEP(X)						(sep((X), '*', DEF_SEP_LEN))
-#define USART1_DEF_SEP()				(DEF_SEP(&USART1_Configuration))
-#define USART1_config()					(USART_config(&USART1_Configuration))
-#define USART1_enable()					(USART_enable(&USART1_Configuration))
+#define DEF_SEP(X)						sep((X), '*', DEF_SEP_LEN)
+#define USART1_DEF_SEP()				DEF_SEP(&USART1_Configuration)
+#define USART1_config()					USART_config(&USART1_Configuration)
+#define USART1_enable()					USART_enable(&USART1_Configuration)
 /*************************************** MACROs ********************************************/
 
 /*************************************** USART Configuration Structure ********************************************/
@@ -181,31 +181,7 @@ void USART_puts(usart_config_t* USART_CONFIGx, const char* str);
  * @brief Loads the default value for USART Struct
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__INLINE__ void USART_load_default(usart_config_t* USART_CONFIGx){
-    // Load default GPIO Configuration
-    USART_CONFIGx->TX.MODE = GPIOx_MODE_OUT_50MHz;
-    USART_CONFIGx->TX.CNF = GPIOx_CNF_OUT_AF_PP;
-    USART_CONFIGx->RX.MODE = GPIOx_MODE_IN;
-    USART_CONFIGx->RX.CNF = GPIOx_CNF_IN_FLOAT;
-    // Set Baud Rate to 9600
-    USART_CONFIGx->baud_rate = USARTx_BAUD_9600;
-    // Set Stop Bit to 1
-	USART_CONFIGx->stop_bits = USARTx_STOP_1_BIT;
-	// Word Length
-	USART_CONFIGx->word_length = USARTx_WORD_8_BITS;
-	// USART Parity Disable
-	USART_CONFIGx->enable_parity = USARTx_PARITY_DISABLE;
-	// USART Parity Selection
-	USART_CONFIGx->parity_selection = USARTx_PARITY_EVEN;
-	// Disable Interrupts
-	USART_CONFIGx->TXEIE = USARTx_TXEIE_DISABLE;
-	USART_CONFIGx->RXNEIE = USARTx_RXNEIE_DISABLE;
-	USART_CONFIGx->TCIE = USARTx_TCIE_DISABLE;
-	// Enable TX
-	USART_CONFIGx->TXE = USARTx_TX_ENABLE;
-	// Enable RX
-	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
-}
+void USART_load_default(usart_config_t* USART_CONFIGx);
 
 /**
  * @brief Prints '*' on USART
@@ -288,18 +264,5 @@ __INLINE__ void USART_DMA_RX_disable(USART_REG_STRUCT* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAR;
 }
-
-/**
- * @brief USART1 IRQ Handler
- */
-void USART1_IRQHandler(void);
-/**
- * @brief USART2 IRQ Handler
- */
-void USART2_IRQHandler(void);
-/**
- * @brief USART3 IRQ Handler
- */
-void USART3_IRQHandler(void);
 
 #endif /* __USART_H__ */

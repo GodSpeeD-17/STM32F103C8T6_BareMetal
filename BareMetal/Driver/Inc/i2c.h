@@ -47,6 +47,15 @@
  //  MACROS
 #define I2C_readAddress(I2Cx, slaveAddress)			(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
 #define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
+#define I2C1_SCL_GPIO								GPIOB
+#define I2C1_SCL_PIN								GPIOx_PIN_6
+#define I2C1_SDA_GPIO								GPIOB
+#define I2C1_SDA_PIN								GPIOx_PIN_7
+#define I2C2_SCL_GPIO								GPIOB
+#define I2C2_SCL_PIN								GPIOx_PIN_10
+#define I2C2_SDA_GPIO								GPIOB
+#define I2C2_SDA_PIN								GPIOx_PIN_11
+
 
 /**
  * @brief I2C Direction Initialisation
@@ -63,12 +72,12 @@
 // I2C Configuration Structure
 typedef struct {
 	// TODO: TRISE for Fast Mode
-	// Serial Clock GPIO Configuration
-	gpio_config_t* SCL;
-	// Serial Data GPIO Configuration
-	gpio_config_t* SDA;
 	// I2C Instance: `I2C1`, `I2C2`
 	I2C_REG_STRUCT* I2Cx;
+	// Serial Clock GPIO Configuration
+	gpio_config_t SCL;
+	// Serial Data GPIO Configuration
+	gpio_config_t SDA;
 	// SCL Clock Frequency (in MHz)
 	// |--- `I2Cx_SCL_FREQ_4MHz`
 	// |--- `I2Cx_SCL_FREQ_8MHz`
@@ -279,6 +288,24 @@ __INLINE__ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ, uint8_t e
 __INLINE__ void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx){
 	// Clear Interrupts
 	I2Cx->CR2.REG &= ~(I2C_CR2_ITBUFEN | I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
+}
+
+/**
+ * @brief Enables I2C DMA Configuration
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__INLINE__ void I2C_DMA_enable(I2C_REG_STRUCT* I2Cx){
+	// Enable the I2C DMA
+	I2Cx->CR2.REG |= I2C_CR2_DMAEN;
+}
+
+/**
+ * @brief Disables I2C DMA Configuration
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ */
+__INLINE__ void I2C_DMA_disable(I2C_REG_STRUCT* I2Cx){
+	// Disable the I2C DMA
+	I2Cx->CR2.REG &= ~I2C_CR2_DMAEN;
 }
 
 /**

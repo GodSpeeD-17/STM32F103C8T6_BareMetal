@@ -1,34 +1,6 @@
 // Dependency
 #include "i2c.h"
 
-// I2C1 GPIO Configuration
-gpio_config_t I2C1_SCL = {
-	.GPIO = GPIOB,
-	.PIN = GPIOx_PIN_6,
-	.MODE = GPIOx_MODE_OUT_50MHz,
-	.CNF = GPIOx_CNF_OUT_AF_OD
-};
-gpio_config_t I2C1_SDA = {
-	.GPIO = GPIOB,
-	.PIN = GPIOx_PIN_7,
-	.MODE = GPIOx_MODE_OUT_50MHz,
-	.CNF = GPIOx_CNF_OUT_AF_OD
-};
-
-// I2C2 GPIO Configuration
-gpio_config_t I2C2_SCL = {
-	.GPIO = GPIOB,
-	.PIN = GPIOx_PIN_10,
-	.MODE = GPIOx_MODE_OUT_50MHz,
-	.CNF = GPIOx_CNF_OUT_AF_OD
-};
-gpio_config_t I2C2_SDA = {
-	.GPIO = GPIOB,
-	.PIN = GPIOx_PIN_11,
-	.MODE = GPIOx_MODE_OUT_50MHz,
-	.CNF = GPIOx_CNF_OUT_AF_OD
-};
-
 /**
  * @brief Configures I2C as per the Configuration Structure
  * @param[in] I2C_CONFIGx I2C Configuration Structure
@@ -37,8 +9,8 @@ void I2C_Config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
 	I2C_clk_enable(I2C_CONFIGx->I2Cx);
 	// Configure GPIOs
-	GPIO_Config(I2C_CONFIGx->SCL);
-	GPIO_Config(I2C_CONFIGx->SDA);
+	GPIO_Config(&I2C_CONFIGx->SCL);
+	GPIO_Config(&I2C_CONFIGx->SDA);
 	// Software Reset
 	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
 	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
@@ -329,11 +301,17 @@ void I2C_Read_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t regi
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
 void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
-	// I2C SCL GPIO Configuration
-	I2C_CONFIGx->SCL = &I2C1_SCL;
-	// I2C SDA GPIO Configuration
-	I2C_CONFIGx->SDA = &I2C1_SDA;
-	// I2C Instance
+	// I2C1 SCL GPIO Configuration
+	I2C_CONFIGx->SCL.GPIO = I2C1_SCL_GPIO;
+	I2C_CONFIGx->SCL.PIN = I2C1_SCL_PIN;
+	I2C_CONFIGx->SCL.MODE = GPIOx_MODE_OUT_50MHz,
+	I2C_CONFIGx->SCL.CNF = GPIOx_CNF_OUT_AF_OD;
+	// I2C1 SDA GPIO Configuration
+	I2C_CONFIGx->SDA.GPIO = I2C1_SDA_GPIO;
+	I2C_CONFIGx->SDA.PIN = I2C1_SDA_PIN;
+	I2C_CONFIGx->SDA.MODE = GPIOx_MODE_OUT_50MHz,
+	I2C_CONFIGx->SDA.CNF = GPIOx_CNF_OUT_AF_OD;
+	// I2C1 Instance
 	I2C_CONFIGx->I2Cx = I2C1;
 	// I2C Standard Mode (100kHz)
 	I2C_CONFIGx->mode = I2Cx_MODE_STD;
@@ -352,11 +330,17 @@ void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
 void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
-	// I2C SCL Configuration
-	I2C_CONFIGx->SCL = &I2C2_SCL;
-	// I2C SDA Configuration
-	I2C_CONFIGx->SDA = &I2C2_SDA;
-	// I2C Instance
+	// I2C2 SCL GPIO Configuration
+	I2C_CONFIGx->SCL.GPIO = I2C2_SCL_GPIO;
+	I2C_CONFIGx->SCL.PIN = I2C2_SCL_PIN;
+	I2C_CONFIGx->SCL.MODE = GPIOx_MODE_OUT_50MHz,
+	I2C_CONFIGx->SCL.CNF = GPIOx_CNF_OUT_AF_OD;
+	// I2C2 SDA GPIO Configuration
+	I2C_CONFIGx->SDA.GPIO = I2C2_SDA_GPIO;
+	I2C_CONFIGx->SDA.PIN = I2C2_SDA_PIN;
+	I2C_CONFIGx->SDA.MODE = GPIOx_MODE_OUT_50MHz,
+	I2C_CONFIGx->SDA.CNF = GPIOx_CNF_OUT_AF_OD;
+	// I2C2 Instance
 	I2C_CONFIGx->I2Cx = I2C2;
 	// I2C Standard Mode (100kHz)
 	I2C_CONFIGx->mode = I2Cx_MODE_STD;
