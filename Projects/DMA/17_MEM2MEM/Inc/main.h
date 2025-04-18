@@ -10,6 +10,7 @@
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
 #define BUFFER_SIZE							((uint8_t) 32)
+// #define BIT_SIZE_8
 
 /*-------------------------------------------------------------------------------*/
 // Variables
@@ -22,7 +23,7 @@
 #endif /* BIT_SIZE_8 */
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
-dma_channel_config_t DMA_Configuration = {NULL};
+dma_config_t DMA_Configuration = {NULL};
 // GPIO Configuration Structure
 gpio_config_t LED_Configuration = {
 	.GPIO = GPIOA,

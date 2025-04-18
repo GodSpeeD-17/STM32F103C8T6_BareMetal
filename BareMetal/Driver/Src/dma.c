@@ -83,11 +83,6 @@ void DMA_Config(dma_config_t* instance){
 void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, uint16_t size){
 	// Disable the DMA Channel
 	DMA_CH_disable(DMA_channelX);
-	// Source Address
-	DMA_channelX->CPAR.REG = (uint32_t)src;
-	// Destination Address
-	DMA_channelX->CMAR.REG = (uint32_t)dst;
-	/*
 	// Out of Memory
 	if(DMA_channelX->CCR.REG & DMA_CCR_DIR){
 		// Destination Address
@@ -102,11 +97,8 @@ void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, ui
 		// Destination Address
 		DMA_channelX->CMAR.REG = (uint32_t)dst;
 	}
-	*/
 	// Size of Data Transfer
 	DMA_channelX->CNDTR.REG = size;
-	// Enable the DMA Channel
-	DMA_CH_enable(DMA_channelX);
 }
 
 /**
