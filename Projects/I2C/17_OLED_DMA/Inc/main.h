@@ -5,7 +5,7 @@
 /*-------------------------------------------------------------------------------*/
 // Headers
 #include "bare_metal.h"
-#include "ssd1306.h"
+#include "ssd1306_font.h"
 /*-------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------*/
@@ -14,8 +14,7 @@
 #define BUFFER_SIZE							128
 /*-------------------------------------------------------------------------------*/
 // Variables
-uint8_t src_buffer[BUFFER_SIZE + 1] = {[0 ... BUFFER_SIZE] = 0xFF};
-
+uint8_t src_buffer[BUFFER_SIZE + 1] = {[0 ... BUFFER_SIZE] = 0x00};
 // DMA Configuration
 dma_config_t DMA_SSD1306_Configuration;
 // I2C Configuration Structure
@@ -29,6 +28,5 @@ gpio_config_t LED_Configuration = {
 	.CNF = GPIOx_CNF_OUT_GP_PP
 };
 /*-------------------------------------------------------------------------------*/
-void I2C1_EV_IRQHandler(void);
 
 #endif /* __MAIN_H__ */ 

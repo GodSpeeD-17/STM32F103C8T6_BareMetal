@@ -14,12 +14,12 @@ int main(){
 	GPIO_Reset(&LED_Configuration);
 
 	// -----------------------------------------------------------------
-	// I2C1 Configuration 
+	// SSD1306_I2Cx Configuration 
 	// -----------------------------------------------------------------
 	I2C1_Load_Default(&I2C_SSD1306_Configuration);
 	I2C_Config(&I2C_SSD1306_Configuration);
-	I2C_IRQ_enable(I2C1, I2Cx_IRQ_BUFFER_DISABLE, I2Cx_IRQ_ERROR_DISABLE);
-	I2C_enable(I2C1);
+	I2C_IRQ_enable(SSD1306_I2Cx, I2Cx_IRQ_BUFFER_DISABLE, I2Cx_IRQ_ERROR_ENABLE);
+	I2C_enable(SSD1306_I2Cx);
 
 	// -----------------------------------------------------------------
 	// DMA Configuration
@@ -28,30 +28,50 @@ int main(){
 	DMA_SSD1306_Configuration.DMA_Channel = DMA_I2C1_TX;
 	DMA_SSD1306_Configuration.data.srcInc = DMAx_INC_ENABLE;
 	DMA_Config(&DMA_SSD1306_Configuration);
-	src_buffer[0] = 0x00;
+	src_buffer[0] = SSD1306_CMD_INDICATOR;
 	memcpy(src_buffer + 1, SSD1306_initCmd, sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0]));
-	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &I2C1->DR.REG, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
+	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
 
 	// -----------------------------------------------------------------
-	// I2C Setup
+	// SSD1306 I2C Initialisation Setup
 	// -----------------------------------------------------------------
 	// Wait for Bus to be Ready
-	while(!I2C_busReady(I2C1));
+	while(!I2C_busReady(SSD1306_I2Cx));
 	// Send Start Condition
-	I2C_sendStart(I2C1);
+	I2C_sendStart(SSD1306_I2Cx);
+	// I2C Sequence Complete
+	while(!I2C_busReady(SSD1306_I2Cx));
+
+	// -----------------------------------------------------------------
+	// SSD1306 I2C Range Selection	
+	// -----------------------------------------------------------------
+	src_buffer[0] = SSD1306_CMD_INDICATOR;
+	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(0);
+	src_buffer[2] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0);
+	src_buffer[3] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0);
+	// memset(src_buffer + 1, 0xFF, BUFFER_SIZE);
+	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, 3);
 
 	// Wait for Bus to be Ready
-	while(!I2C_busReady(I2C1));
+	while(!I2C_busReady(SSD1306_I2Cx));
+	// Send Start Condition
+	I2C_sendStart(SSD1306_I2Cx);
+	// I2C Sequence Complete
+	while(!I2C_busReady(SSD1306_I2Cx));
 
 	// -----------------------------------------------------------------
-	// I2C Data Transmission
+	// SSD1306 I2C Column Data 	
 	// -----------------------------------------------------------------
-	src_buffer[0] = 0x40;
+	src_buffer[0] = SSD1306_DATA_INDICATOR;
 	memset(src_buffer + 1, 0xFF, BUFFER_SIZE);
-	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &I2C1->DR.REG, BUFFER_SIZE);
-	
+	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, BUFFER_SIZE);
+
+	// Wait for Bus to be Ready
+	while(!I2C_busReady(SSD1306_I2Cx));
 	// Send Start Condition
-	I2C_sendStart(I2C1);
+	I2C_sendStart(SSD1306_I2Cx);
+	// I2C Sequence Complete
+	while(!I2C_busReady(SSD1306_I2Cx));
 
 	// Infinite Loop
 	while(1){
@@ -64,138 +84,68 @@ int main(){
 	return 0;
 }
 
-
-// void I2C1_EV_IRQHandler(void){
-// 	// 
-// 	switch(i2c_status){
-
-// 		case 0x00:
-// 			if(I2C1->SR1.REG & I2C_SR1_SB){
-// 				I2C1->DR.REG = ((0x3C << 1) | I2Cx_WRITE);
-// 				i2c_status = 0x01;
-// 			}
-// 			break;
-		
-// 		case 0x01:
-// 			if(I2C1->SR1.REG & I2C_SR1_ADDR){
-// 				uint32_t temp = I2C1->SR2.REG;
-// 				I2C1->CR2.REG |= I2C_CR2_DMAEN;
-// 				DMA_I2C1_TX->CCR.REG |= DMA_CCR_EN;
-// 				I2C1->DR.REG = src_buffer[0];
-// 				i2c_status = 0x02;
-// 			}
-// 		break;
-// 	}
-// }
-
-// void DMA1_Channel6_IRQHandler(void){
-// 	// DMA Transfer Complete
-// 	if(DMA1->ISR.REG & DMA_ISR_TCIF6){
-// 		I2C1->CR2.REG &= ~I2C_CR2_DMAEN;
-// 		I2C1->CR1.REG |= I2C_CR1_STOP;
-// 		DMA_I2C1_TX->CCR.REG &= ~DMA_CCR_EN;
-// 		OB_LED_Toggle();
-// 		DMA1->IFCR.REG |= DMA_IFCR_CTCIF6;
-// 		i2c_status = 0x00;
-// 	}
-// }
-
 /*-------------------------------------------------------------------------------*/
-// I2C IRQ Handler
-// /*
-
 void I2C1_EV_IRQHandler(void){
-	// State Machine
+	// 
 	switch(i2c_status){
-
-		// Initial Status
+		// Start Bit Sent
 		case 0x00:
-			// Start Bit Sent
-			if(I2C1->SR1.REG & I2C_SR1_SB){
-				// Clear SB by sending Address for Write
-				I2C_writeAddress(I2C1, 0x3C);
-				// Update State Machine
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_SB){
+				SSD1306_I2Cx->DR.REG = ((SSD1306_I2C_ADDRESS << 1) | I2Cx_WRITE);
 				i2c_status = 0x01;
 			}
-			// Error Condition
-			else
-				i2c_status = 0xFF;
-		break;
-
-		// Address Match
+			break;
+		
+		// Address Sent
 		case 0x01:
-			// Address Match
-			if(I2C1->SR1.REG & I2C_SR1_ADDR){
-				// Clear ADDR
-				uint32_t temp_reg = I2C1->SR2.REG;
-				// Enable I2C DMA Transfer
-				I2C_DMA_enable(I2C1);
-				// Update State Machine
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
+				uint32_t temp = SSD1306_I2Cx->SR2.REG;
+				SSD1306_I2Cx->DR.REG = src_buffer[0];
 				i2c_status = 0x02;
 			}
-			// Error Condition
-			else
-				i2c_status = 0xFE;
 		break;
 
-		// STOP
-		case 0x03:
-			// Byte Transfer Completed
-			if(I2C1->SR1.REG & I2C_SR1_BTF){
-				// 
-				I2C_sendStop(I2C1);
-				// Indication
-				OB_LED_Toggle();
-				// Bus Free
-				if(I2C_busReady(I2C1)){
-					// Reset State Machine
-					i2c_status = 0x00;
-				}
+		// Indicator
+		case 0x02:
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
+				DMA_I2C1_TX->CCR.REG |= DMA_CCR_EN;
+				SSD1306_I2Cx->CR2.REG |= I2C_CR2_DMAEN;
+				i2c_status = 0x03;
 			}
-		break;
-		// Unaccounted States
-		default:
 		break;
 	}
 }
-// */
 /*-------------------------------------------------------------------------------*/
-// DMA IRQ Handler
-// /*
 void DMA1_Channel6_IRQHandler(void){
 	// DMA Transfer Complete
 	if(DMA1->ISR.REG & DMA_ISR_TCIF6){
-		// Disable the Channel
+		// Disable DMA for I2C
+		I2C_DMA_disable(SSD1306_I2Cx);
+		// Send I2C STOP
+		I2C_sendStop(SSD1306_I2Cx);
+		// Disable DMA Channel
 		DMA_CH_disable(DMA_I2C1_TX);
-		// Disable I2C DMA
-		I2C_DMA_disable(I2C1);
-		// Sent Stop Condition
-		I2C_sendStop(I2C1);
-		// Update State Machine
-		i2c_status = 0x03;
-		// Bus Free
-		if(I2C_busReady(I2C1)){
-			// Indication
-			OB_LED_Toggle();
-			// Reset
-			i2c_status = 0x00;
-		}
-		// Clear the DMA Transfer Complete Interrupt Flag
+		// Toggle On-board LED
+		OB_LED_Toggle();
+		// Acknowledge the Interrupt
 		DMA1->IFCR.REG |= DMA_IFCR_CTCIF6;
+		// Update I2C Status
+		i2c_status = 0x00;
 	}
 }
-// */
+/*-------------------------------------------------------------------------------*/
+
 /*-------------------------------------------------------------------------------*/
 /**
  * @brief Error Protection
  */
 void I2C1_ER_IRQHandler(void){
 	// Arbitration Lost Flag
-	if(I2C1->SR1.REG & I2C_SR1_AF) {
+	if(SSD1306_I2Cx->SR1.REG & I2C_SR1_AF) {
 		// Clear NACK flag
-		I2C1->SR1.REG &= ~I2C_SR1_AF;
+		SSD1306_I2Cx->SR1.REG &= ~I2C_SR1_AF;
 		// Force stop
-		I2C1->CR1.REG |= I2C_CR1_STOP;
+		SSD1306_I2Cx->CR1.REG |= I2C_CR1_STOP;
 		// Reset state machine
 		i2c_status = 0x00;
 	}
