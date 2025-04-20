@@ -56,7 +56,6 @@
 #define I2C2_SDA_GPIO								GPIOB
 #define I2C2_SDA_PIN								GPIOx_PIN_11
 
-
 /**
  * @brief I2C Direction Initialisation
  * @param[in] I2C_CONFIGx I2C Configuration Structure
@@ -259,26 +258,26 @@ __INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
  * @brief Enables the I2C Event Interrupt
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] buff_IRQ Buffer Interrupt Enable
+ * @param[in] er_IRQ Error Interrupt Enable
  */
 __INLINE__ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ, uint8_t er_IRQ){
 	// Temporary Register
-	uint32_t temp = I2Cx->CR2.REG;
+	uint32_t reg = I2Cx->CR2.REG;
 	// Enables the I2C Event Interrupt
-	temp |= I2C_CR2_ITEVTEN;
+	reg |= I2C_CR2_ITEVTEN;
 	// Buffer Interrupt Enable
-	if(buff_IRQ){
-		temp |= I2C_CR2_ITBUFEN;
-	}
+	if(buff_IRQ)
+		reg |= I2C_CR2_ITBUFEN;
 	// Error Interrupt Enable
 	if(er_IRQ){
-		temp |= I2C_CR2_ITERREN;
+		reg |= I2C_CR2_ITERREN;
 		// NVIC Error Interrupt Enable
 		NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
 	}
 	// NVIC Event Interrupt Enable
 	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2Cx));
 	// Write to CR2
-	I2Cx->CR2.REG = temp;
+	I2Cx->CR2.REG = reg;
 }
 
 /**

@@ -76,7 +76,12 @@ void SSD1306_IRQ_clrScreen(I2C_REG_STRUCT* I2Cx, uint8_t color);
 /**
  * @brief I2C1 Event Handler
  */
-void I2C1_EV_IRQHandler(void);
+// static void I2C1_EV_IRQHandler(void);
+/* ------------------------------------------------------------------------------------ */
+/**
+ * @brief Error Protection
+ */
+// void I2C1_ER_IRQHandler(void);
 /* ------------------------------------------------------------------------------------ */
 #endif /* __SSD1306_IRQ_H__ */
 /* ------------------------------------------------------------------------------------ */

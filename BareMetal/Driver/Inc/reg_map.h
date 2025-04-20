@@ -38,12 +38,12 @@
 
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
-#define SysTick_BASE_ADDR					(0xE000E010)
-#define NVIC_BASE_ADDR						(0xE000E100)
-#define APB1_BASE_ADDR						(0x40000000)
-#define APB2_BASE_ADDR						(0x40010000)
-#define AHB_BASE_ADDR						(0x40018000)
-#define FLASH_BASE_ADDR						(0x40022000)
+#define SysTick_BASE_ADDR					0xE000E010
+#define NVIC_BASE_ADDR						0xE000E100
+#define APB1_BASE_ADDR						0x40000000
+#define APB2_BASE_ADDR						0x40010000
+#define AHB_BASE_ADDR						0x40018000
+#define FLASH_BASE_ADDR						0x40022000
 #define DMA1_BASE_ADDR						(AHB_BASE_ADDR + 0x00008000)
 #define DMA2_BASE_ADDR						(DMA1_BASE_ADDR + 0x00000400)
 
@@ -362,11 +362,11 @@ extern volatile uint32_t APB2Clock;
 #define I2Cx_MODE_STD						((uint8_t) 0x00)
 #define I2Cx_MODE_FAST						((uint8_t) 0x01)
 // I2C Configuration Structure Buffer Interrupt
-#define I2Cx_BUFFER_IRQ_DISABLE				((uint8_t) 0x00)
-#define I2Cx_BUFFER_IRQ_ENABLE				((uint8_t) 0x01)
+#define I2Cx_IRQ_BUFFER_DISABLE				((uint8_t) 0x00)
+#define I2Cx_IRQ_BUFFER_ENABLE				((uint8_t) 0x01)
 // I2C Configuration Structure Event Interrupt
-#define I2Cx_EVENT_IRQ_DISABLE				((uint8_t) 0x00)
-#define I2Cx_EVENT_IRQ_ENABLE				((uint8_t) 0x01)
+#define I2Cx_IRQ_ERROR_DISABLE				((uint8_t) 0x00)
+#define I2Cx_IRQ_ERROR_ENABLE				((uint8_t) 0x01)
 // I2C Configuration Structure Fast Mode Duty
 #define I2Cx_DUTY_NORMAL					((uint8_t) 0x00)
 #define I2Cx_DUTY_FAST						((uint8_t) 0x01)

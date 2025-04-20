@@ -24,10 +24,19 @@ void DMA_Config(dma_config_t* instance){
 						(0x03 << DMA_CCR_PSIZE_Pos) |
 						(0x01 << DMA_CCR_MINC_Pos) |
 						(0x01 << DMA_CCR_PINC_Pos)));
-	reg |= (uint32_t)(((instance->data.dstDataSize) << DMA_CCR_MSIZE_Pos) |
-					  ((instance->data.srcDataSize) << DMA_CCR_PSIZE_Pos) |
-					  ((instance->data.dstInc) << DMA_CCR_MINC_Pos) |
-					  ((instance->data.srcInc) << DMA_CCR_PINC_Pos));
+	// Data Outside Memory -> Interchange Source (Memory) & Destination (Peripheral)
+	if(instance->channel.direction){
+		reg |= (uint32_t)(((instance->data.srcDataSize) << DMA_CCR_MSIZE_Pos) |
+								((instance->data.dstDataSize) << DMA_CCR_PSIZE_Pos) |
+								((instance->data.srcInc) << DMA_CCR_MINC_Pos) |
+								((instance->data.dstInc) << DMA_CCR_PINC_Pos));
+	}
+	else{
+		reg |= (uint32_t)(((instance->data.dstDataSize) << DMA_CCR_MSIZE_Pos) |
+						  ((instance->data.srcDataSize) << DMA_CCR_PSIZE_Pos) |
+						  ((instance->data.dstInc) << DMA_CCR_MINC_Pos) |
+						  ((instance->data.srcInc) << DMA_CCR_PINC_Pos));
+	}
 	// DMA Channel Interrupt Configuration
 	reg &= ~((uint32_t)((0x01 << DMA_CCR_TEIE_Pos) |
 						(0x01 << DMA_CCR_HTIE_Pos) | 

@@ -6,6 +6,9 @@
 #include "reg_map.h"
 #include "nvic.h"		// IRQ
 
+
+#define DMA_I2C1_TX_Config()				DMA_Config(&DMA_I2C1_TX_Configuration)
+
 //------------------------------------------------------------------------------
 // DMA Channel Configuration Structure
 //------------------------------------------------------------------------------
@@ -81,7 +84,7 @@ typedef struct {
 //------------------------------------------------------------------------------
 // I2C1 TX DMA Channel Configuration Structure
 //------------------------------------------------------------------------------
-static dma_config_t I2C1_TX_DMA_Configuration = {
+static dma_config_t DMA_I2C1_TX_Configuration = {
 	// DMA Channel
 	.DMA_Channel = DMA_I2C1_TX,
 	// Channel Properties
@@ -151,21 +154,21 @@ __INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 }
 
 /**
- * @brief Disable the DMA Channel
- * @param[in] DMA_channelX DMA Channel
- */
-__INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
-	// Disable the Channel
-	DMA_channelX->CCR.REG &= ~DMA_CCR_EN;
-}
-
-/**
  * @brief Enable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  */
 __INLINE__ void DMA_CH_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Enable the Channel
 	DMA_channelX->CCR.REG |= DMA_CCR_EN;
+}
+
+/**
+ * @brief Disable the DMA Channel
+ * @param[in] DMA_channelX DMA Channel
+ */
+__INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+	// Disable the Channel
+	DMA_channelX->CCR.REG &= ~DMA_CCR_EN;
 }
 
 /**
