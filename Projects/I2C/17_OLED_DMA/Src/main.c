@@ -28,7 +28,7 @@ int main(){
 	DMA_Load_Default_PER2MEM(&DMA_SSD1306_Configuration);
 	DMA_SSD1306_Configuration.DMA_Channel = DMA_I2C1_TX;
 	DMA_SSD1306_Configuration.data.srcInc = DMAx_INC_ENABLE;
-	// DMA_SSD1306_Configuration.interrupt.HTIE = DMAx_IRQ_ENABLE;
+	DMA_SSD1306_Configuration.interrupt.HTIE = DMAx_IRQ_ENABLE;
 	DMA_Config(&DMA_SSD1306_Configuration);
 	src_buffer[0] = SSD1306_CMD_INDICATOR;
 	memcpy(src_buffer + 1, SSD1306_initCmd, sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0]));
@@ -44,17 +44,16 @@ int main(){
 	// I2C Sequence Complete
 	while(!I2C_busReady(SSD1306_I2Cx));
 
-
-	// -----------------------------------------------------------------
-	// SSD1306 I2C Range Selection	
-	// -----------------------------------------------------------------
 	src_buffer[0] = SSD1306_CMD_INDICATOR;
-	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(0);
+	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(5);
 	src_buffer[2] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0);
 	src_buffer[3] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0);
 	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, 3);
-
-	// Wait for Bus to be Ready
+	
+	// -----------------------------------------------------------------
+	// SSD1306 I2C Range Selection	
+	// -----------------------------------------------------------------
+	// I2C Sequence Complete
 	while(!I2C_busReady(SSD1306_I2Cx));
 	// Send Start Condition
 	I2C_sendStart(SSD1306_I2Cx);
@@ -101,7 +100,7 @@ void I2C1_EV_IRQHandler(void){
 		// Address Sent
 		case 0x01:
 			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
-				volatile uint32_t temp = SSD1306_I2Cx->SR1.REG;
+				uint32_t temp = SSD1306_I2Cx->SR1.REG;
 				temp = SSD1306_I2Cx->SR2.REG;
 				// Now TxE is ready
 				if (SSD1306_I2Cx->SR1.REG & I2C_SR1_TXE) {
@@ -116,6 +115,7 @@ void I2C1_EV_IRQHandler(void){
 			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
 				SSD1306_I2Cx->CR2.REG |= I2C_CR2_DMAEN;
 				DMA_I2C1_TX->CCR.REG |= DMA_CCR_EN;
+				i2c_status = 0x03;
 			}
 		break;
 	}
