@@ -101,24 +101,16 @@ void I2C_Config(i2c_config_t* I2C_CONFIGx){
 void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
 	// Temporary Register
 	uint32_t reg = I2Cx->CR2.REG;
-	if(I2C_IRQ_status & I2Cx_IRQ_ALL){
-		// Update the Register
-		reg |= (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-		// NVIC Error Interrupt Enable
+	// Enables the I2C Event Interrupt
+	if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
+		reg |= I2C_CR2_ITEVTEN;
+	// Buffer Interrupt Enable
+	if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
+		reg |= I2C_CR2_ITBUFEN;
+	// Error Interrupt Enable
+	if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
+		reg |= I2C_CR2_ITERREN;
 		NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
-	}
-	else{
-		// Enables the I2C Event Interrupt
-		if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
-			reg |= I2C_CR2_ITEVTEN;
-		// Buffer Interrupt Enable
-		if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
-			reg |= I2C_CR2_ITBUFEN;
-		// Error Interrupt Enable
-		if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
-			reg |= I2C_CR2_ITERREN;
-			NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
-		}
 	}
 	// NVIC Event Interrupt Enable
 	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2Cx));
@@ -138,24 +130,16 @@ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
 void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
 	// Temporary Register
 	uint32_t reg = I2Cx->CR2.REG;
-	if(I2C_IRQ_status & I2Cx_IRQ_ALL){
-		// Update the Register
-		reg &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-		// NVIC Error Interrupt Enable
+	// Enables the I2C Event Interrupt
+	if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
+		reg &= ~I2C_CR2_ITEVTEN;
+	// Buffer Interrupt Enable
+	if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
+		reg &= ~I2C_CR2_ITBUFEN;
+	// Error Interrupt Enable
+	if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
+		reg &= ~I2C_CR2_ITERREN;
 		NVIC_IRQ_Disable(I2C_getER_IRQn(I2Cx));
-	}
-	else{
-		// Enables the I2C Event Interrupt
-		if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
-			reg &= ~I2C_CR2_ITEVTEN;
-		// Buffer Interrupt Enable
-		if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
-			reg &= ~I2C_CR2_ITBUFEN;
-		// Error Interrupt Enable
-		if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
-			reg &= ~I2C_CR2_ITERREN;
-			NVIC_IRQ_Disable(I2C_getER_IRQn(I2Cx));
-		}
 	}
 	// NVIC Event Interrupt Enable
 	NVIC_IRQ_Disable(I2C_getEV_IRQn(I2Cx));

@@ -329,6 +329,7 @@
         "stddef.h": "c",
         "cdefs.h": "c",
         "_ansi.h": "c",
-        "dma.h": "c"
+        "dma.h": "c",
+        "ssd1306_dma.h": "c"
     }
 }

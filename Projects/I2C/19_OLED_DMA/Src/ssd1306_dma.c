@@ -1,0 +1,160 @@
+// Header
+#include "ssd1306_dma.h"
+/*-------------------------------------------------------------------------------*/
+
+
+/**
+ * @brief SSD1306 OLED I2C & DMA Configuration
+ */
+void SSD1306_I2C_DMA_Init(){
+	// SSD1306_I2Cx Configuration 
+	I2C1_Load_Default(&I2C_SSD1306_Configuration);
+	I2C_Config(&I2C_SSD1306_Configuration);
+	I2C_IRQ_enable(SSD1306_I2Cx, (I2Cx_IRQ_EVENT | I2Cx_IRQ_ERROR));
+	I2C_enable(SSD1306_I2Cx);
+
+	// DMA Configuration
+	DMA_Load_Default_MEM2PER(&DMA_SSD1306_Configuration);
+	DMA_SSD1306_Configuration.DMA_Channel = DMA_I2C1_TX;
+	DMA_Config(&DMA_SSD1306_Configuration);
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Updates the Buffer with Display Initialization Commands 
+ */
+void SSD1306_DMA_Disp_Init(){
+	// Copy Initialization Commands
+	memcpy(cmd_buffer, SSD1306_initCmd, SIZEOF(SSD1306_initCmd));
+	// Configure DMA Transfer Parameters
+	DMA_Transfer_Config(DMA_I2C1_TX, cmd_buffer, &SSD1306_I2Cx->DR.REG, SIZEOF(SSD1306_initCmd));
+	// SSD1306 I2C DMA Sequence
+	SSD1306_DMA_CMD_Trigger();
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Fills the Columns in Page with pattern
+ * @param page Page Number: 0 - 7
+ * @param pattern Display Pattern for each Column within the Page
+ */
+void SSD1306_DMA_Page_Color(uint8_t page, uint8_t pattern){
+	// Commands
+	cmd_buffer[0] = SSD1306_CMD_PAGE_MODE_SET_PAGE(page);
+	cmd_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0);
+	cmd_buffer[2] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0);
+	// Data
+	memset(data_buffer, pattern, BUFFER_SIZE);
+	// DMA Commands Configured
+	DMA_Transfer_Config(DMA_I2C1_TX, cmd_buffer, &SSD1306_I2Cx->DR.REG, 3);
+	// DMA Command Trigger
+	SSD1306_DMA_CMD_Trigger();
+	// Delay
+	delay_us(SSD1306_I2C_SYNC_DELAY_TIME_US);
+	// DMA Commands Configured
+	DMA_Transfer_Config(DMA_I2C1_TX, data_buffer, &SSD1306_I2Cx->DR.REG, BUFFER_SIZE);
+	// DMA Data Trigger
+	SSD1306_DMA_Data_Trigger();
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Colors the SSD1306 Screen based on input pattern
+ * @param[in] pattern Display Pattern for each Column
+ */
+void SSD1306_DMA_Color_Screen(uint8_t pattern){
+	// Traverse through all Pages
+	for(uint8_t page = 0; page < 8; page++){
+		// Individual Page Pattern
+		SSD1306_DMA_Page_Color(page, pattern); 
+		// Small Delay
+		delay_ms(1);
+	}
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief I2C1 Event IRQ Handler
+ */
+void I2C1_EV_IRQHandler(void){
+	// I2C Status
+	switch(i2c_status){
+		// Start Bit Sent
+		case 0x00:
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_SB){
+				SSD1306_I2Cx->DR.REG = ((SSD1306_I2C_ADDRESS << 1) | I2Cx_WRITE);
+				i2c_status = 0x01;
+			}
+			break;
+		
+		// Address Sent
+		case 0x01:
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
+				volatile uint32_t temp = SSD1306_I2Cx->SR1.REG;
+				temp = SSD1306_I2Cx->SR2.REG;
+				// Now TxE is ready
+				if (SSD1306_I2Cx->SR1.REG & I2C_SR1_TXE) {
+					// Command Buffer Transfer
+					if(dma_status == DMA_STATUS_CMD)
+						SSD1306_I2Cx->DR.REG = SSD1306_CMD_INDICATOR;
+					// Data Buffer Transfer
+					else if(dma_status == DMA_STATUS_DATA)
+						SSD1306_I2Cx->DR.REG = SSD1306_DATA_INDICATOR;
+					// Update I2C Status
+					i2c_status = 0x02;
+				}
+			}
+		break;
+
+		// Enable DMA
+		case 0x02:
+			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_BTF){
+				SSD1306_I2Cx->CR2.REG |= I2C_CR2_DMAEN;
+				DMA_I2C1_TX->CCR.REG |= DMA_CCR_EN;
+				i2c_status = 0x03;
+			}
+		break;
+	}
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief DMA1 Channel6 IRQ Handler
+ */
+void DMA1_Channel6_IRQHandler(void){
+	// DMA Transfer Complete
+	if(DMA1->ISR.REG & DMA_ISR_TCIF6){
+		// Disable DMA for I2C
+		SSD1306_I2Cx->CR2.REG &= ~I2C_CR2_DMAEN;
+		// Disable DMA Channel
+		DMA_I2C1_TX->CCR.REG &= ~DMA_CCR_EN;
+		// Update Status
+		i2c_status = 0x00;
+		dma_status = DMA_STATUS_COMPLETED;
+		// Acknowledge the Interrupt
+		DMA1->IFCR.REG |= DMA_IFCR_CTCIF6;
+	}
+}
+/*-------------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------------*/
+/**
+ * @brief I2C1 Error IRQ Handler
+ */
+void I2C1_ER_IRQHandler(void){
+	// Arbitration Lost Flag
+	if(SSD1306_I2Cx->SR1.REG & I2C_SR1_AF) {
+		// Clear NACK flag
+		SSD1306_I2Cx->SR1.REG &= ~I2C_SR1_AF;
+		// Force stop
+		SSD1306_I2Cx->CR1.REG |= I2C_CR1_STOP;
+		// Reset state machine
+		i2c_status = 0x00;
+	}
+}
+/*-------------------------------------------------------------------------------*/

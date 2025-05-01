@@ -1,24 +1,14 @@
+/*-------------------------------------------------------------------------------*/
 // Header Guards
 #ifndef __MAIN_H__
 #define __MAIN_H__
-
 /*-------------------------------------------------------------------------------*/
 // Headers
-#include "bare_metal.h"
-#include "ssd1306_font.h"
-/*-------------------------------------------------------------------------------*/
-
+#include "ssd1306_dma.h"
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						1000
-#define BUFFER_SIZE							128
 /*-------------------------------------------------------------------------------*/
-// Main Buffer Size
-__attribute__((aligned(4))) uint8_t src_buffer[BUFFER_SIZE + 1] = {[0 ... BUFFER_SIZE] = 0x00};
-// DMA Configuration
-dma_config_t DMA_SSD1306_Configuration;
-// I2C Configuration Structure
-i2c_config_t I2C_SSD1306_Configuration;
 // LED Configuration
 gpio_config_t LED_Configuration = {
 	.GPIO = GPIOA,
@@ -27,5 +17,5 @@ gpio_config_t LED_Configuration = {
 	.CNF = GPIOx_CNF_OUT_GP_PP
 };
 /*-------------------------------------------------------------------------------*/
-
 #endif /* __MAIN_H__ */ 
+/*-------------------------------------------------------------------------------*/
