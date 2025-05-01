@@ -34,14 +34,14 @@ void GPIO_Config(gpio_config_t* GPIO_CONFIGx){
     }
 
 	// Pull Up
-    if (GPIO_CONFIGx->MODE == GPIOx_MODE_IN && GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PU) {
+    if ((GPIO_CONFIGx->MODE == GPIOx_MODE_IN) && (GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PU)) {
 		// Set the bit high to enable pull-up
 		GPIO_CONFIGx->GPIO->BSRR.REG |= (1 << GPIO_CONFIGx->PIN);
 		// Update the Configuration Bits as Input Push-Pull
 		GPIO_CONFIGx->CNF = (uint8_t)0x02;
 	} 
 	// Pull Down
-    else if (GPIO_CONFIGx->MODE == GPIOx_MODE_IN && GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PD) {
+    else if ((GPIO_CONFIGx->MODE == GPIOx_MODE_IN) && (GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PD)) {
 		// Set the bit low to enable pull-down
 		GPIO_CONFIGx->GPIO->BRR.REG |= (1 << GPIO_CONFIGx->PIN);
 		// Update the Configuration Bits as Input Push-Pull

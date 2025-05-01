@@ -176,8 +176,8 @@ __INLINE__ void I2C_disable(I2C_REG_STRUCT* I2Cx){
 /**
  * @brief I2C Bus Ready
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns - 0: I2C Bus is not ready
- * @returns - 1: I2C Bus is ready
+ * @returns - `0x00`: I2C Bus is not ready
+ * @returns - `0x01`: I2C Bus is ready
  */
 __INLINE__ uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
 	// Bus Busy
@@ -255,39 +255,26 @@ __INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
- * @brief Enables the I2C Event Interrupt
+ * @brief Enables the I2C Interrupt
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] buff_IRQ Buffer Interrupt Enable
- * @param[in] er_IRQ Error Interrupt Enable
+ * @param[in] I2C_IRQ_status Any logical combination of 
+ * @param `I2Cx_IRQ_EVENT`
+ * @param `I2Cx_IRQ_BUFFER`
+ * @param `I2Cx_IRQ_ERROR`
+ * @param `I2Cx_IRQ_ALL`
  */
-__INLINE__ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t buff_IRQ, uint8_t er_IRQ){
-	// Temporary Register
-	uint32_t reg = I2Cx->CR2.REG;
-	// Enables the I2C Event Interrupt
-	reg |= I2C_CR2_ITEVTEN;
-	// Buffer Interrupt Enable
-	if(buff_IRQ)
-		reg |= I2C_CR2_ITBUFEN;
-	// Error Interrupt Enable
-	if(er_IRQ){
-		reg |= I2C_CR2_ITERREN;
-		// NVIC Error Interrupt Enable
-		NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
-	}
-	// NVIC Event Interrupt Enable
-	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2Cx));
-	// Write to CR2
-	I2Cx->CR2.REG = reg;
-}
+void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
 
 /**
- * @brief Disables the I2C Event Interrupt
+ * @brief Disables the I2C Interrupt
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] I2C_IRQ_status Any logical combination of 
+ * @param `I2Cx_IRQ_EVENT`
+ * @param `I2Cx_IRQ_BUFFER`
+ * @param `I2Cx_IRQ_ERROR`
+ * @param `I2Cx_IRQ_ALL`
  */
-__INLINE__ void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx){
-	// Clear Interrupts
-	I2Cx->CR2.REG &= ~(I2C_CR2_ITBUFEN | I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
-}
+void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
 
 /**
  * @brief Enables I2C DMA Configuration

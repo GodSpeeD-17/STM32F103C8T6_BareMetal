@@ -60,5 +60,3 @@ void SSD1306_IRQ_clrScreen(I2C_REG_STRUCT* I2Cx, uint8_t color){
 	}
 }
 
-
-

@@ -20,7 +20,7 @@ int main(){
 	DMA_Load_Default_PER2MEM(&I2C_DMA_Configuration);
 	I2C_DMA_Configuration.DMA_Channel = DMA_I2C1_TX;
 	DMA_Config(&I2C_DMA_Configuration);
-	DMA_Transfer(DMA_I2C1_TX, (void*) &i2c_buffer, (void*) &I2C1->DR.REG, 1);
+	DMA_Transfer_Config(DMA_I2C1_TX, (void*) &i2c_buffer, (void*) &I2C1->DR.REG, 1);
 	DMA_CH_enable(DMA_I2C1_TX);
 
 	// Try

@@ -22,7 +22,7 @@ int main(){
 	// DMA Configuration
 	DMA_Config(&DMA_Configuration);
 	// Configure DMA Transfer
-	DMA_Transfer(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
+	DMA_Transfer_Config(DMA1_Channel1, src_buffer, dst_buffer, BUFFER_SIZE);
 	// Enable DMA Channel
 	DMA_CH_enable(DMA1_Channel1);
 	

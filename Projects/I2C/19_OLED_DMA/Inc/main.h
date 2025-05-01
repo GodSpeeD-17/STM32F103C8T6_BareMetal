@@ -10,16 +10,15 @@
 
 /*-------------------------------------------------------------------------------*/
 // MACROS
-#define LOOP_DELAY_MS						((uint32_t) 1000)
+#define LOOP_DELAY_MS						1000
 #define BUFFER_SIZE							128
 /*-------------------------------------------------------------------------------*/
-// Variables
+// Main Buffer Size
 __attribute__((aligned(4))) uint8_t src_buffer[BUFFER_SIZE + 1] = {[0 ... BUFFER_SIZE] = 0x00};
 // DMA Configuration
 dma_config_t DMA_SSD1306_Configuration;
 // I2C Configuration Structure
 i2c_config_t I2C_SSD1306_Configuration;
-
 // LED Configuration
 gpio_config_t LED_Configuration = {
 	.GPIO = GPIOA,

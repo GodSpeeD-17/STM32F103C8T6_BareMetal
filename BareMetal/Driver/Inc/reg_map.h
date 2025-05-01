@@ -349,30 +349,40 @@ extern volatile uint32_t APB2Clock;
 /*********************************************** EXTI MACROS ***********************************************/
 
 /*********************************************** I2C MACROS ***********************************************/
-// I2C Speed
-#define I2Cx_SPEED_STD						FREQ_100kHz			// Sm
-#define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)	// Fm
-// I2C Configuration Structure SCL Clock Freq
-#define I2Cx_SCL_FREQ_4MHz					((uint8_t) 0x04)
-#define I2Cx_SCL_FREQ_8MHz					((uint8_t) 0x08)
-#define I2Cx_SCL_FREQ_16MHz					((uint8_t) 0x10)
-#define I2Cx_SCL_FREQ_32MHz					((uint8_t) 0x20)
+// I2C Speed: Standard Mode (Sm)
+#define I2Cx_SPEED_STD						FREQ_100kHz	
+// I2C Speed: Fast Mode (Fm)
+#define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)
+// I2C SCL Clock Freq: 4MHz
+#define I2Cx_SCL_FREQ_4MHz					0x04
+// I2C SCL Clock Freq: 8MHz
+#define I2Cx_SCL_FREQ_8MHz					0x08
+// I2C SCL Clock Freq: 16MHz
+#define I2Cx_SCL_FREQ_16MHz					0x10
+// I2C SCL Clock Freq: 32MHz
+#define I2Cx_SCL_FREQ_32MHz					0x20
+// I2C SCL Clock Freq: APB1
 #define I2Cx_SCL_FREQ_DEFAULT				APB1Clock
-// I2C Configuration Structure Mode
-#define I2Cx_MODE_STD						((uint8_t) 0x00)
-#define I2Cx_MODE_FAST						((uint8_t) 0x01)
-// I2C Configuration Structure Buffer Interrupt
-#define I2Cx_IRQ_BUFFER_DISABLE				((uint8_t) 0x00)
-#define I2Cx_IRQ_BUFFER_ENABLE				((uint8_t) 0x01)
-// I2C Configuration Structure Event Interrupt
-#define I2Cx_IRQ_ERROR_DISABLE				((uint8_t) 0x00)
-#define I2Cx_IRQ_ERROR_ENABLE				((uint8_t) 0x01)
-// I2C Configuration Structure Fast Mode Duty
-#define I2Cx_DUTY_NORMAL					((uint8_t) 0x00)
-#define I2Cx_DUTY_FAST						((uint8_t) 0x01)
-// I2C Read/Write
-#define I2Cx_WRITE							((uint8_t) 0x00)
-#define I2Cx_READ							((uint8_t) 0x01)
+// I2C Mode: Standard
+#define I2Cx_MODE_STD						0x00
+// I2C Mode: Fast
+#define I2Cx_MODE_FAST						0x01
+// I2C Event Interrupt
+#define	I2Cx_IRQ_EVENT						0x01
+// I2C Buffer Interrupt
+#define I2Cx_IRQ_BUFFER						0x02
+// I2C Error Interrupt
+#define I2Cx_IRQ_ERROR						0x04
+// I2C All Interrupt Enable
+#define I2Cx_IRQ_ALL						(I2Cx_IRQ_EVENT | I2Cx_IRQ_BUFFER | I2Cx_IRQ_ERROR)
+// I2C Fast Mode: Normal Duty (2:1)
+#define I2Cx_DUTY_NORMAL					0x00
+// I2C Fast Mode: Fast Duty (16:9)
+#define I2Cx_DUTY_FAST						0x01
+// I2C Slave Write
+#define I2Cx_WRITE							0x00
+// I2C Slave Read
+#define I2Cx_READ							0x01
 /*********************************************** I2C MACROS ***********************************************/
 
 /*********************************************** SysTick MACROS ***********************************************/

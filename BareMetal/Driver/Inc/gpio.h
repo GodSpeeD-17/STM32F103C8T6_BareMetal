@@ -11,6 +11,12 @@
 // Register Address Mapping
 #include "reg_map.h"
 
+// MACROs
+#define OB_LED_Set()				OB_LED_PORT->BSRR.REG |= (1 << OB_LED_PIN)
+#define OB_LED_Reset()				OB_LED_PORT->BRR.REG &= ~(1 << OB_LED_PIN)
+#define OB_LED_Toggle()				OB_LED_PORT->BRR.REG ^= (1 << OB_LED_PIN)
+#define OB_LED_Config()				GPIO_Config(&OB_LED_Configuration)
+
 // GPIO Configuration Structure
 typedef struct {
 	// GPIO Port
@@ -41,7 +47,7 @@ typedef struct {
 } gpio_config_t;
 
 // On-board LED Configuration
-static gpio_config_t OB_LED_Configuration = {
+const static gpio_config_t OB_LED_Configuration = {
 	.GPIO = OB_LED_PORT,
 	.PIN = OB_LED_PIN,
 	.MODE = GPIOx_MODE_OUT_2MHz,
@@ -157,39 +163,5 @@ __INLINE__ void GPIO_Toggle(gpio_config_t* GPIO_CONFIGx){
  * @param[out] pin_state Pin State
  */
 uint8_t GPIO_Get(gpio_config_t* GPIO_CONFIGx);
-
-/**
- * @brief Configures the on-board active low LED (PC13) as GP_OUT-PP-2MHz
- * @note Configuration is done based on capability of the GPIO as mentioned in data sheet
- */
-__INLINE__ void OB_LED_Config(void){
-	// Configure the OB LED
-	GPIO_Config(&OB_LED_Configuration); 
-}
-
-/**
- * @brief Turns on-board active low LED (PC13) ON
- */
-__INLINE__ void OB_LED_Set(void){
-	// Reset the on-board active low LED GPIO
-	GPIO_Reset(&OB_LED_Configuration);
-}
-
-/**
- * @brief Turns on-board active low LED (PC13) OFF
- */
-__INLINE__ void OB_LED_Reset(void){
-	// Set the on-board active low LED GPIO
-	GPIO_Set(&OB_LED_Configuration);
-}
-
-/**
- * @brief Toggles the on-board active low LED (PC13)
- */
-__INLINE__ void OB_LED_Toggle(void){
-	// Toggle the on-board active low LED GPIO
-	GPIO_Toggle(&OB_LED_Configuration);
-}
-
 
 #endif /* __GPIO__H__ */

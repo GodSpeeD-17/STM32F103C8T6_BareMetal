@@ -2,26 +2,22 @@
 #include "i2c.h"
 
 /**
- * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration Structure
+ * @brief Calculates the value of TRISE (TRISE) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @returns Calculated TRISE value
  */
-void I2C_Config(i2c_config_t* I2C_CONFIGx){
-	// Enable Clock
-	I2C_clk_enable(I2C_CONFIGx->I2Cx);
-	// Configure GPIOs
-	GPIO_Config(&I2C_CONFIGx->SCL);
-	GPIO_Config(&I2C_CONFIGx->SDA);
-	// Software Reset
-	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
-	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
-	// I2C Buffer IRQ + I2C Event IRQ + I2C Module Frequency
-	I2C_CONFIGx->I2Cx->CR2.REG |= (uint32_t)((I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos);
-	// I2C Mode + I2C Duty + I2C Clock Control Register
-	I2C_CONFIGx->I2Cx->CCR.REG = (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
-									((I2C_CONFIGx->duty & 0x01) << I2C_CCR_DUTY_Pos) | 
-									(I2C_CONFIGx->CCR & 0x0FFF) << I2C_CCR_CCR_Pos);
-	// TRISE Configuration
-	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
+uint8_t I2C_calc_TRISE(uint8_t i2cMode){
+	// Local Value
+	uint8_t calc_TRISE = 0;
+	// Get APB1 Clock (in MHz)
+	calc_TRISE = (APB1Clock/FREQ_1MHz);
+	// Fast I2C Mode: 400kHz
+	if(i2cMode == I2Cx_MODE_FAST){
+		calc_TRISE *= 3;
+		calc_TRISE /= 10;
+	}
+	// Return the value
+	return (calc_TRISE + 1);
 }
 
 /**
@@ -71,22 +67,100 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 }
 
 /**
- * @brief Calculates the value of TRISE (TRISE) for I2C Module
- * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
- * @returns Calculated TRISE value
+ * @brief Configures I2C as per the Configuration Structure
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-uint8_t I2C_calc_TRISE(uint8_t i2cMode){
-	// Local Value
-	uint8_t calc_TRISE = 0;
-	// Get APB1 Clock (in MHz)
-	calc_TRISE = (APB1Clock/FREQ_1MHz);
-	// Fast I2C Mode: 400kHz
-	if(i2cMode == I2Cx_MODE_FAST){
-		calc_TRISE *= 3;
-		calc_TRISE /= 10;
+void I2C_Config(i2c_config_t* I2C_CONFIGx){
+	// Enable Clock
+	I2C_clk_enable(I2C_CONFIGx->I2Cx);
+	// Configure GPIOs
+	GPIO_Config(&I2C_CONFIGx->SCL);
+	GPIO_Config(&I2C_CONFIGx->SDA);
+	// Software Reset
+	I2C_CONFIGx->I2Cx->CR1.REG |= I2C_CR1_SWRST;
+	I2C_CONFIGx->I2Cx->CR1.REG &= ~I2C_CR1_SWRST;
+	// I2C Buffer IRQ + I2C Event IRQ + I2C Module Frequency
+	I2C_CONFIGx->I2Cx->CR2.REG |= (uint32_t)((I2C_CONFIGx->freq_MHz & 0x3F) << I2C_CR2_FREQ_Pos);
+	// I2C Mode + I2C Duty + I2C Clock Control Register
+	I2C_CONFIGx->I2Cx->CCR.REG = (((I2C_CONFIGx->mode & 0x01) << I2C_CCR_FS_Pos) |
+									((I2C_CONFIGx->duty & 0x01) << I2C_CCR_DUTY_Pos) | 
+									(I2C_CONFIGx->CCR & 0x0FFF) << I2C_CCR_CCR_Pos);
+	// TRISE Configuration
+	I2C_CONFIGx->I2Cx->TRISE.REG = (I2C_CONFIGx->TRISE & 0x3F) << I2C_TRISE_TRISE_Pos;
+}
+
+/**
+ * @brief Enables the I2C Interrupt
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] I2C_IRQ_status Any logical combination of 
+ * @param `I2Cx_IRQ_EVENT`
+ * @param `I2Cx_IRQ_BUFFER`
+ * @param `I2Cx_IRQ_ERROR`
+ * @param `I2Cx_IRQ_ALL`
+ */
+void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
+	// Temporary Register
+	uint32_t reg = I2Cx->CR2.REG;
+	if(I2C_IRQ_status & I2Cx_IRQ_ALL){
+		// Update the Register
+		reg |= (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
+		// NVIC Error Interrupt Enable
+		NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
 	}
-	// Return the value
-	return (calc_TRISE + 1);
+	else{
+		// Enables the I2C Event Interrupt
+		if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
+			reg |= I2C_CR2_ITEVTEN;
+		// Buffer Interrupt Enable
+		if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
+			reg |= I2C_CR2_ITBUFEN;
+		// Error Interrupt Enable
+		if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
+			reg |= I2C_CR2_ITERREN;
+			NVIC_IRQ_Enable(I2C_getER_IRQn(I2Cx));
+		}
+	}
+	// NVIC Event Interrupt Enable
+	NVIC_IRQ_Enable(I2C_getEV_IRQn(I2Cx));
+	// Write to CR2
+	I2Cx->CR2.REG = reg;
+}
+
+/**
+ * @brief Disables the I2C Interrupt
+ * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param[in] I2C_IRQ_status Any logical combination of 
+ * @param `I2Cx_IRQ_EVENT`
+ * @param `I2Cx_IRQ_BUFFER`
+ * @param `I2Cx_IRQ_ERROR`
+ * @param `I2Cx_IRQ_ALL`
+ */
+void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
+	// Temporary Register
+	uint32_t reg = I2Cx->CR2.REG;
+	if(I2C_IRQ_status & I2Cx_IRQ_ALL){
+		// Update the Register
+		reg &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
+		// NVIC Error Interrupt Enable
+		NVIC_IRQ_Disable(I2C_getER_IRQn(I2Cx));
+	}
+	else{
+		// Enables the I2C Event Interrupt
+		if(I2C_IRQ_status & I2Cx_IRQ_EVENT)
+			reg &= ~I2C_CR2_ITEVTEN;
+		// Buffer Interrupt Enable
+		if(I2C_IRQ_status & I2Cx_IRQ_BUFFER)
+			reg &= ~I2C_CR2_ITBUFEN;
+		// Error Interrupt Enable
+		if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
+			reg &= ~I2C_CR2_ITERREN;
+			NVIC_IRQ_Disable(I2C_getER_IRQn(I2Cx));
+		}
+	}
+	// NVIC Event Interrupt Enable
+	NVIC_IRQ_Disable(I2C_getEV_IRQn(I2Cx));
+	// Write to CR2
+	I2Cx->CR2.REG = reg;
 }
 
 /**

@@ -28,7 +28,7 @@ int main(){
 	// Configure I2C
 	I2C_Config(&SSD1306_I2C_Config);
 	// Enable Interrupt
-	I2C_IRQ_enable(SSD1306_I2Cx, 1, 1);
+	I2C_IRQ_enable(SSD1306_I2Cx, I2Cx_IRQ_ALL);
 	// Enable I2C
 	I2C_enable(SSD1306_I2Cx);
 	

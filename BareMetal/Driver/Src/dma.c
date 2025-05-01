@@ -59,7 +59,7 @@ void DMA_Config(dma_config_t* instance){
  * @param[in] dst Pointer to Destination
  * @param[in] size Size of the data to be transferred
  */
-void DMA_Transfer(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, uint16_t size){
+void DMA_Transfer_Config(DMA_CHANNEL_REG_STRUCT* DMA_channelX, void* src, void* dst, uint16_t size){
 	// Disable the DMA Channel
 	DMA_CH_disable(DMA_channelX);
 	// Out of Memory
