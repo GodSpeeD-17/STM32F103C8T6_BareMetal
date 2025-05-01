@@ -14,21 +14,27 @@ int main(){
 
 	// Hardware Configuration
 	SSD1306_I2C_DMA_Init();
-
 	// Delay for allowing SSD1306 to Boot Up
 	delay_ms(LOOP_DELAY_MS);
-
 	// DMA Display Initialization Commands
 	SSD1306_DMA_Disp_Init();
-	
-	// Pattern
-	SSD1306_DMA_Color_Screen(0xFF);
-	// Toggle On-board LED
-	OB_LED_Toggle();
+
+	// Clear Screen
+	SSD1306_Clear_Screen();
+
+	SSD1306_DMA_Goto_XY(8, 100);
+	// SSD1306_DMA_Set_Pattern(0xFF);
+
+	// Test
+	// for(uint8_t page = 0; page < 8; page++){
+	// 	SSD1306_DMA_Goto_XY(page, 63);
+	// 	SSD1306_DMA_Set_Pattern(SSD1306_PATTERN_ALTERNATE);
+	// 	delay_ms(100);
+	// }
 
 	// Infinite Loop
 	while(1){
-		// Toggle GPIO
+		// LED Toggle
 		GPIO_Toggle(&LED_Configuration);
 		// Delay
 		delay_ms(LOOP_DELAY_MS);

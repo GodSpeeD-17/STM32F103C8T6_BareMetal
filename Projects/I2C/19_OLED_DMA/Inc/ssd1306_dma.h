@@ -38,7 +38,7 @@
 	/* Send Stop Condition */						\
 	I2C_sendStop((I2Cx)); 							\
 	/* DMA Reset Status for Completion */			\
-	dma_status = DMA_STATUS_RESET;				\
+	dma_status = DMA_STATUS_RESET;					\
 }
 /*-------------------------------------------------------------------------------*/
 /**
@@ -72,12 +72,17 @@
 	SSD1306_DMA_Trigger();							\
 }
 /*-------------------------------------------------------------------------------*/
+/**
+ * @brief Clear the Screen with Black Pattern
+ */
+#define SSD1306_Clear_Screen()					SSD1306_DMA_Color_Screen(SSD1306_PATTERN_BLACK)
+/*-------------------------------------------------------------------------------*/
 // MACRO Function Definition
 // Time required for Display to Synchronize with data or commands
 // @note - Try to keep between 100-150 us
 // @note - Going below 100us is insufficient time for display to synchronize
 // @note - Going beyond 150us creates I2C Bus Error
-#define SSD1306_I2C_SYNC_DELAY_TIME_US			124
+#define SSD1306_I2C_SYNC_DELAY_TIME_US			149
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
 static dma_config_t DMA_SSD1306_Configuration;
@@ -90,35 +95,63 @@ static volatile uint8_t i2c_status = 0x00;
 static volatile uint8_t dma_status = DMA_STATUS_RESET;
 /*-------------------------------------------------------------------------------*/
 // I2C Command Buffer
-__attribute__((aligned(4))) static uint8_t cmd_buffer[(BUFFER_SIZE >> 2)] = {[0 ... ((BUFFER_SIZE >> 2) - 1)] = SSD1306_CMD_INDICATOR};
+__attribute__((aligned(4))) static uint8_t cmd_buffer[(BUFFER_SIZE >> 4)] = {[0 ... ((BUFFER_SIZE >> 4) - 1)] = SSD1306_CMD_INDICATOR};
+/*-------------------------------------------------------------------------------*/
 // I2C Data Buffer
 __attribute__((aligned(4))) static uint8_t data_buffer[BUFFER_SIZE] = {[0 ... (BUFFER_SIZE - 1)] = SSD1306_DATA_INDICATOR};
 /*-------------------------------------------------------------------------------*/
-
+// Postion Co-ordinates
+static SSD1306_pix_t cursor = {
+	.X = 0,
+	.Y = 0
+};
 /*-------------------------------------------------------------------------------*/
 /**
- * @brief SSD1306 OLED I2C & DMA Configuration
+ * @brief SSD1306 Hardware for OLED regarding I2C & DMA Configuration
  */
 void SSD1306_I2C_DMA_Init();
-/*-------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------*/
 /**
  * @brief Updates the Buffer with Display Initialization Commands 
  */
 void SSD1306_DMA_Disp_Init();
-/*-------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Get current X Co-ordinate 
+ * @return Current X Co-ordinate 
+ */
+__INLINE__ uint8_t SSD1306_getX(){
+	return cursor.X;
+}
+
+/**
+ * @brief Get current Y Co-ordinate 
+ * @return Current Y Co-ordinate 
+ */
+__INLINE__ uint8_t SSD1306_getY(){
+	return cursor.Y;
+}
+
+/**
+ * @brief Goes to mentioned Co-ordinates
+ * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y X Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Goto_XY(const uint8_t X, const uint8_t Y);
+
+/**
+ * @brief Set the pattern for current Column i.e cursor.Y
+ * @param pattern Display Pattern for Column
+ */
+void SSD1306_DMA_Set_Pattern(uint8_t pattern);
+
 /**
  * @brief Fills the Columns in Page with pattern
  * @param page Page Number: 0 - 7
  * @param pattern Display Pattern for each Column within the Page
  */
 void SSD1306_DMA_Page_Color(uint8_t page, uint8_t pattern);
-/*-------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------*/
 /**
  * @brief Colors the SSD1306 Screen based on input pattern
  * @param[in] pattern Display Pattern for each Column

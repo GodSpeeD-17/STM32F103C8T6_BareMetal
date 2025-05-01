@@ -6,7 +6,6 @@
 // Dependency
 #include "i2c.h"
 #include "ssd1306_font.h"
-// #include "ssd1306_irq.h"
 /* ------------------------------------------------------------------------------------ */
 /**
  * @brief Single SSD1306 Command
@@ -44,13 +43,7 @@
  */
 #define SSD1306_clrScr(I2Cx)									(SSD1306_fillDisp((I2Cx), 0x00))
 /* ------------------------------------------------------------------------------------ */
-// Pixel Co-ordinates Structure
-typedef struct {
-	// X co-ordinate
-	uint8_t X;
-	// Y co-ordinate
-	uint8_t Y;
-} SSD1306_pix_t;
+
 /* ------------------------------------------------------------------------------------ */
 /**
  * @brief Occupies the I2C Bus
