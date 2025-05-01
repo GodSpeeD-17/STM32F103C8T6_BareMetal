@@ -26,40 +26,6 @@ int main(){
 	// Toggle On-board LED
 	OB_LED_Toggle();
 
-	#ifdef OLD
-	src_buffer[0] = SSD1306_CMD_INDICATOR;
-	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(0);
-	src_buffer[2] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0);
-	src_buffer[3] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0);
-	DMA_Transfer_Config(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, 3);
-	
-	// -----------------------------------------------------------------
-	// SSD1306 I2C Range Selection Start
-	// -----------------------------------------------------------------
-		// SSD1306 I2C DMA Sequence
-		SSD1306_I2C_DMA_trigger(SSD1306_I2Cx);
-		// Toggle On-board LED
-		OB_LED_Toggle();
-	// -----------------------------------------------------------------
-	// SSD1306 I2C Range Selection End
-	// -----------------------------------------------------------------
-
-	src_buffer[0] = SSD1306_DATA_INDICATOR;
-	memset(src_buffer + 1, 0xFF, BUFFER_SIZE);
-	DMA_Transfer_Config(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, BUFFER_SIZE);
-	
-	// -----------------------------------------------------------------
-	// SSD1306 I2C Column Data Start
-	// -----------------------------------------------------------------
-		// SSD1306 I2C DMA Sequence
-		SSD1306_I2C_DMA_trigger(SSD1306_I2Cx);
-		// Toggle On-board LED
-		OB_LED_Toggle();
-	// -----------------------------------------------------------------
-	// SSD1306 I2C Column Data End
-	// -----------------------------------------------------------------	
-	#endif
-
 	// Infinite Loop
 	while(1){
 		// Toggle GPIO
