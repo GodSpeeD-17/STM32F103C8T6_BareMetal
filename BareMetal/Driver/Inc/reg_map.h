@@ -656,8 +656,8 @@ typedef enum{
 
 /*********************************************** DMA MACROS ***********************************************/
 // DMA Direction
-#define DMAx_DIR_MEM_IN						((uint8_t) 0x00)
-#define DMAx_DIR_MEM_OUT					((uint8_t) 0x01)
+#define DMAx_DIR_READ_PER					((uint8_t) 0x00)
+#define DMAx_DIR_READ_MEM					((uint8_t) 0x01)
 
 // Memory to Memory Transfer
 #define DMAx_MEM2MEM_DISABLE				((uint8_t) 0x00)

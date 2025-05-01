@@ -97,7 +97,7 @@ void DMA_Load_Default_MEM2MEM(dma_config_t* instance){
 	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
 	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
 	// DMA Channel Configuration
-	instance->channel.direction = DMAx_DIR_MEM_IN;
+	instance->channel.direction = DMAx_DIR_READ_PER;
 	instance->channel.mem2mem = DMAx_MEM2MEM_ENABLE;
 	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
 	instance->channel.priority = DMAx_PRIORITY_MEDIUM;	
@@ -109,18 +109,41 @@ void DMA_Load_Default_MEM2MEM(dma_config_t* instance){
  */
 void DMA_Load_Default_PER2MEM(dma_config_t* instance){
 	// DMA Channel (Default)
-	instance->DMA_Channel = DMA1_Channel1;
+	instance->DMA_Channel = DMA_USART2_RX;
 	// DMA Channel Data Configuration
 	instance->data.dstDataSize = DMAx_DATA_SIZE_BIT_8;
 	instance->data.srcDataSize = DMAx_DATA_SIZE_BIT_8;
-	instance->data.dstInc = DMAx_INC_DISABLE;
+	instance->data.dstInc = DMAx_INC_ENABLE;
 	instance->data.srcInc = DMAx_INC_DISABLE;
 	// DMA Interrupt Configuration
 	instance->interrupt.HTIE = DMAx_IRQ_DISABLE;
 	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
 	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
 	// DMA Channel Configuration
-	instance->channel.direction = DMAx_DIR_MEM_OUT;
+	instance->channel.direction = DMAx_DIR_READ_MEM;
+	instance->channel.mem2mem = DMAx_MEM2MEM_DISABLE;
+	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
+	instance->channel.priority = DMAx_PRIORITY_HIGH;	
+}
+
+/**
+ * @brief Loads the default configuration for Memory to Peripheral Transfer
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Load_Default_MEM2PER(dma_config_t* instance){
+	// DMA Channel (Default)
+	instance->DMA_Channel = DMA_USART2_TX;
+	// DMA Channel Data Configuration
+	instance->data.dstDataSize = DMAx_DATA_SIZE_BIT_8;
+	instance->data.srcDataSize = DMAx_DATA_SIZE_BIT_8;
+	instance->data.dstInc = DMAx_INC_DISABLE;
+	instance->data.srcInc = DMAx_INC_ENABLE;
+	// DMA Interrupt Configuration
+	instance->interrupt.HTIE = DMAx_IRQ_DISABLE;
+	instance->interrupt.TCIE = DMAx_IRQ_ENABLE;
+	instance->interrupt.TEIE = DMAx_IRQ_ENABLE;
+	// DMA Channel Configuration
+	instance->channel.direction = DMAx_DIR_READ_MEM;
 	instance->channel.mem2mem = DMAx_MEM2MEM_DISABLE;
 	instance->channel.circular_mode = DMAx_CIRC_DISABLE;
 	instance->channel.priority = DMAx_PRIORITY_HIGH;	

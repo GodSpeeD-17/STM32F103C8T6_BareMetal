@@ -89,7 +89,7 @@ static dma_config_t DMA_I2C1_TX_Configuration = {
 	.DMA_Channel = DMA_I2C1_TX,
 	// Channel Properties
 	.channel = {
-		.direction = DMAx_DIR_MEM_OUT,
+		.direction = DMAx_DIR_READ_MEM,
 		.mem2mem = DMAx_MEM2MEM_DISABLE,
 		.circular_mode = DMAx_CIRC_DISABLE,
 		.priority = DMAx_PRIORITY_VERY_HIGH
@@ -239,5 +239,11 @@ void DMA_Load_Default_MEM2MEM(dma_config_t* instance);
  * @param[in] instance DMA Configuration Structure
  */
 void DMA_Load_Default_PER2MEM(dma_config_t* instance);
+
+/**
+ * @brief Loads the default configuration for Memory to Peripheral Transfer
+ * @param[in] instance DMA Configuration Structure
+ */
+void DMA_Load_Default_MEM2PER(dma_config_t* instance);
 
 #endif /* __DMA_H__ */

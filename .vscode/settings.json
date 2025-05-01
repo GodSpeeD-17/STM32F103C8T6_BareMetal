@@ -328,6 +328,7 @@
         "reent.h": "c",
         "stddef.h": "c",
         "cdefs.h": "c",
-        "_ansi.h": "c"
+        "_ansi.h": "c",
+        "dma.h": "c"
     }
 }

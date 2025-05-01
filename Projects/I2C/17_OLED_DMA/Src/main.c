@@ -4,10 +4,13 @@
 /*-------------------------------------------------------------------------------*/
 // I2C Status
 static volatile uint8_t i2c_status = 0x00;
-static volatile uint8_t DMA_IRQ_count = 0x00;
+static volatile uint8_t dma_completed = 0x00;
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
+
+	// Delay for allowing SSD1306 to load
+	delay_ms(2 * 1000);
 
 	// Configure GPIO
 	GPIO_Config(&LED_Configuration);
@@ -25,10 +28,8 @@ int main(){
 	// -----------------------------------------------------------------
 	// DMA Configuration
 	// -----------------------------------------------------------------
-	DMA_Load_Default_PER2MEM(&DMA_SSD1306_Configuration);
+	DMA_Load_Default_MEM2PER(&DMA_SSD1306_Configuration);
 	DMA_SSD1306_Configuration.DMA_Channel = DMA_I2C1_TX;
-	DMA_SSD1306_Configuration.data.srcInc = DMAx_INC_ENABLE;
-	DMA_SSD1306_Configuration.interrupt.HTIE = DMAx_IRQ_ENABLE;
 	DMA_Config(&DMA_SSD1306_Configuration);
 	src_buffer[0] = SSD1306_CMD_INDICATOR;
 	memcpy(src_buffer + 1, SSD1306_initCmd, sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0]));
@@ -42,10 +43,16 @@ int main(){
 	// Send Start Condition
 	I2C_sendStart(SSD1306_I2Cx);
 	// I2C Sequence Complete
-	while(!I2C_busReady(SSD1306_I2Cx));
+	while(!dma_completed);
+	delay_us(124);
+	// Send I2C STOP
+	I2C_sendStop(SSD1306_I2Cx);
+	dma_completed = 0x00;
+	// Toggle On-board LED
+	OB_LED_Toggle();
 
 	src_buffer[0] = SSD1306_CMD_INDICATOR;
-	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(5);
+	src_buffer[1] = SSD1306_CMD_PAGE_MODE_SET_PAGE(2);
 	src_buffer[2] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0);
 	src_buffer[3] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0);
 	DMA_Transfer(DMA_I2C1_TX, src_buffer + 1, &SSD1306_I2Cx->DR.REG, 3);
@@ -58,7 +65,13 @@ int main(){
 	// Send Start Condition
 	I2C_sendStart(SSD1306_I2Cx);
 	// I2C Sequence Complete
-	while(!I2C_busReady(SSD1306_I2Cx));
+	while(!dma_completed);
+	delay_us(124);
+	// Send I2C STOP
+	I2C_sendStop(SSD1306_I2Cx);
+	dma_completed = 0x00;
+	// Toggle On-board LED
+	OB_LED_Toggle();
 
 	// -----------------------------------------------------------------
 	// SSD1306 I2C Column Data 	
@@ -72,7 +85,13 @@ int main(){
 	// Send Start Condition
 	I2C_sendStart(SSD1306_I2Cx);
 	// I2C Sequence Complete
-	while(!I2C_busReady(SSD1306_I2Cx));
+	while(!dma_completed);
+	delay_us(124);
+	// Send I2C STOP
+	I2C_sendStop(SSD1306_I2Cx);
+	dma_completed = 0x00;
+	// Toggle On-board LED
+	OB_LED_Toggle();
 
 	// Infinite Loop
 	while(1){
@@ -100,7 +119,7 @@ void I2C1_EV_IRQHandler(void){
 		// Address Sent
 		case 0x01:
 			if(SSD1306_I2Cx->SR1.REG & I2C_SR1_ADDR){
-				uint32_t temp = SSD1306_I2Cx->SR1.REG;
+				volatile uint32_t temp = SSD1306_I2Cx->SR1.REG;
 				temp = SSD1306_I2Cx->SR2.REG;
 				// Now TxE is ready
 				if (SSD1306_I2Cx->SR1.REG & I2C_SR1_TXE) {
@@ -124,23 +143,19 @@ void I2C1_EV_IRQHandler(void){
 void DMA1_Channel6_IRQHandler(void){
 	// DMA Half Transfer Interrupt
 	if(DMA1->ISR.REG & DMA_ISR_HTIF6){
-		DMA_IRQ_count++;
 		// Clear Flag
 		DMA1->IFCR.REG |= DMA_IFCR_CHTIF6;
 	} 
 
 	// DMA Transfer Complete
 	if(DMA1->ISR.REG & DMA_ISR_TCIF6){
-		// Disable DMA Channel
-		DMA_I2C1_TX->CCR.REG &= ~DMA_CCR_EN;
 		// Disable DMA for I2C
 		SSD1306_I2Cx->CR2.REG &= ~I2C_CR2_DMAEN;
-		// Send I2C STOP
-		SSD1306_I2Cx->CR1.REG |= I2C_CR1_STOP;
-		// Toggle On-board LED
-		OB_LED_Toggle();
-		// Update I2C Status
+		// Disable DMA Channel
+		DMA_I2C1_TX->CCR.REG &= ~DMA_CCR_EN;
+		// Update Status
 		i2c_status = 0x00;
+		dma_completed = 0x01;
 		// Acknowledge the Interrupt
 		DMA1->IFCR.REG |= DMA_IFCR_CTCIF6;
 	}
