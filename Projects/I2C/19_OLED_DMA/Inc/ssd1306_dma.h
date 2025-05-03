@@ -6,12 +6,19 @@
 #include "bare_metal.h"
 #include "ssd1306_font.h"
 /*-------------------------------------------------------------------------------*/
-// MACROS
+// Basic MACROS
 #define BUFFER_SIZE							SSD1306_WIDTH
 #define DMA_STATUS_RESET					0x00
 #define DMA_STATUS_CMD						0x07
 #define DMA_STATUS_DATA						0x70
 #define DMA_STATUS_COMPLETED				0xFF
+/*-------------------------------------------------------------------------------*/
+// MACRO Function Definition
+// Time required for Display to Synchronize with data or commands
+// @note - Try to keep between 100-150 us
+// @note - Going below 100us is insufficient time for display to synchronize
+// @note - Going beyond 150us creates I2C Bus Error
+#define SSD1306_I2C_SYNC_DELAY_TIME_US			75
 /*-------------------------------------------------------------------------------*/
 /**
  * @brief Used for Starting the transmission for I2C using DMA for SSD1306
@@ -75,14 +82,19 @@
 /**
  * @brief Clear the Screen with Black Pattern
  */
-#define SSD1306_Clear_Screen()					SSD1306_DMA_Color_Screen(SSD1306_PATTERN_BLACK)
+#define SSD1306_DMA_Clear_Screen()				SSD1306_DMA_Color_Screen(SSD1306_PATTERN_BLACK)
 /*-------------------------------------------------------------------------------*/
-// MACRO Function Definition
-// Time required for Display to Synchronize with data or commands
-// @note - Try to keep between 100-150 us
-// @note - Going below 100us is insufficient time for display to synchronize
-// @note - Going beyond 150us creates I2C Bus Error
-#define SSD1306_I2C_SYNC_DELAY_TIME_US			75
+/**
+ * @brief Sets a Particular Pixel on the Screen
+ * @param[in] X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param[in] Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+#define SSD1306_DMA_Set_Pixel(X, Y)									\
+{	/* Set the Corresponding Co-ordinates */						\
+	SSD1306_DMA_Goto_XY((X), (Y));									\
+	/* Set the Display Pattern Accordingly */						\
+	SSD1306_DMA_Set_Pattern((1 << (((X) - (((X) >> 3) << 3)))));	\
+}
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
 static dma_config_t DMA_SSD1306_Configuration;
