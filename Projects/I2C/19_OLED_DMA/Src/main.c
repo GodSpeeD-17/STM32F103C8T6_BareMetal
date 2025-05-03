@@ -22,18 +22,37 @@ int main(){
 	// Clear Screen
 	SSD1306_Clear_Screen();
 
-	SSD1306_DMA_Goto_XY(8, 100);
-	// SSD1306_DMA_Set_Pattern(0xFF);
-
 	// Test
-	// for(uint8_t page = 0; page < 8; page++){
-	// 	SSD1306_DMA_Goto_XY(page, 63);
-	// 	SSD1306_DMA_Set_Pattern(SSD1306_PATTERN_ALTERNATE);
-	// 	delay_ms(100);
-	// }
+	SSD1306_DMA_Goto_XY(8, 49);
+	SSD1306_DMA_Set_Pattern(0xFF);
+	SSD1306_DMA_Goto_XY(9, 51);
+	SSD1306_DMA_Set_Pattern(0xFF);
+	SSD1306_DMA_Goto_XY(10, 53);
+	SSD1306_DMA_Set_Pattern(0xFF);
+	
 
 	// Infinite Loop
 	while(1){
+		/*
+		// Test
+		for(uint8_t page = 0; page < 8; page++){
+			SSD1306_DMA_Goto_XY(page << 3, 63);
+			SSD1306_DMA_Set_Pattern(SSD1306_PATTERN_ALTERNATE);
+			delay_ms(100);
+		}
+
+		// LED Toggle
+		GPIO_Toggle(&LED_Configuration);
+		// Delay
+		delay_ms(LOOP_DELAY_MS);
+
+		// Test
+		for(uint8_t page = 7; page >= 0; page--){
+			SSD1306_DMA_Goto_XY(page << 3, 63);
+			SSD1306_DMA_Set_Pattern(SSD1306_PATTERN_BLACK);
+			delay_ms(100);
+		}
+		*/
 		// LED Toggle
 		GPIO_Toggle(&LED_Configuration);
 		// Delay

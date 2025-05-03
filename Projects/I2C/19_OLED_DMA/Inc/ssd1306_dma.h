@@ -32,7 +32,7 @@
  */
 #define SSD1306_I2C_DMA_sendStop(I2Cx) 				\
 {	/* DMA Indicator for Transfer Complete */ 		\
-	while(dma_status != DMA_STATUS_COMPLETED);	\
+	while(dma_status != DMA_STATUS_COMPLETED);		\
 	/* Wait for SSD1306 to synchronize */ 			\
 	delay_us(SSD1306_I2C_SYNC_DELAY_TIME_US); 		\
 	/* Send Stop Condition */						\
@@ -82,7 +82,7 @@
 // @note - Try to keep between 100-150 us
 // @note - Going below 100us is insufficient time for display to synchronize
 // @note - Going beyond 150us creates I2C Bus Error
-#define SSD1306_I2C_SYNC_DELAY_TIME_US			149
+#define SSD1306_I2C_SYNC_DELAY_TIME_US			75
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
 static dma_config_t DMA_SSD1306_Configuration;
@@ -95,10 +95,14 @@ static volatile uint8_t i2c_status = 0x00;
 static volatile uint8_t dma_status = DMA_STATUS_RESET;
 /*-------------------------------------------------------------------------------*/
 // I2C Command Buffer
-__attribute__((aligned(4))) static uint8_t cmd_buffer[(BUFFER_SIZE >> 4)] = {[0 ... ((BUFFER_SIZE >> 4) - 1)] = SSD1306_CMD_INDICATOR};
+__attribute__((aligned(4))) static uint8_t cmd_buffer[(BUFFER_SIZE >> 4)] = {
+	[0 ... ((BUFFER_SIZE >> 4) - 1)] = 0x00
+};
 /*-------------------------------------------------------------------------------*/
 // I2C Data Buffer
-__attribute__((aligned(4))) static uint8_t data_buffer[BUFFER_SIZE] = {[0 ... (BUFFER_SIZE - 1)] = SSD1306_DATA_INDICATOR};
+__attribute__((aligned(4))) static uint8_t data_buffer[(BUFFER_SIZE >> 4)][BUFFER_SIZE] = {
+	[0 ... ((BUFFER_SIZE >> 4) - 1)][0 ... (BUFFER_SIZE - 1)] = 0x00
+};
 /*-------------------------------------------------------------------------------*/
 // Postion Co-ordinates
 static SSD1306_pix_t cursor = {

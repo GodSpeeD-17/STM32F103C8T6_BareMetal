@@ -22,8 +22,6 @@ void SSD1306_I2C_DMA_Init() {
  * @brief Updates the Buffer with Display Initialization Commands
  */
 void SSD1306_DMA_Disp_Init() {
-	// Copy Initialization Commands
-	// memcpy(cmd_buffer, SSD1306_initCmd, SIZEOF(SSD1306_initCmd));
 	// Configure DMA Transfer Parameters
 	DMA_Transfer_Config(DMA_I2C1_TX, SSD1306_initCmd, &SSD1306_I2Cx->DR.REG, SIZEOF(SSD1306_initCmd));
 	// SSD1306 I2C DMA Sequence
@@ -55,12 +53,23 @@ void SSD1306_DMA_Goto_XY(const uint8_t X, const uint8_t Y) {
  * @param pattern Display Pattern for Column
  */
 void SSD1306_DMA_Set_Pattern(uint8_t pattern) {
-	// Data
-	memset(data_buffer, pattern, 1);
-	// DMA Data Configuration
-	DMA_Transfer_Config(DMA_I2C1_TX, data_buffer, &SSD1306_I2Cx->DR.REG, 1);
-	// DMA Data Trigger
+	// Get Current Page & Current Page Start Boundary Offset
+	uint8_t cursor_page = cursor.X >> 3;
+	uint8_t cursor_X_diff = cursor.X - (cursor_page << 3);
+
+	// Padding of 0s based upon the Offset towards LSB to obtain towards top side of Column
+	data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
+	DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 	SSD1306_DMA_Data_Trigger();
+	
+	// Offset from Page Start Boundary
+	if(cursor_X_diff != 0) {
+		// Padding of 0s based upon the Offset towards MSB to obtain towards bottom side of Column
+		data_buffer[++cursor_page][cursor.Y] = (pattern >> (8 - cursor_X_diff));
+		SSD1306_DMA_Goto_XY((cursor_page << 3), cursor.Y);
+		DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
+		SSD1306_DMA_Data_Trigger();
+	}
 }
 
 /**
@@ -69,14 +78,14 @@ void SSD1306_DMA_Set_Pattern(uint8_t pattern) {
  * @param pattern Display Pattern for each Column within the Page
  */
 void SSD1306_DMA_Page_Color(uint8_t page, uint8_t pattern) {
-	// Data
-	memset(data_buffer, pattern, BUFFER_SIZE);
-	// Go to (0, page*8)
+	// Data for the Page: Fill the Page with Pattern
+	memset(&data_buffer[page], pattern, BUFFER_SIZE);
+	// Go to (page*8, 0)
 	SSD1306_DMA_Goto_XY((page << 3), 0);
 	// Delay
 	delay_us(SSD1306_I2C_SYNC_DELAY_TIME_US);
 	// DMA Data Configuration
-	DMA_Transfer_Config(DMA_I2C1_TX, data_buffer, &SSD1306_I2Cx->DR.REG, BUFFER_SIZE);
+	DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[page], &SSD1306_I2Cx->DR.REG, BUFFER_SIZE);
 	// DMA Data Trigger
 	SSD1306_DMA_Data_Trigger();
 }
@@ -87,8 +96,7 @@ void SSD1306_DMA_Page_Color(uint8_t page, uint8_t pattern) {
  */
 void SSD1306_DMA_Color_Screen(uint8_t pattern) {
 	// Traverse through all Pages
-	for (uint8_t page = 0; page < 8; page++)
-	{
+	for (uint8_t page = 0; page < 8; page++) {
 		// Individual Page Pattern
 		SSD1306_DMA_Page_Color(page, pattern);
 		// Small Delay
