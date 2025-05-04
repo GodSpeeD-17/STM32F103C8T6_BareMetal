@@ -33,7 +33,7 @@ void SSD1306_DMA_Disp_Init() {
  * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
  * @param Y X Co-ordinate: 0 - `SSD1306_WIDTH`
  */
-void SSD1306_DMA_Goto_XY(const uint8_t X, const uint8_t Y) {
+void SSD1306_DMA_Goto_XY(uint8_t X, uint8_t Y) {
 	// Update the Co-ordinates
 	cursor.X = (X & (SSD1306_HEIGHT - 1));
 	cursor.Y = (Y & (SSD1306_WIDTH - 1));
@@ -52,24 +52,41 @@ void SSD1306_DMA_Goto_XY(const uint8_t X, const uint8_t Y) {
  * @brief Set the pattern for current Column i.e cursor.Y
  * @param pattern Display Pattern for Column
  */
-void SSD1306_DMA_Set_Pattern(uint8_t pattern) {
+void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern) {
 	// Get Current Page & Current Page Start Boundary Offset
 	uint8_t cursor_page = cursor.X >> 3;
 	uint8_t cursor_X_diff = cursor.X - (cursor_page << 3);
 
+	data_buffer[cursor_page][cursor.Y] |= (pattern << cursor_X_diff);
+
+	/*
+	// Working Temporarily
 	// Padding of 0s based upon the Offset towards LSB to obtain towards top side of Column
-	data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
+	if(pattern != SSD1306_PATTERN_BLACK){
+		data_buffer[cursor_page][cursor.Y] |= (pattern << cursor_X_diff);
+	}
+	else{
+		data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
+	}
 	DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 	SSD1306_DMA_Data_Trigger();
 	
 	// Offset from Page Start Boundary
 	if(cursor_X_diff != 0) {
+		// Go to next Page
+		cursor_page++;
 		// Padding of 0s based upon the Offset towards MSB to obtain towards bottom side of Column
-		data_buffer[++cursor_page][cursor.Y] = (pattern >> (8 - cursor_X_diff));
+		if(pattern != SSD1306_PATTERN_BLACK){
+			data_buffer[cursor_page][cursor.Y] |= (pattern >> (8 - cursor_X_diff));
+		}
+		else{
+			data_buffer[cursor_page][cursor.Y] = (pattern >> (8 - cursor_X_diff));
+		}
 		SSD1306_DMA_Goto_XY((cursor_page << 3), cursor.Y);
 		DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 		SSD1306_DMA_Data_Trigger();
 	}
+	*/
 }
 
 /**

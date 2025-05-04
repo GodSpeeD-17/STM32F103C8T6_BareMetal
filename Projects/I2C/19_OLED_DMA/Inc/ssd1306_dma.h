@@ -18,7 +18,7 @@
 // @note - Try to keep between 100-150 us
 // @note - Going below 100us is insufficient time for display to synchronize
 // @note - Going beyond 150us creates I2C Bus Error
-#define SSD1306_I2C_SYNC_DELAY_TIME_US			75
+#define SSD1306_I2C_SYNC_DELAY_TIME_US		124
 /*-------------------------------------------------------------------------------*/
 /**
  * @brief Used for Starting the transmission for I2C using DMA for SSD1306
@@ -93,7 +93,7 @@
 {	/* Set the Corresponding Co-ordinates */						\
 	SSD1306_DMA_Goto_XY((X), (Y));									\
 	/* Set the Display Pattern Accordingly */						\
-	SSD1306_DMA_Set_Pattern((1 << (((X) - (((X) >> 3) << 3)))));	\
+	SSD1306_DMA_Set_Col_Pattern((0x01 << (((X) - (((X) >> 3) << 3)))));	\
 }
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
@@ -153,13 +153,13 @@ __INLINE__ uint8_t SSD1306_getY(){
  * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
  * @param Y X Co-ordinate: 0 - `SSD1306_WIDTH`
  */
-void SSD1306_DMA_Goto_XY(const uint8_t X, const uint8_t Y);
+void SSD1306_DMA_Goto_XY(uint8_t X, uint8_t Y);
 
 /**
  * @brief Set the pattern for current Column i.e cursor.Y
  * @param pattern Display Pattern for Column
  */
-void SSD1306_DMA_Set_Pattern(uint8_t pattern);
+void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern);
 
 /**
  * @brief Fills the Columns in Page with pattern

@@ -218,6 +218,8 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 /*-------------------------------------------------------------------------------*/
 // Default Handler (Overwrite This)
 __attribute__((weak)) void Default_Handler(void){
+	// Set OB LED for Error
+	OB_LED_Set();
 	// Infinite Loop
 	while(1) 
 		(void) 0;
