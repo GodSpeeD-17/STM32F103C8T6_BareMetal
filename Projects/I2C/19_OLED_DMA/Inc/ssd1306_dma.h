@@ -25,7 +25,7 @@
  * @param[in] I2Cx I2C instance: `I2C1`, `I2C2`
  * @note Dependency on DMA 
  */
-#define SSD1306_I2C_DMA_sendStart(I2Cx) 	\
+#define SSD1306_DMA_I2C_sendStart(I2Cx) 	\
 {	/* Wait for Bus to be free */ 			\
 	while(!I2C_busReady((I2Cx))); 			\
 	/* Send Start Condition */				\
@@ -37,7 +37,7 @@
  * @param[in] I2Cx I2C instance: `I2C1`, `I2C2`
  * @note Dependency on DMA
  */
-#define SSD1306_I2C_DMA_sendStop(I2Cx) 				\
+#define SSD1306_DMA_I2C_sendStop(I2Cx) 				\
 {	/* DMA Indicator for Transfer Complete */ 		\
 	while(dma_status != DMA_STATUS_COMPLETED);		\
 	/* Wait for SSD1306 to synchronize */ 			\
@@ -54,9 +54,9 @@
  */
 #define SSD1306_DMA_Trigger()	                \
 {	/* Start I2C DMA Transfer */		        \
-	SSD1306_I2C_DMA_sendStart(SSD1306_I2Cx);	\
+	SSD1306_DMA_I2C_sendStart(SSD1306_I2Cx);	\
 	/* Stop I2C DMA Transfer */			        \
-	SSD1306_I2C_DMA_sendStop(SSD1306_I2Cx);	    \
+	SSD1306_DMA_I2C_sendStop(SSD1306_I2Cx);	    \
 }
 /*-------------------------------------------------------------------------------*/
 /**
@@ -83,18 +83,6 @@
  * @brief Clear the Screen with Black Pattern
  */
 #define SSD1306_DMA_Clear_Screen()				SSD1306_DMA_Color_Screen(SSD1306_PATTERN_BLACK)
-/*-------------------------------------------------------------------------------*/
-/**
- * @brief Sets a Particular Pixel on the Screen
- * @param[in] X X Co-ordinate: 0 - `SSD1306_HEIGHT`
- * @param[in] Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
- */
-#define SSD1306_DMA_Set_Pixel(X, Y)									\
-{	/* Set the Corresponding Co-ordinates */						\
-	SSD1306_DMA_Goto_XY((X), (Y));									\
-	/* Set the Display Pattern Accordingly */						\
-	SSD1306_DMA_Set_Col_Pattern((0x01 << (((X) - (((X) >> 3) << 3)))));	\
-}
 /*-------------------------------------------------------------------------------*/
 // DMA Configuration
 static dma_config_t DMA_SSD1306_Configuration;
@@ -125,7 +113,7 @@ static SSD1306_pix_t cursor = {
 /**
  * @brief SSD1306 Hardware for OLED regarding I2C & DMA Configuration
  */
-void SSD1306_I2C_DMA_Init();
+void SSD1306_DMA_I2C_Init();
 
 /**
  * @brief Updates the Buffer with Display Initialization Commands 
@@ -136,7 +124,7 @@ void SSD1306_DMA_Disp_Init();
  * @brief Get current X Co-ordinate 
  * @return Current X Co-ordinate 
  */
-__INLINE__ uint8_t SSD1306_getX(){
+__INLINE__ uint8_t SSD1306_DMA_Get_Cursor_X(){
 	return cursor.X;
 }
 
@@ -144,9 +132,33 @@ __INLINE__ uint8_t SSD1306_getX(){
  * @brief Get current Y Co-ordinate 
  * @return Current Y Co-ordinate 
  */
-__INLINE__ uint8_t SSD1306_getY(){
+__INLINE__ uint8_t SSD1306_DMA_Get_Cursor_Y(){
 	return cursor.Y;
 }
+
+/**
+ * @brief Loads the whole pattern for current Column
+ * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ * @return Copy of Column Pattern
+ * @note It will retrieve the pattern with respect to Page Start Boundary Address from the data buffer
+ */
+__INLINE__ uint8_t SSD1306_DMA_Load_Col_Pattern(uint8_t X, uint8_t Y) {
+	//  Retrieve the Pattern
+	return data_buffer[((X & (SSD1306_HEIGHT - 1)) >> 3)][(Y & (SSD1306_WIDTH - 1))];
+}
+
+/**
+ * @brief Stores the whole pattern for current Column
+ * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ * @note It will set the pattern with respect to Page Start Boundary Address in the data buffer
+ */
+__INLINE__ void SSD1306_DMA_Store_Col_Pattern(uint8_t X, uint8_t Y, uint8_t pattern) {
+	// Sets the Pattern
+	data_buffer[(X & (SSD1306_HEIGHT - 1)) >> 3][Y & (SSD1306_WIDTH - 1)] = pattern;
+}
+/*-------------------------------------------------------------------------------*/
 
 /**
  * @brief Goes to mentioned Co-ordinates
@@ -160,6 +172,13 @@ void SSD1306_DMA_Goto_XY(uint8_t X, uint8_t Y);
  * @param pattern Display Pattern for Column
  */
 void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern);
+
+/**
+ * @brief Sets a Particular Pixel on the Screen
+ * @param[in] X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param[in] Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Set_Pixel(uint8_t X, uint8_t Y);
 
 /**
  * @brief Fills the Columns in Page with pattern

@@ -5,7 +5,7 @@
 /**
  * @brief SSD1306 Hardware for OLED regarding I2C & DMA Configuration
  */
-void SSD1306_I2C_DMA_Init() {
+void SSD1306_DMA_I2C_Init() {
 	// SSD1306_I2Cx Configuration
 	I2C1_Load_Default(&I2C_SSD1306_Configuration);
 	I2C_Config(&I2C_SSD1306_Configuration);
@@ -57,17 +57,8 @@ void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern) {
 	uint8_t cursor_page = cursor.X >> 3;
 	uint8_t cursor_X_diff = cursor.X - (cursor_page << 3);
 
-	data_buffer[cursor_page][cursor.Y] |= (pattern << cursor_X_diff);
-
-	/*
-	// Working Temporarily
 	// Padding of 0s based upon the Offset towards LSB to obtain towards top side of Column
-	if(pattern != SSD1306_PATTERN_BLACK){
-		data_buffer[cursor_page][cursor.Y] |= (pattern << cursor_X_diff);
-	}
-	else{
-		data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
-	}
+	data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
 	DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 	SSD1306_DMA_Data_Trigger();
 	
@@ -76,17 +67,27 @@ void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern) {
 		// Go to next Page
 		cursor_page++;
 		// Padding of 0s based upon the Offset towards MSB to obtain towards bottom side of Column
-		if(pattern != SSD1306_PATTERN_BLACK){
-			data_buffer[cursor_page][cursor.Y] |= (pattern >> (8 - cursor_X_diff));
-		}
-		else{
-			data_buffer[cursor_page][cursor.Y] = (pattern >> (8 - cursor_X_diff));
-		}
+		data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
 		SSD1306_DMA_Goto_XY((cursor_page << 3), cursor.Y);
 		DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 		SSD1306_DMA_Data_Trigger();
 	}
-	*/
+}
+
+/**
+ * @brief Sets a Particular Pixel on the Screen
+ * @param[in] X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param[in] Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Set_Pixel(uint8_t X, uint8_t Y) {
+	// Set the Corresponding Co-ordinates						
+	SSD1306_DMA_Goto_XY(X, Y);
+	// Retrieve the Column Pattern
+	uint8_t pattern = SSD1306_DMA_Load_Col_Pattern(cursor.X, cursor.Y);
+	// Set the Pixel
+	pattern |= (1 << (X - ((X >> 3) << 3)));
+	// Store the Column Pattern
+	SSD1306_DMA_Set_Col_Pattern(pattern);
 }
 
 /**

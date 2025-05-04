@@ -125,7 +125,7 @@ void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
  * @brief Retrieves the current X-Coordinate
  * @returns Current X-Coordinate
  */
-uint8_t SSD1306_getX(void){
+uint8_t SSD1306_DMA_Get_Cursor_X(void){
 	return SSD1306_coordinates.X;
 }
 
@@ -133,7 +133,7 @@ uint8_t SSD1306_getX(void){
  * @brief Retrieves the current Y-Coordinate
  * @returns Current Y-Coordinate
  */
-uint8_t SSD1306_getY(void){
+uint8_t SSD1306_DMA_Get_Cursor_Y(void){
 	return SSD1306_coordinates.Y;
 }
 

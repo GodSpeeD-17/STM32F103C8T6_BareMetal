@@ -53,7 +53,7 @@ void SSD1306_loadScrAnim(I2C_REG_STRUCT* I2Cx){
 	// Go to previous line
 	SSD1306_gotoXY(I2Cx, 0, (SSD1306_HEIGHT/2));
 	// Get Current Row
-	const uint8_t row = SSD1306_getY();
+	const uint8_t row = SSD1306_DMA_Get_Cursor_Y();
 	// Loading Animation
 	for(uint8_t column = 0; column < (SSD1306_WIDTH - RECT_WIDTH - 1); column ++){
 		// Fill Rectangle
