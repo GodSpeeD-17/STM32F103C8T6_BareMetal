@@ -66,9 +66,9 @@ void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern) {
 	if(cursor_X_diff != 0) {
 		// Go to next Page
 		cursor_page++;
-		// Padding of 0s based upon the Offset towards MSB to obtain towards bottom side of Column
-		data_buffer[cursor_page][cursor.Y] = (pattern << cursor_X_diff);
 		SSD1306_DMA_Goto_XY((cursor_page << 3), cursor.Y);
+		// Padding of 0s based upon the Offset towards MSB to obtain towards bottom side of Column
+		data_buffer[cursor_page][cursor.Y] = (pattern >> (8 - cursor_X_diff));
 		DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[cursor_page][cursor.Y], &SSD1306_I2Cx->DR.REG, 2);
 		SSD1306_DMA_Data_Trigger();
 	}
@@ -88,6 +88,91 @@ void SSD1306_DMA_Set_Pixel(uint8_t X, uint8_t Y) {
 	pattern |= (1 << (X - ((X >> 3) << 3)));
 	// Store the Column Pattern
 	SSD1306_DMA_Set_Col_Pattern(pattern);
+}
+
+/**
+ * @brief Draws Vertical Line on the Screen
+ * @param X1 Initial X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param X2 Final X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Draw_Vertical_Line(uint8_t X1, uint8_t X2, uint8_t Y) {
+
+	// Wrap the variables
+	X1 &= (SSD1306_HEIGHT - 1);
+	X2 &= (SSD1306_HEIGHT - 1);
+	Y &= (SSD1306_WIDTH - 1);
+	// Swap X1 & X2
+	if (X1 > X2) {
+		X1 ^= X2;
+		X2 ^= X1;
+		X1 ^= X2;
+	}
+	// Get Start & End Page
+	uint8_t start_page = X1 >> 3;
+	uint8_t end_page = X2 >> 3;
+	// Get Start & End Offset
+	uint8_t start_offset = X1 - (start_page << 3);
+	uint8_t end_offset = X2 - (end_page << 3);
+	uint8_t pattern = 0x00;
+	// Iterate over the Pages
+	for (uint8_t page = start_page; page <= end_page; page++) {
+		// Get the Column Pattern
+		pattern = SSD1306_DMA_Load_Col_Pattern((page << 3), cursor.Y);
+		// Set the Pixel Sequence
+		if (page == start_page && page == end_page) {
+			pattern = (0xFF >> (7 - (X2 - X1))) << start_offset;
+		} 
+		else if (page == start_page) {
+			pattern = 0xFF << start_offset;
+		} 
+		else if (page == end_page) {
+			pattern = 0xFF >> (8 - end_offset);
+		} 
+		else {
+			pattern = 0xFF;
+		}
+		// Set the Co-ordinates
+		SSD1306_DMA_Goto_XY(page << 3, Y);
+		// Store the Column Pattern
+		SSD1306_DMA_Set_Col_Pattern(pattern);
+		// Small Delay
+		delay_ms(5);
+	}
+}
+
+/**
+ * @brief Draws Horizontal Line on the Screen
+ * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y1 Initial Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ * @param Y2 Final Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Draw_Horizontal_Line(uint8_t X, uint8_t Y1, uint8_t Y2) {
+	// Wrap the variables
+	X &= (SSD1306_HEIGHT - 1);
+	Y1 &= (SSD1306_WIDTH - 1);
+	Y2 &= (SSD1306_WIDTH - 1);
+	// Swap Y1 & Y2
+	if (Y1 > Y2) {
+		Y1 ^= Y2;
+		Y2 ^= Y1;
+		Y1 ^= Y2;
+	}
+	// Pattern for the Column
+	uint8_t pattern = (0x01 << (X - ((X >> 3) << 3)));
+	// Iterate over the Columns
+	for(uint8_t y = Y1; y <= Y2; y++) {
+		// Update Data Buffer
+		data_buffer[(X >> 3)][y] |= pattern;
+	}
+	// Go to the Co-ordinates
+	SSD1306_DMA_Goto_XY(X, Y1);
+	// Configure DMA Transfer Configuration
+	DMA_Transfer_Config(DMA_I2C1_TX, &data_buffer[(X >> 3)][Y1], &SSD1306_I2Cx->DR.REG, (Y2 - Y1 + 1));
+	// DMA Data Trigger
+	SSD1306_DMA_Data_Trigger();
+	// Small Delay
+	delay_ms(5);
 }
 
 /**

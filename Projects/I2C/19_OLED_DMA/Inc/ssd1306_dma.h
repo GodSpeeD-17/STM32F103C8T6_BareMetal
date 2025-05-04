@@ -181,6 +181,22 @@ void SSD1306_DMA_Set_Col_Pattern(uint8_t pattern);
 void SSD1306_DMA_Set_Pixel(uint8_t X, uint8_t Y);
 
 /**
+ * @brief Draws Vertical Line on the Screen
+ * @param X1 Initial X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param X2 Final X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Draw_Vertical_Line(uint8_t X1, uint8_t X2, uint8_t Y);
+
+/**
+ * @brief Draws Horizontal Line on the Screen
+ * @param X X Co-ordinate: 0 - `SSD1306_HEIGHT`
+ * @param Y1 Initial Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ * @param Y2 Final Y Co-ordinate: 0 - `SSD1306_WIDTH`
+ */
+void SSD1306_DMA_Draw_Horizontal_Line(uint8_t X, uint8_t Y1, uint8_t Y2);
+
+/**
  * @brief Fills the Columns in Page with pattern
  * @param page Page Number: 0 - 7
  * @param pattern Display Pattern for each Column within the Page

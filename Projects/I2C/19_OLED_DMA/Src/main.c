@@ -1,9 +1,6 @@
 /*-------------------------------------------------------------------------------*/
 // Header Files
 #include "main.h"
-
-
-
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
@@ -21,32 +18,12 @@ int main(){
 
 	// Clear Screen
 	SSD1306_DMA_Clear_Screen();
-
 	// Wait
 	delay_ms(2 * LOOP_DELAY_MS);
 
-	// Clear Screen
-	SSD1306_DMA_Clear_Screen();
+	
 
-
-	// Fill the Screen with Pattern
-	for(uint8_t col = 63; col < 70; col++){
-		SSD1306_DMA_Goto_XY(48, col);
-		SSD1306_DMA_Set_Col_Pattern(SSD1306_PATTERN_ALTERNATE);
-		delay_ms(100);
-	}
-	// Delay
-	delay_ms(2 * LOOP_DELAY_MS);
-
-	// /*
-	// Fill the Screen with Pattern
-	for(uint8_t col = 63; col < 70; col++){
-		SSD1306_DMA_Set_Pixel(48, col);
-		delay_ms(100);
-	}
-	delay_ms(2 * LOOP_DELAY_MS);
-	// */
-
+	
 	// Infinite Loop
 	while(1){
 		// LED Toggle
