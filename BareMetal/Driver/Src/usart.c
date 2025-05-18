@@ -11,7 +11,7 @@
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-void USART_config(usart_config_t* USART_CONFIGx){
+void USART_Config(usart_config_t* USART_CONFIGx){
 	// Configure the GPIO
 	GPIO_Config(&USART_CONFIGx->TX);
 	GPIO_Config(&USART_CONFIGx->RX);
@@ -25,10 +25,17 @@ void USART_config(usart_config_t* USART_CONFIGx){
 	// Configure Stop Bits
 	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
 	// Configure Rest of the Parameters
-	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << USART_CR1_M_Pos) | ((USART_CONFIGx->enable_parity & 0x01) << USART_CR1_PCE_Pos) | ((USART_CONFIGx->parity_selection & 0x01) << USART_CR1_PS_Pos) | ((USART_CONFIGx->TXEIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->TCIE & 0x01) << USART_CR1_TXEIE_Pos) | ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
+	USART_CONFIGx->USARTx->CR1.REG |= (((USART_CONFIGx->word_length & 0x01) << USART_CR1_M_Pos) | 
+									   ((USART_CONFIGx->enable_parity & 0x01) << USART_CR1_PCE_Pos) | 
+									   ((USART_CONFIGx->parity_selection & 0x01) << USART_CR1_PS_Pos) | 
+									   ((USART_CONFIGx->TXEIE & 0x01) << USART_CR1_TXEIE_Pos) | 
+									   ((USART_CONFIGx->TCIE & 0x01) << USART_CR1_TXEIE_Pos) | 
+									   ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | 
+									   ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | 
+									   ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
 	// IRQ Enable
 	if(USART_CONFIGx->TCIE || USART_CONFIGx->TXEIE || USART_CONFIGx->RXNEIE)
-		NVIC_IRQ_Enable(USART_get_IRQn(USART_CONFIGx));
+		NVIC_IRQ_Enable(USART_get_IRQn(USART_CONFIGx->USARTx));
 }
 
 /**
@@ -222,7 +229,7 @@ uint16_t USART_receive(usart_config_t* USART_CONFIGx){
 	// Result
 	uint16_t result = 0;
 	// RXNE (Received data is ready to be read)
-	while(!(USART_CONFIGx->USARTx->SR.REG & (1 << 5)));
+	while(!(USART_CONFIGx->USARTx->SR.REG & USART_SR_RXNE));
 	// Read received data
 	result = USART_getc(USART_CONFIGx);
 	// Return Result
@@ -258,3 +265,32 @@ void USART_load_default(usart_config_t* USART_CONFIGx){
 	// Enable RX
 	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
 }
+
+/**
+ * @brief Appends the data to the USART TX buffer
+ * @param str The sequence of characters (string) to be appended
+ * @param length Length of the string
+ * @note The buffer is circular, so it wraps around when it reaches the end
+ */
+void USART_TX_Buffer_Append(const char* str, uint8_t length){
+	// Append the string to the USART TX buffer
+	for(uint8_t i = 0; i < length; i++){
+		USARTx_TX_buffer[USARTx_TX_buffer_head] = str[i];
+		USARTx_TX_buffer_head = ((USARTx_TX_buffer_head + 1) & (USARTx_BUFFER_SIZE - 1));
+	}
+}
+
+/**
+ * @brief Appends the data to the USART RX buffer
+ * @param str The sequence of characters (string) to be appended
+ * @param length Length of the string
+ * @note The buffer is circular, so it wraps around when it reaches the end
+ */
+void USART_RX_Buffer_Append(const char* str, uint8_t length){
+	// Append the string to the USART RX buffer
+	for(uint8_t i = 0; i < length; i++){
+		USARTx_RX_buffer[USARTx_RX_buffer_head] = str[i];
+		USARTx_RX_buffer_head = ((USARTx_RX_buffer_head + 1) & (USARTx_BUFFER_SIZE - 1));
+	}
+}
+

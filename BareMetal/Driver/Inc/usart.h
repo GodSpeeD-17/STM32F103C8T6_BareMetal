@@ -25,9 +25,20 @@
 #define DEF_SEP_LEN						((uint8_t) 50)
 #define DEF_SEP(X)						sep((X), '*', DEF_SEP_LEN)
 #define USART1_DEF_SEP()				DEF_SEP(&USART1_Configuration)
-#define USART1_config()					USART_config(&USART1_Configuration)
-#define USART1_enable()					USART_enable(&USART1_Configuration)
+#define USART1_Config()					USART_Config(&USART1_Configuration)
+#define USART1_Enable()					USART_Enable(&USART1_Configuration)
 /*************************************** MACROs ********************************************/
+
+/*************************************** Buffer ********************************************/
+// USART Buffer Size
+#define USARTx_BUFFER_SIZE				32
+// TX Buffer for USART
+uint8_t USARTx_TX_buffer[USARTx_BUFFER_SIZE] = {[0 ... (USARTx_BUFFER_SIZE - 1)] = 0};
+uint8_t USARTx_TX_buffer_head = 0, USARTx_TX_buffer_tail = 0;
+// RX Buffer for USART
+uint8_t USARTx_RX_buffer[USARTx_BUFFER_SIZE] = {[0 ... (USARTx_BUFFER_SIZE - 1)] = 0};
+uint8_t USARTx_RX_buffer_head = 0, USARTx_RX_buffer_tail = 0;
+/*************************************** Buffer ********************************************/
 
 /*************************************** USART Configuration Structure ********************************************/
 // USART Configuration Structure
@@ -121,7 +132,7 @@ __INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
  * @brief Starts USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__INLINE__ void USART_enable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_Enable(usart_config_t* USART_CONFIGx) {
 	// Enable USART
 	USART_CONFIGx->USARTx->CR1.REG |= USART_CR1_UE;
 }
@@ -130,23 +141,23 @@ __INLINE__ void USART_enable(usart_config_t* USART_CONFIGx) {
  * @brief Stops USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__INLINE__ void USART_disable(usart_config_t* USART_CONFIGx) {
+__INLINE__ void USART_Disable(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
 }
 
 /**
  * @brief Retrieves the IRQn of USART
- * @param[in] USART_CONFIGx USART Configuration Structure
+ * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  * @return IRQn for the corresponding USART
  */
-__INLINE__ uint8_t USART_get_IRQn(usart_config_t* USART_CONFIGx){
+__INLINE__ uint8_t USART_get_IRQn(USART_REG_STRUCT* USARTx){
 	// Retrieves the IRQ Number for NVIC
-	if(USART_CONFIGx->USARTx == USART1)
+	if(USARTx == USART1)
 		return USART1_IRQn;
-	else if(USART_CONFIGx->USARTx == USART2)
+	else if(USARTx == USART2)
 		return USART2_IRQn;
-	else if(USART_CONFIGx->USARTx == USART3)
+	else if(USARTx == USART3)
 		return USART3_IRQn;
 }
 
@@ -154,7 +165,7 @@ __INLINE__ uint8_t USART_get_IRQn(usart_config_t* USART_CONFIGx){
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-void USART_config(usart_config_t* USART_CONFIGx);
+void USART_Config(usart_config_t* USART_CONFIGx);
 
 /**
  * @brief Transmits a character on USART
@@ -233,7 +244,7 @@ __INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
  * @brief Enables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__INLINE__ void USART_DMA_TX_enable(USART_REG_STRUCT* USARTx){
+__INLINE__ void USART_DMA_TX_Enable(USART_REG_STRUCT* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAT;
 }
@@ -242,7 +253,7 @@ __INLINE__ void USART_DMA_TX_enable(USART_REG_STRUCT* USARTx){
  * @brief Disables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__INLINE__ void USART_DMA_TX_disable(USART_REG_STRUCT* USARTx){
+__INLINE__ void USART_DMA_TX_Disable(USART_REG_STRUCT* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAT;
 }
@@ -251,7 +262,7 @@ __INLINE__ void USART_DMA_TX_disable(USART_REG_STRUCT* USARTx){
  * @brief Enables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__INLINE__ void USART_DMA_RX_enable(USART_REG_STRUCT* USARTx){
+__INLINE__ void USART_DMA_RX_Enable(USART_REG_STRUCT* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAR;
 }
@@ -260,9 +271,29 @@ __INLINE__ void USART_DMA_RX_enable(USART_REG_STRUCT* USARTx){
  * @brief Disables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__INLINE__ void USART_DMA_RX_disable(USART_REG_STRUCT* USARTx){
+__INLINE__ void USART_DMA_RX_Disable(USART_REG_STRUCT* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAR;
 }
+
+/**
+ * @brief Appends the data to the USART TX buffer
+ * @param str The sequence of characters (string) to be appended
+ * @param length Length of the string
+ * @note The buffer is circular, so it wraps around when it reaches the end
+ */
+void USART_TX_Buffer_Append(const char* str, uint8_t length);
+
+/**
+ * @brief Appends the data to the USART RX buffer
+ * @param str The sequence of characters (string) to be appended
+ * @param length Length of the string
+ * @note The buffer is circular, so it wraps around when it reaches the end
+ */
+void USART_RX_Buffer_Append(const char* str, uint8_t length);
+
+
+
+
 
 #endif /* __USART_H__ */
