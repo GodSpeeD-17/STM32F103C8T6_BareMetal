@@ -17,6 +17,7 @@
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
+#include "arm_reg_map.h"
 #include "flash_reg_map.h"
 #include "nvic_reg_map.h"
 #include "systick_reg_map.h"
@@ -40,6 +41,7 @@
 // Memory Mapping
 #define SysTick_BASE_ADDR					0xE000E010
 #define NVIC_BASE_ADDR						0xE000E100
+#define CPU_ID_BASE_ADDR					0xE000ED00
 #define APB1_BASE_ADDR						0x40000000
 #define APB2_BASE_ADDR						0x40010000
 #define AHB_BASE_ADDR						0x40018000

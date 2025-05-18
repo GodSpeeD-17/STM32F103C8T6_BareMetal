@@ -123,4 +123,6 @@ SECTIONS
 
   /* Optional symbol marking end of memory layout */
   _end = .;
+  /* For dynamic memory allocation */
+  PROVIDE(end = _eheap);
 }
