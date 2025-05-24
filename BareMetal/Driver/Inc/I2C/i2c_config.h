@@ -1,12 +1,14 @@
 // Header Guards
-#ifndef __I2C_H__
-#define __I2C_H__
+#ifndef __I2C_CONFIG_H__
+#define __I2C_CONFIG_H__
 
-// Dependency
+// Address Mapping
 #include "reg_map.h"
-#include "rcc.h"	// Clock Configuration
-#include "gpio.h"   // For GPIO pin configuration
-#include "nvic.h"	// For Interrupt Configuration
+// For GPIO pin configuration
+#include "gpio.h"
+#include "i2c_config.h"
+// Clock Configuration
+#include "rcc.h"
 
 /**
  ** I2Cx->CR2.BIT.FREQ: I2C Clock Frequency 
@@ -42,11 +44,9 @@
  - For Fast Mode: 400kHz
 	I2C_TRISE = (0.3 * (APB1 Clock/1MHz)) + 1
 	I2C_TRISE = (0.3 * (36MHz/1MHz)) + 1 = (0.3 * 36) + 1 = (10.8) + 1 = 11.8 ~ 12
- */
+*/
 
- //  MACROS
-#define I2C_readAddress(I2Cx, slaveAddress)			(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
-#define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
+// I2C Peripheral Definitions
 #define I2C1_SCL_GPIO								GPIOB
 #define I2C1_SCL_PIN								GPIOx_PIN_6
 #define I2C1_SDA_GPIO								GPIOB
@@ -56,21 +56,9 @@
 #define I2C2_SDA_GPIO								GPIOB
 #define I2C2_SDA_PIN								GPIOx_PIN_11
 
-/**
- * @brief I2C Direction Initialisation
- * @param[in] I2C_CONFIGx I2C Configuration Structure
- */
-#define I2C_init(I2C_CONFIGx) 			\
-{										\
-	/* I2C Configuration */ 			\
-	I2C_Config((I2C_CONFIGx));			\
-	/* I2C Enable */ 					\
-	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
-}
-
+// TODO: TRISE for Fast Mode
 // I2C Configuration Structure
 typedef struct {
-	// TODO: TRISE for Fast Mode
 	// I2C Instance: `I2C1`, `I2C2`
 	I2C_REG_STRUCT* I2Cx;
 	// Serial Clock GPIO Configuration
@@ -174,140 +162,6 @@ __INLINE__ void I2C_disable(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
- * @brief I2C Bus Ready
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns - `0x00`: I2C Bus is not ready
- * @returns - `0x01`: I2C Bus is ready
- */
-__INLINE__ uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
-	// Bus Busy
-	if((I2Cx->SR2.REG & I2C_SR2_BUSY))
-		return (uint8_t)0x00;
-	// Bus Free
-	else
-		return (uint8_t)0x01;
-}
-
-/**
- * @brief I2C Send START Sequence
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-__INLINE__ void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
-	// Send START condition
-	I2Cx->CR1.REG |= I2C_CR1_START;
-}
-
-/**
- * @brief I2C Byte Send
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] data Data to be TX
- */
-__INLINE__ void I2C_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
-	// Send data
-	I2Cx->DR.REG = data;
-}
-
-/**
- * @brief I2C Byte Read
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns Data received from I2C Bus
- */
-__INLINE__ uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx){
-	// Receive data
-	return (uint8_t) (I2Cx->DR.REG & 0xFF);
-}
-
-/**
- * @brief I2C Send STOP Sequence
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-__INLINE__ void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
-	// Send STOP condition
-	I2Cx->CR1.REG |= I2C_CR1_STOP;
-}
-
-/**
- * @brief Retrieves I2C Event IRQn
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns I2C IRQn
- */
-__INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
-	// I2C1
-	if(I2Cx == I2C1)
-	return I2C1_EV_IRQn;
-	// I2C2
-	else if (I2Cx == I2C2)
-		return I2C2_EV_IRQn;
-}
-
-/**
- * @brief Retrieves I2C Event IRQn
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @returns I2C IRQn
- */
-__INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
-	// I2C1
-	if(I2Cx == I2C1)
-		return I2C1_ER_IRQn;
-	// I2C2
-	else if (I2Cx == I2C2)
-		return I2C2_ER_IRQn;
-}
-
-/**
- * @brief Enables the I2C Interrupt
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] I2C_IRQ_status Any logical combination of 
- * @param `I2Cx_IRQ_EVENT`
- * @param `I2Cx_IRQ_BUFFER`
- * @param `I2Cx_IRQ_ERROR`
- * @param `I2Cx_IRQ_ALL`
- */
-void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
-
-/**
- * @brief Disables the I2C Interrupt
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] I2C_IRQ_status Any logical combination of 
- * @param `I2Cx_IRQ_EVENT`
- * @param `I2Cx_IRQ_BUFFER`
- * @param `I2Cx_IRQ_ERROR`
- * @param `I2Cx_IRQ_ALL`
- */
-void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
-
-/**
- * @brief Enables I2C DMA Configuration
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-__INLINE__ void I2C_DMA_enable(I2C_REG_STRUCT* I2Cx){
-	// Enable the I2C DMA
-	I2Cx->CR2.REG |= I2C_CR2_DMAEN;
-}
-
-/**
- * @brief Disables I2C DMA Configuration
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- */
-__INLINE__ void I2C_DMA_disable(I2C_REG_STRUCT* I2Cx){
-	// Disable the I2C DMA
-	I2Cx->CR2.REG &= ~I2C_CR2_DMAEN;
-}
-
-/**
- * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration Structure
- */
-void I2C_Config(i2c_config_t* I2C_CONFIGx);
-
-/**
- * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
- * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
- * @returns Calculated CCR value
- */
-uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequency);
-
-/**
  * @brief Calculates the value of TRISE (TRISE) for I2C Module
  * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
  * @returns Calculated TRISE value
@@ -315,42 +169,21 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 uint8_t I2C_calc_TRISE(uint8_t i2cMode);
 
 /**
- * @brief Writes a Single Byte to Register Address of a given Slave Address
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slave_address MAX30102 Slave Address
- * @param[in] register Register Address
- * @param[in] byte Data to be written
+ * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
+ * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @param[in] i2cDuty I2C Duty: `I2Cx_DUTY_NORMAL`, `I2Cx_DUTY_FAST`
+ * @param[in] i2cClockFrequencyMHz I2C Module Clock Frequency (Recommended APB1Clock)
+ * @returns Calculated CCR value
+ * @note Template Formula:
+ * @note CCR = (I2C_CONFIGx->freq_MHz * `FREQ_1MHz`) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
  */
-void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
+uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz);
 
 /**
- * @brief Writes Multiple Consecutive Bytes to Register Address of a given Slave Address
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @param[in] registerAddress Starting Register Address
- * @param[in] data Pointer to the data buffer
- * @param[in] len Number of bytes to write
+ * @brief Configures I2C as per the Configuration Structure
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
-
-/**
- * @brief Reads a Single Byte from a Register Address of a given Slave Address
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @param[in] registerAddress Register Address to read from
- * @returns The read byte
- */
-uint8_t I2C_Read_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
-
-/**
- * @brief Reads Multiple Consecutive Bytes from a Register Address of a given Slave Address
- * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
- * @param[in] slaveAddress Slave Address
- * @param[in] registerAddress Starting Register Address
- * @param[out] data Pointer to the buffer to store the read data
- * @param[in] len Number of bytes to read
- */
-void I2C_Read_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_Config(i2c_config_t* I2C_CONFIGx);
 
 /**
  * @brief I2C load default values
@@ -364,4 +197,4 @@ void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx);
  */
 void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx);
 
-#endif /* __I2C_H__ */
+#endif /* __I2C_CONFIG_H__ */

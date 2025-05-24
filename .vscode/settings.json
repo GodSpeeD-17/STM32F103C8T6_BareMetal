@@ -264,6 +264,7 @@
         "TENMS",
         "TICKINT",
         "Tlow",
+        "TPCLK",
         "Transfered",
         "TRISE",
         "TSVREFE",
@@ -334,6 +335,7 @@
         "compare": "c",
         "ssd1306_reg_map.h": "c",
         "cmsis_gcc.h": "c",
-        "arm_reg_map.h": "c"
+        "arm_reg_map.h": "c",
+        "i2c_config.h": "c"
     }
 }
