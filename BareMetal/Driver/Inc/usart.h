@@ -29,17 +29,6 @@
 #define USART1_Enable()					USART_Enable(&USART1_Configuration)
 /*************************************** MACROs ********************************************/
 
-/*************************************** Buffer ********************************************/
-// USART Buffer Size
-#define USARTx_BUFFER_SIZE				32
-// TX Buffer for USART
-uint8_t USARTx_TX_buffer[USARTx_BUFFER_SIZE] = {[0 ... (USARTx_BUFFER_SIZE - 1)] = 0};
-uint8_t USARTx_TX_buffer_head = 0, USARTx_TX_buffer_tail = 0;
-// RX Buffer for USART
-uint8_t USARTx_RX_buffer[USARTx_BUFFER_SIZE] = {[0 ... (USARTx_BUFFER_SIZE - 1)] = 0};
-uint8_t USARTx_RX_buffer_head = 0, USARTx_RX_buffer_tail = 0;
-/*************************************** Buffer ********************************************/
-
 /*************************************** USART Configuration Structure ********************************************/
 // USART Configuration Structure
 typedef struct {
