@@ -536,7 +536,7 @@
 /*!< HPRE configuration */
 #define RCC_CFGR_HPRE_Pos                    (4U)                              
 #define RCC_CFGR_HPRE_Msk                    (0xFUL << RCC_CFGR_HPRE_Pos)       /*!< 0x000000F0 */
-#define RCC_CFGR_HPRE                        RCC_CFGR_HPRE_Msk                 /*!< HPRE[3:0] bits (AHB prescaler) */
+#define RCC_CFGR_HPRE                        RCC_CFGR_HPRE_Msk                  /*!< HPRE[3:0] bits (AHB prescaler) */
 #define RCC_CFGR_HPRE_0                      (0x1UL << RCC_CFGR_HPRE_Pos)       /*!< 0x00000010 */
 #define RCC_CFGR_HPRE_1                      (0x2UL << RCC_CFGR_HPRE_Pos)       /*!< 0x00000020 */
 #define RCC_CFGR_HPRE_2                      (0x4UL << RCC_CFGR_HPRE_Pos)       /*!< 0x00000040 */
@@ -592,25 +592,30 @@
 #define RCC_CFGR_ADCPRE_DIV6                 0x00008000U                       /*!< PCLK2 divided by 6 */
 #define RCC_CFGR_ADCPRE_DIV8                 0x0000C000U                       /*!< PCLK2 divided by 8 */
 
+/*!< PLLSRC configuration */
 #define RCC_CFGR_PLLSRC_Pos                  (16U)                             
 #define RCC_CFGR_PLLSRC_Msk                  (0x1UL << RCC_CFGR_PLLSRC_Pos)     /*!< 0x00010000 */
 #define RCC_CFGR_PLLSRC                      RCC_CFGR_PLLSRC_Msk               /*!< PLL entry clock source */
 
+#define RCC_CFGR_PLLSRC_HSI_DIV2  					0x00000000U												/*!< HSI clock divided by 2 selected as PLL entry clock source */ 
+#define RCC_CFGR_PLLSRC_HSE									0x00010000U											  /*!< HSE clock selected as PLL entry clock source */
+
+/*!< PLLSRC HSE Prescaler configuration */
 #define RCC_CFGR_PLLXTPRE_Pos                (17U)                             
 #define RCC_CFGR_PLLXTPRE_Msk                (0x1UL << RCC_CFGR_PLLXTPRE_Pos)   /*!< 0x00020000 */
 #define RCC_CFGR_PLLXTPRE                    RCC_CFGR_PLLXTPRE_Msk             /*!< HSE divider for PLL entry */
 
+#define RCC_CFGR_PLLXTPRE_HSE                0x00000000U                      /*!< HSE clock not divided for PLL entry */
+#define RCC_CFGR_PLLXTPRE_HSE_DIV2           0x00020000U                      /*!< HSE clock divided by 2 for PLL entry */
+
 /*!< PLLMUL configuration */
 #define RCC_CFGR_PLLMULL_Pos                 (18U)                             
 #define RCC_CFGR_PLLMULL_Msk                 (0xFUL << RCC_CFGR_PLLMULL_Pos)    /*!< 0x003C0000 */
-#define RCC_CFGR_PLLMULL                     RCC_CFGR_PLLMULL_Msk              /*!< PLLMUL[3:0] bits (PLL multiplication factor) */
+#define RCC_CFGR_PLLMULL                     RCC_CFGR_PLLMULL_Msk               /*!< PLLMUL[3:0] bits (PLL multiplication factor) */
 #define RCC_CFGR_PLLMULL_0                   (0x1UL << RCC_CFGR_PLLMULL_Pos)    /*!< 0x00040000 */
 #define RCC_CFGR_PLLMULL_1                   (0x2UL << RCC_CFGR_PLLMULL_Pos)    /*!< 0x00080000 */
 #define RCC_CFGR_PLLMULL_2                   (0x4UL << RCC_CFGR_PLLMULL_Pos)    /*!< 0x00100000 */
 #define RCC_CFGR_PLLMULL_3                   (0x8UL << RCC_CFGR_PLLMULL_Pos)    /*!< 0x00200000 */
-
-#define RCC_CFGR_PLLXTPRE_HSE                0x00000000U                      /*!< HSE clock not divided for PLL entry */
-#define RCC_CFGR_PLLXTPRE_HSE_DIV2           0x00020000U                      /*!< HSE clock divided by 2 for PLL entry */
 
 #define RCC_CFGR_PLLMULL2                    0x00000000U                       /*!< PLL input clock*2 */
 #define RCC_CFGR_PLLMULL3_Pos                (18U)                             
@@ -655,6 +660,9 @@
 #define RCC_CFGR_PLLMULL16_Pos               (19U)                             
 #define RCC_CFGR_PLLMULL16_Msk               (0x7UL << RCC_CFGR_PLLMULL16_Pos)  /*!< 0x00380000 */
 #define RCC_CFGR_PLLMULL16                   RCC_CFGR_PLLMULL16_Msk            /*!< PLL input clock*16 */
+// Not considering the last scenario of 0b1111 to maintain uniformity
+
+/*!< USB Device prescaler */
 #define RCC_CFGR_USBPRE_Pos                  (22U)                             
 #define RCC_CFGR_USBPRE_Msk                  (0x1UL << RCC_CFGR_USBPRE_Pos)     /*!< 0x00400000 */
 #define RCC_CFGR_USBPRE                      RCC_CFGR_USBPRE_Msk               /*!< USB Device prescaler */
@@ -4145,7 +4153,7 @@
 
 /* EndPoint REGister MASK (no toggle fields) */
 #define  USB_EPREG_MASK                      (USB_EP_CTR_RX|USB_EP_SETUP|USB_EP_T_FIELD|USB_EP_KIND|USB_EP_CTR_TX|USB_EPADDR_FIELD)
-																		   /*!< EP_TYPE[1:0] EndPoint TYPE */
+																			 /*!< EP_TYPE[1:0] EndPoint TYPE */
 #define USB_EP_TYPE_MASK_Pos                    (9U)                           
 #define USB_EP_TYPE_MASK_Msk                    (0x3UL << USB_EP_TYPE_MASK_Pos) /*!< 0x00000600 */
 #define USB_EP_TYPE_MASK                        USB_EP_TYPE_MASK_Msk           /*!< EndPoint TYPE Mask */
@@ -4156,7 +4164,7 @@
 #define  USB_EP_T_MASK                          (~USB_EP_T_FIELD & USB_EPREG_MASK)
 
 #define  USB_EPKIND_MASK                        (~USB_EP_KIND & USB_EPREG_MASK)  /*!< EP_KIND EndPoint KIND */
-																			   /*!< STAT_TX[1:0] STATus for TX transfer */
+																				 /*!< STAT_TX[1:0] STATus for TX transfer */
 #define USB_EP_TX_DIS                           0x00000000U                    /*!< EndPoint TX DISabled */
 #define USB_EP_TX_STALL                         0x00000010U                    /*!< EndPoint TX STALLed */
 #define USB_EP_TX_NAK                           0x00000020U                    /*!< EndPoint TX NAKed */
@@ -4164,7 +4172,7 @@
 #define USB_EPTX_DTOG1                          0x00000010U                    /*!< EndPoint TX Data TOGgle bit1 */
 #define USB_EPTX_DTOG2                          0x00000020U                    /*!< EndPoint TX Data TOGgle bit2 */
 #define  USB_EPTX_DTOGMASK  (USB_EPTX_STAT|USB_EPREG_MASK)
-																			   /*!< STAT_RX[1:0] STATus for RX transfer */
+																				 /*!< STAT_RX[1:0] STATus for RX transfer */
 #define USB_EP_RX_DIS                           0x00000000U                    /*!< EndPoint RX DISabled */
 #define USB_EP_RX_STALL                         0x00001000U                    /*!< EndPoint RX STALLed */
 #define USB_EP_RX_NAK                           0x00002000U                    /*!< EndPoint RX NAKed */
@@ -4193,7 +4201,7 @@
 #define USB_EP0R_EP_KIND_Pos                    (8U)                           
 #define USB_EP0R_EP_KIND_Msk                    (0x1UL << USB_EP0R_EP_KIND_Pos) /*!< 0x00000100 */
 #define USB_EP0R_EP_KIND                        USB_EP0R_EP_KIND_Msk           /*!< Endpoint Kind */
-																		   
+																			 
 #define USB_EP0R_EP_TYPE_Pos                    (9U)                           
 #define USB_EP0R_EP_TYPE_Msk                    (0x3UL << USB_EP0R_EP_TYPE_Pos) /*!< 0x00000600 */
 #define USB_EP0R_EP_TYPE                        USB_EP0R_EP_TYPE_Msk           /*!< EP_TYPE[1:0] bits (Endpoint type) */
@@ -4221,7 +4229,7 @@
 #define USB_EP1R_EA_Pos                         (0U)                           
 #define USB_EP1R_EA_Msk                         (0xFUL << USB_EP1R_EA_Pos)      /*!< 0x0000000F */
 #define USB_EP1R_EA                             USB_EP1R_EA_Msk                /*!< Endpoint Address */
-																		  
+																			
 #define USB_EP1R_STAT_TX_Pos                    (4U)                           
 #define USB_EP1R_STAT_TX_Msk                    (0x3UL << USB_EP1R_STAT_TX_Pos) /*!< 0x00000030 */
 #define USB_EP1R_STAT_TX                        USB_EP1R_STAT_TX_Msk           /*!< STAT_TX[1:0] bits (Status bits, for transmission transfers) */
@@ -4247,7 +4255,7 @@
 #define USB_EP1R_SETUP_Pos                      (11U)                          
 #define USB_EP1R_SETUP_Msk                      (0x1UL << USB_EP1R_SETUP_Pos)   /*!< 0x00000800 */
 #define USB_EP1R_SETUP                          USB_EP1R_SETUP_Msk             /*!< Setup transaction completed */
-																		   
+																			 
 #define USB_EP1R_STAT_RX_Pos                    (12U)                          
 #define USB_EP1R_STAT_RX_Msk                    (0x3UL << USB_EP1R_STAT_RX_Pos) /*!< 0x00003000 */
 #define USB_EP1R_STAT_RX                        USB_EP1R_STAT_RX_Msk           /*!< STAT_RX[1:0] bits (Status bits, for reception transfers) */
@@ -9449,20 +9457,20 @@
 
 
 /**
-  * @}
+	* @}
 */
 
 /**
-  * @}
+	* @}
 */ 
 
 /** @addtogroup Exported_macro
-  * @{
-  */
+	* @{
+	*/
 
 /****************************** ADC Instances *********************************/
 #define IS_ADC_ALL_INSTANCE(INSTANCE) (((INSTANCE) == ADC1) || \
-									   ((INSTANCE) == ADC2))
+										 ((INSTANCE) == ADC2))
 
 #define IS_ADC_COMMON_INSTANCE(INSTANCE) ((INSTANCE) == ADC12_COMMON)
 
@@ -9480,13 +9488,13 @@
 
 /****************************** DMA Instances *********************************/
 #define IS_DMA_ALL_INSTANCE(INSTANCE) (((INSTANCE) == DMA1_Channel1) || \
-									   ((INSTANCE) == DMA1_Channel2) || \
-									   ((INSTANCE) == DMA1_Channel3) || \
-									   ((INSTANCE) == DMA1_Channel4) || \
-									   ((INSTANCE) == DMA1_Channel5) || \
-									   ((INSTANCE) == DMA1_Channel6) || \
-									   ((INSTANCE) == DMA1_Channel7))
-  
+										 ((INSTANCE) == DMA1_Channel2) || \
+										 ((INSTANCE) == DMA1_Channel3) || \
+										 ((INSTANCE) == DMA1_Channel4) || \
+										 ((INSTANCE) == DMA1_Channel5) || \
+										 ((INSTANCE) == DMA1_Channel6) || \
+										 ((INSTANCE) == DMA1_Channel7))
+	
 /******************************* GPIO Instances *******************************/
 #define IS_GPIO_ALL_INSTANCE(INSTANCE) (((INSTANCE) == GPIOA) || \
 										((INSTANCE) == GPIOB) || \
@@ -9502,7 +9510,7 @@
 
 /******************************** I2C Instances *******************************/
 #define IS_I2C_ALL_INSTANCE(INSTANCE) (((INSTANCE) == I2C1) || \
-									   ((INSTANCE) == I2C2))
+										 ((INSTANCE) == I2C2))
 
 /******************************* SMBUS Instances ******************************/
 #define IS_SMBUS_ALL_INSTANCE         IS_I2C_ALL_INSTANCE
@@ -9512,165 +9520,165 @@
 
 /******************************** SPI Instances *******************************/
 #define IS_SPI_ALL_INSTANCE(INSTANCE) (((INSTANCE) == SPI1) || \
-									   ((INSTANCE) == SPI2))
+										 ((INSTANCE) == SPI2))
 
 /****************************** START TIM Instances ***************************/
 /****************************** TIM Instances *********************************/
 #define IS_TIM_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_ADVANCED_INSTANCE(INSTANCE) ((INSTANCE) == TIM1)
 
 #define IS_TIM_CC1_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CC2_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CC3_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CC4_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CLOCKSOURCE_ETRMODE1_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CLOCKSOURCE_TIX_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_CLOCKSOURCE_ITRX_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_OCXREF_CLEAR_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_ENCODER_INTERFACE_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_XOR_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_MASTER_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_SLAVE_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_DMABURST_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_BREAK_INSTANCE(INSTANCE)\
-  ((INSTANCE) == TIM1)
+	((INSTANCE) == TIM1)
 
 #define IS_TIM_CCX_INSTANCE(INSTANCE, CHANNEL) \
-   ((((INSTANCE) == TIM1) &&                  \
+	 ((((INSTANCE) == TIM1) &&                  \
 	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_2) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_3) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_4)))           \
+		((CHANNEL) == TIM_CHANNEL_2) ||          \
+		((CHANNEL) == TIM_CHANNEL_3) ||          \
+		((CHANNEL) == TIM_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM2) &&                   \
 	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_2) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_3) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_4)))           \
+		((CHANNEL) == TIM_CHANNEL_2) ||          \
+		((CHANNEL) == TIM_CHANNEL_3) ||          \
+		((CHANNEL) == TIM_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM3) &&                   \
 	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_2) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_3) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_4)))           \
+		((CHANNEL) == TIM_CHANNEL_2) ||          \
+		((CHANNEL) == TIM_CHANNEL_3) ||          \
+		((CHANNEL) == TIM_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM4) &&                   \
 	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_2) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_3) ||          \
-	  ((CHANNEL) == TIM_CHANNEL_4))))
+		((CHANNEL) == TIM_CHANNEL_2) ||          \
+		((CHANNEL) == TIM_CHANNEL_3) ||          \
+		((CHANNEL) == TIM_CHANNEL_4))))
 
 #define IS_TIM_CCXN_INSTANCE(INSTANCE, CHANNEL) \
 	(((INSTANCE) == TIM1) &&                    \
 	 (((CHANNEL) == TIM_CHANNEL_1) ||           \
-	  ((CHANNEL) == TIM_CHANNEL_2) ||           \
-	  ((CHANNEL) == TIM_CHANNEL_3)))
+		((CHANNEL) == TIM_CHANNEL_2) ||           \
+		((CHANNEL) == TIM_CHANNEL_3)))
 
 #define IS_TIM_COUNTER_MODE_SELECT_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_REPETITION_COUNTER_INSTANCE(INSTANCE)\
-  ((INSTANCE) == TIM1)
+	((INSTANCE) == TIM1)
 
 #define IS_TIM_CLOCK_DIVISION_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 
 #define IS_TIM_DMA_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 	
 #define IS_TIM_DMA_CC_INSTANCE(INSTANCE)\
-  (((INSTANCE) == TIM1)    || \
-   ((INSTANCE) == TIM2)    || \
-   ((INSTANCE) == TIM3)    || \
-   ((INSTANCE) == TIM4))
+	(((INSTANCE) == TIM1)    || \
+	 ((INSTANCE) == TIM2)    || \
+	 ((INSTANCE) == TIM3)    || \
+	 ((INSTANCE) == TIM4))
 	
 #define IS_TIM_COMMUTATION_EVENT_INSTANCE(INSTANCE)\
-  ((INSTANCE) == TIM1)
+	((INSTANCE) == TIM1)
 
 #define IS_TIM_ETR_INSTANCE(INSTANCE)  (((INSTANCE) == TIM1)    || \
 										((INSTANCE) == TIM2)    || \
@@ -9699,8 +9707,8 @@
 
 /******************** UART Instances : Half-Duplex mode **********************/
 #define IS_UART_HALFDUPLEX_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
-											   ((INSTANCE) == USART2) || \
-											   ((INSTANCE) == USART3))
+												 ((INSTANCE) == USART2) || \
+												 ((INSTANCE) == USART3))
 
 /******************** UART Instances : LIN mode **********************/
 #define IS_UART_LIN_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
@@ -9709,8 +9717,8 @@
 
 /****************** UART Instances : Hardware Flow control ********************/                                    
 #define IS_UART_HWFLOW_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
-										   ((INSTANCE) == USART2) || \
-										   ((INSTANCE) == USART3))
+											 ((INSTANCE) == USART2) || \
+											 ((INSTANCE) == USART3))
 
 /********************* UART Instances : Smard card mode ***********************/
 #define IS_SMARTCARD_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
@@ -9724,8 +9732,8 @@
 
 /***************** UART Instances : Multi-Processor mode **********************/
 #define IS_UART_MULTIPROCESSOR_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \
-												   ((INSTANCE) == USART2) || \
-												   ((INSTANCE) == USART3))
+													 ((INSTANCE) == USART2) || \
+													 ((INSTANCE) == USART3))
 
 /***************** UART Instances : DMA mode available **********************/
 #define IS_UART_DMA_INSTANCE(INSTANCE) (((INSTANCE) == USART1) || \

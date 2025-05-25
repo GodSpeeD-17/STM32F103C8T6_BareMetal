@@ -140,7 +140,7 @@
 // Error Checking MACROS
 #define IS_VALID_GPIO(GPIO) 				((GPIO) == GPIOA || (GPIO) == GPIOB || (GPIO) == GPIOC || (GPIO) == NULL)
 #define IS_VALID_PIN(PIN) 					((PIN) <= GPIOx_PIN_15)
-#define IS_MODE_VALID(MODE)				((MODE) == GPIOx_MODE_IN || (MODE) == GPIOx_MODE_OUT_10MHz || (MODE) == GPIOx_MODE_OUT_2MHz || (MODE) == GPIOx_MODE_OUT_50MHz)
+#define IS_MODE_VALID(MODE)					((MODE) == GPIOx_MODE_IN || (MODE) == GPIOx_MODE_OUT_10MHz || (MODE) == GPIOx_MODE_OUT_2MHz || (MODE) == GPIOx_MODE_OUT_50MHz)
 #define IS_CNF_VALID(CNF)					((CNF) == GPIOx_CNF_IN_ANALOG || (CNF) == GPIOx_CNF_IN_FLOAT || (CNF) == GPIOx_CNF_IN_PD || (CNF) == GPIOx_CNF_IN_PU || \
 											 (CNF) == GPIOx_CNF_OUT_GP_PP || (CNF) == GPIOx_CNF_OUT_GP_OD || (CNF) == GPIOx_CNF_OUT_AF_PP || (CNF) == GPIOx_CNF_OUT_AF_OD)
 #define ARE_GPIO_PARAMETERS_VALID(GPIO, PIN, MODE, CNF)	\
@@ -188,69 +188,66 @@
 #define PLL_MAX_FREQ						((uint32_t) 72000000)
 
 // Clock Source
-#define SW_CLK_HSI							((uint8_t) 0x00)
-#define SW_CLK_HSE							((uint8_t) 0x01)
-#define SW_CLK_PLL							((uint8_t) 0x02)
+#define RCCx_SW_CLK_HSI						0x00
+#define RCCx_SW_CLK_HSE						0x01
+#define RCCx_SW_CLK_PLL						0x02
 
 // AHB Prescaler
-#define AHB_DIV_1							((uint8_t) 0x00)
-#define AHB_DIV_2							((uint8_t) 0x08)
-#define AHB_DIV_4							((uint8_t) 0x09)
-#define AHB_DIV_8							((uint8_t) 0x0A)
-#define AHB_DIV_16							((uint8_t) 0x0B)
-#define AHB_DIV_64							((uint8_t) 0x0C)
-#define AHB_DIV_128							((uint8_t) 0x0D)
-#define AHB_DIV_256							((uint8_t) 0x0E)
-#define AHB_DIV_512							((uint8_t) 0x0F)
+#define RCCx_AHB_DIV_1						0x00
+#define RCCx_AHB_DIV_2						0x08
+#define RCCx_AHB_DIV_4						0x09
+#define RCCx_AHB_DIV_8						0x0A
+#define RCCx_AHB_DIV_16						0x0B
+#define RCCx_AHB_DIV_64						0x0C
+#define RCCx_AHB_DIV_128					0x0D
+#define RCCx_AHB_DIV_256					0x0E
+#define RCCx_AHB_DIV_512					0x0F
 
 // APB1 Prescaler
-#define APB1_DIV_1							((uint8_t) 0x03)
-#define APB1_DIV_2							((uint8_t) 0x04)
-#define APB1_DIV_4							((uint8_t) 0x05)
-#define APB1_DIV_8							((uint8_t) 0x06)
-#define APB1_DIV_16							((uint8_t) 0x07)
+#define RCCx_APB1_DIV_1						0x03
+#define RCCx_APB1_DIV_2						0x04
+#define RCCx_APB1_DIV_4						0x05
+#define RCCx_APB1_DIV_8						0x06
+#define RCCx_APB1_DIV_16					0x07
 
 // APB2 Prescaler
-#define APB2_DIV_1							((uint8_t) 0x03)
-#define APB2_DIV_2							((uint8_t) 0x04)
-#define APB2_DIV_4							((uint8_t) 0x05)
-#define APB2_DIV_8							((uint8_t) 0x06)
-#define APB2_DIV_16							((uint8_t) 0x07)
+#define RCCx_APB2_DIV_1						0x03
+#define RCCx_APB2_DIV_2						0x04
+#define RCCx_APB2_DIV_4						0x05
+#define RCCx_APB2_DIV_8						0x06
+#define RCCx_APB2_DIV_16					0x07
 
 // ADC Prescaler
-#define ADC_DIV_2							((uint8_t) 0x00)
-#define ADC_DIV_4							((uint8_t) 0x01)
-#define ADC_DIV_6							((uint8_t) 0x02)
-#define ADC_DIV_8							((uint8_t) 0x03)
+#define RCCx_ADC_DIV_2						0x00
+#define RCCx_ADC_DIV_4						0x01
+#define RCCx_ADC_DIV_6						0x02
+#define RCCx_ADC_DIV_8						0x03
 
 // PLL Clock Source
-#define PLL_SRC_HSI_DIV_2					((uint8_t) 0x00)
-#define PLL_SRC_HSE							((uint8_t) 0x01)
-
-// PLL Clock Source Prescaler
-#define PLL_HSE_DIV_1						((uint8_t) 0x00)
-#define PLL_HSE_DIV_2						((uint8_t) 0x01)
+#define RCCx_PLL_SRC_HSI_DIV_2				0x00
+#define RCCx_PLL_SRC_HSE_DIV_1				0x01
+#define RCCx_PLL_SRC_HSE_DIV_2				0x03
 
 // PLL Multiplication Factor
-#define PLL_MUL_2							((uint8_t) 0x00)
-#define PLL_MUL_3							((uint8_t) 0x01)
-#define PLL_MUL_4							((uint8_t) 0x02)
-#define PLL_MUL_5							((uint8_t) 0x03)
-#define PLL_MUL_6							((uint8_t) 0x04)
-#define PLL_MUL_7							((uint8_t) 0x05)
-#define PLL_MUL_8							((uint8_t) 0x06)
-#define PLL_MUL_9							((uint8_t) 0x07)
-#define PLL_MUL_10							((uint8_t) 0x08)
-#define PLL_MUL_11							((uint8_t) 0x09)
-#define PLL_MUL_12							((uint8_t) 0x0A)
-#define PLL_MUL_13							((uint8_t) 0x0B)
-#define PLL_MUL_14							((uint8_t) 0x0C)
-#define PLL_MUL_15							((uint8_t) 0x0D)
-#define PLL_MUL_16							((uint8_t) 0x0E)
+#define RCCx_PLL_MUL_2						0x00
+#define RCCx_PLL_MUL_3						0x01
+#define RCCx_PLL_MUL_4						0x02
+#define RCCx_PLL_MUL_5						0x03
+#define RCCx_PLL_MUL_6						0x04
+#define RCCx_PLL_MUL_7						0x05
+#define RCCx_PLL_MUL_8						0x06
+#define RCCx_PLL_MUL_9						0x07
+#define RCCx_PLL_MUL_10						0x08
+#define RCCx_PLL_MUL_11						0x09
+#define RCCx_PLL_MUL_12						0x0A
+#define RCCx_PLL_MUL_13						0x0B
+#define RCCx_PLL_MUL_14						0x0C
+#define RCCx_PLL_MUL_15						0x0D
+#define RCCx_PLL_MUL_16						0x0E
 
 // USB Prescaler
-#define USB_DIV_1_5							((uint8_t) 0x00)
-#define USB_DIV_1							((uint8_t) 0x01)
+#define RCCx_USB_DIV_1_5					0x00
+#define RCCx_USB_DIV_1						0x01
 
 // PLL Clock Source
 typedef enum {
@@ -270,15 +267,6 @@ typedef enum {
 	SYSCLK_64MHz,
 	SYSCLK_72MHz,
 } SYSCLK_FREQ;
-
-// Main Clock Source
-extern volatile uint32_t CoreClock;
-// Advanced High Performance Bus (AHB) Frequency
-extern volatile uint32_t AHBClock;
-// Advanced Peripheral Bus 1 (APB1) Frequency
-extern volatile uint32_t APB1Clock;
-// Advanced Peripheral Bus 2 (APB2) Frequency
-extern volatile uint32_t APB2Clock;
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/
