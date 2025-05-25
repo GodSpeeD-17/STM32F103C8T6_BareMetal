@@ -1,0 +1,178 @@
+# Makefile for STM32 BareMetal
+
+# --- Configuration ---
+MCU_MODEL      := STM32F103C8T6
+FLASH_TOTAL_KB := 64
+RAM_TOTAL_KB   := 20
+
+# Paths
+ROOT_DIR       := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
+TARGET         := main
+BUILD_DIR      := $(shell pwd)/Build
+
+# --- Toolchain ---
+TRIPLE         := arm-none-eabi
+CC             := $(TRIPLE)-gcc
+OBJCOPY        := $(TRIPLE)-objcopy
+SIZE           := $(TRIPLE)-size
+
+# --- Driver/Module Setup ---
+DRIVER_BASE    := $(ROOT_DIR)/BareMetal/Driver
+DRIVER_MODULES := $(shell find $(DRIVER_BASE)/Inc -type d ! -path "$(DRIVER_BASE)/Inc" -printf "%P\n")
+
+# Includes (modular + flat)
+INCLUDES       := -I$(DRIVER_BASE)/Inc \
+                  $(addprefix -I$(DRIVER_BASE)/Inc/,$(DRIVER_MODULES)) \
+                  -I$(ROOT_DIR)/BareMetal/Core/Inc \
+                  -I$(shell pwd)/Inc
+
+# Sources (modular + flat)
+DRIVER_SRCS    := $(foreach dir,$(DRIVER_MODULES),\
+                    $(wildcard $(DRIVER_BASE)/Src/$(dir)/*.c)) \
+                  $(wildcard $(DRIVER_BASE)/Src/*.c)  # Flat .c files
+
+LOCAL_SRCS     := $(wildcard $(shell pwd)/Src/*.c) \
+                  $(wildcard $(shell pwd)/Startup/*.c)
+
+# --- Compiler Flags ---
+CFLAGS         := -mcpu=cortex-m3 -mthumb -mfloat-abi=soft \
+                  --specs=nano.specs \
+                  $(INCLUDES) -std=gnu11 -Og -Wall \
+                  -fdata-sections -ffunction-sections \
+                  -D$(MCU_MODEL) -MMD -MP
+
+# --- Build Rules ---
+$(BUILD_DIR):
+	@mkdir -p $@
+
+OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(DRIVER_SRCS:.c=.o))) \
+        $(addprefix $(BUILD_DIR)/,$(notdir $(LOCAL_SRCS:.c=.o)))
+
+$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/*/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(shell pwd)/Src/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(shell pwd)/Startup/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS)
+	$(CC) $(CFLAGS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
+	-Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--gc-sections -o $@ $^
+	$(SIZE) $@
+
+$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
+	$(OBJCOPY) -O binary $< $@
+
+# --- Memory Report ---
+define memory_report
+	@echo "\n\033[1;36m=== Memory Usage ===\033[0m"
+	@$(SIZE) -A -x $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
+	  /\.text/ { text=$$2 } \
+	  /\.data/ { data=$$2 } \
+	  /\.bss/  { bss=$$3 } \
+	  END { \
+	    flash_used = text + data; \
+	    ram_used = data + bss; \
+	    printf("Flash: %d/%d KB (%.1f%%)\nRAM:   %d/%d KB (%.1f%%)\n", \
+	      flash_used/1024, flash_kb, (flash_used/(flash_kb*1024))*100, \
+	      ram_used/1024, ram_kb, (ram_used/(ram_kb*1024))*100); \
+	    if (ram_used > ram_kb*1024*0.8) \
+	      print "\033[1;31mWARNING: High RAM usage!\033[0m"; \
+	  }'
+endef
+
+# --- Targets ---
+.PHONY: all flash clean debug
+
+all: $(BUILD_DIR)/$(TARGET).bin
+	$(call memory_report)
+
+flash: all
+	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+
+# Clean target
+clean:
+	@rm -r $(BUILD_DIR) || true
+	@rm -r ./.vscode || true
+	@echo "***********************************************************************"
+	@echo "Cleaned Project"
+	@echo "***********************************************************************"
+
+# Debug
+debug: $(BUILD_DIR)/$(TARGET).elf vscode_files
+	@echo "***********************************************************************"
+	@echo "Debug Configurations Ready!"
+	@echo "***********************************************************************"
+
+
+# Generate all necessary files in .vscode directory
+vscode_files:
+	$(MAKE) generate_launch_json
+	$(MAKE) generate_settings_json
+	$(MAKE) generate_tasks_json
+	$(MAKE) generate_c_cpp_properties_json
+
+# Ensure the .vscode directory exists
+.vscode:
+	@mkdir -p ./.vscode
+
+# launch.json
+generate_launch_json: .vscode
+	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
+
+# settings.json
+generate_settings_json: .vscode
+	@printf '{\n    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",\n    "cortex-debug.openocdPath": "/usr/local/bin/openocd",\n    "cortex-debug.stutilPath": "/usr/bin/st-util",\n    "cortex-debug.variableUseNaturalFormat": false\n}' > .vscode/settings.json
+
+# tasks.json
+generate_tasks_json: .vscode
+	@printf '{\n    "version": "2.0.0",\n    "tasks": [\n        {\n            "label": "Build Project",\n            "type": "shell",\n            "command": "make",\n            "args": ["all", "debug"],\n            "group": {\n                "kind": "build",\n                "isDefault": true\n            },\n            "problemMatcher": ["$$gcc"],\n            "detail": "Build the current project using Makefile",\n            "dependsOn": "Clean Project"\n        },\n        {\n            "label": "Clean Project",\n            "type": "shell",\n            "command": "make",\n            "args": ["clean"],\n            "group": "build",\n            "problemMatcher": [],\n            "detail": "Clean the build directory"\n        }\n    ]\n}' > .vscode/tasks.json
+
+# c_cpp_properties.json
+generate_c_cpp_properties_json: .vscode
+	@printf '{\n    "configurations": [\n        {\n            "name": "Linux",\n            "includePath": [\n                "$(ROOT_DIR)/BareMetal/Core/Inc/**",\n                "$(ROOT_DIR)/BareMetal/Driver/Inc/**",\n                "../Inc/**"\n            ],\n            "defines": [],\n            "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n            "cStandard": "c11",\n            "cppStandard": "gnu++17",\n            "intelliSenseMode": "linux-gcc-arm"\n        }\n    ],\n    "version": 4\n}' > .vscode/c_cpp_properties.json
+
+# Target to list files, count them, and replace them based on the FILE parameter
+replace:
+	@if [ -z "$(FILE)" ]; then \
+		echo "ERROR: FILE parameter not specified"; \
+		echo "Usage: make replace_files FILE=<pattern>"; \
+		exit 1; \
+	fi
+	@echo "***********************************************************************"
+	@echo "Current directory: $$(realpath --relative-to=$(ROOT_DIR)/Projects $$(pwd))"
+	@echo "***********************************************************************"
+	@FILE_PATHS=$$(find $(ROOT_DIR)/Projects -type f -name "$(FILE)" -not -path "$$(pwd)/*"); \
+	echo "$$FILE_PATHS" | sed "s|$(ROOT_DIR)/Projects/||"; \
+	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)"; \
+	for dest_file in $$FILE_PATHS; do \
+		rel_path="$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$dest_file")"; \
+		src_file="$$(find $(shell pwd) -type f -name "$$(basename "$$dest_file")" | head -n 1)"; \
+		if [ -n "$$src_file" ]; then \
+			echo "Replacing '$(ROOT_DIR)/Projects/$$rel_path' with '$$src_file'"; \
+			cp "$$src_file" "$(ROOT_DIR)/Projects/$$rel_path"; \
+		else \
+			echo "Source file for '$(ROOT_DIR)/Projects/$$rel_path' not found, skipping."; \
+		fi; \
+	done
+	@echo "***********************************************************************"
+
+# Makefile Alias
+replace_makefile:
+	$(MAKE) replace FILE="Makefile"
+
+# Startup Alias
+replace_startup:
+	$(MAKE) replace FILE="stm32f1_startup.c"
+
+# Linker Alias
+replace_linker:
+	$(MAKE) replace FILE="stm32f1_ls.ld"
+
+
+-include $(wildcard $(BUILD_DIR)/*.d)
