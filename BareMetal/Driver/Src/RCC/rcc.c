@@ -38,7 +38,7 @@ void RCC_Config(rcc_config_t* configX){
 	}
 	// System Clock Source
 	RCC->CFGR.REG |= (uint32_t)(((configX->sys_clk_src & 0x03) << RCC_CFGR_SW_Pos));
-	while(((RCC->CFGR.REG & RCC_CFGR_SWS) != (RCC->CFGR.REG & RCC_CFGR_SW)));
+	while(((RCC->CFGR.REG & RCC_CFGR_SWS) != ((RCC->CFGR.REG & RCC_CFGR_SW) << RCC_CFGR_SWS_Pos)));
 	// Update the Frequency (NOTE: Order of Updation is Important)
 	RCC_Update_CoreClock();
 	RCC_Update_AHBClock();

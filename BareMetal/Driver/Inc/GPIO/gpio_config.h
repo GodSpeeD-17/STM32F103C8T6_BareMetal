@@ -8,7 +8,7 @@
 // On-board LED MACROs (Active-Low)
 #define OB_LED_Set()				OB_LED_PORT->BRR.REG |= (1 << OB_LED_PIN)
 #define OB_LED_Reset()				OB_LED_PORT->BSRR.REG |= (1 << OB_LED_PIN)
-#define OB_LED_Toggle()				OB_LED_PORT->BRR.REG ^= (1 << OB_LED_PIN)
+#define OB_LED_Toggle()				OB_LED_PORT->ODR.REG ^= (1 << OB_LED_PIN)
 
 // TODO: GPIO Lookup Table
 
