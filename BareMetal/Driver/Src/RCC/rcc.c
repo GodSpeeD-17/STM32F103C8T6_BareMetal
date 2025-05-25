@@ -148,45 +148,6 @@ uint32_t RCC_getAPB2Freq(void){
 }
 
 /**
- * @brief Configures PLL parameters
- * @param[in] PLL_SRC PLL Input Source
- * @param[in] PLL_MUL PLL Multiplication Factor
- */
-static void RCC_PLL_config(PLL_CLK_SRC_ENUM PLL_SRC, uint8_t PLL_MUL){
-	// PLL Multiplication Factor
-	RCC->CFGR.BIT.PLLMUL = PLL_MUL;
-	// PLL Clock Source Configuration
-	switch(PLL_SRC){
-		// HSE
-		case HSE_DIV_1:
-			// PLL Clock Source: HSE
-			RCC->CFGR.BIT.PLLSRC = PLL_SRC_HSE;
-			// PLL Clock Source Division
-			RCC->CFGR.BIT.PLLXTPRE = PLL_HSE_DIV_1;
-		break;
-
-		// HSE
-		case HSE_DIV_2:
-			// PLL Clock Source: HSE
-			RCC->CFGR.BIT.PLLSRC = PLL_SRC_HSE;
-			// PLL Clock Source Division
-			RCC->CFGR.BIT.PLLXTPRE = PLL_HSE_DIV_2;
-		break;
-
-		// HSI
-		case HSI_DIV_2:
-			// PLL Clock Source: HSI
-			RCC->CFGR.BIT.PLLSRC = PLL_SRC_HSI_DIV_2;
-		break;
-
-		// Error
-		default:
-			return;
-		break;
-	}
-}
-
-/**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
  */
@@ -218,4 +179,37 @@ void RCC_Config(rcc_config_t* configX){
 	AHBClock = RCC_getAHBFreq();
 	APB1Clock = RCC_getAPB1Freq();
 	APB2Clock = RCC_getAPB2Freq();
+}
+
+
+void RCC_Config_72MHz(){
+	// Configuration: 72MHz
+	rcc_config_t RCC_Configuration_72MHz = {
+		// System Clock Source
+		.sys_clk_src = SW_CLK_PLL,
+		// Flash Configuration
+		.flash = {
+			.latency = FLASH_ACR_LATENCY_2,
+			.prefetch = FLASH_ACR_PRFTBE_Msk,
+		},
+		// PLL Configuration
+		.pll = {
+			.ext_src = PLL_SRC_HSE,
+			.ext_src_pre = PLL_HSE_DIV_1,
+			.mul_fact = PLL_MUL_9,
+		},
+		// Bus Configuration
+		.bus = {
+			.APB1_pre = APB1_DIV_2,
+			.APB2_pre = APB2_DIV_1,
+			.AHB_pre = AHB_DIV_1
+		},
+		// Components Configuration
+		.component = {
+			.ADC_pre = ADC_DIV_6,
+			.USB_pre = USB_DIV_1_5,
+		},
+	};
+	// Configuration
+	RCC_Config(&RCC_Configuration_72MHz);
 }

@@ -6,7 +6,7 @@
  * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
  * @returns Calculated TRISE value
  */
-uint8_t I2C_calc_TRISE(uint8_t i2cMode){
+uint8_t I2C_Calc_tRISE(uint8_t i2cMode){
 	// Local Value
 	uint8_t calc_TRISE = 0;
 	// Get APB1 Clock (in MHz)
@@ -29,7 +29,7 @@ uint8_t I2C_calc_TRISE(uint8_t i2cMode){
  * @note Template Formula:
  * @note CCR = (I2C_CONFIGx->freq_MHz * `FREQ_1MHz`) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
  */
-uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz){
+uint16_t I2C_Calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz){
 	// Local Value
 	uint32_t calculated_CCR = 0;
 	// I2C Module Frequency (Tfreq)
@@ -67,14 +67,13 @@ uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 	return (uint16_t) (calculated_CCR & 0xFFFF);
 }
 
-
 /**
  * @brief Configures I2C as per the Configuration Structure
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
 void I2C_Config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
-	I2C_clk_enable(I2C_CONFIGx->I2Cx);
+	I2C_Clk_Enable(I2C_CONFIGx->I2Cx);
 	// Configure GPIOs
 	GPIO_Config(&I2C_CONFIGx->SCL);
 	GPIO_Config(&I2C_CONFIGx->SDA);
@@ -115,9 +114,9 @@ void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C Frequency
 	I2C_CONFIGx->freq_MHz = (APB1Clock/FREQ_1MHz);
 	// I2C Rise Time Configuration
-	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
+	I2C_CONFIGx->TRISE = I2C_Calc_tRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
-	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
+	I2C_CONFIGx->CCR = I2C_Calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
 }
 
 /**
@@ -144,7 +143,7 @@ void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C Frequency
 	I2C_CONFIGx->freq_MHz = (APB1Clock/FREQ_1MHz);
 	// I2C Rise Time Configuration
-	I2C_CONFIGx->TRISE = I2C_calc_TRISE(I2C_CONFIGx->mode);
+	I2C_CONFIGx->TRISE = I2C_Calc_tRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
-	I2C_CONFIGx->CCR = I2C_calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
+	I2C_CONFIGx->CCR = I2C_Calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
 }

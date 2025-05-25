@@ -4,13 +4,16 @@
 
 // Address Mapping
 #include "reg_map.h"
+#include "i2c_config.h"
+// Interrupt Configuration
+#include "nvic.h"
 
 /**
  * @brief Retrieves I2C Event IRQn
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
+__INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 	return I2C1_EV_IRQn;
@@ -24,7 +27,7 @@ __INLINE__ uint8_t I2C_getEV_IRQn(I2C_REG_STRUCT* I2Cx){
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
+__INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_REG_STRUCT* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 		return I2C1_ER_IRQn;
@@ -42,7 +45,7 @@ __INLINE__ uint8_t I2C_getER_IRQn(I2C_REG_STRUCT* I2Cx){
  * @param `I2Cx_IRQ_ERROR`
  * @param `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
+void I2C_IRQ_Enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
 
 /**
  * @brief Disables the I2C Interrupt
@@ -53,6 +56,6 @@ void I2C_IRQ_enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
  * @param `I2Cx_IRQ_ERROR`
  * @param `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
+void I2C_IRQ_Disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
 
 #endif /* __I2C_IRQ_H__ */ 

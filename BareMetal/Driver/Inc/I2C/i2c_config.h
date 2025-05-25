@@ -46,16 +46,6 @@
 	I2C_TRISE = (0.3 * (36MHz/1MHz)) + 1 = (0.3 * 36) + 1 = (10.8) + 1 = 11.8 ~ 12
 */
 
-// I2C Peripheral Definitions
-#define I2C1_SCL_GPIO								GPIOB
-#define I2C1_SCL_PIN								GPIOx_PIN_6
-#define I2C1_SDA_GPIO								GPIOB
-#define I2C1_SDA_PIN								GPIOx_PIN_7
-#define I2C2_SCL_GPIO								GPIOB
-#define I2C2_SCL_PIN								GPIOx_PIN_10
-#define I2C2_SDA_GPIO								GPIOB
-#define I2C2_SDA_PIN								GPIOx_PIN_11
-
 // TODO: TRISE for Fast Mode
 // I2C Configuration Structure
 typedef struct {
@@ -109,7 +99,7 @@ typedef struct {
  * @brief Enables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_clk_enable(I2C_REG_STRUCT* I2Cx){
+__INLINE__ void I2C_Clk_Enable(I2C_REG_STRUCT* I2Cx){
 	// Enable AFIO
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -128,7 +118,7 @@ __INLINE__ void I2C_clk_enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_clk_disable(I2C_REG_STRUCT* I2Cx){
+__INLINE__ void I2C_Clk_Disable(I2C_REG_STRUCT* I2Cx){
 	// Disable AFIO
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -147,7 +137,7 @@ __INLINE__ void I2C_clk_disable(I2C_REG_STRUCT* I2Cx){
  * @brief Enables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_enable(I2C_REG_STRUCT* I2Cx){
+__INLINE__ void I2C_Enable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG |= I2C_CR1_PE;
 }
@@ -156,7 +146,7 @@ __INLINE__ void I2C_enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_disable(I2C_REG_STRUCT* I2Cx){
+__INLINE__ void I2C_Disable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG &= ~I2C_CR1_PE;
 }
@@ -166,7 +156,7 @@ __INLINE__ void I2C_disable(I2C_REG_STRUCT* I2Cx){
  * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
  * @returns Calculated TRISE value
  */
-uint8_t I2C_calc_TRISE(uint8_t i2cMode);
+uint8_t I2C_Calc_tRISE(uint8_t i2cMode);
 
 /**
  * @brief Calculates the value of Clock Control Register (CCR) for I2C Module
@@ -177,7 +167,7 @@ uint8_t I2C_calc_TRISE(uint8_t i2cMode);
  * @note Template Formula:
  * @note CCR = (I2C_CONFIGx->freq_MHz * `FREQ_1MHz`) / (<T_ns/Thigh_ns> * I2Cx_SPEED_y);
  */
-uint16_t I2C_calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz);
+uint16_t I2C_Calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequencyMHz);
 
 /**
  * @brief Configures I2C as per the Configuration Structure

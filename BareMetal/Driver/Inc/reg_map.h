@@ -351,138 +351,136 @@ extern volatile uint32_t APB2Clock;
 /*********************************************** EXTI MACROS ***********************************************/
 
 /*********************************************** I2C MACROS ***********************************************/
-// I2C Speed: Standard Mode (Sm)
+// I2C Speed
 #define I2Cx_SPEED_STD						FREQ_100kHz	
-// I2C Speed: Fast Mode (Fm)
 #define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)
-// I2C SCL Clock Freq: 4MHz
+// I2C SCL Clock Frequency
 #define I2Cx_SCL_FREQ_4MHz					0x04
-// I2C SCL Clock Freq: 8MHz
 #define I2Cx_SCL_FREQ_8MHz					0x08
-// I2C SCL Clock Freq: 16MHz
 #define I2Cx_SCL_FREQ_16MHz					0x10
-// I2C SCL Clock Freq: 32MHz
 #define I2Cx_SCL_FREQ_32MHz					0x20
-// I2C SCL Clock Freq: APB1
 #define I2Cx_SCL_FREQ_DEFAULT				APB1Clock
-// I2C Mode: Standard
+// I2C Mode
 #define I2Cx_MODE_STD						0x00
-// I2C Mode: Fast
 #define I2Cx_MODE_FAST						0x01
-// I2C Event Interrupt
+// I2C Interrupt Mapping
 #define	I2Cx_IRQ_EVENT						0x01
-// I2C Buffer Interrupt
 #define I2Cx_IRQ_BUFFER						0x02
-// I2C Error Interrupt
 #define I2Cx_IRQ_ERROR						0x04
-// I2C All Interrupt Enable
 #define I2Cx_IRQ_ALL						(I2Cx_IRQ_EVENT | I2Cx_IRQ_BUFFER | I2Cx_IRQ_ERROR)
-// I2C Fast Mode: Normal Duty (2:1)
+// I2C Fast Mode Duty
 #define I2Cx_DUTY_NORMAL					0x00
-// I2C Fast Mode: Fast Duty (16:9)
 #define I2Cx_DUTY_FAST						0x01
-// I2C Slave Write
+// I2C Slave R/W Definitions
 #define I2Cx_WRITE							0x00
-// I2C Slave Read
 #define I2Cx_READ							0x01
+// I2C Peripheral Definitions
+#define I2C1_SCL_GPIO								GPIOB
+#define I2C1_SCL_PIN								GPIOx_PIN_6
+#define I2C1_SDA_GPIO								GPIOB
+#define I2C1_SDA_PIN								GPIOx_PIN_7
+#define I2C2_SCL_GPIO								GPIOB
+#define I2C2_SCL_PIN								GPIOx_PIN_10
+#define I2C2_SDA_GPIO								GPIOB
+#define I2C2_SDA_PIN								GPIOx_PIN_11
 /*********************************************** I2C MACROS ***********************************************/
 
 /*********************************************** SysTick MACROS ***********************************************/
 // SysTick Clock Selection
-#define SYSTICK_CLK_EXT						((uint8_t) 0x00)
-#define SYSTICK_CLK_CORE					((uint8_t) 0x01)
+#define SYSTICK_CLK_EXT						0x00
+#define SYSTICK_CLK_CORE					0x01
 
 // SysTick Delay
 #define SYSTICK_DELAY_1_US					AHBClock
-#define SYSTICK_DELAY_2_US					((uint32_t)(2 * AHBClock))
-#define SYSTICK_DELAY_1_MS					((uint32_t)(AHBClock/1000))
-#define SYSTICK_DELAYS_2_MS					((uint32_t)(2 * SYSTICK_DELAY_1_MS))
+#define SYSTICK_DELAY_2_US					(2 * AHBClock)
+#define SYSTICK_DELAY_1_MS					(AHBClock/1000)
+#define SYSTICK_DELAYS_2_MS					(2 * SYSTICK_DELAY_1_MS)
 /*********************************************** SysTick MACROS ***********************************************/
 
 /*********************************************** TIMER MACROS ***********************************************/
 // Centre-align Mode Selection
-#define TIMx_CMS_EDGE						((uint8_t) 0x00)
-#define TIMx_CMS_IF_DOWN					((uint8_t) 0x01)
-#define TIMx_CMS_IF_UP						((uint8_t) 0x02)
-#define TIMx_CMS_IF_BOTH					((uint8_t) 0x03)
+#define TIMx_CMS_EDGE						0x00
+#define TIMx_CMS_IF_DOWN					0x01
+#define TIMx_CMS_IF_UP						0x02
+#define TIMx_CMS_IF_BOTH					0x03
 
 // Clock Division
-#define TIMx_CKD_CLK_FREQ					((uint8_t) 0x00)
-#define TIMx_CKD_CLK_2_FREQ					((uint8_t) 0x01)
-#define TIMx_CKD_CLK_4_FREQ					((uint8_t) 0x02)
+#define TIMx_CKD_CLK_FREQ					0x00
+#define TIMx_CKD_CLK_2_FREQ					0x01
+#define TIMx_CKD_CLK_4_FREQ					0x02
 
 // Master Mode Selection
-#define TIMx_MMS_RESET						((uint8_t) 0x00)
-#define TIMx_MMS_ENABLE						((uint8_t) 0x01)
-#define TIMx_MMS_UPDATE						((uint8_t) 0x02)
-#define TIMx_MMS_CMP_PULSE					((uint8_t) 0x03)
-#define TIMx_MMS_CMP_OC1REF					((uint8_t) 0x04)
-#define TIMx_MMS_CMP_OC2REF					((uint8_t) 0x05)
-#define TIMx_MMS_CMP_OC3REF					((uint8_t) 0x06)
-#define TIMx_MMS_CMP_OC4REF					((uint8_t) 0x07)
+#define TIMx_MMS_RESET						0x00
+#define TIMx_MMS_ENABLE						0x01
+#define TIMx_MMS_UPDATE						0x02
+#define TIMx_MMS_CMP_PULSE					0x03
+#define TIMx_MMS_CMP_OC1REF					0x04
+#define TIMx_MMS_CMP_OC2REF					0x05
+#define TIMx_MMS_CMP_OC3REF					0x06
+#define TIMx_MMS_CMP_OC4REF					0x07
 
 // Slave Mode Selection
-#define TIMx_SMS_DISABLE					((uint8_t) 0x00)
-#define TIMx_SMS_ENC_MODE1					((uint8_t) 0x01)
-#define TIMx_SMS_ENC_MODE2					((uint8_t) 0x02)
-#define TIMx_SMS_ENC_MODE3					((uint8_t) 0x03)
+#define TIMx_SMS_DISABLE					0x00
+#define TIMx_SMS_ENC_MODE1					0x01
+#define TIMx_SMS_ENC_MODE2					0x02
+#define TIMx_SMS_ENC_MODE3					0x03
 
 // TIM1 REMAP
-#define TIM1_NO_REMAP						((uint8_t) 0x00)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
-#define TIM1_PARTIAL_REMAP					((uint8_t) 0x01)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
-#define TIM1_NOT_USED_REMAP					((uint8_t) 0x02)    // Not Used
-#define TIM1_FULL_REMAP						((uint8_t) 0x03)    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
+#define TIM1_NO_REMAP						0x00    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
+#define TIM1_PARTIAL_REMAP					0x01    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
+#define TIM1_NOT_USED_REMAP					0x02    // Not Used
+#define TIM1_FULL_REMAP						0x03    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
 
 // TIM2 REMAP
-#define TIM2_NO_REMAP						((uint8_t) 0x00)    // (CH1/ETR/PA0, CH2/PA1, CH3/PA2, CH4/PA3)
-#define TIM2_PARTIAL1_REMAP					((uint8_t) 0x01)    // (CH1/ETR/PA15, CH2/PB3, CH3/PA2, CH4/PA3)
-#define TIM2_PARTIAL2_REMAP					((uint8_t) 0x02)    // (CH1/ETR/PA0, CH2/PA1, CH3/PB10, CH4/PB11)
-#define TIM2_FULL_REMAP						((uint8_t) 0x03)    // (CH1/ETR/PA15, CH2/PB3, CH3/PB10, CH4/PB11) 
+#define TIM2_NO_REMAP						0x00    // (CH1/ETR/PA0, CH2/PA1, CH3/PA2, CH4/PA3)
+#define TIM2_PARTIAL1_REMAP					0x01    // (CH1/ETR/PA15, CH2/PB3, CH3/PA2, CH4/PA3)
+#define TIM2_PARTIAL2_REMAP					0x02    // (CH1/ETR/PA0, CH2/PA1, CH3/PB10, CH4/PB11)
+#define TIM2_FULL_REMAP						0x03    // (CH1/ETR/PA15, CH2/PB3, CH3/PB10, CH4/PB11) 
 
 // TIM3 REMAP
-#define TIM3_NO_REMAP						((uint8_t) 0x00)    // (CH1/PA6, CH2/PA7, CH3/PB0, CH4/PB1)
-#define TIM3_NOT_USED_REMAP					((uint8_t) 0x01)    // Not Used
-#define TIM3_PARTIAL_REMAP					((uint8_t) 0x02)    // (CH1/PB4, CH2/PB5, CH3/PB0, CH4/PB1)
-#define TIM3_FULL_REMAP						((uint8_t) 0x03)    // (CH1/PC6, CH2/PC7, CH3/PC8, CH4/PC9) 
+#define TIM3_NO_REMAP						0x00    // (CH1/PA6, CH2/PA7, CH3/PB0, CH4/PB1)
+#define TIM3_NOT_USED_REMAP					0x01    // Not Used
+#define TIM3_PARTIAL_REMAP					0x02    // (CH1/PB4, CH2/PB5, CH3/PB0, CH4/PB1)
+#define TIM3_FULL_REMAP						0x03    // (CH1/PC6, CH2/PC7, CH3/PC8, CH4/PC9) 
 
 // TIM4 REMAP
-#define TIM4_NO_REMAP						((uint8_t) 0x00)    // (TIM4_CH1/PB6, TIM4_CH2/PB7, TIM4_CH3/PB8, TIM4_CH4/PB9)
-#define TIM4_FULL_REMAP						((uint8_t) 0x01)    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
+#define TIM4_NO_REMAP						0x00    // (TIM4_CH1/PB6, TIM4_CH2/PB7, TIM4_CH3/PB8, TIM4_CH4/PB9)
+#define TIM4_FULL_REMAP						0x01    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
 
 // Channel
-#define TIMx_CHANNEL_1						((uint8_t) 0x01)
-#define TIMx_CHANNEL_2						((uint8_t) 0x02)
-#define TIMx_CHANNEL_3						((uint8_t) 0x04)
-#define TIMx_CHANNEL_4						((uint8_t) 0x08)
+#define TIMx_CHANNEL_1						0x01
+#define TIMx_CHANNEL_2						0x02
+#define TIMx_CHANNEL_3						0x04
+#define TIMx_CHANNEL_4						0x08
 #define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
 
 // Counting Mode
 // "Up" if DIR = 0; "Down" if DIR = 1
-#define TIMx_MODE_NORMAL					((uint8_t) 0x00)
-#define TIMx_MODE_ALT_IF_DOWN				((uint8_t) 0x01)
-#define TIMx_MODE_ALT_IF_UP					((uint8_t) 0x02)
-#define TIMx_MODE_ALT_IF_BOTH				((uint8_t) 0x03)
+#define TIMx_MODE_NORMAL					0x00
+#define TIMx_MODE_ALT_IF_DOWN				0x01
+#define TIMx_MODE_ALT_IF_UP					0x02
+#define TIMx_MODE_ALT_IF_BOTH				0x03
 
 // Direction 
-#define TIMx_DIR_COUNT_UP					((uint8_t) 0x00)
-#define TIMx_DIR_COUNT_DOWN					((uint8_t) 0x01)
+#define TIMx_DIR_COUNT_UP					0x00
+#define TIMx_DIR_COUNT_DOWN					0x01
 
 // Auto Reload Preload Enable
-#define TIMx_ARPE_DISABLE					((uint8_t) 0x00)
-#define TIMx_ARPE_ENABLE					((uint8_t) 0x01)
+#define TIMx_ARPE_DISABLE					0x00
+#define TIMx_ARPE_ENABLE					0x01
 
 // One Pulse Mode
-#define TIMx_OPM_DISABLE					((uint8_t) 0x00)
-#define TIMx_OPM_ENABLE						((uint8_t) 0x01)
+#define TIMx_OPM_DISABLE					0x00
+#define TIMx_OPM_ENABLE						0x01
 
 // IRQ Enable
-#define TIMx_IRQ_DISABLE					((uint8_t) 0x00)
-#define TIMx_IRQ_ENABLE						((uint8_t) 0x01)
+#define TIMx_IRQ_DISABLE					0x00
+#define TIMx_IRQ_ENABLE						0x01
 
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
 #define IS_VALID_TIM_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
-#define IS_VALID_TIM_CMS_MODE(MODE)		((MODE) == CMS_EDGE || (MODE) == CMS_IF_BOTH || (MODE) == CMS_IF_DOWN || (MODE) == CMS_IF_UP)
+#define IS_VALID_TIM_CMS_MODE(MODE)			((MODE) == CMS_EDGE || (MODE) == CMS_IF_BOTH || (MODE) == CMS_IF_DOWN || (MODE) == CMS_IF_UP)
 #define IS_VALID_TIM_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
 #define IS_VALID_TIM_COUNT_MODE(MODE)		((MODE) == TIMx_MODE_NORMAL || (MODE) == TIMx_MODE_ALT_IF_DOWN || \
 											 (MODE) == TIMx_MODE_ALT_IF_UP || (MODE) == TIMx_MODE_ALT_IF_BOTH)

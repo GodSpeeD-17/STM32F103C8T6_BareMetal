@@ -2,24 +2,23 @@
 #ifndef __I2C_H__
 #define __I2C_H__
 
-// For Interrupt Configuration
-#include "nvic.h"
+// Includes
+#include "i2c_config.h"
 
 //  MACROS
 #define I2C_readAddress(I2Cx, slaveAddress)			(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_READ)))
 #define I2C_writeAddress(I2Cx, slaveAddress)		(I2C_writeByte((I2Cx), (((slaveAddress) << 1) | I2Cx_WRITE)))
 
-
 /**
  * @brief I2C Direction Initialisation
  * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
-#define I2C_init(I2C_CONFIGx) 			\
+#define I2C_Init(I2C_CONFIGx) 			\
 {										\
 	/* I2C Configuration */ 			\
 	I2C_Config((I2C_CONFIGx));			\
 	/* I2C Enable */ 					\
-	I2C_enable((I2C_CONFIGx)->I2Cx); 	\
+	I2C_Enable((I2C_CONFIGx)->I2Cx); 	\
 }
 
 /**
