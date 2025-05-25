@@ -205,7 +205,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
-	SysTick_Config((AHBClock/FREQ_1MHz));
+	SysTick_Config((RCC_Get_AHBClock()/FREQ_1MHz));
 	// Step 5: Configure OB LED
 	OB_LED_Config();
 	OB_LED_Reset();

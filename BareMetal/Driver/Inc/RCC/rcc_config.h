@@ -65,6 +65,22 @@ typedef struct {
 } rcc_clk_t;
 
 /**
+ * @brief Enables Clock for Alternate Function (AFIO)
+ */
+__INLINE__ void RCC_AFIO_Clk_Enable(void){
+	// Enable AFIO Clock
+	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
+}
+
+/**
+ * @brief Disables Clock for Alternate Function (AFIO)
+ */
+__INLINE__ void RCC_AFIO_Clk_Disable(void){
+	// Disable AFIO Clock
+	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
+}
+
+/**
  * @brief Updates the Core Clock
  * @note This function should be called after any change in the RCC configuration
  * @note Max Frequency: 72MHz 
@@ -109,7 +125,7 @@ uint32_t RCC_Get_AHBClock();
 /**
  * @brief Retrieves the APB1 Clock Frequency
  * @return APB1 Frequency 
- * @note Max Frequency: 36MHz 
+ * @note Max Frequency: 36MHz
  */
 uint32_t RCC_Get_APB1Clock();
 

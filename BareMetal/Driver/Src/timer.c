@@ -113,7 +113,7 @@ uint32_t TIM_getFreq(timer_config_t* TIM_CONFIGx){
 	// Timer Frequency
 	uint32_t timer_freq = 0x00;	
 	// Retrieve Timer Source Clock Frequency
-	timer_freq = (uint32_t) (((RCC->CFGR.REG & RCC_CFGR_PPRE1)== RCC_CFGR_PPRE1_DIV1)? (APB1Clock) : (2 * APB1Clock));
+	timer_freq = (uint32_t) (((RCC->CFGR.REG & RCC_CFGR_PPRE1)== RCC_CFGR_PPRE1_DIV1)? (RCC_Get_APB1Clock()) : (2 * RCC_Get_APB1Clock()));
 	// Consider ARR Value
 	timer_freq /= (TIM_CONFIGx->TIMx->ARR + 1);
 	// Consider Prescaler Value

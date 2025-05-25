@@ -52,7 +52,7 @@ void EXTI_srcConfig(GPIO_REG_STRUCT* GPIO, uint8_t PIN){
 	reg |= (temp << pin);
 
 	// Enable Alternate Function
-	AFIO_clk_enable();
+	RCC_AFIO_Clk_Enable();
 
 	// Write to Appropriate Register 
 	if(PIN < GPIOx_PIN_4){

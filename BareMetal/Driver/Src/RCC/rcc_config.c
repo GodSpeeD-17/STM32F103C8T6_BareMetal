@@ -57,22 +57,6 @@ void RCC_Update_CoreClock() {
 /**
  * @brief Updates the AHB Clock based upon AHB prescaler (`HPRE`)
  * @note This function should be called after any change in the RCC configuration
- */
-void RCC_Update_AHBClock(){
-	// Update the Core Clock and asign to AHB Clock
-	RCC_Update_CoreClock();
-	// Assign Core Clock to AHB Clock
-	System.AHBClock = System.CoreClock;
-	// Calculate the offset from HPRE_DIV_2
-	int8_t prescaler = (((int32_t)(RCC->CFGR.REG & RCC_CFGR_HPRE)) - ((int32_t)RCC_CFGR_HPRE_DIV2)) >> RCC_CFGR_HPRE_Pos;
-	// Positive Offset indicates a prescaler
-	if(prescaler >= 0)
-		System.AHBClock >>= AHB_prescaler[prescaler];
-}
-
-/**
- * @brief Updates the AHB Clock based upon AHB prescaler (`HPRE`)
- * @note This function should be called after any change in the RCC configuration
  * @note Max Frequency: 72MHz
  */
 void RCC_Update_AHBClock(){

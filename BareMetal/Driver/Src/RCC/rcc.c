@@ -7,7 +7,6 @@
 // Header File
 #include "rcc.h"
 
-
 /**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
@@ -48,35 +47,41 @@ void RCC_Config(rcc_config_t* configX){
 }
 
 /**
+ * @brief Loads `rcc_config_t` with PLL 72MHz configuration
+ * @param configX Pointer to `rcc_config_t` structure to be configured
+ */
+void RCC_Config_Load_72MHz(rcc_config_t* configX){
+	// Configure Flash Latency to 2 wait states
+	configX->flash.latency = FLASH_ACR_LATENCY_2;
+	// Enable Flash Prefetch Buffer
+	configX->flash.prefetch = FLASH_ACR_PRFTBE_Msk;
+	// Select PLL as System Clock Source
+	configX->sys_clk_src = RCCx_SW_CLK_PLL;
+	// Select HSE as PLL Clock Source
+	configX->pll.ext_src = RCCx_PLL_SRC_HSE_DIV_1;
+	// Select 9 as PLL Multiplication Factor
+	configX->pll.mul_fact = RCCx_PLL_MUL_9;
+	// Set AHB Bus @72MHz
+	configX->bus.AHB_pre = RCCx_AHB_DIV_1;
+	// Set APB1 Bus @36MHz
+	configX->bus.APB1_pre = RCCx_APB1_DIV_2;
+	// Set APB2 Bus @72MHz
+	configX->bus.APB2_pre = RCCx_APB2_DIV_1;
+	// Set ADC @14MHz
+	configX->component.ADC_pre = RCCx_ADC_DIV_6;
+	// Set USB @48MHz
+	configX->component.USB_pre = RCCx_USB_DIV_1_5;
+}
+
+/**
  * @brief Configures System to run at 72MHz
  */
 void RCC_Config_72MHz(){
 	// Configuration: 72MHz
-	rcc_config_t RCC_Configuration_72MHz = {
-		// Flash Configuration
-		.flash = {
-			.latency = FLASH_ACR_LATENCY_2,
-			.prefetch = FLASH_ACR_PRFTBE_Msk,
-		},
-		// System Clock Source
-		.sys_clk_src = RCCx_SW_CLK_PLL,
-		// PLL Configuration
-		.pll = {
-			.ext_src = RCCx_PLL_SRC_HSE_DIV_1,
-			.mul_fact = RCCx_PLL_MUL_9,
-		},
-		// Bus Configuration
-		.bus = {
-			.APB1_pre = RCCx_APB1_DIV_2,
-			.APB2_pre = RCCx_APB2_DIV_1,
-			.AHB_pre = RCCx_AHB_DIV_1
-		},
-		// Components Configuration
-		.component = {
-			.ADC_pre = RCCx_ADC_DIV_6,
-			.USB_pre = RCCx_USB_DIV_1_5,
-		},
-	};
+	rcc_config_t RCC_Configuration_72MHz;
+	// Load 72MHz Configuration
+	RCC_Config_Load_72MHz(&RCC_Configuration_72MHz);
 	// Configuration
 	RCC_Config(&RCC_Configuration_72MHz);
 }
+

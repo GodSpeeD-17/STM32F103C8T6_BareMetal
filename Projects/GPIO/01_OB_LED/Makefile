@@ -1,13 +1,14 @@
 # Makefile for STM32 BareMetal
 
 # --- Configuration ---
-MCU_MODEL      := STM32F103C8T6
+MCU_MODEL      := STM32F103xB
 FLASH_TOTAL_KB := 64
 RAM_TOTAL_KB   := 20
 
 # Paths
 ROOT_DIR       := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 TARGET         := main
+BUILD_TYPE     := Debug
 BUILD_DIR      := $(shell pwd)/Build
 
 # --- Toolchain ---
@@ -29,48 +30,65 @@ INCLUDES       := -I$(DRIVER_BASE)/Inc \
 # Sources (modular + flat)
 DRIVER_SRCS    := $(foreach dir,$(DRIVER_MODULES),\
                     $(wildcard $(DRIVER_BASE)/Src/$(dir)/*.c)) \
-                  $(wildcard $(DRIVER_BASE)/Src/*.c)  # Flat .c files
+                  $(wildcard $(DRIVER_BASE)/Src/*.c)
 
 LOCAL_SRCS     := $(wildcard $(shell pwd)/Src/*.c) \
                   $(wildcard $(shell pwd)/Startup/*.c)
 
 # --- Compiler Flags ---
-CFLAGS         := -mcpu=cortex-m3 -mthumb -mfloat-abi=soft \
-                  --specs=nano.specs \
-                  $(INCLUDES) -std=gnu11 -Og -Wall \
-                  -fdata-sections -ffunction-sections \
-                  -D$(MCU_MODEL) -MMD -MP
+CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCLUDES) -std=gnu11 -O0 -Wall \
+                  -fstack-usage -fdata-sections -ffunction-sections -D$(MCU_MODEL) -MMD -MP
+# --- Assembler Flags ---
+ASFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCFLAGS) -x assembler-with-cpp
+# --- Linker Flags ---
+LDFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nosys.specs $(INCFLAGS)
+
+# Add debug flags if build type is debug
+ifeq ($(BUILD_TYPE), Debug)
+CFLAGS += -g -gdwarf-2
+endif
+
+# Generate dependency information
+CFLAGS += -MMD -MP
+ASFLAGS += -MMD -MP
 
 # --- Build Rules ---
 $(BUILD_DIR):
 	@mkdir -p $@
 
+# --- Object Files ---
+# Add the Build directory prefix, keeping only the file names (no paths)
 OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(DRIVER_SRCS:.c=.o))) \
         $(addprefix $(BUILD_DIR)/,$(notdir $(LOCAL_SRCS:.c=.o)))
 
-$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/*/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/%.o: $(shell pwd)/Src/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/%.o: $(shell pwd)/Startup/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/$(TARGET).elf: $(OBJS)
-	$(CC) $(CFLAGS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
-	-Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--gc-sections -o $@ $^
-	$(SIZE) $@
-
+# '.bin' file rules
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
 
+# '.elf' rules
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
+	-Wl,-Map="$(BUILD_DIR)/$(TARGET).map",--gc-sections -static
+
+# Compile Driver/Src/ C Files
+$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile Driver/Src/*/ C Files
+$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/*/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile ./Src/ C Files
+$(BUILD_DIR)/%.o: $(shell pwd)/Src/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile ./Startup/ C Files
+$(BUILD_DIR)/%.o: $(shell pwd)/Startup/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- Memory Report ---
 define memory_report
-	@echo "\n\033[1;36m=== Memory Usage ===\033[0m"
+	@echo "\033[1;36m=== Memory Usage ===\033[0m"
 	@$(SIZE) -A -x $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
 	  /\.text/ { text=$$2 } \
 	  /\.data/ { data=$$2 } \
@@ -86,14 +104,47 @@ define memory_report
 	  }'
 endef
 
-# --- Targets ---
-.PHONY: all flash clean debug
+# ST-Link Information
+info:
+	@echo "***********************************************************************"
+	st-info --probe
+	@echo "***********************************************************************"
 
+# All target
 all: $(BUILD_DIR)/$(TARGET).bin
+	@echo "***********************************************************************"
+	@echo "*                         Build Successful!                           *"
+	@echo "***********************************************************************"
+	@echo "*                         Memory Usage Report                         *"
+	@echo "***********************************************************************"
+	@$(SIZE) ./Build/main.elf | awk 'NR==2 { \
+		text=$$1; data=$$2; bss=$$3; \
+		flash=text+data; ram=data+bss; \
+		printf "|-------------------|-------------------|\n"; \
+		printf("|%19s|%19s|\n", "     Flash     ", "      RAM       "); \
+		printf "|-------------------|-------------------|\n"; \
+		printf "|   (text: %5d)   |   (data: %5d)   |\n", text, data; \
+		printf "|   (data: %5d)   |   (bss : %5d)   |\n", data, bss; \
+		printf "|-------------------|-------------------|\n"; \
+		printf("|%16s   |%16s   |\n", sprintf("%7d bytes", flash), sprintf("%7d bytes", ram)); \
+		printf "|-------------------|-------------------|\n"; \
+	}'
+	@echo "***********************************************************************"
 	$(call memory_report)
 
+# Flashing command (adjust as necessary)
 flash: all
 	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+	@echo "***********************************************************************"
+	@echo "Flashed!"
+	@echo "***********************************************************************"
+
+# Flash Clean Project
+erase_flash: clean
+	st-flash erase
+	@echo "***********************************************************************"
+	@echo "Flashed Erased!"
+	@echo "***********************************************************************"
 
 # Clean target
 clean:
@@ -174,5 +225,7 @@ replace_startup:
 replace_linker:
 	$(MAKE) replace FILE="stm32f1_ls.ld"
 
-
+# Include dependency files
 -include $(wildcard $(BUILD_DIR)/*.d)
+
+.PHONY: clean generate_c_cpp_properties_json all flash erase_flash

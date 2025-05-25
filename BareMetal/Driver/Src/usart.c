@@ -19,9 +19,9 @@ void USART_Config(usart_config_t* USART_CONFIGx){
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate
 	if(USART_CONFIGx->USARTx == USART1)
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB2Clock/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_Get_APB2Clock()/(USART_CONFIGx->baud_rate));
 	else
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(APB1Clock/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_Get_APB1Clock()/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
 	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
 	// Configure Rest of the Parameters

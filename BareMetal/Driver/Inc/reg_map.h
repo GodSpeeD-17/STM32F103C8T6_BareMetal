@@ -347,7 +347,7 @@ typedef enum {
 #define I2Cx_SCL_FREQ_8MHz					0x08
 #define I2Cx_SCL_FREQ_16MHz					0x10
 #define I2Cx_SCL_FREQ_32MHz					0x20
-#define I2Cx_SCL_FREQ_DEFAULT				APB1Clock
+#define I2Cx_SCL_FREQ_DEFAULT				RCC_Get_APB1Clock()
 // I2C Mode
 #define I2Cx_MODE_STD						0x00
 #define I2Cx_MODE_FAST						0x01
@@ -379,9 +379,9 @@ typedef enum {
 #define SYSTICK_CLK_CORE					0x01
 
 // SysTick Delay
-#define SYSTICK_DELAY_1_US					AHBClock
-#define SYSTICK_DELAY_2_US					(2 * AHBClock)
-#define SYSTICK_DELAY_1_MS					(AHBClock/1000)
+#define SYSTICK_DELAY_1_US					RCC_Get_AHBClock()
+#define SYSTICK_DELAY_2_US					(2 * RCC_Get_AHBClock())
+#define SYSTICK_DELAY_1_MS					(RCC_Get_AHBClock()/1000)
 #define SYSTICK_DELAYS_2_MS					(2 * SYSTICK_DELAY_1_MS)
 /*********************************************** SysTick MACROS ***********************************************/
 

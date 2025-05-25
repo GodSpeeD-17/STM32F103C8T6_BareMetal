@@ -18,6 +18,12 @@
 void RCC_Config(rcc_config_t* configX);
 
 /**
+ * @brief Loads `rcc_config_t` with PLL 72MHz configuration
+ * @param configX Pointer to `rcc_config_t` structure to be configured
+ */
+void RCC_Config_Load_72MHz(rcc_config_t* configX);
+
+/**
  * @brief Configures System to run at 72MHz
  */
 void RCC_Config_72MHz();

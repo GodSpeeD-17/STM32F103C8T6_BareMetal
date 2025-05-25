@@ -252,7 +252,7 @@ __INLINE__ uint16_t TIM_calcPrescaler(uint32_t freq_Hz, uint16_t arr_value){
 	uint32_t prescaler_value = 0x00;
 	
 	// Calculate the Timer Frequency
-	if((RCC->CFGR.BIT.PPRE1 == APB1_DIV_1))
+	if((RCC->CFGR.BIT.PPRE1 == RCCx_APB1_DIV_1))
 		prescaler_value = RCC_getAPB1Freq();
 	else
 		prescaler_value = (uint32_t)(2 * RCC_getAPB1Freq());

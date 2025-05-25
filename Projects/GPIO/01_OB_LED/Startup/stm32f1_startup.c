@@ -192,8 +192,8 @@ __attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RE
  */ 
 __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
-	uint32_t* pSrc = (uint32_t *) &_sidata;
-	uint32_t* pDst = (uint32_t *) &_sdata;
+	uint32_t *pSrc = (uint32_t *) &_sidata;
+	uint32_t *pDst = (uint32_t *) &_sdata;
 	while(pDst < &_edata){
 		*pDst++ = *pSrc++;
 	}
@@ -205,7 +205,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
-	SysTick_Config((AHBClock/FREQ_1MHz));
+	SysTick_Config((RCC_Get_AHBClock()/FREQ_1MHz));
 	// Step 5: Configure OB LED
 	OB_LED_Config();
 	OB_LED_Reset();
