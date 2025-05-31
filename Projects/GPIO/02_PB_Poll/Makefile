@@ -71,21 +71,42 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 
 # --- Memory Report ---
 define memory_report
-	@echo "\033[1;36m=== Memory Usage ===\033[0m"
-	@$(SIZE) -A -x $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
-	  /\.text/ { text=$$2 } \
-	  /\.data/ { data=$$2 } \
-	  /\.bss/  { bss=$$3 } \
-	  END { \
-	    flash_used = text + data; \
-	    ram_used = data + bss; \
-	    printf("Flash: %d/%d KB (%.1f%%)\nRAM:   %d/%d KB (%.1f%%)\n", \
-	      flash_used/1024, flash_kb, (flash_used/(flash_kb*1024))*100, \
-	      ram_used/1024, ram_kb, (ram_used/(ram_kb*1024))*100); \
-	    if (ram_used > ram_kb*1024*0.8) \
-	      print "\033[1;31mWARNING: High RAM usage!\033[0m"; \
-	  }'
+	@echo "\033[1;36m"
+	@echo "╔══════════════════════════════════════════════════════════╗"
+	@echo "║                 STM32 Memory Usage Report                ║"
+	@echo "╠═════════════════════════════║════════════════════════════╣"
+	@$(SIZE) $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
+	NR==2 { \
+		text = $$1; data = $$2; bss = $$3; \
+		flash_used = text + data; \
+		ram_used = data + bss; \
+		flash_pct = (flash_used / (flash_kb * 1024)) * 100; \
+		ram_pct = (ram_used / (ram_kb * 1024)) * 100; \
+		\
+		printf("║         %-5s (%2d kB)       ║        %-3s (%2d kB)         ║\n", \
+		       "Flash", flash_kb, \
+		       "RAM", ram_kb); \
+		printf("╠═════════════════════════════║════════════════════════════╣\n"); \
+		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
+		       "Text", text/1024, \
+		       "BSS", bss/1024); \
+		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
+		       "Data", data/1024, \
+		       "Data", data/1024); \
+		printf("║═════════════════════════════║════════════════════════════║\n"); \
+		printf("║ %-7s %5.2f kB (%5.2f %)  ║ %-7s %5.2f kB (%5.2f %) ║\n", \
+		       "Total", flash_used/1024, flash_pct, \
+		       "Total", ram_used/1024, ram_pct); \
+		printf("╚═════════════════════════════╩════════════════════════════╝\n"); \
+		if (flash_pct > 90.0) \
+			print "\033[1;31m⚠ FLASH usage exceeds 90%\033[0m"; \
+		if (ram_pct > 80.0) \
+			print "\033[1;31m⚠ RAM usage exceeds 80%\033[0m"; \
+	}'
+	@echo "\033[0m"
 endef
+
+
 # ST-Link Information
 info:
 	@echo "***********************************************************************"
@@ -95,22 +116,7 @@ info:
 # All target
 all: $(BUILD_DIR)/$(TARGET).bin
 	@echo "***********************************************************************"
-	@echo "*                         Build Successful!                           *"
-	@echo "***********************************************************************"
-	@echo "*                         Memory Usage Report                         *"
-	@echo "***********************************************************************"
-	@$(SIZE) ./Build/main.elf | awk 'NR==2 { \
-		text=$$1; data=$$2; bss=$$3; \
-		flash=text+data; ram=data+bss; \
-		printf "|-------------------|-------------------|\n"; \
-		printf("|%19s|%19s|\n", "     Flash     ", "      RAM       "); \
-		printf "|-------------------|-------------------|\n"; \
-		printf "|   (text: %5d)   |   (data: %5d)   |\n", text, data; \
-		printf "|   (data: %5d)   |   (bss : %5d)   |\n", data, bss; \
-		printf "|-------------------|-------------------|\n"; \
-		printf("|%16s   |%16s   |\n", sprintf("%7d bytes", flash), sprintf("%7d bytes", ram)); \
-		printf "|-------------------|-------------------|\n"; \
-	}'
+	$(memory_report)
 	@echo "***********************************************************************"
 
 # Flashing command (adjust as necessary)

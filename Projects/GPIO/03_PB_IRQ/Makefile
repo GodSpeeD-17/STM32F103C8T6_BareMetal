@@ -72,9 +72,9 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 # --- Memory Report ---
 define memory_report
 	@echo "\033[1;36m"
-	@echo "╔══════════════════════════════════════════════════════════════════╗"
-	@echo "║                     STM32 Memory Usage Report                    ║"
-	@echo "╠════════════════════════════════╦═════════════════════════════════╣"
+	@echo "╔══════════════════════════════════════════════════════════╗"
+	@echo "║                 STM32 Memory Usage Report                ║"
+	@echo "╠═════════════════════════════║════════════════════════════╣"
 	@$(SIZE) $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
 	NR==2 { \
 		text = $$1; data = $$2; bss = $$3; \
@@ -83,24 +83,21 @@ define memory_report
 		flash_pct = (flash_used / (flash_kb * 1024)) * 100; \
 		ram_pct = (ram_used / (ram_kb * 1024)) * 100; \
 		\
-		printf("║         %-5s (%2d kB)          ║            %-3s (%2d kB)          ║\n", \
+		printf("║         %-5s (%2d kB)       ║        %-3s (%2d kB)         ║\n", \
 		       "Flash", flash_kb, \
 		       "RAM", ram_kb); \
-		printf("╠════════════════════════════════║═════════════════════════════════╣\n"); \
-		printf("║ %-18s %5.2f kB    ║ %-18s %5.2f kB     ║\n", \
-		       "Text:", text/1024, \
-		       "Data:", data/1024); \
-		printf("║ %-18s %5.2f kB    ║ %-18s %5.2f kB     ║\n", \
-		       "Data:", data/1024, \
-		       "BSS:", bss/1024); \
-		printf("╠════════════════════════════════║═════════════════════════════════╣\n"); \
-		printf("║ %-18s %5.2f kB    ║ %-18s %5.2f kB     ║\n", \
-		       "Total:", flash_used/1024, \
-		       "Total:", ram_used/1024); \
-		printf("║ %-18s %5.2f %     ║ %-18s %5.2f %      ║\n", \
-		       "Usage:", flash_pct, \
-		       "Usage:", ram_pct); \
-		printf("╚════════════════════════════════╩═════════════════════════════════╝\n"); \
+		printf("╠═════════════════════════════║════════════════════════════╣\n"); \
+		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
+		       "Text", text/1024, \
+		       "BSS", bss/1024); \
+		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
+		       "Data", data/1024, \
+		       "Data", data/1024); \
+		printf("║═════════════════════════════║════════════════════════════║\n"); \
+		printf("║ %-7s %5.2f kB (%5.2f %)  ║ %-7s %5.2f kB (%5.2f %) ║\n", \
+		       "Total", flash_used/1024, flash_pct, \
+		       "Total", ram_used/1024, ram_pct); \
+		printf("╚═════════════════════════════╩════════════════════════════╝\n"); \
 		if (flash_pct > 90.0) \
 			print "\033[1;31m⚠ FLASH usage exceeds 90%\033[0m"; \
 		if (ram_pct > 80.0) \
