@@ -11,15 +11,10 @@
 // Dependency
 #include "reg_map.h"
 
-// Delay Variable
-static volatile uint64_t future_ticks = 0x00;
-// Ticks Counter
-static volatile uint64_t curr_ticks = 0x00;
-
 /**
  * @brief Enables SysTick Counter
  */
-__INLINE__ void SysTick_enable(void){
+__INLINE__ void SysTick_Enable(void){
 	// Enable SysTick
 	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
 }
@@ -27,10 +22,23 @@ __INLINE__ void SysTick_enable(void){
 /**
  * @brief Disables SysTick Counter
  */
-__INLINE__ void SysTick_disable(void){
+__INLINE__ void SysTick_Disable(void){
 	// Disable SysTick
 	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
 }
+
+/**
+ * @brief Returns the current number of ticks
+ * @note The ticks are dependent on Core Clock Frequency
+ */
+uint64_t SysTick_Get_Ticks(void);
+
+/**
+ * @brief Sets the current number of ticks
+ * @param[in] tick_value The number of ticks to be set
+ * @note The ticks are dependent on Core Clock Frequency
+ */
+void SysTick_Set_Ticks(uint64_t tick_value);
 
 /**
  * @brief Configures the SysTick Timer based upon the input count value
@@ -52,25 +60,6 @@ void delay_us(uint32_t delayTime);
  * @note Based upon SysTick Timer
  */
 void delay_ms(uint32_t delayTime);
-
-/**
- * @brief Returns the current number of ticks
- * @note The ticks are dependent on Core Clock Frequency
- */
-__INLINE__ uint64_t SysTick_getCurrTicks(void){
-	// Return final Value
-	return curr_ticks;
-}
-
-/**
- * @brief Sets the current number of ticks
- * @param[in] tick_value The number of ticks to be set
- * @note The ticks are dependent on Core Clock Frequency
- */
-__INLINE__ void SysTick_setCurrTicks(uint64_t tick_value){
-	// Set the Current number of Ticks as `tick_value`
-	curr_ticks = tick_value;
-}
 
 /***
  * @brief ISR for SysTick

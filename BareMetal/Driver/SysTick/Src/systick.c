@@ -7,6 +7,32 @@
 // Main Header File
 #include "systick.h"
 
+// Delay Variable
+static volatile uint64_t future_ticks = 0x00;
+// Ticks Counter
+static volatile uint64_t curr_ticks = 0x00;
+
+/**
+ * @brief Returns the current number of ticks
+ * @note The ticks are dependent on Core Clock Frequency
+ */
+uint64_t SysTick_Get_Ticks(void){
+	// Store the Current Ticks Value
+	uint64_t tick_value = curr_ticks; 
+	// Return final Value
+	return tick_value;
+}
+
+/**
+ * @brief Sets the current number of ticks
+ * @param[in] tick_value The number of ticks to be set
+ * @note The ticks are dependent on Core Clock Frequency
+ */
+void SysTick_Set_Ticks(uint64_t tick_value){
+	// Set the Current number of Ticks as `tick_value`
+	curr_ticks = tick_value;
+}
+
 /**
  * @brief Configures the SysTick Timer based upon the input count value
  * @param[in] reloadValue Number of Ticks

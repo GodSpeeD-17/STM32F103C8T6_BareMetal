@@ -65,7 +65,7 @@ __INLINE__ void GPIO_Toggle(gpio_config_t* GPIO_CONFIGx){
 /**
  * @brief Retrieves the state of GPIO Pin
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
- * @param[out] pin_state Pin State
+ * @returns Pin State
  */
 uint8_t GPIO_Get(gpio_config_t* GPIO_CONFIGx);
 
