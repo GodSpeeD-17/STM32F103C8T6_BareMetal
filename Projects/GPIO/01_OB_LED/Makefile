@@ -1,5 +1,3 @@
-# Makefile for STM32 BareMetal
-
 # --- Configuration ---
 MCU_MODEL      := STM32F103xB
 FLASH_TOTAL_KB := 64
@@ -7,9 +5,10 @@ RAM_TOTAL_KB   := 20
 
 # Paths
 ROOT_DIR       := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
+DRIVER_BASE    := $(ROOT_DIR)/BareMetal/Driver
+BUILD_DIR      := $(shell pwd)/Build
 TARGET         := main
 BUILD_TYPE     := Debug
-BUILD_DIR      := $(shell pwd)/Build
 
 # --- Toolchain ---
 TRIPLE         := arm-none-eabi
@@ -17,23 +16,24 @@ CC             := $(TRIPLE)-gcc
 OBJCOPY        := $(TRIPLE)-objcopy
 SIZE           := $(TRIPLE)-size
 
-# --- Driver/Module Setup ---
-DRIVER_BASE    := $(ROOT_DIR)/BareMetal/Driver
-DRIVER_MODULES := $(shell find $(DRIVER_BASE)/Inc -type d ! -path "$(DRIVER_BASE)/Inc" -printf "%P\n")
-
-# Includes (modular + flat)
-INCLUDES       := -I$(DRIVER_BASE)/Inc \
-                  $(addprefix -I$(DRIVER_BASE)/Inc/,$(DRIVER_MODULES)) \
-                  -I$(ROOT_DIR)/BareMetal/Core/Inc \
+# Includes (Core, Driver root, and all Driver module Inc directories)
+INCLUDES       := -I$(ROOT_DIR)/BareMetal/Core/Inc \
+                  -I$(DRIVER_BASE) \
+                  $(addprefix -I, $(wildcard $(DRIVER_BASE)/*/Inc)) \
                   -I$(shell pwd)/Inc
 
-# Sources (modular + flat)
-DRIVER_SRCS    := $(foreach dir,$(DRIVER_MODULES),\
-                    $(wildcard $(DRIVER_BASE)/Src/$(dir)/*.c)) \
-                  $(wildcard $(DRIVER_BASE)/Src/*.c)
-
+# Sources Files
+DRIVER_SRCS    := $(wildcard $(DRIVER_BASE)/*/Src/*.c)
 LOCAL_SRCS     := $(wildcard $(shell pwd)/Src/*.c) \
                   $(wildcard $(shell pwd)/Startup/*.c)
+# Combine all sources
+SRCS := $(DRIVER_SRCS) $(LOCAL_SRCS)
+
+# --- Object Files ---
+OBJS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
+
+# Add vpath to help Make find matching source files
+vpath %.c $(sort $(dir $(SRCS)))
 
 # --- Compiler Flags ---
 CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCLUDES) -std=gnu11 -O0 -Wall \
@@ -56,11 +56,6 @@ ASFLAGS += -MMD -MP
 $(BUILD_DIR):
 	@mkdir -p $@
 
-# --- Object Files ---
-# Add the Build directory prefix, keeping only the file names (no paths)
-OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(DRIVER_SRCS:.c=.o))) \
-        $(addprefix $(BUILD_DIR)/,$(notdir $(LOCAL_SRCS:.c=.o)))
-
 # '.bin' file rules
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
@@ -70,20 +65,8 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
 	-Wl,-Map="$(BUILD_DIR)/$(TARGET).map",--gc-sections -static
 
-# Compile Driver/Src/ C Files
-$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile Driver/Src/*/ C Files
-$(BUILD_DIR)/%.o: $(DRIVER_BASE)/Src/*/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile ./Src/ C Files
-$(BUILD_DIR)/%.o: $(shell pwd)/Src/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile ./Startup/ C Files
-$(BUILD_DIR)/%.o: $(shell pwd)/Startup/%.c | $(BUILD_DIR)
+# Compile C Files
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Memory Report ---
@@ -103,7 +86,6 @@ define memory_report
 	      print "\033[1;31mWARNING: High RAM usage!\033[0m"; \
 	  }'
 endef
-
 # ST-Link Information
 info:
 	@echo "***********************************************************************"
@@ -130,7 +112,6 @@ all: $(BUILD_DIR)/$(TARGET).bin
 		printf "|-------------------|-------------------|\n"; \
 	}'
 	@echo "***********************************************************************"
-	$(call memory_report)
 
 # Flashing command (adjust as necessary)
 flash: all
@@ -159,7 +140,6 @@ debug: $(BUILD_DIR)/$(TARGET).elf vscode_files
 	@echo "***********************************************************************"
 	@echo "Debug Configurations Ready!"
 	@echo "***********************************************************************"
-
 
 # Generate all necessary files in .vscode directory
 vscode_files:
