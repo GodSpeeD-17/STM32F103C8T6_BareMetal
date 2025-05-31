@@ -11,11 +11,29 @@
 // Register Address Mapping
 #include "gpio_config.h"
 
+// On-board LED MACROs (Active-Low)
+#define OB_LED_Set()				OB_LED_PORT->BRR.REG |= (1 << OB_LED_PIN)
+#define OB_LED_Reset()				OB_LED_PORT->BSRR.REG |= (1 << OB_LED_PIN)
+#define OB_LED_Toggle()				OB_LED_PORT->ODR.REG ^= (1 << OB_LED_PIN)
+
 /**
  * @brief Configures the GPIO based upon gpio structure
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
 void GPIO_Config(gpio_config_t* GPIO_CONFIGx);
+
+/**
+ * @brief Configures the GPIO assuming LED
+ * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ */
+__INLINE__ void GPIO_Config_LED(gpio_config_t* GPIO_CONFIGx){
+	// Set Mode to Output at 10MHz
+	GPIO_CONFIGx->MODE = GPIOx_MODE_OUT_10MHz;
+	// Set Configuration to General Purpose Push-Pull
+	GPIO_CONFIGx->CNF = GPIOx_CNF_OUT_GP_PP;
+	// Configure GPIO
+	GPIO_Config(GPIO_CONFIGx);
+}
 
 /**
  * @brief Sets the state of GPIO Pin to HIGH

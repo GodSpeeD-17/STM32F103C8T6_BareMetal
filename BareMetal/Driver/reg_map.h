@@ -98,68 +98,44 @@
 
 /*********************************************** GPIO MACROS ***********************************************/
 // Generic
-#define BIT_SET								((uint8_t) 0x01)
-#define BIT_RESET							((uint8_t) 0x00)
+#define BIT_SET								0x01
+#define BIT_RESET							0x00
 
 // GPIO PIN
-#define GPIOx_PIN_0							((uint8_t) 0)
-#define GPIOx_PIN_1							((uint8_t) 1)
-#define GPIOx_PIN_2							((uint8_t) 2)
-#define GPIOx_PIN_3							((uint8_t) 3)
-#define GPIOx_PIN_4							((uint8_t) 4)
-#define GPIOx_PIN_5							((uint8_t) 5)
-#define GPIOx_PIN_6							((uint8_t) 6)
-#define GPIOx_PIN_7							((uint8_t) 7)
-#define GPIOx_PIN_8							((uint8_t) 8)
-#define GPIOx_PIN_9							((uint8_t) 9)
-#define GPIOx_PIN_10						((uint8_t) 10)
-#define GPIOx_PIN_11						((uint8_t) 11)
-#define GPIOx_PIN_12						((uint8_t) 12)
-#define GPIOx_PIN_13						((uint8_t) 13)
-#define GPIOx_PIN_14						((uint8_t) 14)
-#define GPIOx_PIN_15						((uint8_t) 15)
+#define GPIOx_PIN_0							0
+#define GPIOx_PIN_1							1
+#define GPIOx_PIN_2							2
+#define GPIOx_PIN_3							3
+#define GPIOx_PIN_4							4
+#define GPIOx_PIN_5							5
+#define GPIOx_PIN_6							6
+#define GPIOx_PIN_7							7
+#define GPIOx_PIN_8							8
+#define GPIOx_PIN_9							9
+#define GPIOx_PIN_10						10
+#define GPIOx_PIN_11						11
+#define GPIOx_PIN_12						12
+#define GPIOx_PIN_13						13
+#define GPIOx_PIN_14						14
+#define GPIOx_PIN_15						15
 #define OB_LED_PORT							GPIOC
 #define OB_LED_PIN							GPIOx_PIN_13
 
 // MODE
-#define GPIOx_MODE_IN						((uint8_t) 0)
-#define GPIOx_MODE_OUT_10MHz				((uint8_t) 1)
-#define GPIOx_MODE_OUT_2MHz					((uint8_t) 2)
-#define GPIOx_MODE_OUT_50MHz				((uint8_t) 3)
+#define GPIOx_MODE_IN						0x00
+#define GPIOx_MODE_OUT_10MHz				0x01
+#define GPIOx_MODE_OUT_2MHz					0x02
+#define GPIOx_MODE_OUT_50MHz				0x03
 
 // CONFIGURATION
-#define GPIOx_CNF_IN_ANALOG					((uint8_t) 0)
-#define GPIOx_CNF_IN_FLOAT					((uint8_t) 1)
-#define GPIOx_CNF_IN_PD						((uint8_t) 3)
-#define GPIOx_CNF_IN_PU						((uint8_t) 4)
-#define GPIOx_CNF_OUT_GP_PP					((uint8_t) 0)
-#define GPIOx_CNF_OUT_GP_OD					((uint8_t) 1)
-#define GPIOx_CNF_OUT_AF_PP					((uint8_t) 2)
-#define GPIOx_CNF_OUT_AF_OD					((uint8_t) 3)
-
-// Error Checking MACROS
-#define IS_VALID_GPIO(GPIO) 				((GPIO) == GPIOA || (GPIO) == GPIOB || (GPIO) == GPIOC || (GPIO) == NULL)
-#define IS_VALID_PIN(PIN) 					((PIN) <= GPIOx_PIN_15)
-#define IS_MODE_VALID(MODE)					((MODE) == GPIOx_MODE_IN || (MODE) == GPIOx_MODE_OUT_10MHz || (MODE) == GPIOx_MODE_OUT_2MHz || (MODE) == GPIOx_MODE_OUT_50MHz)
-#define IS_CNF_VALID(CNF)					((CNF) == GPIOx_CNF_IN_ANALOG || (CNF) == GPIOx_CNF_IN_FLOAT || (CNF) == GPIOx_CNF_IN_PD || (CNF) == GPIOx_CNF_IN_PU || \
-											 (CNF) == GPIOx_CNF_OUT_GP_PP || (CNF) == GPIOx_CNF_OUT_GP_OD || (CNF) == GPIOx_CNF_OUT_AF_PP || (CNF) == GPIOx_CNF_OUT_AF_OD)
-#define ARE_GPIO_PARAMETERS_VALID(GPIO, PIN, MODE, CNF)	\
-											(IS_VALID_GPIO((GPIO)) && \
-											 IS_VALID_PIN((PIN)) && \
-											 IS_MODE_VALID((MODE)) && \
-											 IS_CNF_VALID((CNF)))
-#define IS_MODE_IN_VALID(MODE, CNF)		(((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_ANALOG) || ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_FLOAT) || \
-											 ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_PD) || ((MODE) == GPIOx_MODE_IN && (CNF) == GPIOx_CNF_IN_PU))
-#define IS_MODE_OUT_VALID(MODE, CNF)		(((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_GP_PP) || ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_GP_OD) || \
-											 ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_AF_PP) || ((MODE) != GPIOx_MODE_IN && (CNF) == GPIOx_CNF_OUT_AF_OD))
-#define IS_MODE_CNF_VALID(MODE, CNF)		(IS_MODE_IN_VALID((MODE), (CNF)) || IS_MODE_OUT_VALID((MODE), (CNF)))
-#define IS_GPIO_STRUCTURE_VALID(GPIO_CONFIGx)	\	
-											(((GPIO_CONFIGx) == NULL) || (\
-											 IS_VALID_GPIO(GPIO_CONFIGx->GPIO) && \
-											 IS_VALID_PIN(GPIO_CONFIGx->PIN) && \
-											 IS_MODE_VALID(GPIO_CONFIGx->MODE) && \
-											 IS_CNF_VALID(GPIO_CONFIGx->CNF) && \
-											 IS_MODE_CNF_VALID(GPIO_CONFIGx->MODE, GPIO_CONFIGx->CNF)))
+#define GPIOx_CNF_IN_ANALOG					0x00
+#define GPIOx_CNF_IN_FLOAT					0x01
+#define GPIOx_CNF_IN_PD						0x03
+#define GPIOx_CNF_IN_PU						0x04
+#define GPIOx_CNF_OUT_GP_PP					0x00
+#define GPIOx_CNF_OUT_GP_OD					0x01
+#define GPIOx_CNF_OUT_AF_PP					0x02
+#define GPIOx_CNF_OUT_AF_OD					0x03
 
 /*********************************************** GPIO MACROS ***********************************************/
 
@@ -248,82 +224,63 @@
 // USB Prescaler
 #define RCCx_USB_DIV_1_5					0x00
 #define RCCx_USB_DIV_1						0x01
-
-// PLL Clock Source
-typedef enum {
-	HSE_DIV_1 = (uint8_t)0XAA,
-	HSE_DIV_2 = (uint8_t)0XBB,
-	HSI_DIV_2 = (uint8_t)0XCC,
-} PLL_CLK_SRC_ENUM;
-
-// System Clock Frequency
-typedef enum {
-	SYSCLK_16MHz = (uint8_t) 0x01,
-	SYSCLK_24MHz,
-	SYSCLK_32MHz,
-	SYSCLK_40MHz,
-	SYSCLK_48MHz,
-	SYSCLK_56MHz,
-	SYSCLK_64MHz,
-	SYSCLK_72MHz,
-} SYSCLK_FREQ;
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/
 // IRQn Number
-#define WWDG_IRQn							((uint8_t) 0)
-#define PVD_IRQn							((uint8_t) 1)
-#define TAMPER_IRQn							((uint8_t) 2)
-#define RTC_IRQn							((uint8_t) 3)
-#define RCC_IRQn							((uint8_t) 5)
-#define EXTI0_IRQn							((uint8_t) 6)
-#define EXTI1_IRQn							((uint8_t) 7)
-#define EXTI2_IRQn							((uint8_t) 8)
-#define EXTI3_IRQn							((uint8_t) 9)
-#define EXTI4_IRQn							((uint8_t) 10)
-#define DMA1_Channel1_IRQn					((uint8_t) 11)
-#define DMA1_Channel2_IRQn					((uint8_t) 12)
-#define DMA1_Channel3_IRQn					((uint8_t) 13)
-#define DMA1_Channel4_IRQn					((uint8_t) 14)
-#define DMA1_Channel5_IRQn					((uint8_t) 15)
-#define DMA1_Channel6_IRQn					((uint8_t) 16)
-#define DMA1_Channel7_IRQn					((uint8_t) 17)
-#define ADC1_2_IRQn							((uint8_t) 18)
-#define EXTI9_5_IRQn						((uint8_t) 23)
-#define TIM2_IRQn							((uint8_t) 28)
-#define TIM3_IRQn							((uint8_t) 29)
-#define TIM4_IRQn							((uint8_t) 30)
-#define I2C1_EV_IRQn						((uint8_t) 31)
-#define I2C1_ER_IRQn						((uint8_t) 32)
-#define I2C2_EV_IRQn						((uint8_t) 33)
-#define I2C2_ER_IRQn						((uint8_t) 34)
-#define SPI1_IRQn							((uint8_t) 35)
-#define SPI2_IRQn							((uint8_t) 36)
-#define USART1_IRQn							((uint8_t) 37)
-#define USART2_IRQn							((uint8_t) 38)
-#define USART3_IRQn							((uint8_t) 39)
-#define EXTI15_10_IRQn						((uint8_t) 40)
-#define ADC3_IRQn							((uint8_t) 47)
-#define DMA2_Channel1_IRQn					((uint8_t) 56)
-#define DMA2_Channel2_IRQn					((uint8_t) 57)
-#define DMA2_Channel3_IRQn					((uint8_t) 58)
-#define DMA2_Channel4_5_IRQn				((uint8_t) 59)
+#define WWDG_IRQn							0
+#define PVD_IRQn							1
+#define TAMPER_IRQn							2
+#define RTC_IRQn							3
+#define RCC_IRQn							5
+#define EXTI0_IRQn							6
+#define EXTI1_IRQn							7
+#define EXTI2_IRQn							8
+#define EXTI3_IRQn							9
+#define EXTI4_IRQn							10
+#define DMA1_Channel1_IRQn					11
+#define DMA1_Channel2_IRQn					12
+#define DMA1_Channel3_IRQn					13
+#define DMA1_Channel4_IRQn					14
+#define DMA1_Channel5_IRQn					15
+#define DMA1_Channel6_IRQn					16
+#define DMA1_Channel7_IRQn					17
+#define ADC1_2_IRQn							18
+#define EXTI9_5_IRQn						23
+#define TIM2_IRQn							28
+#define TIM3_IRQn							29
+#define TIM4_IRQn							30
+#define I2C1_EV_IRQn						31
+#define I2C1_ER_IRQn						32
+#define I2C2_EV_IRQn						33
+#define I2C2_ER_IRQn						34
+#define SPI1_IRQn							35
+#define SPI2_IRQn							36
+#define USART1_IRQn							37
+#define USART2_IRQn							38
+#define USART3_IRQn							39
+#define EXTI15_10_IRQn						40
+#define ADC3_IRQn							47
+#define DMA2_Channel1_IRQn					56
+#define DMA2_Channel2_IRQn					57
+#define DMA2_Channel3_IRQn					58
+#define DMA2_Channel4_5_IRQn				59
 /*********************************************** NVIC MACROS ***********************************************/
 
 /*********************************************** EXTI MACROS ***********************************************/
 // External Trigger Selection
-#define EXTI_TRIG_FALLING					((uint8_t) 0x00)
-#define EXTI_TRIG_RISING					((uint8_t) 0x01)
-#define EXTI_TRIG_BOTH						((uint8_t) 0x02)
+#define EXTI_TRIG_FALLING					0x00
+#define EXTI_TRIG_RISING					0x01
+#define EXTI_TRIG_BOTH						0x02
 
 // AF EXTI
-#define AF_EXTI_PA							((uint8_t) 0x00)
-#define AF_EXTI_PB							((uint8_t) 0x01)
-#define AF_EXTI_PC							((uint8_t) 0x02)
-#define AF_EXTI_PD							((uint8_t) 0x03)
-#define AF_EXTI_PE							((uint8_t) 0x04)
-#define AF_EXTI_PF							((uint8_t) 0x05)
-#define AF_EXTI_PG							((uint8_t) 0x06)
+#define AF_EXTI_PA							0x00
+#define AF_EXTI_PB							0x01
+#define AF_EXTI_PC							0x02
+#define AF_EXTI_PD							0x03
+#define AF_EXTI_PE							0x04
+#define AF_EXTI_PF							0x05
+#define AF_EXTI_PG							0x06
 
 // Error Checking MACROs
 #define IS_EXTI_TRIG_VALID(TRIGx)			(((TRIGx) == EXTI_TRIG_FALLING) \
