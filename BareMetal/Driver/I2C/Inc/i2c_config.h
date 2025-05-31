@@ -171,7 +171,7 @@ uint16_t I2C_Calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 
 /**
  * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration Structure
+ * @param[in] I2C_CONFIGx I2C Configuration STRUCTUR
  */
 void I2C_Config(i2c_config_t* I2C_CONFIGx);
 
