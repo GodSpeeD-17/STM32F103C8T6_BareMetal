@@ -11,7 +11,7 @@ typedef struct {
 	// - `TIM2`
 	// - `TIM3`
 	// - `TIM4`
-	TIM_REG_STRUCT* TIMx;
+	TIM_REG_STRUCT* TIM;
 	// Timer Channel
 	// - `TIMx_CHANNEL_1`
 	// - `TIMx_CHANNEL_2`
@@ -42,8 +42,8 @@ typedef struct {
 	// - `TIMx_ARPE_ENABLE`: Buffers the ARR Value temporarily
 	uint8_t arpe: 1;
 	// One-Pulse Mode Enable
-	// - `TIMx_OPM_DISABLE`
-	// - `TIMx_OPM_ENABLE`
+	// - `TIMx_OPM_DISABLE`: One Pulse Mode is disabled
+	// - `TIMx_OPM_ENABLE`: One Pulse Mode is enabled
 	uint8_t one_pulse: 1;
 } timer_config_t;
 
@@ -174,41 +174,7 @@ __INLINE__ void TIM_Clear_UIF(TIM_REG_STRUCT* TIMx){
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
 
-/**
- * @brief Resets the General Purpose TIMx
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- */
-void TIM_Reset(TIM_REG_STRUCT* TIMx){
-	// Register
-	uint32_t reg = RCC->APB1RSTR.REG;
-	// Set based on Timer
-	if(TIMx == TIM2){
-		reg |= RCC_APB1RSTR_TIM2RST;
-	}
-	if(TIMx == TIM3){
-		reg |= RCC_APB1RSTR_TIM3RST;
-	}
-	if(TIMx == TIM4){
-		reg |= RCC_APB1RSTR_TIM4RST;
-	}
-	// Write to Register
-	RCC->APB1RSTR.REG = reg;
-	// Reset Based on Timer
-	if(TIMx == TIM2){
-		reg &= ~RCC_APB1RSTR_TIM2RST;
-	}
-	if(TIMx == TIM3){
-		reg &= ~RCC_APB1RSTR_TIM3RST;
-	}
-	if(TIMx == TIM4){
-		reg &= ~RCC_APB1RSTR_TIM4RST;
-	}
-	// Local Delay
-	volatile uint16_t i = 10 * 1000;
-	while(i--);
-	// Write to Register
-	RCC->APB1RSTR.REG = reg;
-}
+
 
 /**
  * @brief Triggers an update event to apply the settings
@@ -221,6 +187,24 @@ __INLINE__ void TIM_Update_Parameters(TIM_REG_STRUCT* TIMx){
 	while(TIMx->EGR.REG & TIM_EGR_UG);
 	// Clear the update flag
 	TIMx->SR.REG &= ~TIM_SR_UIF; 
+}
+
+/**
+ * @brief Enables the Update Event for TIMx
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+__INLINE__ void TIM_UEV_Enable(TIM_REG_STRUCT* TIMx){
+	// Enable Update Event
+	TIMx->CR1.REG &= ~TIM_CR1_UDIS;
+}
+
+/**
+ * @brief Disables the Update Event for TIMx
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+__INLINE__ void TIM_UEV_Disable(TIM_REG_STRUCT* TIMx){
+	// Disable Update Event
+	TIMx->CR1.REG |= TIM_CR1_UDIS;
 }
 
 

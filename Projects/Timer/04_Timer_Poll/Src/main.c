@@ -2,17 +2,26 @@
 // Header Files
 #include "main.h"
 /*-------------------------------------------------------------------------------*/
-
+// Timer 4 Configuration
+timer_config_t TIM4_Config = {
+	.TIM = TIM4,
+	.channel = TIMx_CHANNEL_ALL,
+};
 
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
-	// Initialisation
-
+	// Timer Initialisation
+	TIM_1MHz_Load_Default(&TIM4_Config);
+	TIM_Config(&TIM4_Config);
+	// TIM_Enable(TIM4_Config.TIM);
+	uint32_t TIM4_Freq = TIM_Get_Freq(TIM4_Config.TIM);
 	// Infinite Loop
 	while(1){
+		// Toggle OB LED
+		OB_LED_Toggle();
 		// Loop Delay
-		delay_ms(LOOP_DELAY_MS);
+		TIM_delay_ms(TIM4_Config.TIM, 1000);
 	}
 	// Return Value
 	return 0;

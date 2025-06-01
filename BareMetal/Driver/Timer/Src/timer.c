@@ -1,5 +1,5 @@
 /***************************************************************************************
- *  File: gpt.c
+ *  File: timer.c
  *  Created on: 23/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
@@ -57,9 +57,17 @@
 
 // Main Library
 #include "timer.h"
+// APB1 Clock Frequency
 #include "rcc.h"
-#include "gpio.h"		// Required for Configuration
-#include "nvic.h"		// IRQ Configuration
+// IRQ Enable/Disable
+#include "nvic.h"
+
+// Lookup Table for Timer IRQn
+static const uint8_t TIMx_IRQn[3] = {
+	TIM2_IRQn,
+	TIM3_IRQn,
+	TIM4_IRQn
+};
 
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
@@ -82,75 +90,103 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
 } 
 
 /**
+ * @brief Configures the default parameters for TIM_CONFIGx
+ * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 10kHz
+ */
+void TIM_10kHz_Load_Default(timer_config_t* TIM_CONFIGx){
+	// Configure Auto-Reload Register Value
+	TIM_CONFIGx->auto_reload = TIMx_DEFAULT_10kHz_ARR;
+	// Configure Prescaler Value
+	TIM_CONFIGx->prescaler = TIMx_DEFAULT_10kHz_PSC;
+	// Configure Timer Count Value
+	TIM_CONFIGx->count = TIMx_DEFAULT_CNT;
+	// CMS Mode Selection (Edge Mode Selection)
+	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
+	// Counting Direction (Up Counting)
+	TIM_CONFIGx->direction = TIMx_DIR_COUNT_UP;
+	// Auto Reload-Preload Enable
+	TIM_CONFIGx->arpe = TIMx_ARPE_ENABLE;
+	// One Pulse Mode (OFF)
+	TIM_CONFIGx->one_pulse = TIMx_OPM_DISABLE;
+}
+
+/**
+ * @brief Configures the default parameters for TIM_CONFIGx
+ * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 1MHz
+ */
+void TIM_1MHz_Load_Default(timer_config_t* TIM_CONFIGx){
+	// Configure Auto-Reload Register Value
+	TIM_CONFIGx->auto_reload = TIMx_DEFAULT_1MHz_ARR;
+	// TIM_CONFIGx->auto_reload = 8;
+	// Configure Prescaler Value
+	TIM_CONFIGx->prescaler = TIMx_DEFAULT_1MHz_PSC;
+	// TIM_CONFIGx->prescaler = 9;
+	// Configure Timer Count Value
+	TIM_CONFIGx->count = TIMx_DEFAULT_CNT;
+	// CMS Mode Selection (Edge Mode Selection)
+	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
+	// Counting Direction (Up Counting)
+	TIM_CONFIGx->direction = TIMx_DIR_COUNT_UP;
+	// Auto Reload-Preload Enable
+	TIM_CONFIGx->arpe = TIMx_ARPE_ENABLE;
+	// One Pulse Mode (OFF)
+	TIM_CONFIGx->one_pulse = TIMx_OPM_DISABLE;	
+}
+
+/**
  * @brief Configures the General Purpose Timer (TIMx)
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  */
-void TIM_config(timer_config_t* TIM_CONFIGx){
-	// Enable APBx Clock for Timer
-	TIM_Clk_Enable(TIM_CONFIGx->TIMx);
+void TIM_Config(timer_config_t* TIM_CONFIGx){
+	// Enable Clock for Timer
+	TIM_Clk_Enable(TIM_CONFIGx->TIM);
 	// Reset the Timer
-	TIM_Reset(TIM_CONFIGx->TIMx);
+	TIM_Reset(TIM_CONFIGx->TIM);
 	// Disable the Timer
-	TIM_Disable(TIM_CONFIGx->TIMx);
+	TIM_Disable(TIM_CONFIGx->TIM);
 	// Disable Update Event
-	TIM_CONFIGx->TIMx->CR1.REG |= TIM_CR1_UDIS;
+	TIM_UEV_Disable(TIM_CONFIGx->TIM);
 	// Auto Reload Value
-	TIM_CONFIGx->TIMx->ARR = TIM_CONFIGx->auto_reload;
+	TIM_CONFIGx->TIM->ARR = TIM_CONFIGx->auto_reload;
 	// Prescaler Value
-	TIM_CONFIGx->TIMx->PSC = TIM_CONFIGx->prescaler;
+	TIM_CONFIGx->TIM->PSC = TIM_CONFIGx->prescaler;
 	// Initial Count Value
-	TIM_CONFIGx->TIMx->CNT = TIM_CONFIGx->count;
+	TIM_CONFIGx->TIM->CNT = TIM_CONFIGx->count;
 	// Auto Reload Preload Enable
-	TIM_CONFIGx->TIMx->CR1.REG |= (((TIM_CONFIGx->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
+	TIM_CONFIGx->TIM->CR1.REG |= (((TIM_CONFIGx->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
 									// Centre-Aligned Mode 
 								   ((TIM_CONFIGx->cms_mode & 0x03) << TIM_CR1_CMS_Pos) | \
 									// Direction 
 								   ((TIM_CONFIGx->direction & 0x01)<< TIM_CR1_DIR_Pos) | \
-									// One Pulse Mode 
+									// One Pulse Mode (OPM)
 								   ((TIM_CONFIGx->one_pulse & 0x01) << TIM_CR1_OPM_Pos));
 	// Enable Update Event
-	TIM_CONFIGx->TIMx->CR1.REG &= ~TIM_CR1_UDIS;
-	// IRQ Configuration
-	// if(TIM_CONFIGx->enable_IRQ == TIMx_IRQ_ENABLE){
-	// 	// Global Interrupt Disable
-	// 	__disable_irq();
-	// 	// Enable NVIC Interrupt
-    // 	NVIC_IRQ_Enable(TIM_Get_IRQn(TIM_CONFIGx->TIMx));
-    // 	// Enable Timer Interrupt
-    // 	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
-	// 	// Global Interrupt Enable
-	// 	__enable_irq();
-	// }
+	TIM_UEV_Enable(TIM_CONFIGx->TIM);
 	// Update the Timer
-	TIM_Update_Parameters(TIM_CONFIGx);
+	TIM_Update_Parameters(TIM_CONFIGx->TIM);
 }
 
 /**
  * @brief Gets the GP Timer Clock Frequency
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
- * @returns Timer Frequency	
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @returns Timer Frequency	(in Hz)
  */
-uint32_t TIM_getFreq(timer_config_t* TIM_CONFIGx){
+uint32_t TIM_Get_Freq(TIM_REG_STRUCT* TIMx){
 	// Timer Frequency
-	uint32_t timer_freq = 0x00;	
-	// Retrieve Timer Source Clock Frequency
-	timer_freq = (uint32_t) (((RCC->CFGR.REG & RCC_CFGR_PPRE1)== RCC_CFGR_PPRE1_DIV1)? (RCC_Get_APB1Clock()) : (2 * RCC_Get_APB1Clock()));
+	uint32_t timer_freq = RCC_Get_APB1Clock();
+	// APB1_Prescaler != 1 --> 2 * APB1Clock
+	if((RCC->CFGR.REG & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1)
+		timer_freq <<= 1;
 	// Consider ARR Value
-	timer_freq /= (TIM_CONFIGx->TIMx->ARR + 1);
+	timer_freq /= (TIMx->ARR + 1);
 	// Consider Prescaler Value
-	timer_freq /= (TIM_CONFIGx->TIMx->PSC + 1);
+	timer_freq /= (TIMx->PSC + 1);
 	// Return the Timer Frequency
 	return timer_freq;
-}
-
-/**
- * @brief Updates the GP Timer Clock Frequency
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
- * @param[in] freq_Hz Updated Timer Frequency
- */
-__INLINE__ void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
-	// Calculate updated PSC Value
-	TIM_CONFIGx->TIMx->PSC = TIM_Calc_Prescaler(freq_Hz, TIM_CONFIGx->TIMx->ARR);
 }
 
 /**
@@ -158,9 +194,9 @@ __INLINE__ void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
  * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
-void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
+static void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
-	if(TIM_getFreq(TIM_CONFIGx) != FREQ_1kHz){
+	if(TIM_Get_Freq(TIM_CONFIGx) != FREQ_1kHz){
 		// Disable Timer
 		TIM_Disable(TIM_CONFIGx);
 		// Set update event after 1ms (1kHz)
@@ -173,36 +209,94 @@ void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 	// Iteration for Milliseconds
 	while(delayMs--){
 		// Wait till Update Flag is Set
-		while(!(TIM_CONFIGx->TIMx->SR.REG & TIM_SR_UIF));
+		while(!(TIM_CONFIGx->TIM->SR.REG & TIM_SR_UIF));
 		// Clear the update flag
-		TIM_CONFIGx->TIMx->SR.REG &= ~TIM_SR_UIF;
+		TIM_CONFIGx->TIM->SR.REG &= ~TIM_SR_UIF;
 	}
 }
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIM_CONFIGx Timer Configuration Structure
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
  * @param[in] delayUs Number of microseconds to delay
  * @note Assuming, Timer is already configured for 1MHz
  */
-void TIM_delay_us(timer_config_t* TIM_CONFIGx, volatile uint32_t delayUs){
+void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
 	// Configure Delay Time
-	TIM_CONFIGx->TIMx->ARR = delayUs - 1;
+	TIMx->ARR = delayUs - 1;
 	// Enable One Pulse Mode + Timer
-	TIM_CONFIGx->TIMx->CR1.REG |= (TIM_CR1_OPM | TIM_CR1_CEN);
+	TIMx->CR1.REG |= (TIM_CR1_OPM | TIM_CR1_CEN);
 	// Wait until Timer is Enabled
-	while(TIM_CONFIGx->TIMx->CR1.REG & TIM_CR1_CEN);
+	while(TIMx->CR1.REG & TIM_CR1_CEN);
 }
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIM_CONFIGx Timer Configuration Structure 
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
  * @param[in] delayMs Number of milliseconds to delay
- * @note Depends upon `TIM_delay_us()`
+ * @note Assuming, Timer is already configured for 1MHz
  */
-void TIM_delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
+void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
 	// Iteration for each number of milliseconds
 	while(delayMs--){
-		TIM_delay_us(TIM_CONFIGx, 1000);
+		TIM_delay_us(TIMx, 1000);
 	}
+}
+
+/**
+ * @brief Enables the Timer Interrupt
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx){
+	// Enable NVIC Interrupt
+	NVIC_IRQ_Enable(TIMx_IRQn[((TIMx - TIM2) >> 10)]);
+	// Enable the Timer Interrupt
+	TIMx->DIER.REG |= TIM_DIER_UIE;
+}
+
+/**
+ * @brief Disables the Timer Interrupt
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx){
+	// Disable NVIC Interrupt
+	NVIC_IRQ_Disable(TIMx_IRQn[((TIMx - TIM2) >> 10)]);
+	// Disable the Timer Interrupt
+	TIMx->DIER.REG &= ~TIM_DIER_UIE;
+}
+
+/**
+ * @brief Resets the General Purpose TIMx
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+void TIM_Reset(TIM_REG_STRUCT* TIMx){
+	// Register
+	uint32_t reg = RCC->APB1RSTR.REG;
+	// Set based on Timer
+	if(TIMx == TIM2){
+		reg |= RCC_APB1RSTR_TIM2RST;
+	}
+	if(TIMx == TIM3){
+		reg |= RCC_APB1RSTR_TIM3RST;
+	}
+	if(TIMx == TIM4){
+		reg |= RCC_APB1RSTR_TIM4RST;
+	}
+	// Write to Register
+	RCC->APB1RSTR.REG = reg;
+	// Reset Based on Timer
+	if(TIMx == TIM2){
+		reg &= ~RCC_APB1RSTR_TIM2RST;
+	}
+	if(TIMx == TIM3){
+		reg &= ~RCC_APB1RSTR_TIM3RST;
+	}
+	if(TIMx == TIM4){
+		reg &= ~RCC_APB1RSTR_TIM4RST;
+	}
+	// Local Delay
+	volatile uint16_t i = 10 * 1000;
+	while(i--);
+	// Write to Register
+	RCC->APB1RSTR.REG = reg;
 }
