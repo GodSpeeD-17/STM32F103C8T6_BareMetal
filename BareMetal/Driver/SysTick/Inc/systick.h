@@ -9,23 +9,7 @@
 #define __SYSTICK_H__
 
 // Dependency
-#include "reg_map.h"
-
-/**
- * @brief Enables SysTick Counter
- */
-__INLINE__ void SysTick_Enable(void){
-	// Enable SysTick
-	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
-}
-
-/**
- * @brief Disables SysTick Counter
- */
-__INLINE__ void SysTick_Disable(void){
-	// Disable SysTick
-	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
-}
+#include "systick_config.h"
 
 /**
  * @brief Returns the current number of ticks

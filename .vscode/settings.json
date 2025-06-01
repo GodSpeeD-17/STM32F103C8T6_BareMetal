@@ -337,6 +337,7 @@
         "cmsis_gcc.h": "c",
         "arm_reg_map.h": "c",
         "i2c_config.h": "c",
-        "gpio_config.h": "c"
+        "gpio_config.h": "c",
+        "rcc_config.h": "c"
     }
 }

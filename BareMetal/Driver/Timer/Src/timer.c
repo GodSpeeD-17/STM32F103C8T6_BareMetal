@@ -20,7 +20,7 @@
 	|    |-> The value in the CCRx determines when the timer output changes OCx state
 	|    |-> The active CCRx contains the value to be compared to the TIMx_CNT and signaled on OCx output
 	|
-	|=> PWM Mode 1 (TIMx_OCM_PWM_NORMAL): 
+	|=> PWM Mode 1 (TIMx_OCM_PWM_NORMAL): ***
 	|    |-> The output is high as long as the timer counter is less than the CCR value
 	|
 	|=> PWM Mode 2 (TIMx_OCM_PWM_INVERTED):
@@ -52,13 +52,34 @@
 	|            PSC = ------------------------------ - 1;
 	|                    (PWM Frequency) * (ARR + 1)
 	|
-	|
 	|--> TIMx === General Purpose Timer
-	|--> TO DO: Error Handling Uniformity for TIMx
 */
 
 // Main Library
 #include "timer.h"
+#include "rcc.h"
+#include "gpio.h"		// Required for Configuration
+#include "nvic.h"		// IRQ Configuration
+
+/**
+ * @brief Calculates the Prescaler Value based upon ARR Value provided
+ * @param[in] freq_Hz Frequency (in Hz)
+ * @param[in] arr_value Auto-Reload Register Value
+ * @return Prescaler Value
+ */
+uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
+	// Final Value
+	uint32_t prescaler_value = RCC_Get_APB1Clock();
+	// Calculate the Timer Frequency
+	if((RCC->CFGR.REG & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1)
+		prescaler_value = (RCC_Get_APB1Clock() << 1);
+	// Update the value based upon the desired frequency
+	prescaler_value /= freq_Hz;
+	// Update the value based upon the ARR Value
+	prescaler_value /= (arr_value + 1);
+	// Final Calculated Value
+	return (uint16_t)(prescaler_value - 1);
+} 
 
 /**
  * @brief Configures the General Purpose Timer (TIMx)
@@ -66,11 +87,11 @@
  */
 void TIM_config(timer_config_t* TIM_CONFIGx){
 	// Enable APBx Clock for Timer
-	TIM_clk_enable(TIM_CONFIGx);
+	TIM_Clk_Enable(TIM_CONFIGx->TIMx);
 	// Reset the Timer
-	TIM_reset(TIM_CONFIGx);
+	TIM_Reset(TIM_CONFIGx->TIMx);
 	// Disable the Timer
-	TIM_disable(TIM_CONFIGx);
+	TIM_Disable(TIM_CONFIGx->TIMx);
 	// Disable Update Event
 	TIM_CONFIGx->TIMx->CR1.REG |= TIM_CR1_UDIS;
 	// Auto Reload Value
@@ -90,18 +111,18 @@ void TIM_config(timer_config_t* TIM_CONFIGx){
 	// Enable Update Event
 	TIM_CONFIGx->TIMx->CR1.REG &= ~TIM_CR1_UDIS;
 	// IRQ Configuration
-	if(TIM_CONFIGx->enable_IRQ == TIMx_IRQ_ENABLE){
-		// Global Interrupt Disable
-		__disable_irq();
-		// Enable NVIC Interrupt
-    	NVIC_IRQ_Enable(TIM_get_IRQn(TIM_CONFIGx->TIMx));
-    	// Enable Timer Interrupt
-    	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
-		// Global Interrupt Enable
-		__enable_irq();
-	}
+	// if(TIM_CONFIGx->enable_IRQ == TIMx_IRQ_ENABLE){
+	// 	// Global Interrupt Disable
+	// 	__disable_irq();
+	// 	// Enable NVIC Interrupt
+    // 	NVIC_IRQ_Enable(TIM_Get_IRQn(TIM_CONFIGx->TIMx));
+    // 	// Enable Timer Interrupt
+    // 	TIM_CONFIGx->TIMx->DIER.REG |= TIM_DIER_UIE;
+	// 	// Global Interrupt Enable
+	// 	__enable_irq();
+	// }
 	// Update the Timer
-	TIM_updateParams(TIM_CONFIGx);
+	TIM_Update_Parameters(TIM_CONFIGx);
 }
 
 /**
@@ -129,7 +150,7 @@ uint32_t TIM_getFreq(timer_config_t* TIM_CONFIGx){
  */
 __INLINE__ void update_TIM_freq(timer_config_t* TIM_CONFIGx, uint32_t freq_Hz){
 	// Calculate updated PSC Value
-	TIM_CONFIGx->TIMx->PSC = TIM_calcPrescaler(freq_Hz, TIM_CONFIGx->TIMx->ARR);
+	TIM_CONFIGx->TIMx->PSC = TIM_Calc_Prescaler(freq_Hz, TIM_CONFIGx->TIMx->ARR);
 }
 
 /**
@@ -141,13 +162,13 @@ void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
 	if(TIM_getFreq(TIM_CONFIGx) != FREQ_1kHz){
 		// Disable Timer
-		TIM_disable(TIM_CONFIGx);
+		TIM_Disable(TIM_CONFIGx);
 		// Set update event after 1ms (1kHz)
 		update_TIM_freq(TIM_CONFIGx, FREQ_1kHz);
 		// Update the Parameters
-		TIM_updateParams(TIM_CONFIGx);
+		TIM_Update_Parameters(TIM_CONFIGx);
 		// Enable Timer
-		TIM_enable(TIM_CONFIGx);
+		TIM_Enable(TIM_CONFIGx);
 	}
 	// Iteration for Milliseconds
 	while(delayMs--){

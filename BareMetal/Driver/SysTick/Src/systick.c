@@ -6,21 +6,27 @@
 
 // Main Header File
 #include "systick.h"
+#include "rcc.h"
 
 // Delay Variable
 static volatile uint64_t future_ticks = 0x00;
 // Ticks Counter
 static volatile uint64_t curr_ticks = 0x00;
+// Default SysTick Configuration
+static systick_config_t default_systick_config = {
+	.CLK_SRC = 1, // Core Clock
+	.TICK_INT = 1, // Enable SysTick Interrupt
+	.LOAD = 0x00FFFFFF,
+	.VAL = 0x00 // Initial Value
+};
 
 /**
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
  */
 uint64_t SysTick_Get_Ticks(void){
-	// Store the Current Ticks Value
-	uint64_t tick_value = curr_ticks; 
 	// Return final Value
-	return tick_value;
+	return curr_ticks;
 }
 
 /**
@@ -31,6 +37,8 @@ uint64_t SysTick_Get_Ticks(void){
 void SysTick_Set_Ticks(uint64_t tick_value){
 	// Set the Current number of Ticks as `tick_value`
 	curr_ticks = tick_value;
+	// Update the SysTick Current Value Register (24-bit)
+	SysTick->VAL = tick_value & 0x00FFFFFF;
 }
 
 /**
@@ -46,7 +54,9 @@ void SysTick_Config(uint32_t reloadValue){
 	// Update Current Value
 	SysTick->VAL = 0x00;
 	// Set Core as Reference Clock
-	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
+	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | 
+						 SysTick_CTRL_TICKINT_Msk | 
+						 SysTick_CTRL_ENABLE_Msk);
 }
 
 /***

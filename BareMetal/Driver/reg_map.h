@@ -14,6 +14,7 @@
 #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
 #define __STATIC_INLINE__					static __attribute__((always_inline)) inline
+#define __IO								 volatile
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
