@@ -14,22 +14,22 @@
  * @param[in] GPIO_CONFIGx GPIO Configuration Structure
  */
 void GPIO_Config(gpio_config_t* GPIO_CONFIGx){
-	// Local Variables
-	uint32_t reg = 0x00, shift = 0x00;
-    // Enable GPIO Clock
+	
+    // GPIO Clock
     GPIO_Clk_Enable(GPIO_CONFIGx->GPIO);
-
 	// Alternate Function Clock
-	if((GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_OD) || (GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_PP))
+	if((GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_PP) || (GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_OD))
 		RCC_AFIO_Clk_Enable();
-    // Determine the register, shift based on the pin number
+    
+	// Determine the register, shift based on the pin number
+	uint32_t reg = 0x00, shift = 0x00;
     if (GPIO_CONFIGx->PIN <= GPIOx_PIN_7){
         reg = GPIO_CONFIGx->GPIO->CRL.REG;
         shift = GPIO_CONFIGx->PIN << 2;
-    } 
+    }
 	else if (GPIO_CONFIGx->PIN <= GPIOx_PIN_15){
         reg = GPIO_CONFIGx->GPIO->CRH.REG;
-        shift = (GPIO_CONFIGx->PIN - 0x08) << 2;
+        shift = (GPIO_CONFIGx->PIN & 0x07) << 2;
     }
 
 	// Input Mode Configuration

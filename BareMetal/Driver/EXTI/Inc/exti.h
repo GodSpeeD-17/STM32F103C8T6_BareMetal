@@ -54,6 +54,16 @@ __INLINE__ uint8_t EXTI_IRQ_Get_Pending(uint8_t PINx){
 }
 
 /**
+ * @brief Retrieves the AFIO EXTI CR Register Address based upon the Pin Number
+ * @param PINx `GPIO_PIN_x` Pin Number
+ * @return Pointer to the relevant EXTI AFIO Register 
+ */
+__INLINE__ uint32_t* AFIO_EXTI_CR_Register(uint8_t PINx){
+	// Return the Register Address
+	return (uint32_t*)((&AFIO->EXTICR1) + (PINx >> 2));
+}
+
+/**
  * @brief Configures the NVIC EXTI Source
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`

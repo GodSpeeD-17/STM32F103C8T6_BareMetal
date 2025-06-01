@@ -106,7 +106,6 @@ define memory_report
 	@echo "\033[0m"
 endef
 
-
 # ST-Link Information
 info:
 	@echo "***********************************************************************"

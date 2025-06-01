@@ -22,8 +22,8 @@ static const uint8_t EXTI_IRQn[7] = {EXTI0_IRQn, EXTI1_IRQn, EXTI2_IRQn,
  */
 void EXTI_Source_Set(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// Local Variables
-	uint32_t reg = 0;
-	uint8_t temp = 0xFF, pin = 0;
+	uint32_t* reg = NULL;
+	uint8_t temp = 0xFF, pin = ((PINx & 0x03) << 2);
 	// Port based selection
 	if(GPIOx == GPIOA){
 		temp = AF_EXTI_PA;
@@ -37,39 +37,8 @@ void EXTI_Source_Set(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
 	// Enable Alternate Function
 	RCC_AFIO_Clk_Enable();
 	// Parameter Determination
-	if(PINx < GPIOx_PIN_4){
-		reg = AFIO->EXTICR1.REG;
-		pin = PINx << 2;
-	}
-	else if(PINx < GPIOx_PIN_8){
-		reg = AFIO->EXTICR2.REG;
-		pin = (PINx - 4) << 2;
-	}
-	else if(PINx < GPIOx_PIN_12){
-		reg = AFIO->EXTICR3.REG;
-		pin = (PINx - 8) << 2;
-	}
-	else if(PINx <= GPIOx_PIN_15){
-		reg = AFIO->EXTICR4.REG;
-		pin = (PINx - 12) << 2;
-	}
-	// Clear Register
-	reg &= ~(0x0F << pin);
-	// Set Register
-	reg |= (temp << pin);
-	// Write to Appropriate Register 
-	if(PINx < GPIOx_PIN_4){
-		AFIO->EXTICR1.REG = reg;
-	}
-	else if(PINx < GPIOx_PIN_8){
-		AFIO->EXTICR2.REG = reg;
-	}
-	else if(PINx < GPIOx_PIN_12){
-		AFIO->EXTICR3.REG = reg;
-	}
-	else if(PINx <= GPIOx_PIN_15){
-		AFIO->EXTICR4.REG = reg;
-	}
+	reg = AFIO_EXTI_CR_Register(PINx);
+	*reg = ((*reg & ~(0x0F << pin)) | (temp << pin));
 }
 
 /**
@@ -104,7 +73,7 @@ void EXTI_Trigger_Set(uint8_t PINx, uint8_t TRIGx){
  */
 void EXTI_Config(gpio_config_t* GPIO_CONFIGx, uint8_t TRIGx){
 	// Configure the GPIO
-	GPIO_Config(&GPIO_CONFIGx);
+	GPIO_Config(GPIO_CONFIGx);
 	// Configure the Source of Interrupt (Port Selection)
 	EXTI_Source_Set(GPIO_CONFIGx->GPIO, GPIO_CONFIGx->PIN);
 	// Configure the External Trigger

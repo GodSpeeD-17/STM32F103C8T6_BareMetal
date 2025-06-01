@@ -11,7 +11,7 @@
 /*-------------------------------------------------------------------------------*/
 // MACROS
 #define LOOP_DELAY_MS						((uint32_t) 1000)
-#define DEBOUNCE_TIME_MS					((volatile uint64_t) 50)
+#define DEBOUNCE_TIME_MS					((volatile uint64_t) 100)
 /*-------------------------------------------------------------------------------*/
 
 #endif /* __MAIN_H__ */ 
