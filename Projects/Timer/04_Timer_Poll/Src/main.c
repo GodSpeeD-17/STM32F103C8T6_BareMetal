@@ -7,15 +7,12 @@ timer_config_t TIM4_Config = {
 	.TIM = TIM4,
 	.channel = TIMx_CHANNEL_ALL,
 };
-
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
 	// Timer Initialisation
 	TIM_1MHz_Load_Default(&TIM4_Config);
 	TIM_Config(&TIM4_Config);
-	// TIM_Enable(TIM4_Config.TIM);
-	uint32_t TIM4_Freq = TIM_Get_Freq(TIM4_Config.TIM);
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED

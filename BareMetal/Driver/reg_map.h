@@ -450,10 +450,10 @@
 /*********************************************** TIMER MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
-#define TIMx_DEFAULT_10kHz_PSC				((uint16_t) 71)    // (PSC + 1) = (71 + 1) = (72)
-#define TIMx_DEFAULT_10kHz_ARR				((uint16_t) 99)    // (ARR + 1) = (99 + 1) = (100) 
-#define TIMx_DEFAULT_1MHz_PSC				((uint16_t) 7)    // (PSC + 1) = (7 + 1) = (8)
-#define TIMx_DEFAULT_1MHz_ARR				((uint16_t) 8)    // (ARR + 1) = (8 + 1) = (9) 
+#define TIMx_DEFAULT_10kHz_PSC				((uint16_t) 7199)    // (PSC + 1) = (7199 + 1) = (7200)
+#define TIMx_DEFAULT_10kHz_ARR				((uint16_t) 9999)    // (ARR + 1) = (9999 + 1) = (10000)	
+#define TIMx_DEFAULT_1MHz_PSC				((uint16_t) 71)      // (PSC + 1) = (71 + 1) = (72)
+#define TIMx_DEFAULT_1MHz_ARR				((uint16_t) 999)     // (ARR + 1) = (999 + 1) = (1000)	
 #define TIMx_DEFAULT_CNT					((uint16_t) 0)
 #define MIN_DUTY_CYCLE						((uint8_t) 1)      // Min Value = 1%
 #define MAX_DUTY_CYCLE						((uint8_t) 100)    // Max Value = 100%

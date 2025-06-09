@@ -121,10 +121,8 @@ void TIM_10kHz_Load_Default(timer_config_t* TIM_CONFIGx){
 void TIM_1MHz_Load_Default(timer_config_t* TIM_CONFIGx){
 	// Configure Auto-Reload Register Value
 	TIM_CONFIGx->auto_reload = TIMx_DEFAULT_1MHz_ARR;
-	// TIM_CONFIGx->auto_reload = 8;
 	// Configure Prescaler Value
 	TIM_CONFIGx->prescaler = TIMx_DEFAULT_1MHz_PSC;
-	// TIM_CONFIGx->prescaler = 9;
 	// Configure Timer Count Value
 	TIM_CONFIGx->count = TIMx_DEFAULT_CNT;
 	// CMS Mode Selection (Edge Mode Selection)
@@ -222,6 +220,8 @@ static void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs
  * @note Assuming, Timer is already configured for 1MHz
  */
 void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
+	// Disable the Timer
+	TIM_Disable(TIMx);
 	// Configure Delay Time
 	TIMx->ARR = delayUs - 1;
 	// Enable One Pulse Mode + Timer

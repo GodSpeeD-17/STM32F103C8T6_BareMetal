@@ -174,8 +174,6 @@ __INLINE__ void TIM_Clear_UIF(TIM_REG_STRUCT* TIMx){
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
 
-
-
 /**
  * @brief Triggers an update event to apply the settings
  * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
