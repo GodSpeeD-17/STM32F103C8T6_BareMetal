@@ -32,6 +32,7 @@ typedef struct {
 	uint16_t preload: 1;
 } pwm_config_t;
 
+
 /**
  * @brief Retrieve the GPIO mapping for a given General Purpose Timer
  * @param TIMx_CONFIG General Purpose Timer Configuration Structure
@@ -54,5 +55,12 @@ uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GP
  * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
  */
 void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG);
+
+/**
+ * @brief Copies the PWM Configuration from source to destination
+ * @param dest Destination PWM Configuration Structure
+ * @param src Source PWM Configuration Structure
+ */
+void PWM_Config_Copy(pwm_config_t* dest, const pwm_config_t* src);
 
 #endif /* __PWM_CONFIG_H__ */

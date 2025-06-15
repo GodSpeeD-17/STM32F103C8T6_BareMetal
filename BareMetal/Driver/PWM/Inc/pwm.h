@@ -15,4 +15,29 @@ typedef struct pwm_handle pwm_handle_t;
  */
 void PWM_Config(pwm_handle_t* PWM_HANDLE, pwm_config_t* PWM_CONFIG);
 
+/**
+ * @brief Enables the PWM
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Enable(pwm_handle_t* PWM_HANDLE);
+
+/**
+ * @brief Enables the PWM Channel
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Channel_Enable(pwm_handle_t* PWM_HANDLE);
+
+/**
+ * @brief Disables the PWM
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Disable(pwm_handle_t* PWM_HANDLE);
+
+/**
+ * @brief Disables the PWM Channel
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Channel_Disable(pwm_handle_t* PWM_HANDLE);
+
+
 #endif /* __PWM_H__ */

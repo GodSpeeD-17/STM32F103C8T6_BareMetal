@@ -23,14 +23,12 @@ typedef struct {
 	// - `GPIOx_MODE_OUT_50MHz`
 	uint8_t MODE: 2;
 	// GPIO Pin Configuration
-	// - `GPIOx_CNF_IN_ANALOG`
-	// - `GPIOx_CNF_IN_FLOAT`
-	// - `GPIOx_CNF_IN_PD`
-	// - `GPIOx_CNF_IN_PU`
-	// - `GPIOx_CNF_OUT_GP_PP`
-	// - `GPIOx_CNF_OUT_GP_OD`
-	// - `GPIOx_CNF_OUT_AF_PP`
-	// - `GPIOx_CNF_OUT_AF_OD`
+	// - Input Configuration:
+	// `GPIOx_CNF_IN_ANALOG`, `GPIOx_CNF_IN_FLOAT`
+	// `GPIOx_CNF_IN_PD`, `GPIOx_CNF_IN_PU`
+	// - Output Configuration:
+	// `GPIOx_CNF_OUT_GP_PP`, `GPIOx_CNF_OUT_GP_OD`
+	// `GPIOx_CNF_OUT_AF_PP`, `GPIOx_CNF_OUT_AF_OD`
 	uint8_t CNF: 2;
 } gpio_config_t;
 

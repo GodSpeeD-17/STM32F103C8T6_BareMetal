@@ -8,7 +8,7 @@
 // Internal Handle for PWM Configuration
 struct pwm_handle {
 	// PWM Configuration Structure
-	pwm_config_t* PWM_CONFIG;
+	pwm_config_t PWM_CONFIG;
 	// Timer Configuration Structure
 	timer_config_t TIMx_CONFIG;
 };
@@ -34,26 +34,5 @@ void PWM_Default_TIM_Config(pwm_handle_t* PWM_HANDLE) {
 	PWM_HANDLE->TIMx_CONFIG.one_pulse = TIMx_OPM_DISABLE;
 }
 
-/**
- * @brief Enables the PWM
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-void PWM_Enable(pwm_handle_t* PWM_HANDLE) {
-	// Enable the Timer
-	TIM_Enable(PWM_HANDLE->TIMx_CONFIG.TIM);
-	// Enable the Channel
-	TIM_Channel_Enable(PWM_HANDLE->TIMx_CONFIG.TIM, PWM_HANDLE->TIMx_CONFIG.channel);
-}
-
-/**
- * @brief Disables the PWM
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-void PWM_Disable(pwm_handle_t* PWM_HANDLE) {
-	// Enable the Timer
-	TIM_Disable(PWM_HANDLE->TIMx_CONFIG.TIM);
-	// Enable the Channel
-	TIM_Channel_Disable(PWM_HANDLE->TIMx_CONFIG.TIM, PWM_HANDLE->TIMx_CONFIG.channel);
-}
 
 #endif /* __PWM_HANDLE_H__ */

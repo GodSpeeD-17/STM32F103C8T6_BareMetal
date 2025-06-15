@@ -111,3 +111,5 @@ void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG){
 	// Configure the GPIO
 	GPIO_Config(GPIOx_CONFIG);
 }
+
+
