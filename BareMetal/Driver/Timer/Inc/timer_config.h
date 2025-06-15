@@ -24,9 +24,9 @@ typedef struct {
 	uint16_t auto_reload;
 	// Prescaler Value
 	// - Division from APB1 Clock Frequency
-	uint16_t prescaler;
+	uint32_t prescaler: 16;
 	// Start Count Value
-	uint16_t count;
+	uint32_t count: 16;
 	// Centre-Aligned Mode Selection
 	// - `TIMx_CMS_EDGE`
 	// - `TIMx_CMS_IF_DOWN`

@@ -338,44 +338,63 @@
 
 // SysTick Delay
 #define SYSTICK_DELAY_1_US					RCC_Get_AHBClock()
-#define SYSTICK_DELAY_2_US					(2 * RCC_Get_AHBClock())
-#define SYSTICK_DELAY_1_MS					(RCC_Get_AHBClock()/1000)
+#define SYSTICK_DELAY_2_US					(2 * SYSTICK_DELAY_1_US)
+#define SYSTICK_DELAY_1_MS					(SYSTICK_DELAY_1_US / 1000)
 #define SYSTICK_DELAYS_2_MS					(2 * SYSTICK_DELAY_1_MS)
 /*********************************************** SysTick MACROS ***********************************************/
 
 /*********************************************** TIMER MACROS ***********************************************/
+// - Prescaler
+// |-> Timer Frequency: 10kHz 
+// |-> (PSC + 1) = (7199 + 1) = (7200)
+#define TIMx_DEFAULT_10kHz_PSC				((uint16_t) 7199)
+// - Max Count Value
+// |-> Timer Frequency: 10kHz
+// |-> (ARR + 1) = (9999 + 1) = (10000)
+#define TIMx_DEFAULT_10kHz_ARR				((uint16_t) 9999)
+// - Prescaler
+// |-> Timer Frequency: 1MHz 
+// |-> (PSC + 1) = (71 + 1) = (72)
+#define TIMx_DEFAULT_1MHz_PSC				((uint16_t) 71)
+// - Max Count Value
+// |-> Timer Frequency: 10kHz
+// |-> (ARR + 1) = (999 + 1) = (1000)
+#define TIMx_DEFAULT_1MHz_ARR				((uint16_t) 999)
+// Timer Start Value
+#define TIMx_DEFAULT_CNT					((uint16_t) 0)
+
 // Centre-align Mode Selection
-#define TIMx_CMS_EDGE						0x00
-#define TIMx_CMS_IF_DOWN					0x01
-#define TIMx_CMS_IF_UP						0x02
-#define TIMx_CMS_IF_BOTH					0x03
+#define TIMx_CMS_EDGE						(0x00)
+#define TIMx_CMS_IF_DOWN					(0x01)
+#define TIMx_CMS_IF_UP						(0x02)
+#define TIMx_CMS_IF_BOTH					(0x03)
 
 // Clock Division
-#define TIMx_CKD_CLK_FREQ					0x00
-#define TIMx_CKD_CLK_2_FREQ					0x01
-#define TIMx_CKD_CLK_4_FREQ					0x02
+#define TIMx_CKD_CLK_FREQ					(0x00)
+#define TIMx_CKD_CLK_2_FREQ					(0x01)
+#define TIMx_CKD_CLK_4_FREQ					(0x02)
 
 // Master Mode Selection
-#define TIMx_MMS_RESET						0x00
-#define TIMx_MMS_ENABLE						0x01
-#define TIMx_MMS_UPDATE						0x02
-#define TIMx_MMS_CMP_PULSE					0x03
-#define TIMx_MMS_CMP_OC1REF					0x04
-#define TIMx_MMS_CMP_OC2REF					0x05
-#define TIMx_MMS_CMP_OC3REF					0x06
-#define TIMx_MMS_CMP_OC4REF					0x07
+#define TIMx_MMS_RESET						(0x00)
+#define TIMx_MMS_ENABLE						(0x01)
+#define TIMx_MMS_UPDATE						(0x02)
+#define TIMx_MMS_CMP_PULSE					(0x03)
+#define TIMx_MMS_CMP_OC1REF					(0x04)
+#define TIMx_MMS_CMP_OC2REF					(0x05)
+#define TIMx_MMS_CMP_OC3REF					(0x06)
+#define TIMx_MMS_CMP_OC4REF					(0x07)
 
 // Slave Mode Selection
-#define TIMx_SMS_DISABLE					0x00
-#define TIMx_SMS_ENC_MODE1					0x01
-#define TIMx_SMS_ENC_MODE2					0x02
-#define TIMx_SMS_ENC_MODE3					0x03
+#define TIMx_SMS_DISABLE					(0x00)
+#define TIMx_SMS_ENC_MODE1					(0x01)
+#define TIMx_SMS_ENC_MODE2					(0x02)
+#define TIMx_SMS_ENC_MODE3					(0x03)
 
 // TIM1 REMAP
-#define TIM1_NO_REMAP						0x00    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
-#define TIM1_PARTIAL_REMAP					0x01    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
-#define TIM1_NOT_USED_REMAP					0x02    // Not Used
-#define TIM1_FULL_REMAP						0x03    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
+#define TIM1_NO_REMAP						(0x00)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PB12, CH1N/PB13, CH2N/PB14, CH3N/PB15)
+#define TIM1_PARTIAL_REMAP					(0x01)    // (ETR/PA12, CH1/PA8, CH2/PA9, CH3/PA10, CH4/PA11, BKIN/PA6, CH1N/PA7, CH2N/PB0, CH3N/PB1)
+#define TIM1_NOT_USED_REMAP					(0x02)    // Not Used
+#define TIM1_FULL_REMAP						(0x03)    // (ETR/PE7, CH1/PE9, CH2/PE11, CH3/PE13, CH4/PE14, BKIN/PE15, CH1N/PE8, CH2N/PE10, CH3N/PE12)
 
 // TIM2 REMAP
 #define TIM2_NO_REMAP						0x00    // (CH1/ETR/PA0, CH2/PA1, CH3/PA2, CH4/PA3)
@@ -423,6 +442,7 @@
 #define TIMx_IRQ_DISABLE					0x00
 #define TIMx_IRQ_ENABLE						0x01
 
+/*
 // Error Check MACROS
 #define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
 #define IS_VALID_TIM_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
@@ -447,69 +467,80 @@
 											 IS_VALID_TIM_DIRECTION((TIMx_CONFIG->direction)) && \
 											 IS_VALID_TIM_ARPE((TIMx_CONFIG->auto_reload_preload)) && \
 											 IS_VALID_TIM_OPM((TIMx_CONFIG->one_pulse)))									 
+*/
 /*********************************************** TIMER MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
-#define TIMx_DEFAULT_10kHz_PSC				((uint16_t) 7199)    // (PSC + 1) = (7199 + 1) = (7200)
-#define TIMx_DEFAULT_10kHz_ARR				((uint16_t) 9999)    // (ARR + 1) = (9999 + 1) = (10000)	
-#define TIMx_DEFAULT_1MHz_PSC				((uint16_t) 71)      // (PSC + 1) = (71 + 1) = (72)
-#define TIMx_DEFAULT_1MHz_ARR				((uint16_t) 999)     // (ARR + 1) = (999 + 1) = (1000)	
-#define TIMx_DEFAULT_CNT					((uint16_t) 0)
-#define MIN_DUTY_CYCLE						((uint8_t) 1)      // Min Value = 1%
-#define MAX_DUTY_CYCLE						((uint8_t) 100)    // Max Value = 100%
+// PWM Min Duty Cycle: 1%
+#define PWM_MIN_DUTY_CYCLE					(10)
+// PWM Max Duty Cycle: 100%
+#define PWM_MAX_DUTY_CYCLE					(1000)
 
 // Timer Remapping
-#define TIM1_NO_REMAP						((uint8_t) 0x00)
-#define TIM1_PARTIAL_REMAP					((uint8_t) 0x01)
-#define TIM2_NO_REMAP						((uint8_t) 0x00)
-#define TIM2_PARTIAL_REMAP_1				((uint8_t) 0x01)
-#define TIM2_PARTIAL_REMAP_2				((uint8_t) 0x02)
-#define TIM2_FULL_REMAP						((uint8_t) 0x03)
-#define TIM3_NO_REMAP						((uint8_t) 0x00)
-#define TIM3_PARTIAL_REMAP					((uint8_t) 0x02)
-#define TIM4_NO_REMAP						((uint8_t) 0x00)
+#define TIM1_NO_REMAP						(0x00)
+#define TIM1_PARTIAL_REMAP					(0x01)
+#define TIM2_NO_REMAP						(0x00)
+#define TIM2_PARTIAL_REMAP_1				(0x01)
+#define TIM2_PARTIAL_REMAP_2				(0x02)
+#define TIM2_FULL_REMAP						(0x03)
+#define TIM3_NO_REMAP						(0x00)
+#define TIM3_PARTIAL_REMAP					(0x02)
+#define TIM4_NO_REMAP						(0x00)
 
-// Preload Enable
-#define PRELOAD_DISABLE						((uint8_t) 0x00)
-#define PRELOAD_ENABLE						((uint8_t) 0x01)
+// PWM Channel Active Polarity
+#define PWM_CHx_POL_ACTIVE_HIGH				(0x00)
+#define PWM_CHx_POL_ACTIVE_LOW				(0x01)
 
-// Polarity (Defines what Active means)
-#define TIMx_POL_ACTIVE_HIGH				((uint8_t) 0x00)
-#define TIMx_POL_ACTIVE_LOW					((uint8_t) 0x01)
+// PWM Channel Preload
+#define PWM_CHx_PRELOAD_DISABLE				(0x00)
+#define PWM_CHx_PRELOAD_ENABLE				(0x01)
 
-// Timer Modes
-typedef enum{
-	TIMx_OCM_FREEZE         = ((uint8_t) 0x00),    // The comparison between the output compare register TIMx_CCRy and the counter TIMx_CNT has no effect on the outputs.
-	TIMx_OCM_SET_CH         = ((uint8_t) 0x01),    // OCyREF signal is forced high when TIMx_CNT == TIMx_CCRy    
-	TIMx_OCM_RESET_CH       = ((uint8_t) 0x02),    // OCyREF signal is forced low when TIMx_CNT == TIMx_CCRy
-	TIMx_OCM_TOGGLE         = ((uint8_t) 0x03),    // OCyREF toggles when TIMx_CNT == TIMx_CCRy
-	TIMx_OCM_FORCE_RESET    = ((uint8_t) 0x04),    // OCyREF is forced low
-	TIMx_OCM_FORCE_SET      = ((uint8_t) 0x05),    // OCyREF is forced high
-	TIMx_OCM_PWM_NORMAL     = ((uint8_t) 0x06),    // In up counting, CHy is active as long as TIMx_CNT < TIMx_CCRy else inactive. In down counting, CHy is inactive (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
-	TIMx_OCM_PWM_INVERTED   = ((uint8_t) 0x07),    // In up counting, CHy is inactive as long as TIMx_CNT < TIMx_CCRy else active. In down counting, CHy is active (OC1REF = ‘0’) as long as TIMx_CNT > TIMx_CCRy else active (OC1REF = ’1’) 
-} TIMx_OCM_MODE;
+// Freeze mode: 
+// Comparison between `TIMx_CCRy` and `TIMx_CNT` has no effect on the outputs 
+#define PWM_MODE_FREEZE						(0x00)
+// Set Channel Mode:
+// `OCyREF` signal is forced high when `TIMx_CNT` == `TIMx_CCRy`
+#define PWM_MODE_SET_CH						(0x01)    
+// Reset Channel Mode:
+// `OCyREF` signal is forced low when `TIMx_CNT` == `TIMx_CCRy`
+#define PWM_MODE_RESET_CH					(0x02)
+// Toggle Mode:
+// `OCyREF` toggles when `TIMx_CNT` == `TIMx_CCRy`
+#define PWM_MODE_TOGGLE						(0x03)
+// Force Reset Mode:
+// `OCyREF` is forced low
+#define PWM_MODE_FORCE_RESET				(0x04)
+// Force Set Mode:
+// `OCyREF` is forced high
+#define PWM_MODE_FORCE_SET					(0x05)
+// PWM Normal Mode:
+// `CHy` is active as long as `TIMx_CNT` < `TIMx_CCRy`
+#define PWM_MODE_NORMAL						(0x06)
+// PWM Inverted Mode:
+// `CHy` is active as long as `TIMx_CNT` > `TIMx_CCRy`
+#define PWM_MODE_INVERTED					(0x07)
 
-// PWM Channel Preload Enable
-#define PWM_CHx_PRELOAD_DISABLE				((uint8_t) 0x00)
-#define PWM_CHx_PRELOAD_ENABLE				((uint8_t) 0x01)
+// Max Counter Value for PWM
+#define PWM_DEFAULT_ARR						((uint16_t) 9999)
 
-
+/*
 // Error Checking MACROS
-#define IS_VALID_PWM_MODE(MODE)			((MODE) == TIMx_OCM_FREEZE || (MODE) == TIMx_OCM_SET_CH || \
+#define IS_VALID_PWM_MODE(MODE)				((MODE) == TIMx_OCM_FREEZE || (MODE) == TIMx_OCM_SET_CH || \
 											 (MODE) == TIMx_OCM_RESET_CH || (MODE) == TIMx_OCM_TOGGLE || \
 											 (MODE) == TIMx_OCM_FORCE_RESET || (MODE) == TIMx_OCM_FORCE_SET || \
 											 (MODE) == TIMx_OCM_PWM_NORMAL || (MODE) == TIMx_OCM_PWM_INVERTED)
 #define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
 #define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))
-#define IS_VALID_PWM_CONFIG_STRUCT(PWMx_CONFIG) \
-											(IS_VALID_TIM_CONFIG_STRUCT(PWMx_CONFIG->TIMx_CONFIG) && \
-											 IS_VALID_PWM_MODE(PWMx_CONFIG->pwm_mode) && \
-											 IS_VALID_PWM_POLARITY(PWMx_CONFIG->polarity) && \
-											 IS_VALID_PWM_DUTY_CYCLE(PWMx_CONFIG->duty_cycle) && \
-											 IS_VALID_PWM_CHANNEL_PRELOAD(PWMx_CONFIG->pwm_channel_preload))
+#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIG) \
+											(IS_VALID_TIM_CONFIG_STRUCT(PWM_CONFIG->TIMx_CONFIG) && \
+											 IS_VALID_PWM_MODE(PWM_CONFIG->pwm_mode) && \
+											 IS_VALID_PWM_POLARITY(PWM_CONFIG->polarity) && \
+											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIG->duty_cycle) && \
+											 IS_VALID_PWM_CHANNEL_PRELOAD(PWM_CONFIG->pwm_channel_preload))
 #define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (((DUTYx) < MIN_DUTY_CYCLE) ? (MIN_DUTY_CYCLE) : (DUTYx))))
 #define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
+*/
 
 /*********************************************** PWM MACROS ***********************************************/
 

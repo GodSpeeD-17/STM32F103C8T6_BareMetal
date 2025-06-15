@@ -3,24 +3,60 @@
 #include "pwm_handle.h"
 
 /**
- * @brief Configures the GPIO based on Timer for PWM output
- * @param TIMx_CONFIG General Purpose Timer Configuration Structure
- * @param GPIOx_CONFIG GPIO Configuration Structure
+ * @brief Configures PWM 
+ * @param PWM_HANDLE Final Handle for future reference to PWM Configuration
+ * @param PWM_CONFIG PWM Configuration Structure
  */
-void PWM_GPIO_Config(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG){
-	// Get the GPIO Mapping
-	PWM_Get_GPIO_Mapping(TIMx_CONFIG, GPIOx_CONFIG);
-	// Set the GPIO Mode to Output
-	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
-	// Set the GPIO Configuration to Alternate Function Push-Pull
-	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_AF_PP;
-	// Configure the GPIO
-	GPIO_Config(GPIOx_CONFIG);
-}
-
-
-void PWM_Config(pwm_handle_t* PWMx_HANDLE, pwm_config_t* PWMx_CONFIG) {
+void PWM_Config(pwm_handle_t* PWM_HANDLE, pwm_config_t* PWM_CONFIG){
+	// Local Variable
+	uint16_t reg = 0x00;
 	// Assign the PWM Configuration
-	PWMx_HANDLE->PWMx_CONFIG = PWMx_CONFIG;
-	
+	PWM_HANDLE->PWM_CONFIG = PWM_CONFIG;
+	// Fetch the Timer & Channel Mapping
+	if(!PWM_Get_TIM_Mapping(&PWM_HANDLE->TIMx_CONFIG, &PWM_CONFIG->GPIOx_CONFIG))
+		return -1;
+	// Prescaler Based on PWM Frequency
+	PWM_HANDLE->TIMx_CONFIG.prescaler = (RCC_Get_APB1Clock() / PWM_CONFIG->freq_Hz) - 1;
+	// Default Timer Configuration for PWM
+	PWM_Default_TIM_Config(PWM_HANDLE);
+	// Configure Timer based on the PWM Configuration
+	TIM_Config(&PWM_HANDLE->TIMx_CONFIG);
+	// Channel Configuration
+	switch(PWM_HANDLE->TIMx_CONFIG.channel){
+		// Channel 1 Configuration
+		case TIMx_CHANNEL_1:
+			// Set the PWM Mode & Preload
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCMR1.REG |= ((PWM_CONFIG->mode << TIM_CCMR1_OC1M_Pos) |
+													   (PWM_CONFIG->preload << TIM_CCMR1_OC1PE_Pos));
+			// Set the Polarity	
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCER.REG |= (PWM_CONFIG->polarity << TIM_CCER_CC1P_Pos);											   
+		break;
+		// Channel 2 Configuration
+		case TIMx_CHANNEL_2:
+			// Set the PWM Mode & Preload
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCMR1.REG |= ((PWM_CONFIG->mode << TIM_CCMR1_OC2M_Pos) |
+													   (PWM_CONFIG->preload << TIM_CCMR1_OC2PE_Pos));
+			// Set the Polarity	
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCER.REG |= (PWM_CONFIG->polarity << TIM_CCER_CC2P_Pos);
+		break;
+		// Channel 3 Configuration
+		case TIMx_CHANNEL_3:
+			// Set the PWM Mode & Preload
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCMR2.REG |= ((PWM_CONFIG->mode << TIM_CCMR2_OC3M_Pos) |
+													   (PWM_CONFIG->preload << TIM_CCMR2_OC3PE_Pos));
+			// Set the Polarity	
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCER.REG |= (PWM_CONFIG->polarity << TIM_CCER_CC3P_Pos);
+		break;
+		// Channel 4 Configuration
+		case TIMx_CHANNEL_4:
+			// Set the PWM Mode & Preload
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCMR2.REG |= ((PWM_CONFIG->mode << TIM_CCMR2_OC4M_Pos) |
+													   (PWM_CONFIG->preload << TIM_CCMR2_OC4PE_Pos));
+			// Set the Polarity	
+			PWM_HANDLE->TIMx_CONFIG.TIM->CCER.REG |= (PWM_CONFIG->polarity << TIM_CCER_CC4P_Pos);
+		break;
+	}
+	// Configures the GPIO for PWM output
+	PWM_GPIO_Config(&PWM_CONFIG->GPIOx_CONFIG);
 }
+

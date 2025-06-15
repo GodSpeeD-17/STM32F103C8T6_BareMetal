@@ -1,6 +1,21 @@
 // Library
 #include "pwm_config.h"
 
+// Timer GPIO Mapping Configuration Structure
+typedef struct {
+	// GPIO
+	// - `GPIOA`
+	// - `GPIOB`
+	// - `GPIOC`
+	// - `GPIOD`
+	GPIO_REG_STRUCT* GPIO;
+	// GPIO Pin
+	// - `GPIO_PIN_0`
+	// ....
+	// - `GPIO_PIN_15`
+	uint8_t PIN;
+} timer_gpio_mapping_t;
+
 // Common Timer GPIO Mapping Lookup Table
 static const timer_gpio_mapping_t tim_gpio_map[3][4] = {
 	// TIM2
@@ -81,4 +96,18 @@ uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GP
 	}
 	// Not Found
 	return 0;
+}
+
+/**
+ * @brief Configures the GPIO for PWM output
+ * @param GPIOx_CONFIG GPIO Configuration Structure
+ * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
+ */
+void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG){
+	// Set the GPIO Mode to Output
+	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
+	// Set the GPIO Configuration to Alternate Function Push-Pull
+	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_AF_PP;
+	// Configure the GPIO
+	GPIO_Config(GPIOx_CONFIG);
 }

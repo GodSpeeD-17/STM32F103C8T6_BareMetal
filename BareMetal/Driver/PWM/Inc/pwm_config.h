@@ -7,21 +7,6 @@
 #include "gpio.h"
 #include "timer.h"
 
-// Timer GPIO Mapping Configuration Structure
-typedef struct {
-	// GPIO
-	// - `GPIOA`
-	// - `GPIOB`
-	// - `GPIOC`
-	// - `GPIOD`
-	GPIO_REG_STRUCT* GPIO;
-	// GPIO Pin
-	// - `GPIO_PIN_0`
-	// ....
-	// - `GPIO_PIN_15`
-	uint8_t PIN;
-} timer_gpio_mapping_t;
-
 // PWM Configuration Structure
 typedef struct {
 	// GPIO Configuration Structure
@@ -33,8 +18,18 @@ typedef struct {
 		// - `0` for 0%
 		// - `1000` for 100%
 	uint16_t duty_cycle: 10;
-	// PWM Mode
+	// PWM Mode:
+	// - `PWM_MODE_NORMAL`
+	// - `PWM_MODE_INVERTED`
 	uint16_t mode: 3;
+	// Polarity
+	// - `PWM_CHx_POL_ACTIVE_HIGH`: Active High
+	// - `PWM_CHx_POL_ACTIVE_LOW`: Active Low
+	uint16_t polarity: 1;
+	// PWM Channel Preload Enable
+	// - `PWM_CHx_PRELOAD_DISABLE`: Preload Disabled
+	// - `PWM_CHx_PRELOAD_ENABLE`: Preload Enabled
+	uint16_t preload: 1;
 } pwm_config_t;
 
 /**
@@ -53,5 +48,11 @@ void PWM_Get_GPIO_Mapping(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIO
  */
 uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GPIOx_CONFIG);
 
+/**
+ * @brief Configures the GPIO for PWM output
+ * @param GPIOx_CONFIG GPIO Configuration Structure
+ * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
+ */
+void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG);
 
 #endif /* __PWM_CONFIG_H__ */
