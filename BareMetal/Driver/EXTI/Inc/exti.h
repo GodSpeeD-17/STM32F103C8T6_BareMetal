@@ -80,9 +80,9 @@ void EXTI_Trigger_Set(uint8_t PINx, uint8_t TRIGx);
 
 /**
  * @brief Configures the External Interrupt
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_RISING`, `EXTI_TRIG_BOTH`
  */
-void EXTI_Config(gpio_config_t* GPIO_CONFIGx, uint8_t TRIGx);
+void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx);
 
 #endif /* __EXTI_H__ */

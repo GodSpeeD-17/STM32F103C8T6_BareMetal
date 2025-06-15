@@ -11,70 +11,70 @@
 
 /**
  * @brief Configures the GPIO based upon gpio structure
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-void GPIO_Config(gpio_config_t* GPIO_CONFIGx){
+void GPIO_Config(gpio_config_t* GPIOx_CONFIG){
 	
     // GPIO Clock
-    GPIO_Clk_Enable(GPIO_CONFIGx->GPIO);
+    GPIO_Clk_Enable(GPIOx_CONFIG->GPIO);
 	// Alternate Function Clock
-	if((GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_PP) || (GPIO_CONFIGx->CNF == GPIOx_CNF_OUT_AF_OD))
+	if((GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_PP) || (GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_OD))
 		RCC_AFIO_Clk_Enable();
     
 	// Determine the register, shift based on the pin number
 	uint32_t reg = 0x00, shift = 0x00;
-    if (GPIO_CONFIGx->PIN <= GPIOx_PIN_7){
-        reg = GPIO_CONFIGx->GPIO->CRL.REG;
-        shift = GPIO_CONFIGx->PIN << 2;
+    if (GPIOx_CONFIG->PIN <= GPIOx_PIN_7){
+        reg = GPIOx_CONFIG->GPIO->CRL.REG;
+        shift = GPIOx_CONFIG->PIN << 2;
     }
-	else if (GPIO_CONFIGx->PIN <= GPIOx_PIN_15){
-        reg = GPIO_CONFIGx->GPIO->CRH.REG;
-        shift = (GPIO_CONFIGx->PIN & 0x07) << 2;
+	else if (GPIOx_CONFIG->PIN <= GPIOx_PIN_15){
+        reg = GPIOx_CONFIG->GPIO->CRH.REG;
+        shift = (GPIOx_CONFIG->PIN & 0x07) << 2;
     }
 
 	// Input Mode Configuration
-	if(GPIO_CONFIGx->MODE == GPIOx_MODE_IN){
+	if(GPIOx_CONFIG->MODE == GPIOx_MODE_IN){
 		// Pull-Up Configuration
-		if(GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PU){
+		if(GPIOx_CONFIG->CNF == GPIOx_CNF_IN_PU){
 			// Set the bit high to enable pull-up
-			GPIO_CONFIGx->GPIO->BSRR.REG |= (1 << GPIO_CONFIGx->PIN);
+			GPIOx_CONFIG->GPIO->BSRR.REG |= (1 << GPIOx_CONFIG->PIN);
 		}
 		// Pull-Down Configuration
-		else if (GPIO_CONFIGx->CNF == GPIOx_CNF_IN_PD){
+		else if (GPIOx_CONFIG->CNF == GPIOx_CNF_IN_PD){
 			// Reset the bit to enable pull-down
-			GPIO_CONFIGx->GPIO->BRR.REG |= (1 << GPIO_CONFIGx->PIN);
+			GPIOx_CONFIG->GPIO->BRR.REG |= (1 << GPIOx_CONFIG->PIN);
 		}
 		// Update the Configuration Bits as Input Push-Pull
-		GPIO_CONFIGx->CNF = 0x02;
+		GPIOx_CONFIG->CNF = 0x02;
 	}
 
     // Clear the current mode and configuration bits
     reg &= ~(0x0F << shift);
 	// Update the configuration
-	reg |= (uint32_t)((GPIO_CONFIGx->CNF << (shift + 2) | GPIO_CONFIGx->MODE << shift));
+	reg |= (uint32_t)((GPIOx_CONFIG->CNF << (shift + 2) | GPIOx_CONFIG->MODE << shift));
 
     // Register Updation
-    if (GPIO_CONFIGx->PIN <= GPIOx_PIN_7) {
-        GPIO_CONFIGx->GPIO->CRL.REG = reg;
+    if (GPIOx_CONFIG->PIN <= GPIOx_PIN_7) {
+        GPIOx_CONFIG->GPIO->CRL.REG = reg;
     } 
-	else if(GPIO_CONFIGx->PIN <= GPIOx_PIN_15){
-        GPIO_CONFIGx->GPIO->CRH.REG = reg;
+	else if(GPIOx_CONFIG->PIN <= GPIOx_PIN_15){
+        GPIOx_CONFIG->GPIO->CRH.REG = reg;
     } 
 }
 
 /**
  * @brief Retrieves the state of GPIO Pin
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @returns Pin State
  */
-uint8_t GPIO_Get(gpio_config_t* GPIO_CONFIGx){
+uint8_t GPIO_Get(gpio_config_t* GPIOx_CONFIG){
 	// Pin State
 	uint32_t pin_state = 0xFFFFFFFF;
 	uint8_t result = 0x00; // Safety
 	// Get State
-	pin_state = (GPIO_CONFIGx->GPIO->IDR.REG & (0x01 << GPIO_CONFIGx->PIN));
+	pin_state = (GPIOx_CONFIG->GPIO->IDR.REG & (0x01 << GPIOx_CONFIG->PIN));
 	// Shift the pin state to the right based on the pin number
-	pin_state >>= GPIO_CONFIGx->PIN;
+	pin_state >>= GPIOx_CONFIG->PIN;
 	// Convert to uint8_t
 	result = (uint8_t)pin_state;
 	// Return Result

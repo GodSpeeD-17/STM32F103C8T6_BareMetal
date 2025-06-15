@@ -47,7 +47,7 @@ typedef struct {
 // ADC Configuration Structure
 typedef struct {
 	// GPIO Configuration
-	gpio_config_t* GPIO_CONFIGx;
+	gpio_config_t* GPIOx_CONFIG;
 	// ADC Number
 	ADC_REG_STRUCT* ADCx;
 	// ADC Channel
@@ -220,8 +220,8 @@ void ADC3_IRQHandler(void);
  */
 __INLINE__ void ADC_load_default(adc_config_t* ADC_CONFIGx){
 	// Configure GPIO Mode and Configuration
-	ADC_CONFIGx->GPIO_CONFIGx->MODE = GPIOx_MODE_IN;
-	ADC_CONFIGx->GPIO_CONFIGx->CNF = GPIOx_CNF_IN_ANALOG;
+	ADC_CONFIGx->GPIOx_CONFIG->MODE = GPIOx_MODE_IN;
+	ADC_CONFIGx->GPIOx_CONFIG->CNF = GPIOx_CNF_IN_ANALOG;
 	// Number of Channels as 1
 	ADC_CONFIGx->num_channels = 1;
 	// Sample Time as 239.5 cycles

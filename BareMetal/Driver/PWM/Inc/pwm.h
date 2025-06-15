@@ -4,21 +4,15 @@
 
 // Header Files
 #include "pwm_config.h"
-#include "gpio.h"
-#include "timer.h"
 
-/**
- * @brief Retrieve the GPIO mapping for a given timer
- * @param TIMx General Purpose Timer
- * @param GPIO_CONFIGx GPIO Configuration Structure 
- */
-void PWM_Get_GPIO_Mapping(const timer_config_t* TIM_CONFIGx, gpio_config_t* GPIO_CONFIGx);
+// Handle Type Definition
+typedef struct pwm_handle pwm_handle_t;
 
 /**
  * @brief Configures the GPIO based on Timer for PWM output
- * @param TIM_CONFIGx General Purpose Timer Configuration Structure
- * @param GPIO_CONFIGx GPIO Configuration Structure
+ * @param TIMx_CONFIG General Purpose Timer Configuration Structure
+ * @param GPIOx_CONFIG GPIO Configuration Structure
  */
-void PWM_GPIO_Config(const timer_config_t* TIM_CONFIGx, gpio_config_t* GPIO_CONFIGx);
+void PWM_GPIO_Config(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG);
 
 #endif /* __PWM_H__ */

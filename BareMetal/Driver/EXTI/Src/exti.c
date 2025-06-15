@@ -68,26 +68,26 @@ void EXTI_Trigger_Set(uint8_t PINx, uint8_t TRIGx){
 
 /**
  * @brief Configures the External Interrupt
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_RISING`, `EXTI_TRIG_BOTH`
  */
-void EXTI_Config(gpio_config_t* GPIO_CONFIGx, uint8_t TRIGx){
+void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx){
 	// Configure the GPIO
-	GPIO_Config(GPIO_CONFIGx);
+	GPIO_Config(GPIOx_CONFIG);
 	// Configure the Source of Interrupt (Port Selection)
-	EXTI_Source_Set(GPIO_CONFIGx->GPIO, GPIO_CONFIGx->PIN);
+	EXTI_Source_Set(GPIOx_CONFIG->GPIO, GPIOx_CONFIG->PIN);
 	// Configure the External Trigger
-	EXTI_Trigger_Set(GPIO_CONFIGx->PIN, TRIGx);
+	EXTI_Trigger_Set(GPIOx_CONFIG->PIN, TRIGx);
 	// Enable the IRQ (Remove the Mask)
-	EXTI_IRQ_Enable(GPIO_CONFIGx->PIN);
+	EXTI_IRQ_Enable(GPIOx_CONFIG->PIN);
 	// Enable the NVIC Global Interrupt
-	if(GPIO_CONFIGx->PIN <= GPIOx_PIN_4){
-		NVIC_IRQ_Enable(EXTI_IRQn[GPIO_CONFIGx->PIN]);
+	if(GPIOx_CONFIG->PIN <= GPIOx_PIN_4){
+		NVIC_IRQ_Enable(EXTI_IRQn[GPIOx_CONFIG->PIN]);
 	}
-	else if(GPIO_CONFIGx->PIN <= GPIOx_PIN_9){
+	else if(GPIOx_CONFIG->PIN <= GPIOx_PIN_9){
 		NVIC_IRQ_Enable(EXTI_IRQn[5]);
 	}
-	else if(GPIO_CONFIGx->PIN <= GPIOx_PIN_15){
+	else if(GPIOx_CONFIG->PIN <= GPIOx_PIN_15){
 		NVIC_IRQ_Enable(EXTI_IRQn[6]);
 	}
 }

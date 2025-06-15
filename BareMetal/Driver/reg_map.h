@@ -289,10 +289,10 @@
 											 || ((TRIGx) == EXTI_TRIG_BOTH))
 #define IS_EXTI_IRQn_VALID(IRQn)			((IRQn) < 60)
 #define IS_EXTI_STRUCTURE_VALID(EXTI_CONFIGx)	\
-											((IS_GPIO_STRUCTURE_VALID(EXTI_CONFIGx->GPIO_CONFIGx) )&& \
+											((IS_GPIO_STRUCTURE_VALID(EXTI_CONFIGx->GPIOx_CONFIG) )&& \
 											 (IS_EXTI_TRIG_VALID(EXTI_CONFIGx->TRIGx)) && \
 											 (IS_EXTI_IRQn_VALID(EXTI_CONFIGx->IRQn)) && \
-											 (EXTI_CONFIGx->GPIO_CONFIGx->MODE == GPIOx_MODE_IN))
+											 (EXTI_CONFIGx->GPIOx_CONFIG->MODE == GPIOx_MODE_IN))
 								 
 /*********************************************** EXTI MACROS ***********************************************/
 
@@ -436,17 +436,17 @@
 #define IS_VALID_TIM_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
 #define IS_VALID_TIM_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
 #define IS_VALID_TIM_IRQ(IRQx)				(((IRQx) == TIMx_IRQ_ENABLE) || ((IRQx) == TIMx_IRQ_DISABLE))
-#define IS_VALID_TIM_CONFIG_STRUCT(TIM_CONFIGx) \
-											(IS_GPIO_STRUCTURE_VALID(TIM_CONFIGx->GPIO_CONFIGx) && \
-											 IS_VALID_GPT((TIM_CONFIGx->GP_TIMx)) && \
-											 IS_VALID_TIM_CHANNEL((TIM_CONFIGx->channel)) && \
-											 IS_VALID_TIM_ARR((TIM_CONFIGx->auto_reload_value)) && \
-											 IS_VALID_TIM_FREQ((TIM_CONFIGx->frequency_Hz)) && \
-											 IS_VALID_TIM_CNT((TIM_CONFIGx->count)) && \
-											 IS_VALID_TIM_CMS_MODE((TIM_CONFIGx->cms_mode)) && \
-											 IS_VALID_TIM_DIRECTION((TIM_CONFIGx->direction)) && \
-											 IS_VALID_TIM_ARPE((TIM_CONFIGx->auto_reload_preload)) && \
-											 IS_VALID_TIM_OPM((TIM_CONFIGx->one_pulse)))									 
+#define IS_VALID_TIM_CONFIG_STRUCT(TIMx_CONFIG) \
+											(IS_GPIO_STRUCTURE_VALID(TIMx_CONFIG->GPIOx_CONFIG) && \
+											 IS_VALID_GPT((TIMx_CONFIG->GP_TIMx)) && \
+											 IS_VALID_TIM_CHANNEL((TIMx_CONFIG->channel)) && \
+											 IS_VALID_TIM_ARR((TIMx_CONFIG->auto_reload_value)) && \
+											 IS_VALID_TIM_FREQ((TIMx_CONFIG->frequency_Hz)) && \
+											 IS_VALID_TIM_CNT((TIMx_CONFIG->count)) && \
+											 IS_VALID_TIM_CMS_MODE((TIMx_CONFIG->cms_mode)) && \
+											 IS_VALID_TIM_DIRECTION((TIMx_CONFIG->direction)) && \
+											 IS_VALID_TIM_ARPE((TIMx_CONFIG->auto_reload_preload)) && \
+											 IS_VALID_TIM_OPM((TIMx_CONFIG->one_pulse)))									 
 /*********************************************** TIMER MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
@@ -502,12 +502,12 @@ typedef enum{
 #define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
 #define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
 #define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))
-#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIGx) \
-											(IS_VALID_TIM_CONFIG_STRUCT(PWM_CONFIGx->TIM_CONFIGx) && \
-											 IS_VALID_PWM_MODE(PWM_CONFIGx->pwm_mode) && \
-											 IS_VALID_PWM_POLARITY(PWM_CONFIGx->polarity) && \
-											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIGx->duty_cycle) && \
-											 IS_VALID_PWM_CHANNEL_PRELOAD(PWM_CONFIGx->pwm_channel_preload))
+#define IS_VALID_PWM_CONFIG_STRUCT(PWMx_CONFIG) \
+											(IS_VALID_TIM_CONFIG_STRUCT(PWMx_CONFIG->TIMx_CONFIG) && \
+											 IS_VALID_PWM_MODE(PWMx_CONFIG->pwm_mode) && \
+											 IS_VALID_PWM_POLARITY(PWMx_CONFIG->polarity) && \
+											 IS_VALID_PWM_DUTY_CYCLE(PWMx_CONFIG->duty_cycle) && \
+											 IS_VALID_PWM_CHANNEL_PRELOAD(PWMx_CONFIG->pwm_channel_preload))
 #define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (((DUTYx) < MIN_DUTY_CYCLE) ? (MIN_DUTY_CYCLE) : (DUTYx))))
 #define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
 

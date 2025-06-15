@@ -90,82 +90,82 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
 } 
 
 /**
- * @brief Configures the default parameters for TIM_CONFIGx
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 10kHz
  */
-void TIM_10kHz_Load_Default(timer_config_t* TIM_CONFIGx){
+void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG){
 	// Configure Auto-Reload Register Value
-	TIM_CONFIGx->auto_reload = TIMx_DEFAULT_10kHz_ARR;
+	TIMx_CONFIG->auto_reload = TIMx_DEFAULT_10kHz_ARR;
 	// Configure Prescaler Value
-	TIM_CONFIGx->prescaler = TIMx_DEFAULT_10kHz_PSC;
+	TIMx_CONFIG->prescaler = TIMx_DEFAULT_10kHz_PSC;
 	// Configure Timer Count Value
-	TIM_CONFIGx->count = TIMx_DEFAULT_CNT;
+	TIMx_CONFIG->count = TIMx_DEFAULT_CNT;
 	// CMS Mode Selection (Edge Mode Selection)
-	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
+	TIMx_CONFIG->cms_mode = TIMx_CMS_EDGE;
 	// Counting Direction (Up Counting)
-	TIM_CONFIGx->direction = TIMx_DIR_COUNT_UP;
+	TIMx_CONFIG->direction = TIMx_DIR_COUNT_UP;
 	// Auto Reload-Preload Enable
-	TIM_CONFIGx->arpe = TIMx_ARPE_ENABLE;
+	TIMx_CONFIG->arpe = TIMx_ARPE_ENABLE;
 	// One Pulse Mode (OFF)
-	TIM_CONFIGx->one_pulse = TIMx_OPM_DISABLE;
+	TIMx_CONFIG->one_pulse = TIMx_OPM_DISABLE;
 }
 
 /**
- * @brief Configures the default parameters for TIM_CONFIGx
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 1MHz
  */
-void TIM_1MHz_Load_Default(timer_config_t* TIM_CONFIGx){
+void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG){
 	// Configure Auto-Reload Register Value
-	TIM_CONFIGx->auto_reload = TIMx_DEFAULT_1MHz_ARR;
+	TIMx_CONFIG->auto_reload = TIMx_DEFAULT_1MHz_ARR;
 	// Configure Prescaler Value
-	TIM_CONFIGx->prescaler = TIMx_DEFAULT_1MHz_PSC;
+	TIMx_CONFIG->prescaler = TIMx_DEFAULT_1MHz_PSC;
 	// Configure Timer Count Value
-	TIM_CONFIGx->count = TIMx_DEFAULT_CNT;
+	TIMx_CONFIG->count = TIMx_DEFAULT_CNT;
 	// CMS Mode Selection (Edge Mode Selection)
-	TIM_CONFIGx->cms_mode = TIMx_CMS_EDGE;
+	TIMx_CONFIG->cms_mode = TIMx_CMS_EDGE;
 	// Counting Direction (Up Counting)
-	TIM_CONFIGx->direction = TIMx_DIR_COUNT_UP;
+	TIMx_CONFIG->direction = TIMx_DIR_COUNT_UP;
 	// Auto Reload-Preload Enable
-	TIM_CONFIGx->arpe = TIMx_ARPE_ENABLE;
+	TIMx_CONFIG->arpe = TIMx_ARPE_ENABLE;
 	// One Pulse Mode (OFF)
-	TIM_CONFIGx->one_pulse = TIMx_OPM_DISABLE;	
+	TIMx_CONFIG->one_pulse = TIMx_OPM_DISABLE;	
 }
 
 /**
  * @brief Configures the General Purpose Timer (TIMx)
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  */
-void TIM_Config(timer_config_t* TIM_CONFIGx){
+void TIM_Config(timer_config_t* TIMx_CONFIG){
 	// Enable Clock for Timer
-	TIM_Clk_Enable(TIM_CONFIGx->TIM);
+	TIM_Clk_Enable(TIMx_CONFIG->TIM);
 	// Reset the Timer
-	TIM_Reset(TIM_CONFIGx->TIM);
+	TIM_Reset(TIMx_CONFIG->TIM);
 	// Disable the Timer
-	TIM_Disable(TIM_CONFIGx->TIM);
+	TIM_Disable(TIMx_CONFIG->TIM);
 	// Disable Update Event
-	TIM_UEV_Disable(TIM_CONFIGx->TIM);
+	TIM_UEV_Disable(TIMx_CONFIG->TIM);
 	// Auto Reload Value
-	TIM_CONFIGx->TIM->ARR = TIM_CONFIGx->auto_reload;
+	TIMx_CONFIG->TIM->ARR = TIMx_CONFIG->auto_reload;
 	// Prescaler Value
-	TIM_CONFIGx->TIM->PSC = TIM_CONFIGx->prescaler;
+	TIMx_CONFIG->TIM->PSC = TIMx_CONFIG->prescaler;
 	// Initial Count Value
-	TIM_CONFIGx->TIM->CNT = TIM_CONFIGx->count;
+	TIMx_CONFIG->TIM->CNT = TIMx_CONFIG->count;
 	// Auto Reload Preload Enable
-	TIM_CONFIGx->TIM->CR1.REG |= (((TIM_CONFIGx->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
+	TIMx_CONFIG->TIM->CR1.REG |= (((TIMx_CONFIG->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
 									// Centre-Aligned Mode 
-								   ((TIM_CONFIGx->cms_mode & 0x03) << TIM_CR1_CMS_Pos) | \
+								   ((TIMx_CONFIG->cms_mode & 0x03) << TIM_CR1_CMS_Pos) | \
 									// Direction 
-								   ((TIM_CONFIGx->direction & 0x01)<< TIM_CR1_DIR_Pos) | \
+								   ((TIMx_CONFIG->direction & 0x01)<< TIM_CR1_DIR_Pos) | \
 									// One Pulse Mode (OPM)
-								   ((TIM_CONFIGx->one_pulse & 0x01) << TIM_CR1_OPM_Pos));
+								   ((TIMx_CONFIG->one_pulse & 0x01) << TIM_CR1_OPM_Pos));
 	// Enable Update Event
-	TIM_UEV_Enable(TIM_CONFIGx->TIM);
+	TIM_UEV_Enable(TIMx_CONFIG->TIM);
 	// Update the Timer
-	TIM_Update_Parameters(TIM_CONFIGx->TIM);
+	TIM_Update_Parameters(TIMx_CONFIG->TIM);
 }
 
 /**
@@ -189,27 +189,27 @@ uint32_t TIM_Get_Freq(TIM_REG_STRUCT* TIMx){
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
-static void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs){
+static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
-	if(TIM_Get_Freq(TIM_CONFIGx) != FREQ_1kHz){
+	if(TIM_Get_Freq(TIMx_CONFIG) != FREQ_1kHz){
 		// Disable Timer
-		TIM_Disable(TIM_CONFIGx);
+		TIM_Disable(TIMx_CONFIG);
 		// Set update event after 1ms (1kHz)
-		update_TIM_freq(TIM_CONFIGx, FREQ_1kHz);
+		update_TIM_freq(TIMx_CONFIG, FREQ_1kHz);
 		// Update the Parameters
-		TIM_Update_Parameters(TIM_CONFIGx);
+		TIM_Update_Parameters(TIMx_CONFIG);
 		// Enable Timer
-		TIM_Enable(TIM_CONFIGx);
+		TIM_Enable(TIMx_CONFIG);
 	}
 	// Iteration for Milliseconds
 	while(delayMs--){
 		// Wait till Update Flag is Set
-		while(!(TIM_CONFIGx->TIM->SR.REG & TIM_SR_UIF));
+		while(!(TIMx_CONFIG->TIM->SR.REG & TIM_SR_UIF));
 		// Clear the update flag
-		TIM_CONFIGx->TIM->SR.REG &= ~TIM_SR_UIF;
+		TIMx_CONFIG->TIM->SR.REG &= ~TIM_SR_UIF;
 	}
 }
 

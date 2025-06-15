@@ -20,26 +20,26 @@
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value);
 
 /**
- * @brief Configures the default parameters for TIM_CONFIGx
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 10kHz
  */
-void TIM_10kHz_Load_Default(timer_config_t* TIM_CONFIGx);
+void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG);
 
 /**
- * @brief Configures the default parameters for TIM_CONFIGx
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 1MHz
  */
-void TIM_1MHz_Load_Default(timer_config_t* TIM_CONFIGx);
+void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
 
 /**
  * @brief Configures the General Purpose Timer (TIMx)
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  */
-void TIM_Config(timer_config_t* TIM_CONFIGx);
+void TIM_Config(timer_config_t* TIMx_CONFIG);
 
 /**
  * @brief Gets the GP Timer Clock Frequency
@@ -50,10 +50,10 @@ uint32_t TIM_Get_Freq(TIM_REG_STRUCT* TIMx);
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] TIM_CONFIGx `timer_config_t *` structure containing the configuration
+ * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
  */
-// static void TIM__delay_ms(timer_config_t* TIM_CONFIGx, volatile uint32_t delayMs);
+// static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs);
 
 /**
  * @brief Creates a delay using Timer

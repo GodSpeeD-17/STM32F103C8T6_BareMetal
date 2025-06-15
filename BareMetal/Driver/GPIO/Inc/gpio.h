@@ -18,56 +18,56 @@
 
 /**
  * @brief Configures the GPIO based upon gpio structure
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-void GPIO_Config(gpio_config_t* GPIO_CONFIGx);
+void GPIO_Config(gpio_config_t* GPIOx_CONFIG);
 
 /**
  * @brief Configures the GPIO assuming LED
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Config_LED(gpio_config_t* GPIO_CONFIGx){
+__INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
 	// Set Mode to Output at 10MHz
-	GPIO_CONFIGx->MODE = GPIOx_MODE_OUT_10MHz;
+	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
 	// Set Configuration to General Purpose Push-Pull
-	GPIO_CONFIGx->CNF = GPIOx_CNF_OUT_GP_PP;
+	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_GP_PP;
 	// Configure GPIO
-	GPIO_Config(GPIO_CONFIGx);
+	GPIO_Config(GPIOx_CONFIG);
 }
 
 /**
  * @brief Sets the state of GPIO Pin to HIGH
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Set(gpio_config_t* GPIO_CONFIGx){
+__INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
 	// Bit Set (Atomicity)
-	GPIO_CONFIGx->GPIO->BSRR.REG |= (1 << GPIO_CONFIGx->PIN);
+	GPIOx_CONFIG->GPIO->BSRR.REG |= (1 << GPIOx_CONFIG->PIN);
 }
 
 /**
  * @brief Sets the state of GPIO Pin to LOW
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Reset(gpio_config_t* GPIO_CONFIGx){
+__INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
 	// Bit Reset (Atomicity)
-	GPIO_CONFIGx->GPIO->BRR.REG |= (1 << GPIO_CONFIGx->PIN);
+	GPIOx_CONFIG->GPIO->BRR.REG |= (1 << GPIOx_CONFIG->PIN);
 }
 
 /**
  * @brief Toggles the state of GPIO Pin
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Toggle(gpio_config_t* GPIO_CONFIGx){
+__INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
 	// Output Data Register
-	GPIO_CONFIGx->GPIO->ODR.REG ^= (1 << GPIO_CONFIGx->PIN);
+	GPIOx_CONFIG->GPIO->ODR.REG ^= (1 << GPIOx_CONFIG->PIN);
 }
 
 /**
  * @brief Retrieves the state of GPIO Pin
- * @param[in] GPIO_CONFIGx GPIO Configuration Structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @returns Pin State
  */
-uint8_t GPIO_Get(gpio_config_t* GPIO_CONFIGx);
+uint8_t GPIO_Get(gpio_config_t* GPIOx_CONFIG);
 
 /**
  * @brief Configures On-board LED
