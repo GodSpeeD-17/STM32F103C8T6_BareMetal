@@ -35,11 +35,7 @@ pwm_handle_t PWM_Config(pwm_config_t* PWM_CONFIG){
 	// Default Timer Configuration for PWM
 	PWM_Default_TIM_Config(pwm_handle);
 	// Prescaler for Target PWM Frequency based on Timer Frequency
-	// PSC = ((APB2 Clock Frequency)/(Target PWM Frequency * (ARR + 1))) - 1
-	uint32_t prescaler = TIM_Get_Frequency(pwm_handle->TIMx_CONFIG.TIM);
-	prescaler /= PWM_CONFIG->freq_Hz;
-	prescaler /= (pwm_handle->TIMx_CONFIG.auto_reload + 1);
-	pwm_handle->TIMx_CONFIG.prescaler = prescaler - 1;
+	pwm_handle->TIMx_CONFIG.prescaler = PWM_Calc_TIM_Prescaler(pwm_handle);
 	// Configure Timer based on the PWM Configuration
 	TIM_Config(&pwm_handle->TIMx_CONFIG);
 	// Channel Configuration
@@ -195,4 +191,49 @@ void PWM_Disable(pwm_handle_t PWM_HANDLE){
 	PWM_Stop(PWM_HANDLE);
 	// Disable the Timer
 	TIM_Disable(PWM_HANDLE->TIMx_CONFIG.TIM);
+}
+
+/**
+ * @brief Updates the Duty Cycle for a PWM Configuration
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ * @param duty_cycle Updated Duty Cycle Value (%) x 10
+ * @note `duty_cycle` is scaled value:
+ * @note For 0.1% Duty Cycle -> `duty_cycle = 1`
+ * @note For 100% Duty Cycle -> `duty_cycle = 1000`
+ */
+void PWM_Update_Duty_Cycle(pwm_handle_t PWM_HANDLE, uint16_t duty_cycle){
+	// Wrap Duty Cycle
+	if(duty_cycle >= PWM_MAX_DUTY_CYCLE)
+		duty_cycle = PWM_MAX_DUTY_CYCLE;
+	else if (duty_cycle <= PWM_MIN_DUTY_CYCLE)
+		duty_cycle = PWM_MIN_DUTY_CYCLE;
+	// Channel 1: Update the Duty Cycle Directly due to Buffered Value
+	if(PWM_HANDLE->TIMx_CONFIG.channel == TIMx_CHANNEL_1)
+		PWM_HANDLE->TIMx_CONFIG.TIM->CCR1.CC1_OUT = duty_cycle;
+	// Channel 2: Update the Duty Cycle Directly due to Buffered Value	
+	else if(PWM_HANDLE->TIMx_CONFIG.channel == TIMx_CHANNEL_2)
+		PWM_HANDLE->TIMx_CONFIG.TIM->CCR2.CC2_OUT = duty_cycle;
+	// Channel 3: Update the Duty Cycle Directly due to Buffered Value	
+	else if(PWM_HANDLE->TIMx_CONFIG.channel == TIMx_CHANNEL_3)
+		PWM_HANDLE->TIMx_CONFIG.TIM->CCR3.CC3_OUT = duty_cycle;
+	// Channel 4: Update the Duty Cycle Directly due to Buffered Value	
+	else if(PWM_HANDLE->TIMx_CONFIG.channel == TIMx_CHANNEL_4)
+		PWM_HANDLE->TIMx_CONFIG.TIM->CCR4.CC4_OUT = duty_cycle;
+}
+
+/**
+ * @brief Calculates Timer Prescaler based on target PWM Frequency 
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ * @returns Timer Prescaler Value
+ */
+uint16_t PWM_Calc_TIM_Prescaler(pwm_handle_t PWM_HANDLE){
+	// Formula: PSC = ((APB2 Clock Frequency)/((Target PWM Frequency) * (ARR + 1))) - 1
+	// Calculate the Timer Input Frequency First
+	uint32_t prescaler = TIM_Get_Frequency(PWM_HANDLE->TIMx_CONFIG.TIM);
+	// Divide by Target PWM Frequency
+	prescaler /= PWM_HANDLE->PWM_CONFIG.freq_Hz;
+	// Divide by Auto Reload Value
+	prescaler /= PWM_HANDLE->TIMx_CONFIG.auto_reload;
+	// Return the final Calculated Prescaler Value
+	return (uint16_t) (prescaler - 1);
 }
