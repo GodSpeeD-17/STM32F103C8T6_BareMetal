@@ -334,9 +334,9 @@
 
 /*********************************************** SysTick MACROS ***********************************************/
 // SysTick Clock Selection
-#define SYSTICK_CLK_EXT						(0x00
-#define) SYSTICK_CLK_CORE					(0x01
-)
+#define SYSTICK_CLK_EXT						(0x00)
+#define SYSTICK_CLK_CORE					(0x01)
+
 // SysTick Delay
 #define SYSTICK_DELAY_1_US					(RCC_Get_AHBClock())
 #define SYSTICK_DELAY_2_US					(2 * SYSTICK_DELAY_1_US)
