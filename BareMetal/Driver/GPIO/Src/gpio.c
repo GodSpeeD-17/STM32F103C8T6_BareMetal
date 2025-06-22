@@ -9,6 +9,14 @@
 // Include RCC for clock enabling
 #include "rcc.h"
 
+// On-board LED Configuration
+const static gpio_config_t OB_LED_Configuration = {
+	.GPIO = OB_LED_PORT,
+	.PIN = OB_LED_PIN,
+	.MODE = GPIOx_MODE_OUT_2MHz,	// Refer RM008
+	.CNF = GPIOx_CNF_OUT_GP_PP,
+};
+
 /**
  * @brief Configures the GPIO based upon gpio structure
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
@@ -125,13 +133,6 @@ uint8_t GPIO_Get(gpio_config_t* GPIOx_CONFIG){
  * @note The on-board LED is active-low, meaning it turns ON when the pin is set to LOW.
  */
 void OB_LED_Config(void){
-	// On-board LED Configuration
-	gpio_config_t OB_LED_Configuration = {
-		.GPIO = OB_LED_PORT,
-		.PIN = OB_LED_PIN,
-		.MODE = GPIOx_MODE_OUT_2MHz,	// Refer RM008
-		.CNF = GPIOx_CNF_OUT_GP_PP,
-	};
 	// Configure the On-board LED
 	GPIO_Config(&OB_LED_Configuration);
 	// Set the On-board LED to LOW (Active-Low)
