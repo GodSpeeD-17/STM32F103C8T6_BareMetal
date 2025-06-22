@@ -21,16 +21,14 @@ pwm_handle_t pwm_yellow_led_handle;
 int main(){
 	// Initialisation
 	pwm_yellow_led_handle = PWM_Config(&yellow_led);
-	// Start PWM
+	// Enable PWM
 	PWM_Enable(pwm_yellow_led_handle);
-
 	// Infinite Loop
 	while(1){
 		OB_LED_Toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
-
 	// Free PWM Handle
 	PWM_DeConfig(pwm_yellow_led_handle);
 	// Return Value

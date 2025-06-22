@@ -32,10 +32,14 @@ pwm_handle_t PWM_Config(pwm_config_t* PWM_CONFIG){
 	// Fetch the Timer & Channel Mapping based on GPIO
 	if(!PWM_Get_TIM_From_GPIO(&PWM_CONFIG->GPIOx_CONFIG, &pwm_handle->TIMx_CONFIG))
 		return NULL;
-	// Prescaler Based on PWM Frequency
-	pwm_handle->TIMx_CONFIG.prescaler = (RCC_Get_APB1Clock() / PWM_CONFIG->freq_Hz) - 1;
 	// Default Timer Configuration for PWM
 	PWM_Default_TIM_Config(pwm_handle);
+	// Prescaler for Target PWM Frequency based on Timer Frequency
+	// PSC = ((APB2 Clock Frequency)/(Target PWM Frequency * (ARR + 1))) - 1
+	uint32_t prescaler = TIM_Get_Frequency(pwm_handle->TIMx_CONFIG.TIM);
+	prescaler /= PWM_CONFIG->freq_Hz;
+	prescaler /= (pwm_handle->TIMx_CONFIG.auto_reload + 1);
+	pwm_handle->TIMx_CONFIG.prescaler = prescaler - 1;
 	// Configure Timer based on the PWM Configuration
 	TIM_Config(&pwm_handle->TIMx_CONFIG);
 	// Channel Configuration
@@ -68,7 +72,7 @@ pwm_handle_t PWM_Config(pwm_config_t* PWM_CONFIG){
 			// Set the Polarity	
 			pwm_handle->TIMx_CONFIG.TIM->CCER.REG |= (PWM_CONFIG->polarity << TIM_CCER_CC3P_Pos);
 			// Duty Cycle
-			pwm_handle->TIMx_CONFIG.TIM->CCR3.CC3_OUT = PWM_CONFIG->duty_cycle;
+			pwm_handle->TIMx_CONFIG.TIM->CCR3.CC3_OUT = (PWM_CONFIG->duty_cycle - 1);
 		break;
 		// Channel 4 Configuration
 		case TIMx_CHANNEL_4:

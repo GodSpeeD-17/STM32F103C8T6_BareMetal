@@ -65,8 +65,9 @@ void RCC_Update_AHBClock(){
 	// Calculate the offset from `HPRE_DIV_2`
 	int8_t prescaler = (((int32_t)(RCC->CFGR.REG & RCC_CFGR_HPRE)) - ((int32_t)RCC_CFGR_HPRE_DIV2)) >> RCC_CFGR_HPRE_Pos;
 	// Positive Offset indicates a prescaler
-	if(prescaler >= 0)
+	if(prescaler >= 0){
 		AHB_Clock >>= AHB_prescaler[prescaler];
+	}
 	// Assign the AHB Clock Value
 	System.AHBClock = AHB_Clock; 
 }
@@ -151,5 +152,38 @@ uint32_t RCC_Get_APB2Clock(){
 	uint32_t APB2_Clock = System.APB2Clock;
 	// Return the value
 	return APB2_Clock;
+}
+
+/**
+ * @brief AHB Prescaler
+ */
+uint8_t RCC_Get_AHB_Prescaler(void){
+	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_HPRE) >> RCC_CFGR_HPRE_Pos);
+	if(index > 0x07)
+		return (1 << APB_prescaler[(index & 0x07)]);
+	else
+		return 1;
+}
+
+/**
+ * @brief APB1 Prescaler
+ */
+uint8_t RCC_Get_APB1_Prescaler(void){
+	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos);
+	if(index > 0x03)
+		return (1 << APB_prescaler[(index & 0x03)]);
+	else
+		return 1;
+}
+
+/**
+ * @brief APB2 Prescaler
+ */
+uint8_t RCC_Get_APB2_Prescaler(void){
+	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos);
+	if(index > 0x03)
+		return (1 << APB_prescaler[(index & 0x03)]);
+	else
+		return 1;
 }
 

@@ -89,4 +89,11 @@ void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx);
  */
 void TIM_Reset(TIM_REG_STRUCT* TIMx);
 
+/**
+ * @brief Provides the Current Timer Frequency
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @returns Timer Frequency (in Hz)
+ */
+uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx);
+
 #endif /* __TIMER_H__ */

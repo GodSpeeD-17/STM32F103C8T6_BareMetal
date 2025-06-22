@@ -300,3 +300,26 @@ void TIM_Reset(TIM_REG_STRUCT* TIMx){
 	// Write to Register
 	RCC->APB1RSTR.REG = reg;
 }
+
+/**
+ * @brief Provides the Current Timer Frequency
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @returns Timer Frequency (in Hz)
+ */
+uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx){
+	// Local Variables
+	uint32_t timer_freq_Hz = 0x00;
+	uint8_t prescaler = 0x00;
+	if(TIMx != TIM1 && TIMx != TIM8){
+		// APB1 Clock Frequency
+		timer_freq_Hz = RCC_Get_APB1Clock();
+		// APB1 Clock Prescaler
+		prescaler = RCC_Get_APB1_Prescaler();
+		// Actual Timer Frequency
+		if(prescaler != 1){
+			timer_freq_Hz <<= 1;
+		}
+	}
+	// Timer Frequency
+	return timer_freq_Hz;
+}

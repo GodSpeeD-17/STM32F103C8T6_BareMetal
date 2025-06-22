@@ -521,7 +521,7 @@
 #define PWM_MODE_INVERTED					(0x07)
 
 // Max Counter Value for PWM
-#define PWM_DEFAULT_ARR						((uint16_t) 9999)
+#define PWM_DEFAULT_ARR						((uint16_t) 999)
 
 /*
 // Error Checking MACROS

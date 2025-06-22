@@ -81,6 +81,21 @@ __INLINE__ void RCC_AFIO_Clk_Disable(void){
 }
 
 /**
+ * @brief AHB Prescaler
+ */
+uint8_t RCC_Get_AHB_Prescaler(void);
+
+/**
+ * @brief APB1 Prescaler
+ */
+uint8_t RCC_Get_APB1_Prescaler(void);
+
+/**
+ * @brief APB2 Prescaler
+ */
+uint8_t RCC_Get_APB2_Prescaler(void);
+
+/**
  * @brief Updates the Core Clock
  * @note This function should be called after any change in the RCC configuration
  * @note Max Frequency: 72MHz 

@@ -195,15 +195,18 @@ uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_c
 	const gpio_timer_mapping_t* map = NULL;
 	uint8_t map_size = 0;
 	// GPIO Port
-	if(gpio->GPIO == GPIOA)
+	if(gpio->GPIO == GPIOA){
 		map = gpioa_pin_map;
-	else if (gpio->GPIO == GPIOB)
+		map_size = (sizeof(gpioa_pin_map)/sizeof(map[0]));
+	}
+	else if (gpio->GPIO == GPIOB){
 		map = gpiob_pin_map;
+		map_size = (sizeof(gpiob_pin_map)/sizeof(map[0]));
+	}
 	// Unsupported GPIO Port
 	else
 		return 0;
-	// Calculate GPIO Pin Mapping Size
-	map_size = (sizeof(map)/sizeof(gpio_timer_mapping_t));
+	
 	// Provide Timer Details against GPIO
 	if(gpio->PIN < map_size && map[gpio->PIN].TIM != NULL) {
 		timer_cfg->TIM = map[gpio->PIN].TIM;
