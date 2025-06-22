@@ -37,4 +37,29 @@ pwm_handle_t PWM_DeConfig(pwm_handle_t PWM_HANDLE);
  */
 void PWM_Default_TIM_Config(pwm_handle_t PWM_HANDLE);
 
+/**
+ * @brief Enables the PWM Channel
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Start(pwm_handle_t PWM_HANDLE);
+
+/**
+ * @brief Enables the PWM
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Enable(pwm_handle_t PWM_HANDLE);
+
+/**
+ * @brief Disables the PWM Channel
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Stop(pwm_handle_t PWM_HANDLE);
+
+/**
+ * @brief Disables the PWM
+ * @param PWM_HANDLE Handle to the PWM Configuration
+ */
+void PWM_Disable(pwm_handle_t PWM_HANDLE);
+
+
 #endif /* __PWM_H__ */

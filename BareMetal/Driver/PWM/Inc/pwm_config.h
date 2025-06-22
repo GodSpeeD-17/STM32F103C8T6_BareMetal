@@ -32,6 +32,9 @@ typedef struct {
 	uint16_t preload: 1;
 } pwm_config_t;
 
+// Handle Type Definition
+typedef struct pwm_handle* pwm_handle_t;
+
 /**
  * @brief Retrieve the GPIO mapping for a given General Purpose Timer
  * @param TIMx_CONFIG General Purpose Timer Configuration Structure
@@ -71,46 +74,5 @@ void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG);
  * @param src Source PWM Configuration Structure
  */
 void PWM_Config_Copy(pwm_config_t* dest, const pwm_config_t* src);
-
-/**
- * @brief Enables the PWM Channel
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-__INLINE__ void PWM_Start(pwm_handle_t PWM_HANDLE){
-	// Enable the Channel
-	TIM_Channel_Enable(PWM_HANDLE->TIMx_CONFIG.TIM, PWM_HANDLE->TIMx_CONFIG.channel);
-}
-
-/**
- * @brief Enables the PWM
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-__INLINE__ void PWM_Enable(pwm_handle_t PWM_HANDLE){
-	// Enable the Timer
-	TIM_Enable(PWM_HANDLE->TIMx_CONFIG.TIM);
-	// Enable the Channel
-	PWM_Start(PWM_HANDLE);
-}
-
-/**
- * @brief Disables the PWM Channel
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-__INLINE__ void PWM_Stop(pwm_handle_t PWM_HANDLE){
-	// Disable the Channel
-	TIM_Channel_Disable(PWM_HANDLE->TIMx_CONFIG.TIM, PWM_HANDLE->TIMx_CONFIG.channel);
-}
-
-/**
- * @brief Disables the PWM
- * @param PWM_HANDLE Handle to the PWM Configuration
- */
-__INLINE__ void PWM_Disable(pwm_handle_t PWM_HANDLE){
-	// Disable the Channel
-	PWM_Stop(PWM_HANDLE);
-	// Disable the Timer
-	TIM_Disable(PWM_HANDLE->TIMx_CONFIG.TIM);
-}
-
 
 #endif /* __PWM_CONFIG_H__ */
