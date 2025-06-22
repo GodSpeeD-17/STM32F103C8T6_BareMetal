@@ -73,7 +73,7 @@ __INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @returns Pin State
  */
-uint8_t GPIO_Get(gpio_config_t* GPIOx_CONFIG);
+uint8_t GPIO_Get_State(gpio_config_t* GPIOx_CONFIG);
 
 /**
  * @brief Configures On-board LED

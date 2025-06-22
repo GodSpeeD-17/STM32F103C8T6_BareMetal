@@ -23,7 +23,7 @@ int main(){
 	// Infinite Loop
 	while(1){
 		// Push Button Pressed
-		if(GPIO_Get(&Push_Button) != 0x00){
+		if(GPIO_Get_State(&Push_Button) != 0x00){
 			// Toggle LEDs
 			GPIO_Toggle(&LED_Red);
 		}

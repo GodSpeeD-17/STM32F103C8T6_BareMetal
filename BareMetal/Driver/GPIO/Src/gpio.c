@@ -112,18 +112,15 @@ void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  * @returns Pin State
  */
-uint8_t GPIO_Get(gpio_config_t* GPIOx_CONFIG){
+uint8_t GPIO_Get_State(gpio_config_t* GPIOx_CONFIG){
 	// Pin State
 	uint32_t pin_state = 0xFFFFFFFF;
-	uint8_t result = 0x00; // Safety
 	// Get State
-	pin_state = (GPIOx_CONFIG->GPIO->IDR.REG & (0x01 << GPIOx_CONFIG->PIN));
+	pin_state = ((GPIOx_CONFIG->GPIO->IDR.REG) & (0x01 << GPIOx_CONFIG->PIN));
 	// Shift the pin state to the right based on the pin number
 	pin_state >>= GPIOx_CONFIG->PIN;
-	// Convert to uint8_t
-	result = (uint8_t)pin_state;
 	// Return Result
-	return result;
+	return (uint8_t) pin_state;
 }
 
 /**
