@@ -36,12 +36,12 @@ OBJS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 vpath %.c $(sort $(dir $(SRCS)))
 
 # --- Compiler Flags ---
-CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCLUDES) -std=gnu11 -O0 -Wall \
+CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCLUDES) -std=gnu11 -O0 -Wall \
                   -fstack-usage -fdata-sections -ffunction-sections -D$(MCU_MODEL) -MMD -MP
 # --- Assembler Flags ---
-ASFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs $(INCFLAGS) -x assembler-with-cpp
+ASFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCFLAGS) -x assembler-with-cpp
 # --- Linker Flags ---
-LDFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nosys.specs $(INCFLAGS)
+LDFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCFLAGS)
 
 # Add debug flags if build type is debug
 ifeq ($(BUILD_TYPE), Debug)
@@ -105,6 +105,7 @@ define memory_report
 	}'
 	@echo "\033[0m"
 endef
+
 
 # ST-Link Information
 info:

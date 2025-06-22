@@ -42,20 +42,6 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
 void TIM_Config(timer_config_t* TIMx_CONFIG);
 
 /**
- * @brief Gets the GP Timer Clock Frequency
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @returns Timer Frequency	(in Hz)
- */
-uint32_t TIM_Get_Freq(TIM_REG_STRUCT* TIMx);
-
-/**
- * @brief General Purpose Timer Delay
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
- * @param[in] delayMs Number of milliseconds
- */
-// static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs);
-
-/**
  * @brief Creates a delay using Timer
  * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
  * @param[in] delayUs Number of microseconds to delay
@@ -90,7 +76,7 @@ void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx);
 void TIM_Reset(TIM_REG_STRUCT* TIMx);
 
 /**
- * @brief Provides the Current Timer Frequency
+ * @brief Provides the Timer Frequency
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns Timer Frequency (in Hz)
  */

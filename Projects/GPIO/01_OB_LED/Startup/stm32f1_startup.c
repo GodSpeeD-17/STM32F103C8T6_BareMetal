@@ -13,6 +13,8 @@
 #include "systick.h"
 // GPIO Configuration
 #include "gpio.h"
+// Required for `errno` in standard `malloc`
+#include <errno.h>
 /*-------------------------------------------- MACROS ----------------------------------*/
 #define ARM_IRQ						((uint8_t) 11)
 #define RESERVED					((uint8_t) 6)
@@ -30,6 +32,12 @@ extern uint32_t _sbss;
 extern uint32_t _ebss;
 // Top of stack from linker
 extern uint32_t _estack;
+// Start of heap
+extern uint8_t _sheap;
+// End of heap
+extern uint8_t _eheap;
+// Current heap pointer
+static uint8_t *heap_ptr = &_sheap;
 /*-------------------------------------------------------------------------------*/
 // External Main Function
 __attribute__((weak, naked)) extern int main(void);    
@@ -192,8 +200,8 @@ __attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RE
  */ 
 __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
-	uint32_t *pSrc = (uint32_t *) &_sidata;
-	uint32_t *pDst = (uint32_t *) &_sdata;
+	uint32_t* pSrc = (uint32_t *) &_sidata;
+	uint32_t* pDst = (uint32_t *) &_sdata;
 	while(pDst < &_edata){
 		*pDst++ = *pSrc++;
 	}
@@ -223,3 +231,35 @@ __attribute__((weak)) void Default_Handler(void){
 		(void) 0;
 }
 /*-------------------------------------------------------------------------------*/
+/**
+ * @brief Requests additional heap memory from the system
+ * 
+ * @param increment Number of bytes to increase the heap by
+ * @return void* 
+ *   - On success: Pointer to the start of the newly allocated memory block
+ *   - On failure: (void*)-1 with errno set to ENOMEM (heap overflow)
+ * 
+ * @note This is the low-level memory allocator used by malloc()/calloc()
+ * @warning The heap grows upward while stack grows downward - ensure they don't collide!
+ * @warning Not thread-safe - use in single-threaded environments only
+ * 
+ * Memory layout:
+ * 
+ * RAM: [.data][.bss][heap → ... ← stack]
+ *            _sheap   heap_ptr   _eheap
+ *                   (grows up)
+ */
+void *_sbrk(intptr_t increment){
+	// Update Previous Heap Pointer
+    uint8_t *prev_heap_ptr = heap_ptr;
+    // Check for heap overflow
+    if (heap_ptr + increment > &_eheap) {
+		// Set standard `errno` for `malloc` compatibility
+        errno = ENOMEM;
+        return (void *)-1;
+    }
+	// Update heap pointer
+    heap_ptr += increment;
+	// Return previous heap pointer
+    return (void *)prev_heap_ptr;
+}

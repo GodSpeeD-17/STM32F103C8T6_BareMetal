@@ -216,16 +216,3 @@ uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_c
 	return 0;
 }
 
-/**
- * @brief Configures the GPIO for PWM output
- * @param GPIOx_CONFIG GPIO Configuration Structure
- * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
- */
-void PWM_GPIO_Config(gpio_config_t* GPIOx_CONFIG){
-	// Set the GPIO Mode to Output
-	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
-	// Set the GPIO Configuration to Alternate Function Push-Pull
-	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_AF_PP;
-	// Configure the GPIO
-	GPIO_Config(GPIOx_CONFIG);
-}

@@ -78,4 +78,11 @@ void PWM_Update_Duty_Cycle(pwm_handle_t PWM_HANDLE, uint16_t duty_cycle);
  */
 uint16_t PWM_Calc_TIM_Prescaler(pwm_handle_t PWM_HANDLE);
 
+/**
+ * @brief Configures the GPIO for PWM output
+ * @param PWM_HANDLE PWM Handle
+ * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
+ */
+void PWM_GPIO_Config(pwm_handle_t PWM_HANDLE);
+
 #endif /* __PWM_H__ */

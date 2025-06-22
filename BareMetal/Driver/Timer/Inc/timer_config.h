@@ -108,11 +108,11 @@ __INLINE__ void TIM_Channel_Enable(TIM_REG_STRUCT* TIMx, uint8_t channel){
 	// Enable the General Purpose Timer Channel
 	if(channel & TIMx_CHANNEL_1)
 		reg |= TIM_CCER_CC1E;
-	if(channel & TIMx_CHANNEL_2)
+	else if(channel & TIMx_CHANNEL_2)
 		reg |= TIM_CCER_CC2E;
-	if(channel & TIMx_CHANNEL_3)
+	else if(channel & TIMx_CHANNEL_3)
 		reg |= TIM_CCER_CC3E;
-	if(channel & TIMx_CHANNEL_4)
+	else if(channel & TIMx_CHANNEL_4)
 		reg |= TIM_CCER_CC4E;
 	// Write to the register
 	TIMx->CCER.REG = reg;
@@ -126,14 +126,14 @@ __INLINE__ void TIM_Channel_Enable(TIM_REG_STRUCT* TIMx, uint8_t channel){
 __INLINE__ void TIM_Channel_Disable(TIM_REG_STRUCT* TIMx, uint8_t channel){
 	// Local Variable
 	uint32_t reg = TIMx->CCER.REG; 
-	// Enable the General Purpose Timer Channel
+	// Disable the General Purpose Timer Channel
 	if(channel & TIMx_CHANNEL_1)
 		reg &= ~TIM_CCER_CC1E;
-	if(channel & TIMx_CHANNEL_2)
+	else if(channel & TIMx_CHANNEL_2)
 		reg &= ~TIM_CCER_CC2E;
-	if(channel & TIMx_CHANNEL_3)
+	else if(channel & TIMx_CHANNEL_3)
 		reg &= ~TIM_CCER_CC3E;
-	if(channel & TIMx_CHANNEL_4)
+	else if(channel & TIMx_CHANNEL_4)
 		reg &= ~TIM_CCER_CC4E;
 	// Write to the register
 	TIMx->CCER.REG = reg;

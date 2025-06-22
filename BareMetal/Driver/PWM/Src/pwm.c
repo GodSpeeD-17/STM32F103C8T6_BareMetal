@@ -54,19 +54,25 @@ struct pwm_handle {
 pwm_handle_t PWM_Config(pwm_config_t* PWM_CONFIG){
 	// Dynamic Memory Allocation for PWM Handle
 	pwm_handle_t pwm_handle = calloc(1, sizeof(struct pwm_handle));
-	if(!pwm_handle)
-		return NULL;
+	if(!pwm_handle) return NULL;
 	// Deep Copy PWM Configuration
 	memcpy(&pwm_handle->PWM_CONFIG, PWM_CONFIG, sizeof(pwm_config_t));
 	// Fetch the Timer & Channel Mapping based on GPIO
-	if(!PWM_Get_TIM_From_GPIO(&PWM_CONFIG->GPIOx_CONFIG, &pwm_handle->TIMx_CONFIG))
+	if(!PWM_Get_TIM_From_GPIO(&PWM_CONFIG->GPIOx_CONFIG, &pwm_handle->TIMx_CONFIG)){
+		free(pwm_handle);
 		return NULL;
-	// Default Timer Configuration for PWM
-	PWM_Default_TIM_Config(pwm_handle);
-	// Prescaler for Target PWM Frequency based on Timer Frequency
-	pwm_handle->TIMx_CONFIG.prescaler = PWM_Calc_TIM_Prescaler(pwm_handle);
-	// Configure Timer based on the PWM Configuration
-	TIM_Config(&pwm_handle->TIMx_CONFIG);
+	}
+	// Disable the Timer Module
+	TIM_Disable(pwm_handle->TIMx_CONFIG.TIM);
+	// Timer is not configured
+	if(pwm_handle->TIMx_CONFIG.TIM->ARR != PWM_DEFAULT_ARR){
+		// Default Timer Configuration for PWM
+		PWM_Default_TIM_Config(pwm_handle);
+		// Prescaler for Target PWM Frequency based on Timer Frequency
+		pwm_handle->TIMx_CONFIG.prescaler = PWM_Calc_TIM_Prescaler(pwm_handle);
+		// Configure Timer based on the PWM Configuration
+		TIM_Config(&pwm_handle->TIMx_CONFIG);
+	}
 	// Channel Configuration
 	switch(pwm_handle->TIMx_CONFIG.channel){
 		// Channel 1 Configuration
@@ -109,13 +115,9 @@ pwm_handle_t PWM_Config(pwm_config_t* PWM_CONFIG){
 			// Duty Cycle
 			pwm_handle->TIMx_CONFIG.TIM->CCR4.CC4_OUT = PWM_CONFIG->duty_cycle;
 		break;
-		// Error Case
-		default:
-			return NULL;
-		break;
 	}
 	// Configures the GPIO for PWM output
-	PWM_GPIO_Config(&PWM_CONFIG->GPIOx_CONFIG);
+	PWM_GPIO_Config(pwm_handle);
 	// Return Pointer to the PWM Handle
 	return pwm_handle;
 }
@@ -136,29 +138,6 @@ pwm_handle_t PWM_DeConfig(pwm_handle_t PWM_HANDLE){
 	free(PWM_HANDLE);
 	// Return the PWM Handle
 	return NULL;
-}
-
-/**
- * @brief Copies the PWM Configuration from source to destination
- * @param dest Destination PWM Configuration Structure
- * @param src Source PWM Configuration Structure
- */
-void PWM_Config_Copy(pwm_config_t* dest, const pwm_config_t* src){
-	// Copy the Frequency
-	dest->freq_Hz = src->freq_Hz;
-	// Copy the Duty Cycle
-	dest->duty_cycle = src->duty_cycle;
-	// Copy the Mode
-	dest->mode = src->mode;
-	// Copy the Polarity
-	dest->polarity = src->polarity;
-	// Copy the Preload
-	dest->preload = src->preload;
-	// Copy the GPIO Configuration
-	dest->GPIOx_CONFIG.MODE = src->GPIOx_CONFIG.MODE;
-	dest->GPIOx_CONFIG.CNF = src->GPIOx_CONFIG.CNF;
-	dest->GPIOx_CONFIG.GPIO = src->GPIOx_CONFIG.GPIO;
-	dest->GPIOx_CONFIG.PIN = src->GPIOx_CONFIG.PIN;
 }
 
 /**
@@ -263,4 +242,18 @@ uint16_t PWM_Calc_TIM_Prescaler(pwm_handle_t PWM_HANDLE){
 	prescaler /= ((PWM_HANDLE->TIMx_CONFIG.auto_reload + 1) * (PWM_HANDLE->PWM_CONFIG.freq_Hz));
 	// Return the final Calculated Prescaler Value
 	return (uint16_t) (prescaler - 1);
+}
+
+/**
+ * @brief Configures the GPIO for PWM output
+ * @param PWM_HANDLE PWM Handle
+ * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
+ */
+void PWM_GPIO_Config(pwm_handle_t PWM_HANDLE){
+	// Set the GPIO Mode to Output
+	PWM_HANDLE->PWM_CONFIG.GPIOx_CONFIG.MODE = GPIOx_MODE_OUT_10MHz;
+	// Set the GPIO Configuration to Alternate Function Push-Pull
+	PWM_HANDLE->PWM_CONFIG.GPIOx_CONFIG.CNF = GPIOx_CNF_OUT_AF_PP;
+	// Configure the GPIO
+	GPIO_Config(&PWM_HANDLE->PWM_CONFIG.GPIOx_CONFIG);
 }

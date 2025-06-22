@@ -152,25 +152,6 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
 }
 
 /**
- * @brief Gets the GP Timer Clock Frequency
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @returns Timer Frequency	(in Hz)
- */
-uint32_t TIM_Get_Freq(TIM_REG_STRUCT* TIMx){
-	// Timer Frequency
-	uint32_t timer_freq = RCC_Get_APB1Clock();
-	// APB1_Prescaler != 1 --> 2 * APB1Clock
-	if((RCC->CFGR.REG & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1)
-		timer_freq <<= 1;
-	// Consider ARR Value
-	timer_freq /= (TIMx->ARR + 1);
-	// Consider Prescaler Value
-	timer_freq /= (TIMx->PSC + 1);
-	// Return the Timer Frequency
-	return timer_freq;
-}
-
-/**
  * @brief General Purpose Timer Delay
  * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
  * @param[in] delayMs Number of milliseconds
@@ -285,7 +266,7 @@ void TIM_Reset(TIM_REG_STRUCT* TIMx){
 }
 
 /**
- * @brief Provides the Current Timer Frequency
+ * @brief Provides the Timer Frequency
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns Timer Frequency (in Hz)
  */
