@@ -36,23 +36,6 @@
 	|=> Summary:
 	|    |-> ARR + PSC sets the frequency of the PWM signal            
 	|    |-> CCR determines the duty cycle of the PWM signal
-	|
-	|
-	|=> FORMULA:
-	|                                (Timer Frequency)
-	|            PWM Frequency = -------------------------   [Hz]
-	|                              (ARR + 1) * (PSC + 1)     
-	|    where,
-	|        Timer Frequency = ((SYSCLK)*(TIMx_PRE)) / ((AHB_PRE)*(APB1_PRE)) {72 MHz}
-	|        ARR = TIMx Auto Reload Register
-	|        PSC = TIMx Prescaler
-	|
-	|    After re-arranging,
-	|                        (Timer Frequency)
-	|            PSC = ------------------------------ - 1;
-	|                    (PWM Frequency) * (ARR + 1)
-	|
-	|--> TIMx === General Purpose Timer
 */
 
 // Main Library

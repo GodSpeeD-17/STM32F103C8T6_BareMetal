@@ -165,123 +165,123 @@
 #define PLL_MAX_FREQ						((uint32_t) 72000000)
 
 // Clock Source
-#define RCCx_SW_CLK_HSI						0x00
-#define RCCx_SW_CLK_HSE						0x01
-#define RCCx_SW_CLK_PLL						0x02
+#define RCCx_SW_CLK_HSI						(0x00)
+#define RCCx_SW_CLK_HSE						(0x01)
+#define RCCx_SW_CLK_PLL						(0x02)
 
 // AHB Prescaler
-#define RCCx_AHB_DIV_1						0x00
-#define RCCx_AHB_DIV_2						0x08
-#define RCCx_AHB_DIV_4						0x09
-#define RCCx_AHB_DIV_8						0x0A
-#define RCCx_AHB_DIV_16						0x0B
-#define RCCx_AHB_DIV_64						0x0C
-#define RCCx_AHB_DIV_128					0x0D
-#define RCCx_AHB_DIV_256					0x0E
-#define RCCx_AHB_DIV_512					0x0F
+#define RCCx_AHB_DIV_1						(0x00)
+#define RCCx_AHB_DIV_2						(0x08)
+#define RCCx_AHB_DIV_4						(0x09)
+#define RCCx_AHB_DIV_8						(0x0A)
+#define RCCx_AHB_DIV_16						(0x0B)
+#define RCCx_AHB_DIV_64						(0x0C)
+#define RCCx_AHB_DIV_128					(0x0D)
+#define RCCx_AHB_DIV_256					(0x0E)
+#define RCCx_AHB_DIV_512					(0x0F)
 
 // APB1 Prescaler
-#define RCCx_APB1_DIV_1						0x03
-#define RCCx_APB1_DIV_2						0x04
-#define RCCx_APB1_DIV_4						0x05
-#define RCCx_APB1_DIV_8						0x06
-#define RCCx_APB1_DIV_16					0x07
+#define RCCx_APB1_DIV_1						(0x03)
+#define RCCx_APB1_DIV_2						(0x04)
+#define RCCx_APB1_DIV_4						(0x05)
+#define RCCx_APB1_DIV_8						(0x06)
+#define RCCx_APB1_DIV_16					(0x07)
 
 // APB2 Prescaler
-#define RCCx_APB2_DIV_1						0x03
-#define RCCx_APB2_DIV_2						0x04
-#define RCCx_APB2_DIV_4						0x05
-#define RCCx_APB2_DIV_8						0x06
-#define RCCx_APB2_DIV_16					0x07
+#define RCCx_APB2_DIV_1						(0x03)
+#define RCCx_APB2_DIV_2						(0x04)
+#define RCCx_APB2_DIV_4						(0x05)
+#define RCCx_APB2_DIV_8						(0x06)
+#define RCCx_APB2_DIV_16					(0x07)
 
 // ADC Prescaler
-#define RCCx_ADC_DIV_2						0x00
-#define RCCx_ADC_DIV_4						0x01
-#define RCCx_ADC_DIV_6						0x02
-#define RCCx_ADC_DIV_8						0x03
+#define RCCx_ADC_DIV_2						(0x00)
+#define RCCx_ADC_DIV_4						(0x01)
+#define RCCx_ADC_DIV_6						(0x02)
+#define RCCx_ADC_DIV_8						(0x03)
 
 // PLL Clock Source
-#define RCCx_PLL_SRC_HSI_DIV_2				0x00
-#define RCCx_PLL_SRC_HSE_DIV_1				0x01
-#define RCCx_PLL_SRC_HSE_DIV_2				0x03
+#define RCCx_PLL_SRC_HSI_DIV_2				(0x00)
+#define RCCx_PLL_SRC_HSE_DIV_1				(0x01)
+#define RCCx_PLL_SRC_HSE_DIV_2				(0x03)
 
 // PLL Multiplication Factor
-#define RCCx_PLL_MUL_2						0x00
-#define RCCx_PLL_MUL_3						0x01
-#define RCCx_PLL_MUL_4						0x02
-#define RCCx_PLL_MUL_5						0x03
-#define RCCx_PLL_MUL_6						0x04
-#define RCCx_PLL_MUL_7						0x05
-#define RCCx_PLL_MUL_8						0x06
-#define RCCx_PLL_MUL_9						0x07
-#define RCCx_PLL_MUL_10						0x08
-#define RCCx_PLL_MUL_11						0x09
-#define RCCx_PLL_MUL_12						0x0A
-#define RCCx_PLL_MUL_13						0x0B
-#define RCCx_PLL_MUL_14						0x0C
-#define RCCx_PLL_MUL_15						0x0D
-#define RCCx_PLL_MUL_16						0x0E
+#define RCCx_PLL_MUL_2						(0x00)
+#define RCCx_PLL_MUL_3						(0x01)
+#define RCCx_PLL_MUL_4						(0x02)
+#define RCCx_PLL_MUL_5						(0x03)
+#define RCCx_PLL_MUL_6						(0x04)
+#define RCCx_PLL_MUL_7						(0x05)
+#define RCCx_PLL_MUL_8						(0x06)
+#define RCCx_PLL_MUL_9						(0x07)
+#define RCCx_PLL_MUL_10						(0x08)
+#define RCCx_PLL_MUL_11						(0x09)
+#define RCCx_PLL_MUL_12						(0x0A)
+#define RCCx_PLL_MUL_13						(0x0B)
+#define RCCx_PLL_MUL_14						(0x0C)
+#define RCCx_PLL_MUL_15						(0x0D)
+#define RCCx_PLL_MUL_16						(0x0E)
 
 // USB Prescaler
-#define RCCx_USB_DIV_1_5					0x00
-#define RCCx_USB_DIV_1						0x01
+#define RCCx_USB_DIV_1_5					(0x00)
+#define RCCx_USB_DIV_1						(0x01)
 /*********************************************** RCC MACROS ***********************************************/
 
 /*********************************************** NVIC MACROS ***********************************************/
 // IRQn Number
-#define WWDG_IRQn							0
-#define PVD_IRQn							1
-#define TAMPER_IRQn							2
-#define RTC_IRQn							3
-#define RCC_IRQn							5
-#define EXTI0_IRQn							6
-#define EXTI1_IRQn							7
-#define EXTI2_IRQn							8
-#define EXTI3_IRQn							9
-#define EXTI4_IRQn							10
-#define DMA1_Channel1_IRQn					11
-#define DMA1_Channel2_IRQn					12
-#define DMA1_Channel3_IRQn					13
-#define DMA1_Channel4_IRQn					14
-#define DMA1_Channel5_IRQn					15
-#define DMA1_Channel6_IRQn					16
-#define DMA1_Channel7_IRQn					17
-#define ADC1_2_IRQn							18
-#define EXTI9_5_IRQn						23
-#define TIM2_IRQn							28
-#define TIM3_IRQn							29
-#define TIM4_IRQn							30
-#define I2C1_EV_IRQn						31
-#define I2C1_ER_IRQn						32
-#define I2C2_EV_IRQn						33
-#define I2C2_ER_IRQn						34
-#define SPI1_IRQn							35
-#define SPI2_IRQn							36
-#define USART1_IRQn							37
-#define USART2_IRQn							38
-#define USART3_IRQn							39
-#define EXTI15_10_IRQn						40
-#define ADC3_IRQn							47
-#define DMA2_Channel1_IRQn					56
-#define DMA2_Channel2_IRQn					57
-#define DMA2_Channel3_IRQn					58
-#define DMA2_Channel4_5_IRQn				59
+#define WWDG_IRQn							(0)
+#define PVD_IRQn							(1)
+#define TAMPER_IRQn							(2)
+#define RTC_IRQn							(3)
+#define RCC_IRQn							(5)
+#define EXTI0_IRQn							(6)
+#define EXTI1_IRQn							(7)
+#define EXTI2_IRQn							(8)
+#define EXTI3_IRQn							(9)
+#define EXTI4_IRQn							(10)
+#define DMA1_Channel1_IRQn					(11)
+#define DMA1_Channel2_IRQn					(12)
+#define DMA1_Channel3_IRQn					(13)
+#define DMA1_Channel4_IRQn					(14)
+#define DMA1_Channel5_IRQn					(15)
+#define DMA1_Channel6_IRQn					(16)
+#define DMA1_Channel7_IRQn					(17)
+#define ADC1_2_IRQn							(18)
+#define EXTI9_5_IRQn						(23)
+#define TIM2_IRQn							(28)
+#define TIM3_IRQn							(29)
+#define TIM4_IRQn							(30)
+#define I2C1_EV_IRQn						(31)
+#define I2C1_ER_IRQn						(32)
+#define I2C2_EV_IRQn						(33)
+#define I2C2_ER_IRQn						(34)
+#define SPI1_IRQn							(35)
+#define SPI2_IRQn							(36)
+#define USART1_IRQn							(37)
+#define USART2_IRQn							(38)
+#define USART3_IRQn							(39)
+#define EXTI15_10_IRQn						(40)
+#define ADC3_IRQn							(47)
+#define DMA2_Channel1_IRQn					(56)
+#define DMA2_Channel2_IRQn					(57)
+#define DMA2_Channel3_IRQn					(58)
+#define DMA2_Channel4_5_IRQn				(59)
 /*********************************************** NVIC MACROS ***********************************************/
 
 /*********************************************** EXTI MACROS ***********************************************/
 // External Trigger Selection
-#define EXTI_TRIG_FALLING					0x00
-#define EXTI_TRIG_RISING					0x01
-#define EXTI_TRIG_BOTH						0x02
+#define EXTI_TRIG_FALLING					(0x00)
+#define EXTI_TRIG_RISING					(0x01)
+#define EXTI_TRIG_BOTH						(0x02)
 
 // AF EXTI
-#define AF_EXTI_PA							0x00
-#define AF_EXTI_PB							0x01
-#define AF_EXTI_PC							0x02
-#define AF_EXTI_PD							0x03
-#define AF_EXTI_PE							0x04
-#define AF_EXTI_PF							0x05
-#define AF_EXTI_PG							0x06
+#define AF_EXTI_PA							(0x00)
+#define AF_EXTI_PB							(0x01)
+#define AF_EXTI_PC							(0x02)
+#define AF_EXTI_PD							(0x03)
+#define AF_EXTI_PE							(0x04)
+#define AF_EXTI_PF							(0x05)
+#define AF_EXTI_PG							(0x06)
 
 /*
 // Error Checking MACROs

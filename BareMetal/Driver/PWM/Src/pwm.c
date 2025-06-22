@@ -1,3 +1,32 @@
+/***************************************************************************************
+ *  File: pwm.c
+ *  Created on: 22/06/2025
+ *  Author: Shrey Shah
+ ***************************************************************************************/
+
+/*
+	THEORY:
+	|=> Pulse Width Modulation (PWM) is used to create pseudo Analog Value from Digital Value
+	|=> Main job is to provide an Average Voltage value which is Analog in nature but made up of Digital Signals
+	|=> PWM is used in various applications like Motor Speed Control, LED Dimming
+	|=> From experience, 10kHz - 100kHz is the best range of frequency where almost all the devices will work
+	|=> From Datasheet and Formula, do not exceed 200kHz and do not go below 100Hz (Toy Servo Motor)
+	|=> FORMULA:
+	|                                (Timer Frequency)
+	|            PWM Frequency = -------------------------   [Hz]
+	|                              (ARR + 1) * (PSC + 1)     
+	|    where,
+	|        Timer Frequency = ((SysClk)*(TIMx_PRE)) / ((AHB_PRE)*(APB1_PRE)) {72 MHz}
+	|        ARR = TIMx Auto Reload Register
+	|        PSC = TIMx Prescaler
+	|
+	|    After re-arranging,
+	|                        (Timer Frequency)
+	|            PSC = ------------------------------ - 1;
+	|                    (PWM Frequency) * (ARR + 1)
+	|
+*/
+
 // Main Header
 #include "pwm.h"
 // Dynamic Memory Allocation
@@ -230,10 +259,8 @@ uint16_t PWM_Calc_TIM_Prescaler(pwm_handle_t PWM_HANDLE){
 	// Formula: PSC = ((APB2 Clock Frequency)/((Target PWM Frequency) * (ARR + 1))) - 1
 	// Calculate the Timer Input Frequency First
 	uint32_t prescaler = TIM_Get_Frequency(PWM_HANDLE->TIMx_CONFIG.TIM);
-	// Divide by Target PWM Frequency
-	prescaler /= PWM_HANDLE->PWM_CONFIG.freq_Hz;
-	// Divide by Auto Reload Value
-	prescaler /= PWM_HANDLE->TIMx_CONFIG.auto_reload;
+	// Divide by Auto Reload Value & Target PWM Frequency
+	prescaler /= ((PWM_HANDLE->TIMx_CONFIG.auto_reload + 1) * (PWM_HANDLE->PWM_CONFIG.freq_Hz));
 	// Return the final Calculated Prescaler Value
 	return (uint16_t) (prescaler - 1);
 }
