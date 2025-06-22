@@ -25,19 +25,14 @@ SECTIONS
   {
     /* Align word to 4-byte boundary */
     . = ALIGN(4);
-
     /* Keep the interrupt vector table (important for startup) */
     KEEP(*(.isr_vector))
-
     /* Include all executable code sections */
     *(.text*)
-
     /* Include all constant read-only data */
     *(.rodata*)
-
     /* Align word to 4-byte boundary */
     . = ALIGN(4);
-
     /* Mark the end of the .text section */
     _etext = .;
   } > FLASH
@@ -47,16 +42,12 @@ SECTIONS
   {
     /* Align word to 4-byte boundary */
     . = ALIGN(4);
-
     /* Mark the start of .data in RAM */
     _sdata = .;
-
     /* Include all initialized global/static variables */
     *(.data*)
-
     /* Align word to 4-byte boundary */
     . = ALIGN(4);
-
     /* Mark the end of .data in RAM */
     _edata = .;
   } > RAM AT > FLASH
@@ -69,60 +60,44 @@ SECTIONS
   {
     /* Align word to 4-byte boundary */
     . = ALIGN(4);
-
     /* Mark the start of BSS section */
     _sbss = .;
-
     /* Include all uninitialized global/static variables */
     *(.bss*)
-
     /* Include any common variables not explicitly in .bss */
     *(COMMON)
-
     /* Mark the end of BSS section */
     _ebss = .;
   } > RAM
 
   /* Heap section: required for dynamic allocation */
-  .heap (COPY):
+  .heap (NOLOAD) :  /* NOLOAD prevents the section from being loaded into FLASH */
   {
-    /* Align word to 4-byte boundary */
-    . = ALIGN(4);
-
+    /* Align to 8 bytes (ARM ABI requirement) */
+    . = ALIGN(8);
     /* Mark start of heap */
-    _sheap = .;
-
+    __heap_start = .;      /* Symbol for heap start (debugging) */
+    _sheap = .;            /* Traditional symbol name for _sbrk() */
+    PROVIDE(__heap_start__ = .);  /* Alternative for some toolchains */
     /* Reserve minimum heap space */
     . = . + _Min_Heap_Size;
-
-    /* Align word to 4-byte boundary */
-    . = ALIGN(4);
-
-    /* Mark end of heap */
-    _eheap = .;
+    /* Align to 8 bytes (ARM ABI requirement) */
+    . = ALIGN(8);
+    __heap_end = .;        /* Symbol for heap end (debugging) */
+    _eheap = .;            /* Traditional symbol name for _sbrk() */
+    PROVIDE(__heap_end__ = .);    /* Alternative for some toolchains */
+    PROVIDE(end = .);      /* Required for _sbrk() in newlib */
   } > RAM
 
   /* Stack section: grows downward from end of RAM */
-  .stack (COPY):
+  .stack (NOLOAD):
   {
     /* Align stack to 8 bytes */
     . = ALIGN(8);
-
     /* Mark start of stack */
     _sstack = .;
-
-    /* Reserve minimum stack space */
-    . = . + _Min_Stack_Size;
-
-    /* Align stack to 8 bytes */
-    . = ALIGN(8);
-
-    /* Mark end of stack (top of RAM) */
-    _estack = ORIGIN(RAM) + LENGTH(RAM);
   } > RAM
 
   /* Optional symbol marking end of memory layout */
   _end = .;
-  /* For dynamic memory allocation */
-  PROVIDE(end = _eheap);
 }

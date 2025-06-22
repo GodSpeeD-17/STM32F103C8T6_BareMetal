@@ -23,6 +23,12 @@
 void GPIO_Config(gpio_config_t* GPIOx_CONFIG);
 
 /**
+ * @brief De-configures the GPIO based upon gpio structure
+ * @param[in] GPIOx_CONFIG GPIO Configuration Structure
+ */
+void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG);
+
+/**
  * @brief Configures the GPIO assuming LED
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */

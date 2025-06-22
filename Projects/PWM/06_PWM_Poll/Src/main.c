@@ -15,12 +15,12 @@ pwm_config_t yellow_led = {
 	.preload = PWM_CHx_PRELOAD_ENABLE, 
 };
 // PWM Handle Structure
-pwm_handle_t* pwm_yellow_led_handle;
+pwm_handle_t pwm_yellow_led_handle;
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
 	// Initialisation
-	PWM_Config(pwm_yellow_led_handle, &yellow_led);
+	pwm_yellow_led_handle = PWM_Config(&yellow_led);
 	// Start PWM
 	PWM_Enable(pwm_yellow_led_handle);
 
@@ -30,6 +30,9 @@ int main(){
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 	}
+
+	// Free PWM Handle
+	PWM_DeConfig(pwm_yellow_led_handle);
 	// Return Value
 	return 0;
 }
