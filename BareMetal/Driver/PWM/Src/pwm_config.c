@@ -216,3 +216,23 @@ uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_c
 	return 0;
 }
 
+/**
+ * @brief Default PWM Configuration
+ * @param PWM_CONFIG Pointer to PWM Configuration Structure
+ */
+void PWM_Default_Configuration(pwm_config_t* PWM_CONFIG){
+	// Frequency: 10kHz 
+	PWM_CONFIG->freq_Hz = FREQ_10kHz;
+	// Normal PWM Mode
+	PWM_CONFIG->mode = PWM_MODE_NORMAL;
+	// Defines "Active" as Logic High
+	PWM_CONFIG->polarity = PWM_CHx_POL_ACTIVE_HIGH;
+	// Enable PWM Channel Preload (Buffered Value for avoiding glitch)
+	PWM_CONFIG->preload = PWM_CHx_PRELOAD_ENABLE;
+	// Minimum Duty Cycle
+	PWM_CONFIG->duty_cycle = PWM_MIN_DUTY_CYCLE;
+	// Set the GPIO Mode to Output
+	PWM_CONFIG->GPIOx_CONFIG.MODE = GPIOx_MODE_OUT_10MHz;
+	// Set the GPIO Configuration to Alternate Function Push-Pull
+	PWM_CONFIG->GPIOx_CONFIG.CNF = GPIOx_CNF_OUT_AF_PP;
+}

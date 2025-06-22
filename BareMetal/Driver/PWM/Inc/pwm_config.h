@@ -61,4 +61,10 @@ uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GP
  */
 uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_cfg);
 
+/**
+ * @brief Default PWM Configuration
+ * @param PWM_CONFIG Pointer to PWM Configuration Structure
+ */
+void PWM_Default_Configuration(pwm_config_t* PWM_CONFIG);
+
 #endif /* __PWM_CONFIG_H__ */

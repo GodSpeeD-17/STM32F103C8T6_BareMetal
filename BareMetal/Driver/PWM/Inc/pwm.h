@@ -69,7 +69,7 @@ void PWM_Disable(pwm_handle_t PWM_HANDLE);
  * @note For 0.1% Duty Cycle -> `duty_cycle = 1`
  * @note For 100% Duty Cycle -> `duty_cycle = 1000`
  */
-void PWM_Update_Duty_Cycle(pwm_handle_t PWM_HANDLE, uint16_t duty_cycle);
+void PWM_Update_Duty_Cycle(pwm_handle_t PWM_HANDLE, int16_t duty_cycle);
 
 /**
  * @brief Calculates Timer Prescaler based on target PWM Frequency 
