@@ -18,7 +18,7 @@ int main(){
 		// Toggle OB LED
 		OB_LED_Toggle();
 		// Loop Delay
-		TIM_delay_ms(TIM4_Config.TIM, 1000);
+		TIM_delay_ms(TIM4_Config.TIM, LOOP_DELAY_MS);
 	}
 	// Return Value
 	return 0;

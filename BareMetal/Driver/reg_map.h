@@ -233,6 +233,7 @@
 #define PVD_IRQn							(1)
 #define TAMPER_IRQn							(2)
 #define RTC_IRQn							(3)
+#define FLASH_IRQn							(4)
 #define RCC_IRQn							(5)
 #define EXTI0_IRQn							(6)
 #define EXTI1_IRQn							(7)
@@ -247,7 +248,15 @@
 #define DMA1_Channel6_IRQn					(16)
 #define DMA1_Channel7_IRQn					(17)
 #define ADC1_2_IRQn							(18)
+#define USB_HP_CAN_TX_IRQ					(19)
+#define USB_LP_CAN_RX0_IRQ					(20)
+#define CAN_RX1_IRQ							(21)
+#define CAN_SCE_IRQ							(22)
 #define EXTI9_5_IRQn						(23)
+#define TIM1_BRK_IRQn						(24)
+#define TIM1_UP_IRQn						(25)
+#define TIM1_TRG_COM_IRQn					(26)
+#define TIM1_CC_IRQn						(27)
 #define TIM2_IRQn							(28)
 #define TIM3_IRQn							(29)
 #define TIM4_IRQn							(30)
@@ -261,6 +270,7 @@
 #define USART2_IRQn							(38)
 #define USART3_IRQn							(39)
 #define EXTI15_10_IRQn						(40)
+#define RTC_Alarm_IRQn						(41)
 #define ADC3_IRQn							(47)
 #define DMA2_Channel1_IRQn					(56)
 #define DMA2_Channel2_IRQn					(57)
@@ -344,7 +354,7 @@
 #define SYSTICK_DELAYS_2_MS					(2 * SYSTICK_DELAY_1_MS)
 /*********************************************** SysTick MACROS ***********************************************/
 
-/*********************************************** TIMER MACROS ***********************************************/
+/*********************************************** Timer MACROS ***********************************************/
 // - Prescaler
 // |-> Timer Frequency: 10kHz 
 // |-> (PSC + 1) = (7199 + 1) = (7200)
@@ -418,7 +428,8 @@
 #define TIMx_CHANNEL_2						(0x02)
 #define TIMx_CHANNEL_3						(0x04)
 #define TIMx_CHANNEL_4						(0x08)
-#define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
+#define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | \
+											 TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
 
 // Counting Mode
 // "Up" if DIR = 0; "Down" if DIR = 1
@@ -442,6 +453,35 @@
 // IRQ Enable
 #define TIMx_IRQ_DISABLE					(0x00)
 #define TIMx_IRQ_ENABLE						(0x01)
+
+// Timer Update Event: Counter Overflow(OVF)/Underflow(UVF)
+#define TIMx_IRQ_OVF_UVF					(0x01)
+// Compare Match on Channel 1
+#define TIMx_IRQ_CMP_CH1					(0x02)
+// Compare Match on Channel 2
+#define TIMx_IRQ_CMP_CH2					(0x04)
+// Compare Match on Channel 3
+#define TIMx_IRQ_CMP_CH3					(0x08)
+// Compare Match on Channel 4
+#define TIMx_IRQ_CMP_CH4					(0x10)
+// Input Compare on Channel 1
+#define TIMx_IRQ_CAP_CH1					(0x02)
+// Input Compare on Channel 2
+#define TIMx_IRQ_CAP_CH2					(0x04)
+// Input Compare on Channel 3
+#define TIMx_IRQ_CAP_CH3					(0x08)
+// Input Compare on Channel 4
+#define TIMx_IRQ_CAP_CH4					(0x10)
+// All Timer Interrupts
+#define TIMx_IRQ_ALL						(TIMx_IRQ_OVF_UVF | TIMx_IRQ_CMP_CH1 | \
+											 TIMx_IRQ_CMP_CH2 | TIMx_IRQ_CMP_CH3 | \
+											 TIMx_IRQ_CMP_CH4)
+// Timer DMA Definitions
+#define TIMx_DMA_UPDATE						(0x01)
+#define TIMx_DMA_CC1DE						(0x02)
+#define TIMx_DMA_CC2DE						(0x04)
+#define TIMx_DMA_CC3DE						(0x08)
+#define TIMx_DMA_CC4DE						(0x10)
 
 /*
 // Error Check MACROS
@@ -469,7 +509,7 @@
 											 IS_VALID_TIM_ARPE((TIMx_CONFIG->auto_reload_preload)) && \
 											 IS_VALID_TIM_OPM((TIMx_CONFIG->one_pulse)))									 
 */
-/*********************************************** TIMER MACROS ***********************************************/
+/*********************************************** Timer MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
 // PWM Min Duty Cycle: 1%

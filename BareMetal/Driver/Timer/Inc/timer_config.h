@@ -209,6 +209,4 @@ __INLINE__ void TIM_UEV_Disable(TIM_REG_STRUCT* TIMx){
 	TIMx->CR1.REG |= TIM_CR1_UDIS;
 }
 
-
-
 #endif /* __TIMER_CONFIG_H__ */

@@ -45,7 +45,7 @@
 static const uint8_t TIMx_IRQn[3] = {
 	TIM2_IRQn,
 	TIM3_IRQn,
-	TIM4_IRQn
+	TIM4_IRQn,
 };
 
 /**
@@ -204,25 +204,115 @@ void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
 }
 
 /**
- * @brief Enables the Timer Interrupt
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @brief Enables Timer Interrupt for mentioned Interrupt
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx){
+void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+	// Get the DMA/Interrupt Enable Register Status
+	uint16_t reg = TIMx->DIER.REG;
+	// Enable the Timer Event Interrupt
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		reg |= TIM_DIER_UIE;
+	// Enable Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+		reg |= TIM_DIER_CC1IE;
+	// Enable Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+		reg |= TIM_DIER_CC2IE;
+	// Enable Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+		reg |= TIM_DIER_CC3IE;
+	// Enable Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+		reg |= TIM_DIER_CC4IE;
+	// Update the DMA/Interrupt Enable Register
+	TIMx->DIER.REG = reg;
+	// Update reg with calculation
+	reg = (((uint32_t)TIMx - (uint32_t)TIM2) >> 10);
 	// Enable NVIC Interrupt
-	NVIC_IRQ_Enable(TIMx_IRQn[((TIMx - TIM2) >> 10)]);
-	// Enable the Timer Interrupt
-	TIMx->DIER.REG |= TIM_DIER_UIE;
+	NVIC_IRQ_Enable(TIMx_IRQn[reg]);
 }
 
 /**
- * @brief Disables the Timer Interrupt
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @brief Disables Timer Interrupt for mentioned Interrupt
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx){
+void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+	// Get the DMA/Interrupt Enable Register Status
+	uint16_t reg = TIMx->DIER.REG;
+	// Disable the Timer Interrupt
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		reg &= ~TIM_DIER_UIE;
+	// Disable Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+		reg &= ~TIM_DIER_CC1IE;
+	// Disable Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+		reg &= ~TIM_DIER_CC2IE;
+	// Disable Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+		reg &= ~TIM_DIER_CC3IE;
+	// Disable Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+		reg &= ~TIM_DIER_CC4IE;
+	// Update the DMA/Interrupt Enable Register
+	TIMx->DIER.REG = reg;
 	// Disable NVIC Interrupt
 	NVIC_IRQ_Disable(TIMx_IRQn[((TIMx - TIM2) >> 10)]);
-	// Disable the Timer Interrupt
-	TIMx->DIER.REG &= ~TIM_DIER_UIE;
+}
+
+/**
+ * @brief Timer Interrupt Flag Acknowledge
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ */
+void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+	// Acknowledge Interrupt Flag
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		TIMx->SR.REG &= ~TIM_SR_UIF;
+	// Acknowledge Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+		TIMx->SR.REG &= ~TIM_SR_CC1IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+		TIMx->SR.REG &= ~TIM_SR_CC2IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+		TIMx->SR.REG &= ~TIM_SR_CC3IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+		TIMx->SR.REG &= ~TIM_SR_CC4IF;
+}
+
+/**
+ * @brief Retrieves the Interrupt Status
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @return - 0: Interrupt was not triggered 
+ * @return - 1: Interrupt was triggered 
+ */
+uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+	// Capture the Status Register
+	uint16_t status = TIMx->SR.REG;
+	// Acknowledge Interrupt Flag
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		status >>= TIM_SR_UIF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+		status >>= TIM_SR_CC1IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+		status >>= TIM_SR_CC2IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+		status >>= TIM_SR_CC3IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+		status >>= TIM_SR_CC4IF_Pos;
+	// Return the status
+	return (uint8_t) status;
 }
 
 /**

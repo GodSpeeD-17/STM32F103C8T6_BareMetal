@@ -58,16 +58,34 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs);
 void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs);
 
 /**
- * @brief Enables the Timer Interrupt
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @brief Enables Timer Interrupt for mentioned Interrupt
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx);
+void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
 
 /**
- * @brief Disables the Timer Interrupt
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @brief Disables Timer Interrupt for mentioned Interrupt
+ * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx);
+void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
+
+/**
+ * @brief Timer Interrupt Flag Acknowledge
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ */
+void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
+
+/**
+ * @brief Retrieves the Interrupt Status
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @return - 0: Interrupt was not triggered 
+ * @return - 1: Interrupt was triggered 
+ */
+uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
 
 /**
  * @brief Resets the General Purpose TIMx
