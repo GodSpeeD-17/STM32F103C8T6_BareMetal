@@ -6,8 +6,6 @@
 
 // Dependency
 #include "gpio.h"
-// Include RCC for clock enabling
-#include "rcc.h"
 
 // On-board LED Configuration
 const static gpio_config_t OB_LED_Configuration = {

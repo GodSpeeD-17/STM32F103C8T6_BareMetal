@@ -29,10 +29,6 @@
 
 // Main Header
 #include "pwm.h"
-// Dynamic Memory Allocation
-#include "stdlib.h"
-// Memory Copy
-#include "string.h"
 
 // Internal Handle for PWM Configuration
 struct pwm_handle {

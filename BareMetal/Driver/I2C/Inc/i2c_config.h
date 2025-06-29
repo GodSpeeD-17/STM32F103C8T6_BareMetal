@@ -6,7 +6,6 @@
 #include "reg_map.h"
 // For GPIO pin configuration
 #include "gpio.h"
-#include "i2c_config.h"
 // Clock Configuration
 #include "rcc.h"
 
@@ -171,7 +170,7 @@ uint16_t I2C_Calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 
 /**
  * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration STRUCTUR
+ * @param[in] I2C_CONFIGx I2C Configuration Structure
  */
 void I2C_Config(i2c_config_t* I2C_CONFIGx);
 

@@ -40,10 +40,6 @@
 
 // Main Library
 #include "timer.h"
-// APB1 Clock Frequency
-#include "rcc.h"
-// IRQ Enable/Disable
-#include "nvic.h"
 
 // Lookup Table for Timer IRQn
 static const uint8_t TIMx_IRQn[3] = {

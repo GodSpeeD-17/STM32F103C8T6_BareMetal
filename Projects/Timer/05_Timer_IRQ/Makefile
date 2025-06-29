@@ -1,80 +1,63 @@
-# --- Configuration ---
+# ---------------------- Configuration ----------------------
 MCU_MODEL      := STM32F103xB
 FLASH_TOTAL_KB := 64
 RAM_TOTAL_KB   := 20
-
-# Paths
+# ---------------------- Path Definitions ----------------------
 ROOT_DIR       := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 DRIVER_BASE    := $(ROOT_DIR)/BareMetal/Driver
 BUILD_DIR      := $(shell pwd)/Build
 TARGET         := main
-BUILD_TYPE     := Debug
-
-# --- Toolchain ---
+# ---------------------- Toolchain ----------------------
 TRIPLE         := arm-none-eabi
 CC             := $(TRIPLE)-gcc
 OBJCOPY        := $(TRIPLE)-objcopy
 SIZE           := $(TRIPLE)-size
-
-# Includes (Core, Driver root, and all Driver module Inc directories)
+# ---------------------- Include Directories ----------------------
 INCLUDES       := -I$(ROOT_DIR)/BareMetal/Core/Inc \
-                  -I$(DRIVER_BASE) \
-                  $(addprefix -I, $(wildcard $(DRIVER_BASE)/*/Inc)) \
-                  -I$(shell pwd)/Inc
-
-# Sources Files
-DRIVER_SRCS    := $(wildcard $(DRIVER_BASE)/*/Src/*.c)
-LOCAL_SRCS     := $(wildcard $(shell pwd)/Src/*.c) \
-                  $(wildcard $(shell pwd)/Startup/*.c)
-# Combine all sources
-SRCS := $(DRIVER_SRCS) $(LOCAL_SRCS)
-
-# --- Object Files ---
-OBJS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
-
-# Add vpath to help Make find matching source files
-vpath %.c $(sort $(dir $(SRCS)))
-
-# --- Compiler Flags ---
+				  -I$(DRIVER_BASE) \
+				  $(addprefix -I, $(wildcard $(DRIVER_BASE)/*/Inc)) \
+				  -I$(shell pwd)/Inc
+# ---------------------- Compiler Flags -----------------------
 CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCLUDES) -std=gnu11 -O0 -Wall \
-                  -fstack-usage -fdata-sections -ffunction-sections -D$(MCU_MODEL) -MMD -MP
-# --- Assembler Flags ---
-ASFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCFLAGS) -x assembler-with-cpp
-# --- Linker Flags ---
+				  -fstack-usage -fdata-sections -ffunction-sections -D$(MCU_MODEL) -MMD -MP -g -gdwarf-2
+# ---------------------- Assembler Flags ----------------------
+ASFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCFLAGS) -x assembler-with-cpp -MMD -MP
+# ---------------------- Linker Flags ----------------------
 LDFLAGS        := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCFLAGS)
-
-# Add debug flags if build type is debug
-ifeq ($(BUILD_TYPE), Debug)
-CFLAGS += -g -gdwarf-2
-endif
-
-# Generate dependency information
-CFLAGS += -MMD -MP
-ASFLAGS += -MMD -MP
-
-# --- Build Rules ---
+# ---------------------- Dependency Placeholders ----------------------
+DEPENDENCY_OUTPUT :=
+DEPENDENCY_HEADERS :=
+DRIVER_SRCS :=
+SRCS := 
+OBJS :=
+# Dependency mk file
+DEPENDENCY_FILE := $(BUILD_DIR)/dependency.mk
+# Include generated dependencies early
+-include $(DEPENDENCY_FILE)
+# ---------------------- Build Rules ----------------------
+# Ensure Build Directory Exists
 $(BUILD_DIR):
 	@mkdir -p $@
 
-# '.bin' file rules
-$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
-	$(OBJCOPY) -O binary $< $@
+# Rule to compile C source files to object files
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# '.elf' rules
+# Link Object files to produce ELF file
 $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
 	-Wl,-Map="$(BUILD_DIR)/$(TARGET).map",--gc-sections -static
 
-# Compile C Files
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+# Convert ELF to binary
+$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
+	$(OBJCOPY) -O binary $< $@
 
-# --- Memory Report ---
+# ---------------------- Memory Usage Report ----------------------
 define memory_report
 	@echo "\033[1;36m"
 	@echo "╔══════════════════════════════════════════════════════════╗"
 	@echo "║                 STM32 Memory Usage Report                ║"
-	@echo "╠═════════════════════════════║════════════════════════════╣"
+	@echo "╠══════════════════════════════════════════════════════════╣"
 	@$(SIZE) $(BUILD_DIR)/$(TARGET).elf | awk -v flash_kb=$(FLASH_TOTAL_KB) -v ram_kb=$(RAM_TOTAL_KB) '\
 	NR==2 { \
 		text = $$1; data = $$2; bss = $$3; \
@@ -84,19 +67,19 @@ define memory_report
 		ram_pct = (ram_used / (ram_kb * 1024)) * 100; \
 		\
 		printf("║         %-5s (%2d kB)       ║        %-3s (%2d kB)         ║\n", \
-		       "Flash", flash_kb, \
-		       "RAM", ram_kb); \
+			   "Flash", flash_kb, \
+			   "RAM", ram_kb); \
 		printf("╠═════════════════════════════║════════════════════════════╣\n"); \
 		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
-		       "Text", text/1024, \
-		       "BSS", bss/1024); \
+			   "Text", text/1024, \
+			   "BSS", bss/1024); \
 		printf("║ %-7s %5.2f kB            ║ %-7s %5.2f kB           ║\n", \
-		       "Data", data/1024, \
-		       "Data", data/1024); \
+			   "Data", data/1024, \
+			   "Data", data/1024); \
 		printf("║═════════════════════════════║════════════════════════════║\n"); \
 		printf("║ %-7s %5.2f kB (%5.2f %)  ║ %-7s %5.2f kB (%5.2f %) ║\n", \
-		       "Total", flash_used/1024, flash_pct, \
-		       "Total", ram_used/1024, ram_pct); \
+			   "Total", flash_used/1024, flash_pct, \
+			   "Total", ram_used/1024, ram_pct); \
 		printf("╚═════════════════════════════╩════════════════════════════╝\n"); \
 		if (flash_pct > 90.0) \
 			print "\033[1;31m⚠ FLASH usage exceeds 90%\033[0m"; \
@@ -105,41 +88,99 @@ define memory_report
 	}'
 	@echo "\033[0m"
 endef
+# ---------------------- Dynamic Dependency Resolution ----------------------
+# This rule extracts dependencies and stores them in dependency.mk inside Build/
+dependency:
+	@echo "\033[1;36m============================== Resolving Dependencies ==============================\033[0m"
+	$(eval DEPENDENCY_OUTPUT := $(shell $(CC) $(INCLUDES) -M -MF - -MG -MM $(shell pwd)/Src/main.c))
+	$(eval DEPENDENCY_HEADERS := $(filter %.h, $(subst \,,$(wordlist 2,999,$(DEPENDENCY_OUTPUT)))))
+	$(eval DRIVER_SRCS := $(sort $(foreach hdr, $(DEPENDENCY_HEADERS), \
+		$(if $(findstring $(DRIVER_BASE),$(hdr)), \
+			$(wildcard $(subst /Inc/,/Src/,$(dir $(hdr)))*.c), \
+		))))
+	$(eval LOCAL_DEP_SRCS := $(sort $(foreach hdr, $(DEPENDENCY_HEADERS), \
+		$(if $(findstring $(shell pwd)/Inc,$(hdr)), \
+			$(wildcard $(shell pwd)/Src/*.c), \
+		))))
+	$(eval STARTUP_SRCS := $(wildcard $(shell pwd)/Startup/*.c))
+	$(eval SRCS := $(DRIVER_SRCS) $(LOCAL_DEP_SRCS) $(STARTUP_SRCS))
+	$(eval OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(SRCS:%.c=%.o))))
+	$(eval vpath %.c $(sort $(dir $(SRCS))))
+
+	@mkdir -p $(BUILD_DIR)
+	@echo "SRCS := $(SRCS)" > $(DEPENDENCY_FILE)
+	@echo "OBJS := $(OBJS)" >> $(DEPENDENCY_FILE)
+	@echo "vpath %.c $(sort $(dir $(SRCS)))" >> $(DEPENDENCY_FILE)
+
+	@echo "\033[1;33m→ Driver Sources:\033[0m"
+	@echo "$(DRIVER_SRCS)" | tr ' ' '\n' | sed 's/^/   - /'
+
+	@echo "\033[1;33m→ Local Sources:\033[0m"
+	@echo "$(LOCAL_DEP_SRCS)" | tr ' ' '\n' | sed 's/^/   - /'
+
+	@echo "\033[1;33m→ Startup Sources:\033[0m"
+	@echo "$(STARTUP_SRCS)" | tr ' ' '\n' | sed 's/^/   - /'
+
+	@echo "\033[1;32m✔ Final Source List:\033[0m"
+	@echo "$(SRCS)" | tr ' ' '\n' | sed 's/^/   - /'
+	@echo "\033[1;36m=====================================================================================\033[0m"
+
+
+# ---------------------- Main Targets ----------------------
+# Full Build Flow
+all:
+	@$(MAKE) dependency
+	@$(MAKE) build
+
+# ---------------------- Build Target (Post Dependency Resolution) ----------------------
+build: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).bin
+	@echo "\033[1;35m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;35m║               🔥 Compiling Project 🔥                    ║\033[0m"
+	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
+	@$(memory_report)
+	@echo "\033[1;35m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;35m║\033[0m               🔥 \033[1;33mProject Compiled\033[0m 🔥                     \033[1;35m║\033[0m"
+	@echo "\033[1;35m║\033[0m ✔✔✔ \033[1;32mBuild Completed Successfully!\033[0m                        \033[1;35m║\033[0m"
+	@echo "\033[1;35m║\033[0m 💡 \033[1;34mFlash your binary with: make flash\033[0m                    \033[1;35m║\033[0m"
+	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
+
+# Flash Binary to MCU
+flash: all
+	@echo "\033[1;34m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;34m║\033[0m         🚀 \033[1;36mFlashing Binary to STM32 MCU\033[0m 🚀               \033[1;34m║\033[0m"
+	@echo "\033[1;34m╚══════════════════════════════════════════════════════════╝\033[0m"
+	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
+	@echo "\033[1;35m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;35m║           🎯 Your binary is now on the STM32 MCU!        ║\033[0m"
+	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
+
+# ---------------------- Clean Target ----------------------
+clean:
+	@rm -r $(BUILD_DIR) || true
+	@rm -r ./.vscode || true
+	@echo "\033[1;35m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;35m║                    🧹 Project Cleaned                    ║\033[0m"
+	@echo "\033[1;35m║      \033[1;32m✔✔✔ Build files and VSCode configs removed ✔✔✔\033[0m      \033[1;35m║\033[0m"
+	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
+
 
 
 # ST-Link Information
 info:
-	@echo "***********************************************************************"
-	st-info --probe
-	@echo "***********************************************************************"
-
-# All target
-all: $(BUILD_DIR)/$(TARGET).bin
-	@echo "***********************************************************************"
-	$(memory_report)
-	@echo "***********************************************************************"
-
-# Flashing command (adjust as necessary)
-flash: all
-	st-flash --reset write $(BUILD_DIR)/$(TARGET).bin 0x08000000
-	@echo "***********************************************************************"
-	@echo "Flashed!"
-	@echo "***********************************************************************"
+	@echo "\033[1;36m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;36m║\033[0m             🔍 \033[1;33mST-Link Debug Probe Info\033[0m                  \033[1;36m║\033[0m"
+	@echo "\033[1;36m╠══════════════════════════════════════════════════════════╣\033[0m"
+	@st-info --probe | sed 's/^ *//' | awk '{ printf("\033[1;36m║ %-56s ║\033[0m\n", $$0) }'
+	@echo "\033[1;36m╚══════════════════════════════════════════════════════════╝\033[0m"
 
 # Flash Clean Project
 erase_flash: clean
 	st-flash erase
-	@echo "***********************************************************************"
-	@echo "Flashed Erased!"
-	@echo "***********************************************************************"
-
-# Clean target
-clean:
-	@rm -r $(BUILD_DIR) || true
-	@rm -r ./.vscode || true
-	@echo "***********************************************************************"
-	@echo "Cleaned Project"
-	@echo "***********************************************************************"
+	@echo "\033[1;35m╔══════════════════════════════════════════════════════════╗\033[0m"
+	@echo "\033[1;35m║\033[0m              💥 \033[1;33mFlash Erased Successfully!\033[0m 💥            \033[1;35m║\033[0m"
+	@echo "\033[1;35m║            \033[0m ✔✔✔ \033[1;32mMCU Flash memory wiped clean\033[0m             \033[1;35m║\033[0m"
+	@echo "\033[1;35m║            \033[0m 💡 \033[1;34mReady to program with: make flash\033[0m         \033[1;35m║\033[0m"
+	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
 
 # Debug
 debug: $(BUILD_DIR)/$(TARGET).elf vscode_files
@@ -211,7 +252,11 @@ replace_startup:
 replace_linker:
 	$(MAKE) replace FILE="stm32f1_ls.ld"
 
-# Include dependency files
+# Dependency Files
+get_dependency:
+	$(CC) $(INCLUDES) -M -MF - -MG -MM $(shell pwd)/Src/main.c
+
+# ---------------------- Dependency Inclusion ----------------------
 -include $(wildcard $(BUILD_DIR)/*.d)
 
-.PHONY: clean generate_c_cpp_properties_json all flash erase_flash
+.PHONY: all build flash clean resolve_dependency

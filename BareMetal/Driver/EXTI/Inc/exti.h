@@ -10,7 +10,10 @@
 
 // Register Map
 #include "reg_map.h"
+// GPIO
 #include "gpio.h"
+// Alternate Function I/O
+#include "rcc.h"
 
 /**
  * @brief Enables the External Interrupt

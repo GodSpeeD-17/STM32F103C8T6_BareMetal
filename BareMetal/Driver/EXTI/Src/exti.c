@@ -5,8 +5,6 @@
  ***************************************************************************************/
 // Global Interrupt
 #include "nvic.h"
-// Alternate Function I/O
-#include "rcc.h"
 // EXTI Configuration
 #include "exti.h"
 

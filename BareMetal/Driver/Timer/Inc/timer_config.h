@@ -4,6 +4,10 @@
 
 // Register Mapping
 #include "reg_map.h"
+// APB1 Clock Frequency
+#include "rcc.h"
+// IRQ Enable/Disable
+#include "nvic.h"
 
 // Timer Configuration Structure
 typedef struct {

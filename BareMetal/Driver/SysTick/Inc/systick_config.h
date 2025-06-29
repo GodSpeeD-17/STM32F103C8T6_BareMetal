@@ -2,7 +2,10 @@
 #ifndef __SYSTICK_CONFIG_H__
 #define __SYSTICK_CONFIG_H__
 
+// Register Mapping
 #include "reg_map.h"
+// RCC Configuration
+#include "rcc.h"
 
 // SysTick Configuration Structure
 typedef struct {

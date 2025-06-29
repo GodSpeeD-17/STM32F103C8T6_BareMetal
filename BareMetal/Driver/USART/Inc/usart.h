@@ -9,10 +9,14 @@
 
 /*************************************** Dependency ********************************************/
 #include "reg_map.h"
-#include "rcc.h"    // Clocks (APB1/APB2)
-#include "gpio.h"   // GPIO Struct
-#include "nvic.h"   // NVIC Enable
-#include <stdarg.h> // va_list
+// Clocks (APB1/APB2)
+#include "rcc.h"
+// GPIO Struct
+#include "gpio.h"
+// NVIC Enable
+#include "nvic.h"
+// va_list
+#include <stdarg.h>
 /*************************************** Dependency ********************************************/
 
 /*************************************** MACROs ********************************************/

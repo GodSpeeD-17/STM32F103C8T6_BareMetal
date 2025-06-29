@@ -2,9 +2,15 @@
 #ifndef __PWM_CONFIG_H__
 #define __PWM_CONFIG_H__
 
+// Dynamic Memory Allocation
+#include <stdlib.h>
+// Memory Copy
+#include <string.h>
 // Register Mapping
 #include "reg_map.h"
+// GPIO Configuration
 #include "gpio.h"
+// Timer Configuration
 #include "timer.h"
 
 // PWM Configuration Structure

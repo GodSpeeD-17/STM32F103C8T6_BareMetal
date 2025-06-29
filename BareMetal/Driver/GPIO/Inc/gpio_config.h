@@ -4,6 +4,8 @@
 
 // Register Address Mapping
 #include "reg_map.h"
+// Include RCC for clock enabling
+#include "rcc.h"
 
 // GPIO Configuration Structure
 typedef struct {

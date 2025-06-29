@@ -6,7 +6,6 @@
 
 // Main Header File
 #include "systick.h"
-#include "rcc.h"
 
 // Delay Variable
 static volatile uint64_t future_ticks = 0x00;
