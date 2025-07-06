@@ -340,6 +340,9 @@
         "gpio_config.h": "c",
         "rcc_config.h": "c",
         "pwm_config.h": "c",
-        "timer_config.h": "c"
+        "timer_config.h": "c",
+        "ring_buffer.h": "c",
+        "ssd1306_new.h": "c",
+        "i2c_ring_buffer.h": "c"
     }
 }

@@ -762,6 +762,9 @@
 /*********************************************** DMA MACROS ***********************************************/
 
 /*********************************************** Helper Functions ***********************************************/
+// Size of an array
+// #define SIZEOF(X)							(sizeof((X))/sizeof((X)[0]))
+
 /**
  * @brief Check if a number is a power of 2
  * @param num The number to check
