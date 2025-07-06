@@ -112,24 +112,24 @@
 /* ------------------------------------------------------------------------------------ */
 /**
  * @brief Set Page Address
- * @param CURSOR_X 0 - (`SSD1306_HEIGHT` - 1)
+ * @param CURSOR_Y 0 - (`SSD1306_HEIGHT` - 1)
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE_X(CURSOR_X)				(SSD1306_CMD_PAGE_MODE_SET_PAGE(CURSOR_X >> 3))
+#define SSD1306_CMD_PAGE_MODE_SET_Y(CURSOR_Y)					(SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + (((CURSOR_Y) >> 3) & 0x07))
 
 /**
  * @brief Set Column Lower Nibble Address
- * @param CURSOR_Y 0 - (`SSD1306_WIDTH` - 1)
+ * @param CURSOR_X 0 - (`SSD1306_WIDTH` - 1)
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE_Y(CURSOR_Y)	(SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(CURSOR_Y))
+#define SSD1306_CMD_PAGE_MODE_SET_X_LOWER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0) + ((CURSOR_X) & 0x0F))
 
 /**
  * @brief Set Column Upper Nibble Address
- * @param CURSOR_Y 0 - (`SSD1306_WIDTH` - 1)
+ * @param CURSOR_X 0 - (`SSD1306_WIDTH` - 1)
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE_Y(CURSOR_Y)	(0x10 + (((CURSOR_Y) & 0xF0) >> 4))
+#define SSD1306_CMD_PAGE_MODE_SET_X_UPPER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) + (((CURSOR_X) >> 4) & 0x0F))
 /* ------------------------------------------------------------------------------------ */
 // Memory Addressing Mode Options
 #define SSD1306_MEM_ADDR_MODE_H					(0x00)

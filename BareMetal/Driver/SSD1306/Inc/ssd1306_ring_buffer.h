@@ -6,6 +6,19 @@
 #include "ssd1306_reg_map.h"
 #include "i2c_ring_buffer.h"
 
+// SSD1306 Display Pixel Structure
+typedef struct {
+	// 2D Array of 128x64 pixels for display
+	// - Each pixel is represented by 1 byte
+	// - Total 1024 bytes for the entire display
+	// - Each byte represents 8 vertical pixels
+	uint8_t (*buffer)[SSD1306_WIDTH];
+	// Page Tracker
+	uint16_t page: 3;
+	// Column Tracker
+	uint16_t col: 7;
+} ssd1306_buff_t;
+
 // SSD1306 Structure Definition
 typedef struct {
 	// I2C Configuration Structure
@@ -16,11 +29,8 @@ typedef struct {
 	uint8_t address;
 	// I2C Ring Buffer
 	ring_buffer_t i2c_rb;
-	// 2D Array of 128x64 pixels for display
-	// - Each pixel is represented by 1 byte
-	// - Total 1024 bytes for the entire display
-	// - Each byte represents 8 vertical pixels
-	uint8_t* display;
+	// Display Buffer
+	ssd1306_buff_t display;
 	// Cursor position
 	SSD1306_pix_t cursor;
 } ssd1306_config_t;
@@ -33,9 +43,22 @@ typedef struct {
  * @note - The buffer will have `SSD1306_PAGE` rows
  * @note - The buffer will have `SSD1306_WIDTH` columns
  */
-__STATIC_INLINE__ void SSD1306_RB_Config_Disp_Buff(ssd1306_config_t* ssd1306, uint8_t* buffer){
+__STATIC_INLINE__ void SSD1306_RB_Disp_Config(ssd1306_config_t* ssd1306, uint8_t (*buffer)[SSD1306_WIDTH]){
 	// Set the Display Buffer
-	ssd1306->display = buffer;
+	ssd1306->display.buffer = buffer;
+	// Initialize the Page and Column Tracker
+	ssd1306->display.page = 0;
+	ssd1306->display.col = 0;
+}
+
+/**
+ * @brief Updates the Cursor Position in the SSD1306 OLED Display Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ */
+__STATIC_INLINE__ void SSD1306_RB_Disp_Cursor_Update(ssd1306_config_t* ssd1306){
+	// Update the Cursor Position
+	ssd1306->display.page = (ssd1306->cursor.Y >> 3);
+	ssd1306->display.col = ssd1306->cursor.X;
 }
 
 /**
@@ -67,5 +90,51 @@ void SSD1306_RB_Load_Default(ssd1306_config_t* ssd1306);
  */
 void SSD1306_RB_Disp_Init(ssd1306_config_t* ssd1306);
 
+/**
+ * @brief Goto a specific position in the SSD1306 OLED Display
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param X X-coordinate (0-`SSD1306_WIDTH`-1)
+ * @param Y Y-coordinate (0 -> `SSD1306_HEIGHT`-1)
+ */
+void SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, const uint8_t X, const uint8_t Y);
+
+/**
+ * @brief Set a pixel in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306);
+
+/**
+ * @brief Clear a pixel in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306);
+
+/**
+ * @brief Set a specific page pattern in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param page Page Number (0-`SSD1306_PAGE`-1)
+ * @param pattern Pattern to set in the page
+ * @return Operation Status
+ * @return - `index`: Failure (Provides the number of pixels that were enqueued)
+ * @return - 0x01: Success (if all pixels were enqueued successfully) 
+ */
+uint8_t SSD1306_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t page, const uint8_t pattern);
+
+/**
+ * @brief Set a specific display pattern in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param pattern Pattern to set in the display
+ * @return Operation Status
+ * @return - 0x00: Failure (if any page setting fails)
+ * @return - 0x01: Success (if all pages are set successfully)
+ */
+uint8_t SSD1306_RB_Set_Disp_Pattern(ssd1306_config_t* ssd1306, const uint8_t pattern);
 
 #endif /* __SSD1306_RING_BUFFER_H__ */
