@@ -1,9 +1,36 @@
 /*
-	Basic Notes:-
-	YT Reference Video: https://youtu.be/zvTd3Zxtiek
-	`uint32_t` inside every BIT struct because of padding alignment
-	`volatile` used for ensuring no further optimization by compiler
-	`: x` indicates only x bit(s) to be used from that 32-bit
+****************************************************************************************************************
+ *	Basic Notes:-
+ *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
+ *	`uint32_t` inside every BIT struct because of padding alignment
+ *	`volatile` used for ensuring no further optimization by compiler
+ *	`: x` indicates only x bit(s) to be used from that 32-bit
+****************************************************************************************************************
+ *                            🔧 Bit Manipulation Built-ins (GCC)                      
+ * -------------------------------------------------------------------------------------
+ * | Built-in Function        | Description                                           |
+ * |--------------------------|--------------------------------------------------------|
+ * | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
+ * | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
+ * | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
+ * | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
+ * | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
+ * | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
+ * | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
+ * | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
+ * -------------------------------------------------------------------------------------
+ * Notes:
+ * - All __builtin_* functions are evaluated at compile-time if argument is constant.
+ * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
+ * - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
+ * - Use with uint32_t or cast explicitly to avoid type promotion issues.
+ *
+ * Example Usage:
+ *   uint32_t val = 0x0000000F;
+ *   int zeros = __builtin_clz(val);    // → 28
+ *   int set   = __builtin_popcount(val); // → 4
+ *   int rev   = __builtin_bswap32(val);  // → 0xF0000000
+ *
 */
 
 // Header Guards
@@ -733,5 +760,60 @@
 #define DMA_TIM4_UP							(DMA1_Channel7)
 
 /*********************************************** DMA MACROS ***********************************************/
+
+/*********************************************** Helper Functions ***********************************************/
+/**
+ * @brief Check if a number is a power of 2
+ * @param num The number to check
+ * @returns 0: Not a power of 2
+ * @returns 1: Power of 2
+ */
+__INLINE__ uint8_t Is_Power_Of_2(uint16_t num) {
+	// Check if the number is a power of two
+	return (num && (!(num & (num - 1))));
+}
+
+/**
+ * @brief Rounds up a number to the next power of 2
+ * @param n The number to round up 
+ * @return Rounded up power of 2
+ */
+__INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
+    // Input = 0 -> Output = 1
+	if (n == 0) return 1;
+	// Step 1: Subtract 1 to handle exact powers of 2
+    n--;
+	// Step 2: Propagate highest bit to the right
+    // NOTE: No need for >>16 because uint16_t is only 16 bits
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    // Step 3: Add 1 to get the next power of 2
+	return n + 1;
+}
+
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @return __INLINE__ 
+ */
+__INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x) {
+    // If x is 0, return 1 (2^0)
+	if (x == 0)
+		return 0x00000001;
+	/**
+	 * 		Expression						Meaning
+	 *		__builtin_clz(x)				Count leading zeros of 32-bit integer
+	 * 		32 - __builtin_clz(x)			log₂(x) rounded up to nearest power
+	 * 		1 << (32 - __builtin_clz(x))	Next power of 2
+	 *  NOTE: clz() returns 32 for input 0, which is undefined behavior — so we always use (size - 1) to avoid that
+	 */
+	// Calculate the next power of 2 greater than or equal to x
+    return (1 << (32 - __builtin_clz(x - 1)));
+}
+
+/*********************************************** Helper Functions ***********************************************/
 
 #endif  /* __REG_MAP_H__ */
