@@ -771,7 +771,7 @@
  * @returns 0: Not a power of 2
  * @returns 1: Power of 2
  */
-__INLINE__ uint8_t Is_Power_Of_2(uint16_t num) {
+__STATIC_INLINE__ uint8_t Is_Power_Of_2(uint16_t num) {
 	// Check if the number is a power of two
 	return (num && (!(num & (num - 1))));
 }
@@ -781,7 +781,7 @@ __INLINE__ uint8_t Is_Power_Of_2(uint16_t num) {
  * @param n The number to round up 
  * @return Rounded up power of 2
  */
-__INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
+__STATIC_INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
     // Input = 0 -> Output = 1
 	if (n == 0) return 1;
 	// Step 1: Subtract 1 to handle exact powers of 2
@@ -797,12 +797,11 @@ __INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
 }
 
 /**
- * @brief 
- * 
- * @param x 
- * @return __INLINE__ 
+ * @brief Rounds up a number to the next power of 2
+ * @param n The number to round up 
+ * @return Rounded up power of 2
  */
-__INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x) {
+__STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x) {
     // If x is 0, return 1 (2^0)
 	if (x == 0)
 		return 0x00000001;

@@ -3,7 +3,7 @@
 
 /**
  * @brief Calculates the value of TRISE (TRISE) for I2C Module
- * @param[in] i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
+ * @param i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
  * @returns Calculated TRISE value
  */
 uint8_t I2C_Calc_tRISE(uint8_t i2cMode){
@@ -69,7 +69,7 @@ uint16_t I2C_Calc_CCR(uint8_t i2cMode, uint8_t i2cDuty, uint8_t i2cClockFrequenc
 
 /**
  * @brief Configures I2C as per the Configuration Structure
- * @param[in] I2C_CONFIGx I2C Configuration Structure
+ * @param I2C_CONFIGx I2C Configuration Structure
  */
 void I2C_Config(i2c_config_t* I2C_CONFIGx){
 	// Enable Clock
@@ -92,7 +92,7 @@ void I2C_Config(i2c_config_t* I2C_CONFIGx){
 
 /**
  * @brief I2C load default values
- * @param[in] I2C_CONFIGx I2C Configuration Structure
+ * @param I2C_CONFIGx I2C Configuration Structure
  */
 void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C1 SCL GPIO Configuration
@@ -121,7 +121,7 @@ void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
 
 /**
  * @brief I2C load default values
- * @param[in] I2C_CONFIGx I2C Configuration Structure
+ * @param I2C_CONFIGx I2C Configuration Structure
  */
 void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C2 SCL GPIO Configuration

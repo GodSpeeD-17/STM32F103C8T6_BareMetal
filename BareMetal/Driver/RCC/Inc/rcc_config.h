@@ -67,7 +67,7 @@ typedef struct {
 /**
  * @brief Enables Clock for Alternate Function (AFIO)
  */
-__INLINE__ void RCC_AFIO_Clk_Enable(void){
+__STATIC_INLINE__ void RCC_AFIO_Clk_Enable(void){
 	// Enable AFIO Clock
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 }
@@ -75,7 +75,7 @@ __INLINE__ void RCC_AFIO_Clk_Enable(void){
 /**
  * @brief Disables Clock for Alternate Function (AFIO)
  */
-__INLINE__ void RCC_AFIO_Clk_Disable(void){
+__STATIC_INLINE__ void RCC_AFIO_Clk_Disable(void){
 	// Disable AFIO Clock
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 }

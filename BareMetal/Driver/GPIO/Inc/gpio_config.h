@@ -38,7 +38,7 @@ typedef struct {
  * @brief Enables Clock for respective GPIO
  * @param[in] GPIO The GPIO Port
  */
-__INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
+__STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
 	// Enable Clock for respective GPIO
 	if(GPIO == GPIOA){
 		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPAEN;
@@ -65,7 +65,7 @@ __INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
  * @brief Disables Clock for respective GPIO
  * @param[in] GPIO The GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Clk_Disable(GPIO_REG_STRUCT* GPIO){
+__STATIC_INLINE__ void GPIO_Clk_Disable(GPIO_REG_STRUCT* GPIO){
 	// Disable Clock for respective GPIO
 	if(GPIO == GPIOA){
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;

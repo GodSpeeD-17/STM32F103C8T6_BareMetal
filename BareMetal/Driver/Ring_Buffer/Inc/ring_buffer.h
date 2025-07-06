@@ -25,7 +25,7 @@ typedef struct {
  * @returns - 0: Ring Buffer is Not Empty
  * @returns - 1: Ring Buffer is Empty  
  */
-__INLINE__ uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer) {
+__STATIC_INLINE__ uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer) {
     // Check if Ring Buffer is Empty
 	return (ring_buffer->head == ring_buffer->tail);
 }
@@ -37,7 +37,7 @@ __INLINE__ uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer) {
  * @returns - 0: Ring Buffer is Not Full
  * @returns - 1: Ring Buffer is Full
  */
-__INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer) {
+__STATIC_INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer) {
     // Check if Ring Buffer is Full
 	return (((ring_buffer->head + 1) & (ring_buffer->size - 1)) == ring_buffer->tail);
 }
@@ -48,7 +48,7 @@ __INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer) {
  * @param ring_buff Pointer to the ring buffer structure
  * @returns Available Spaces currently in the ring buffer
  */
-__INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring_buff) {
+__STATIC_INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring_buff) {
 	// Provides Empty Spaces currently in the ring buffer
     return ((ring_buff->tail - ring_buff->head - 1 + ring_buff->size) & (ring_buff->size - 1));
 }
@@ -58,7 +58,7 @@ __INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring_buff) 
  * @param ring_buff Pointer to the ring buffer structure
  * @return Filled Spaces currently in the ring buffer
  */
-uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_buff) {
+__STATIC_INLINE__ uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_buff) {
 	// Provides Filled Spaces currently in the ring buffer
     return ((ring_buff->head - ring_buff->tail + ring_buff->size) & (ring_buff->size - 1));
 }
@@ -115,6 +115,6 @@ uint16_t Ring_Buffer_Dequeue_Multiple(ring_buffer_t* ring_buff, uint8_t* dest_da
  * @note - The size must be a power of 2
  * @note - If not, it will be rounded up to the next power of 2
  */
-void Ring_Buffer_Init(ring_buffer_t* ring_buff, uint8_t* buffer, uint16_t* size);
+void Ring_Buffer_Config(ring_buffer_t* ring_buff, uint8_t* buffer, uint16_t size);
 
 #endif /* __RING_BUFFER_H__ */

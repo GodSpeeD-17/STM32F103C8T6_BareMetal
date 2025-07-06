@@ -27,7 +27,7 @@ typedef struct {
 /**
  * @brief Enables SysTick Counter
  */
-__INLINE__ void SysTick_Enable(void){
+__STATIC_INLINE__ void SysTick_Enable(void){
 	// Enable SysTick
 	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
 }
@@ -35,7 +35,7 @@ __INLINE__ void SysTick_Enable(void){
 /**
  * @brief Disables SysTick Counter
  */
-__INLINE__ void SysTick_Disable(void){
+__STATIC_INLINE__ void SysTick_Disable(void){
 	// Disable SysTick
 	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
 }

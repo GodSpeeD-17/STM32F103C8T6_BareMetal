@@ -13,7 +13,7 @@
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 	return I2C1_EV_IRQn;
@@ -27,7 +27,7 @@ __INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_REG_STRUCT* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 		return I2C1_ER_IRQn;

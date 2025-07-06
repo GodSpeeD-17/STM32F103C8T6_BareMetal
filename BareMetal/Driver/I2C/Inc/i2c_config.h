@@ -98,7 +98,7 @@ typedef struct {
  * @brief Enables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_Clk_Enable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_Clk_Enable(I2C_REG_STRUCT* I2Cx){
 	// Enable AFIO
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -117,7 +117,7 @@ __INLINE__ void I2C_Clk_Enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the Clock for I2C Module
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_Clk_Disable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_Clk_Disable(I2C_REG_STRUCT* I2Cx){
 	// Disable AFIO
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 	// I2C1
@@ -136,7 +136,7 @@ __INLINE__ void I2C_Clk_Disable(I2C_REG_STRUCT* I2Cx){
  * @brief Enables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_Enable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_Enable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG |= I2C_CR1_PE;
 }
@@ -145,7 +145,7 @@ __INLINE__ void I2C_Enable(I2C_REG_STRUCT* I2Cx){
  * @brief Disables the I2C
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__INLINE__ void I2C_Disable(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_Disable(I2C_REG_STRUCT* I2Cx){
 	// Enable the I2C Module
 	I2Cx->CR1.REG &= ~I2C_CR1_PE;
 }

@@ -19,7 +19,7 @@
  * @brief Enables the External Interrupt
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_IRQ_Enable(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_IRQ_Enable(uint8_t PINx){
 	// Unmask the IRQ
 	EXTI->IMR.REG |= (1 << PINx);
 }
@@ -28,7 +28,7 @@ __INLINE__ void EXTI_IRQ_Enable(uint8_t PINx){
  * @brief Disables the External Interrupt Mask
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_IRQ_Disable(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_IRQ_Disable(uint8_t PINx){
 	// Mask the IRQ
 	EXTI->IMR.REG &= ~(1 << PINx);
 }
@@ -37,7 +37,7 @@ __INLINE__ void EXTI_IRQ_Disable(uint8_t PINx){
  * @brief Clear the EXTI bit
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-__INLINE__ void EXTI_IRQ_Clear_Pending(uint8_t PINx){
+__STATIC_INLINE__ void EXTI_IRQ_Clear_Pending(uint8_t PINx){
 	// Acknowledge the Pending Bit
 	EXTI->PR.REG |= (1 << PINx);
 }
@@ -47,7 +47,7 @@ __INLINE__ void EXTI_IRQ_Clear_Pending(uint8_t PINx){
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  * @returns Pending Bit Status for Input Pin
  */
-__INLINE__ uint8_t EXTI_IRQ_Get_Pending(uint8_t PINx){
+__STATIC_INLINE__ uint8_t EXTI_IRQ_Get_Pending(uint8_t PINx){
 	// Get the Pending Register Status
 	uint32_t result = EXTI->PR.REG;
 	// Get the exact bit
@@ -61,7 +61,7 @@ __INLINE__ uint8_t EXTI_IRQ_Get_Pending(uint8_t PINx){
  * @param PINx `GPIO_PIN_x` Pin Number
  * @return Pointer to the relevant EXTI AFIO Register 
  */
-__INLINE__ uint32_t* AFIO_EXTI_CR_Register(uint8_t PINx){
+__STATIC_INLINE__ uint32_t* AFIO_EXTI_CR_Register(uint8_t PINx){
 	// Return the Register Address
 	return (uint32_t*)((&AFIO->EXTICR1) + (PINx >> 2));
 }

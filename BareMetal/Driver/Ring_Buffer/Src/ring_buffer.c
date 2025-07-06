@@ -121,15 +121,15 @@ uint16_t Ring_Buffer_Dequeue_Multiple(ring_buffer_t* ring_buff, uint8_t* dest_da
  * @note - The size must be a power of 2
  * @note - If not, it will be rounded up to the next power of 2
  */
-void Ring_Buffer_Init(ring_buffer_t* ring_buff, uint8_t* buffer, uint16_t* size){
+void Ring_Buffer_Config(ring_buffer_t* ring_buff, uint8_t* buffer, uint16_t size){
 	// Initialize the ring buffer structure
 	ring_buff->buffer = buffer;
 	ring_buff->head = 0;
 	ring_buff->tail = 0;
 	// Ensure the size is a power of 2
-	if (!Is_Power_Of_2(*size)) {
-		*size = Round_Up_Power_of_2(*size);
+	if (!Is_Power_Of_2(size)) {
+		size = Round_Up_Power_of_2(size);
 	}
 	// Update the size of the ring buffer & provide it back to user
-	ring_buff->size = *size;
+	ring_buff->size = size;
 }

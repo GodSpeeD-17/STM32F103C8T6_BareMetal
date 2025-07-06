@@ -32,7 +32,7 @@ void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG);
  * @brief Configures the GPIO assuming LED
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
+__STATIC_INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
 	// Set Mode to Output at 10MHz
 	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
 	// Set Configuration to General Purpose Push-Pull
@@ -45,7 +45,7 @@ __INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
  * @brief Sets the state of GPIO Pin to HIGH
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
+__STATIC_INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
 	// Bit Set (Atomicity)
 	GPIOx_CONFIG->GPIO->BSRR.REG |= (1 << GPIOx_CONFIG->PIN);
 }
@@ -54,7 +54,7 @@ __INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
  * @brief Sets the state of GPIO Pin to LOW
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
+__STATIC_INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
 	// Bit Reset (Atomicity)
 	GPIOx_CONFIG->GPIO->BRR.REG |= (1 << GPIOx_CONFIG->PIN);
 }
@@ -63,7 +63,7 @@ __INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
  * @brief Toggles the state of GPIO Pin
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
-__INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
+__STATIC_INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
 	// Output Data Register
 	GPIOx_CONFIG->GPIO->ODR.REG ^= (1 << GPIOx_CONFIG->PIN);
 }

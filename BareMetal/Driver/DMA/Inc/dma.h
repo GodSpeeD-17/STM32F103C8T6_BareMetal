@@ -113,7 +113,7 @@ static dma_config_t DMA_I2C1_TX_Configuration = {
  * @brief Enables the main DMA Clock
  * @param[in] DMA_channelX DMA Channel 
  */
-__INLINE__ void DMA_clk_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+__STATIC_INLINE__ void DMA_clk_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Use Register
 	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
@@ -135,7 +135,7 @@ __INLINE__ void DMA_clk_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  * @brief Disables the main DMA Clock
  * @param[in] DMA_channelX DMA Channel 
  */
-__INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+__STATIC_INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Use Register
 	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
@@ -157,7 +157,7 @@ __INLINE__ void DMA_clk_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  * @brief Enable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  */
-__INLINE__ void DMA_CH_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+__STATIC_INLINE__ void DMA_CH_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Enable the Channel
 	DMA_channelX->CCR.REG |= DMA_CCR_EN;
 }
@@ -166,7 +166,7 @@ __INLINE__ void DMA_CH_enable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  * @brief Disable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  */
-__INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+__STATIC_INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Disable the Channel
 	DMA_channelX->CCR.REG &= ~DMA_CCR_EN;
 }
@@ -176,7 +176,7 @@ __INLINE__ void DMA_CH_disable(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
  * @param[in] DMA_channelX DMA Channel Number
  * @returns The DMA Channel IRQ Number
  */
-__INLINE__ uint8_t DMA_CH_get_IRQn(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
+__STATIC_INLINE__ uint8_t DMA_CH_get_IRQn(DMA_CHANNEL_REG_STRUCT* DMA_channelX){
 	// Return the IRQn
 	if(DMA_channelX == DMA1_Channel1){
 		return DMA1_Channel1_IRQn;
