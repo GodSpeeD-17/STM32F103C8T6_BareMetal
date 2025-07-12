@@ -5,6 +5,10 @@
 // Includes
 #include "ssd1306_reg_map.h"
 #include "i2c_ring_buffer.h"
+#include "systick.h"
+
+// Display Pattern Delay between Page Updates 
+#define SSD1306_DISP_PATTERN_DELAY_MS				(0xFFF)
 
 // SSD1306 Display Pixel Structure
 typedef struct {
@@ -52,16 +56,6 @@ __STATIC_INLINE__ void SSD1306_RB_Disp_Config(ssd1306_config_t* ssd1306, uint8_t
 }
 
 /**
- * @brief Updates the Cursor Position in the SSD1306 OLED Display Buffer
- * @param ssd1306 Pointer to the SSD1306 configuration structure
- */
-__STATIC_INLINE__ void SSD1306_RB_Disp_Cursor_Update(ssd1306_config_t* ssd1306){
-	// Update the Cursor Position
-	ssd1306->display.page = (ssd1306->cursor.Y >> 3);
-	ssd1306->display.col = ssd1306->cursor.X;
-}
-
-/**
  * @brief Configures the I2C Ring Buffer for the SSD1306 OLED Display
  * @param ssd1306 Pointer to the SSD1306 configuration structure
  * @param i2c_buffer Pointer to the I2C buffer
@@ -93,10 +87,13 @@ void SSD1306_RB_Disp_Init(ssd1306_config_t* ssd1306);
 /**
  * @brief Goto a specific position in the SSD1306 OLED Display
  * @param ssd1306 Pointer to the SSD1306 configuration structure
- * @param X X-coordinate (0-`SSD1306_WIDTH`-1)
- * @param Y Y-coordinate (0 -> `SSD1306_HEIGHT`-1)
+ * @param X X-coordinate (0-`SSD1306_WIDTH_MAX`)
+ * @param Y Y-coordinate (0 - `SSD1306_HEIGHT_MAX`)
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
  */
-void SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, const uint8_t X, const uint8_t Y);
+uint8_t SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y);
 
 /**
  * @brief Set a pixel in the SSD1306 OLED Display using Ring Buffer
@@ -136,5 +133,34 @@ uint8_t SSD1306_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t page, con
  * @return - 0x01: Success (if all pages are set successfully)
  */
 uint8_t SSD1306_RB_Set_Disp_Pattern(ssd1306_config_t* ssd1306, const uint8_t pattern);
+
+/**
+ * @brief Clears the entire SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @note This function sets the entire display to black (clears the screen)
+ * @note It uses the `SSD1306_RB_Set_Disp_Pattern` function
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Screen(ssd1306_config_t* ssd1306){
+	// Set the Display Pattern to Black
+	return SSD1306_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_BLACK);
+}
+
+/**
+ * @brief Lightens the entire SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @note This function sets the entire display to white
+ * @note It uses the `SSD1306_RB_Set_Disp_Pattern` function
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Torch_Screen(ssd1306_config_t* ssd1306){
+	// Set the Display Pattern to White
+	return SSD1306_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_WHITE);
+}
+
 
 #endif /* __SSD1306_RING_BUFFER_H__ */

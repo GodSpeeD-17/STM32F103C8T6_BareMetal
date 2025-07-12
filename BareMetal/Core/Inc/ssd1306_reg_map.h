@@ -14,10 +14,22 @@
 #endif
 /* ------------------------------------------------------------------------------------ */
 // SSD1306 Characteristics
-#define SSD1306_HEIGHT							(64)
-#define SSD1306_WIDTH							(128)
-#define SSD1306_PAGE							(SSD1306_HEIGHT >> 3)
-#define SSD1306_PIXELS							(SSD1306_PAGE * SSD1306_WIDTH)
+#define SSD1306_HEIGHT							((uint8_t) 64)
+#define SSD1306_WIDTH							((uint8_t) 128)
+#define SSD1306_PAGE							((uint8_t) 8)
+#define SSD1306_COLUMN							((uint8_t) 128)
+#define SSD1306_PIXELS							((uint16_t) 1024)
+#define SSD1306_HEIGHT_MAX						((uint8_t) 63)
+#define SSD1306_WIDTH_MAX						((uint8_t) 127)
+#define SSD1306_PAGE_MAX						((uint8_t) 7)
+#define SSD1306_COLUMN_MAX						((uint8_t) 127)
+/* ------------------------------------------------------------------------------------ */
+// Wrap X and Y coordinates
+#define SSD1306_WRAP_X(X)						((X) & SSD1306_WIDTH_MAX)
+#define SSD1306_WRAP_Y(Y)						((Y) & SSD1306_HEIGHT_MAX)
+// Wrap Page & Column 
+#define SSD1306_WRAP_PAGE(PAGE)					((PAGE) & SSD1306_PAGE_MAX)
+#define SSD1306_WRAP_COLUMN(COLUMN)				((COLUMN) & SSD1306_COLUMN_MAX)
 /* ------------------------------------------------------------------------------------ */
 // Indicator regarding the sent bytes
 #define SSD1306_CMD_INDICATOR					(0x00)
@@ -40,7 +52,11 @@
 #define SSD1306_PATTERN_TOP						(0x03)
 // Bottom 2 Rows
 #define SSD1306_PATTERN_BOTTOM					(0xC0)
-
+/* ------------------------------------------------------------------------------------ */
+// Memory Addressing Mode Options
+#define SSD1306_MEM_ADDR_MODE_H					(0x00)
+#define SSD1306_MEM_ADDR_MODE_V					(0x01)
+#define SSD1306_MEM_ADDR_MODE_PAGE				(0x02)
 /* ------------------------------------------------------------------------------------ */
 // <! --- Command Table --- !> //
 // Double byte command to select 1 out of 256 contrast steps
@@ -93,7 +109,6 @@
 #define SSD1306_CMD_SET_PAGE_ADDR				(0x22)
 /* ------------------------------------------------------------------------------------ */
 // Set Page Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)	(0xB0 + ((VALUE) & 0x07))
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_0		(0xB0)
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_1		(0xB1)
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_2		(0xB2)
@@ -102,50 +117,51 @@
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_5		(0xB5)
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_6		(0xB6)
 #define SSD1306_CMD_PAGE_MODE_SET_PAGE_7		(0xB7)
+#define SSD1306_CMD_PAGE_MODE_SET_PAGE(VALUE)	(SSD1306_CMD_PAGE_MODE_SET_PAGE_0 + ((VALUE) & 0x07))
 /* ------------------------------------------------------------------------------------ */
+// Set Column 0 Lower Nibble Address (`Only for Page Addressing Mode`)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_0_LOWER_NIBBLE			(0x00)
+// Set Column 0 Upper Nibble Address (`Only for Page Addressing Mode`)
+#define SSD1306_CMD_PAGE_MODE_SET_COL_0_UPPER_NIBBLE			(0x10)
 // Set Column Lower Nibble Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(0x00 + ((VALUE) & 0x0F))
+#define SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(VALUE)		(SSD1306_CMD_PAGE_MODE_SET_COL_0_LOWER_NIBBLE + ((VALUE) & 0x0F))
 // Set Column Upper Nibble Address (`Only for Page Addressing Mode`)
-#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(0x10 + ((VALUE) & 0x0F))
+#define SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(VALUE)		(SSD1306_CMD_PAGE_MODE_SET_COL_0_UPPER_NIBBLE + (((VALUE) >> 4) & 0x0F))
 /* ------------------------------------------------------------------------------------ */
-#define SSD1306_INIT_CMD_SIZE					(SIZEOF(SSD1306_initCmd))
+// Size of Initialization Command Buffer
+#define SSD1306_INIT_CMD_SIZE									(25)
 /* ------------------------------------------------------------------------------------ */
 /**
  * @brief Set Page Address
- * @param CURSOR_Y 0 - (`SSD1306_HEIGHT` - 1)
+ * @param CURSOR_Y 0 - `SSD1306_HEIGHT_MAX`
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_Y(CURSOR_Y)					(SSD1306_CMD_PAGE_MODE_SET_PAGE(0) + (((CURSOR_Y) >> 3) & 0x07))
-
+#define SSD1306_CMD_PAGE_MODE_SET_Y(CURSOR_Y)					(SSD1306_CMD_PAGE_MODE_SET_PAGE_0 + (((CURSOR_Y) >> 3) & SSD1306_PAGE_MAX))
+/* ------------------------------------------------------------------------------------ */
 /**
  * @brief Set Column Lower Nibble Address
- * @param CURSOR_X 0 - (`SSD1306_WIDTH` - 1)
+ * @param CURSOR_X 0 - `SSD1306_WIDTH_MAX`
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_X_LOWER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0) + ((CURSOR_X) & 0x0F))
-
+#define SSD1306_CMD_PAGE_MODE_SET_X_LOWER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_0_LOWER_NIBBLE + ((CURSOR_X) & 0x0F))
+/* ------------------------------------------------------------------------------------ */
 /**
  * @brief Set Column Upper Nibble Address
- * @param CURSOR_X 0 - (`SSD1306_WIDTH` - 1)
+ * @param CURSOR_X 0 - `SSD1306_WIDTH_MAX`
  * @note Only for `Page Addressing` Mode
  */
-#define SSD1306_CMD_PAGE_MODE_SET_X_UPPER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(0) + (((CURSOR_X) >> 4) & 0x0F))
-/* ------------------------------------------------------------------------------------ */
-// Memory Addressing Mode Options
-#define SSD1306_MEM_ADDR_MODE_H					(0x00)
-#define SSD1306_MEM_ADDR_MODE_V					(0x01)
-#define SSD1306_MEM_ADDR_MODE_PAGE				(0x02)
+#define SSD1306_CMD_PAGE_MODE_SET_X_UPPER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_0_UPPER_NIBBLE + (((CURSOR_X) & 0xF0) >> 4))
 /* ------------------------------------------------------------------------------------ */
 // Pixel Co-ordinates Structure
 typedef struct {
 	// X co-ordinate
-	uint8_t X;
+	uint8_t X: 6;
 	// Y co-ordinate
-	uint8_t Y;
+	uint8_t Y: 7;
 } SSD1306_pix_t;
 /* ------------------------------------------------------------------------------------ */
 // Initialization sequence for SSD1306 OLED Display
-static const uint8_t SSD1306_initCmd[] = {
+static const uint8_t SSD1306_initCmd[SSD1306_INIT_CMD_SIZE] = {
 	
 	/******************************************************************
 	 * Turn Display OFF

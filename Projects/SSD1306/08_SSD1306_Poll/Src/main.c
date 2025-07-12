@@ -23,10 +23,17 @@ int main(){
 	// SSD1306 Display Initialization
 	SSD1306_RB_Disp_Init(&myOLED);
 
-	// Draw a Black Strap
-	// if(SSD1306_RB_Set_Disp_Pattern(&myOLED, SSD1306_PATTERN_BLACK) != 0x01){
-	if(SSD1306_RB_Set_Page_Pattern(&myOLED, 1, SSD1306_PATTERN_WHITE) != 0x01){
-		OB_LED_Set();
+	// Draw a White Strap
+	if(SSD1306_RB_Torch_Screen(&myOLED) != 0x01){
+		while(1);
+	}
+
+	// Wait for the Display to Settle
+	delay_ms(10 * LOOP_DELAY_MS);
+	
+	// Clear the SSD1306 OLED Display
+	if(SSD1306_RB_Clear_Screen(&myOLED) != 0x01){
+		while(1);
 	}
 
 	// Infinite Loop

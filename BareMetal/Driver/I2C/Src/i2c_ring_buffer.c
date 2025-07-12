@@ -39,7 +39,7 @@ uint8_t I2C_Ring_Buffer_TX_Block(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffe
 	// Iterate through the number of bytes to be sent
 	while(len--){
 		// Transmit a single byte from the ring buffer over I2C
-		if(!I2C_Ring_Buffer_TX_Byte(I2Cx, ring_buffer)){
+		if(I2C_Ring_Buffer_TX_Byte(I2Cx, ring_buffer) != 0x01){
 			// If transmission fails, return failure
 			return 0x00;
 		}

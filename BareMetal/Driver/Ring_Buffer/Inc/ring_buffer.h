@@ -42,7 +42,6 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer) 
 	return (((ring_buffer->head + 1) & (ring_buffer->size - 1)) == ring_buffer->tail);
 }
 
-
 /**
  * @brief Gets the available spaces currently in the ring buffer
  * @param ring_buff Pointer to the ring buffer structure
@@ -61,6 +60,30 @@ __STATIC_INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring
 __STATIC_INLINE__ uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_buff) {
 	// Provides Filled Spaces currently in the ring buffer
     return ((ring_buff->head - ring_buff->tail + ring_buff->size) & (ring_buff->size - 1));
+}
+
+/**
+ * @brief Peeks the data at the head of the ring buffer 
+ * @param ring_buff Pointer to the ring buffer structure
+ * @return Data at the head of the ring buffer
+ * @note - It only retrieves the data at the head of the ring buffer
+ * @note - The data at the head of the ring buffer is not removed from the buffer
+ */
+__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Head(const ring_buffer_t* ring_buff){
+	// Peek the data at the head of the ring buffer
+	return (ring_buff->buffer[ring_buff->head]);
+}
+
+/**
+ * @brief Peeks the data at the tail of the ring buffer 
+ * @param ring_buff Pointer to the ring buffer structure
+ * @return Data at the tail of the ring buffer
+ * @note - It only retrieves the data at the tail of the ring buffer
+ * @note - The data at the tail of the ring buffer is not removed from the buffer
+ */
+__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
+	// Peek the data at the head of the ring buffer
+	return (ring_buff->buffer[ring_buff->tail]);
 }
 
 /**
