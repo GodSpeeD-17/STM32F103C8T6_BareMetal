@@ -102,7 +102,7 @@ uint8_t SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y);
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306);
+uint8_t SSD1306_RB_Set_Current_Pixel(ssd1306_config_t* ssd1306);
 
 /**
  * @brief Clear a pixel in the SSD1306 OLED Display using Ring Buffer
@@ -111,7 +111,7 @@ uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306);
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306);
+uint8_t SSD1306_RB_Clear_Current_Pixel(ssd1306_config_t* ssd1306);
 
 /**
  * @brief Set a specific page pattern in the SSD1306 OLED Display using Ring Buffer
@@ -162,5 +162,50 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Torch_Screen(ssd1306_config_t* ssd1306){
 	return SSD1306_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_WHITE);
 }
 
+/**
+ * @brief Sets the pixel at the specified coordinates in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param X X-coordinate (0-`SSD1306_WIDTH_MAX`)
+ * @param Y Y-coordinate (0 - `SSD1306_HEIGHT_MAX`)
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+	// Go to mentioned pixel 
+	if(SSD1306_RB_Goto_XY(ssd1306, X, Y) != 0x01){
+		return 0x00;
+	}
+	// Set the pixel
+	if(SSD1306_RB_Set_Current_Pixel(ssd1306) != 0x01){
+		// Could not set the pixel
+		return 0x00;
+	}
+	// Success
+	return 0x01;
+}
+
+/**
+ * @brief Clears the pixel at the specified coordinates in the SSD1306 OLED Display using Ring Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param X X-coordinate (0-`SSD1306_WIDTH_MAX`)
+ * @param Y Y-coordinate (0 - `SSD1306_HEIGHT_MAX`)
+ * @return Operation Status
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+	// Go to mentioned pixel 
+	if(SSD1306_RB_Goto_XY(ssd1306, X, Y) != 0x01){
+		return 0x00;
+	}
+	// Clear the pixel
+	if(SSD1306_RB_Clear_Current_Pixel(ssd1306) != 0x01){
+		// Could not set the pixel
+		return 0x00;
+	}
+	// Success
+	return 0x01;
+}
 
 #endif /* __SSD1306_RING_BUFFER_H__ */

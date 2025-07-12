@@ -132,7 +132,7 @@ uint8_t SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306){
+uint8_t SSD1306_RB_Set_Current_Pixel(ssd1306_config_t* ssd1306){
 	// Retrieve the current pixel value from the display buffer  
 	uint8_t pixel = ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col];
 	// Set the pixel offset from Page Reference in the display buffer
@@ -166,7 +166,7 @@ uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306){
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306){
+uint8_t SSD1306_RB_Clear_Current_Pixel(ssd1306_config_t* ssd1306){
 	// Retrieve the current pixel value from the display buffer  
 	uint8_t pixel = ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col];
 	// Set the pixel offset from Page Reference in the display buffer

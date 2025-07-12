@@ -23,18 +23,18 @@ int main(){
 	// SSD1306 Display Initialization
 	SSD1306_RB_Disp_Init(&myOLED);
 
-	// Draw a White Strap
-	if(SSD1306_RB_Torch_Screen(&myOLED) != 0x01){
+	// Clear the Display
+	if(SSD1306_RB_Clear_Screen(&myOLED) != 0x01){
+		// Infinite Loop
 		while(1);
 	}
 
-	// Wait for the Display to Settle
-	delay_ms(10 * LOOP_DELAY_MS);
-	
-	// Clear the SSD1306 OLED Display
-	if(SSD1306_RB_Clear_Screen(&myOLED) != 0x01){
-		while(1);
-	}
+	// 
+	delay_ms(LOOP_DELAY_MS);
+
+	// Set the Pixel
+	SSD1306_RB_Set_Pixel(&myOLED, 63, 32);
+	SSD1306_RB_Set_Pixel(&myOLED, 63, 33);
 
 	// Infinite Loop
 	while(1){
