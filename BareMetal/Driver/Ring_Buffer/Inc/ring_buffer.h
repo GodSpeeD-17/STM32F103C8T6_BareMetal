@@ -87,6 +87,19 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
 }
 
 /**
+ * @brief Peeks the data at the specified offset from the tail of the ring buffer
+ * @param ring_buff Pointer to the ring buffer structure
+ * @param position Offset Location from the Tail
+ * @return Data at the tail of the ring buffer
+ * @note - It only retrieves the data at the tail of the ring buffer
+ * @note - The data at the tail of the ring buffer is not removed from the buffer
+ */
+__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail_Offset(const ring_buffer_t* ring_buff, uint16_t position){
+	// Peek the data at the offset location from the tail of the ring buffer
+	return (ring_buff->buffer[(ring_buff->tail + position) & (ring_buff->size - 1)]);
+}
+
+/**
  * @brief Appends the given data to the ring buffer
  * @param ring_buff Pointer to the ring buffer structure
  * @param src_data Pointer to the source data to be appended
