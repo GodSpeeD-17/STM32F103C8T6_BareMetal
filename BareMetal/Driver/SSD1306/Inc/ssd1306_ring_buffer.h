@@ -215,4 +215,22 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306, uint
 	return 0x01;
 }
 
+/**
+ * @brief Retrieves the pixel from the SSD1306 OLED Display Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Get_Page_Col_Pixel(ssd1306_config_t* ssd1306){
+	return (ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col]);
+}
+
+/**
+ * @brief Sets the pixel from the SSD1306 OLED Display Buffer
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param pixel Pixel Value
+ */
+__STATIC_INLINE__ void SSD1306_RB_Set_Page_Col_Pixel(ssd1306_config_t* ssd1306, const uint8_t pixel){
+	ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col] = pixel;
+}
+
+
 #endif /* __SSD1306_RING_BUFFER_H__ */

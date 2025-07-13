@@ -45,6 +45,12 @@ void delay_us(uint32_t delayTime);
  */
 void delay_ms(uint32_t delayTime);
 
+/**
+ * @brief Registers Callback Function for SysTick
+ * @param callback Callback Function
+ */
+void SysTick_Register_Callback(void (*callback)(void));
+
 /***
  * @brief ISR for SysTick
  * @note Used for Delay Generation and Getting the total Number of Ticks

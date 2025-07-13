@@ -83,7 +83,7 @@ void SSD1306_RB_Disp_Init(ssd1306_config_t* ssd1306){
 	Ring_Buffer_Enqueue_Multiple(&ssd1306->i2c_rb, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE);
 	// <<< I2C Master Write Start Sequence >>>
 	I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_CMD_INDICATOR);
-	// <<< Trigger I2C Data Transfer from Ring Buffer>>>
+	// <<< Trigger I2C Data Transfer from Ring Buffer >>>
 	I2C_Ring_Buffer_TX_Block(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb, SSD1306_INIT_CMD_SIZE);
 	// <<< I2C Master Stop Sequence >>>
 	I2C_Master_Stop(ssd1306->i2c_config.I2Cx);

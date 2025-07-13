@@ -28,6 +28,89 @@ __STATIC_INLINE__ void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd
 }
 
 /**
+ * @brief Initializes the Display post reset
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Status of operation
+ * @return - 0: Failure  
+ * @return - 1: Success 
+ */
+static uint8_t SSD1306_Frame_RB_Disp_Reset_Sequence(ssd1306_config_t* ssd1306){
+	// Initialize the display
+	if(SSD1306_RB_Encode_CMD_Frame(ssd1306, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	
+	// Instant Triggering
+	#ifdef __SSD1306_FRAME_I2C__
+	// I2C Handling
+	if(SSD1306_Frame_RB_I2C_Dequeue(ssd1306) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	#endif
+
+	// Success
+	return 0x01;
+}
+
+/**
+ * @brief Sets the Page to a particular pattern
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @param page Page Number: 0 - `PAGE_MAX`
+ * @param pattern Pattern to be followed for each column
+ * @return Status of operation
+ * @return - 0: Failure
+ * @return - 1: Success
+ */
+uint8_t SSD1306_Frame_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t page, const uint8_t pattern){
+	// Wrap the page
+	page = SSD1306_WRAP_PAGE(page);
+	// Go to (X,Y) co-ordinates
+	if(SSD1306_Frame_RB_Goto_XY(ssd1306, 0, (page << 3)) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	// I2C Buffer Data
+	uint8_t i2cBuffData[SSD1306_WIDTH];
+	memset(i2cBuffData, pattern, SSD1306_WIDTH);
+	// Enqueue the data
+	if(SSD1306_RB_Encode_Data_Frame(ssd1306, i2cBuffData, SSD1306_WIDTH) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	
+	// Instant Trigger
+	#ifdef __SSD1306_FRAME_I2C__
+	SSD1306_Frame_RB_I2C_Dequeue(ssd1306);
+	#endif
+
+	// Update the Display Buffer
+	memset(&ssd1306->display.buffer[page][0], pattern, SSD1306_WIDTH);
+	// Success
+	return 0x01;
+}
+
+/**
+ * @brief SSD1306 Display Initialization
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Status of operation
+ * @return - 0: Failure  
+ * @return - 1: Success 
+ */
+uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306){
+	// Display reset sequence
+	if(SSD1306_Frame_RB_Disp_Reset_Sequence(ssd1306) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	// Reset the display Buffer
+	SSD1306_Frame_RB_Clear_Screen(ssd1306);
+	// Success
+	return 0x01;
+}
+
+/**
  * @brief Enqueues the SSD1306 Cursor Frame in I2C Ring Buffer 
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
  * @param cursor_X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
@@ -36,7 +119,7 @@ __STATIC_INLINE__ void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd
  * @return - 0: Failure  
  * @return - 1: Success  
  */
-uint8_t SSD1306_Frame_RB_Goto_XY_Enqueue(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
+uint8_t SSD1306_Frame_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
 	// Check space availability
 	if(Ring_Buffer_Available_Space(&ssd1306->i2c_rb) < (SSD1306_BUFFER_GOTO_XY_SIZE + 2)){
 		// Not enough space in the Ring Buffer
@@ -54,6 +137,66 @@ uint8_t SSD1306_Frame_RB_Goto_XY_Enqueue(ssd1306_config_t* ssd1306, uint8_t curs
 	}
 	// Update the internal structure parameters
 	__ssd1306_structure_update_cursor__(ssd1306, cursor_X, cursor_Y);
+
+	// Instant Triggering
+	#ifdef __SSD1306_FRAME_I2C__
+	if(SSD1306_Frame_RB_I2C_Dequeue(ssd1306) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	#endif
+
+	// Success
+	return 0x01;
+}
+
+/**
+ * @brief Manipulates a pixel mentioned at given co-ordinates
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @param isClear 0: Set the pixel, 1: Clear the pixel
+ * @param cursor_X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
+ * @param cursor_Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
+ * @return Status of the operation 
+ * @return - 0: Failure  
+ * @return - 1: Success
+ */
+uint8_t SSD1306_Frame_RB_Manipulate_Pixel(ssd1306_config_t* ssd1306, uint8_t isClear, uint8_t cursor_X, uint8_t cursor_Y){
+	// Traverse to the co-ordinates
+	if(SSD1306_Frame_RB_Goto_XY(ssd1306, cursor_X, cursor_Y) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	// Instant Triggering
+	#ifdef __SSD1306_FRAME_I2C__
+	if(SSD1306_Frame_RB_I2C_Dequeue(ssd1306) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	#endif
+	// Retrieve the page & column value
+	uint8_t pcValue = SSD1306_RB_Get_Page_Col_Pixel(ssd1306);
+	// Set the Pixel
+	if(isClear == 0x00){
+		pcValue |= (1 << (cursor_Y - (ssd1306->display.page << 3)));
+	}
+	// Clear the pixel
+	else{
+		pcValue &= ~(1 << (cursor_Y - (ssd1306->display.page << 3)));
+	}
+	// Enqueue the Data
+	if(SSD1306_RB_Encode_Data(ssd1306, pcValue) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	// Instant Triggering
+	#ifdef __SSD1306_FRAME_I2C__
+	if(SSD1306_Frame_RB_I2C_Dequeue(ssd1306) == 0x00){
+		// Failure
+		return 0x00;
+	}
+	#endif
+	// Update the Value in Display Buffer
+	SSD1306_RB_Set_Page_Col_Pixel(ssd1306, pcValue);
 	// Success
 	return 0x01;
 }
@@ -67,7 +210,7 @@ uint8_t SSD1306_Frame_RB_Goto_XY_Enqueue(ssd1306_config_t* ssd1306, uint8_t curs
  */
 uint8_t SSD1306_Frame_RB_I2C_Dequeue(ssd1306_config_t* ssd1306){
 	// Confirmation of tail aligned with Frame
-	if(SSD1306_RB_Frame_Aligned(ssd1306) != 0x01){
+	if(SSD1306_RB_Frame_Aligned(ssd1306) == 0x00){
 		// Failure
 		return 0x00;
 	}
