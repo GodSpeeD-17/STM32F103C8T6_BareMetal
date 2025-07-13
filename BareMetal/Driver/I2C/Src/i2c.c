@@ -1,16 +1,18 @@
 // Dependency
 #include "i2c.h"
 
+// Static Variable for Memory Efficiency
+static uint32_t temp = 0x00;
+
 /**
  * @brief I2C Master Write Start Sequence
  * @param I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param slaveAddress Target I2C Slave Address
- * @param registerAddress Target Register Address
  * @note Does not generate STOP condition, use `I2C_sendStop()` after writing data
  */
-void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress){
+void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress){
 	// Local Variable
-	uint32_t temp = 0x00;
+	temp = 0x00;
 	// Start Sequence
 	I2C_sendStart(I2Cx);
 	// Wait for Start condition (EV5)
@@ -25,6 +27,18 @@ void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t 
 	temp = I2Cx->SR2.REG;
 	// Wait for TXE flag (EV8_1)
 	while(!(I2Cx->SR1.REG & I2C_SR1_TXE));
+}
+
+/**
+ * @brief I2C Master Write Start Sequence
+ * @param I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param slaveAddress Target I2C Slave Address
+ * @param registerAddress Target Register Address
+ * @note Does not generate STOP condition, use `I2C_sendStop()` after writing data
+ */
+void I2C_Master_Write_Start_Reg(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress){
+	// Start Sequence
+	I2C_Master_Write_Start(I2Cx, slaveAddress);
 	// Write Register Address
 	I2C_writeByte(I2Cx, registerAddress);
 	// Wait for TXE and BTF flags (EV8_2)
@@ -42,9 +56,9 @@ void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t 
  */
 void I2C_Master_Read_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress){
 	// Local Variable
-	uint32_t temp = 0x00;
+	temp = 0x00;
 	// I2C Master Write Start Sequence
-	I2C_Master_Write_Start(I2Cx, slaveAddress, registerAddress);
+	I2C_Master_Write_Start_Reg(I2Cx, slaveAddress, registerAddress);
 	// Repeated START Condition (Switch to Read Mode)
 	I2C_sendStart(I2Cx);
 	// Wait for Start condition (EV5)
@@ -73,6 +87,22 @@ void I2C_Master_Stop(I2C_REG_STRUCT* I2Cx){
 }
 
 /**
+ * @brief I2C Master Write Buffer Data
+ * @param I2Cx I2Cx I2C Instance: `I2C1`, `I2C2`
+ * @param buffer Pointer to buffer to be transmitted
+ * @param buff_len Length of data in buffer to be transmitted
+ */
+void I2C_Master_Write_Data(I2C_REG_STRUCT* I2Cx, uint8_t* buffer, uint16_t buff_len){
+	// Write Multiple Bytes
+	for (uint8_t i = 0; i < buff_len; i++) {
+		// Write Data Byte
+		I2C_writeByte(I2Cx, buffer[i]);
+		// Wait for TXE and BTF flags (EV8_2)
+		while(!(I2Cx->SR1.REG & (I2C_SR1_TXE | I2C_SR1_BTF)));
+	}
+}
+
+/**
  * @brief Writes a Single Byte to Register Address of a given Slave Address
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] slave_address MAX30102 Slave Address
@@ -81,7 +111,7 @@ void I2C_Master_Stop(I2C_REG_STRUCT* I2Cx){
  */
 void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte){
 	// I2C Master Write Start Sequence
-	I2C_Master_Write_Start(I2Cx, slaveAddress, registerAddress);
+	I2C_Master_Write_Start_Reg(I2Cx, slaveAddress, registerAddress);
 	// Write Data Byte
 	I2C_writeByte(I2Cx, byte);
 	// Wait for TXE and BTF flags (EV8_2)
@@ -100,7 +130,7 @@ void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t regi
  */
 void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len){
 	// I2C Master Write Start Sequence
-	I2C_Master_Write_Start(I2Cx, slaveAddress, registerAddress);
+	I2C_Master_Write_Start_Reg(I2Cx, slaveAddress, registerAddress);
 	// Write Multiple Bytes
 	for (uint8_t i = 0; i < len; i++) {
 		// Write Data Byte

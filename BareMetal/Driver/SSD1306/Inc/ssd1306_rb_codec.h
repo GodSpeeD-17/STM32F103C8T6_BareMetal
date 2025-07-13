@@ -1,32 +1,29 @@
 /**
- * @file ssd1306_ring_buffer_encode.h
+ * @file ssd1306_rb_codec.h
  * @author Shrey Shah
  * @brief Encoding & Framing for SSD1306 to differentiate between Command & Data Sequence
  * @version 0.1
  * @date 13-07-2025
  * 
  * Framing:
- * 
  * - Command Sequence:
- * |-------|-------|-------|
- * |CMD_IND|CMD_LEN|CMD_SEQ|
- * |-------|-------|-------|
- *    0x00   <LEN>   <SEQ>
+ * 		|-------|-------|-------|
+ * 		|CMD_IND|CMD_LEN|CMD_SEQ|
+ * 		|-------|-------|-------|
+ * 		   0x00   <LEN>   <SEQ>
  * 
  * - Data Sequence:
- * |--------|--------|--------|
- * |DATA_IND|DATA_LEN|DATA_SEQ|
- * |--------|--------|--------|
- *    0x40     <LEN>    <SEQ>
- * 
+ * 		|--------|--------|--------|
+ * 		|DATA_IND|DATA_LEN|DATA_SEQ|
+ * 		|--------|--------|--------|
+ * 		   0x40     <LEN>    <SEQ>
  */
 
 // Header Guards
-#ifndef __SSD1306_RING_BUFFER_ENCODE_H__
-#define __SSD1306_RING_BUFFER_ENCODE_H__
+#ifndef __SSD1306_RB_CODEC_H__
+#define __SSD1306_RB_CODEC_H__
 
 // Includes
-#include "i2c_ring_buffer.h"
 #include "ssd1306_ring_buffer.h"
 
 /**
@@ -108,4 +105,25 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306
 	return (SSD1306_RB_Encode_Frame(ssd1306, 0x00, data_buffer, data_len));
 }
 
-#endif /* __SSD1306_RING_BUFFER_ENCODE_H__ */
+/**
+ * @brief Checks if Tail is aligned with Frame Start
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Status of operation
+ * @return - 0: Mismatch in Frame
+ * @return - 1: Matching Frame
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
+	return ((Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_CMD_INDICATOR) || (Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_DATA_INDICATOR));
+}
+
+/**
+ * @brief Retrieves the length of I2C Buffer required
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Length of Local I2C Buffer required 
+ */
+__STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Get_Size(ssd1306_config_t* ssd1306){
+	// Returns the length of the frame
+	return (Ring_Buffer_Peek_Tail_Offset(&ssd1306->i2c_rb, 1) + 1);
+}
+
+#endif /* __SSD1306_RB_CODEC_H__ */

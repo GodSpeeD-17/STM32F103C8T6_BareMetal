@@ -96,7 +96,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
  */
 __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail_Offset(const ring_buffer_t* ring_buff, uint16_t position){
 	// Peek the data at the offset location from the tail of the ring buffer
-	return (ring_buff->buffer[(ring_buff->tail + position) & (ring_buff->size - 1)]);
+	return (ring_buff->buffer[((ring_buff->tail + position) & (ring_buff->size - 1))]);
 }
 
 /**

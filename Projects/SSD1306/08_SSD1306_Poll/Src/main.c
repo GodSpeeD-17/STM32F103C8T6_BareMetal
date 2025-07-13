@@ -3,7 +3,7 @@
 #include "main.h"
 /*-------------------------------------------------------------------------------*/
 // SSD1306 Configuration Structure
-ssd1306_config_t myOLED;
+static ssd1306_config_t myOLED;
 // SSD1306 Display Buffer
 static uint8_t displayBuffer[SSD1306_PAGE][SSD1306_WIDTH];
 // I2C Ring Buffer
@@ -25,16 +25,28 @@ int main(){
 
 	// Clear the Display
 	if(SSD1306_RB_Clear_Screen(&myOLED) != 0x01){
+		// Set OB LED
+		OB_LED_Set();
 		// Infinite Loop
 		while(1);
 	}
 
-	// 
-	delay_ms(LOOP_DELAY_MS);
+	// Try
+	if(SSD1306_Frame_RB_Goto_XY_Enqueue(&myOLED, 10, 30) != 0x01){
+		// Set OB LED
+		OB_LED_Set();
+		// Infinite Loop
+		while(1);
+	}
+	
+	// Try
+	if(SSD1306_Frame_RB_I2C_Dequeue(&myOLED) != 0x01){
+		// Set OB LED
+		OB_LED_Set();
+		// Infinite Loop
+		while(1);
+	}
 
-	// Set the Pixel
-	SSD1306_RB_Set_Pixel(&myOLED, 63, 32);
-	SSD1306_RB_Set_Pixel(&myOLED, 63, 33);
 
 	// Infinite Loop
 	while(1){

@@ -82,7 +82,7 @@ void SSD1306_RB_Disp_Init(ssd1306_config_t* ssd1306){
 	// Enqueue the I2C Ring Buffer
 	Ring_Buffer_Enqueue_Multiple(&ssd1306->i2c_rb, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE);
 	// <<< I2C Master Write Start Sequence >>>
-	I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_CMD_INDICATOR);
+	I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_CMD_INDICATOR);
 	// <<< Trigger I2C Data Transfer from Ring Buffer>>>
 	I2C_Ring_Buffer_TX_Block(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb, SSD1306_INIT_CMD_SIZE);
 	// <<< I2C Master Stop Sequence >>>
@@ -111,7 +111,7 @@ uint8_t SSD1306_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Enqueue the Cursor Position Commands
 	__SSD1306_RB_Enqueue_Cursor_Position__(ssd1306, X, Y);
 	// <<< I2C Master Write Start Sequence >>>
-	I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_CMD_INDICATOR);
+	I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_CMD_INDICATOR);
 	// <<< Trigger I2C Data Transfer from Ring Buffer >>>
 	if(I2C_Ring_Buffer_TX_Block(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb, 3) != 0x01){
 		// <<< I2C Master Stop Sequence >>>
@@ -140,7 +140,7 @@ uint8_t SSD1306_RB_Set_Current_Pixel(ssd1306_config_t* ssd1306){
 	// Enqueue the pixel on Ring Buffer
 	if(Ring_Buffer_Enqueue(&ssd1306->i2c_rb, pixel)){
 		// <<< I2C Master Write Start Sequence >>>
-		I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
+		I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
 		// <<< Trigger I2C Data Transfer from Ring Buffer >>>
 		if(I2C_Ring_Buffer_TX_Byte(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb) != 0x01){
 			// <<< I2C Master Stop Sequence >>>
@@ -174,7 +174,7 @@ uint8_t SSD1306_RB_Clear_Current_Pixel(ssd1306_config_t* ssd1306){
 	// Enqueue the pixel on Ring Buffer
 	if(Ring_Buffer_Enqueue(&ssd1306->i2c_rb, pixel)){
 		// <<< I2C Master Write Start Sequence >>>
-		I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
+		I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
 		// <<< Trigger I2C Data Transfer from Ring Buffer >>>
 		if(I2C_Ring_Buffer_TX_Byte(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb) != 0x01){
 			// <<< I2C Master Stop Sequence >>>
@@ -221,7 +221,7 @@ uint8_t SSD1306_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t page, con
 		}
 	}
 	// <<< I2C Master Write Start Sequence >>>
-	I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
+	I2C_Master_Write_Start_Reg(ssd1306->i2c_config.I2Cx, ssd1306->address, SSD1306_DATA_INDICATOR);
 	// <<< Trigger I2C Data Transfer from Ring Buffer>>>
 	if(I2C_Ring_Buffer_TX_Block(ssd1306->i2c_config.I2Cx, &ssd1306->i2c_rb, SSD1306_WIDTH)){
 		// Update the Display Buffer

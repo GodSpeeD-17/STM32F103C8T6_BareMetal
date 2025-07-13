@@ -22,7 +22,7 @@
  */
 
 // Includes
-#include "ssd1306_ring_buffer_codec.h"
+#include "ssd1306_rb_codec.h"
 
 /**
  * @brief Encode multiple bytes in Ring Buffer
@@ -81,18 +81,19 @@ uint8_t SSD1306_RB_Encode_Frame(ssd1306_config_t* ssd1306, uint8_t isCMD, const 
  * @return - Length of Data appended in the Buffer 
  */
 uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint16_t buff_len){
-	// Check if the Head is in alignment with Encoding
-	if((Ring_Buffer_Peek_Head(&ssd1306->i2c_rb) != SSD1306_CMD_INDICATOR) || (Ring_Buffer_Peek_Head(&ssd1306->i2c_rb) != SSD1306_DATA_INDICATOR)){
-		// Failure
-		return 0x00;
-	}
-	// Check if the Data is available in Frame or insufficient Buffer Size 
-	else if((Ring_Buffer_Available_Space(&ssd1306->i2c_rb) < 0x03) || ((Ring_Buffer_Peek_Tail_Offset(&ssd1306->i2c_rb, 0x01) + 1) > buff_len)){
+	// Check if the Tail is aligned with Frame
+	if(SSD1306_RB_Frame_Aligned(ssd1306) != 0x01){
 		// Failure
 		return 0x00;
 	}
 	// Ininitialize the Data Length 
-	uint8_t data_length = 0;
+	uint8_t data_length = SSD1306_RB_Frame_Get_Size(ssd1306);
+	// Check if the Data is available in Frame or insufficient Buffer Size
+	if(data_length > buff_len){
+		// Failure
+		return 0x00;
+	}
+
 	// Step 1: Decode the Data/Command Indicator
 	if(Ring_Buffer_Dequeue(&ssd1306->i2c_rb, buffer) != 0x01){
 		// Failure
@@ -104,12 +105,11 @@ uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint
 		return 0x00;
 	}
 	// Step 3: Decode the Data/Command
-	if(Ring_Buffer_Dequeue_Multiple(&ssd1306->i2c_rb, buffer, data_length) != 0x01){
+	if(Ring_Buffer_Dequeue_Multiple(&ssd1306->i2c_rb, buffer + 1, data_length) != 0x01){
+		// Failure
 		return 0x00;
 	}
 	// Return the data_length
 	return data_length;
 }
-
-
 
