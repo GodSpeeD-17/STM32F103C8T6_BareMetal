@@ -36,7 +36,7 @@ typedef struct {
 
 /**
  * @brief Enables Clock for respective GPIO
- * @param[in] GPIO The GPIO Port
+ * @param GPIO The GPIO Port
  */
 __STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
 	// Enable Clock for respective GPIO
@@ -63,7 +63,7 @@ __STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
 
 /**
  * @brief Disables Clock for respective GPIO
- * @param[in] GPIO The GPIO Configuration Structure
+ * @param GPIO The GPIO Configuration Structure
  */
 __STATIC_INLINE__ void GPIO_Clk_Disable(GPIO_REG_STRUCT* GPIO){
 	// Disable Clock for respective GPIO

@@ -147,8 +147,8 @@
 #define GPIOx_PIN_13						(0x0D)
 #define GPIOx_PIN_14						(0x0E)
 #define GPIOx_PIN_15						(0x0F)
-#define OB_LED_PORT							(GPIOC)
-#define OB_LED_PIN							(GPIOx_PIN_13)
+#define OB_LED_PORT							GPIOC
+#define OB_LED_PIN							GPIOx_PIN_13
 
 // MODE
 #define GPIOx_MODE_IN						(0x00)

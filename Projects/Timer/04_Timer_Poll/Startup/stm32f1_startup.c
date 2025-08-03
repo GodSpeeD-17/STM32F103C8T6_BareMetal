@@ -7,8 +7,6 @@
 /*--------------------------------------------- HEADERS ----------------------------------*/
 // Dependency
 #include <stdint.h>
-// For System Clock Configuration (72MHz)
-#include "rcc.h"
 // SysTick Configuration
 #include "systick.h"
 // GPIO Configuration
@@ -213,22 +211,22 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
-	SysTick_Config((RCC_Get_AHBClock()/FREQ_1MHz));
-	// Step 5: Configure OB LED
+	SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
+	// Step 5: Configure OB LED & Enable SysTick
 	OB_LED_Config();
-	OB_LED_Reset();
+	SysTick_Enable();
 	// Step 6: Call main()
 	main();
-	// Step 7: Infinite Loop (Backup)
-	while(1) 
-		(void) 0;
+	// Step 7: Default Handler (Should never be reached)
+	Default_Handler();
 }
 /*-------------------------------------------------------------------------------*/
 // Default Handler (Overwrite This)
 __attribute__((weak)) void Default_Handler(void){
 	// Infinite Loop
-	while(1) 
+	while(1){
 		(void) 0;
+	}
 }
 /*-------------------------------------------------------------------------------*/
 /**

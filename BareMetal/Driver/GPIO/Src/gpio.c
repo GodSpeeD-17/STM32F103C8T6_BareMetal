@@ -8,12 +8,16 @@
 #include "gpio.h"
 
 // On-board LED Configuration
-const static gpio_config_t OB_LED_Configuration = {
+static const gpio_config_t OB_LED_Configuration = {
 	.GPIO = OB_LED_PORT,
 	.PIN = OB_LED_PIN,
 	.MODE = GPIOx_MODE_OUT_2MHz,	// Refer RM008
 	.CNF = GPIOx_CNF_OUT_GP_PP,
 };
+
+// Determine the register, shift based on the pin number
+static volatile uint32_t reg = 0x00; 
+static volatile uint32_t shift = 0x00;
 
 /**
  * @brief Configures the GPIO based upon gpio structure
@@ -23,11 +27,10 @@ void GPIO_Config(gpio_config_t* GPIOx_CONFIG){
 	// GPIO Clock
 	GPIO_Clk_Enable(GPIOx_CONFIG->GPIO);
 	// Alternate Function Clock
-	if((GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_PP) || (GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_OD))
+	if((GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_PP) || (GPIOx_CONFIG->CNF == GPIOx_CNF_OUT_AF_OD)){
 		RCC_AFIO_Clk_Enable();
+	}
 	
-	// Determine the register, shift based on the pin number
-	uint32_t reg = 0x00, shift = 0x00;
 	if (GPIOx_CONFIG->PIN <= GPIOx_PIN_7){
 		reg = GPIOx_CONFIG->GPIO->CRL.REG;
 		shift = GPIOx_CONFIG->PIN << 2;
@@ -72,9 +75,6 @@ void GPIO_Config(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
 void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG){
-	// Local Variables
-	uint32_t reg = 0x00, shift = 0x00;
-	
 	// Determine the register, shift based on the pin number
 	if (GPIOx_CONFIG->PIN <= GPIOx_PIN_7){
 		reg = GPIOx_CONFIG->GPIO->CRL.REG;
@@ -112,13 +112,15 @@ void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG){
  */
 uint8_t GPIO_Get_State(gpio_config_t* GPIOx_CONFIG){
 	// Pin State
-	uint32_t pin_state = 0xFFFFFFFF;
+	reg = 0x00; 
+	shift = GPIOx_CONFIG->PIN;
 	// Get State
-	pin_state = ((GPIOx_CONFIG->GPIO->IDR.REG) & (0x01 << GPIOx_CONFIG->PIN));
+	reg = (GPIOx_CONFIG->GPIO->IDR.REG);
+	reg >>= shift;
 	// Shift the pin state to the right based on the pin number
-	pin_state >>= GPIOx_CONFIG->PIN;
+	reg &= 0x01;
 	// Return Result
-	return (uint8_t) pin_state;
+	return (uint8_t) reg;
 }
 
 /**

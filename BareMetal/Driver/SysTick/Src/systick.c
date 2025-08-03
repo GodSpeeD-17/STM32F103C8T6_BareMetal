@@ -45,8 +45,9 @@ void SysTick_Set_Ticks(uint64_t tick_value){
 
 /**
  * @brief Configures the SysTick Timer based upon the input count value
- * @param[in] reloadValue Number of Ticks
+ * @param reloadValue Number of Ticks
  * @note Value should be within the range of 24-bit unsigned integer
+ * @note Call `SysTick_Enable()` to start the SysTick Timer
  */
 void SysTick_Config(uint32_t reloadValue){
 	// Reset Value
@@ -56,14 +57,12 @@ void SysTick_Config(uint32_t reloadValue){
 	// Update Current Value
 	SysTick->VAL = 0x00;
 	// Set Core as Reference Clock
-	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | 
-						 SysTick_CTRL_TICKINT_Msk | 
-						 SysTick_CTRL_ENABLE_Msk);
+	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk);
 }
 
-/***
+/**
  * @brief Accurate us delay generation
- * @param[in] delayTime Delay in microseconds (us)
+ * @param delayTime Delay in microseconds (us)
  * @note Based upon SysTick Timer
  */
 void delay_us(uint32_t delayTime){
@@ -73,9 +72,9 @@ void delay_us(uint32_t delayTime){
 	while(curr_ticks <= future_ticks);
 }
 
-/***
+/**
  * @brief Accurate ms delay generation
- * @param[in] delayTime Delay in milliseconds (ms)
+ * @param delayTime Delay in milliseconds (ms)
  * @note Based upon SysTick Timer
  */
 void delay_ms(uint32_t delayTime){
@@ -99,7 +98,7 @@ void SysTick_Register_Callback(void (*callback)(void)){
 	__enable_irq();
 }
 
-/***
+/**
  * @brief ISR for SysTick
  * @note Used for Delay Generation and Getting the total Number of Ticks
  */
@@ -107,15 +106,17 @@ __attribute__((weak)) void SysTick_Handler(void){
 
 	/*********************************************** DO NOT COMMENT ***********************************************/
 	// Delay (Non-blocking)
-	if(curr_ticks <= (uint64_t) 0xFFFFFFFFFFFFFFF)
-	curr_ticks++;
-	else
-	curr_ticks = 0;
+	if(curr_ticks <= (uint64_t) 0xFFFFFFFFFFFFFFF){
+		curr_ticks++;
+	}
+	else{
+		curr_ticks = 0;
+	}
 	/*********************************************** DO NOT COMMENT ***********************************************/
 
 	/*********************************************** USER CODE ***********************************************/
 	// User Callback
-	if (SysTick_Callback) {
+	if(SysTick_Callback){
         SysTick_Callback();
     }
 	/*********************************************** USER CODE ***********************************************/

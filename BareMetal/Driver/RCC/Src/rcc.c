@@ -7,6 +7,41 @@
 // Header File
 #include "rcc.h"
 
+// 72MHz Configuration
+static const rcc_config_t RCC_Configuration_72MHz = {
+	// Flash Configuration
+	.flash = {
+		// 2 wait states
+		.latency = FLASH_ACR_LATENCY_2,
+		// Prefetch enabled
+		.prefetch = FLASH_ACR_PRFTBE_Msk
+	},
+	// PLL Configuration
+	.pll = {
+		// HSE as PLL Clock Source
+		.ext_src = RCCx_PLL_SRC_HSE_DIV_1,
+		// PLL Multiplication Factor 9
+		.mul_fact = RCCx_PLL_MUL_9
+	},
+	// Bus Configuration
+	.bus = {
+		// AHB Bus Prescaler: 1 (72MHz)
+		.AHB_pre = RCCx_AHB_DIV_1,
+		// APB1 Bus Prescaler: 2 (36MHz)
+		.APB1_pre = RCCx_APB1_DIV_2,
+		// APB2 Bus Prescaler: 1 (72MHz)
+		.APB2_pre = RCCx_APB2_DIV_1
+	},
+	.component = {
+		// ADC Prescaler: @14MHz
+		.ADC_pre = RCCx_ADC_DIV_6,
+		// USB Prescaler: @48MHz
+		.USB_pre = RCCx_USB_DIV_1_5
+	},
+	// Select PLL as System Clock Source
+	.sys_clk_src = RCCx_SW_CLK_PLL
+};
+
 /**
  * @brief Configures RCC
  * @param configX RCC Configuration Structure
@@ -77,11 +112,6 @@ void RCC_Config_Load_72MHz(rcc_config_t* configX){
  * @brief Configures System to run at 72MHz
  */
 void RCC_Config_72MHz(){
-	// Configuration: 72MHz
-	rcc_config_t RCC_Configuration_72MHz;
-	// Load 72MHz Configuration
-	RCC_Config_Load_72MHz(&RCC_Configuration_72MHz);
 	// Configuration
 	RCC_Config(&RCC_Configuration_72MHz);
 }
-

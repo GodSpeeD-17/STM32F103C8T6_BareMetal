@@ -163,8 +163,6 @@ clean:
 	@echo "\033[1;35m║      \033[1;32m✔✔✔ Build files and VSCode configs removed ✔✔✔\033[0m      \033[1;35m║\033[0m"
 	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
 
-
-
 # ST-Link Information
 info:
 	@echo "\033[1;36m╔══════════════════════════════════════════════════════════╗\033[0m"
@@ -183,7 +181,7 @@ erase_flash: clean
 	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
 
 # Debug
-debug: $(BUILD_DIR)/$(TARGET).elf vscode_files
+debug: $(BUILD_DIR)/$(TARGET).elf vscode_files all
 	@echo "***********************************************************************"
 	@echo "Debug Configurations Ready!"
 	@echo "***********************************************************************"
@@ -202,6 +200,7 @@ vscode_files:
 # launch.json
 generate_launch_json: .vscode
 	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
+# 	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "Reset_Handler",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
 
 # settings.json
 generate_settings_json: .vscode

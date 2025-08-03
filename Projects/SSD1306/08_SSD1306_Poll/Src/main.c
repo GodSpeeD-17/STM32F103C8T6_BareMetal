@@ -21,13 +21,10 @@ int main(){
 	SSD1306_Config_Disp(&myOLED, displayBuffer);
 	SSD1306_Config_RB(&myOLED, i2cBuffer, I2C_BUFFER_SIZE);
 	SSD1306_Config_I2C1_Load_Default(&myOLED);
-
-	// SSD1306 I2C Configure
-	SSD1306_Config_I2C(&myOLED);
-	SSD1306_Config_I2C_Enable(&myOLED);
+	SSD1306_Config_I2C_Init(&myOLED);
 
 	// Register SysTick Callback Function
-	SysTick_Register_Callback(SysTick_Callback_Fn);
+	// SysTick_Register_Callback(SysTick_Callback_Fn);
 
 	// SSD1306 Display Initialization
 	if(SSD1306_Frame_RB_Disp_Reset(&myOLED) == 0x00){
