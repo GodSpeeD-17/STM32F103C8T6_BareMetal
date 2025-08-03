@@ -1,22 +1,33 @@
 /**
  * @file ssd1306_rb_codec.h
  * @author Shrey Shah
- * @brief Encoding & Framing for SSD1306 to differentiate between Command & Data Sequence
- * @version 0.1
- * @date 13-07-2025
+ * @brief Encoding & Decoding the frames for SSD1306 OLED Display
+ * @version 1.1
+ * @date 03-08-2025
  * 
- * Framing:
+ * Frame Information:
+ * 
+ * - Template:
+ * 		|-----------|-----------------|----------|
+ * 		| INDICATOR | SEQUENCE_LENGTH | SEQUENCE |
+ * 		|-----------|-----------------|----------|
+ * 		    <IND>        <SEQ_LEN>       <SEQ> 
+ * 
  * - Command Sequence:
  * 		|-------|-------|-------|
  * 		|CMD_IND|CMD_LEN|CMD_SEQ|
  * 		|-------|-------|-------|
- * 		   0x00   <LEN>   <SEQ>
+ * 		   0x00   <LEN>   <CMD>
  * 
  * - Data Sequence:
  * 		|--------|--------|--------|
  * 		|DATA_IND|DATA_LEN|DATA_SEQ|
  * 		|--------|--------|--------|
- * 		   0x40     <LEN>    <SEQ>
+ * 		   0x40     <LEN>   <DATA>
+ * 
+ * - Indicators: (Refer SSD1306 datasheet for Details)
+ * 		- `0x00`: Command Indicator
+ * 		- `0x40`: Data Indicator
  */
 
 // Header Guards
@@ -24,30 +35,30 @@
 #define __SSD1306_RB_CODEC_H__
 
 // Includes
-#include "ssd1306_ring_buffer.h"
+#include "ssd1306_rb.h"
 
 /**
  * @brief Encode multiple bytes in Ring Buffer
  * @param ssd1306 Pointer to SSD1306 Configuration Structure 
- * @param isCMD   Type of byte to encode:  
- *				  - 0: Command  
- *				  - 1: Data
+ * @param isCMD   Type of byte to encode:
+ * @param | `0x00`: Data  
+ * @param | `0x01`: Command
  * @param buffer Pointer to buffer
  * @param buff_len Length of the buffer
- * @return Status of Operation
- * @return - 0: Failure
- * @return - 1: Success   
+ * @return Status of operation
+ * @return 	- `0x00`: Failure
+ * @return 	- `0x01`: Success   
  */
-uint8_t SSD1306_RB_Encode_Frame(ssd1306_config_t* ssd1306, uint8_t isCMD, const uint8_t* buffer, uint16_t buff_len);
+uint8_t SSD1306_RB_Encode_Frame(ssd1306_config_t* ssd1306, const uint8_t isCMD, const uint8_t* buffer, uint16_t buff_len);
 
 /**
  * @brief Decodes the data from Ring Buffer
  * @param ssd1306 Pointer to SSD1306 Configuration Structure 
  * @param buffer Pointer to data storage buffer
  * @param buff_len Length of the buffer
- * @return Status of Operation
- * @return - 0: Failure 
- * @return - Length of Data appended in the Buffer 
+ * @return Status of operation
+ * @return 	- `0x00`: Failure
+ * @return 	- `0xXX`: Successful Length of Data appended in the Buffer
  */
 uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint16_t buff_len);
 
@@ -56,8 +67,8 @@ uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint
  * @param ssd1306 Pointer to SSD1306 Configuration Structure 
  * @param command Command to be encoded
  * @return Status of operation
- * @return - 0: Failure
- * @return - 1: Success 
+ * @return 	- `0x00`: Failure
+ * @return 	- `0x01`: Success  
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD(ssd1306_config_t* ssd1306, uint8_t command){
 	// Encode a Single Command
@@ -70,8 +81,8 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD(ssd1306_config_t* ssd1306, uint8
  * @param cmd_buffer Pointer to command buffer
  * @param cmd_len Length of command buffer
  * @return Status of operation
- * @return - 0: Failure
- * @return - 1: Success 
+ * @return - 0x00: Failure
+ * @return - 0x01: Success 
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD_Frame(ssd1306_config_t* ssd1306, const uint8_t* cmd_buffer, uint16_t cmd_len){
 	// Encode the Command Frame
@@ -83,8 +94,8 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD_Frame(ssd1306_config_t* ssd1306,
  * @param ssd1306 Pointer to SSD1306 Configuration Structure 
  * @param data Data to be encoded
  * @return Status of operation
- * @return - 0: Failure
- * @return - 1: Success 
+ * @return - 0x00: Failure
+ * @return - 0x01: Success 
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data(ssd1306_config_t* ssd1306, uint8_t data){
 	// Encode a Single Data
@@ -97,8 +108,8 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data(ssd1306_config_t* ssd1306, uint
  * @param data_buffer Pointer to data buffer
  * @param data_len Length of data buffer
  * @return Status of operation
- * @return - 0: Failure
- * @return - 1: Success 
+ * @return - 0x00: Failure
+ * @return - 0x01: Success 
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306, const uint8_t* data_buffer, uint16_t data_len){
 	// Encode the Data Frame
@@ -109,8 +120,8 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306
  * @brief Checks if Tail is aligned with Frame Start
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
  * @return Status of operation
- * @return - 0: Mismatch in Frame
- * @return - 1: Matching Frame
+ * @return - 0x00: Mismatch in Frame
+ * @return - 0x01: Matching Frame
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
 	return ((Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_CMD_INDICATOR) || (Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_DATA_INDICATOR));

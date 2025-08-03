@@ -5,6 +5,8 @@
 /* ------------------------------------------------------------------------------------ */
 // Library
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 /* ------------------------------------------------------------------------------------ */
 // SSD1306 I2C Address
 #ifndef SA0
@@ -19,9 +21,13 @@
 #define SSD1306_PAGE							((uint8_t) 8)
 #define SSD1306_COLUMN							((uint8_t) 128)
 #define SSD1306_PIXELS							((uint16_t) 1024)
+#define SSD1306_HEIGHT_MIN						((uint8_t) 0)
 #define SSD1306_HEIGHT_MAX						((uint8_t) 63)
+#define SSD1306_WIDTH_MIN						((uint8_t) 0)
 #define SSD1306_WIDTH_MAX						((uint8_t) 127)
+#define SSD1306_PAGE_MIN						((uint8_t) 0)
 #define SSD1306_PAGE_MAX						((uint8_t) 7)
+#define SSD1306_COLUMN_MIN						((uint8_t) 0)
 #define SSD1306_COLUMN_MAX						((uint8_t) 127)
 /* ------------------------------------------------------------------------------------ */
 // Wrap X and Y coordinates

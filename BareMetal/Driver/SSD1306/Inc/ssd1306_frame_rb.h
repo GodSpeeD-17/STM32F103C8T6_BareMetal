@@ -2,38 +2,19 @@
  * @file ssd1306_frame_rb.h
  * @author Shrey Shah
  * @brief SSD1306 OLED Display Driver using Ring Buffer & Codec
- * @version 0.1
+ * @version 1.0
  * @date 13-07-2025
  */
 
 // Header Guards
-#ifndef SSD1306_FRAME_RB_H_
-#define SSD1306_FRAME_RB_H_
+#ifndef __SSD1306_FRAME_RB_H__
+#define __SSD1306_FRAME_RB_H__
 
 // Defined for instant triggering
-#define __SSD1306_FRAME_I2C__
+// #define __SSD1306_FRAME_I2C_INSTANT_TRIGGER__
 
 // Includes
 #include "ssd1306_rb_codec.h"
-#include <stdlib.h>
-#include <string.h>
-
-/**
- * @brief Initializes the buffer with X, Y command sequence
- * @param X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
- * @param Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
- */
-#define SSD1306_BUFFER_GOTO_XY(X, Y) 				 \
-{													 \
-	/* Send X Lower Nibble Command */				 \
-	SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE((X)), \
-	/* Send X Upper Nibble Command */				 \
-	SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE((X)), \
-	/* Send Y Command */				 \
-	SSD1306_CMD_PAGE_MODE_SET_PAGE(((Y) >> 3)) 		 \
-}
-// Size of SSD1306 Goto XY Buffer Size
-#define SSD1306_BUFFER_GOTO_XY_SIZE					(3)
 
 /**
  * @brief Clear the Display
@@ -51,16 +32,18 @@
  * @return - 0: Failure  
  * @return - 1: Success 
  */
-uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306);
+uint8_t SSD1306_Frame_RB_Disp_Reset(ssd1306_config_t* ssd1306);
 
 /**
  * @brief Enqueues the SSD1306 Cursor Frame in I2C Ring Buffer 
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
- * @param cursor_X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
- * @param cursor_Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
- * @return Status of the operation 
- * @return - 0: Failure  
- * @return - 1: Success  
+ * @param cursor_X X-coordinate:
+ * @param | `SSD1306_WIDTH_MIN` - `SSD1306_WIDTH_MAX`
+ * @param cursor_Y Y-coordinate:
+ * @param | `SSD1306_HEIGHT_MIN` - `SSD1306_HEIGHT_MAX`
+ * @return Status of the operation:
+ * @return - `0x00`: Failure
+ * @return - `0x01`: Success
  */
 uint8_t SSD1306_Frame_RB_Goto_XY(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y);
 
@@ -145,4 +128,4 @@ __STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306_config_t* ss
 	return 0x01;
 }
 
-#endif /* SSD1306_FRAME_RB_H_ */
+#endif /* __SSD1306_FRAME_RB_H__ */

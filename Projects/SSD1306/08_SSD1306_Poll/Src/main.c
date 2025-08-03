@@ -18,24 +18,25 @@ static uint8_t i2cRBStatus = 0x00;
 // Main Entry Point
 int main(){
 	// SSD1306 Parameters Configuration
-	SSD1306_RB_Load_Default(&myOLED);
-	SSD1306_RB_Disp_Config(&myOLED, displayBuffer);
-	SSD1306_RB_Config(&myOLED, i2cBuffer, I2C_BUFFER_SIZE);
+	SSD1306_Config_Disp(&myOLED, displayBuffer);
+	SSD1306_Config_RB(&myOLED, i2cBuffer, I2C_BUFFER_SIZE);
+	SSD1306_Config_I2C1_Load_Default(&myOLED);
 
 	// SSD1306 I2C Configure
-	I2C_Config(&myOLED.i2c_config);
-	I2C_Enable(myOLED.i2c_config.I2Cx);
+	SSD1306_Config_I2C(&myOLED);
+	SSD1306_Config_I2C_Enable(&myOLED);
 
 	// Register SysTick Callback Function
 	SysTick_Register_Callback(SysTick_Callback_Fn);
 
 	// SSD1306 Display Initialization
-	if(SSD1306_Frame_RB_Disp_Init(&myOLED) == 0x00){
+	if(SSD1306_Frame_RB_Disp_Reset(&myOLED) == 0x00){
+		// Indication of Failure
 		OB_LED_Set();
 		// Infinite Loop
 		while(1);
 	}
-
+	// SSD1306 Display Alternate Pattern
 	SSD1306_Frame_RB_Set_Disp_Pattern(&myOLED, SSD1306_PATTERN_ALTERNATE);
 
 	// Infinite Loop

@@ -27,9 +27,9 @@
  *
  * Example Usage:
  *   uint32_t val = 0x0000000F;
- *   int zeros = __builtin_clz(val);    // → 28
- *   int set   = __builtin_popcount(val); // → 4
- *   int rev   = __builtin_bswap32(val);  // → 0xF0000000
+ *   uint8_t zeros = __builtin_clz(val);      // → 28
+ *   uint8_t set   = __builtin_popcount(val); // → 4
+ *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
  *
 */
 
@@ -40,7 +40,8 @@
 /*********************************************** Custom Declaration ***********************************************/
 #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
-#define __STATIC_INLINE__					static __attribute__((always_inline)) inline
+#define __STATIC__							static
+#define __STATIC_INLINE__					__STATIC__ __INLINE__
 #define __IO								volatile
 /*********************************************** Custom Declaration ***********************************************/
 

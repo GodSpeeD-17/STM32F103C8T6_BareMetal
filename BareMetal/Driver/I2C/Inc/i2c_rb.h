@@ -14,7 +14,7 @@
  * @returns - 0: Failure 
  * @returns - 1: Success
  */
-uint8_t I2C_Ring_Buffer_TX_Byte(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer);
+uint8_t I2C_RB_TX_Byte(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer);
 
 /**
  * @brief Transmits a block of data from the ring buffer over I2C
@@ -25,6 +25,6 @@ uint8_t I2C_Ring_Buffer_TX_Byte(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer
  * @returns - 0: Failure
  * @returns - 1: Success 
  */
-uint8_t I2C_Ring_Buffer_TX_Block(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer, uint8_t len);
+uint8_t I2C_RB_TX_Block(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer, uint8_t len);
 
 #endif /* __I2C_RING_BUFFER_H__ */
