@@ -181,7 +181,7 @@ erase_flash: clean
 	@echo "\033[1;35m╚══════════════════════════════════════════════════════════╝\033[0m"
 
 # Debug
-debug: $(BUILD_DIR)/$(TARGET).elf vscode_files all
+debug: all vscode_files $(BUILD_DIR)/$(TARGET).elf
 	@echo "***********************************************************************"
 	@echo "Debug Configurations Ready!"
 	@echo "***********************************************************************"

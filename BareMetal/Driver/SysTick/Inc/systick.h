@@ -11,6 +11,10 @@
 // Dependency
 #include "systick_config.h"
 
+// "SysTick_Callback_t" is now a type representing:
+// "Pointer to any function taking void and returning void"
+typedef void (*SysTick_Callback_t)(void);
+
 /**
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
@@ -49,8 +53,14 @@ void delay_ms(uint32_t delayTime);
 /**
  * @brief Registers Callback Function for SysTick
  * @param callback Callback Function
+ * @note Updates the callback to new function by overwriting the previous one
  */
-void SysTick_Register_Callback(void (*callback)(void));
+void SysTick_Register_Callback(SysTick_Callback_t callback);
+
+/**
+ * @brief Unregisters Callback Function for SysTick
+ */
+void SysTick_UnRegister_Callback(void);
 
 /**
  * @brief ISR for SysTick

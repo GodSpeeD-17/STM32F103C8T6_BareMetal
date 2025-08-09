@@ -11,8 +11,8 @@
 static volatile uint64_t future_ticks = 0x00;
 // Ticks Counter
 static volatile uint64_t curr_ticks = 0x00;
-// Call Back Function
-static void (*SysTick_Callback)(void) = 0;
+// User Callback
+static volatile SysTick_Callback_t userCallback = NULL;
 
 // Default SysTick Configuration
 static systick_config_t default_systick_config = {
@@ -88,12 +88,25 @@ void delay_ms(uint32_t delayTime){
 /**
  * @brief Registers Callback Function for SysTick
  * @param callback Callback Function
+ * @note Updates the callback to new function by overwriting the previous one 
  */
-void SysTick_Register_Callback(void (*callback)(void)){
+void SysTick_Register_Callback(SysTick_Callback_t callback){
 	// Disable Global Interrupt
 	__disable_irq();
 	// Register Callback
-    SysTick_Callback = callback;
+	userCallback = callback;
+	// Enable Global Interrupt
+	__enable_irq();
+}
+
+/**
+ * @brief Unregisters Callback Function for SysTick
+ */
+void SysTick_UnRegister_Callback(void){
+	// Disable Global Interrupt
+	__disable_irq();
+	// Unregister Callback
+	userCallback = NULL;
 	// Enable Global Interrupt
 	__enable_irq();
 }
@@ -116,8 +129,8 @@ __attribute__((weak)) void SysTick_Handler(void){
 
 	/*********************************************** USER CODE ***********************************************/
 	// User Callback
-	if(SysTick_Callback){
-        SysTick_Callback();
-    }
+	if(userCallback != NULL){
+		userCallback();
+	}
 	/*********************************************** USER CODE ***********************************************/
 }
