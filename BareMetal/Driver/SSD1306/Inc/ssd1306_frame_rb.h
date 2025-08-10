@@ -20,10 +20,17 @@
  * @brief Clear the Display
  * @param ssd1306 Pointer to SSD1306 structure
  */
-#define SSD1306_Frame_RB_Clear_Screen(ssd1306) 							\
-{																		\
-	SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_BLACK);  \
-}
+#define SSD1306_Frame_RB_Clear_Screen(ssd1306) 			\
+	SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_BLACK)
+
+/**
+ * @brief Initializes the Display post power up
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Status of operation
+ * @return - 0x00: Failure  
+ * @return - 0x01: Success 
+ */
+uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306);
 
 /**
  * @brief SSD1306 Display Initialization

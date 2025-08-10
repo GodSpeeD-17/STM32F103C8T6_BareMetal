@@ -55,22 +55,16 @@ uint8_t SSD1306_RB_Encode_Frame(ssd1306_config_t* ssd1306, const uint8_t isCMD, 
  * @return - `0x00`: Failure 
  * @return - Length of Data appended in the Buffer 
  */
-uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint16_t buff_len){
-	// Check if the Tail is aligned with Frame
-	if(SSD1306_RB_Frame_Aligned(ssd1306) != 0x01){
-		// Failure
-		return 0x00;
-	}
+uint16_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, const uint16_t buff_len){
 	// Ininitialize the Data Length 
-	uint8_t data_length = SSD1306_RB_Frame_Get_Size(ssd1306);
+	uint16_t data_length = SSD1306_RB_Frame_Get_Size(ssd1306);
 	// Check if the Data is available in Frame or insufficient Buffer Size
-	if(data_length > buff_len){
+	if((data_length > buff_len) || (data_length == 0x00)){
 		// Failure
 		return 0x00;
 	}
-
 	// Step 1: Decode the Data/Command Indicator
-	if(Ring_Buffer_Dequeue(&ssd1306->i2c_rb, buffer) != 0x01){
+	if(Ring_Buffer_Dequeue(&ssd1306->i2c_rb, &buffer[0]) != 0x01){
 		// Failure
 		return 0x00;
 	}
@@ -80,7 +74,7 @@ uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint
 		return 0x00;
 	}
 	// Step 3: Decode the Data/Command
-	if(Ring_Buffer_Dequeue_Multiple(&ssd1306->i2c_rb, buffer + 1, data_length) != 0x01){
+	if(Ring_Buffer_Dequeue_Multiple(&ssd1306->i2c_rb, (buffer + 1), data_length) != 0x01){
 		// Failure
 		return 0x00;
 	}

@@ -6,41 +6,69 @@
 static ssd1306_config_t myOLED;
 // SSD1306 Display Buffer
 static uint8_t displayBuffer[SSD1306_PAGE][SSD1306_WIDTH];
-// I2C Ring Buffer
-static uint8_t i2cBuffer[I2C_BUFFER_SIZE];
-// I2C Ring Buffer Status
-static uint8_t i2cRBStatus = 0x00;
+// Frame Ring Buffer
+static uint8_t frameBuffer[FRAME_BUFFER_SIZE];
+static volatile uint8_t i2cRBStatus = 0x00;
+static volatile uint16_t tickCountUs = 0x00;
+/*-------------------------------------------------------------------------------*/
+// SysTick Callback Function
+__STATIC_INLINE__ void SysTick_Callback_Fn(void){
+	// Check if new data is available
+	if(((tickCountUs & 0x3FFF) == 0x00) && (tickCountUs)){
+		tickCountUs = 0x00;
+		i2cRBStatus = 0x01;
+	}
+	else{
+		tickCountUs++;
+	}
+}
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
 	// Disable the SysTick
 	SysTick_Disable();
+
+	// Local Variables
+	const uint16_t localI2CBuffSize = 0xFF;
+	uint8_t localI2CBuffer[localI2CBuffSize];
+	uint16_t localI2CMaxIndex = 0x00;
+	memset(localI2CBuffer, 0x00, localI2CBuffSize);
+
 	// SSD1306 Parameters Configuration
 	SSD1306_Config_Disp(&myOLED, displayBuffer);
-	SSD1306_Config_RB(&myOLED, i2cBuffer, I2C_BUFFER_SIZE);
+	SSD1306_Config_RB(&myOLED, frameBuffer, FRAME_BUFFER_SIZE);
 	SSD1306_Config_I2C1_Load_Default(&myOLED);
 	SSD1306_Config_I2C_Init(&myOLED);
+	
+
+	// SSD1306 Display Initialization
+	if(SSD1306_Frame_RB_Disp_Init(&myOLED) != 0x01){
+		// Indication of Failure
+		OB_LED_Set();
+		// Return Error
+		return 1;
+	}
+
 	// Register SysTick Callback Function
 	SysTick_Register_Callback(SysTick_Callback_Fn);
 	// Enable SysTick
 	SysTick_Enable();
 
-	// SSD1306 Display Initialization
-	if(SSD1306_Frame_RB_Disp_Reset(&myOLED) == 0x00){
-		// Indication of Failure
-		OB_LED_Set();
-		// Infinite Loop
-		while(1);
-	}
-	// SSD1306 Display Alternate Pattern
-	SSD1306_Frame_RB_Set_Disp_Pattern(&myOLED, SSD1306_PATTERN_ALTERNATE);
-
 	// Infinite Loop
 	while(1){
-		// I2C Buffer Data Present
+		// Buffer Space Read Time
 		if(i2cRBStatus){
-			SSD1306_Frame_RB_I2C_Dequeue(&myOLED);
-			i2cRBStatus = 0x00;
+			// Buffer Value
+			i2cRBStatus = Ring_Buffer_Available_Space(&myOLED.i2c_rb);
+			// Buffer Data Present
+			if(i2cRBStatus){
+				// SSD1306 Frame Buffer Decode
+				localI2CMaxIndex = SSD1306_RB_Decode_Frame(&myOLED, localI2CBuffer, localI2CBuffSize);
+				// Occupy the I2C Bus
+				SSD1306_I2C_Write(&myOLED, localI2CBuffer, localI2CMaxIndex);
+				// Reset Status
+				i2cRBStatus = 0x00;
+			}
 		}
 		// On-board LED Toggle
 		OB_LED_Toggle();
@@ -49,19 +77,5 @@ int main(){
 	}
 	// Return Value
 	return 0;
-}
-/*-------------------------------------------------------------------------------*/
-// SysTick Callback Function
-void SysTick_Callback_Fn(void){
-	// Counter (us)
-	static uint32_t tickCountUs = 0x00;
-	// Increment Tick Count
-	if((tickCountUs++) > 0x0FFFFFFF){
-		tickCountUs = 0x00;
-	}
-	// Check if new data is available
-	if((tickCountUs & 0x3FFF) == 0x00){
-		i2cRBStatus = Ring_Buffer_Available_Space(&myOLED.i2c_rb);
-	}
 }
 /*-------------------------------------------------------------------------------*/

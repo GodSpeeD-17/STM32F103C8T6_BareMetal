@@ -263,4 +263,12 @@ void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str);
  */
 void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray);
 
+/**
+ * @brief Write the data to the SSD1306 display
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param data Pointer to the data buffer
+ * @param size Size of the data buffer
+ */
+void SSD1306_I2C_Write(ssd1306_config_t* ssd1306, uint8_t* data, uint16_t size);
+
 #endif /* __SSD1306_H__ */ 

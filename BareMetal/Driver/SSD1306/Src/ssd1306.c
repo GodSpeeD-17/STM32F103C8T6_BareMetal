@@ -310,3 +310,18 @@ void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray){
 	}
 }
 
+/**
+ * @brief Write the data to the SSD1306 display
+ * @param ssd1306 Pointer to the SSD1306 configuration structure
+ * @param data Pointer to the data buffer
+ * @param size Size of the data buffer
+ */
+void SSD1306_I2C_Write(ssd1306_config_t* ssd1306, uint8_t* data, uint16_t size){
+	// Start I2C Transmission
+	I2C_Master_Write_Start(ssd1306->i2c_config.I2Cx, ssd1306->address);
+	// Write Data
+	I2C_Master_Write_Data(ssd1306->i2c_config.I2Cx, data, size);
+	// Stop I2C Transmission
+	I2C_Master_Stop(ssd1306->i2c_config.I2Cx);
+}
+

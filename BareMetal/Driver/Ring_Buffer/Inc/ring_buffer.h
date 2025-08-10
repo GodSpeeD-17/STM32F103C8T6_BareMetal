@@ -102,7 +102,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail_Offset(const ring_buffer_t* ring
 /**
  * @brief Appends the given data to the ring buffer
  * @param ring_buff Pointer to the ring buffer structure
- * @param src_data Pointer to the source data to be appended
+ * @param src_data Source data to be appended
  * @returns Status of the operation
  * @returns - 0: Failure (Not enough space in the ring buffer)
  * @returns - 1: Success

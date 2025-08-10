@@ -18,23 +18,23 @@
 /**
  * @brief Appends the given data to the ring buffer
  * @param ring_buff Pointer to the ring buffer structure
- * @param src_data Pointer to the source data to be appended
+ * @param src_data Source data to be appended
  * @returns Status of the operation
- * @returns - 0: Failure (Not enough space in the ring buffer)
- * @returns - 1: Success
+ * @returns - 0x00: Failure (Not enough space in the ring buffer)
+ * @returns - 0x01: Success
  */
 uint8_t Ring_Buffer_Enqueue(ring_buffer_t* ring_buff, uint8_t src_data){
 	// Ring Buffer is full
 	if(Ring_Buffer_Is_Full(ring_buff)){
 		// Not enough space in the ring buffer
-		return 0;
+		return 0x00;
 	}
 	// Store the data in the buffer at the head index
 	ring_buff->buffer[ring_buff->head] = src_data;
 	// Update the head index
 	ring_buff->head = ((ring_buff->head + 1) & (ring_buff->size - 1));
 	// Success
-	return 1;
+	return 0x01;
 }
 
 /**
@@ -77,7 +77,7 @@ uint16_t Ring_Buffer_Enqueue_Multiple(ring_buffer_t* ring_buff, const uint8_t* s
 	}
 	// Copy the data from the source to the ring buffer
 	for(uint16_t index = 0; index < src_len; index++){
-		if(!Ring_Buffer_Enqueue(ring_buff, src_data[index])){
+		if(Ring_Buffer_Enqueue(ring_buff, src_data[index]) != 0x01){
 			// If enqueue fails, return index for failure
 			return index;
 		}

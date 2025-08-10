@@ -58,9 +58,9 @@ uint8_t SSD1306_RB_Encode_Frame(ssd1306_config_t* ssd1306, const uint8_t isCMD, 
  * @param buff_len Length of the buffer
  * @return Status of operation
  * @return 	- `0x00`: Failure
- * @return 	- `0xXX`: Successful Length of Data appended in the Buffer
+ * @return 	- `0xXXXX`: Successful Length of Data appended in the Buffer
  */
-uint8_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, uint16_t buff_len);
+uint16_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, const uint16_t buff_len);
 
 /**
  * @brief Encodes a Single Command on I2C Ring Buffer
@@ -121,20 +121,29 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
  * @return Status of operation
  * @return - 0x00: Mismatch in Frame
- * @return - 0x01: Matching Frame
+ * @return - 0x01: Frame Aligned
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
-	return ((Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_CMD_INDICATOR) || (Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb) == SSD1306_DATA_INDICATOR));
+	// Check if Tail is aligned with Frame Start
+	uint8_t tail = Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb); 
+	return ((tail == SSD1306_CMD_INDICATOR) || (tail == SSD1306_DATA_INDICATOR));
 }
 
 /**
  * @brief Retrieves the length of I2C Buffer required
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
- * @return Length of Local I2C Buffer required 
+ * @return Length of Local I2C Buffer required
+ * @note Checks alignment of the Frame as well
  */
 __STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Get_Size(ssd1306_config_t* ssd1306){
+	if(SSD1306_RB_Frame_Aligned(ssd1306) != 0x01){
+		// Failure
+		return 0x00;
+	}
 	// Returns the length of the frame
-	return (Ring_Buffer_Peek_Tail_Offset(&ssd1306->i2c_rb, 1) + 1);
+	else {
+		return (Ring_Buffer_Peek_Tail_Offset(&ssd1306->i2c_rb, 1) + 1);
+	}
 }
 
 #endif /* __SSD1306_RB_CODEC_H__ */

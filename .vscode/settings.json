@@ -349,6 +349,7 @@
         "ssd1306_rb.h": "c",
         "i2c_rb.h": "c",
         "ssd1306_frame_rb.h": "c",
-        "systick_config.h": "c"
+        "systick_config.h": "c",
+        "ssd1306_rb_codec.h": "c"
     }
 }

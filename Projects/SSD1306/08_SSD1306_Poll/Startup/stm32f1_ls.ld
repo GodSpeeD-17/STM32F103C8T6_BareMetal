@@ -13,9 +13,9 @@ MEMORY
 /* Set the initial stack pointer to the end of RAM */
 _estack = ORIGIN(RAM) + LENGTH(RAM);
 
-/* Define minimum sizes for heap (1kB) and stack (1kB)*/
+/* Define minimum sizes for heap (1kB) and stack (3kB)*/
 _Min_Heap_Size = 0x400;
-_Min_Stack_Size = 0x400;
+_Min_Stack_Size = 0x0C00;
 
 /* Define all output sections */
 SECTIONS

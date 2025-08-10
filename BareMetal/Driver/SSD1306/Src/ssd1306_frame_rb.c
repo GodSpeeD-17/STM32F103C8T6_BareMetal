@@ -37,12 +37,16 @@ __STATIC_INLINE__ void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd
  * @return - 0x00: Failure  
  * @return - 0x01: Success 
  */
-__STATIC__ uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306){
+uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306){
 	// Initialize the display
-	if(SSD1306_RB_Encode_CMD_Frame(ssd1306, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) == 0x00){
+	if(SSD1306_RB_Encode_Frame(ssd1306, 0x01, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) != 0x01){
 		// Failure
 		return 0x00;
 	}
+	// if(SSD1306_RB_Encode_CMD_Frame(ssd1306, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) != 0x01){
+	// 	// Failure
+	// 	return 0x00;
+	// }
 	// Instant Triggering
 	#ifdef __SSD1306_FRAME_I2C_INSTANT_TRIGGER__
 		// I2C Handling
@@ -64,12 +68,15 @@ __STATIC__ uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306){
  */
 uint8_t SSD1306_Frame_RB_Disp_Reset(ssd1306_config_t* ssd1306){
 	// Display reset sequence
-	if(SSD1306_Frame_RB_Disp_Init(ssd1306) == 0x00){
+	if(SSD1306_Frame_RB_Disp_Init(ssd1306) != 0x01){
 		// Failure
 		return 0x00;
 	}
 	// Reset the display Buffer
-	SSD1306_Frame_RB_Clear_Screen(ssd1306);
+	if(SSD1306_Frame_RB_Clear_Screen(ssd1306) != 0x01){
+		// Failure
+		return 0x00;
+	}
 	// Success
 	return 0x01;
 }
@@ -210,6 +217,8 @@ uint8_t SSD1306_Frame_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t pag
 /**
  * @brief Dequeues the SSD1306 I2C Ring Buffer & transmits over I2C
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @param i2cBuffer Pointer to I2C Storage Buffer
+ * @param i2cBuffSize Size of I2C Storage Buffer
  * @return Status of the operation
  * @return - `0x00`: Failure  
  * @return - `0x01`: Success

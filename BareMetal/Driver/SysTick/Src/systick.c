@@ -8,9 +8,9 @@
 #include "systick.h"
 
 // Delay Variable
-static volatile uint64_t future_ticks = 0x00;
+static volatile uint32_t future_ticks = 0x00;
 // Ticks Counter
-static volatile uint64_t curr_ticks = 0x00;
+static volatile uint32_t curr_ticks = 0x00;
 // User Callback
 static volatile SysTick_Callback_t userCallback = NULL;
 
@@ -119,7 +119,7 @@ __attribute__((weak)) void SysTick_Handler(void){
 
 	/*********************************************** DO NOT COMMENT ***********************************************/
 	// Delay (Non-blocking)
-	if(curr_ticks <= (uint64_t) 0xFFFFFFFFFFFFFFF){
+	if(curr_ticks <= (uint32_t) 0x0FFFFFFF){
 		curr_ticks++;
 	}
 	else{
@@ -129,8 +129,8 @@ __attribute__((weak)) void SysTick_Handler(void){
 
 	/*********************************************** USER CODE ***********************************************/
 	// User Callback
-	if(userCallback != NULL){
-		userCallback();
-	}
+	// if(userCallback != NULL){
+	// 	userCallback();
+	// }
 	/*********************************************** USER CODE ***********************************************/
 }
