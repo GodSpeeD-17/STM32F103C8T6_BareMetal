@@ -51,7 +51,6 @@ __attribute__((weak, alias("Default_Handler"))) void UsageFault_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void SVC_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void DebugMon_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void PendSV_Handler(void);
-__attribute__((weak, alias("Default_Handler"))) void SysTick_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void WWDG_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void PVD_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TAMPER_IRQHandler(void);
@@ -223,10 +222,25 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 /*-------------------------------------------------------------------------------*/
 // Default Handler (Overwrite This)
 __attribute__((weak)) void Default_Handler(void){
-	// Infinite Loop
-	while(1){
-		(void) 0;
-	}
+	// Read the fault status registers
+	__asm volatile (
+		"MRS r0, MSP\n"          // Get the main stack pointer
+		"B hard_fault_handler_c\n" // Branch to C handler
+	);
+}
+
+void hard_fault_handler_c(uint32_t *stack) {
+	// Inspect the stack frame
+	uint32_t r0 = stack[0];
+	uint32_t r1 = stack[1];
+	uint32_t r2 = stack[2];
+	uint32_t r3 = stack[3];
+	uint32_t r12 = stack[4];
+	uint32_t lr = stack[5];
+	uint32_t pc = stack[6];
+	uint32_t psr = stack[7];
+	// You can log these values or inspect them in the debugger
+	while (1); // Loop forever
 }
 /*-------------------------------------------------------------------------------*/
 /**
@@ -249,15 +263,15 @@ __attribute__((weak)) void Default_Handler(void){
  */
 void *_sbrk(intptr_t increment){
 	// Update Previous Heap Pointer
-    uint8_t *prev_heap_ptr = heap_ptr;
-    // Check for heap overflow
-    if (heap_ptr + increment > &_eheap) {
+	uint8_t *prev_heap_ptr = heap_ptr;
+	// Check for heap overflow
+	if (heap_ptr + increment > &_eheap) {
 		// Set standard `errno` for `malloc` compatibility
-        errno = ENOMEM;
-        return (void *)-1;
-    }
+		errno = ENOMEM;
+		return (void *)-1;
+	}
 	// Update heap pointer
-    heap_ptr += increment;
+	heap_ptr += increment;
 	// Return previous heap pointer
-    return (void *)prev_heap_ptr;
+	return (void *)prev_heap_ptr;
 }

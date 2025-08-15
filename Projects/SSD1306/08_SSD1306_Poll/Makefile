@@ -247,7 +247,7 @@ replace_makefile:
 
 # Startup Alias
 replace_startup:
-	$(MAKE) replace FILE="stm32f1_startup.c"
+	$(MAKE) replace FILE="startup.c"
 
 # Linker Alias
 replace_linker:
