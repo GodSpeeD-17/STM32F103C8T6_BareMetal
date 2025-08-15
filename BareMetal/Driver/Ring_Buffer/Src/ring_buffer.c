@@ -1,8 +1,8 @@
 /**
  * @file ring_buffer.c
  * @author Shrey Shah
- * @brief 
- * @version 0.1
+ * @brief Implementation of Ring Buffer
+ * @version 1.0
  * @date 06-07-2025
  * 
  * Details about the ring buffer implementation:
@@ -25,8 +25,8 @@
  */
 uint8_t Ring_Buffer_Enqueue(ring_buffer_t* ring_buff, uint8_t src_data){
 	// Ring Buffer is full
-	if(Ring_Buffer_Is_Full(ring_buff)){
-		// Not enough space in the ring buffer
+	if(Ring_Buffer_Is_Full(ring_buff) != 0x01){
+		// No space available in the ring buffer
 		return 0x00;
 	}
 	// Store the data in the buffer at the head index
@@ -47,16 +47,16 @@ uint8_t Ring_Buffer_Enqueue(ring_buffer_t* ring_buff, uint8_t src_data){
  */
 uint8_t Ring_Buffer_Dequeue(ring_buffer_t* ring_buff, uint8_t* dst_data){
 	// Buffer is Empty
-	if(Ring_Buffer_Is_Empty(ring_buff)) {
+	if(Ring_Buffer_Is_Empty(ring_buff) != 0x01) {
 		// No new data available in the ring buffer
-		return 0;
+		return 0x00;
 	}
 	// Retrieve the data from the buffer at the tail index
 	*dst_data = ring_buff->buffer[ring_buff->tail];
 	// Update the tail index
 	ring_buff->tail = ((ring_buff->tail + 1) & (ring_buff->size - 1));
 	// Success
-	return 1;
+	return 0x01;
 }
 
 /**

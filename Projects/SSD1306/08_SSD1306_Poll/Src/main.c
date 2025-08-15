@@ -38,8 +38,8 @@ int main(){
 	// SSD1306 Parameters Configuration
 	SSD1306_Config_Disp(&myOLED, displayBuffer);
 	SSD1306_Config_RB(&myOLED, frameBuffer, FRAME_BUFFER_SIZE);
-	SSD1306_Config_I2C1_Load_Default(&myOLED);
-	SSD1306_Config_I2C_Init(&myOLED);
+	SSD1306_Load_I2C1(&myOLED);
+	SSD1306_I2C_Init(&myOLED);
 	
 	// SSD1306 Display Initialization
 	if(SSD1306_Frame_RB_Disp_Init(&myOLED) != 0x01){

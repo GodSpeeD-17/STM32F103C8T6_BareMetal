@@ -1,9 +1,10 @@
 /**
- * @file ssd1306_ring_buffer.h
+ * @file ssd1306_rb.h
  * @author Shrey Shah
  * @brief SSD1306 OLED Display Driver using Ring Buffer
- * @version 0.1
+ * @version 1.0
  * @date 06-07-2025
+ * @state Obsolete
  */
 
 // Header Guards
@@ -11,7 +12,7 @@
 #define __SSD1306_RING_BUFFER_H__
 
 // Includes
-#include "ssd1306_config.h"
+#include "ssd1306_i2c.h"
 
 // Display Pattern Delay between Page Updates 
 #define SSD1306_DISP_PATTERN_DELAY_MS				(0xFFF)

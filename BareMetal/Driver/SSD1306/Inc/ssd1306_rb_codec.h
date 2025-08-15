@@ -35,7 +35,7 @@
 #define __SSD1306_RB_CODEC_H__
 
 // Includes
-#include "ssd1306_rb.h"
+#include "ssd1306_config.h"
 
 /**
  * @brief Encode multiple bytes in Ring Buffer

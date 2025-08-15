@@ -3,10 +3,8 @@
 #define __SSD1306_REG_MAP_H__
 
 /* ------------------------------------------------------------------------------------ */
-// Library
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+// Includes
+#include "reg_map.h"
 /* ------------------------------------------------------------------------------------ */
 // SSD1306 I2C Address
 #ifndef SA0
@@ -157,14 +155,6 @@
  * @note Only for `Page Addressing` Mode
  */
 #define SSD1306_CMD_PAGE_MODE_SET_X_UPPER_NIBBLE(CURSOR_X)		(SSD1306_CMD_PAGE_MODE_SET_COL_0_UPPER_NIBBLE + (((CURSOR_X) & 0xF0) >> 4))
-/* ------------------------------------------------------------------------------------ */
-// Pixel Co-ordinates Structure
-typedef struct {
-	// X co-ordinate
-	uint8_t X: 6;
-	// Y co-ordinate
-	uint8_t Y: 7;
-} SSD1306_pix_t;
 /* ------------------------------------------------------------------------------------ */
 // Initialization sequence for SSD1306 OLED Display
 static const uint8_t SSD1306_initCmd[SSD1306_INIT_CMD_SIZE] = {
