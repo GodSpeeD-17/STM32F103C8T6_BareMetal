@@ -8,31 +8,32 @@ static ssd1306_config_t myOLED;
 static uint8_t displayBuffer[SSD1306_PAGE][SSD1306_WIDTH];
 // Frame Ring Buffer
 static uint8_t frameBuffer[FRAME_BUFFER_SIZE];
-static volatile uint8_t i2cRBStatus = 0x00;
-static volatile uint16_t tickCountUs = 0x00;
-/*-------------------------------------------------------------------------------*/
-// SysTick Callback Function
-__STATIC_INLINE__ void SysTick_Callback_Fn(void){
-	// Check if new data is available
-	if(((tickCountUs & 0x3FFF) == 0x00) && (tickCountUs)){
-		tickCountUs = 0x00;
-		i2cRBStatus = 0x01;
-	}
-	else{
-		tickCountUs++;
-	}
-}
+// I2C Ring Buffer Status 
+extern volatile uint8_t i2cRBStatus;
+extern volatile uint8_t readFrameBuffer;
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
-int main(){
-	// Disable the SysTick
-	SysTick_Disable();
+int main(void){
+	// Initialization
+	
 
+	// Infinite Loop
+	while(1){
+		// Delay
+		delay_ms(LOOP_DELAY_MS);
+	}
+}
+
+/*
+int main(){
+
+	__disable_irq(); // Disable Interrupts
 	// Local Variables
-	const uint16_t localI2CBuffSize = 0xFF;
+	const uint16_t localI2CBuffSize = 0x100;
 	uint8_t localI2CBuffer[localI2CBuffSize];
 	uint16_t localI2CMaxIndex = 0x00;
 	memset(localI2CBuffer, 0x00, localI2CBuffSize);
+	__enable_irq(); // Enable Interrupts
 
 	// SSD1306 Parameters Configuration
 	SSD1306_Config_Disp(&myOLED, displayBuffer);
@@ -40,7 +41,6 @@ int main(){
 	SSD1306_Config_I2C1_Load_Default(&myOLED);
 	SSD1306_Config_I2C_Init(&myOLED);
 	
-
 	// SSD1306 Display Initialization
 	if(SSD1306_Frame_RB_Disp_Init(&myOLED) != 0x01){
 		// Indication of Failure
@@ -49,10 +49,7 @@ int main(){
 		return 1;
 	}
 
-	// Register SysTick Callback Function
-	SysTick_Register_Callback(SysTick_Callback_Fn);
-	// Enable SysTick
-	SysTick_Enable();
+	readFrameBuffer = 0x01;
 
 	// Infinite Loop
 	while(1){
@@ -78,4 +75,5 @@ int main(){
 	// Return Value
 	return 0;
 }
+*/
 /*-------------------------------------------------------------------------------*/

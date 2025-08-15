@@ -1,12 +1,15 @@
 # ---------------------- Configuration ----------------------
-MCU_MODEL      := STM32F103xB
+MCU_MODEL      := STM32F103C8T6
 FLASH_TOTAL_KB := 64
 RAM_TOTAL_KB   := 20
 # ---------------------- Path Definitions ----------------------
 ROOT_DIR       := /home/shrey_shah/Desktop/STM32/STM32F103C8T6
 DRIVER_BASE    := $(ROOT_DIR)/BareMetal/Driver
-BUILD_DIR      := $(shell pwd)/Build
+CURR_DIR       := $(shell pwd)
+BUILD_DIR      := $(CURR_DIR)/Build
 TARGET         := main
+DEBUG_START	   := $(TARGET)
+# DEBUG_START	   := Reset_Handler
 # ---------------------- Toolchain ----------------------
 TRIPLE         := arm-none-eabi
 CC             := $(TRIPLE)-gcc
@@ -16,7 +19,7 @@ SIZE           := $(TRIPLE)-size
 INCLUDES       := -I$(ROOT_DIR)/BareMetal/Core/Inc \
 				  -I$(DRIVER_BASE) \
 				  $(addprefix -I, $(wildcard $(DRIVER_BASE)/*/Inc)) \
-				  -I$(shell pwd)/Inc
+				  -I$(CURR_DIR)/Inc
 # ---------------------- Compiler Flags -----------------------
 CFLAGS         := -mcpu=cortex-m3 -mfloat-abi=soft -mthumb --specs=nano.specs -lc -lm $(INCLUDES) -std=gnu11 -O0 -Wall \
 				  -fstack-usage -fdata-sections -ffunction-sections -D$(MCU_MODEL) -MMD -MP -g -gdwarf-2
@@ -45,7 +48,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 
 # Link Object files to produce ELF file
 $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) -T $(shell pwd)/Startup/stm32f1_ls.ld \
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) -T $(CURR_DIR)/Startup/stm32f1_ls.ld \
 	-Wl,-Map="$(BUILD_DIR)/$(TARGET).map",--gc-sections -static
 
 # Convert ELF to binary
@@ -92,17 +95,17 @@ endef
 # This rule extracts dependencies and stores them in dependency.mk inside Build/
 dependency:
 	@echo "\033[1;36m============================== Resolving Dependencies ==============================\033[0m"
-	$(eval DEPENDENCY_OUTPUT := $(shell $(CC) $(INCLUDES) -M -MF - -MG -MM $(shell pwd)/Src/main.c))
+	$(eval DEPENDENCY_OUTPUT := $(shell $(CC) $(INCLUDES) -M -MF - -MG -MM $(CURR_DIR)/Src/main.c))
 	$(eval DEPENDENCY_HEADERS := $(filter %.h, $(subst \,,$(wordlist 2,999,$(DEPENDENCY_OUTPUT)))))
 	$(eval DRIVER_SRCS := $(sort $(foreach hdr, $(DEPENDENCY_HEADERS), \
 		$(if $(findstring $(DRIVER_BASE),$(hdr)), \
 			$(wildcard $(subst /Inc/,/Src/,$(dir $(hdr)))*.c), \
 		))))
 	$(eval LOCAL_DEP_SRCS := $(sort $(foreach hdr, $(DEPENDENCY_HEADERS), \
-		$(if $(findstring $(shell pwd)/Inc,$(hdr)), \
-			$(wildcard $(shell pwd)/Src/*.c), \
+		$(if $(findstring $(CURR_DIR)/Inc,$(hdr)), \
+			$(wildcard $(CURR_DIR)/Src/*.c), \
 		))))
-	$(eval STARTUP_SRCS := $(wildcard $(shell pwd)/Startup/*.c))
+	$(eval STARTUP_SRCS := $(wildcard $(CURR_DIR)/Startup/*.c))
 	$(eval SRCS := $(DRIVER_SRCS) $(LOCAL_DEP_SRCS) $(STARTUP_SRCS))
 	$(eval OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(SRCS:%.c=%.o))))
 	$(eval vpath %.c $(sort $(dir $(SRCS))))
@@ -199,8 +202,7 @@ vscode_files:
 
 # launch.json
 generate_launch_json: .vscode
-	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "main",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
-# 	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(shell pwd))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "Reset_Handler",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
+	@printf '{\n  "version": "0.2.0",\n  "configurations": [\n    {\n      "name": "Debug: $(notdir $(CURR_DIR))",\n      "executable": "$(BUILD_DIR)/$(TARGET).elf",\n      "request": "launch",\n      "type": "cortex-debug",\n      "servertype": "openocd",\n      "device": "STM32F103C8",\n      "configFiles": [\n        "$(ROOT_DIR)/BareMetal/Core/Src/stlink.cfg",\n        "$(ROOT_DIR)/BareMetal/Core/Src/stm32f1x.cfg"\n      ],\n      "svdFile": "$(ROOT_DIR)/BareMetal/Core/Src/STM32F103.svd",\n      "runToEntryPoint": "${DEBUG_START}",\n      "preLaunchTask": "Build Project"\n    }\n  ]\n}' > .vscode/launch.json
 
 # settings.json
 generate_settings_json: .vscode
@@ -229,7 +231,7 @@ replace:
 	echo "Total count: $$(echo "$$FILE_PATHS" | wc -l)"; \
 	for dest_file in $$FILE_PATHS; do \
 		rel_path="$$(realpath --relative-to=$(ROOT_DIR)/Projects "$$dest_file")"; \
-		src_file="$$(find $(shell pwd) -type f -name "$$(basename "$$dest_file")" | head -n 1)"; \
+		src_file="$$(find $(CURR_DIR) -type f -name "$$(basename "$$dest_file")" | head -n 1)"; \
 		if [ -n "$$src_file" ]; then \
 			echo "Replacing '$(ROOT_DIR)/Projects/$$rel_path' with '$$src_file'"; \
 			cp "$$src_file" "$(ROOT_DIR)/Projects/$$rel_path"; \
@@ -253,7 +255,7 @@ replace_linker:
 
 # Dependency Files
 get_dependency:
-	$(CC) $(INCLUDES) -M -MF - -MG -MM $(shell pwd)/Src/main.c
+	$(CC) $(INCLUDES) -M -MF - -MG -MM $(CURR_DIR)/Src/main.c
 
 # ---------------------- Dependency Inclusion ----------------------
 -include $(wildcard $(BUILD_DIR)/*.d)
