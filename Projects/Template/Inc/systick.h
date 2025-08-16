@@ -16,16 +16,16 @@ typedef struct {
 	// SysTick Clock Source
 	// - 0: External Reference Clock
 	// - 1: Core Clock (AHB Clock)
-	uint32_t CLK_SRC: 1;
+	uint64_t CLK_SRC: 1;
 	// SysTick Interrupt
 	// - 0: Counting Down to 0 does not pend the `SysTick_Handler`
 	// - 1: Counting Down to 0 pends the `SysTick_Handler`
-	uint32_t TICK_INT: 1;
+	uint64_t TICK_INT: 1;
 	// SysTick Reload Value Register
 	// - 24-bit value that is loaded into the counter register
-	uint32_t LOAD: 24;
+	uint64_t LOAD: 24;
 	// SysTick Current Value Register
-	uint32_t VAL;
+	uint64_t VAL;
 } systick_config_t;
 #endif
 
@@ -57,14 +57,14 @@ __STATIC_INLINE__ void SysTick_Disable(void){
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
  */
-uint32_t SysTick_Get_Ticks(void);
+uint64_t SysTick_Get_Ticks(void);
 
 /**
  * @brief Sets the current number of ticks
  * @param tick_value The number of ticks to be set
  * @note The ticks are dependent on Core Clock Frequency
  */
-void SysTick_Set_Ticks(uint32_t tick_value);
+void SysTick_Set_Ticks(uint64_t tick_value);
 
 /**
  * @brief Configures the SysTick Timer based upon the input count value
@@ -72,21 +72,21 @@ void SysTick_Set_Ticks(uint32_t tick_value);
  * @note Value should be within the range of 24-bit unsigned integer
  * @note Call `SysTick_Enable()` to start the SysTick Timer
  */
-void SysTick_Config(uint32_t reloadValue);
+void SysTick_Config(uint64_t reloadValue);
 
 /**
  * @brief Accurate us delay generation
  * @param delayTime Delay in microseconds (us)
  * @note Based upon SysTick Timer
  */
-void delay_us(uint32_t delayTime);
+void delay_us(uint64_t delayTime);
 
 /**
  * @brief Accurate ms delay generation
  * @param delayTime Delay in milliseconds (ms)
  * @note Based upon SysTick Timer
  */
-void delay_ms(uint32_t delayTime);
+void delay_ms(uint64_t delayTime);
 
 /**
  * @brief ISR for SysTick

@@ -1,8 +1,22 @@
+/**
+ * @file ssd1306.h
+ * @author Shrey Shah
+ * @brief SSD1306 Specific Header File
+ * @version 1.0
+ * @date 16-08-2025
+ */
 /* ------------------------------------------------------------------------------------ */
 // Header Guards
 #ifndef __SSD1306_H__
 #define __SSD1306_H__
 /* ------------------------------------------------------------------------------------ */
+#include "ssd1306_config.h"
+#include "ssd1306_font.h"
+#include "ssd1306_i2c.h"
+#include "ssd1306_disp.h"
+/* ------------------------------------------------------------------------------------ */
+
+#ifdef __OLD__
 // Includes
 #include "reg_map.h"
 #include "i2c.h"
@@ -270,5 +284,20 @@ void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray);
  * @param size Size of the data buffer
  */
 void SSD1306_I2C_Write(ssd1306_config_t* ssd1306, uint8_t* data, uint16_t size);
+#endif /* __OLD__ */
+
+/**
+ * @brief Copies SSD1306 (X,Y) Command to input buffer
+ * @param buffer Pointer to Buffer which holds the command
+ * @param buff_len Length of the buffer
+ * @param X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
+ * @param Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
+ * @return Status of the operation:
+ * @return - 0x00: Failure
+ * @return - 0x01: Success
+ */
+// uint8_t __SSD1306_Goto_XY_CMD__(uint8_t* buffer, uint8_t buff_len, uint8_t X, uint8_t Y); 
+
+
 
 #endif /* __SSD1306_H__ */ 

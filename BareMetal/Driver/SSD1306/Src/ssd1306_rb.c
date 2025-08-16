@@ -1,8 +1,8 @@
 /**
- * @file ssd1306_ring_buffer.c
+ * @file ssd1306_rb.c
  * @author Shrey Shah
  * @brief SSD1306 OLED Display Driver using Ring Buffer
- * @version 0.1
+ * @version 1.0
  * @date 06-07-2025
  */
 
@@ -54,8 +54,6 @@ __STATIC_INLINE__ void __SSD1306_RB_Enqueue_Cursor_Position__(ssd1306_config_t* 
 	Ring_Buffer_Enqueue(&ssd1306->i2c_rb, SSD1306_CMD_PAGE_MODE_SET_X_UPPER_NIBBLE(X));
 	Ring_Buffer_Enqueue(&ssd1306->i2c_rb, SSD1306_CMD_PAGE_MODE_SET_Y(Y));
 }
-
-
 
 /**
  * @brief Initializes the SSD1306 OLED Display

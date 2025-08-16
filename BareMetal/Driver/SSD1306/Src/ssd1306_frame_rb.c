@@ -39,14 +39,10 @@ __STATIC_INLINE__ void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd
  */
 uint8_t SSD1306_Frame_RB_Disp_Init(ssd1306_config_t* ssd1306){
 	// Initialize the display
-	if(SSD1306_RB_Encode_Frame(ssd1306, 0x01, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) != 0x01){
+	if(SSD1306_RB_Encode_CMD_Frame(ssd1306, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) != 0x01){
 		// Failure
 		return 0x00;
 	}
-	// if(SSD1306_RB_Encode_CMD_Frame(ssd1306, SSD1306_initCmd, SSD1306_INIT_CMD_SIZE) != 0x01){
-	// 	// Failure
-	// 	return 0x00;
-	// }
 	// Instant Triggering
 	#ifdef __SSD1306_FRAME_I2C_INSTANT_TRIGGER__
 		// I2C Handling

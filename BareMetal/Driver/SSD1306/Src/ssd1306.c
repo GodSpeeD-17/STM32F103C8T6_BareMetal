@@ -1,6 +1,7 @@
 // Header File
 #include "ssd1306.h"
 
+#ifdef __OLD__
 // Co-ordinate Storing Structure
 static SSD1306_pix_t SSD1306_coordinates = {
 	.X = 0,
@@ -325,3 +326,35 @@ void SSD1306_I2C_Write(ssd1306_config_t* ssd1306, uint8_t* data, uint16_t size){
 	I2C_Master_Stop(ssd1306->i2c_config.I2Cx);
 }
 
+#endif /* __OLD__ */
+
+
+/**
+ * @brief Copies SSD1306 (X,Y) Command to input buffer
+ * @param buffer Pointer to Buffer which holds the command
+ * @param buff_len Length of the buffer
+ * @param X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
+ * @param Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
+ * @return Status of the operation:
+ * @return - `0x00`: Failure
+ * @return - `0x01`: Success
+ */
+/*
+uint8_t __SSD1306_Goto_XY_CMD__(uint8_t* buffer, uint8_t buff_len, uint8_t X, uint8_t Y){
+	// Check Buffer Length
+	if(buff_len < 3){
+		return 0x00;
+	}
+	// Wrap X Coordinate
+	X = SSD1306_WRAP_X(X);
+	// Wrap Y Coordinate
+	Y = SSD1306_WRAP_Y(Y);
+	// Set Column Address
+	buffer[0] = SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(X);
+	buffer[1] = SSD1306_CMD_PAGE_MODE_SET_COL_UPPER_NIBBLE(X);
+	// Set Page Address
+	buffer[2] = SSD1306_CMD_PAGE_MODE_SET_PAGE((Y >> 3));
+	// Success
+	return 0x01;
+}
+*/

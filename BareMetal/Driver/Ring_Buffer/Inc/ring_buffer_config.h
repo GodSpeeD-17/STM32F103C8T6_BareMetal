@@ -15,6 +15,7 @@
 #define __RING_BUFFER_CONFIG_H__
 
 // Includes
+#include <string.h>
 #include "reg_map.h"
 
 // Ring Buffer Structure

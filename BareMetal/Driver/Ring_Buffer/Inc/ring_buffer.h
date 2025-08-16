@@ -3,7 +3,6 @@
 #define __RING_BUFFER_H__
 
 // Includes
-#include <string.h>
 #include "ring_buffer_config.h"
 
 /**

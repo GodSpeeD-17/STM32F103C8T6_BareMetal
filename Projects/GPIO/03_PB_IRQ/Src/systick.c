@@ -2,23 +2,16 @@
 #include "systick.h"
 #include "gpio.h"
 
-// Delay Variable for microseconds
-static volatile uint32_t futureTicksUs = 0x00;
 // Tick Counter for microseconds
-static volatile uint32_t tickCountUs = 0x00;
-// Tick Counter for milliseconds
-static volatile uint32_t tickCountMs = 0x00;
-// I2C Ring Buffer Status 
-volatile uint8_t i2cRBStatus = 0x00;
-volatile uint8_t readFrameBuffer = 0x00;
+static volatile uint64_t tickCount = 0x00;
 
 /**
  * @brief Returns the current number of ticks
  * @note The ticks are dependent on Core Clock Frequency
  */
-uint32_t SysTick_Get_Ticks(void){
+uint64_t SysTick_Get_Ticks(void){
 	// Return final Value
-	return tickCountUs;
+	return tickCount;
 }
 
 /**
@@ -26,11 +19,11 @@ uint32_t SysTick_Get_Ticks(void){
  * @param tick_value The number of ticks to be set
  * @note The ticks are dependent on Core Clock Frequency
  */
-void SysTick_Set_Ticks(uint32_t tick_value){
-	// Set the Current number of Ticks as `tick_value`
-	tickCountUs = tick_value;
+void SysTick_Set_Ticks(uint64_t tick_value){
 	// SysTick Disable
 	SysTick_Disable();
+	// Set the Current number of Ticks as `tick_value`
+	tickCount = tick_value;
 	// Update the SysTick Current Value Register (24-bit)
 	SysTick->VAL = SYSTICK_WRAP_VAL(tick_value - 1);
 	// SysTick Enable
@@ -43,7 +36,7 @@ void SysTick_Set_Ticks(uint32_t tick_value){
  * @note - Value should be within the range of 24-bit unsigned integer
  * @note - Call `SysTick_Enable()` to start the SysTick Timer
  */
-void SysTick_Config(uint32_t reloadValue){
+void SysTick_Config(uint64_t reloadValue){
 	// Reset Value
 	SysTick->CTRL.REG = 0x00;
 	// Reload Value (24-bit)
@@ -59,11 +52,13 @@ void SysTick_Config(uint32_t reloadValue){
  * @param delayTime Delay in microseconds (us)
  * @note Based upon SysTick Timer
  */
-void delay_us(uint32_t delayTime){
-	// Calculate the delay time
-	futureTicksUs = tickCountUs + delayTime;
+void delay_us(uint64_t delayTime){
+	// Get Reference Ticks
+	uint64_t refTicks = SysTick_Get_Ticks();
 	// Wait for delay
-	while(tickCountUs <= futureTicksUs);
+	while((SysTick_Get_Ticks() - refTicks) <= delayTime){
+		__WFI();
+	}
 }
 
 /**
@@ -71,12 +66,9 @@ void delay_us(uint32_t delayTime){
  * @param delayTime Delay in milliseconds (ms)
  * @note Based upon SysTick Timer
  */
-void delay_ms(uint32_t delayTime){
+void delay_ms(uint64_t delayTime){
 	// Calculate the delay time
-	while(delayTime--){
-		// Wait for 1ms
-		delay_us(1000);
-	}
+	delay_us(delayTime * 1000);
 }
 
 /**
@@ -87,23 +79,10 @@ void SysTick_Handler(void){
 
 	/*********************************************** DO NOT COMMENT ***********************************************/
 	// Delay (Non-blocking)
-	tickCountUs = (tickCountUs <= (uint32_t) 0x0FFFFFFF)? (tickCountUs + 1) : 0;
-	// Millisecond Counter (Raw as /1024)
-	tickCountMs = (tickCountUs >> 10);
+	tickCount++;
 	/*********************************************** DO NOT COMMENT ***********************************************/
 
 	/*********************************************** USER CODE ***********************************************/
-	// Toggle On-board LED
-	if(((tickCountMs & 0x003FF) == 0) && (tickCountMs != 0)){
-		OB_LED_Toggle();
-	}
-
-	// if(readFrameBuffer){
-	// 	// Increment the count
-	// 	tickCountUs++;
-	// 	// if((tickCountUs & 0x3FFF) == 0x0000){
-	// 	// 	i2cRBStatus = 0x01;
-	// 	// }
-	// }
+	
 	/*********************************************** USER CODE ***********************************************/
 }

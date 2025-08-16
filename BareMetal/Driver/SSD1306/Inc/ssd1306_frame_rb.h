@@ -15,6 +15,8 @@
 
 // Includes
 #include "ssd1306_rb_codec.h"
+#include "ssd1306_disp.h"
+#include "ssd1306_i2c.h"
 
 /**
  * @brief Clear the Display
@@ -133,6 +135,15 @@ __STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306_config_t* ss
 	}
 	// Success
 	return 0x01;
+}
+
+/**
+ * @brief Gets the Filled Space in the Frame Buffer
+ * @param ssd1306 Pointer to SSD1306 Configuration Structure
+ * @return Filled Space in the Frame Buffer
+ */
+__STATIC_INLINE__ uint16_t SSD1306_Frame_RB_Get_Filled_Space(const ssd1306_config_t* ssd1306){
+	return Ring_Buffer_Filled_Space(&ssd1306->i2c_rb);
 }
 
 #endif /* __SSD1306_FRAME_RB_H__ */

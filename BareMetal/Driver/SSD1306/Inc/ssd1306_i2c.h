@@ -11,8 +11,6 @@
 
 // Includes
 #include "ssd1306_config.h"
-#include "i2c_rb.h"
-#include "i2c_irq.h"
 
 /**
  * @brief Loads `I2C1` configuration for the SSD1306 OLED Display
@@ -94,6 +92,8 @@ __STATIC_INLINE__ void SSD1306_I2C_Init(ssd1306_config_t* ssd1306){
 	// Enable the I2C Peripheral
 	SSD1306_I2C_Enable(ssd1306);
 }
+
+
 // ------------------------------------------------------------- CONFIGURATION FUNCTION END ------------------------------------------------------------- //
 
 
