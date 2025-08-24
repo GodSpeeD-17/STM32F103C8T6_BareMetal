@@ -211,9 +211,9 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick (Resolution us)
 	SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
+	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick
 	OB_LED_Config();
-	SysTick_Enable();
 	// Step 6: Call main()
 	main();
 	// Step 7: Default Handler (Should never be reached)
