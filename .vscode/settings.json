@@ -294,7 +294,7 @@
         "mapfile"
     ],
     "files.associations": {
-        "main.h": "c",
+        "main.h": "../Projects/*/Src/main.c",
         "rcc.h": "c",
         "gpio_function.h": "c",
         "reg_map.h": "c",
