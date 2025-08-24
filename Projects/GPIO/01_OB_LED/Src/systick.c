@@ -2,6 +2,10 @@
 #include "systick.h"
 #include "gpio.h"
 
+// TODO: Need to find a way for 64-bit handling
+// TODO: When carrying out any operation, by default 32-bit is assumed
+// TODO: This causes overflow in input data & very large 64-bit values
+// TODO: Causes issues with timing and delays
 // Tick Counter for microseconds
 static volatile uint32_t tickCount = 0x00;
 

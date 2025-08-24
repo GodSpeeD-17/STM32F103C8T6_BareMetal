@@ -10,6 +10,7 @@
 // SysTick Wrap Value Macro
 #define SYSTICK_WRAP_VAL(X) 				((X) & 0x00FFFFFF)
 
+// Future Usage for SysTick
 #ifdef __SYSTICK_CONFIG__
 // SysTick Configuration Structure
 typedef struct {

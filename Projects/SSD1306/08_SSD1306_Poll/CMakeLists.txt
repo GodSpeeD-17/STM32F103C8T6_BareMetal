@@ -177,108 +177,45 @@ add_custom_target(erase_mcu DEPENDS erase_flash)
 add_custom_target(debug_config DEPENDS debug)
 
 # ---------------------- Replace ----------------------
+# Function to create a replace target
+function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
+	# Create Custom Target
+    add_custom_target(${TARGET_NAME}
+        # Display header
+        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+        COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing ${FILE_PATH} in all projects        ║"
+        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 
-# main.h
-add_custom_target(replace_main_h
-	# Display Initial Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing main.h in all projects            ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+        # Count files to be replaced
+        COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" | wc -l
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}"
 
-	# Display files being replaced
-    COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-	COMMAND find ${REPO_ROOT}/Projects -name "main.h" -not -path "${PROJ_DIR}/Inc/main.h" | wc -l
-    COMMAND find ${REPO_ROOT}/Projects -name "main.h" -not -path "${PROJ_DIR}/Inc/main.h"
+        # Replace files using xargs
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
 
-    # Use xargs instead of -exec (more reliable)
-    COMMAND find ${REPO_ROOT}/Projects -name "main.h" -not -path "${PROJ_DIR}/Inc/main.h" -print0 | xargs -0 -I {} cp "${PROJ_DIR}/Inc/main.h" "{}"
+        # Display footer
+        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+        COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
+        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    )
+endfunction()
 
-	# Display Completion Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All main.h files replaced!                    ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-)
 
-# systick.h
-add_custom_target(replace_systick_h
-	# Display Initial Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing systick.h in all projects           ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+# Replace main.h
+add_replace_target(replace_main_h "main.h" "${PROJ_DIR}/Inc")
 
-	# Display files being replaced
-    COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-	COMMAND find ${REPO_ROOT}/Projects -name "systick.h" -not -path "${PROJ_DIR}/Inc/systick.h" | wc -l
-    COMMAND find ${REPO_ROOT}/Projects -name "systick.h" -not -path "${PROJ_DIR}/Inc/systick.h"
+# Replace systick.h
+add_replace_target(replace_systick_h "systick.h" "${PROJ_DIR}/Inc")
 
-    # Use xargs instead of -exec (more reliable)
-    COMMAND find ${REPO_ROOT}/Projects -name "systick.h" -not -path "${PROJ_DIR}/Inc/systick.h" -print0 | xargs -0 -I {} cp "${PROJ_DIR}/Inc/systick.h" "{}"
+# Replace systick.c
+add_replace_target(replace_systick_c "systick.c" "${PROJ_DIR}/Src")
 
-	# Display Completion Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All systick.h files replaced!                 ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-)
+# Replace startup.c
+add_replace_target(replace_startup_c "startup.c" "${PROJ_DIR}/Src")
 
-# systick.c
-add_custom_target(replace_systick_c
-	# Display Initial Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing systick.c in all projects           ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+# Replace linker script
+add_replace_target(replace_linker "stm32f1_ls.ld" "${PROJ_DIR}/Startup")
 
-	# Display files being replaced
-    COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-	COMMAND find ${REPO_ROOT}/Projects -name "systick.c" -not -path "${PROJ_DIR}/Src/systick.c" | wc -l
-    COMMAND find ${REPO_ROOT}/Projects -name "systick.c" -not -path "${PROJ_DIR}/Src/systick.c"
-
-    # Use xargs instead of -exec (more reliable)
-    COMMAND find ${REPO_ROOT}/Projects -name "systick.c" -not -path "${PROJ_DIR}/Src/systick.c" -print0 | xargs -0 -I {} cp "${PROJ_DIR}/Src/systick.c" "{}"
-
-	# Display Completion Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All systick.c files replaced!                 ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-)
-
-# startup.c
-add_custom_target(replace_startup_c
-	# Display Initial Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing startup.c in all projects          ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-
-	# Display files being replaced
-    COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-	COMMAND find ${REPO_ROOT}/Projects -name "startup.c" -not -path "${PROJ_DIR}/Src/startup.c" | wc -l
-    COMMAND find ${REPO_ROOT}/Projects -name "startup.c" -not -path "${PROJ_DIR}/Src/startup.c"
-
-    # Use xargs instead of -exec (more reliable)
-    COMMAND find ${REPO_ROOT}/Projects -name "startup.c" -not -path "${PROJ_DIR}/Src/startup.c" -print0 | xargs -0 -I {} cp "${PROJ_DIR}/Src/startup.c" "{}"
-
-	# Display Completion Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All startup.c files replaced!                 ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-)
-
-# CMakeLists.txt
-add_custom_target(replace_cmake
-	# Display Initial Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing CMakeLists.txt in all projects      ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-
-	# Display files being replaced
-    COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-	COMMAND find ${REPO_ROOT}/Projects -name "CMakeLists.txt" -not -path "${PROJ_DIR}/CMakeLists.txt" | wc -l
-    COMMAND find ${REPO_ROOT}/Projects -name "CMakeLists.txt" -not -path "${PROJ_DIR}/CMakeLists.txt"
-    
-    # Use xargs instead of -exec (more reliable)
-    COMMAND find ${REPO_ROOT}/Projects -name CMakeLists.txt -not -path "${PROJ_DIR}/CMakeLists.txt" -print0 | xargs -0 -I {} cp "${PROJ_DIR}/CMakeLists.txt" "{}"
-
-	# Display Completion Message
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All CMakeLists.txt files replaced!            ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-)
+# Replace CMakeLists.txt
+add_replace_target(replace_cmake "CMakeLists.txt" "${PROJ_DIR}")
