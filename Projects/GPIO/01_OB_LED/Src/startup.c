@@ -1,6 +1,21 @@
 /*-------------------------------- Includes ---------------------------*/
 #include "startup.h"
 
+// Uncomment this to achieve delay from SysTick
+// #define __SYSTICK_DELAY__
+
+#ifndef __SYSTICK_DELAY__
+#include "timer.h"
+/*-------------------------------- Local Variables ------------------------*/
+timer_config_t TIM_Configuration = {
+	// Timer
+	.TIM = DELAY_TIMER,
+	// Channel
+	.channel = DELAY_TIMER_CHANNEL,
+};
+
+#endif /* __SYSTICK_DELAY__ */
+
 /*-------------------------------- Heap Pointer ---------------------------*/
 static uint8_t *heap_ptr = &_sheap;
 
@@ -104,8 +119,18 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	}
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
-	// Step 4: Configure SysTick (Resolution us)
-	SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
+	// Step 4: Configure SysTick & Timer
+	#ifdef __SYSTICK_DELAY__
+		// SysTick: Resolution 1us
+		SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
+	#else
+		// SysTick: Resolution 1ms
+		SysTick_Config(((RCC_Get_AHBClock())/FREQ_1kHz));
+		// TIM Configuration for 1us resolution
+		TIM_1MHz_Load_Default(&TIM_Configuration);
+		// Configure TIM
+		TIM_Config(&TIM_Configuration);
+	#endif /* __SYSTICK_DELAY__ */
 	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick
 	OB_LED_Config();

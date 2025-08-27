@@ -43,14 +43,16 @@ void SysTick_Set_Ticks(uint32_t tick_value){
 void SysTick_Config(uint32_t reloadValue){
 	// Reset Value
 	SysTick->CTRL.REG = 0x00;
-	// Reload Value (24-bit)
+	// Set Reload Value
 	SysTick->LOAD = SYSTICK_WRAP_VAL(reloadValue - 1);
-	// Update Current Value
-	SysTick->VAL = 0x00;
-	// Set Core as Reference Clock
+	// Set Current Value as `reloadValue`
+	SysTick->VAL = SYSTICK_WRAP_VAL(reloadValue - 1);
+	// Set Core as Reference Clock & enable SysTick Interrupt
 	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk);
 }
 
+// Delay using SysTick
+#ifdef __SYSTICK_DELAY__
 /**
  * @brief Accurate us delay generation
  * @param delayTime Delay in microseconds (us)
@@ -72,6 +74,7 @@ void delay_ms(uint32_t delayTime){
 	// Calculate the delay time
 	delay_us(delayTime * 1000);
 }
+#endif /* __SYSTICK_DELAY__ */
 
 /**
  * @brief ISR for SysTick

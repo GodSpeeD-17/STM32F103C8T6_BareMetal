@@ -6,6 +6,10 @@
 #include "reg_map.h"
 // RCC Configuration
 #include "rcc.h"
+// Delay Substitute
+#ifndef __SYSTICK_DELAY__
+#include "timer.h"
+#endif
 
 // SysTick Wrap Value Macro
 #define SYSTICK_WRAP_VAL(X) 				((X) & 0x00FFFFFF)
@@ -75,6 +79,8 @@ void SysTick_Set_Ticks(uint32_t tick_value);
  */
 void SysTick_Config(uint32_t reloadValue);
 
+// Delay using SysTick
+#ifdef __SYSTICK_DELAY__
 /**
  * @brief Accurate us delay generation
  * @param delayTime Delay in microseconds (us)
@@ -88,6 +94,7 @@ void delay_us(uint32_t delayTime);
  * @note Based upon SysTick Timer
  */
 void delay_ms(uint32_t delayTime);
+#endif /* __SYSTICK_DELAY__ */
 
 /**
  * @brief ISR for SysTick
