@@ -11,17 +11,38 @@
 // Register Mapping
 #include "timer_config.h"
 
+// Delay Functions
+#ifndef __SYSTICK_DELAY__
+// Timer used for Delay
+#define DELAY_TIMER							TIM4
+// Channel for Timer used for Delay
+#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_ALL
+
+/**
+ * @brief Blocking Delay in microseconds
+ * @param timeUs Time in microseconds
+ */
+#define delay_us(timeUs)			TIM_delay_us(DELAY_TIMER, timeUs)
+
+/**
+ * @brief Blocking Delay in milliseconds
+ * @param timeUs Time in milliseconds
+ */
+#define delay_ms(timeMs)			TIM_delay_ms(DELAY_TIMER, timeMs)
+
+#endif /* __SYSTICK_DELAY__ */
+
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
- * @param[in] freq_Hz Frequency (in Hz)
- * @param[in] arr_value Auto-Reload Register Value
+ * @param freq_Hz Frequency (in Hz)
+ * @param arr_value Auto-Reload Register Value
  * @return Prescaler Value
  */
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value);
 
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 10kHz
  */
@@ -29,7 +50,7 @@ void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG);
 
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 1MHz
  */
@@ -37,37 +58,43 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
 
 /**
  * @brief Configures the General Purpose Timer (TIMx)
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG);
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] delayUs Number of microseconds to delay
- * @note Assuming, Timer is already configured for 1MHz
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param delayUs Number of microseconds to delay
+ * @note The following assumptions are made: 
+ * @note - Timer is configured for 1MHz
+ * @note - Timer is upcounter
+ * @note - Timer Channel 1 is used for output compare
  */
 void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs);
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] delayMs Number of milliseconds to delay
- * @note Assuming, Timer is already configured for 1MHz
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param delayMs Number of milliseconds to delay
+ * @note The following assumptions are made: 
+ * @note - Timer is configured for 1MHz
+ * @note - Timer is upcounter
+ * @note - Timer Channel 1 is used for output compare
  */
 void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs);
 
 /**
  * @brief Enables Timer Interrupt for mentioned Interrupt
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
 void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
 
 /**
  * @brief Disables Timer Interrupt for mentioned Interrupt
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
 void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
 
@@ -89,7 +116,7 @@ uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, uint8_t IRQ);
 
 /**
  * @brief Resets the General Purpose TIMx
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
 void TIM_Reset(TIM_REG_STRUCT* TIMx);
 

@@ -286,18 +286,4 @@ void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray);
 void SSD1306_I2C_Write(ssd1306_config_t* ssd1306, uint8_t* data, uint16_t size);
 #endif /* __OLD__ */
 
-/**
- * @brief Copies SSD1306 (X,Y) Command to input buffer
- * @param buffer Pointer to Buffer which holds the command
- * @param buff_len Length of the buffer
- * @param X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
- * @param Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
- * @return Status of the operation:
- * @return - 0x00: Failure
- * @return - 0x01: Success
- */
-// uint8_t __SSD1306_Goto_XY_CMD__(uint8_t* buffer, uint8_t buff_len, uint8_t X, uint8_t Y); 
-
-
-
 #endif /* __SSD1306_H__ */ 

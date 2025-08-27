@@ -50,8 +50,8 @@ static const uint8_t TIMx_IRQn[3] = {
 
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
- * @param[in] freq_Hz Frequency (in Hz)
- * @param[in] arr_value Auto-Reload Register Value
+ * @param freq_Hz Frequency (in Hz)
+ * @param arr_value Auto-Reload Register Value
  * @return Prescaler Value
  */
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
@@ -70,7 +70,7 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
 
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 10kHz
  */
@@ -93,7 +93,7 @@ void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG){
 
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  * @note - TIM & Channel should be already configured
  * @note - This loads frequency as 1MHz
  */
@@ -116,7 +116,7 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG){
 
 /**
  * @brief Configures the General Purpose Timer (TIMx)
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG){
 	// Enable Clock for Timer
@@ -134,11 +134,11 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
 	// Initial Count Value
 	TIMx_CONFIG->TIM->CNT = TIMx_CONFIG->count;
 	// Auto Reload Preload Enable
-	TIMx_CONFIG->TIM->CR1.REG |= (((TIMx_CONFIG->arpe & 0x01)<< TIM_CR1_ARPE_Pos) | \
+	TIMx_CONFIG->TIM->CR1.REG |= (((TIMx_CONFIG->arpe & 0x01)<< TIM_CR1_ARPE_Pos) |
 									// Centre-Aligned Mode 
-								   ((TIMx_CONFIG->cms_mode & 0x03) << TIM_CR1_CMS_Pos) | \
+								   ((TIMx_CONFIG->cms_mode & 0x03) << TIM_CR1_CMS_Pos) |
 									// Direction 
-								   ((TIMx_CONFIG->direction & 0x01)<< TIM_CR1_DIR_Pos) | \
+								   ((TIMx_CONFIG->direction & 0x01)<< TIM_CR1_DIR_Pos) |
 									// One Pulse Mode (OPM)
 								   ((TIMx_CONFIG->one_pulse & 0x01) << TIM_CR1_OPM_Pos));
 	// Enable Update Event
@@ -149,8 +149,8 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
 
 /**
  * @brief General Purpose Timer Delay
- * @param[in] TIMx_CONFIG `timer_config_t *` structure containing the configuration
- * @param[in] delayMs Number of milliseconds
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ * @param delayMs Number of milliseconds
  */
 static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs){
 	// Update the Event Frequency at 1kHz
@@ -175,38 +175,52 @@ static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] delayUs Number of microseconds to delay
- * @note Assuming, Timer is already configured for 1MHz
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param delayUs Number of microseconds to delay
+ * @note The following assumptions are made:
+ * @note - Timer is configured for 1MHz
+ * @note - Timer is upcounter
+ * @note - Timer Channel 1 is used for output compare
  */
 void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
 	// Disable the Timer
 	TIM_Disable(TIMx);
+	// Configure Timer Count Value
+	TIMx->CNT = TIMx_DEFAULT_CNT;
 	// Configure Delay Time
-	TIMx->ARR = delayUs - 1;
-	// Enable One Pulse Mode + Timer
-	TIMx->CR1.REG |= (TIM_CR1_OPM | TIM_CR1_CEN);
-	// Wait until Timer is Enabled
-	while(TIMx->CR1.REG & TIM_CR1_CEN);
+	TIMx->ARR = (delayUs - 1);
+	// Enable One Pulse Mode (OPM)
+	// TIMx->CR1.REG |= TIM_CR1_OPM;
+	// Enable the Timer
+	TIM_Enable(TIMx);
+	// Wait until ARR is reached
+	while(!(TIMx->SR.REG & TIM_SR_UIF));
+	// Disable the Timer
+	TIM_Disable(TIMx);
+	// Clear the UIF Flag
+	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
 
 /**
  * @brief Creates a delay using Timer
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] delayMs Number of milliseconds to delay
- * @note Assuming, Timer is already configured for 1MHz
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param delayMs Number of milliseconds to delay
+ * @note The following assumptions are made: 
+ * @note - Timer is configured for 1MHz
+ * @note - Timer is upcounter
+ * @note - Timer Channel 1 is used for output compare
  */
 void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
 	// Iteration for each number of milliseconds
 	while(delayMs--){
-		TIM_delay_us(TIMx, 1000);
+		TIM_delay_us(TIMx, 998);
 	}
 }
 
 /**
  * @brief Enables Timer Interrupt for mentioned Interrupt
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
 void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
@@ -236,8 +250,8 @@ void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
 
 /**
  * @brief Disables Timer Interrupt for mentioned Interrupt
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
- * @param[in] IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
  */
 void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
@@ -317,7 +331,7 @@ uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
 
 /**
  * @brief Resets the General Purpose TIMx
- * @param[in] TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
 void TIM_Reset(TIM_REG_STRUCT* TIMx){
 	// Register

@@ -1,18 +1,18 @@
 # ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
 
 ---
-Hi! I am a beginner and trying to program the Blue Pill Module using Bare Metal (Register Programming). This repository is only meant for learning purpose. Please let me know if there is any mistake and if possible how to resolve it. For any suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)
+Hi! I am a beginner and trying to program the Blue Pill Module using Bare Metal (Register-Level) Programming. This repository is only meant for learning purpose. Kindly inform in case of any mistake and if possible suggestions to resolve it. For any other suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)
 
-Few GitHub Repositories that I referred to during development phase:
+Few GitHub Repositories that I had used for learning purpose during development phase:
 - [stm32f1-baremetal](https://github.com/csrohit/stm32f1-baremetal/tree/main)
 - [stm32f103-1](https://github.com/freesources/stm32f103-1)
 ---
 
 ---
 ## ***Description***
-  - Basic Repository for understanding the Registers present in Blue Pill Development Module
+  - Basic Repository for understanding the Registers present in Blue Pill Development (STM32F103C8T6) Module
   - Created basic source files to use Registers for controlling purpose
-  - `Projects/Template` is the template which can be used as reference while creating New Project
+  - `Projects/Template` is the reference template
 
 ---
 ## ***Repository Structure***
@@ -22,7 +22,7 @@ Few GitHub Repositories that I referred to during development phase:
 
 ---
 ## ***STM32F103C8T6 Reference Manual***
-[STM32F103C_Reference_Manual.pdf](https://github.com/user-attachments/files/17964492/STM32F103C_Reference_Manual.pdf)
+[STM32F103C_Reference_Manual.pdf](./Reference_Docs/STM32F103C_Reference_Manual.pdf)
 
 ---
 ## ***STM32F103C8T6 Pinout***

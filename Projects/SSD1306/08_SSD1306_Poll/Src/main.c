@@ -31,16 +31,6 @@ int main(void){
 
 	// Infinite Loop
 	while(1){
-		// Read Frame Buffer
-		// if(readFrameBuffer != 0x00){
-		// 	// Check Data Availability
-		// 	if(SSD1306_Frame_RB_Get_Filled_Space(&myOLED)){
-		// 		// Process the Frame Buffer
-		// 		SSD1306_Frame_RB_I2C_Dequeue(&myOLED);
-		// 	}
-		// 	// Reset
-		// 	readFrameBuffer = 0x00;
-		// }
 		// On-board LED Toggle
 		OB_LED_Toggle();
 		// Delay
