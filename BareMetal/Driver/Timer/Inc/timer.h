@@ -32,6 +32,7 @@
 
 #endif /* __SYSTICK_DELAY__ */
 
+#ifdef __OLD_TIMER_METHOD__
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
  * @param freq_Hz Frequency (in Hz)
@@ -61,6 +62,7 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG);
+#endif /* __OLD_TIMER_METHOD__ */
 
 /**
  * @brief Creates a delay using Timer

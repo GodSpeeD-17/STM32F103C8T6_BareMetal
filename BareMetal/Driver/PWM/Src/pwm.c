@@ -30,6 +30,7 @@
 // Main Header
 #include "pwm.h"
 
+#ifdef __OLD_TIMER_METHOD__
 // Internal Handle for PWM Configuration
 struct pwm_handle {
 	// PWM Configuration Structure
@@ -254,3 +255,4 @@ void PWM_GPIO_Config(pwm_handle_t PWM_HANDLE){
 	GPIO_Config(&PWM_HANDLE->PWM_CONFIG.GPIOx_CONFIG);
 }
 
+#endif /* __OLD_TIMER_METHOD__ */

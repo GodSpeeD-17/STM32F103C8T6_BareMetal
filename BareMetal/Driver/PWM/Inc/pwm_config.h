@@ -13,6 +13,7 @@
 // Timer Configuration
 #include "timer.h"
 
+#ifdef __OLD_TIMER_METHOD__
 // PWM Configuration Structure
 typedef struct {
 	// GPIO Configuration Structure
@@ -72,5 +73,6 @@ uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_c
  * @param PWM_CONFIG Pointer to PWM Configuration Structure
  */
 void PWM_Default_Configuration(pwm_config_t* PWM_CONFIG);
+#endif /* __OLD_TIMER_METHOD__ */
 
 #endif /* __PWM_CONFIG_H__ */

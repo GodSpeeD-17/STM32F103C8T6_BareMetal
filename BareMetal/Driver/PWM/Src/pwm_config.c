@@ -1,6 +1,8 @@
 // Library
 #include "pwm_config.h"
 
+#ifdef __OLD_TIMER_METHOD__
+
 // Test Case
 #ifdef REVERSE_TIMER_MAPPING
 
@@ -236,3 +238,5 @@ void PWM_Default_Configuration(pwm_config_t* PWM_CONFIG){
 	// Set the GPIO Configuration to Alternate Function Push-Pull
 	PWM_CONFIG->GPIOx_CONFIG.CNF = GPIOx_CNF_OUT_AF_PP;
 }
+
+#endif /* __OLD_TIMER_METHOD__ */

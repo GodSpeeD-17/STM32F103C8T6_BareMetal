@@ -68,6 +68,7 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
 	return (uint16_t)(prescaler_value - 1);
 } 
 
+#ifdef __OLD_TIMER_METHOD__
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
  * @param TIMx_CONFIG Pointer to timer configuration structure
@@ -200,6 +201,7 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
 	// Clear the UIF Flag
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
+#endif /* __OLD_TIMER_METHOD__ */
 
 /**
  * @brief Creates a delay using Timer

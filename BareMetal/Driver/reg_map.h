@@ -43,6 +43,7 @@
 #define __STATIC__							static
 #define __STATIC_INLINE__					__STATIC__ __INLINE__
 #define __IO								volatile
+#define __PACKED__							__attribute__((__packed__))
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** Core C ***********************************************/
@@ -457,36 +458,135 @@
 #define TIM4_NO_REMAP						(0x00)    // (TIM4_CH1/PB6, TIM4_CH2/PB7, TIM4_CH3/PB8, TIM4_CH4/PB9)
 #define TIM4_FULL_REMAP						(0x01)    // (TIM4_CH1/PD12, TIM4_CH2/PD13, TIM4_CH3/PD14, TIM4_CH4/PD15)
 
-// Channel
-#define TIMx_CHANNEL_1						(0x01)
-#define TIMx_CHANNEL_2						(0x02)
-#define TIMx_CHANNEL_3						(0x04)
-#define TIMx_CHANNEL_4						(0x08)
-#define TIMx_CHANNEL_ALL					(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | \
-											 TIMx_CHANNEL_3 | TIMx_CHANNEL_4)
+/**
+ * @enum tim_channel_t
+ * @brief Timer Channel Enumeration
+ * @note  This enumeration defines the available timer channels
+ */
+typedef enum {
+	// Timer Channel 1
+	TIM_CHANNEL_1 = 0x01,
+	// Timer Channel 2
+	TIM_CHANNEL_2 = 0x02,
+	// Timer Channel 3
+	TIM_CHANNEL_3 = 0x04,
+	// Timer Channel 4
+	TIM_CHANNEL_4 = 0x08,
+	// All Timer Channels
+	TIM_CHANNEL_ALL = 0x0F
+} tim_channel_t;
 
-// Counting Mode
-// "Up" if DIR = 0; "Down" if DIR = 1
-#define TIMx_MODE_NORMAL					(0x00)
-#define TIMx_MODE_ALT_IF_DOWN				(0x01)
-#define TIMx_MODE_ALT_IF_UP					(0x02)
-#define TIMx_MODE_ALT_IF_BOTH				(0x03)
+/**
+ * @brief Timer Counting Mode Enumeration
+ * @note  This enumeration defines the available timer modes
+ */
+typedef enum {
+	/**
+	 	@brief Normal Mode
+	 	@note The counter counts up or down depending on direction
+	 */
+	TIMx_MODE_NORMAL = 0x00,
+	/**
+	 	@brief Alternate Mode Counting
+	 	@note  The counter counts up and down alternatively but 
+				interrupt flags are set only during counting down
+	 */
+	TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING = 0x01,
+	/**
+	 	@brief Alternate Mode Counting
+	 	@note  The counter counts up and down alternatively but 
+				interrupt flags are set only during counting up
+	 */
+	TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING = 0x02,
+	/**
+	 	@brief Alternate Mode Counting
+	 	@note  The counter counts up and down alternatively but 
+				interrupt flags are set during both counting up and down
+	 */
+	TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING = 0x03
+} tim_count_mode_t;
 
-// Direction 
-#define TIMx_DIR_COUNT_UP					(0x00)
-#define TIMx_DIR_COUNT_DOWN					(0x01)
+/**
+ * @brief Timer Direction Enumeration
+ * @note  This enumeration defines the counting direction of the timer
+ */
+typedef enum {
+	/**
+	 	@brief Count Up
+	 	@note  The timer counts up
+	 */
+	TIMx_DIR_COUNT_UP = 0x00,
+	/**
+	 	@brief Count Down
+	 	@note  The timer counts down
+	 */
+	TIMx_DIR_COUNT_DOWN = 0x01
+} tim_direction_t;
 
-// Auto Reload Preload Enable
-#define TIMx_ARPE_DISABLE					(0x00)
-#define TIMx_ARPE_ENABLE					(0x01)
+/**
+ * @brief Auto-Reload Preload Enable
+ * @note  This enumeration defines the Auto-Reload Preload Enable state of the timer
+ */
+typedef enum {
+	/**
+	 	@brief Auto-Reload Preload Disable
+	 	@note  The timer's auto-reload preload is disabled
+	 */
+	TIMx_ARPE_DISABLE = 0x00,
+	/**
+	 	@brief Auto-Reload Preload Enable
+	 	@note  The timer's auto-reload preload is enabled
+	 */
+	TIMx_ARPE_ENABLE = 0x01
+} tim_arpe_t;
 
-// One Pulse Mode
-#define TIMx_OPM_DISABLE					(0x00)
-#define TIMx_OPM_ENABLE						(0x01)
+/**
+ * @brief One Pulse Mode
+ * @note  This enumeration defines the One Pulse Mode state of the timer
+ */
+typedef enum {
+	/**
+	 	@brief One Pulse Mode Disable
+	 	@note  The timer's one pulse mode is disabled
+	 */
+	TIMx_OPM_DISABLE = 0x00,
+	/**
+	 	@brief One Pulse Mode Enable
+	 	@note  The timer's one pulse mode is enabled
+	 */
+	TIMx_OPM_ENABLE = 0x01
+} tim_opm_t;
+
+/**
+ * @brief Trigger Source Enumeration
+ * @note  This enumeration defines the available trigger sources for the timer
+ */
+typedef enum {
+	/**
+	 	@brief Trigger Source - All
+	 	@note  Only following sources for Updated Event (UEV) enabled:
+				@note 1. Counter overflow (OVF)
+				@note 2. Counter underflow (UVF)
+				@note 3. DMA request
+				@note 4. Setting the `UG` bit (Refer `TIMx->EGR`)
+				@note 5. Update generation through the slave mode controller
+	 */
+	TIMx_UPDATE_SOURCE_ANY = 0x00,
+	/**
+	 	@brief Trigger Source - UVF/OVF/DMA
+	 	@note  Only following sources for Updated Event (UEV) enabled:
+				@note 1. Counter overflow (OVF) 
+				@note 2. Counter underflow (UVF) 
+				@note 3. DMA request
+	 */
+	TIMx_UPDATE_SOURCE_OVF_DMA = 0x01
+} tim_update_source_t;
 
 // IRQ Enable
-#define TIMx_IRQ_DISABLE					(0x00)
-#define TIMx_IRQ_ENABLE						(0x01)
+typedef enum {
+	TIMx_IRQ_DISABLE = 0x00,
+	TIMx_IRQ_ENABLE = 0x01
+} tim_irq_t;
 
 // Timer Update Event: Counter Overflow(OVF)/Underflow(UVF)
 #define TIMx_IRQ_OVF_UVF					(0x01)
@@ -517,32 +617,6 @@
 #define TIMx_DMA_CC3DE						(0x08)
 #define TIMx_DMA_CC4DE						(0x10)
 
-/*
-// Error Check MACROS
-#define IS_VALID_GPT(GP_TIMx)				((GP_TIMx) == TIM2 || (GP_TIMx) == TIM3 || (GP_TIMx) == TIM4)
-#define IS_VALID_TIM_CHANNEL(CHx)			(((CHx) & ~(TIMx_CHANNEL_1 | TIMx_CHANNEL_2 | TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) == ((uint8_t)0x00))
-#define IS_VALID_TIM_CMS_MODE(MODE)			((MODE) == CMS_EDGE || (MODE) == CMS_IF_BOTH || (MODE) == CMS_IF_DOWN || (MODE) == CMS_IF_UP)
-#define IS_VALID_TIM_DIRECTION(DIRx)		((DIRx) == TIMx_COUNT_UP || (DIRx) == TIMx_COUNT_DOWN)
-#define IS_VALID_TIM_COUNT_MODE(MODE)		((MODE) == TIMx_MODE_NORMAL || (MODE) == TIMx_MODE_ALT_IF_DOWN || \
-											 (MODE) == TIMx_MODE_ALT_IF_UP || (MODE) == TIMx_MODE_ALT_IF_BOTH)
-#define IS_VALID_TIM_ARR(ARRx)				(((ARRx) >= (uint16_t)0x00) && ((ARRx) < (uint16_t)0xFFFF))
-#define IS_VALID_TIM_FREQ(FREQx)			(((FREQx) > (uint32_t)0x00) && ((FREQx) <= PLL_MAX_FREQ))
-#define IS_VALID_TIM_CNT(CNTx)				(((CNTx) >= (uint16_t)0x00) && ((CNTx) <= (uint16_t)0xFFFF))
-#define IS_VALID_TIM_ARPE(ARPEx)			((ARPEx) == TIMx_ARPE_DISABLE || ((ARPEx) == TIMx_ARPE_ENABLE))
-#define IS_VALID_TIM_OPM(OPMx)				((OPMx) == TIMx_OPM_DISABLE || ((OPMx) == TIMx_OPM_ENABLE))
-#define IS_VALID_TIM_IRQ(IRQx)				(((IRQx) == TIMx_IRQ_ENABLE) || ((IRQx) == TIMx_IRQ_DISABLE))
-#define IS_VALID_TIM_CONFIG_STRUCT(TIMx_CONFIG) \
-											(IS_GPIO_STRUCTURE_VALID(TIMx_CONFIG->GPIOx_CONFIG) && \
-											 IS_VALID_GPT((TIMx_CONFIG->GP_TIMx)) && \
-											 IS_VALID_TIM_CHANNEL((TIMx_CONFIG->channel)) && \
-											 IS_VALID_TIM_ARR((TIMx_CONFIG->auto_reload_value)) && \
-											 IS_VALID_TIM_FREQ((TIMx_CONFIG->frequency_Hz)) && \
-											 IS_VALID_TIM_CNT((TIMx_CONFIG->count)) && \
-											 IS_VALID_TIM_CMS_MODE((TIMx_CONFIG->cms_mode)) && \
-											 IS_VALID_TIM_DIRECTION((TIMx_CONFIG->direction)) && \
-											 IS_VALID_TIM_ARPE((TIMx_CONFIG->auto_reload_preload)) && \
-											 IS_VALID_TIM_OPM((TIMx_CONFIG->one_pulse)))									 
-*/
 /*********************************************** Timer MACROS ***********************************************/
 
 /*********************************************** PWM MACROS ***********************************************/
@@ -562,60 +636,101 @@
 #define TIM3_PARTIAL_REMAP					(0x02)
 #define TIM4_NO_REMAP						(0x00)
 
-// PWM Channel Active Polarity
-#define PWM_CHx_POL_ACTIVE_HIGH				(0x00)
-#define PWM_CHx_POL_ACTIVE_LOW				(0x01)
+/**
+ * @enum `tim_channel_mode_t`
+ * @brief Channel Output Compare operating modes for TIMx channels
+ * @note These modes define how the Output Compare (OC) signal behaves based on
+ * @note the relationship between the counter (`TIMx_CNT`) and the capture/compare
+ * @note register (`TIMx_CCRy`)
+ */
+typedef enum {
+	/**
+	 * @brief Freeze Mode
+	 * @details `TIMx_CNT == TIMx_CCRy` has no effect on the outputs
+	 */
+	TIMx_CHANNEL_MODE_FREEZE = 0x00,
 
-// PWM Channel Preload
-#define PWM_CHx_PRELOAD_DISABLE				(0x00)
-#define PWM_CHx_PRELOAD_ENABLE				(0x01)
+	/**
+	 * @brief Set Channel Mode
+	 * @details `OCyREF` signal is forced high when `TIMx_CNT == TIMx_CCRy`
+	 */
+	TIMx_CHANNEL_MODE_SET_CH = 0x01,
 
-// Freeze mode: 
-// Comparison between `TIMx_CCRy` and `TIMx_CNT` has no effect on the outputs 
-#define PWM_MODE_FREEZE						(0x00)
-// Set Channel Mode:
-// `OCyREF` signal is forced high when `TIMx_CNT` == `TIMx_CCRy`
-#define PWM_MODE_SET_CH						(0x01)    
-// Reset Channel Mode:
-// `OCyREF` signal is forced low when `TIMx_CNT` == `TIMx_CCRy`
-#define PWM_MODE_RESET_CH					(0x02)
-// Toggle Mode:
-// `OCyREF` toggles when `TIMx_CNT` == `TIMx_CCRy`
-#define PWM_MODE_TOGGLE						(0x03)
-// Force Reset Mode:
-// `OCyREF` is forced low
-#define PWM_MODE_FORCE_RESET				(0x04)
-// Force Set Mode:
-// `OCyREF` is forced high
-#define PWM_MODE_FORCE_SET					(0x05)
-// PWM Normal Mode:
-// `CHy` is active as long as `TIMx_CNT` < `TIMx_CCRy`
-#define PWM_MODE_NORMAL						(0x06)
-// PWM Inverted Mode:
-// `CHy` is active as long as `TIMx_CNT` > `TIMx_CCRy`
-#define PWM_MODE_INVERTED					(0x07)
+	/**
+	 * @brief Reset Channel Mode
+	 * @details `OCyREF` signal is forced low when `TIMx_CNT == TIMx_CCRy`
+	 */
+	TIMx_CHANNEL_MODE_RESET_CH = 0x02,
+
+	/**
+	 * @brief Toggle Mode
+	 * @details `OCyREF` toggles whenever `TIMx_CNT == TIMx_CCRy`
+	 */
+	TIMx_CHANNEL_MODE_TOGGLE = 0x03,
+
+	/**
+	 * @brief Force Reset Mode
+	 * @details `OCyREF` is permanently forced low
+	 */
+	TIMx_CHANNEL_MODE_FORCE_RESET = 0x04,
+
+	/**
+	 * @brief Force Set Mode
+	 * @details `OCyREF` is permanently forced high
+	 */
+	TIMx_CHANNEL_MODE_FORCE_SET = 0x05,
+
+	/**
+	 * @brief PWM Normal Mode
+	 * @details Channel `CHy` is active as long as `TIMx_CNT < TIMx_CCRy`
+	 */
+	TIMx_CHANNEL_MODE_PWM_NORMAL = 0x06,
+
+	/**
+	 * @brief PWM Inverted Mode
+	 * @details Channel `CHy` is active as long as `TIMx_CNT > TIMx_CCRy`
+	 */
+	TIMx_CHANNEL_MODE_PWM_INVERTED = 0x07
+} tim_channel_mode_t;
+
+/**
+ * @enum `tim_channel_polarity_t`
+ * @brief Channel Polarity Configuration
+ * @note This enum defines the polarity of the PWM signal for each channel
+ */
+typedef enum {
+	/**
+	 * @brief Channel Active High
+	 * @note The PWM signal is active high
+	 */
+	TIMx_CHANNEL_POLARITY_HIGH = 0x00,
+	/**
+	 * @brief Channel Active Low
+	 * @note The PWM signal is active low
+	 */
+	TIMx_CHANNEL_POLARITY_LOW = 0x01
+} tim_channel_polarity_t;
+
+/**
+ * @enum `tim_channel_oc_preload_t`
+ * @brief Timer Channel Output Compare Preload Configuration
+ * @note This enum defines the preload configuration for the Output Compare (OC) feature
+ */
+typedef enum {
+	/**
+	 * @brief Channel Output Compare Preload Disable
+	 * @note The PWM channel does not use preload
+	 */
+	TIMx_CHANNEL_OUTPUT_COMPARE_PRELOAD_DISABLE = 0x00,
+	/**
+	 * @brief Channel Output Compare Preload Enable
+	 * @note The PWM channel uses preload
+	 */
+	TIMx_CHANNEL_OUTPUT_COMPARE_PRELOAD_ENABLE = 0x01
+} tim_channel_oc_preload_t;
 
 // Max Counter Value for PWM
 #define PWM_DEFAULT_ARR						((uint16_t) 999)
-
-/*
-// Error Checking MACROS
-#define IS_VALID_PWM_MODE(MODE)				((MODE) == TIMx_OCM_FREEZE || (MODE) == TIMx_OCM_SET_CH || \
-											 (MODE) == TIMx_OCM_RESET_CH || (MODE) == TIMx_OCM_TOGGLE || \
-											 (MODE) == TIMx_OCM_FORCE_RESET || (MODE) == TIMx_OCM_FORCE_SET || \
-											 (MODE) == TIMx_OCM_PWM_NORMAL || (MODE) == TIMx_OCM_PWM_INVERTED)
-#define IS_VALID_PWM_POLARITY(POLx)			((POLx) == TIMx_POL_ACTIVE_HIGH || (POLx) == TIMx_POL_ACTIVE_LOW)
-#define IS_VALID_PWM_DUTY_CYCLE(DUTYx)		((DUTYx) >= MIN_DUTY_CYCLE && (DUTYx) <= MAX_DUTY_CYCLE)
-#define IS_VALID_PWM_CHANNEL_PRELOAD(CH_PRx)(((CH_PRx) == PWM_CHx_PRELOAD_DISABLE) || ((CH_PRx) == PWM_CHx_PRELOAD_ENABLE))
-#define IS_VALID_PWM_CONFIG_STRUCT(PWM_CONFIG) \
-											(IS_VALID_TIM_CONFIG_STRUCT(PWM_CONFIG->TIMx_CONFIG) && \
-											 IS_VALID_PWM_MODE(PWM_CONFIG->pwm_mode) && \
-											 IS_VALID_PWM_POLARITY(PWM_CONFIG->polarity) && \
-											 IS_VALID_PWM_DUTY_CYCLE(PWM_CONFIG->duty_cycle) && \
-											 IS_VALID_PWM_CHANNEL_PRELOAD(PWM_CONFIG->pwm_channel_preload))
-#define WRAP_DUTY_CYCLE(DUTYx)				((DUTYx) = (((DUTYx) > MAX_DUTY_CYCLE) ? (MAX_DUTY_CYCLE) : (((DUTYx) < MIN_DUTY_CYCLE) ? (MIN_DUTY_CYCLE) : (DUTYx))))
-#define PWM_DUTY_CYCLE_WRAP(PWMx)			(WRAP_DUTY_CYCLE(((PWMx)->duty_cycle)))
-*/
 
 /*********************************************** PWM MACROS ***********************************************/
 
@@ -789,17 +904,17 @@ __STATIC_INLINE__ uint8_t Is_Power_Of_2(uint16_t num) {
  * @return Rounded up power of 2
  */
 __STATIC_INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
-    // Input = 0 -> Output = 1
+	// Input = 0 -> Output = 1
 	if (n == 0) return 1;
 	// Step 1: Subtract 1 to handle exact powers of 2
-    n--;
+	n--;
 	// Step 2: Propagate highest bit to the right
-    // NOTE: No need for >>16 because uint16_t is only 16 bits
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    // Step 3: Add 1 to get the next power of 2
+	// NOTE: No need for >>16 because uint16_t is only 16 bits
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	// Step 3: Add 1 to get the next power of 2
 	return n + 1;
 }
 
@@ -809,7 +924,7 @@ __STATIC_INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n) {
  * @return Rounded up power of 2
  */
 __STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x) {
-    // If x is 0, return 1 (2^0)
+	// If x is 0, return 1 (2^0)
 	if (x == 0)
 		return 0x00000001;
 	/**
@@ -820,7 +935,7 @@ __STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x) {
 	 *  NOTE: clz() returns 32 for input 0, which is undefined behavior — so we always use (size - 1) to avoid that
 	 */
 	// Calculate the next power of 2 greater than or equal to x
-    return (1 << (32 - __builtin_clz(x - 1)));
+	return (1 << (32 - __builtin_clz(x - 1)));
 }
 
 /*********************************************** Helper Functions ***********************************************/

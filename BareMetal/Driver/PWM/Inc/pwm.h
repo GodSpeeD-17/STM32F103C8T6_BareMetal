@@ -5,6 +5,7 @@
 // Header Files
 #include "pwm_config.h"
 
+#ifdef __OLD_TIMER_METHOD__
 // Handle Type Definition
 typedef struct pwm_handle* pwm_handle_t;
 
@@ -84,5 +85,6 @@ uint16_t PWM_Calc_TIM_Prescaler(pwm_handle_t PWM_HANDLE);
  * @note Assumes that the GPIO & PIN is already set in the GPIO Configuration Structure
  */
 void PWM_GPIO_Config(pwm_handle_t PWM_HANDLE);
+#endif /* __OLD_TIMER_METHOD__ */
 
 #endif /* __PWM_H__ */
