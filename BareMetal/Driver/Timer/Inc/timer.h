@@ -62,6 +62,29 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG);
+#else
+
+/**
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 10kHz
+ */
+void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG);
+
+/**
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 1MHz
+ */
+void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
+
+/**
+ * @brief Configures the General Purpose Timer (TIMx)
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ */
+void TIM_Config(timer_config_t* TIMx_CONFIG);
 #endif /* __OLD_TIMER_METHOD__ */
 
 /**

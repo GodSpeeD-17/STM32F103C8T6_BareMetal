@@ -174,6 +174,133 @@ static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs
 	}
 }
 
+#else
+
+/**
+ * @brief Helper Function for Timer Configuration
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ */
+__STATIC__ void __TIM__Configure_Default(timer_config_t* TIMx_CONFIG){
+	// !<< Timer Parameter Configuration >>!
+	// CMS Mode Selection (Edge Mode Selection)
+	TIMx_CONFIG->config.mode = TIMx_MODE_NORMAL;
+	// Counting Direction (Up Counting)
+	TIMx_CONFIG->config.direction = TIMx_DIR_COUNT_UP;
+	// Auto Reload-Preload Enable
+	TIMx_CONFIG->config.preload_arr = TIMx_ARPE_ENABLE;
+	// One Pulse Mode Disable
+	TIMx_CONFIG->config.one_pulse = TIMx_OPM_DISABLE;
+	// Update Source - Any
+	TIMx_CONFIG->config.update_source = TIMx_UPDATE_SOURCE_ANY;
+	// !<< Timer Channel Configuration >>!
+	TIMx_CONFIG->channel.instance = TIMx_CHANNEL_1;
+	TIMx_CONFIG->channel.config.oc_clear = TIMx_CHANNEL_OC_CLEAR_DISABLE;
+	TIMx_CONFIG->channel.config.mode = TIMx_CHANNEL_MODE_PWM1;
+	TIMx_CONFIG->channel.config.oc_preload = TIMx_CHANNEL_OC_PRELOAD_ENABLE;
+	TIMx_CONFIG->channel.config.oc_fast = TIMx_CHANNEL_OC_FAST_DISABLE;
+	TIMx_CONFIG->channel.config.ccs = TIMx_CHANNEL_CCS_OUTPUT;
+}
+
+/**
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 10kHz
+ */
+void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG){
+	// !<< Timer Clock Configuration >>!
+	// Configure Auto-Reload Register Value
+	TIMx_CONFIG->clk.auto_reload = TIMx_DEFAULT_10kHz_ARR;
+	// Configure Prescaler Value
+	TIMx_CONFIG->clk.prescaler = TIMx_DEFAULT_10kHz_PSC;
+	// Configure Timer Count Value
+	TIMx_CONFIG->clk.count = TIMx_DEFAULT_CNT;
+	// Configure Default Parameters
+	__TIM__Configure_Default(TIMx_CONFIG);
+}
+
+/**
+ * @brief Configures the default parameters for TIMx_CONFIG
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ * @note - TIM & Channel should be already configured
+ * @note - This loads frequency as 1MHz
+ */
+void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG){
+	// !<< Timer Clock Configuration >>!
+	// Configure Auto-Reload Register Value
+	TIMx_CONFIG->clk.auto_reload = TIMx_DEFAULT_1MHz_ARR;
+	// Configure Prescaler Value
+	TIMx_CONFIG->clk.prescaler = TIMx_DEFAULT_1MHz_PSC;
+	// Configure Timer Count Value
+	TIMx_CONFIG->clk.count = TIMx_DEFAULT_CNT;
+	// Configure Default Parameters
+	__TIM__Configure_Default(TIMx_CONFIG);
+}
+
+/**
+ * @brief Configures the General Purpose Timer (TIMx)
+ * @param TIMx_CONFIG Pointer to timer configuration structure
+ */
+void TIM_Config(timer_config_t* TIMx_CONFIG){
+	// Enable Clock for Timer
+	TIM_Clk_Enable(TIMx_CONFIG->instance);
+	// Reset the Timer
+	TIM_Reset(TIMx_CONFIG->instance);
+	// Disable the Timer
+	TIM_Disable(TIMx_CONFIG->instance);
+	// Disable Update Event
+	TIM_UEV_Disable(TIMx_CONFIG->instance);
+	// << Timer Clock Source Configuration >>
+	// Auto Reload Value
+	TIMx_CONFIG->instance->ARR = TIMx_CONFIG->clk.auto_reload;
+	// Prescaler Value
+	TIMx_CONFIG->instance->PSC = TIMx_CONFIG->clk.prescaler;
+	// Initial Count Value
+	TIMx_CONFIG->instance->CNT = TIMx_CONFIG->clk.count;
+	// << Timer Configuration >>
+	TIMx_CONFIG->instance->CR1.REG |= (
+		((TIMx_CONFIG->config.preload_arr & 0x01) << TIM_CR1_ARPE_Pos) |
+		((TIMx_CONFIG->config.mode & 0x03) << TIM_CR1_CMS_Pos) |
+		((TIMx_CONFIG->config.direction & 0x01) << TIM_CR1_DIR_Pos) |
+		((TIMx_CONFIG->config.one_pulse & 0x01) << TIM_CR1_OPM_Pos) |
+		((TIMx_CONFIG->config.update_source & 0x01) << TIM_CR1_URS_Pos)
+		);
+	// << Timer Channel Configuration >>
+	uint32_t* mode_reg = NULL; 
+	uint8_t index = 0x00;
+	uint16_t ccmr_temp = 0x0000;
+	// Update Pointers to Registers
+	if(TIMx_CONFIG->channel.instance < TIMx_CHANNEL_3){
+		mode_reg = &TIMx_CONFIG->instance->CCMR1.REG;
+		index = (TIMx_CONFIG->channel.instance >> 1);
+	}
+	else{
+		mode_reg = &TIMx_CONFIG->instance->CCMR2.REG;
+		index = (TIMx_CONFIG->channel.instance >> 3);
+	}
+	index <<= 8;
+	// Get the current value
+	ccmr_temp = *mode_reg;
+	// Clear the relevant bits
+	ccmr_temp &= ~(0xFF << index);
+	// Update the relevant bits
+	ccmr_temp |= (
+		((TIMx_CONFIG->channel.config.oc_clear & 0x01) << (index + 7)) |
+		((TIMx_CONFIG->channel.config.mode & 0x07) << (index + 4)) |
+		((TIMx_CONFIG->channel.config.oc_preload & 0x01) << (index + 3)) |
+		((TIMx_CONFIG->channel.config.oc_fast & 0x01) << (index + 2)) |
+		((TIMx_CONFIG->channel.config.ccs & 0x03) << (index))
+	);
+	// Write the value back to register
+	*mode_reg = ccmr_temp;
+	// Enable Update Event
+	TIM_UEV_Enable(TIMx_CONFIG->instance);
+	// Update the Timer
+	TIM_Update_Parameters(TIMx_CONFIG->instance);
+}
+
+#endif /* __OLD_TIMER_METHOD__ */
+
 /**
  * @brief Creates a delay using Timer
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
@@ -201,7 +328,6 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
 	// Clear the UIF Flag
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
-#endif /* __OLD_TIMER_METHOD__ */
 
 /**
  * @brief Creates a delay using Timer
@@ -213,10 +339,14 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
  * @note - Timer Channel 1 is used for output compare
  */
 void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
+	// Convert milliseconds to microseconds
+	delayMs = (delayMs * 1000);
+	// Delay for input equivalent microseconds
+	TIM_delay_us(TIMx, delayMs);
 	// Iteration for each number of milliseconds
-	while(delayMs--){
-		TIM_delay_us(TIMx, 998);
-	}
+	// while(delayMs--){
+	// 	TIM_delay_us(TIMx, 998);
+	// }
 }
 
 /**

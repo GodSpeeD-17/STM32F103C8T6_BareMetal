@@ -9621,34 +9621,34 @@
 
 #define IS_TIM_CCX_INSTANCE(INSTANCE, CHANNEL) \
 	 ((((INSTANCE) == TIM1) &&                  \
-	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-		((CHANNEL) == TIM_CHANNEL_2) ||          \
-		((CHANNEL) == TIM_CHANNEL_3) ||          \
-		((CHANNEL) == TIM_CHANNEL_4)))           \
+	 (((CHANNEL) == TIMx_CHANNEL_1) ||          \
+		((CHANNEL) == TIMx_CHANNEL_2) ||          \
+		((CHANNEL) == TIMx_CHANNEL_3) ||          \
+		((CHANNEL) == TIMx_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM2) &&                   \
-	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-		((CHANNEL) == TIM_CHANNEL_2) ||          \
-		((CHANNEL) == TIM_CHANNEL_3) ||          \
-		((CHANNEL) == TIM_CHANNEL_4)))           \
+	 (((CHANNEL) == TIMx_CHANNEL_1) ||          \
+		((CHANNEL) == TIMx_CHANNEL_2) ||          \
+		((CHANNEL) == TIMx_CHANNEL_3) ||          \
+		((CHANNEL) == TIMx_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM3) &&                   \
-	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-		((CHANNEL) == TIM_CHANNEL_2) ||          \
-		((CHANNEL) == TIM_CHANNEL_3) ||          \
-		((CHANNEL) == TIM_CHANNEL_4)))           \
+	 (((CHANNEL) == TIMx_CHANNEL_1) ||          \
+		((CHANNEL) == TIMx_CHANNEL_2) ||          \
+		((CHANNEL) == TIMx_CHANNEL_3) ||          \
+		((CHANNEL) == TIMx_CHANNEL_4)))           \
 	||                                         \
 	(((INSTANCE) == TIM4) &&                   \
-	 (((CHANNEL) == TIM_CHANNEL_1) ||          \
-		((CHANNEL) == TIM_CHANNEL_2) ||          \
-		((CHANNEL) == TIM_CHANNEL_3) ||          \
-		((CHANNEL) == TIM_CHANNEL_4))))
+	 (((CHANNEL) == TIMx_CHANNEL_1) ||          \
+		((CHANNEL) == TIMx_CHANNEL_2) ||          \
+		((CHANNEL) == TIMx_CHANNEL_3) ||          \
+		((CHANNEL) == TIMx_CHANNEL_4))))
 
 #define IS_TIM_CCXN_INSTANCE(INSTANCE, CHANNEL) \
 	(((INSTANCE) == TIM1) &&                    \
-	 (((CHANNEL) == TIM_CHANNEL_1) ||           \
-		((CHANNEL) == TIM_CHANNEL_2) ||           \
-		((CHANNEL) == TIM_CHANNEL_3)))
+	 (((CHANNEL) == TIMx_CHANNEL_1) ||           \
+		((CHANNEL) == TIMx_CHANNEL_2) ||           \
+		((CHANNEL) == TIMx_CHANNEL_3)))
 
 #define IS_TIM_COUNTER_MODE_SELECT_INSTANCE(INSTANCE)\
 	(((INSTANCE) == TIM1)    || \

@@ -409,12 +409,6 @@
 // Timer Start Value
 #define TIMx_DEFAULT_CNT					((uint16_t) 0)
 
-// Centre-align Mode Selection
-#define TIMx_CMS_EDGE						(0x00)
-#define TIMx_CMS_IF_DOWN					(0x01)
-#define TIMx_CMS_IF_UP						(0x02)
-#define TIMx_CMS_IF_BOTH					(0x03)
-
 // Clock Division
 #define TIMx_CKD_CLK_FREQ					(0x00)
 #define TIMx_CKD_CLK_2_FREQ					(0x01)
@@ -465,15 +459,15 @@
  */
 typedef enum {
 	// Timer Channel 1
-	TIM_CHANNEL_1 = 0x01,
+	TIMx_CHANNEL_1 = 0x01,
 	// Timer Channel 2
-	TIM_CHANNEL_2 = 0x02,
+	TIMx_CHANNEL_2 = 0x02,
 	// Timer Channel 3
-	TIM_CHANNEL_3 = 0x04,
+	TIMx_CHANNEL_3 = 0x04,
 	// Timer Channel 4
-	TIM_CHANNEL_4 = 0x08,
+	TIMx_CHANNEL_4 = 0x08,
 	// All Timer Channels
-	TIM_CHANNEL_ALL = 0x0F
+	TIMx_CHANNEL_ALL = 0x0F
 } tim_channel_t;
 
 /**
@@ -684,14 +678,107 @@ typedef enum {
 	 * @brief PWM Normal Mode
 	 * @details Channel `CHy` is active as long as `TIMx_CNT < TIMx_CCRy`
 	 */
-	TIMx_CHANNEL_MODE_PWM_NORMAL = 0x06,
+	TIMx_CHANNEL_MODE_PWM1 = 0x06,
 
 	/**
 	 * @brief PWM Inverted Mode
 	 * @details Channel `CHy` is active as long as `TIMx_CNT > TIMx_CCRy`
 	 */
-	TIMx_CHANNEL_MODE_PWM_INVERTED = 0x07
+	TIMx_CHANNEL_MODE_PWM2 = 0x07
 } tim_channel_mode_t;
+
+/**
+ * @brief Timer Channel Capture/Compare Selection
+ * @note This enum defines the selection mode for the Timer Channel Capture/Compare (CC) feature
+ */
+typedef enum {
+	/**
+	 	@brief Channel configured as Output
+	 	@note This mode allows the channel to output a PWM signal based on the compare value
+	 */
+	TIMx_CHANNEL_CCS_OUTPUT = 0x00,
+	/**
+	 	@brief Channel configured as Input
+	 	@note This mode allows ICx to be mapped on TIx
+	 */
+	TIMx_CHANNEL_CCS_INPUT_TIx = 0x01,
+	/**
+	 	@brief - Channel configured as Input
+	 	@brief - If x is odd, This mode allows ICx to be mapped on TIx+1
+	 	@brief - If x is even, This mode allows ICx to be mapped on TIx-1
+		@note - For CC1S, IC1 is mapped on TI2
+		@note - For CC2S, IC2 is mapped on TI1
+		@note - For CC3S, IC3 is mapped on TI4
+		@note - For CC4S, IC4 is mapped on TI3
+	 */
+	TIMx_CHANNEL_CCS_INPUT_TIx_1 = 0x02,
+	/**
+	 	@brief - Channel configured as Input
+	 	@brief - This mode allows ICx to be mapped on TRC
+	 	@note This mode is working only if an internal trigger input is selected through the TS bit (TIMx_SMCR register)
+	 */
+	TIMx_CHANNEL_CCS_INPUT_TRC = 0x03
+} tim_channel_ccs_t;
+
+/**
+ * @enum `tim_channel_oc_preload_t`
+ * @brief Timer Channel Output Compare Preload Configuration
+ * @note This enum defines the preload configuration for the Output Compare (OC) feature
+ */
+typedef enum {
+	/**
+	 * @brief Channel Output Compare Preload Disable
+	 * @note The PWM channel does not use preload
+	 */
+	TIMx_CHANNEL_OC_PRELOAD_DISABLE = 0x00,
+	/**
+	 * @brief Channel Output Compare Preload Enable
+	 * @note The PWM channel uses preload
+	 */
+	TIMx_CHANNEL_OC_PRELOAD_ENABLE = 0x01
+} tim_channel_oc_preload_t;
+
+/**
+ * @enum `tim_channel_oc_fast_t`
+ * @brief Timer Channel Output Compare Fast Configuration. 
+ * @brief Used to accelerate the effect of an event on the trigger in input on the CC output
+ * @note This enum defines the fast configuration for the Output Compare (OC) feature
+ */
+typedef enum {
+	/**
+	 * @brief - Channel Output Compare Fast Disable
+	 * @brief - CCx behaves normally depending on counter and CCRx values even when the trigger is ON
+	 * @note The minimum delay to activate CC1 output when an edge occurs on the trigger input is 5 clock cycles
+	 */
+	TIMx_CHANNEL_OC_FAST_DISABLE = 0x00,
+	/**
+	 * @brief - Channel Output Compare Fast Enable
+	 * @brief - An active edge on the trigger input acts like a compare match on CCx output
+	 * @brief - OC is set to the compare level independently from the result of the comparison
+	 * @brief - Delay to sample the trigger input and to activate CC1 output is reduced to 3 clock cycles
+	 * @note Acts only if the channel is configured in PWM1 or PWM2 mode
+	 */
+	TIMx_CHANNEL_OC_FAST_ENABLE = 0x01
+} tim_channel_oc_fast_t;
+
+/**
+ * @enum `tim_channel_oc_clear_t`
+ * @brief Timer Channel Output Compare Clear Configuration.
+ * @brief Used to clear the effect of an event on the trigger in input on the CC output
+ * @note This enum defines the clear configuration for the Output Compare (OC) feature
+ */
+typedef enum {
+	/**
+	 * @brief - Channel Output Compare Clear Disable
+	 * @brief - OCxRef is not affected by the ETRF input
+	 */
+	TIMx_CHANNEL_OC_CLEAR_DISABLE = 0x00,
+	/**
+	 * @brief - Channel Output Compare Clear Enable
+	 * @brief - OCxRef is cleared as soon as a High level is detected on ETRF input
+	 */
+	TIMx_CHANNEL_OC_CLEAR_ENABLE = 0x01
+} tim_channel_oc_clear_t;
 
 /**
  * @enum `tim_channel_polarity_t`
@@ -710,24 +797,6 @@ typedef enum {
 	 */
 	TIMx_CHANNEL_POLARITY_LOW = 0x01
 } tim_channel_polarity_t;
-
-/**
- * @enum `tim_channel_oc_preload_t`
- * @brief Timer Channel Output Compare Preload Configuration
- * @note This enum defines the preload configuration for the Output Compare (OC) feature
- */
-typedef enum {
-	/**
-	 * @brief Channel Output Compare Preload Disable
-	 * @note The PWM channel does not use preload
-	 */
-	TIMx_CHANNEL_OUTPUT_COMPARE_PRELOAD_DISABLE = 0x00,
-	/**
-	 * @brief Channel Output Compare Preload Enable
-	 * @note The PWM channel uses preload
-	 */
-	TIMx_CHANNEL_OUTPUT_COMPARE_PRELOAD_ENABLE = 0x01
-} tim_channel_oc_preload_t;
 
 // Max Counter Value for PWM
 #define PWM_DEFAULT_ARR						((uint16_t) 999)

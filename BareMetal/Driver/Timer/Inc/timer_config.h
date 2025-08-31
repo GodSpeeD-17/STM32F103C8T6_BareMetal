@@ -109,7 +109,7 @@ __PACKED__ typedef struct {
 	 *          Counter clock (`CK_CNT`) = `f_TIMx / (PSC + 1)`.
 	 * @range  0x0000 – 0xFFFF
 	 */
-	uint32_t prescaler : 16;
+	uint16_t prescaler;
 
 	/**
 	 * @brief Auto-Reload value
@@ -117,8 +117,15 @@ __PACKED__ typedef struct {
 	 *          Timer resets after reaching `(ARR + 1)`.
 	 * @range  0x0000 – 0xFFFF
 	 */
-	uint32_t auto_reload : 16;
+	uint16_t auto_reload;
 
+	/**
+	 * @brief Timer Start Value
+	 * @details Loaded into CNT (Counter Register).
+	 *          Timer starts counting from this value.
+	 * @range  0x0000 – 0xFFFF
+	 */
+	uint16_t count;
 } tim_clk_config_t;
 
 /**
@@ -165,20 +172,30 @@ __PACKED__ typedef struct {
  */
 __PACKED__ typedef struct {
 	/**
+	 * @brief Channel Polarity Configuration
+	 * @param tim_channel_oc_clear_t
+	 */
+	tim_channel_oc_clear_t oc_clear: 1;
+	/**
 	 * @brief Channel Mode Configuration
 	 * @param tim_channel_mode_t
 	 */
 	tim_channel_mode_t mode: 3;
 	/**
-	 * @brief Channel Polarity Configuration
-	 * @param tim_channel_polarity_t
-	 */
-	tim_channel_polarity_t polarity: 1;
-	/**
 	 * @brief Channel Output Compare Preload Enable
 	 * @param tim_channel_oc_preload_t
 	 */
 	tim_channel_oc_preload_t oc_preload: 1;
+	/**
+	 * @brief Channel Output Compare Fast Enable
+	 * @param tim_channel_oc_fast_t
+	 */
+	tim_channel_oc_fast_t oc_fast: 1;
+	/**
+	 * @brief Channel Capture/Compare Selection
+	 * @param tim_channel_ccs_t
+	 */
+	tim_channel_ccs_t ccs: 2;
 } tim_channel_config_t;
 
 /**
@@ -214,15 +231,16 @@ typedef struct {
      * @brief Timer clock configuration
 	 * @param prescaler Timer frequency prescaler from APBx Clock Source
 	 * @param auto_reload Timer reachable maximum/minimum value
+	 * @param count Timer start/current value
      * @struct tim_clk_config_t
      */
 	tim_clk_config_t clk;
 	/**
 	 * @brief Timer Parameter Configuration
-	 * @param direction Timer counting direction
-	 * @param mode Timer counting mode
-	 * @param one_pulse Timer one-pulse mode
 	 * @param preload_arr Timer auto-reload preload enable
+	 * @param mode Timer counting mode
+	 * @param direction Timer counting direction
+	 * @param one_pulse Timer one-pulse mode
 	 * @param update_source Timer update source
 	 * @struct tim_param_t
 	 */
@@ -237,7 +255,7 @@ typedef struct {
 	 * @struct tim_channel_instance_t
 	 */
 	tim_channel_instance_t channel;
-} tim_config_t;
+} timer_config_t;
 
 #endif /* __OLD_TIMER_METHOD__ */
 
@@ -355,6 +373,35 @@ __STATIC_INLINE__ void TIM_UEV_Enable(TIM_REG_STRUCT* TIMx){
 __STATIC_INLINE__ void TIM_UEV_Disable(TIM_REG_STRUCT* TIMx){
 	// Disable Update Event
 	TIMx->CR1.REG |= TIM_CR1_UDIS;
+}
+
+/**
+ * @brief Configures the polarity for a specific timer channel
+ * @param TIMx_CONFIG Pointer to the timer configuration structure
+ * @param polarity The desired polarity for the channel
+ */
+__STATIC_INLINE__ void TIM_Polarity_Config(timer_config_t* TIMx_CONFIG, tim_channel_polarity_t polarity){
+	// Get the current CCER register value
+	uint32_t reg = TIMx_CONFIG->instance->CCER.REG;
+	// Clear the polarity bits for the channel
+	if(TIMx_CONFIG->channel.instance & TIMx_CHANNEL_1){
+		reg &= ~TIM_CCER_CC1P;
+		reg |= (polarity << TIM_CCER_CC1P_Pos);
+	}
+	if(TIMx_CONFIG->channel.instance & TIMx_CHANNEL_2){
+		reg &= ~TIM_CCER_CC2P;
+		reg |= (polarity << TIM_CCER_CC2P_Pos);
+	}
+	if(TIMx_CONFIG->channel.instance & TIMx_CHANNEL_3){
+		reg &= ~TIM_CCER_CC3P;
+		reg |= (polarity << TIM_CCER_CC3P_Pos);
+	}
+	if(TIMx_CONFIG->channel.instance & TIMx_CHANNEL_4){
+		reg &= ~TIM_CCER_CC4P;
+		reg |= (polarity << TIM_CCER_CC4P_Pos);
+	}
+	// Configure Timer Channel Polarity
+	TIMx_CONFIG->instance->CCER.REG = reg;
 }
 
 #endif /* __TIMER_CONFIG_H__ */
