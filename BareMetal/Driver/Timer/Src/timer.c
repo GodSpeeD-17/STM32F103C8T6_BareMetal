@@ -58,7 +58,7 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value){
 	// Final Value
 	uint32_t prescaler_value = RCC_Get_APB1Clock();
 	// Calculate the Timer Frequency
-	if((RCC->CFGR.REG & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1)
+	if(RCC_Get_APB1_Prescaler() != RCC_CFGR_PPRE1_DIV1)
 		prescaler_value = (RCC_Get_APB1Clock() << 1);
 	// Update the value based upon the desired frequency
 	prescaler_value /= freq_Hz;
@@ -180,7 +180,7 @@ static void TIM__delay_ms(timer_config_t* TIMx_CONFIG, volatile uint32_t delayMs
  * @brief Helper Function for Timer Configuration
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
-__STATIC__ void __TIM__Configure_Default(timer_config_t* TIMx_CONFIG){
+__STATIC__ void __TIM__Config_Default__(timer_config_t* TIMx_CONFIG){
 	// !<< Timer Parameter Configuration >>!
 	// CMS Mode Selection (Edge Mode Selection)
 	TIMx_CONFIG->config.mode = TIMx_MODE_NORMAL;
@@ -193,7 +193,6 @@ __STATIC__ void __TIM__Configure_Default(timer_config_t* TIMx_CONFIG){
 	// Update Source - Any
 	TIMx_CONFIG->config.update_source = TIMx_UPDATE_SOURCE_ANY;
 	// !<< Timer Channel Configuration >>!
-	TIMx_CONFIG->channel.instance = TIMx_CHANNEL_1;
 	TIMx_CONFIG->channel.config.oc_clear = TIMx_CHANNEL_OC_CLEAR_DISABLE;
 	TIMx_CONFIG->channel.config.mode = TIMx_CHANNEL_MODE_PWM1;
 	TIMx_CONFIG->channel.config.oc_preload = TIMx_CHANNEL_OC_PRELOAD_ENABLE;
@@ -216,7 +215,7 @@ void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG){
 	// Configure Timer Count Value
 	TIMx_CONFIG->clk.count = TIMx_DEFAULT_CNT;
 	// Configure Default Parameters
-	__TIM__Configure_Default(TIMx_CONFIG);
+	__TIM__Config_Default__(TIMx_CONFIG);
 }
 
 /**
@@ -234,7 +233,7 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG){
 	// Configure Timer Count Value
 	TIMx_CONFIG->clk.count = TIMx_DEFAULT_CNT;
 	// Configure Default Parameters
-	__TIM__Configure_Default(TIMx_CONFIG);
+	__TIM__Config_Default__(TIMx_CONFIG);
 }
 
 /**
@@ -278,7 +277,7 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
 		mode_reg = &TIMx_CONFIG->instance->CCMR2.REG;
 		index = (TIMx_CONFIG->channel.instance >> 3);
 	}
-	index <<= 8;
+	index <<= 3;
 	// Get the current value
 	ccmr_temp = *mode_reg;
 	// Clear the relevant bits
@@ -317,8 +316,6 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
 	TIMx->CNT = TIMx_DEFAULT_CNT;
 	// Configure Delay Time
 	TIMx->ARR = (delayUs - 1);
-	// Enable One Pulse Mode (OPM)
-	// TIMx->CR1.REG |= TIM_CR1_OPM;
 	// Enable the Timer
 	TIM_Enable(TIMx);
 	// Wait until ARR is reached
@@ -337,40 +334,37 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
  * @note - Timer is configured for 1MHz
  * @note - Timer is upcounter
  * @note - Timer Channel 1 is used for output compare
+ * @note - This is designed in such a way for scalability in `ms` delays
  */
 void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
-	// Convert milliseconds to microseconds
-	delayMs = (delayMs * 1000);
-	// Delay for input equivalent microseconds
-	TIM_delay_us(TIMx, delayMs);
 	// Iteration for each number of milliseconds
-	// while(delayMs--){
-	// 	TIM_delay_us(TIMx, 998);
-	// }
+	while(delayMs--){
+		TIM_delay_us(TIMx, 998);
+	}
 }
 
 /**
  * @brief Enables Timer Interrupt for mentioned Interrupt
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;
 	// Enable the Timer Event Interrupt
 	if(IRQ & TIMx_IRQ_OVF_UVF)
 		reg |= TIM_DIER_UIE;
 	// Enable Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
 		reg |= TIM_DIER_CC1IE;
 	// Enable Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
 		reg |= TIM_DIER_CC2IE;
 	// Enable Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
 		reg |= TIM_DIER_CC3IE;
 	// Enable Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
 		reg |= TIM_DIER_CC4IE;
 	// Update the DMA/Interrupt Enable Register
 	TIMx->DIER.REG = reg;
@@ -383,82 +377,85 @@ void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
 /**
  * @brief Disables Timer Interrupt for mentioned Interrupt
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;
-	// Disable the Timer Interrupt
+	// Enable the Timer Event Interrupt
 	if(IRQ & TIMx_IRQ_OVF_UVF)
 		reg &= ~TIM_DIER_UIE;
-	// Disable Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+	// Enable Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
 		reg &= ~TIM_DIER_CC1IE;
-	// Disable Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+	// Enable Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
 		reg &= ~TIM_DIER_CC2IE;
-	// Disable Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+	// Enable Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
 		reg &= ~TIM_DIER_CC3IE;
-	// Disable Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+	// Enable Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
 		reg &= ~TIM_DIER_CC4IE;
 	// Update the DMA/Interrupt Enable Register
 	TIMx->DIER.REG = reg;
-	// Disable NVIC Interrupt
-	NVIC_IRQ_Disable(TIMx_IRQn[((TIMx - TIM2) >> 10)]);
+	// Update reg with calculation
+	reg = (((uint32_t)TIMx - (uint32_t)TIM2) >> 10);
+	// Enable NVIC Interrupt
+	NVIC_IRQ_Disable(TIMx_IRQn[reg]);
 }
 
 /**
  * @brief Timer Interrupt Flag Acknowledge
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
 	// Acknowledge Interrupt Flag
 	if(IRQ & TIMx_IRQ_OVF_UVF)
 		TIMx->SR.REG &= ~TIM_SR_UIF;
 	// Acknowledge Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
 		TIMx->SR.REG &= ~TIM_SR_CC1IF;
 	// Acknowledge Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
 		TIMx->SR.REG &= ~TIM_SR_CC2IF;
 	// Acknowledge Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
 		TIMx->SR.REG &= ~TIM_SR_CC3IF;
 	// Acknowledge Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
 		TIMx->SR.REG &= ~TIM_SR_CC4IF;
 }
 
 /**
  * @brief Retrieves the Interrupt Status
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_CMP_CHx`, `TIMx_IRQ_CAP_CHx`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, uint8_t IRQ){
+uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
 	// Capture the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
 	if(IRQ & TIMx_IRQ_OVF_UVF)
 		status >>= TIM_SR_UIF_Pos;
 	// Acknowledge Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_CMP_CH1) || (IRQ & TIMx_IRQ_CAP_CH1))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
 		status >>= TIM_SR_CC1IF_Pos;
 	// Acknowledge Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_CMP_CH2) || (IRQ & TIMx_IRQ_CAP_CH2))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
 		status >>= TIM_SR_CC2IF_Pos;
 	// Acknowledge Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_CMP_CH3) || (IRQ & TIMx_IRQ_CAP_CH3))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
 		status >>= TIM_SR_CC3IF_Pos;
 	// Acknowledge Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_CMP_CH4) || (IRQ & TIMx_IRQ_CAP_CH4))
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
 		status >>= TIM_SR_CC4IF_Pos;
 	// Return the status
-	return (uint8_t) status;
+	status &= 0x01;
+	return ((uint8_t)status);
 }
 
 /**
@@ -512,7 +509,8 @@ uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx){
 		// APB1 Clock Prescaler
 		prescaler = RCC_Get_APB1_Prescaler();
 		// Actual Timer Frequency
-		if(prescaler != 1){
+		if(prescaler != 0x01){
+			// Multiplication Factor = 2 (Refer Clock Tree)
 			timer_freq_Hz <<= 1;
 		}
 	}

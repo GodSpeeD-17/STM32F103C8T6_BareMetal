@@ -7,12 +7,21 @@
 #ifndef __SYSTICK_DELAY__
 #include "timer.h"
 /*-------------------------------- Local Variables ------------------------*/
-timer_config_t TIM_Configuration = {
+#ifdef __OLD_TIMER_METHOD__
+static timer_config_t TIM_Configuration = {
 	// Timer
 	.TIM = DELAY_TIMER,
 	// Channel
 	.channel = DELAY_TIMER_CHANNEL,
 };
+#else
+static timer_config_t TIM_Configuration = {
+	// Timer
+	.instance = DELAY_TIMER,
+	// Channel
+	.channel.instance = DELAY_TIMER_CHANNEL,
+};
+#endif /* __OLD_TIMER_METHOD__ */
 
 #endif /* __SYSTICK_DELAY__ */
 
@@ -99,7 +108,6 @@ __attribute__((section(".isr_vector"))) const uint32_t vector_table[ARM_IRQ + RE
 	(uint32_t) DMA2_Channel3_IRQHandler,
 	(uint32_t) DMA2_Channel4_5_IRQHandler
 };
-
 /*-------------------------------- Reset Handler ------------------------*/
 /**
  * @brief Function executed upon Reset 

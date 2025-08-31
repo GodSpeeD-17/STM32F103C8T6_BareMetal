@@ -580,30 +580,35 @@ typedef enum {
 typedef enum {
 	TIMx_IRQ_DISABLE = 0x00,
 	TIMx_IRQ_ENABLE = 0x01
+} tim_irq_enable_t;
+
+/**
+ * @brief Timer Interrupt Request (IRQ) Enumeration
+ * @note  This enumeration defines the available timer IRQ sources
+ */
+typedef enum {
+	/* Timer Interrupt for Overflow (OVF) /Underflow (UVF) Event */
+	TIMx_IRQ_OVF_UVF = 0x01,
+	/* Timer Interrupt for Output Compare (CMP) Event on Channel 1 */
+	TIMx_IRQ_OUT_CMP_CH1 = 0x02,
+	/* Timer Interrupt for Output Compare (CMP) Event on Channel 2 */
+	TIMx_IRQ_OUT_CMP_CH2 = 0x04,
+	/* Timer Interrupt for Output Compare (CMP) Event on Channel 3 */
+	TIMx_IRQ_OUT_CMP_CH3 = 0x08,
+	/* Timer Interrupt for Output Compare (CMP) Event on Channel 4 */
+	TIMx_IRQ_OUT_CMP_CH4 = 0x10,
+	/* Timer Interrupt for Input Capture (CAP) Event on Channel 1 */
+	TIMx_IRQ_IN_CAP_CH1 = 0x02,
+	/* Timer Interrupt for Input Capture (CAP) Event on Channel 2 */
+	TIMx_IRQ_IN_CAP_CH2 = 0x04,
+	/* Timer Interrupt for Input Capture (CAP) Event on Channel 3 */
+	TIMx_IRQ_IN_CAP_CH3 = 0x08,
+	/* Timer Interrupt for Input Capture (CAP) Event on Channel 4 */
+	TIMx_IRQ_IN_CAP_CH4 = 0x10,
+	/* Timer Interrupt for All Events */
+	TIMx_IRQ_ALL = 0x1F
 } tim_irq_t;
 
-// Timer Update Event: Counter Overflow(OVF)/Underflow(UVF)
-#define TIMx_IRQ_OVF_UVF					(0x01)
-// Compare Match on Channel 1
-#define TIMx_IRQ_CMP_CH1					(0x02)
-// Compare Match on Channel 2
-#define TIMx_IRQ_CMP_CH2					(0x04)
-// Compare Match on Channel 3
-#define TIMx_IRQ_CMP_CH3					(0x08)
-// Compare Match on Channel 4
-#define TIMx_IRQ_CMP_CH4					(0x10)
-// Input Compare on Channel 1
-#define TIMx_IRQ_CAP_CH1					(0x02)
-// Input Compare on Channel 2
-#define TIMx_IRQ_CAP_CH2					(0x04)
-// Input Compare on Channel 3
-#define TIMx_IRQ_CAP_CH3					(0x08)
-// Input Compare on Channel 4
-#define TIMx_IRQ_CAP_CH4					(0x10)
-// All Timer Interrupts
-#define TIMx_IRQ_ALL						(TIMx_IRQ_OVF_UVF | TIMx_IRQ_CMP_CH1 | \
-											 TIMx_IRQ_CMP_CH2 | TIMx_IRQ_CMP_CH3 | \
-											 TIMx_IRQ_CMP_CH4)
 // Timer DMA Definitions
 #define TIMx_DMA_UPDATE						(0x01)
 #define TIMx_DMA_CC1DE						(0x02)

@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.28)
 
 # ---------------------- Project ----------------------
-project(01_OB_LED C ASM)
+set(PROJECT_NAME 04_Timer_Poll)
+project(${PROJECT_NAME} C ASM)
 
 # ---------------------- Cross Compilation ----------------------
 set(CMAKE_SYSTEM_NAME Generic)

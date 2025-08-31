@@ -10,15 +10,15 @@ Few GitHub Repositories that I had used for learning purpose during development 
 
 ---
 ## ***Description***
-  - Basic Repository for understanding the Registers present in Blue Pill Development (STM32F103C8T6) Module
-  - Created basic source files to use Registers for controlling purpose
-  - `Projects/Template` is the reference template
+	- Basic Repository for understanding the Registers present in Blue Pill Development (STM32F103C8T6) Module
+	- Created basic source files to use Registers for controlling purpose
+	- `Projects/Template` is the reference template
 
 ---
 ## ***Repository Structure***
-  - `BareMetal`: Consists of all the Register Address Mapping along with Driver Source Code
-  - `Projects`: Consists of User Specific Application
-  - `Reference_Docs`: All the Reference Documentation relevant to the topic
+	- `BareMetal`: Consists of all the Register Address Mapping along with Driver Source Code
+	- `Projects`: Consists of User Specific Application
+	- `Reference_Docs`: All the Reference Documentation relevant to the topic
 
 ---
 ## ***STM32F103C8T6 Reference Manual***
@@ -26,7 +26,7 @@ Few GitHub Repositories that I had used for learning purpose during development 
 
 ---
 ## ***STM32F103C8T6 Pinout***
-![Blue_PIll_Pinout](https://github.com/user-attachments/assets/13d3a619-ac7a-4799-9715-64730e110f1b)
+![Blue_PIll_Pinout](./Reference_Docs/Blue_Pill_Pinout.gif)
 
 ---
 ## ***STM32F103C8T6 Features (Medium Density Device)***
@@ -50,28 +50,35 @@ Few GitHub Repositories that I had used for learning purpose during development 
 ## ***Boot Process***
 1. **Power ON**
 2. **Stack Pointer (SP)** 
-   - Points to the top of SRAM (Vector Table Offset: `0x00`)
+	 - Points to the top of SRAM (Vector Table Offset: `0x00`)
 3. **`Reset_Handler()` is called** 
-   - Vector Table Offset: `0x01`
-   - **Initialization Steps:**
-     1. Copy the **`.data`** section from FLASH to SRAM 
-        - **Note:** `.data` refers to initialized variables.
-     2. Initialize the **`.bss`** section to `0` 
-        - **Note:** `.bss` refers to uninitialized variables.
-     3. Call the **Main function**
+	 - Vector Table Offset: `0x01`
+	 - **Initialization Steps:**
+		 1. Copy the **`.data`** section from FLASH to SRAM 
+				- **Note:** `.data` refers to initialized variables.
+		 2. Initialize the **`.bss`** section to `0` 
+				- **Note:** `.bss` refers to uninitialized variables.
+		 3. Call the **Main function**
 
 ---
 ## ***Repository Structure***
 ```
 STM32F103C8T6
-    ├── BareMetal      # Main Bare Metal Codes
-    │   ├── Core       ## Core Files: Register Structure + Debugging Configurations
-    │   └── Driver     ## Driver Files: RCC, GPIO, USART, I2C, SSD1306 OLED, etc.
-    ├── Projects       # User Specific Application
-    │   ├── GPIO       ## GPIO Application
-    │   └── Template   ## Reference Template
-    ├── README.md      # Documentation
-    └── Reference_Docs # Contains the Reference Documentations useful for STM32F103
+		├── BareMetal      # Main Bare Metal Codes
+		│   ├── Core       ## Core Files: Register Structure + Debugging Configurations
+		│   └── Driver     ## Driver Files: RCC, GPIO, USART, I2C, SSD1306 OLED, etc.
+		├── Projects       # User Specific Application
+		│   ├── GPIO       ## GPIO Application
+		│   ├── Timer      ## Timer Application
+		│   ├── USART      ## USART Application
+		│   ├── I2C        ## I2C Application
+		│   ├── SSD1306    ## SSD1306 OLED Application
+		│   ├── ADC        ## ADC Application
+		│   ├── DMA        ## DMA Application
+		│   ├── PWM        ## PWM Application
+		│   └── Template   ## Reference Template
+		├── README.md      # Documentation
+		└── Reference_Docs # Contains the Reference Documentations useful for STM32F103
 ```
 
 ## ***Driver Structure***
@@ -105,12 +112,14 @@ Driver
 │   │   ├── i2c_config.h
 │   │   ├── i2c_dma.h
 │   │   ├── i2c.h
-│   │   └── i2c_irq.h
+│   │   ├── i2c_irq.h
+│   │   └── i2c_rb.h
 │   └── Src
 │       ├── i2c.c
 │       ├── i2c_config.c
 │       ├── i2c_dma.c
-│       └── i2c_irq.c
+│       ├── i2c_irq.c
+│       └── i2c_rb.c
 ├── PWM
 │   ├── Inc
 │   │   ├── pwm_config.h
@@ -126,18 +135,28 @@ Driver
 │       ├── rcc.c
 │       └── rcc_config.c
 ├── reg_map.h
+├── Ring_Buffer
+│   ├── Inc
+│   │   ├── ring_buffer_config.h
+│   │   └── ring_buffer.h
+│   └── Src
+│       └── ring_buffer.c
 ├── SSD1306
 │   ├── Inc
+│   │   ├── ssd1306_config.h
+│   │   ├── ssd1306_disp.h
 │   │   ├── ssd1306_font.h
-│   │   └── ssd1306.h
+│   │   ├── ssd1306_frame_rb.h
+│   │   ├── ssd1306.h
+│   │   ├── ssd1306_i2c.h
+│   │   ├── ssd1306_rb_codec.h
+│   │   └── ssd1306_rb.h
 │   └── Src
-│       └── ssd1306.c
-├── SysTick
-│   ├── Inc
-│   │   ├── systick_config.h
-│   │   └── systick.h
-│   └── Src
-│       └── systick.c
+│       ├── ssd1306.c
+│       ├── ssd1306_frame_rb.c
+│       ├── ssd1306_rb.c
+│       └── ssd1306_rb_codec.c
+├── startup.h
 ├── Timer
 │   ├── Inc
 │   │   ├── timer_config.h
@@ -145,51 +164,36 @@ Driver
 │   └── Src
 │       └── timer.c
 └── USART
-    ├── Inc
-    │   └── usart.h
-    └── Src
-        └── usart.c
+		├── Inc
+		│   └── usart.h
+		└── Src
+				└── usart.c
 ```
-
-### ⚠️ **Important Dependency Guideline**
-
-✅ Ensure that **all dependent header files (`.h`)** are included **within the corresponding `.h` file**, *not* inside the `.c` source file.
-
-### 💡 **Why?**
-
-- The build system uses the `-M` flag with the compiler to automatically track dependencies.
-- `-M` only processes included headers visible through `.h` files at compile time
-- Missing or misplaced includes (inside `.c` only) will **break dependency resolution**, leading to incomplete or incorrect builds
-
-### ✔ **Best Practice**
-
-- If a `.c` file depends on an external header, that header must be included in the corresponding `.h` file
-- This ensures proper dependency extraction, reliable incremental builds, and fewer surprises
-
----
 
 ## ***Project Structure***
 ---
 ```
 <Project_Name>
-      ├── Inc
-      │   └── main.h
-      ├── Makefile
-      ├── Src
-      │   └── main.c
-      └── Startup
-          ├── stm32f1_ls.ld
-          └── stm32f1_startup.c
+├── CMakeLists.txt						# CMake Configuration File
+├── generate_vscode.cmake     # Generates /.vscode
+├── Inc
+│   ├── main.h								# Main Header File
+│   └── systick.h							# Systick Header File
+├── Src
+│   ├── main.c								# Main Source File
+│   ├── startup.c							# Startup Source File
+│   ├── systick.c							# Systick Source File
+└── Startup
+    └── stm32f1_ls.ld					# Linker Script File
 ```
 
 ---
 ## ***Makefile Basic Commands***
-  - `make all`: Compiles all the relevant files and generates the executable in a "Build" Directory
-  - `make clean`: Removes the "Build" Directory
-  - `make flash`: Flashes .bin file at Flash Address (`0x080000000`)
-  - `make erase_flash`: Erases the Flash Memory of Blue Pill Module
-  - `make debug`: Creates the .json debug related files for Arm-Cortex Debug (VS Code) inside a .vscode directory
-  - `make replace_makefiles`: Updates all Makefiles inside "Project" directory with current Makefile
-  - `make info`: Provides information about the connected STM32 device
-  - `make dependency`: Lists the relevant files required for compilation & stores it in `Build/dependency.mk` for dynamic dependency tracking
+	- `make all`: Compiles all the relevant files and generates the executable in a "Build" Directory
+	- `make clean`: Removes the "Build" Directory
+	- `make flash`: Flashes .bin file at Flash Address (`0x080000000`)
+	- `make erase_flash`: Erases the Flash Memory of Blue Pill Module
+	- `make debug`: Creates the .json debug related files for Arm-Cortex Debug (VS Code) inside a .vscode directory
+	- `make replace_makefiles`: Updates all Makefiles inside "Project" directory with current Makefile
+	- `make info`: Provides information about the connected STM32 device
 ---

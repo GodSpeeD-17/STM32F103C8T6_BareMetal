@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.28)
 
 # ---------------------- Project ----------------------
-project(01_OB_LED C ASM)
+set(PROJECT_NAME 01_OB_LED)
+project(${PROJECT_NAME} C ASM)
 
 # ---------------------- Cross Compilation ----------------------
 set(CMAKE_SYSTEM_NAME Generic)
@@ -72,15 +73,15 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
 # ---------------------- Flags ----------------------
 # For the executable
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
+    -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm
 	-std=${C_STD} -O${OPTIMIZATION_LEVEL} -Wall
-	-fstack-usage -fdata-sections -ffunction-sections 
+    -fstack-usage -fdata-sections -ffunction-sections 
 	-D${MCU_MODEL} -MMD -MP -g -gdwarf-2
 )
 
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-	$<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
+    $<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm -x assembler-with-cpp -MMD -MP>
 )
 
@@ -180,25 +181,25 @@ add_custom_target(debug_config DEPENDS debug)
 # Function to create a replace target
 function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
 	# Create Custom Target
-	add_custom_target(${TARGET_NAME}
-		# Display header
-		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-		COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing ${FILE_PATH} in all projects        ║"
-		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    add_custom_target(${TARGET_NAME}
+        # Display header
+        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+        COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing ${FILE_PATH} in all projects        ║"
+        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 
-		# Count files to be replaced
-		COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" | wc -l
-		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}"
+        # Count files to be replaced
+        COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" | wc -l
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}"
 
-		# Replace files using xargs
-		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
+        # Replace files using xargs
+        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
 
-		# Display footer
-		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
-		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	)
+        # Display footer
+        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+        COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
+        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    )
 endfunction()
 
 
