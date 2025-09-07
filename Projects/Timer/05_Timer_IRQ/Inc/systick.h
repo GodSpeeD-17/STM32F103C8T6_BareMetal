@@ -6,10 +6,8 @@
 #include "reg_map.h"
 // RCC Configuration
 #include "rcc.h"
-// Delay Substitute
-#ifndef __SYSTICK_DELAY__
-#include "timer.h"
-#endif
+// GPIO Configuration
+#include "gpio.h"
 
 // SysTick Wrap Value Macro
 #define SYSTICK_WRAP_VAL(X) 				((X) & 0x00FFFFFF)
@@ -32,7 +30,7 @@ typedef struct {
 	// SysTick Current Value Register
 	uint32_t VAL;
 } systick_config_t;
-#endif
+#endif /* __SYSTICK_CONFIG__ */
 
 /**
  * @brief Enables SysTick Counter

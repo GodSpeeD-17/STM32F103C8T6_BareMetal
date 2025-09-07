@@ -11,28 +11,6 @@
 // Register Mapping
 #include "timer_config.h"
 
-// Delay Functions
-#ifndef __SYSTICK_DELAY__
-// Timer used for Delay
-#define DELAY_TIMER							TIM4
-// Channel for Timer used for Delay
-#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_ALL
-
-/**
- * @brief Blocking Delay in microseconds
- * @param timeUs Time in microseconds
- */
-#define delay_us(timeUs)			TIM_delay_us(DELAY_TIMER, timeUs)
-
-/**
- * @brief Blocking Delay in milliseconds
- * @param timeUs Time in milliseconds
- */
-#define delay_ms(timeMs)			TIM_delay_ms(DELAY_TIMER, timeMs)
-
-#endif /* __SYSTICK_DELAY__ */
-
-#ifdef __OLD_TIMER_METHOD__
 /**
  * @brief Calculates the Prescaler Value based upon ARR Value provided
  * @param freq_Hz Frequency (in Hz)
@@ -42,27 +20,10 @@
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value);
 
 /**
- * @brief Configures the default parameters for TIMx_CONFIG
- * @param TIMx_CONFIG Pointer to timer configuration structure
- * @note - TIM & Channel should be already configured
- * @note - This loads frequency as 10kHz
- */
-void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG);
-
-/**
- * @brief Configures the default parameters for TIMx_CONFIG
- * @param TIMx_CONFIG Pointer to timer configuration structure
- * @note - TIM & Channel should be already configured
- * @note - This loads frequency as 1MHz
- */
-void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
-
-/**
  * @brief Configures the General Purpose Timer (TIMx)
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG);
-#else
 
 /**
  * @brief Configures the default parameters for TIMx_CONFIG
@@ -81,12 +42,101 @@ void TIM_10kHz_Load_Default(timer_config_t* TIMx_CONFIG);
 void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
 
 /**
+ * @brief Provides CCMRx expected register value based on Channel Configuration Settings
+ * @param channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`  
+ * @param config Channel Configuration Structure
+ * @param ccmr_reg Pointer to CCMR register value
+ */
+void TIM_Channel_CCMRx_Config(tim_channel_t channel, tim_channel_config_t config, uint16_t* ccmr_reg);
+
+/**
+ * @brief Configures the Timer Channel as per configuration structure
+ * @param TIMx_CONFIG Pointer to Timer Configuration Structure
+ */
+void TIM_Channel_Config(timer_config_t* TIMx_CONFIG);
+
+/**
  * @brief Configures the General Purpose Timer (TIMx)
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
 void TIM_Config(timer_config_t* TIMx_CONFIG);
 
-#endif /* __OLD_TIMER_METHOD__ */
+/**
+ * @brief Retrieves the Interrupt Status
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
+ * @return - 0: Interrupt was not triggered 
+ * @return - 1: Interrupt was triggered 
+ */
+__STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+	// Capture the Status Register
+	uint16_t status = TIMx->SR.REG;
+	// Acknowledge Interrupt Flag
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		status >>= TIM_SR_UIF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
+		status >>= TIM_SR_CC1IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
+		status >>= TIM_SR_CC2IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
+		status >>= TIM_SR_CC3IF_Pos;
+	// Acknowledge Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
+		status >>= TIM_SR_CC4IF_Pos;
+	// Return the status
+	status &= 0x01;
+	return ((uint8_t)status);
+}
+
+/**
+ * @brief Retrieves the Overflow/Underflow Interrupt Status
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @return - 0: Interrupt was not triggered 
+ * @return - 1: Interrupt was triggered
+ */
+__STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_REG_STRUCT* TIMx){
+	// Get the Status Register Value
+	return (TIMx->SR.REG & 0x01);
+}
+
+/**
+ * @brief Timer Interrupt Flag Acknowledge
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
+ */
+__STATIC_INLINE__ void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+	// Get the Status Register
+	uint16_t status = TIMx->SR.REG;
+	// Acknowledge Interrupt Flag
+	if(IRQ & TIMx_IRQ_OVF_UVF)
+		status &= ~TIM_SR_UIF;
+	// Acknowledge Capture/Compare Interrupt for Channel 1
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
+		status &= ~TIM_SR_CC1IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 2
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
+		status &= ~TIM_SR_CC2IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 3
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
+		status &= ~TIM_SR_CC3IF;
+	// Acknowledge Capture/Compare Interrupt for Channel 4
+	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
+		status &= ~TIM_SR_CC4IF;
+	// Update the Status Register
+	TIMx->SR.REG = status;
+}
+
+/**
+ * @brief Acknowledges the Overflow/Underflow Interrupt Status
+ * @param TIMx `TIM2`, `TIM3`, `TIM4`
+ */
+__STATIC_INLINE__ void TIM_IRQ_Ack_OVF_UVF(TIM_REG_STRUCT* TIMx){
+	// Acknowledge the Interrupt Flag
+	TIMx->SR.REG &= ~TIM_SR_UIF;
+}
 
 /**
  * @brief Creates a delay using Timer
@@ -138,7 +188,7 @@ void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
+uint8_t TIM_IRQ_Get_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
 
 /**
  * @brief Resets the General Purpose TIMx
@@ -152,5 +202,6 @@ void TIM_Reset(TIM_REG_STRUCT* TIMx);
  * @returns Timer Frequency (in Hz)
  */
 uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx);
+
 
 #endif /* __TIMER_H__ */

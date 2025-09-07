@@ -1,6 +1,5 @@
 // Main Header File
 #include "systick.h"
-#include "gpio.h"
 
 // TODO: Need to find a way for 64-bit handling
 // TODO: When carrying out any operation, by default 32-bit is assumed

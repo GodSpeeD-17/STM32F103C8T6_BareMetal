@@ -41,6 +41,10 @@
 // Main Library
 #include "timer.h"
 
+// MACROS for Channel Configuration (Local)
+#define TIMx_CCMR1_STATUS		0x0F
+#define TIMx_CCMR2_STATUS		0xF0
+
 // Lookup Table for Timer IRQn
 static const uint8_t TIMx_IRQn[3] = {
 	TIM2_IRQn,
@@ -237,6 +241,60 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG){
 }
 
 /**
+ * @brief Provides CCMRx expected register value based on Channel Configuration Settings
+ * @param channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`  
+ * @param config Channel Configuration Structure
+ * @param ccmr_reg Pointer to CCMR register value
+ */
+void TIM_Channel_CCMRx_Config(tim_channel_t channel, tim_channel_config_t config, uint16_t* ccmr_reg){
+	uint8_t index = (uint8_t)(((channel & TIMx_CHANNEL_2) || (channel & TIMx_CHANNEL_4)) ? TIM_CCMR1_CC2S_Pos: TIM_CCMR1_CC1S_Pos);
+	*ccmr_reg &= ~(0xFF << index);
+	*ccmr_reg |= (((config.oc_clear & 0x01) << (index + 7)) |
+				  ((config.mode & 0x07) << (index + 4)) |
+				  ((config.oc_preload & 0x01) << (index + 3)) |
+				  ((config.oc_fast & 0x01) << (index + 2)) |
+				  ((config.ccs & 0x03) << (index)));
+}
+
+/**
+ * @brief Configures the Timer Channel as per configuration structure
+ * @param TIMx_CONFIG Pointer to Timer Configuration Structure
+ */
+void TIM_Channel_Config(timer_config_t* TIMx_CONFIG){
+	// No Configuration
+	if(TIMx_CONFIG->channel.instance == TIMx_CHANNEL_NONE)
+		return;
+	// Local Variables
+	uint16_t ccmr1_reg = TIMx_CONFIG->instance->CCMR1.REG;
+	uint16_t ccmr2_reg = TIMx_CONFIG->instance->CCMR2.REG;
+	uint8_t ccmr_status = 0x00;
+	tim_channel_t current_channel = 0x00;
+	// Iterate through all timer channels
+	for(uint8_t i = 0; i < 4; i++){
+		// All possible channels
+		current_channel = (0x01 << i);
+		// Only proceed if channel is defined
+		if(TIMx_CONFIG->channel.instance & current_channel){
+			if(current_channel < TIMx_CHANNEL_3){
+				TIM_Channel_CCMRx_Config(current_channel, TIMx_CONFIG->channel.config, &ccmr1_reg);
+				ccmr_status |= TIMx_CCMR1_STATUS; 
+			}
+			else{
+				TIM_Channel_CCMRx_Config(current_channel, TIMx_CONFIG->channel.config, &ccmr2_reg);
+				ccmr_status |= TIMx_CCMR2_STATUS; 
+			}
+		}
+	}
+	// Writing back to CCMR Registers
+	if(ccmr_status & TIMx_CCMR1_STATUS){
+		TIMx_CONFIG->instance->CCMR1.REG = ccmr1_reg;
+	}
+	if(ccmr_status & TIMx_CCMR2_STATUS){
+		TIMx_CONFIG->instance->CCMR2.REG = ccmr2_reg;
+	}
+}
+
+/**
  * @brief Configures the General Purpose Timer (TIMx)
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
@@ -262,36 +320,9 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
 		((TIMx_CONFIG->config.mode & 0x03) << TIM_CR1_CMS_Pos) |
 		((TIMx_CONFIG->config.direction & 0x01) << TIM_CR1_DIR_Pos) |
 		((TIMx_CONFIG->config.one_pulse & 0x01) << TIM_CR1_OPM_Pos) |
-		((TIMx_CONFIG->config.update_source & 0x01) << TIM_CR1_URS_Pos)
-		);
-	// << Timer Channel Configuration >>
-	uint32_t* mode_reg = NULL; 
-	uint8_t index = 0x00;
-	uint16_t ccmr_temp = 0x0000;
-	// Update Pointers to Registers
-	if(TIMx_CONFIG->channel.instance < TIMx_CHANNEL_3){
-		mode_reg = &TIMx_CONFIG->instance->CCMR1.REG;
-		index = (TIMx_CONFIG->channel.instance >> 1);
-	}
-	else{
-		mode_reg = &TIMx_CONFIG->instance->CCMR2.REG;
-		index = (TIMx_CONFIG->channel.instance >> 3);
-	}
-	index <<= 3;
-	// Get the current value
-	ccmr_temp = *mode_reg;
-	// Clear the relevant bits
-	ccmr_temp &= ~(0xFF << index);
-	// Update the relevant bits
-	ccmr_temp |= (
-		((TIMx_CONFIG->channel.config.oc_clear & 0x01) << (index + 7)) |
-		((TIMx_CONFIG->channel.config.mode & 0x07) << (index + 4)) |
-		((TIMx_CONFIG->channel.config.oc_preload & 0x01) << (index + 3)) |
-		((TIMx_CONFIG->channel.config.oc_fast & 0x01) << (index + 2)) |
-		((TIMx_CONFIG->channel.config.ccs & 0x03) << (index))
-	);
-	// Write the value back to register
-	*mode_reg = ccmr_temp;
+		((TIMx_CONFIG->config.update_source & 0x01) << TIM_CR1_URS_Pos));
+	// << Timer Channel Configuration >> 
+	TIM_Channel_Config(TIMx_CONFIG);
 	// Enable Update Event
 	TIM_UEV_Enable(TIMx_CONFIG->instance);
 	// Update the Timer
@@ -403,59 +434,6 @@ void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
 	reg = (((uint32_t)TIMx - (uint32_t)TIM2) >> 10);
 	// Enable NVIC Interrupt
 	NVIC_IRQ_Disable(TIMx_IRQn[reg]);
-}
-
-/**
- * @brief Timer Interrupt Flag Acknowledge
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
- */
-void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
-	// Acknowledge Interrupt Flag
-	if(IRQ & TIMx_IRQ_OVF_UVF)
-		TIMx->SR.REG &= ~TIM_SR_UIF;
-	// Acknowledge Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
-		TIMx->SR.REG &= ~TIM_SR_CC1IF;
-	// Acknowledge Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
-		TIMx->SR.REG &= ~TIM_SR_CC2IF;
-	// Acknowledge Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
-		TIMx->SR.REG &= ~TIM_SR_CC3IF;
-	// Acknowledge Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
-		TIMx->SR.REG &= ~TIM_SR_CC4IF;
-}
-
-/**
- * @brief Retrieves the Interrupt Status
- * @param TIMx `TIM2`, `TIM3`, `TIM4`
- * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
- * @return - 0: Interrupt was not triggered 
- * @return - 1: Interrupt was triggered 
- */
-uint8_t TIM_Get_IRQ_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
-	// Capture the Status Register
-	uint16_t status = TIMx->SR.REG;
-	// Acknowledge Interrupt Flag
-	if(IRQ & TIMx_IRQ_OVF_UVF)
-		status >>= TIM_SR_UIF_Pos;
-	// Acknowledge Capture/Compare Interrupt for Channel 1
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH1) || (IRQ & TIMx_IRQ_IN_CAP_CH1))
-		status >>= TIM_SR_CC1IF_Pos;
-	// Acknowledge Capture/Compare Interrupt for Channel 2
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH2) || (IRQ & TIMx_IRQ_IN_CAP_CH2))
-		status >>= TIM_SR_CC2IF_Pos;
-	// Acknowledge Capture/Compare Interrupt for Channel 3
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH3) || (IRQ & TIMx_IRQ_IN_CAP_CH3))
-		status >>= TIM_SR_CC3IF_Pos;
-	// Acknowledge Capture/Compare Interrupt for Channel 4
-	if((IRQ & TIMx_IRQ_OUT_CMP_CH4) || (IRQ & TIMx_IRQ_IN_CAP_CH4))
-		status >>= TIM_SR_CC4IF_Pos;
-	// Return the status
-	status &= 0x01;
-	return ((uint8_t)status);
 }
 
 /**

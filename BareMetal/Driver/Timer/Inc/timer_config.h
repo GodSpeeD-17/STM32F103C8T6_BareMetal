@@ -102,7 +102,7 @@ __STATIC_INLINE__ void TIM_Channel_Disable(TIM_REG_STRUCT* TIMx, uint8_t channel
  * @note  Configures the timer's clock source and its fundamental period.
  *        This defines the "heartbeat" of the timer.
  */
-__PACKED__ typedef struct {
+typedef struct {
 	/**
 	 * @brief Prescaler value
 	 * @details Divides the timer clock.
@@ -133,7 +133,7 @@ __PACKED__ typedef struct {
   * @note   Configures the fundamental operating mode of the timer's counter.
   *         This defines the "behavior" of the timer.
   */
- __PACKED__ typedef struct {
+typedef struct {
 	/**
 	 * @brief Timer Counting Direction
 	 * @note  Specifies the counter direction
@@ -170,7 +170,7 @@ __PACKED__ typedef struct {
  * @brief Timer Channel Configuration Structure
  * @note  Configures the settings for a specific timer channel
  */
-__PACKED__ typedef struct {
+typedef struct {
 	/**
 	 * @brief Channel Polarity Configuration
 	 * @param tim_channel_oc_clear_t
@@ -203,17 +203,17 @@ __PACKED__ typedef struct {
   * @note   Configures the preload (buffering) for the timer's registers.
   *         This is critical for preventing glitches during runtime changes.
   */
-__PACKED__ typedef struct {
-	/**
-	 * @brief Instance of Timer Channel
-	 * @param `tim_channel_t`
-	 */
-	tim_channel_t instance;
+typedef struct {
 	/**
 	 * @brief Specifies the Timer Channel Configuration
 	 * @param `tim_channel_config_t`
 	 */
 	tim_channel_config_t config;
+	/**
+	 * @brief Instance of Timer Channel
+	 * @param `tim_channel_t`
+	 */
+	tim_channel_t instance;
 } tim_channel_instance_t;
 
 /**

@@ -10,17 +10,32 @@
 /*--------------------------------------------- Headers ----------------------------------*/
 // Dependency
 #include <stdint.h>
-// SysTick Configuration
-#include "systick.h"
-// GPIO Configuration
-#include "gpio.h"
 // Required for `errno` in standard `malloc`
 #include <errno.h>
+// SysTick Configuration
+#include "systick.h"
+// Use Timer for Delay
+#ifndef __SYSTICK_DELAY__
+#include "timer.h"
+#endif /* __SYSTICK_DELAY__ */
 
 /*-------------------------------------------- MACROS ----------------------------------*/
 #define ARM_IRQ									(11)
 #define RESERVED								(6)
 #define STM32F103C8_IRQ							(59)
+
+// Uncomment this to achieve delay from SysTick
+// #define __SYSTICK_DELAY__
+
+// Use Timer for Delay
+#ifndef __SYSTICK_DELAY__
+// Timer used for Delay
+#define DELAY_TIMER							TIM4
+// Channel for Timer used for Delay
+#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_NONE
+// Timer Interrupt Handler
+#define DELAY_TIMER_IRQHandler				TIM4_IRQHandler
+#endif /* __SYSTICK_DELAY__ */
 
 /*----------------------------------- Linker Script --------------------------------------------*/
 // Start address of initialized data in Flash
@@ -39,9 +54,6 @@ extern uint32_t _estack;
 extern uint8_t _sheap;
 // End of heap
 extern uint8_t _eheap;
-
-/*-------------------------------- Main Entry -----------------------------*/
-extern int main(void);
 
 /*-------------------------------- Handler Prototypes ---------------------*/
 __attribute__((weak)) void Default_Handler(void);
@@ -86,7 +98,14 @@ __attribute__((weak, alias("Default_Handler"))) void TIM1_TRG_COM_IRQHandler(voi
 __attribute__((weak, alias("Default_Handler"))) void TIM1_CC_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM3_IRQHandler(void);
+#ifdef __SYSTICK_DELAY__
 __attribute__((weak, alias("Default_Handler"))) void TIM4_IRQHandler(void);
+#else
+/**
+ * @brief Delay Timer Interrupt Handler
+ */
+void TIM4_IRQHandler(void);
+#endif /* __SYSTICK_DELAY__ */
 __attribute__((weak, alias("Default_Handler"))) void I2C1_EV_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C1_ER_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C2_EV_IRQHandler(void);
@@ -115,6 +134,34 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel1_IRQHandler(vo
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel3_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(void);
-/*-------------------------------------------------------------------------------*/
 
+/*-------------------------------- Delay Function Prototypes ---------------------*/
+#ifndef __SYSTICK_DELAY__
+/**
+ * @brief Provides a blocking delay in microseconds using TIMx
+ * @param delayUs Delay time in microseconds
+ * @note Maximum delay achievable is 4,294,967 us (~4.29 seconds)
+ * @note - Assumes 1MHz timer frequency
+ * @note - Timer is configured in Upcounting Mode
+ * @note - Timer is disabled after delay is complete
+ * @note - Uses polling method to check for delay completion
+ */
+void delay_us(uint32_t delayUs);
+
+/**
+ * @brief Provides a blocking delay in milliseconds using TIMx
+ * @param delayMs Delay time in milliseconds
+ * @note Maximum delay achievable is 4,294,967 ms (~4294 seconds or ~71 minutes)
+ * @note - Assumes 1MHz timer frequency
+ * @note - Timer is configured in Upcounting Mode
+ * @note - Timer is disabled after delay is complete
+ * @note - Uses polling method to check for delay completion
+ */
+void delay_ms(uint32_t delayMs);
+#endif /* __SYSTICK_DELAY__ */
+
+/*-------------------------------- Main Entry -----------------------------*/
+extern int main(void);
+
+/*-------------------------------------------------------------------------------*/
 #endif /* __STARTUP_H__ */

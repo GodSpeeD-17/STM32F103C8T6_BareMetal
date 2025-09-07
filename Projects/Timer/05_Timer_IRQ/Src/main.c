@@ -29,7 +29,7 @@ int main(){
 // Timer IRQ Handler
 void TIM4_IRQHandler(void){
 	// Overflow/Underflow detected
-	if(TIM_Get_IRQ_Status(TIM4_Config.TIM, TIMx_IRQ_OVF_UVF)){
+	if(TIM_IRQ_Get_Status(TIM4_Config.TIM, TIMx_IRQ_OVF_UVF)){
 		// Toggle OB LED
 		OB_LED_Toggle();
 		// Acknowledge the Interrupt

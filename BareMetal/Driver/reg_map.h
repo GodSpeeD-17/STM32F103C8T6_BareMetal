@@ -458,6 +458,8 @@
  * @note  This enumeration defines the available timer channels
  */
 typedef enum {
+	// Timer Channel None
+	TIMx_CHANNEL_NONE = 0x00,
 	// Timer Channel 1
 	TIMx_CHANNEL_1 = 0x01,
 	// Timer Channel 2
