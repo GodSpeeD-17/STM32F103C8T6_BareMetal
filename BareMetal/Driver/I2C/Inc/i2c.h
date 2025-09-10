@@ -27,7 +27,7 @@
  * @returns - `0x00`: I2C Bus is not ready
  * @returns - `0x01`: I2C Bus is ready
  */
-__STATIC_INLINE__ uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_busReady(I2C_TypeDef* I2Cx){
 	// Bus Busy
 	if((I2Cx->SR2.REG & I2C_SR2_BUSY))
 		return 0x00;
@@ -40,7 +40,7 @@ __STATIC_INLINE__ uint8_t I2C_busReady(I2C_REG_STRUCT* I2Cx){
  * @brief I2C Send START Sequence
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__STATIC_INLINE__ void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_sendStart(I2C_TypeDef* I2Cx){
 	// Send START condition
 	I2Cx->CR1.REG |= I2C_CR1_START;
 }
@@ -50,7 +50,7 @@ __STATIC_INLINE__ void I2C_sendStart(I2C_REG_STRUCT* I2Cx){
  * @param I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param data Data to be TX
  */
-__STATIC_INLINE__ void I2C_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
+__STATIC_INLINE__ void I2C_writeByte(I2C_TypeDef* I2Cx, uint8_t data){
 	// Send data
 	I2Cx->DR.REG = data;
 }
@@ -60,7 +60,7 @@ __STATIC_INLINE__ void I2C_writeByte(I2C_REG_STRUCT* I2Cx, uint8_t data){
  * @param I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns Data received from I2C Bus
  */
-__STATIC_INLINE__ uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_readByte(I2C_TypeDef* I2Cx){
 	// Read data
 	uint8_t byte = I2Cx->DR.REG;
 	// Wrap
@@ -73,7 +73,7 @@ __STATIC_INLINE__ uint8_t I2C_readByte(I2C_REG_STRUCT* I2Cx){
  * @brief I2C Send STOP Sequence
  * @param I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__STATIC_INLINE__ void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ void I2C_sendStop(I2C_TypeDef* I2Cx){
 	// Send STOP condition
 	I2Cx->CR1.REG |= I2C_CR1_STOP;
 }
@@ -84,7 +84,7 @@ __STATIC_INLINE__ void I2C_sendStop(I2C_REG_STRUCT* I2Cx){
  * @param slaveAddress Target I2C Slave Address
  * @note Does not generate STOP condition, use `I2C_sendStop()` after writing data
  */
-void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
+void I2C_Master_Write_Start(I2C_TypeDef* I2Cx, uint8_t slaveAddress);
 
 /**
  * @brief I2C Master Write Start Sequence
@@ -93,7 +93,7 @@ void I2C_Master_Write_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress);
  * @param registerAddress Target Register Address
  * @note Does not generate STOP condition, use `I2C_sendStop()` after writing data
  */
-void I2C_Master_Write_Start_Reg(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
+void I2C_Master_Write_Start_Reg(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
 
 /**
  * @brief I2C Master Read Start Sequence
@@ -102,13 +102,13 @@ void I2C_Master_Write_Start_Reg(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint
  * @param registerAddress Target Register Address
  * @note Does not generate STOP condition, use `I2C_sendStop()` after reading data
  */
-void I2C_Master_Read_Start(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
+void I2C_Master_Read_Start(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
 
 /**
  * @brief I2C Master Stop Sequence
  * @param I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-void I2C_Master_Stop(I2C_REG_STRUCT* I2Cx);
+void I2C_Master_Stop(I2C_TypeDef* I2Cx);
 
 /**
  * @brief I2C Master Write Buffer Data
@@ -116,14 +116,14 @@ void I2C_Master_Stop(I2C_REG_STRUCT* I2Cx);
  * @param buffer Pointer to buffer to be transmitted
  * @param buff_len Length of data in buffer to be transmitted
  */
-void I2C_Master_Write_Data(I2C_REG_STRUCT* I2Cx, uint8_t* buffer, uint16_t buff_len);
+void I2C_Master_Write_Data(I2C_TypeDef* I2Cx, uint8_t* buffer, uint16_t buff_len);
 
 /**
  * @brief I2C Master Write Byte
  * @param I2Cx I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param data Data to be sent on I2C
  */
-__STATIC_INLINE__ void I2C_Master_Write_Byte(I2C_REG_STRUCT* I2Cx, uint8_t data){
+__STATIC_INLINE__ void I2C_Master_Write_Byte(I2C_TypeDef* I2Cx, uint8_t data){
 	// I2C Master Single Byte Sent
 	I2C_Master_Write_Data(I2Cx, &data, 1);
 }
@@ -135,7 +135,7 @@ __STATIC_INLINE__ void I2C_Master_Write_Byte(I2C_REG_STRUCT* I2Cx, uint8_t data)
  * @param register Register Address
  * @param byte Data to be written
  */
-void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
+void I2C_Write_Reg_Byte(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t byte);
 
 /**
  * @brief Writes Multiple Consecutive Bytes to Register Address of a given Slave Address
@@ -145,7 +145,7 @@ void I2C_Write_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t regi
  * @param data Pointer to the data buffer
  * @param len Number of bytes to write
  */
-void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_Write_Reg_Block(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 /**
  * @brief Reads a Single Byte from a Register Address of a given Slave Address
@@ -154,7 +154,7 @@ void I2C_Write_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t reg
  * @param registerAddress Register Address to read from
  * @returns The read byte
  */
-uint8_t I2C_Read_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
+uint8_t I2C_Read_Reg_Byte(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress);
 
 /**
  * @brief Reads Multiple Consecutive Bytes from a Register Address of a given Slave Address
@@ -164,6 +164,6 @@ uint8_t I2C_Read_Reg_Byte(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t re
  * @param data Pointer to the buffer to store the read data
  * @param len Number of bytes to read
  */
-void I2C_Read_Reg_Block(I2C_REG_STRUCT* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
+void I2C_Read_Reg_Block(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 #endif /* __I2C_H__ */

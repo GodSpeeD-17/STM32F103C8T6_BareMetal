@@ -13,7 +13,7 @@ typedef struct {
 	// - `GPIOB`
 	// - `GPIOC`
 	// - `GPIOD`
-	GPIO_REG_STRUCT* GPIO;
+	GPIO_TypeDef* GPIO;
 	// GPIO Pin
 	// - `GPIO_PIN_0`
 	// ....
@@ -132,7 +132,7 @@ uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GP
 			if((tim_gpio_map[tim_index][channel_index].GPIO == GPIOx_CONFIG->GPIO) &&
 			   (tim_gpio_map[tim_index][channel_index].PIN == GPIOx_CONFIG->PIN)){
 				// Set the Timer and Channel
-				TIMx_CONFIG->TIM = (TIM_REG_STRUCT*)((uint32_t)TIM2 + (tim_index << 10));
+				TIMx_CONFIG->TIM = (TIM_TypeDef*)((uint32_t)TIM2 + (tim_index << 10));
 				TIMx_CONFIG->channel = (1 << channel_index);
 				// Exit once found
 				return 1;
@@ -151,7 +151,7 @@ typedef struct {
 	// - `TIM2`
 	// - `TIM3`
 	// - `TIM4`
-	TIM_REG_STRUCT* TIM;
+	TIM_TypeDef* TIM;
 	// Timer Channel
 	// - `TIMx_CHANNEL_1`
 	// - `TIMx_CHANNEL_2`

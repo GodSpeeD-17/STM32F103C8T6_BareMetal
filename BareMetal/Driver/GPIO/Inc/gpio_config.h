@@ -7,14 +7,19 @@
 // Include RCC for clock enabling
 #include "rcc.h"
 
+// Legacy Support
+#define __OLD_GPIO_METHOD__
+
 // GPIO Configuration Structure
 typedef struct {
+	// Old GPIO Method
+	#ifdef __OLD_GPIO_METHOD__
 	// GPIO Port
 	// - `GPIOA`
 	// - `GPIOB`
 	// - `GPIOC`
 	// - `GPIOD`
-	GPIO_REG_STRUCT* GPIO;
+	GPIO_TypeDef* GPIO;
 	// GPIO Pin
 	// - `GPIOx_PIN_XY`
 	uint8_t PIN: 4;
@@ -32,13 +37,27 @@ typedef struct {
 	// `GPIOx_CNF_OUT_GP_PP`, `GPIOx_CNF_OUT_GP_OD`
 	// `GPIOx_CNF_OUT_AF_PP`, `GPIOx_CNF_OUT_AF_OD`
 	uint8_t CNF: 2;
+	#else
+		// GPIO
+		GPIO_TypeDef* instance;
+		// GPIO Pin
+		gpio_pin_t pin: 4;
+		// GPIO Mode
+		gpio_mode_t mode: 2;
+		// GPIO Configuration
+		union {
+			gpio_cnf_t cnf: 2;
+			gpio_state_input_t in_config: 2;
+			gpio_state_output_t out_config: 2;
+		};
+	#endif /* __OLD_GPIO_METHOD__ */
 } gpio_config_t;
 
 /**
  * @brief Enables Clock for respective GPIO
  * @param GPIO The GPIO Port
  */
-__STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
+__STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_TypeDef* GPIO){
 	// Enable Clock for respective GPIO
 	if(GPIO == GPIOA){
 		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPAEN;
@@ -65,7 +84,7 @@ __STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_REG_STRUCT* GPIO){
  * @brief Disables Clock for respective GPIO
  * @param GPIO The GPIO Configuration Structure
  */
-__STATIC_INLINE__ void GPIO_Clk_Disable(GPIO_REG_STRUCT* GPIO){
+__STATIC_INLINE__ void GPIO_Clk_Disable(GPIO_TypeDef* GPIO){
 	// Disable Clock for respective GPIO
 	if(GPIO == GPIOA){
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;

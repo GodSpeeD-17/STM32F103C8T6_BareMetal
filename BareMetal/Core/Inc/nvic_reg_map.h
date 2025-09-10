@@ -41,6 +41,6 @@ typedef struct {
 	uint32_t RESERVED_2[24];
 	// Interrupt Clear-Pending Register (ICPR)
 	uint32_t ICPR[8];
-} NVIC_REG_STRUCT;
+} NVIC_TypeDef;
 
 #endif  /* __NVIC_REG_MAP_H__ */

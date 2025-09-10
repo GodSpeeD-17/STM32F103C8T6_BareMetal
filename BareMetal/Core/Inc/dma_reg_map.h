@@ -97,7 +97,7 @@ typedef struct {
 			volatile uint32_t RESERVED: 4;
 		} BIT;
 	} IFCR;
-} DMA_REG_STRUCT;
+} DMA_TypeDef;
 
 // DMA Channel Register Structure Configuration
 typedef struct {
@@ -155,7 +155,7 @@ typedef struct {
 			volatile uint32_t MA;
 		} BIT;
 	} CMAR;
-} DMA_CHANNEL_REG_STRUCT;
+} DMA_Channel_TypeDef;
 
 
 #endif /* __DMA_REG_MAP_H__ */ 

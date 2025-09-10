@@ -71,7 +71,7 @@ __STATIC_INLINE__ uint32_t* AFIO_EXTI_CR_Register(uint8_t PINx){
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-void EXTI_Source_Set(GPIO_REG_STRUCT* GPIOx, uint8_t PINx);
+void EXTI_Source_Set(GPIO_TypeDef* GPIOx, uint8_t PINx);
 
 /**
  * @brief Configures the External Interrupt Trigger Selection

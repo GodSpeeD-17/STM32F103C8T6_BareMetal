@@ -38,7 +38,7 @@
 #define __REG_MAP_H__
 
 /*********************************************** Custom Declaration ***********************************************/
-#define NULL            					((void *) 0)
+// #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
 #define __STATIC__							static
 #define __STATIC_INLINE__					__STATIC__ __INLINE__
@@ -86,50 +86,50 @@
 #define DMA2_BASE_ADDR						(DMA1_BASE_ADDR + 0x00000400)
 
 // Address Mapping
-#define SysTick								((SYSTICK_REG_STRUCT *)(SysTick_BASE_ADDR))
-#define NVIC								((NVIC_REG_STRUCT *)(NVIC_BASE_ADDR))
+#define SysTick								((SysTick_TypeDef *)(SysTick_BASE_ADDR))
+#define NVIC								((NVIC_TypeDef *)(NVIC_BASE_ADDR))
 #define FLASH								((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
 #define WWDG								((WWDG_REG_STRUCT *) (APB1_BASE_ADDR + 0x00002C00))
 #define RCC                     			((RCC_REG_STRUCT *)(AHB_BASE_ADDR + 0x00009000))
-#define GPIOA								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00000800))
-#define GPIOB								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00000C00))
-#define GPIOC								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00001000))
-#define GPIOD								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00001400))
-#define GPIOE								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00001800))
-#define GPIOF								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00001C00))
-#define GPIOG								((GPIO_REG_STRUCT *)(APB2_BASE_ADDR + 0x00002000))
-#define AFIO								((AFIO_REG_STRUCT *)(APB2_BASE_ADDR))
-#define TIM1								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + 0x00002C00))
-#define TIM2								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00000000))
-#define TIM3								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00000400))
-#define TIM4								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00000800))
-#define TIM5								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00000C00))
-#define TIM6								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00001000))
-#define TIM7								((TIM_REG_STRUCT *)(APB1_BASE_ADDR + 0x00001400))
-#define TIM8								((ADV_TIM_REG_STRUCT *)(APB2_BASE_ADDR + 0x00003400))
-#define ADC1								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + 0x00002400))
-#define ADC2								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + 0x00002800))
-#define ADC3								((ADC_REG_STRUCT *)(APB2_BASE_ADDR + 0x00003C00))
-#define USART1								((USART_REG_STRUCT *)(APB2_BASE_ADDR + 0x00003800))
-#define USART2								((USART_REG_STRUCT *)(APB1_BASE_ADDR + 0x00004400))
-#define USART3								((USART_REG_STRUCT *)(APB1_BASE_ADDR + 0x00004800))
+#define GPIOA								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000800))
+#define GPIOB								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000C00))
+#define GPIOC								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001000))
+#define GPIOD								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001400))
+#define GPIOE								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001800))
+#define GPIOF								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001C00))
+#define GPIOG								((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00002000))
+#define AFIO								((AFIO_TypeDef *)(APB2_BASE_ADDR))
+#define TIM1								((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00002C00))
+#define TIM2								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000000))
+#define TIM3								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000400))
+#define TIM4								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000800))
+#define TIM5								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000C00))
+#define TIM6								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001000))
+#define TIM7								((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001400))
+#define TIM8								((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00003400))
+#define ADC1								((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002400))
+#define ADC2								((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002800))
+#define ADC3								((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00003C00))
+#define USART1								((USART_TypeDef *)(APB2_BASE_ADDR + 0x00003800))
+#define USART2								((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004400))
+#define USART3								((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004800))
 #define EXTI								((EXTI_REG_STRUCT*)(APB2_BASE_ADDR + 0x00000400))
-#define I2C1								((I2C_REG_STRUCT *)(APB1_BASE_ADDR + 0x00005400))
-#define I2C2								((I2C_REG_STRUCT *)(APB1_BASE_ADDR + 0x00005800))
-#define DMA1								((DMA_REG_STRUCT *) DMA1_BASE_ADDR)
-#define DMA1_Channel1						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x00000008))
-#define DMA1_Channel2						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x0000001C))
-#define DMA1_Channel3						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x00000030))
-#define DMA1_Channel4						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x00000044))
-#define DMA1_Channel5						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x00000058))
-#define DMA1_Channel6						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x0000006C))
-#define DMA1_Channel7						((DMA_CHANNEL_REG_STRUCT *) (DMA1_BASE_ADDR + 0x00000080))
-#define DMA2								((DMA_REG_STRUCT *) DMA2_BASE_ADDR)
-#define DMA2_Channel1						((DMA_CHANNEL_REG_STRUCT *) (DMA2_BASE_ADDR + 0x00000008))
-#define DMA2_Channel2						((DMA_CHANNEL_REG_STRUCT *) (DMA2_BASE_ADDR + 0x0000001C))
-#define DMA2_Channel3						((DMA_CHANNEL_REG_STRUCT *) (DMA2_BASE_ADDR + 0x00000030))
-#define DMA2_Channel4						((DMA_CHANNEL_REG_STRUCT *) (DMA2_BASE_ADDR + 0x00000044))
-#define DMA2_Channel5						((DMA_CHANNEL_REG_STRUCT *) (DMA2_BASE_ADDR + 0x00000058))
+#define I2C1								((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005400))
+#define I2C2								((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005800))
+#define DMA1								((DMA_TypeDef *) DMA1_BASE_ADDR)
+#define DMA1_Channel1						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x00000008))
+#define DMA1_Channel2						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x0000001C))
+#define DMA1_Channel3						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x00000030))
+#define DMA1_Channel4						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x00000044))
+#define DMA1_Channel5						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x00000058))
+#define DMA1_Channel6						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x0000006C))
+#define DMA1_Channel7						((DMA_Channel_TypeDef *) (DMA1_BASE_ADDR + 0x00000080))
+#define DMA2								((DMA_TypeDef *) DMA2_BASE_ADDR)
+#define DMA2_Channel1						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x00000008))
+#define DMA2_Channel2						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x0000001C))
+#define DMA2_Channel3						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x00000030))
+#define DMA2_Channel4						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x00000044))
+#define DMA2_Channel5						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x00000058))
 /*********************************************** Address Mapping ***********************************************/
 
 /*********************************************** GPIO MACROS ***********************************************/
@@ -157,11 +157,50 @@
 #define OB_LED_PORT							GPIOC
 #define OB_LED_PIN							GPIOx_PIN_13
 
+/**
+ * @brief GPIO Pin Enumeration
+ * @note Used to specify the pin number of a GPIO
+ */
+typedef enum {
+	GPIO_PIN_0 = 0x00,
+	GPIO_PIN_1 = 0x01,
+	GPIO_PIN_2 = 0x02,
+	GPIO_PIN_3 = 0x03,
+	GPIO_PIN_4 = 0x04,
+	GPIO_PIN_5 = 0x05,
+	GPIO_PIN_6 = 0x06,
+	GPIO_PIN_7 = 0x07,
+	GPIO_PIN_8 = 0x08,
+	GPIO_PIN_9 = 0x09,
+	GPIO_PIN_10 = 0x0A,
+	GPIO_PIN_11 = 0x0B,
+	GPIO_PIN_12 = 0x0C,
+	GPIO_PIN_13 = 0x0D,
+	GPIO_PIN_14 = 0x0E,
+	GPIO_PIN_15 = 0x0F
+} gpio_pin_t;
+
+
 // MODE
 #define GPIOx_MODE_IN						(0x00)
 #define GPIOx_MODE_OUT_10MHz				(0x01)
 #define GPIOx_MODE_OUT_2MHz					(0x02)
 #define GPIOx_MODE_OUT_50MHz				(0x03)
+
+/**
+ * @brief GPIO Mode Enumeration
+ * @brief Used to specify the mode of a GPIO
+ */
+typedef enum {
+	// GPIO as Input
+	GPIO_MODE_INPUT = 0x00,
+	// GPIO as Output @10MHz
+	GPIO_MODE_OUTPUT_10MHz = 0x01,
+	// GPIO as Output @2MHz
+	GPIO_MODE_OUTPUT_2MHz = 0x02,
+	// GPIO as Output @50MHz
+	GPIO_MODE_OUTPUT_50MHz = 0x03
+} gpio_mode_t;
 
 // CONFIGURATION
 #define GPIOx_CNF_IN_ANALOG					(0x00)
@@ -172,6 +211,36 @@
 #define GPIOx_CNF_OUT_GP_OD					(0x01)
 #define GPIOx_CNF_OUT_AF_PP					(0x02)
 #define GPIOx_CNF_OUT_AF_OD					(0x03)
+
+/**
+ * @brief GPIO Pin Configuration Enumeration
+ * @note Configuration options vary based on whether the pin is set as input or output
+ */
+typedef enum {
+	GPIO_CNF_IN_ANALOG = 0x00,
+	GPIO_CNF_IN_FLOAT = 0x01,
+	GPIO_CNF_IN_PD = 0x03,
+	GPIO_CNF_IN_PU = 0x04,
+	GPIO_CNF_OUT_GP_PP = 0x00,
+	GPIO_CNF_OUT_GP_OD = 0x01,
+	GPIO_CNF_OUT_AF_PP = 0x02,
+	GPIO_CNF_OUT_AF_OD = 0x03
+} gpio_cnf_t;
+
+typedef enum {
+	GPIO_ANALOG = 0x00,
+	GPIO_FLOATING = 0x01,
+	GPIO_PULL_DOWN = 0x03,
+	GPIO_PULL_UP = 0x04,
+} gpio_state_input_t;
+
+typedef enum {
+	GPIO_GP_PUSH_PULL = 0x00,
+	GPIO_GP_OPEN_DRAIN = 0x01,
+	GPIO_AF_PUSH_PULL = 0x02,
+	GPIO_AF_OPEN_DRAIN = 0x03
+} gpio_state_output_t;
+
 
 /*********************************************** GPIO MACROS ***********************************************/
 
@@ -384,9 +453,9 @@
 
 // SysTick Delay
 #define SYSTICK_DELAY_1_US					(RCC_Get_AHBClock())
-#define SYSTICK_DELAY_2_US					(2 * SYSTICK_DELAY_1_US)
-#define SYSTICK_DELAY_1_MS					(SYSTICK_DELAY_1_US / 1000)
-#define SYSTICK_DELAYS_2_MS					(2 * SYSTICK_DELAY_1_MS)
+#define SYSTICK_DELAY_2_US					(SYSTICK_DELAY_1_US << 1)
+#define SYSTICK_DELAY_1_MS					(SYSTICK_DELAY_1_US / FREQ_1kHz)
+#define SYSTICK_DELAYS_2_MS					(SYSTICK_DELAY_1_MS << 1)
 /*********************************************** SysTick MACROS ***********************************************/
 
 /*********************************************** Timer MACROS ***********************************************/

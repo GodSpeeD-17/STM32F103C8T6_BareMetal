@@ -9,7 +9,7 @@
  * @returns - 0: Failure 
  * @returns - 1: Success
  */
-uint8_t I2C_RB_TX_Byte(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer){
+uint8_t I2C_RB_TX_Byte(I2C_TypeDef* I2Cx, ring_buffer_t* ring_buffer){
 	// Dequeue data from the ring buffer & store it in I2Cx->DR
 	if(Ring_Buffer_Dequeue(ring_buffer, &I2Cx->DR.REG)){
 		// Wait until the data is transmitted
@@ -30,7 +30,7 @@ uint8_t I2C_RB_TX_Byte(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer){
  * @returns - 0: Failure
  * @returns - 1: Success
  */
-uint8_t I2C_RB_TX_Block(I2C_REG_STRUCT* I2Cx, ring_buffer_t* ring_buffer, uint8_t len){
+uint8_t I2C_RB_TX_Block(I2C_TypeDef* I2Cx, ring_buffer_t* ring_buffer, uint8_t len){
 	// Check if the ring buffer has enough data to send
 	if(Ring_Buffer_Filled_Space(ring_buffer) < len){
 		// Not enough data in the ring buffer

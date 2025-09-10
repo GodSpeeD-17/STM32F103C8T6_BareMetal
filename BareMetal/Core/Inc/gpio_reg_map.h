@@ -195,6 +195,6 @@ typedef struct {
             volatile uint32_t reserved : 15;
         } BIT;
     } LCKR;
-} GPIO_REG_STRUCT;
+} GPIO_TypeDef;
 
 #endif /* __GPIO_REG_MAP_H__ */

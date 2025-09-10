@@ -33,10 +33,15 @@ void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG);
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
 __STATIC_INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
+	#ifdef __OLD_GPIO_METHOD__
 	// Set Mode to Output at 10MHz
 	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
 	// Set Configuration to General Purpose Push-Pull
 	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_GP_PP;
+	#else
+	GPIOx_CONFIG->mode = GPIO_MODE_OUTPUT_10MHz;
+	GPIOx_CONFIG->cnf = GPIO_CNF_OUT_GP_PP;
+	#endif /* __OLD_GPIO_METHOD__ */
 	// Configure GPIO
 	GPIO_Config(GPIOx_CONFIG);
 }
@@ -46,8 +51,12 @@ __STATIC_INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
 __STATIC_INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
+	#ifdef __OLD_GPIO_METHOD__
 	// Bit Set (Atomicity)
 	GPIOx_CONFIG->GPIO->BSRR.REG |= (1 << GPIOx_CONFIG->PIN);
+	#else
+	GPIOx_CONFIG->instance->BSRR.REG |= (1 << GPIOx_CONFIG->pin);
+	#endif /* __OLD_GPIO_METHOD__ */
 }
 
 /**
@@ -55,8 +64,12 @@ __STATIC_INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
 __STATIC_INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
+	#ifdef __OLD_GPIO_METHOD__
 	// Bit Reset (Atomicity)
 	GPIOx_CONFIG->GPIO->BRR.REG |= (1 << GPIOx_CONFIG->PIN);
+	#else
+	GPIOx_CONFIG->instance->BRR.REG |= (1 << GPIOx_CONFIG->pin);
+	#endif /* __OLD_GPIO_METHOD__ */
 }
 
 /**
@@ -64,8 +77,12 @@ __STATIC_INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
  * @param[in] GPIOx_CONFIG GPIO Configuration Structure
  */
 __STATIC_INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
+	#ifdef __OLD_GPIO_METHOD__
 	// Output Data Register
 	GPIOx_CONFIG->GPIO->ODR.REG ^= (1 << GPIOx_CONFIG->PIN);
+	#else
+	GPIOx_CONFIG->instance->ODR.REG ^= (1 << GPIOx_CONFIG->pin);
+	#endif /* __OLD_GPIO_METHOD__ */
 }
 
 /**

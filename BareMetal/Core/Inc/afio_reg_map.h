@@ -100,6 +100,6 @@ typedef struct {
         } BIT;
     } EXTICR4;
     
-} AFIO_REG_STRUCT;
+} AFIO_TypeDef;
 
 #endif /* __AFIO_REG_MAP_H__ */

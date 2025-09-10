@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
 	{
-	  "name": "Debug: 01_OB_LED",
-	  "executable": "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/GPIO/01_OB_LED/Build/01_OB_LED.elf",
+	  "name": "Debug: 01_OB_LED_Test",
+	  "executable": "/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/GPIO/01_OB_LED_Test/Build/01_OB_LED_Test.elf",
 	  "request": "launch",
 	  "type": "cortex-debug",
 	  "servertype": "openocd",

@@ -37,7 +37,7 @@
 // USART Configuration Structure
 typedef struct {
 	// USART
-	USART_REG_STRUCT* USARTx;
+	USART_TypeDef* USARTx;
 	// TX Configuration
 	gpio_config_t TX;
 	// RX Configuration
@@ -144,7 +144,7 @@ __STATIC_INLINE__ void USART_Disable(usart_config_t* USART_CONFIGx) {
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  * @return IRQn for the corresponding USART
  */
-__STATIC_INLINE__ uint8_t USART_get_IRQn(USART_REG_STRUCT* USARTx){
+__STATIC_INLINE__ uint8_t USART_get_IRQn(USART_TypeDef* USARTx){
 	// Retrieves the IRQ Number for NVIC
 	if(USARTx == USART1)
 		return USART1_IRQn;
@@ -237,7 +237,7 @@ __STATIC_INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_c
  * @brief Enables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Enable(USART_REG_STRUCT* USARTx){
+__STATIC_INLINE__ void USART_DMA_TX_Enable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAT;
 }
@@ -246,7 +246,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Enable(USART_REG_STRUCT* USARTx){
  * @brief Disables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Disable(USART_REG_STRUCT* USARTx){
+__STATIC_INLINE__ void USART_DMA_TX_Disable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAT;
 }
@@ -255,7 +255,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Disable(USART_REG_STRUCT* USARTx){
  * @brief Enables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_RX_Enable(USART_REG_STRUCT* USARTx){
+__STATIC_INLINE__ void USART_DMA_RX_Enable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAR;
 }
@@ -264,7 +264,7 @@ __STATIC_INLINE__ void USART_DMA_RX_Enable(USART_REG_STRUCT* USARTx){
  * @brief Disables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_RX_Disable(USART_REG_STRUCT* USARTx){
+__STATIC_INLINE__ void USART_DMA_RX_Disable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAR;
 }

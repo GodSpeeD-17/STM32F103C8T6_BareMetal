@@ -164,6 +164,6 @@ typedef struct {
 			volatile uint32_t RESERVED_1: 26;
 		} BIT;
 	} TRISE;
-} I2C_REG_STRUCT;
+} I2C_TypeDef;
 
 #endif /* __I2C_REG_MAP_H__ */ 

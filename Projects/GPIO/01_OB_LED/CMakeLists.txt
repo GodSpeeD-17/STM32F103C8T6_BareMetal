@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.28)
 
 # ---------------------- Project ----------------------
-set(PROJECT_NAME 01_OB_LED)
+# Get the current source directory name (last folder name)
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${PROJECT_NAME} C ASM)
 
 # ---------------------- Cross Compilation ----------------------

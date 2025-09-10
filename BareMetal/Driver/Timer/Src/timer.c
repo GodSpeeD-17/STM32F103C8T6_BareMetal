@@ -340,7 +340,7 @@ void TIM_Config(timer_config_t* TIMx_CONFIG){
  * @note - Timer is upcounter
  * @note - Timer Channel 1 is used for output compare
  */
-void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
+void TIM_delay_us(TIM_TypeDef* TIMx, uint32_t delayUs){
 	// Disable the Timer
 	TIM_Disable(TIMx);
 	// Configure Timer Count Value
@@ -367,7 +367,7 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs){
  * @note - Timer Channel 1 is used for output compare
  * @note - This is designed in such a way for scalability in `ms` delays
  */
-void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
+void TIM_delay_ms(TIM_TypeDef* TIMx, uint32_t delayMs){
 	// Iteration for each number of milliseconds
 	while(delayMs--){
 		TIM_delay_us(TIMx, 998);
@@ -379,7 +379,7 @@ void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+void TIM_IRQ_Enable(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;
 	// Enable the Timer Event Interrupt
@@ -410,7 +410,7 @@ void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+void TIM_IRQ_Disable(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;
 	// Enable the Timer Event Interrupt
@@ -440,7 +440,7 @@ void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
  * @brief Resets the General Purpose TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-void TIM_Reset(TIM_REG_STRUCT* TIMx){
+void TIM_Reset(TIM_TypeDef* TIMx){
 	// Register
 	uint32_t reg = RCC->APB1RSTR.REG;
 	// Set based on Timer
@@ -477,7 +477,7 @@ void TIM_Reset(TIM_REG_STRUCT* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns Timer Frequency (in Hz)
  */
-uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx){
+uint32_t TIM_Get_Frequency(TIM_TypeDef* TIMx){
 	// Local Variables
 	uint32_t timer_freq_Hz = 0x00;
 	uint8_t prescaler = 0x00;

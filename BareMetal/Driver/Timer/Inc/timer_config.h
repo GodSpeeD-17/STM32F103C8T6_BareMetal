@@ -16,7 +16,7 @@ typedef struct {
 	// - `TIM2`
 	// - `TIM3`
 	// - `TIM4`
-	TIM_REG_STRUCT* TIM;
+	TIM_TypeDef* TIM;
 	// Timer Channel
 	// - `TIMx_CHANNEL_1`
 	// - `TIMx_CHANNEL_2`
@@ -57,7 +57,7 @@ typedef struct {
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
-__STATIC_INLINE__ void TIM_Channel_Enable(TIM_REG_STRUCT* TIMx, uint8_t channel){
+__STATIC_INLINE__ void TIM_Channel_Enable(TIM_TypeDef* TIMx, uint8_t channel){
 	// Local Variable
 	uint32_t reg = TIMx->CCER.REG; 
 	// Enable the General Purpose Timer Channel
@@ -78,7 +78,7 @@ __STATIC_INLINE__ void TIM_Channel_Enable(TIM_REG_STRUCT* TIMx, uint8_t channel)
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param channel `TIMx_CHANNEL_1`, `TIMx_CHANNEL_2`, `TIMx_CHANNEL_3`, `TIMx_CHANNEL_4`, `TIMx_CHANNEL_ALL`
  */
-__STATIC_INLINE__ void TIM_Channel_Disable(TIM_REG_STRUCT* TIMx, uint8_t channel){
+__STATIC_INLINE__ void TIM_Channel_Disable(TIM_TypeDef* TIMx, uint8_t channel){
 	// Local Variable
 	uint32_t reg = TIMx->CCER.REG; 
 	// Disable the General Purpose Timer Channel
@@ -226,7 +226,7 @@ typedef struct {
      * @param TIMx
 	 * @note Typically one of `TIM2`, `TIM3`, `TIM4`.
      */
-	TIM_REG_STRUCT* instance;
+	TIM_TypeDef* instance;
 	/**
      * @brief Timer clock configuration
 	 * @param prescaler Timer frequency prescaler from APBx Clock Source
@@ -263,7 +263,7 @@ typedef struct {
  * @brief Enables the Clock for General Purpose Timer
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_Clk_Enable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Clk_Enable(TIM_TypeDef* TIMx){
 	// Enable the clock for the timer
 	if(TIMx == TIM2)
 		RCC->APB1ENR.REG |= RCC_APB1ENR_TIM2EN;
@@ -277,7 +277,7 @@ __STATIC_INLINE__ void TIM_Clk_Enable(TIM_REG_STRUCT* TIMx){
  * @brief Disables the Clock for General Purpose Timer
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_Clk_Disable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Clk_Disable(TIM_TypeDef* TIMx){
 	// Disable the clock for the timer
 	if(TIMx == TIM2)
 		RCC->APB1ENR.REG &= ~RCC_APB1ENR_TIM2EN;
@@ -291,7 +291,7 @@ __STATIC_INLINE__ void TIM_Clk_Disable(TIM_REG_STRUCT* TIMx){
  * @brief Enables the General Purpose TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_Enable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Enable(TIM_TypeDef* TIMx){
 	// Clear Update Interrupt Flag
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 	// Enable TIMx
@@ -302,7 +302,7 @@ __STATIC_INLINE__ void TIM_Enable(TIM_REG_STRUCT* TIMx){
  * @brief Disables the General Purpose TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_Disable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Disable(TIM_TypeDef* TIMx){
 	// Disable TIMx
 	TIMx->CR1.REG &= ~TIM_CR1_CEN;
 	// Clear Update Interrupt Flag
@@ -314,7 +314,7 @@ __STATIC_INLINE__ void TIM_Disable(TIM_REG_STRUCT* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns IRQn (0 - 59)
  */
-__STATIC_INLINE__ uint8_t TIM_Get_IRQn(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ uint8_t TIM_Get_IRQn(TIM_TypeDef* TIMx){
 	// Return IRQn based upon TIMx
 	if(TIMx == TIM2)	
 		return TIM2_IRQn;	
@@ -329,7 +329,7 @@ __STATIC_INLINE__ uint8_t TIM_Get_IRQn(TIM_REG_STRUCT* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns UIF Flag Status
  */
-__STATIC_INLINE__ uint8_t TIM_Get_UIF(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ uint8_t TIM_Get_UIF(TIM_TypeDef* TIMx){
 	// Update Interrupt Flag (UIF) Status
 	return (uint8_t)(TIMx->SR.REG & TIM_SR_UIF);
 }
@@ -339,7 +339,7 @@ __STATIC_INLINE__ uint8_t TIM_Get_UIF(TIM_REG_STRUCT* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns UIF Flag Status
  */
-__STATIC_INLINE__ void TIM_Clear_UIF(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Clear_UIF(TIM_TypeDef* TIMx){
 	// Clear Update Interrupt Flag (UIF)
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
@@ -348,7 +348,7 @@ __STATIC_INLINE__ void TIM_Clear_UIF(TIM_REG_STRUCT* TIMx){
  * @brief Triggers an update event to apply the settings
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_Update_Parameters(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_Update_Parameters(TIM_TypeDef* TIMx){
 	// Send an update event to reset the timer and apply settings
   	TIMx->EGR.REG |= TIM_EGR_UG;
 	// Wait until bit reset by Hardware
@@ -361,7 +361,7 @@ __STATIC_INLINE__ void TIM_Update_Parameters(TIM_REG_STRUCT* TIMx){
  * @brief Enables the Update Event for TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_UEV_Enable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_UEV_Enable(TIM_TypeDef* TIMx){
 	// Enable Update Event
 	TIMx->CR1.REG &= ~TIM_CR1_UDIS;
 }
@@ -370,7 +370,7 @@ __STATIC_INLINE__ void TIM_UEV_Enable(TIM_REG_STRUCT* TIMx){
  * @brief Disables the Update Event for TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_UEV_Disable(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_UEV_Disable(TIM_TypeDef* TIMx){
 	// Disable Update Event
 	TIMx->CR1.REG |= TIM_CR1_UDIS;
 }

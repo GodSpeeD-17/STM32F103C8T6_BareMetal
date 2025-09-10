@@ -5,7 +5,7 @@
 			"includePath": [
 				"/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Core/Inc/**",
 				"/home/shrey_shah/Desktop/STM32/STM32F103C8T6/BareMetal/Driver/*/Inc/**",
-				"/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc/**"
+				"/home/shrey_shah/Desktop/STM32/STM32F103C8T6/Projects/GPIO/01_OB_LED_Test/Inc/**"
 			],
 			"defines": ["STM32F103C8T6"],
 			"compilerPath": "/usr/bin/arm-none-eabi-gcc",

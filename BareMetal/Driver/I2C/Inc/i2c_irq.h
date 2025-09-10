@@ -13,7 +13,7 @@
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__STATIC_INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_TypeDef* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 	return I2C1_EV_IRQn;
@@ -27,7 +27,7 @@ __STATIC_INLINE__ uint8_t I2C_Get_EV_IRQn(I2C_REG_STRUCT* I2Cx){
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @returns I2C IRQn
  */
-__STATIC_INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_REG_STRUCT* I2Cx){
+__STATIC_INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_TypeDef* I2Cx){
 	// I2C1
 	if(I2Cx == I2C1)
 		return I2C1_ER_IRQn;
@@ -45,7 +45,7 @@ __STATIC_INLINE__ uint8_t I2C_Get_ER_IRQn(I2C_REG_STRUCT* I2Cx){
  * 		  - `I2Cx_IRQ_ERROR`
  * 		  - `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_Enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
+void I2C_IRQ_Enable(I2C_TypeDef* I2Cx, uint8_t I2C_IRQ_status);
 
 /**
  * @brief Disables the I2C Interrupt
@@ -56,6 +56,6 @@ void I2C_IRQ_Enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
  * 		  - `I2Cx_IRQ_ERROR`
  * 		  - `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_Disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status);
+void I2C_IRQ_Disable(I2C_TypeDef* I2Cx, uint8_t I2C_IRQ_status);
 
 #endif /* __I2C_IRQ_H__ */ 

@@ -290,7 +290,7 @@ typedef struct {
             volatile uint32_t DATA: 16;
         } BIT;
 	} DR;
-} ADC_REG_STRUCT;
+} ADC_TypeDef;
 
 
 #endif /* __ADC_REG_MAP_H__ */ 

@@ -269,6 +269,6 @@ typedef struct {
 	} DCR;
 	// TIM1 and TIM8 DMA Address for full transfer register (DMAR)
     volatile uint32_t DMAR;
-} ADV_TIM_REG_STRUCT;
+} Adv_TIM_TypeDef;
 
 #endif /* __ADVTIM_REG_MAP_H__ */

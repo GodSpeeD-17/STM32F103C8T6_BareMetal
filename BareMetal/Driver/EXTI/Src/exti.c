@@ -18,7 +18,7 @@ static const uint8_t EXTI_IRQn[7] = {EXTI0_IRQn, EXTI1_IRQn, EXTI2_IRQn,
  * @param[in] GPIOx `GPIOA`, `GPIOB`, `GPIOC`
  * @param[in] PINx Pin Number `GPIO_PIN_x`
  */
-void EXTI_Source_Set(GPIO_REG_STRUCT* GPIOx, uint8_t PINx){
+void EXTI_Source_Set(GPIO_TypeDef* GPIOx, uint8_t PINx){
 	// Local Variables
 	uint32_t* reg = NULL;
 	uint8_t temp = 0xFF, pin = ((PINx & 0x03) << 2);

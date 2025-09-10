@@ -49,7 +49,7 @@ typedef struct {
 	// GPIO Configuration
 	gpio_config_t* GPIOx_CONFIG;
 	// ADC Number
-	ADC_REG_STRUCT* ADCx;
+	ADC_TypeDef* ADCx;
 	// ADC Channel
 	uint8_t channel;
 	// Number of Channels
@@ -69,7 +69,7 @@ typedef struct {
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  * @note RCC->APB2ENR
  */
-__STATIC_INLINE__ void ADC_clk_enable(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_clk_enable(ADC_TypeDef* ADCx){
 	// Enable the clock for the ADC
 	if(ADCx == ADC1)
 		RCC->APB2ENR.BIT.ADC1EN = BIT_SET;
@@ -82,7 +82,7 @@ __STATIC_INLINE__ void ADC_clk_enable(ADC_REG_STRUCT* ADCx){
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  * @note RCC->APB2ENR
  */
-__STATIC_INLINE__ void ADC_clk_disable(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_clk_disable(ADC_TypeDef* ADCx){
 	// Disable the clock for the ADC
 	if(ADCx == ADC1)
 		RCC->APB2ENR.BIT.ADC1EN = BIT_RESET;
@@ -94,7 +94,7 @@ __STATIC_INLINE__ void ADC_clk_disable(ADC_REG_STRUCT* ADCx){
  * @brief Enables the Analog to Digital Converter (ADC)
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-__STATIC_INLINE__ void ADC_enable(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_enable(ADC_TypeDef* ADCx){
 	// Enable ADC
 	ADCx->CR2.REG |= BIT_SET;  
 }
@@ -103,7 +103,7 @@ __STATIC_INLINE__ void ADC_enable(ADC_REG_STRUCT* ADCx){
  * @brief Disables the Analog to Digital Converter (ADC)
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-__STATIC_INLINE__ void ADC_disable(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_disable(ADC_TypeDef* ADCx){
 	// Disable the ADC
 	ADCx->CR2.REG &= ~BIT_SET;
 }
@@ -114,7 +114,7 @@ __STATIC_INLINE__ void ADC_disable(ADC_REG_STRUCT* ADCx){
  * @note - It is recommended to perform a calibration after each power-up
  * @note - Before starting a calibration, the ADC must have been in power-on state for at least two ADC clock cycles
  */
-__STATIC_INLINE__ void ADC_calibrate(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_calibrate(ADC_TypeDef* ADCx){
 	// Reset Calibration Registers
 	ADCx->CR2.REG |= (1 << 3);
 	// Cleared after the Calibration Registers are Initialized
@@ -129,7 +129,7 @@ __STATIC_INLINE__ void ADC_calibrate(ADC_REG_STRUCT* ADCx){
  * @brief Starts the ADC based upon the sequence
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-__STATIC_INLINE__ void ADC_start(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_start(ADC_TypeDef* ADCx){
 	// When the ADON bit is set for the first time, it wakes up the ADC from Power Down mode
 	// If this bit holds a value of 0 and a 1 is written to it then it wakes up the ADC from Power Down state
 	ADC_enable(ADCx);
@@ -148,7 +148,7 @@ __STATIC_INLINE__ void ADC_start(ADC_REG_STRUCT* ADCx){
  * @returns - `0`: ADC Data Not Ready
  * @returns - `1`: ADC Data Ready
  */
-__STATIC_INLINE__ uint8_t ADC_get_EOC_flag(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ uint8_t ADC_get_EOC_flag(ADC_TypeDef* ADCx){
 	// Return the value based upon the ADC Number
 	return (uint8_t)(ADCx->SR.REG & (1 << 1));
 }
@@ -157,7 +157,7 @@ __STATIC_INLINE__ uint8_t ADC_get_EOC_flag(ADC_REG_STRUCT* ADCx){
  * @brief Clears the ADC End Of Conversion (EOC) Flag
  * @param[in] ADCx `ADC1`, `ADC2`, `ADC3`
  */
-__STATIC_INLINE__ void ADC_clear_EOC_flag(ADC_REG_STRUCT* ADCx){
+__STATIC_INLINE__ void ADC_clear_EOC_flag(ADC_TypeDef* ADCx){
 	// Clear the EOC Flag
 	ADCx->SR.REG &= ~(1 << 1);
  }

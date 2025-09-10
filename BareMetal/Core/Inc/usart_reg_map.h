@@ -127,6 +127,6 @@ typedef struct {
 		} BIT;
 	} GTPR;
 
-} USART_REG_STRUCT;
+} USART_TypeDef;
 
 #endif /* __USART_REG_MAP_H__ */

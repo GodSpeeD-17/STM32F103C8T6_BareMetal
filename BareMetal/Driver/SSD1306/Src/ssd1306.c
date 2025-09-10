@@ -14,7 +14,7 @@ static SSD1306_pix_t SSD1306_coordinates = {
  * @param[in] cmd SSD1306 Command
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_CMD(I2C_REG_STRUCT* I2Cx, uint8_t cmd){
+void SSD1306_I2C_CMD(I2C_TypeDef* I2Cx, uint8_t cmd){
 	// Occupy the I2C Bus
 	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
@@ -30,7 +30,7 @@ void SSD1306_I2C_CMD(I2C_REG_STRUCT* I2Cx, uint8_t cmd){
  * @param[in] cmdArrayLen Length of the array storing the SSD1306 Commands
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen){
+void SSD1306_I2C_cmdArray(I2C_TypeDef* I2Cx, uint8_t* cmdArray, uint16_t cmdArrayLen){
 	// Occupy the I2C Bus
 	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
@@ -45,7 +45,7 @@ void SSD1306_I2C_cmdArray(I2C_REG_STRUCT* I2Cx, uint8_t* cmdArray, uint16_t cmdA
  * @param[in] data SSD1306 Command
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_Data(I2C_REG_STRUCT* I2Cx, uint8_t data){
+void SSD1306_I2C_Data(I2C_TypeDef* I2Cx, uint8_t data){
 	// Occupy the I2C Bus
 	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
@@ -61,7 +61,7 @@ void SSD1306_I2C_Data(I2C_REG_STRUCT* I2Cx, uint8_t data){
  * @param[in] dataArrayLen Length of the array storing the Data
  * @note Takes care of complete I2C Sequence as well 
  */
-void SSD1306_I2C_dataArray(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen){
+void SSD1306_I2C_dataArray(I2C_TypeDef* I2Cx, uint8_t* dataArray, uint16_t dataArrayLen){
 	// Occupy the I2C Bus
 	SSD1306_I2C_Start(I2Cx);
 	// Send the Command Array
@@ -77,7 +77,7 @@ void SSD1306_I2C_dataArray(I2C_REG_STRUCT* I2Cx, uint8_t* dataArray, uint16_t da
  * @param[in] end Ending Column
  * @note Only valid for Horizontal & Vertical Addressing Mode
  */
-void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
+void SSD1306_setColumnRange(I2C_TypeDef* I2Cx, uint8_t start, uint8_t end){
 	// I2C Start
 	SSD1306_I2C_Start(I2Cx);
 	// Command
@@ -103,7 +103,7 @@ void SSD1306_setColumnRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
  * @param[in] end Ending Page
  * @note Only valid for Horizontal & Vertical Addressing Mode
  */
-void SSD1306_setPageRange(I2C_REG_STRUCT* I2Cx, uint8_t start, uint8_t end){
+void SSD1306_setPageRange(I2C_TypeDef* I2Cx, uint8_t start, uint8_t end){
 	// I2C Start
 	SSD1306_I2C_Start(I2Cx);
 	// Command
@@ -145,7 +145,7 @@ uint8_t SSD1306_DMA_Get_Cursor_Y(void){
  * @param[in] Y Y-Coordinate (Along the Page)
  * @note Only valid for Page Addressing Mode
  */
-void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y){
+void SSD1306_gotoXY(I2C_TypeDef* I2Cx, uint8_t X, uint8_t Y){
 	// Wrap X, Y
 	X &= 0x7F; Y &= 0x3F; 
 	// Mathematical Calculations to obtain the Commands
@@ -165,7 +165,7 @@ void SSD1306_gotoXY(I2C_REG_STRUCT* I2Cx, uint8_t X, uint8_t Y){
  * @param[in] color 0x00: Black; 0xFF: White
  * @note Column Storage: TOP: LSB --> BOTTOM: MSB
  */
-void SSD1306_fillDisp(I2C_REG_STRUCT* I2Cx, uint8_t color){
+void SSD1306_fillDisp(I2C_TypeDef* I2Cx, uint8_t color){
 	// Command Array
 	uint8_t cmdArray[3] = { SSD1306_CMD_PAGE_MODE_SET_PAGE(0), 
 							SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0), 
@@ -193,7 +193,7 @@ void SSD1306_fillDisp(I2C_REG_STRUCT* I2Cx, uint8_t color){
  * @param[in] X2 Bottom right X-coordinate
  * @param[in] Y2 Bottom right Y-coordinate
  */
-void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, uint8_t Y2){
+void SSD1306_fillRect(I2C_TypeDef* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, uint8_t Y2){
 	// TODO: Implement this logic
 	if((X1 > X2) || (Y1 > Y2))
 		return;
@@ -258,7 +258,7 @@ void SSD1306_fillRect(I2C_REG_STRUCT* I2Cx, uint8_t X1, uint8_t Y1, uint8_t X2, 
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  * @param[in] c Character to display
  */
-void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c){
+void SSD1306_I2C_dispChar(I2C_TypeDef* I2Cx, char c){
 	// Send character data
 	SSD1306_I2C_dataArray(I2Cx, font8x8[font_get_index(font8x8, c)], 8);
 }
@@ -269,7 +269,7 @@ void SSD1306_I2C_dispChar(I2C_REG_STRUCT* I2Cx, char c){
  * @param[in] str String to display
  * @param[in] strLength Length of String
  */
-void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str){
+void SSD1306_I2C_dispString(I2C_TypeDef* I2Cx, const char* str){
 	// Local Variable
 	char c = 0xFF; uint8_t index = 0;
 	// Capture I2C Bus
@@ -293,7 +293,7 @@ void SSD1306_I2C_dispString(I2C_REG_STRUCT* I2Cx, const char* str){
  * @param[in] dataArray The array of data
  * @note The data size should be of 1024 bytes
  */
-void SSD1306_I2C_dispFullScreen(I2C_REG_STRUCT* I2Cx, const uint8_t* dataArray){
+void SSD1306_I2C_dispFullScreen(I2C_TypeDef* I2Cx, const uint8_t* dataArray){
 	// Command Array
 	uint8_t cmdArray[3] = {SSD1306_CMD_PAGE_MODE_SET_PAGE(0), 
 		SSD1306_CMD_PAGE_MODE_SET_COL_LOWER_NIBBLE(0),

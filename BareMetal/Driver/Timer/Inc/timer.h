@@ -68,7 +68,7 @@ void TIM_Config(timer_config_t* TIMx_CONFIG);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-__STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+__STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Capture the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -97,7 +97,7 @@ __STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered
  */
-__STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* TIMx){
 	// Get the Status Register Value
 	return (TIMx->SR.REG & 0x01);
 }
@@ -107,7 +107,7 @@ __STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_REG_STRUCT* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-__STATIC_INLINE__ void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
+__STATIC_INLINE__ void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Get the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -133,7 +133,7 @@ __STATIC_INLINE__ void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ){
  * @brief Acknowledges the Overflow/Underflow Interrupt Status
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_IRQ_Ack_OVF_UVF(TIM_REG_STRUCT* TIMx){
+__STATIC_INLINE__ void TIM_IRQ_Ack_OVF_UVF(TIM_TypeDef* TIMx){
 	// Acknowledge the Interrupt Flag
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }
@@ -147,7 +147,7 @@ __STATIC_INLINE__ void TIM_IRQ_Ack_OVF_UVF(TIM_REG_STRUCT* TIMx){
  * @note - Timer is upcounter
  * @note - Timer Channel 1 is used for output compare
  */
-void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs);
+void TIM_delay_us(TIM_TypeDef* TIMx, uint32_t delayUs);
 
 /**
  * @brief Creates a delay using Timer
@@ -158,28 +158,28 @@ void TIM_delay_us(TIM_REG_STRUCT* TIMx, uint32_t delayUs);
  * @note - Timer is upcounter
  * @note - Timer Channel 1 is used for output compare
  */
-void TIM_delay_ms(TIM_REG_STRUCT* TIMx, uint32_t delayMs);
+void TIM_delay_ms(TIM_TypeDef* TIMx, uint32_t delayMs);
 
 /**
  * @brief Enables Timer Interrupt for mentioned Interrupt
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Enable(TIM_TypeDef* TIMx, tim_irq_t IRQ);
 
 /**
  * @brief Disables Timer Interrupt for mentioned Interrupt
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Disable(TIM_TypeDef* TIMx, tim_irq_t IRQ);
 
 /**
  * @brief Timer Interrupt Flag Acknowledge
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ);
 
 /**
  * @brief Retrieves the Interrupt Status
@@ -188,20 +188,20 @@ void TIM_IRQ_Ack(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-uint8_t TIM_IRQ_Get_Status(TIM_REG_STRUCT* TIMx, tim_irq_t IRQ);
+uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ);
 
 /**
  * @brief Resets the General Purpose TIMx
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-void TIM_Reset(TIM_REG_STRUCT* TIMx);
+void TIM_Reset(TIM_TypeDef* TIMx);
 
 /**
  * @brief Provides the Timer Frequency
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @returns Timer Frequency (in Hz)
  */
-uint32_t TIM_Get_Frequency(TIM_REG_STRUCT* TIMx);
+uint32_t TIM_Get_Frequency(TIM_TypeDef* TIMx);
 
 
 #endif /* __TIMER_H__ */

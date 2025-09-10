@@ -39,6 +39,6 @@ typedef struct {
 			volatile uint32_t NOREF: 1;
 		} BIT;
 	} CALIB;
-} SYSTICK_REG_STRUCT;
+} SysTick_TypeDef;
 
 #endif /* __SYSTICK_REG_MAP_H__ */ 

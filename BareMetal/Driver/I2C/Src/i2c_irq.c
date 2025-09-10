@@ -13,7 +13,7 @@ static uint32_t reg = 0x00;
  * 		  - `I2Cx_IRQ_ERROR`
  * 		  - `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_Enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
+void I2C_IRQ_Enable(I2C_TypeDef* I2Cx, uint8_t I2C_IRQ_status){
 	// Temporary Register
 	reg = I2Cx->CR2.REG;
 	// Enables the I2C Event Interrupt
@@ -42,7 +42,7 @@ void I2C_IRQ_Enable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
  * 		  - `I2Cx_IRQ_ERROR`
  * 		  - `I2Cx_IRQ_ALL`
  */
-void I2C_IRQ_Disable(I2C_REG_STRUCT* I2Cx, uint8_t I2C_IRQ_status){
+void I2C_IRQ_Disable(I2C_TypeDef* I2Cx, uint8_t I2C_IRQ_status){
 	// Temporary Register
 	reg = I2Cx->CR2.REG;
 	// Enables the I2C Event Interrupt
