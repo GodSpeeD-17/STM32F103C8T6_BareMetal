@@ -175,6 +175,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick
 	OB_LED_Config();
+	OB_LED_Reset();
 	// Step 6: Call main()
 	main();
 	// Step 7: Default Handler (Should never be reached)

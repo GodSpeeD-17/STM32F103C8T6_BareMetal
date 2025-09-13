@@ -7,14 +7,13 @@
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
 int main(){
-	// Initialisation
-	gpio_config_t ledConfig = {
-		.pin = LED_PIN,
-		.mode = LED_MODE,
-		.config = LED_CONFIG
+	// Configure LEDs
+	gpio_config_t multiLedConfig = {
+		.pin = (RED_LED_GPIO_PIN | YELLOW_LED_GPIO_PIN),
 	};
-	GPIO_Config(LED_PORT, &ledConfig);
-	GPIO_Set(LED_PORT, LED_PIN);
+	GPIO_LED_Config(RED_LED_GPIO_PORT, &multiLedConfig);
+	GPIO_Set(RED_LED_GPIO_PORT, RED_LED_GPIO_PIN);
+	GPIO_Reset(YELLOW_LED_GPIO_PORT, YELLOW_LED_GPIO_PIN);
 
 	// Infinite Loop
 	while(1){
@@ -22,8 +21,9 @@ int main(){
 		OB_LED_Toggle();
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
-		// Toggle external LED
-		GPIO_Toggle(LED_PORT, LED_PIN);
+		// Toggle LEDs
+		GPIO_Toggle(RED_LED_GPIO_PORT, RED_LED_GPIO_PIN);
+		GPIO_Toggle(YELLOW_LED_GPIO_PORT, YELLOW_LED_GPIO_PIN);
 	}
 	// Return Value
 	return 0;

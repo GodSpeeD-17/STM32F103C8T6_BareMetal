@@ -115,6 +115,27 @@ driver_status_t GPIO_Deconfig(gpio_port_t gpio, gpio_config_t* const gpioConfig)
 }
 
 /**
+ * @brief Configures the LED connected to the specified GPIO Port and Pin
+ * @param gpio GPIO Port (Refer `gpio_port_t`)
+ * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t GPIO_LED_Config(gpio_port_t gpio, gpio_config_t* gpioConfig){
+	// Validate GPIO Port Support on Hardware
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
+	if(GPIOx == NULL){
+		return DRIVER_FAIL;
+	}
+	// Update the GPIO Configuration Structure for LED
+	gpioConfig->mode = GPIO_MODE_OUTPUT_10MHz;
+	gpioConfig->config = GPIO_CNF_OUT_GP_PP;
+	// Call GPIO Config()
+	return GPIO_Config(gpio, gpioConfig);
+}
+
+/**
  * @brief Configures the On-board LED
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure

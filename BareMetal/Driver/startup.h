@@ -14,6 +14,8 @@
 #include <errno.h>
 // SysTick Configuration
 #include "systick.h"
+// GPIO Configuration
+#include "gpio.h"
 // Use Timer for Delay
 #ifndef __SYSTICK_DELAY__
 #include "timer.h"

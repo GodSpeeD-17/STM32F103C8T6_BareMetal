@@ -10,7 +10,13 @@
 
 /*-------------------------------------------------------------------------------*/
 // MACROS
-#define LOOP_DELAY_MS						(1000)
+#define LOOP_DELAY_MS						(10)
+#define RED_LED_GPIO_PORT					(GPIO_PORT_A)
+#define RED_LED_GPIO_PIN					(GPIO_PIN_2)
+#define YELLOW_LED_GPIO_PORT				(GPIO_PORT_A)
+#define YELLOW_LED_GPIO_PIN					(GPIO_PIN_3)
+#define PUSH_BUTTON_PORT                    (GPIO_PORT_A)
+#define PUSH_BUTTON_PIN                     (GPIO_PIN_1)
 /*-------------------------------------------------------------------------------*/
 
 #endif /* __MAIN_H__ */

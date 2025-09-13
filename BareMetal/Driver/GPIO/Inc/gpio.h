@@ -87,6 +87,16 @@ __STATIC_INLINE__ void OB_LED_Toggle(void){
 driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig);
 
 /**
+ * @brief Configures the LED connected to the specified GPIO Port and Pin
+ * @param gpio GPIO Port (Refer `gpio_port_t`)
+ * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t GPIO_LED_Config(gpio_port_t gpio, gpio_config_t* gpioConfig);
+
+/**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
  * @param gpio GPIO Port (Refer `gpio_port_t`)
  * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
