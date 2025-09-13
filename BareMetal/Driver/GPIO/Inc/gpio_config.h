@@ -2,109 +2,94 @@
 #ifndef __GPIO_CONFIG_H__
 #define __GPIO_CONFIG_H__
 
-// Register Address Mapping
+/*********************************************** Includes ***********************************************/
 #include "reg_map.h"
-// Include RCC for clock enabling
 #include "rcc.h"
 
-// Legacy Support
-#define __OLD_GPIO_METHOD__
-
-// GPIO Configuration Structure
+/*********************************************** GPIO Configuration Structure ***********************************************/
 typedef struct {
-	// Old GPIO Method
-	#ifdef __OLD_GPIO_METHOD__
-	// GPIO Port
-	// - `GPIOA`
-	// - `GPIOB`
-	// - `GPIOC`
-	// - `GPIOD`
-	GPIO_TypeDef* GPIO;
 	// GPIO Pin
-	// - `GPIOx_PIN_XY`
-	uint8_t PIN: 4;
-	// GPIO Pin Mode
-	// - `GPIOx_MODE_INPUT`
-	// - `GPIOx_MODE_OUT_10MHz`
-	// - `GPIOx_MODE_OUT_2MHz`
-	// - `GPIOx_MODE_OUT_50MHz`
-	uint8_t MODE: 2;
-	// GPIO Pin Configuration
-	// - Input Configuration:
-	// `GPIOx_CNF_IN_ANALOG`, `GPIOx_CNF_IN_FLOAT`
-	// `GPIOx_CNF_IN_PD`, `GPIOx_CNF_IN_PU`
-	// - Output Configuration:
-	// `GPIOx_CNF_OUT_GP_PP`, `GPIOx_CNF_OUT_GP_OD`
-	// `GPIOx_CNF_OUT_AF_PP`, `GPIOx_CNF_OUT_AF_OD`
-	uint8_t CNF: 2;
-	#else
-		// GPIO
-		GPIO_TypeDef* instance;
-		// GPIO Pin
-		gpio_pin_t pin: 4;
-		// GPIO Mode
-		gpio_mode_t mode: 2;
-		// GPIO Configuration
-		union {
-			gpio_cnf_t cnf: 2;
-			gpio_state_input_t in_config: 2;
-			gpio_state_output_t out_config: 2;
-		};
-	#endif /* __OLD_GPIO_METHOD__ */
+	gpio_pin_t pin: 16;
+	// GPIO Mode
+	gpio_mode_t mode: 2;
+	// GPIO Configuration
+	gpio_cnf_t config: 2;
 } gpio_config_t;
 
+/*********************************************** Helper Functions ***********************************************/
 /**
- * @brief Enables Clock for respective GPIO
- * @param GPIO The GPIO Port
+ * @brief Enables the clock for the specified GPIO port
+ * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void GPIO_Clk_Enable(GPIO_TypeDef* GPIO){
-	// Enable Clock for respective GPIO
-	if(GPIO == GPIOA){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPAEN;
-	}
-	else if (GPIO == GPIOB){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPBEN;
-	}
-	else if (GPIO == GPIOC){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPCEN;
-	}
-	else if (GPIO == GPIOD){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPDEN;
-	}
-	else if (GPIO == GPIOE){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_IOPEEN;
-	}
-	// Error
-	else{
-		return;
-	}
+__STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort){
+	// Enable Clock for GPIO Port
+	RCC->APB2ENR.REG |= (1 << (2 + thisPort));
 }
 
 /**
- * @brief Disables Clock for respective GPIO
- * @param GPIO The GPIO Configuration Structure
+ * @brief Disables the clock for the specified GPIO port
+ * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void GPIO_Clk_Disable(GPIO_TypeDef* GPIO){
-	// Disable Clock for respective GPIO
-	if(GPIO == GPIOA){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;
-	}
-	else if (GPIO == GPIOB){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPBEN;
-	}
-	else if (GPIO == GPIOC){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPCEN;
-	}
-	else if (GPIO == GPIOD){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPDEN;
-	}
-	else if (GPIO == GPIOE){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPEEN;
-	}
-	// Error
-	else{
-		return;
-	}
-} 
+__STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort){
+	// Disables Clock for GPIO Port
+	RCC->APB2ENR.REG &= ~(1 << (2 + thisPort));
+}
 
-#endif /* __GPIO_CONFIG_H__ */ 
+/**
+ * @brief Retrieves the pin position (0-15) based on the provided pin mask
+ * @param pinMask Mask representing the specific GPIO pin
+ * @return GPIO Pin Number
+ */
+__STATIC_INLINE__ uint8_t __GPIO_getPin__(const gpio_pin_t pinMask){
+	// Retrieve Pin Position (0-15)
+	if(pinMask == 0x00)
+		return (uint8_t) 0x00;
+	else
+		return (uint8_t) __builtin_ctz(pinMask);
+}
+
+/**
+ * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
+ * @param pinMask Mask representing the specific GPIO pin to be configured
+ * @param gpioODRReg Pointer to the output data register (ODR) to be updated
+ * @note Pass only single pin not logical combination of Pins 
+ */
+__STATIC_INLINE__ void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32_t* gpioODRReg){
+	*gpioODRReg &= ~(pinMask);
+}
+
+/**
+ * @brief Retrieves the GPIO Port structure based on port enumeration
+ * @param thisPort GPIO Port Enumeration `gpio_port_t` 
+ * @return GPIO_TypeDef* Pointer to the GPIO Port structure
+ */
+GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort);
+
+/**
+ * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
+ * @param pinMask Mask representing the specific GPIO pin to be configured
+ * @param gpioMode GPIO Mode Enumeration `gpio_mode_t`
+ * @param gpioCnf GPIO Configuration Enumeration `gpio_cnf_t`
+ * @param gpioCtrlReg Pointer to the control register (CRL or CRH) to be updated
+ * @note Pass only single pin not logical combination of Pins 
+ */
+void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, gpio_mode_t gpioMode, gpio_cnf_t gpioCnf, uint32_t* gpioCtrlReg);
+
+/**
+ * @brief Resets the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
+ * @param pinMask Mask representing the specific GPIO pin to be configured
+ * @param gpioCtrlReg Pointer to the control register (CRL or CRH) to be updated
+ * @note Pass only single pin not logical combination of Pins
+ */
+void __GPIO_resetCtrlRegister__(const gpio_pin_t pinMask, uint32_t* gpioCtrlReg);
+
+/**
+ * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
+ * @param pinMask Mask representing the specific GPIO pin to be configured
+ * @param gpioCnf GPIO Configuration Enumeration `gpio_cnf_t`
+ * @param gpioODRReg Pointer to the output data register (ODR) to be updated
+ * @note Pass only single pin not logical combination of Pins 
+ */
+void __GPIO_updatePullConfig__(const gpio_pin_t pinMask, gpio_cnf_t gpioCnf, uint32_t* gpioODRReg);
+
+#endif /* __GPIO_CONFIG_H__ */

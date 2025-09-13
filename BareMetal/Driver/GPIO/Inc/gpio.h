@@ -1,103 +1,115 @@
-/***************************************************************************************
- *  File: gpio.h
- *  Created on: 14/09/2024
- *  Author: Shrey Shah
- ***************************************************************************************/
-
 // Header Guards
-#ifndef __GPIO__H__
-#define __GPIO__H__
+#ifndef __GPIO_H__
+#define __GPIO_H__
 
-// Register Address Mapping
+// Includes
 #include "gpio_config.h"
 
-// On-board LED MACROs (Active-Low)
-#define OB_LED_Set()				OB_LED_PORT->BRR.REG |= (1 << OB_LED_PIN)
-#define OB_LED_Reset()				OB_LED_PORT->BSRR.REG |= (1 << OB_LED_PIN)
-#define OB_LED_Toggle()				OB_LED_PORT->ODR.REG ^= (1 << OB_LED_PIN)
-
 /**
- * @brief Configures the GPIO based upon gpio structure
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
+ * @brief Sets the GPIO 
+ * @param gpioPort GPIO Port 
+ * @param gpioPin GPIO Pin
+ * @note Atomicity
  */
-void GPIO_Config(gpio_config_t* GPIOx_CONFIG);
-
-/**
- * @brief De-configures the GPIO based upon gpio structure
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
- */
-void GPIO_DeConfig(gpio_config_t* GPIOx_CONFIG);
-
-/**
- * @brief Configures the GPIO assuming LED
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
- */
-__STATIC_INLINE__ void GPIO_Config_LED(gpio_config_t* GPIOx_CONFIG){
-	#ifdef __OLD_GPIO_METHOD__
-	// Set Mode to Output at 10MHz
-	GPIOx_CONFIG->MODE = GPIOx_MODE_OUT_10MHz;
-	// Set Configuration to General Purpose Push-Pull
-	GPIOx_CONFIG->CNF = GPIOx_CNF_OUT_GP_PP;
-	#else
-	GPIOx_CONFIG->mode = GPIO_MODE_OUTPUT_10MHz;
-	GPIOx_CONFIG->cnf = GPIO_CNF_OUT_GP_PP;
-	#endif /* __OLD_GPIO_METHOD__ */
-	// Configure GPIO
-	GPIO_Config(GPIOx_CONFIG);
+__STATIC_INLINE__ void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
+	if(GPIOx != NULL)
+		GPIOx->BSRR.REG |= gpioPin;
 }
 
 /**
- * @brief Sets the state of GPIO Pin to HIGH
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
+ * @brief Resets the GPIO 
+ * @param gpioPort GPIO Port 
+ * @param gpioPin GPIO Pin
+ * @note Atomicity
  */
-__STATIC_INLINE__ void GPIO_Set(gpio_config_t* GPIOx_CONFIG){
-	#ifdef __OLD_GPIO_METHOD__
-	// Bit Set (Atomicity)
-	GPIOx_CONFIG->GPIO->BSRR.REG |= (1 << GPIOx_CONFIG->PIN);
-	#else
-	GPIOx_CONFIG->instance->BSRR.REG |= (1 << GPIOx_CONFIG->pin);
-	#endif /* __OLD_GPIO_METHOD__ */
+__STATIC_INLINE__ void GPIO_Reset(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
+	if(GPIOx != NULL)
+		GPIOx->BRR.REG |= gpioPin;
 }
 
 /**
- * @brief Sets the state of GPIO Pin to LOW
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
+ * @brief Toggles the GPIO 
+ * @param gpioPort GPIO Port 
+ * @param gpioPin GPIO Pin
  */
-__STATIC_INLINE__ void GPIO_Reset(gpio_config_t* GPIOx_CONFIG){
-	#ifdef __OLD_GPIO_METHOD__
-	// Bit Reset (Atomicity)
-	GPIOx_CONFIG->GPIO->BRR.REG |= (1 << GPIOx_CONFIG->PIN);
-	#else
-	GPIOx_CONFIG->instance->BRR.REG |= (1 << GPIOx_CONFIG->pin);
-	#endif /* __OLD_GPIO_METHOD__ */
+__STATIC_INLINE__ void GPIO_Toggle(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
+	if(GPIOx != NULL)
+		GPIOx->ODR.REG ^= gpioPin;
 }
 
 /**
- * @brief Toggles the state of GPIO Pin
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
+ * @brief Retrieves the GPIO Status 
+ * @param gpioPort GPIO Port 
+ * @param gpioPin GPIO Pin
  */
-__STATIC_INLINE__ void GPIO_Toggle(gpio_config_t* GPIOx_CONFIG){
-	#ifdef __OLD_GPIO_METHOD__
-	// Output Data Register
-	GPIOx_CONFIG->GPIO->ODR.REG ^= (1 << GPIOx_CONFIG->PIN);
-	#else
-	GPIOx_CONFIG->instance->ODR.REG ^= (1 << GPIOx_CONFIG->pin);
-	#endif /* __OLD_GPIO_METHOD__ */
+__STATIC_INLINE__ uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
+	if(GPIOx != NULL){
+		return ((uint8_t) ((GPIOx->IDR.REG & gpioPin) ? (0x01) : (0x00)));
+	}
 }
 
 /**
- * @brief Retrieves the state of GPIO Pin
- * @param[in] GPIOx_CONFIG GPIO Configuration Structure
- * @returns Pin State
+ * @brief Sets the On-board (OB) LED
+ * @note OB LED is active LOW
  */
-uint8_t GPIO_Get_State(gpio_config_t* GPIOx_CONFIG);
+__STATIC_INLINE__ void OB_LED_Set(void){
+	GPIO_Reset(OB_LED_PORT, OB_LED_PIN);
+}
 
 /**
- * @brief Configures On-board LED
- * @note This function configures the on-board LED (OB_LED) for output mode at 2MHz
- *       with general-purpose push-pull configuration.
- * @note The on-board LED is active-low, meaning it turns ON when the pin is set to LOW.
+ * @brief Resets the On-board (OB) LED
+ * @note OB LED is active LOW
  */
-void OB_LED_Config(void);
+__STATIC_INLINE__ void OB_LED_Reset(void){
+	GPIO_Set(OB_LED_PORT, OB_LED_PIN);
+}
 
-#endif /* __GPIO__H__ */
+/**
+ * @brief Toggles the On-board (OB) LED
+ * @note OB LED is active LOW
+ */
+__STATIC_INLINE__ void OB_LED_Toggle(void){
+	GPIO_Toggle(OB_LED_PORT, OB_LED_PIN);
+}
+
+/**
+ * @brief Configures GPIO Port based on GPIO Configuration Structure
+ * @param gpio GPIO Port (Refer `gpio_port_t`)
+ * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig);
+
+/**
+ * @brief Configures GPIO Port based on GPIO Configuration Structure
+ * @param gpio GPIO Port (Refer `gpio_port_t`)
+ * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t GPIO_Deconfig(gpio_port_t gpio, gpio_config_t* const gpioConfig);
+
+/**
+ * @brief Configures the On-board LED
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t OB_LED_Config(void);
+
+/**
+ * @brief Deconfigures the On-board LED
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t OB_LED_Deconfig(void);
+
+#endif /* __GPIO_H__ */

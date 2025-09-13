@@ -874,14 +874,21 @@
 #define RCC_APB2ENR_IOPDEN_Pos               (5U)                              
 #define RCC_APB2ENR_IOPDEN_Msk               (0x1UL << RCC_APB2ENR_IOPDEN_Pos)  /*!< 0x00000020 */
 #define RCC_APB2ENR_IOPDEN                   RCC_APB2ENR_IOPDEN_Msk            /*!< I/O port D clock enable */
+#define RCC_APB2ENR_IOPEEN_Pos               (6U)                              
+#define RCC_APB2ENR_IOPEEN_Msk               (0x1UL << RCC_APB2ENR_IOPEEN_Pos)  /*!< 0x00000040 */
+#define RCC_APB2ENR_IOPEEN                   RCC_APB2ENR_IOPEEN_Msk            /*!< I/O port E clock enable */
+#define RCC_APB2ENR_IOPFEN_Pos               (7U)                              
+#define RCC_APB2ENR_IOPFEN_Msk               (0x1UL << RCC_APB2ENR_IOPFEN_Pos)  /*!< 0x00000080 */
+#define RCC_APB2ENR_IOPFEN                   RCC_APB2ENR_IOPFEN_Msk            /*!< I/O port F clock enable */
+#define RCC_APB2ENR_IOPGEN_Pos               (8U)                              
+#define RCC_APB2ENR_IOPGEN_Msk               (0x1UL << RCC_APB2ENR_IOPGEN_Pos)  /*!< 0x00000100 */
+#define RCC_APB2ENR_IOPGEN                   RCC_APB2ENR_IOPGEN_Msk            /*!< I/O port G clock enable */
 #define RCC_APB2ENR_ADC1EN_Pos               (9U)                              
 #define RCC_APB2ENR_ADC1EN_Msk               (0x1UL << RCC_APB2ENR_ADC1EN_Pos)  /*!< 0x00000200 */
 #define RCC_APB2ENR_ADC1EN                   RCC_APB2ENR_ADC1EN_Msk            /*!< ADC 1 interface clock enable */
-
 #define RCC_APB2ENR_ADC2EN_Pos               (10U)                             
 #define RCC_APB2ENR_ADC2EN_Msk               (0x1UL << RCC_APB2ENR_ADC2EN_Pos)  /*!< 0x00000400 */
 #define RCC_APB2ENR_ADC2EN                   RCC_APB2ENR_ADC2EN_Msk            /*!< ADC 2 interface clock enable */
-
 #define RCC_APB2ENR_TIM1EN_Pos               (11U)                             
 #define RCC_APB2ENR_TIM1EN_Msk               (0x1UL << RCC_APB2ENR_TIM1EN_Pos)  /*!< 0x00000800 */
 #define RCC_APB2ENR_TIM1EN                   RCC_APB2ENR_TIM1EN_Msk            /*!< TIM1 Timer clock enable */
@@ -891,14 +898,6 @@
 #define RCC_APB2ENR_USART1EN_Pos             (14U)                             
 #define RCC_APB2ENR_USART1EN_Msk             (0x1UL << RCC_APB2ENR_USART1EN_Pos) /*!< 0x00004000 */
 #define RCC_APB2ENR_USART1EN                 RCC_APB2ENR_USART1EN_Msk          /*!< USART1 clock enable */
-
-
-#define RCC_APB2ENR_IOPEEN_Pos               (6U)                              
-#define RCC_APB2ENR_IOPEEN_Msk               (0x1UL << RCC_APB2ENR_IOPEEN_Pos)  /*!< 0x00000040 */
-#define RCC_APB2ENR_IOPEEN                   RCC_APB2ENR_IOPEEN_Msk            /*!< I/O port E clock enable */
-
-
-
 
 /*****************  Bit definition for RCC_APB1ENR register  ******************/
 #define RCC_APB1ENR_TIM2EN_Pos               (0U)                              

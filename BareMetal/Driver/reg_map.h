@@ -44,6 +44,14 @@
 #define __STATIC_INLINE__					__STATIC__ __INLINE__
 #define __IO								volatile
 #define __PACKED__							__attribute__((__packed__))
+
+/**
+ * @brief Enumeration for Success/Failure for Driver return
+ */
+typedef enum {
+	DRIVER_SUCCESS = (uint8_t) 0x00,
+	DRIVER_FAIL = (uint8_t) 0x01
+} driver_status_t;
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** Core C ***********************************************/
@@ -137,6 +145,29 @@
 #define BIT_SET								(0x01)
 #define BIT_RESET							(0x00)
 
+/**
+ * @brief GPIO Port Enumeration
+ * @note Used to specify the port of a GPIO
+ */
+typedef enum {
+	// GPIO Port A
+	GPIO_PORT_A = (uint8_t) 0x00,
+	// GPIO Port B
+	GPIO_PORT_B = (uint8_t) 0x01,
+	// GPIO Port C
+	GPIO_PORT_C = (uint8_t) 0x02,
+	// GPIO Port D
+	GPIO_PORT_D = (uint8_t) 0x03,
+	// GPIO Port E
+	GPIO_PORT_E = (uint8_t) 0x04,
+	// GPIO Port F
+	GPIO_PORT_F = (uint8_t) 0x05,
+	// GPIO Port G
+	GPIO_PORT_G = (uint8_t) 0x06,
+	// On-board (OB) LED Port
+	GPIO_PORT_OB_LED = GPIO_PORT_C
+} gpio_port_t;
+
 // GPIO PIN
 #define GPIOx_PIN_0							(0x00)
 #define GPIOx_PIN_1							(0x01)
@@ -162,24 +193,25 @@
  * @note Used to specify the pin number of a GPIO
  */
 typedef enum {
-	GPIO_PIN_0 = 0x00,
-	GPIO_PIN_1 = 0x01,
-	GPIO_PIN_2 = 0x02,
-	GPIO_PIN_3 = 0x03,
-	GPIO_PIN_4 = 0x04,
-	GPIO_PIN_5 = 0x05,
-	GPIO_PIN_6 = 0x06,
-	GPIO_PIN_7 = 0x07,
-	GPIO_PIN_8 = 0x08,
-	GPIO_PIN_9 = 0x09,
-	GPIO_PIN_10 = 0x0A,
-	GPIO_PIN_11 = 0x0B,
-	GPIO_PIN_12 = 0x0C,
-	GPIO_PIN_13 = 0x0D,
-	GPIO_PIN_14 = 0x0E,
-	GPIO_PIN_15 = 0x0F
+	GPIO_PIN_0 = (uint16_t) 0x0001,
+	GPIO_PIN_1 = (uint16_t) 0x0002,
+	GPIO_PIN_2 = (uint16_t) 0x0004,
+	GPIO_PIN_3 = (uint16_t) 0x0008,
+	GPIO_PIN_4 = (uint16_t) 0x0010,
+	GPIO_PIN_5 = (uint16_t) 0x0020,
+	GPIO_PIN_6 = (uint16_t) 0x0040,
+	GPIO_PIN_7 = (uint16_t) 0x0080,
+	GPIO_PIN_8 = (uint16_t) 0x0100,
+	GPIO_PIN_9 = (uint16_t) 0x0200,
+	GPIO_PIN_10 = (uint16_t) 0x0400,
+	GPIO_PIN_11 = (uint16_t) 0x0800,
+	GPIO_PIN_12 = (uint16_t) 0x1000,
+	GPIO_PIN_13 = (uint16_t) 0x2000,
+	GPIO_PIN_14 = (uint16_t) 0x4000,
+	GPIO_PIN_15 = (uint16_t) 0x8000,
+	GPIO_PIN_ALL = (uint16_t) 0xFFFF,
+	GPIO_PIN_OB_LED = GPIO_PIN_13
 } gpio_pin_t;
-
 
 // MODE
 #define GPIOx_MODE_IN						(0x00)
@@ -193,13 +225,13 @@ typedef enum {
  */
 typedef enum {
 	// GPIO as Input
-	GPIO_MODE_INPUT = 0x00,
+	GPIO_MODE_INPUT = (uint8_t) 0x00,
 	// GPIO as Output @10MHz
-	GPIO_MODE_OUTPUT_10MHz = 0x01,
+	GPIO_MODE_OUTPUT_10MHz = (uint8_t) 0x01,
 	// GPIO as Output @2MHz
-	GPIO_MODE_OUTPUT_2MHz = 0x02,
+	GPIO_MODE_OUTPUT_2MHz = (uint8_t) 0x02,
 	// GPIO as Output @50MHz
-	GPIO_MODE_OUTPUT_50MHz = 0x03
+	GPIO_MODE_OUTPUT_50MHz = (uint8_t) 0x03
 } gpio_mode_t;
 
 // CONFIGURATION
@@ -217,14 +249,14 @@ typedef enum {
  * @note Configuration options vary based on whether the pin is set as input or output
  */
 typedef enum {
-	GPIO_CNF_IN_ANALOG = 0x00,
-	GPIO_CNF_IN_FLOAT = 0x01,
-	GPIO_CNF_IN_PD = 0x03,
-	GPIO_CNF_IN_PU = 0x04,
-	GPIO_CNF_OUT_GP_PP = 0x00,
-	GPIO_CNF_OUT_GP_OD = 0x01,
-	GPIO_CNF_OUT_AF_PP = 0x02,
-	GPIO_CNF_OUT_AF_OD = 0x03
+	GPIO_CNF_IN_ANALOG = (uint8_t) 0x00,
+	GPIO_CNF_IN_FLOAT = (uint8_t) 0x01,
+	GPIO_CNF_IN_PULL_DOWN = (uint8_t) 0x02,
+	GPIO_CNF_IN_PULL_UP = (uint8_t) 0x03,
+	GPIO_CNF_OUT_GP_PP = (uint8_t) 0x00,
+	GPIO_CNF_OUT_GP_OD = (uint8_t) 0x01,
+	GPIO_CNF_OUT_AF_PP = (uint8_t) 0x02,
+	GPIO_CNF_OUT_AF_OD = (uint8_t) 0x03
 } gpio_cnf_t;
 
 typedef enum {
@@ -240,7 +272,6 @@ typedef enum {
 	GPIO_AF_PUSH_PULL = 0x02,
 	GPIO_AF_OPEN_DRAIN = 0x03
 } gpio_state_output_t;
-
 
 /*********************************************** GPIO MACROS ***********************************************/
 
