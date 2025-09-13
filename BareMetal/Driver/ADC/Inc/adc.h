@@ -8,6 +8,8 @@
 #ifndef __ADC_H__
 #define __ADC_H__
 
+#ifdef  __OLD_GPIO_METHOD__
+
 // Dependency
 #include "reg_map.h"
 #include "gpio.h"			// For Configuration
@@ -233,5 +235,9 @@ __STATIC_INLINE__ void ADC_load_default(adc_config_t* ADC_CONFIGx){
 	// Disable IRQ
 	ADC_CONFIGx->enable_IRQ = ADCx_IRQ_DISABLE;
 }
+
+#endif /* __OLD_GPIO_METHOD__ */
+
+
 
 #endif /* __ADC_H__ */

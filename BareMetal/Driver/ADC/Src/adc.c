@@ -8,6 +8,9 @@
 // Header File
 #include "adc.h"
 
+
+#ifdef  __OLD_GPIO_METHOD__
+
 /**
  * @brief Configures the ADC based upon ADC Configuration Structure
  * @param[in] ADC_CONFIGx ADC Configuration Structure
@@ -72,3 +75,6 @@ uint16_t ADC_get_data(adc_config_t* ADC_CONFIGx){
 	// Return the result
 	return result; 
 }
+
+
+#endif /* __OLD_GPIO_METHOD__ */

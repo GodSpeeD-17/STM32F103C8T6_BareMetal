@@ -23,7 +23,7 @@
 
 /**
  * @brief Enables the NVIC Interrupt for the input IRQn
- * @param[in] IRQn The Interrupt Number
+ * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
 __STATIC_INLINE__ void NVIC_IRQ_Enable(uint8_t IRQn){
@@ -33,7 +33,7 @@ __STATIC_INLINE__ void NVIC_IRQ_Enable(uint8_t IRQn){
 
 /**
  * @brief Disables the NVIC Interrupt for the input IRQn
- * @param[in] IRQn The Interrupt Number
+ * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
 __STATIC_INLINE__ void NVIC_IRQ_Disable(uint8_t IRQn){
@@ -43,7 +43,7 @@ __STATIC_INLINE__ void NVIC_IRQ_Disable(uint8_t IRQn){
 
 /**
  * @brief Software IRQ Trigger
- * @param[in] IRQn The Interrupt Number
+ * @param IRQn The Interrupt Number
  */
 __STATIC_INLINE__ void NVIC_IRQ_Software_Trigger(uint8_t IRQn){
 	// Set Pending Register

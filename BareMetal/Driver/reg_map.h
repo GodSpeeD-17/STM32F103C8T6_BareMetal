@@ -37,6 +37,12 @@
 #ifndef __REG_MAP_H__
 #define __REG_MAP_H__
 
+/*********************************************** Core C ***********************************************/
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+/*********************************************** Core C ***********************************************/
+
 /*********************************************** Custom Declaration ***********************************************/
 // #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
@@ -53,12 +59,6 @@ typedef enum {
 	DRIVER_FAIL = (uint8_t) 0x01
 } driver_status_t;
 /*********************************************** Custom Declaration ***********************************************/
-
-/*********************************************** Core C ***********************************************/
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-/*********************************************** Core C ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
 #include "arm_reg_map.h"
@@ -169,24 +169,24 @@ typedef enum {
 } gpio_port_t;
 
 // GPIO PIN
-#define GPIOx_PIN_0							(0x00)
-#define GPIOx_PIN_1							(0x01)
-#define GPIOx_PIN_2							(0x02)
-#define GPIOx_PIN_3							(0x03)
-#define GPIOx_PIN_4							(0x04)
-#define GPIOx_PIN_5							(0x05)
-#define GPIOx_PIN_6							(0x06)
-#define GPIOx_PIN_7							(0x07)
-#define GPIOx_PIN_8							(0x08)
-#define GPIOx_PIN_9							(0x09)
-#define GPIOx_PIN_10						(0x0A)
-#define GPIOx_PIN_11						(0x0B)
-#define GPIOx_PIN_12						(0x0C)
-#define GPIOx_PIN_13						(0x0D)
-#define GPIOx_PIN_14						(0x0E)
-#define GPIOx_PIN_15						(0x0F)
-#define OB_LED_PORT							GPIOC
-#define OB_LED_PIN							GPIOx_PIN_13
+// #define GPIOx_PIN_0							(0x00)
+// #define GPIOx_PIN_1							(0x01)
+// #define GPIOx_PIN_2							(0x02)
+// #define GPIOx_PIN_3							(0x03)
+// #define GPIOx_PIN_4							(0x04)
+// #define GPIOx_PIN_5							(0x05)
+// #define GPIOx_PIN_6							(0x06)
+// #define GPIOx_PIN_7							(0x07)
+// #define GPIOx_PIN_8							(0x08)
+// #define GPIOx_PIN_9							(0x09)
+// #define GPIOx_PIN_10						(0x0A)
+// #define GPIOx_PIN_11						(0x0B)
+// #define GPIOx_PIN_12						(0x0C)
+// #define GPIOx_PIN_13						(0x0D)
+// #define GPIOx_PIN_14						(0x0E)
+// #define GPIOx_PIN_15						(0x0F)
+// #define OB_LED_PORT							GPIOC
+// #define OB_LED_PIN							GPIOx_PIN_13
 
 /**
  * @brief GPIO Pin Enumeration

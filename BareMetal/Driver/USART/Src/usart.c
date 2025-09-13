@@ -7,6 +7,8 @@
 // Dependency
 #include "usart.h"
 
+#ifdef  __OLD_GPIO_METHOD__
+
 /**
  * @brief Initialises USART based upon input Configuration Structure
  * @param[in] USART_CONFIGx USART Configuration Structure
@@ -265,3 +267,5 @@ void USART_load_default(usart_config_t* USART_CONFIGx){
 	// Enable RX
 	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
 }
+
+#endif /* __OLD_GPIO_METHOD__ */

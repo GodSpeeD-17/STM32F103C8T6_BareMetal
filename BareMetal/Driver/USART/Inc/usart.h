@@ -7,6 +7,8 @@
 #ifndef __USART_H__
 #define __USART_H__
 
+#ifdef  __OLD_GPIO_METHOD__
+
 /*************************************** Dependency ********************************************/
 #include "reg_map.h"
 // Clocks (APB1/APB2)
@@ -286,7 +288,7 @@ void USART_TX_Buffer_Append(const char* str, uint8_t length);
 void USART_RX_Buffer_Append(const char* str, uint8_t length);
 
 
-
+#endif /* __OLD_GPIO_METHOD__ */
 
 
 #endif /* __USART_H__ */

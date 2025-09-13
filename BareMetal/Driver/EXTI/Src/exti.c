@@ -3,8 +3,9 @@
  *  Created on: 17/11/2024
  *  Author: Shrey Shah
  ***************************************************************************************/
-// Global Interrupt
-#include "nvic.h"
+
+#ifdef  __OLD_GPIO_METHOD__
+
 // EXTI Configuration
 #include "exti.h"
 
@@ -89,3 +90,5 @@ void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx){
 		NVIC_IRQ_Enable(EXTI_IRQn[6]);
 	}
 }
+
+#endif /* __OLD_GPIO_METHOD__ */

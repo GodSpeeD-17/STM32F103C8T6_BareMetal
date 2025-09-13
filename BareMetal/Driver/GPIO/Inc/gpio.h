@@ -57,7 +57,7 @@ __STATIC_INLINE__ uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin){
  * @note OB LED is active LOW
  */
 __STATIC_INLINE__ void OB_LED_Set(void){
-	GPIO_Reset(OB_LED_PORT, OB_LED_PIN);
+	GPIO_Reset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /**
@@ -65,7 +65,7 @@ __STATIC_INLINE__ void OB_LED_Set(void){
  * @note OB LED is active LOW
  */
 __STATIC_INLINE__ void OB_LED_Reset(void){
-	GPIO_Set(OB_LED_PORT, OB_LED_PIN);
+	GPIO_Set(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /**
@@ -73,7 +73,7 @@ __STATIC_INLINE__ void OB_LED_Reset(void){
  * @note OB LED is active LOW
  */
 __STATIC_INLINE__ void OB_LED_Toggle(void){
-	GPIO_Toggle(OB_LED_PORT, OB_LED_PIN);
+	GPIO_Toggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /**

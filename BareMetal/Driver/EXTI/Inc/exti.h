@@ -8,12 +8,16 @@
 #ifndef __EXTI_H__
 #define __EXTI_H__
 
+#ifdef  __OLD_GPIO_METHOD__
+
 // Register Map
 #include "reg_map.h"
 // GPIO
 #include "gpio.h"
 // Alternate Function I/O
 #include "rcc.h"
+ // Global Interrupt
+#include "nvic.h"
 
 /**
  * @brief Enables the External Interrupt
@@ -87,5 +91,7 @@ void EXTI_Trigger_Set(uint8_t PINx, uint8_t TRIGx);
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_RISING`, `EXTI_TRIG_BOTH`
  */
 void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx);
+
+#endif /* __OLD_GPIO_METHOD__ */
 
 #endif /* __EXTI_H__ */

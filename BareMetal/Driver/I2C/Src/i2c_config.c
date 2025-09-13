@@ -1,6 +1,8 @@
 // Dependency
 #include "i2c_config.h"
 
+#ifdef  __OLD_GPIO_METHOD__
+
 /**
  * @brief Calculates the value of TRISE (TRISE) for I2C Module
  * @param i2cMode I2C Mode: `I2Cx_MODE_FAST`, `I2Cx_MODE_STD`
@@ -147,3 +149,5 @@ void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C Clock Control Register
 	I2C_CONFIGx->CCR = I2C_Calc_CCR(I2C_CONFIGx->mode, I2C_CONFIGx->duty, I2C_CONFIGx->freq_MHz);
 }
+
+#endif /* __OLD_GPIO_METHOD__ */
