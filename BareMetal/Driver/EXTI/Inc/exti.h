@@ -8,8 +8,6 @@
 #ifndef __EXTI_H__
 #define __EXTI_H__
 
-#ifdef  __OLD_GPIO_METHOD__
-
 // Register Map
 #include "reg_map.h"
 // GPIO
@@ -18,6 +16,8 @@
 #include "rcc.h"
  // Global Interrupt
 #include "nvic.h"
+
+#ifdef  __OLD_GPIO_METHOD__
 
 /**
  * @brief Enables the External Interrupt
@@ -91,6 +91,80 @@ void EXTI_Trigger_Set(uint8_t PINx, uint8_t TRIGx);
  * @param[in] TRIGx `EXTI_TRIG_FALLING`, `EXTI_TRIG_RISING`, `EXTI_TRIG_BOTH`
  */
 void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx);
+
+#else
+
+/**
+ * @brief Enables the External Interrupt
+ * @param pin Refer to `gpio_pin_t` enum
+ */
+__STATIC_INLINE__ void EXTI_IRQ_Enable(const gpio_pin_t pin){
+	// Unmask the IRQ
+	EXTI->IMR.REG |= pin;
+}
+
+/**
+ * @brief Disables the External Interrupt
+ * @param pin Refer to `gpio_pin_t` enum
+ */
+__STATIC_INLINE__ void EXTI_IRQ_Disable(const gpio_pin_t pin){
+	// Unmask the IRQ
+	EXTI->IMR.REG &= ~(pin);
+}
+
+/**
+ * @brief Returns the Pending Bit of External Interrupt
+ * @param pin Refer to `gpio_pin_t` enum
+ * @returns Pending Bit Status for Input Pin
+ */
+__STATIC_INLINE__ uint16_t EXTI_IRQ_Get_Pending(const gpio_pin_t pin){
+	// Return the value
+	return (uint16_t) (EXTI->PR.REG & pin);
+}
+
+/**
+ * @brief Acknowledge the Pending Bit of External Interrupt
+ * @param pin Refer to `gpio_pin_t` enum
+ */
+__STATIC_INLINE__ void EXTI_IRQ_Ack(const gpio_pin_t pin){
+	// Acknowledge the Pending Bit
+	EXTI->PR.REG |= pin;
+}
+
+/**
+ * @brief Retrieves the EXTI Configuration Register based upon the Pin Number
+ * @param pin Refer to `gpio_pin_t` enum
+ * @return Pointer to the relevant EXTI Configuration Register
+ * @note Pass only one pin at a time
+ */
+uint32_t* __EXTI_getPointerToAFIO_EXTICRx__(const gpio_pin_t pin);
+
+/**
+ * @brief Sets the EXTI Source Port
+ * @param gpio Refer to `gpio_port_t` enum
+ * @param pin Refer to `gpio_pin_t` enum
+ * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
+ * @note Pass only one pin at a time
+ */
+void EXTI_Set_Source_Port(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg);
+
+/**
+ * @brief Sets the EXTI Trigger Selection
+ * @param pin Refer to `gpio_pin_t` enum
+ * @param trigger Refer to `exti_trigger_t` enum
+ */
+void EXTI_Set_Trigger(const gpio_pin_t pin, const exti_trigger_t trigger);
+
+/**
+ * @brief Configures the External Interrupt
+ * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
+ * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
+ * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t EXTI_Config(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger);
 
 #endif /* __OLD_GPIO_METHOD__ */
 

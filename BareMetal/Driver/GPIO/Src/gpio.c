@@ -24,6 +24,10 @@ driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	}
 	// Enable Clock for GPIO Port
 	__GPIO_enableClock__(gpio);
+	// Enable AFIO Clock
+	if((gpioConfig->config == GPIO_CNF_OUT_AF_PP) || (gpioConfig->config == GPIO_CNF_OUT_AF_OD)){
+		RCC_AFIO_Clk_Enable();
+	}
 	// Local Variables
 	uint32_t gpioX_CRH = GPIOx->CRH.REG;
 	uint32_t gpioX_CRL = GPIOx->CRL.REG;

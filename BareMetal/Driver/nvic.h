@@ -18,8 +18,6 @@
 
 // Main Library
 #include "reg_map.h"
-// Alternate Function I/O
-#include "rcc.h"
 
 /**
  * @brief Enables the NVIC Interrupt for the input IRQn

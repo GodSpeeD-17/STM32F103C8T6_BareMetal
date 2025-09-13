@@ -4,15 +4,41 @@
  *  Author: Shrey Shah
  ***************************************************************************************/
 
-#ifdef  __OLD_GPIO_METHOD__
-
 // EXTI Configuration
 #include "exti.h"
 
 // Lookup Table for IRQn
-static const uint8_t EXTI_IRQn[7] = {EXTI0_IRQn, EXTI1_IRQn, EXTI2_IRQn, 
-									 EXTI3_IRQn, EXTI4_IRQn, 
-									 EXTI9_5_IRQn, EXTI15_10_IRQn};
+static const uint8_t EXTI_IRQn[16] = {
+	EXTI0_IRQn,
+	EXTI1_IRQn,
+	EXTI2_IRQn,
+	EXTI3_IRQn,
+	EXTI4_IRQn,
+	EXTI9_5_IRQn,
+	EXTI9_5_IRQn,
+	EXTI9_5_IRQn,
+	EXTI9_5_IRQn,
+	EXTI9_5_IRQn,
+	EXTI15_10_IRQn,
+	EXTI15_10_IRQn,
+	EXTI15_10_IRQn,
+	EXTI15_10_IRQn,
+	EXTI15_10_IRQn,
+	EXTI15_10_IRQn,
+};
+
+// Lookup Table for EXTI Source
+static const exti_port_t EXTI_Source_Port[7] = {
+	AF_EXTI_PORT_A, 
+	AF_EXTI_PORT_B, 
+	AF_EXTI_PORT_C,
+	AF_EXTI_PORT_D,
+	AF_EXTI_PORT_E,
+	AF_EXTI_PORT_F,
+	AF_EXTI_PORT_G
+};
+
+#ifdef  __OLD_GPIO_METHOD__
 
 /**
  * @brief Configures the NVIC EXTI Source
@@ -89,6 +115,107 @@ void EXTI_Config(gpio_config_t* GPIOx_CONFIG, uint8_t TRIGx){
 	else if(GPIOx_CONFIG->PIN <= GPIOx_PIN_15){
 		NVIC_IRQ_Enable(EXTI_IRQn[6]);
 	}
+}
+#else
+
+/**
+ * @brief Retrieves the EXTI Configuration Register based upon the Pin Number
+ * @param pin Refer to `gpio_pin_t` enum
+ * @return Pointer to the relevant EXTI Configuration Register
+ * @note Pass only one pin at a time
+ */
+uint32_t* __EXTI_getPointerToAFIO_EXTICRx__(const gpio_pin_t pin){
+	// Return the Register Address
+	return (uint32_t *) (&AFIO->EXTICR1.REG + (__GPIO_getPin__(pin) >> 2));
+}
+
+/**
+ * @brief Sets the EXTI Source Port
+ * @param gpio Refer to `gpio_port_t` enum
+ * @param pin Refer to `gpio_pin_t` enum
+ * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
+ * @note Pass only one pin at a time
+ */
+void EXTI_Set_Source_Port(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg){
+	// Get the Pin Number
+	pin = __GPIO_getPin__(pin);
+	// Wrap the pin to 0-3
+	pin &= 0x03;
+	// Shift to the relevant position
+	pin <<= 2;
+	// Set the relevant port
+	*extiConfigReg &= ~(0x0F << pin);
+	*extiConfigReg |= (EXTI_Source_Port[gpio] << pin);
+}
+
+/**
+ * @brief Sets the EXTI Trigger Selection
+ * @param pin Refer to `gpio_pin_t` enum
+ * @param trigger Refer to `exti_trigger_t` enum
+ */
+void EXTI_Set_Trigger(const gpio_pin_t pin, const exti_trigger_t trigger){
+	// Falling Edge Trigger Selection
+	if(trigger & EXTI_TRIGGER_FALLING){
+		EXTI->FTSR.REG |= pin;
+	}
+	// Rising Edge Trigger Selection
+	if(trigger & EXTI_TRIGGER_RISING){
+		EXTI->RTSR.REG |= pin;
+	}
+}
+
+/**
+ * @brief Configures the External Interrupt
+ * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
+ * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
+ * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t EXTI_Config(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger){
+	// Check hardware compatibility
+	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
+	if(GPIOx == NULL){
+		return DRIVER_FAIL;
+	}
+	// Enable AFIO Clock
+	RCC_AFIO_Clk_Enable();
+	// Local Variables
+	gpio_pin_t pinNumber = pin;
+	// EXTI Configuration Register - Instantaneous Value
+	uint32_t extiConfigReg[] = {
+		AFIO->EXTICR1.REG, 
+		AFIO->EXTICR2.REG, 
+		AFIO->EXTICR3.REG, 
+		AFIO->EXTICR4.REG
+	};
+	uint8_t AFIOExtiCRStatus = 0x00;
+	// Iterate through all the pins
+	while(pinNumber){
+		// Extract only one pin set from LSB
+		gpio_pin_t currentPinMask = (gpio_pin_t) (pinNumber & (-pinNumber));
+		uint8_t currentPin = __GPIO_getPin__(currentPinMask);
+		// Update the relevant EXTI Configuration Register
+		EXTI_Set_Source_Port(gpio, currentPinMask, &extiConfigReg[(currentPin >> 2)]);
+		AFIOExtiCRStatus |= (0x01 << (currentPin >> 2));
+		// Enable NVIC (Global) Interrupt
+		NVIC_IRQ_Enable(EXTI_IRQn[currentPin]);
+		// Clear the current pin from the pin number
+		pinNumber &= ~currentPinMask;
+	}
+	// Set the Trigger Selection
+	EXTI_Set_Trigger(pin, trigger);
+
+	// Write back the modified EXTI Configuration Registers
+	for(uint8_t i = 0; i < 4; i++){
+		if(AFIOExtiCRStatus & (0x01 << i)){
+			*(&AFIO->EXTICR1.REG + i) = extiConfigReg[i];
+		}
+	}
+	// Enable the EXTI Interrupt
+	EXTI_IRQ_Enable(pin);
+	return DRIVER_SUCCESS;
 }
 
 #endif /* __OLD_GPIO_METHOD__ */

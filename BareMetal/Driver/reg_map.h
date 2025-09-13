@@ -419,6 +419,15 @@ typedef enum {
 #define EXTI_TRIG_RISING					(0x01)
 #define EXTI_TRIG_BOTH						(0x02)
 
+/**
+ * @brief External Interrupt Trigger Enumeration
+ */
+typedef enum {
+	EXTI_TRIGGER_FALLING = (uint8_t) 0x01,
+	EXTI_TRIGGER_RISING = (uint8_t) 0x02,
+	EXTI_TRIGGER_BOTH = (EXTI_TRIGGER_FALLING | EXTI_TRIGGER_RISING)
+} exti_trigger_t;
+
 // AF EXTI
 #define AF_EXTI_PA							(0x00)
 #define AF_EXTI_PB							(0x01)
@@ -427,6 +436,16 @@ typedef enum {
 #define AF_EXTI_PE							(0x04)
 #define AF_EXTI_PF							(0x05)
 #define AF_EXTI_PG							(0x06)
+
+typedef enum {
+	AF_EXTI_PORT_A = (uint8_t) 0x00,
+	AF_EXTI_PORT_B = (uint8_t) 0x01,
+	AF_EXTI_PORT_C = (uint8_t) 0x02,
+	AF_EXTI_PORT_D = (uint8_t) 0x03,
+	AF_EXTI_PORT_E = (uint8_t) 0x04,
+	AF_EXTI_PORT_F = (uint8_t) 0x05,
+	AF_EXTI_PORT_G = (uint8_t) 0x06
+} exti_port_t;
 
 /*
 // Error Checking MACROs
