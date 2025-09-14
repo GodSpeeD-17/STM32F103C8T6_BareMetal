@@ -168,26 +168,6 @@ typedef enum {
 	GPIO_PORT_OB_LED = GPIO_PORT_C
 } gpio_port_t;
 
-// GPIO PIN
-// #define GPIOx_PIN_0							(0x00)
-// #define GPIOx_PIN_1							(0x01)
-// #define GPIOx_PIN_2							(0x02)
-// #define GPIOx_PIN_3							(0x03)
-// #define GPIOx_PIN_4							(0x04)
-// #define GPIOx_PIN_5							(0x05)
-// #define GPIOx_PIN_6							(0x06)
-// #define GPIOx_PIN_7							(0x07)
-// #define GPIOx_PIN_8							(0x08)
-// #define GPIOx_PIN_9							(0x09)
-// #define GPIOx_PIN_10						(0x0A)
-// #define GPIOx_PIN_11						(0x0B)
-// #define GPIOx_PIN_12						(0x0C)
-// #define GPIOx_PIN_13						(0x0D)
-// #define GPIOx_PIN_14						(0x0E)
-// #define GPIOx_PIN_15						(0x0F)
-// #define OB_LED_PORT							GPIOC
-// #define OB_LED_PIN							GPIOx_PIN_13
-
 /**
  * @brief GPIO Pin Enumeration
  * @note Used to specify the pin number of a GPIO
@@ -213,12 +193,6 @@ typedef enum {
 	GPIO_PIN_OB_LED = GPIO_PIN_13
 } gpio_pin_t;
 
-// MODE
-#define GPIOx_MODE_IN						(0x00)
-#define GPIOx_MODE_OUT_10MHz				(0x01)
-#define GPIOx_MODE_OUT_2MHz					(0x02)
-#define GPIOx_MODE_OUT_50MHz				(0x03)
-
 /**
  * @brief GPIO Mode Enumeration
  * @brief Used to specify the mode of a GPIO
@@ -234,30 +208,20 @@ typedef enum {
 	GPIO_MODE_OUTPUT_50MHz = (uint8_t) 0x03
 } gpio_mode_t;
 
-// CONFIGURATION
-#define GPIOx_CNF_IN_ANALOG					(0x00)
-#define GPIOx_CNF_IN_FLOAT					(0x01)
-#define GPIOx_CNF_IN_PD						(0x03)
-#define GPIOx_CNF_IN_PU						(0x04)
-#define GPIOx_CNF_OUT_GP_PP					(0x00)
-#define GPIOx_CNF_OUT_GP_OD					(0x01)
-#define GPIOx_CNF_OUT_AF_PP					(0x02)
-#define GPIOx_CNF_OUT_AF_OD					(0x03)
-
 /**
  * @brief GPIO Pin Configuration Enumeration
  * @note Configuration options vary based on whether the pin is set as input or output
  */
 typedef enum {
-	GPIO_CNF_IN_ANALOG = (uint8_t) 0x00,
-	GPIO_CNF_IN_FLOAT = (uint8_t) 0x01,
-	GPIO_CNF_IN_PULL_DOWN = (uint8_t) 0x02,
-	GPIO_CNF_IN_PULL_UP = (uint8_t) 0x03,
-	GPIO_CNF_OUT_GP_PP = (uint8_t) 0x00,
-	GPIO_CNF_OUT_GP_OD = (uint8_t) 0x01,
-	GPIO_CNF_OUT_AF_PP = (uint8_t) 0x02,
-	GPIO_CNF_OUT_AF_OD = (uint8_t) 0x03
-} gpio_cnf_t;
+	GPIO_PIN_CNF_IN_ANALOG = (uint8_t) 0x00,
+	GPIO_PIN_CNF_IN_FLOAT = (uint8_t) 0x01,
+	GPIO_PIN_CNF_IN_PULL_DOWN = (uint8_t) 0x02,
+	GPIO_PIN_CNF_IN_PULL_UP = (uint8_t) 0x03,
+	GPIO_PIN_CNF_OUT_GP_PP = (uint8_t) 0x00,
+	GPIO_PIN_CNF_OUT_GP_OD = (uint8_t) 0x01,
+	GPIO_PIN_CNF_OUT_AF_PP = (uint8_t) 0x02,
+	GPIO_PIN_CNF_OUT_AF_OD = (uint8_t) 0x03
+} gpio_pin_cnf_t;
 
 typedef enum {
 	GPIO_ANALOG = 0x00,
@@ -272,6 +236,28 @@ typedef enum {
 	GPIO_AF_PUSH_PULL = 0x02,
 	GPIO_AF_OPEN_DRAIN = 0x03
 } gpio_state_output_t;
+
+/**
+ * @brief External Interrupt Trigger Enumeration
+ */
+typedef enum {
+	GPIO_EXTI_TRIGGER_FALLING = (uint8_t) 0x01,
+	GPIO_EXTI_TRIGGER_RISING = (uint8_t) 0x02,
+	GPIO_EXTI_TRIGGER_BOTH = (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
+} gpio_exti_trigger_t;
+
+/**
+ * @brief External Interrupt Source Port Enumeration
+ */
+typedef enum {
+	GPIO_EXTI_PORT_A = (uint8_t) 0x00,
+	GPIO_EXTI_PORT_B = (uint8_t) 0x01,
+	GPIO_EXTI_PORT_C = (uint8_t) 0x02,
+	GPIO_EXTI_PORT_D = (uint8_t) 0x03,
+	GPIO_EXTI_PORT_E = (uint8_t) 0x04,
+	GPIO_EXTI_PORT_F = (uint8_t) 0x05,
+	GPIO_EXTI_PORT_G = (uint8_t) 0x06
+} gpio_exti_port_t;
 
 /*********************************************** GPIO MACROS ***********************************************/
 
@@ -413,58 +399,10 @@ typedef enum {
 #define DMA2_Channel4_5_IRQn				(59)
 /*********************************************** NVIC MACROS ***********************************************/
 
-/*********************************************** EXTI MACROS ***********************************************/
-// External Trigger Selection
-#define EXTI_TRIG_FALLING					(0x00)
-#define EXTI_TRIG_RISING					(0x01)
-#define EXTI_TRIG_BOTH						(0x02)
-
-/**
- * @brief External Interrupt Trigger Enumeration
- */
-typedef enum {
-	EXTI_TRIGGER_FALLING = (uint8_t) 0x01,
-	EXTI_TRIGGER_RISING = (uint8_t) 0x02,
-	EXTI_TRIGGER_BOTH = (EXTI_TRIGGER_FALLING | EXTI_TRIGGER_RISING)
-} exti_trigger_t;
-
-// AF EXTI
-#define AF_EXTI_PA							(0x00)
-#define AF_EXTI_PB							(0x01)
-#define AF_EXTI_PC							(0x02)
-#define AF_EXTI_PD							(0x03)
-#define AF_EXTI_PE							(0x04)
-#define AF_EXTI_PF							(0x05)
-#define AF_EXTI_PG							(0x06)
-
-typedef enum {
-	AF_EXTI_PORT_A = (uint8_t) 0x00,
-	AF_EXTI_PORT_B = (uint8_t) 0x01,
-	AF_EXTI_PORT_C = (uint8_t) 0x02,
-	AF_EXTI_PORT_D = (uint8_t) 0x03,
-	AF_EXTI_PORT_E = (uint8_t) 0x04,
-	AF_EXTI_PORT_F = (uint8_t) 0x05,
-	AF_EXTI_PORT_G = (uint8_t) 0x06
-} exti_port_t;
-
-/*
-// Error Checking MACROs
-#define IS_EXTI_TRIG_VALID(TRIGx)			(((TRIGx) == EXTI_TRIG_FALLING) \
-											 || ((TRIGx) == EXTI_TRIG_RISING) \
-											 || ((TRIGx) == EXTI_TRIG_BOTH))
-#define IS_EXTI_IRQn_VALID(IRQn)			((IRQn) < 60)
-#define IS_EXTI_STRUCTURE_VALID(EXTI_CONFIGx)	\
-											((IS_GPIO_STRUCTURE_VALID(EXTI_CONFIGx->GPIOx_CONFIG) )&& \
-											 (IS_EXTI_TRIG_VALID(EXTI_CONFIGx->TRIGx)) && \
-											 (IS_EXTI_IRQn_VALID(EXTI_CONFIGx->IRQn)) && \
-											 (EXTI_CONFIGx->GPIOx_CONFIG->MODE == GPIOx_MODE_IN))
-*/							 
-/*********************************************** EXTI MACROS ***********************************************/
-
 /*********************************************** I2C MACROS ***********************************************/
 // I2C Speed
-#define I2Cx_SPEED_STD						(FREQ_100kHz)	
-#define I2Cx_SPEED_FAST						(4 * FREQ_100kHz)
+#define I2Cx_SPEED_STD						(FREQ_100kHz)
+#define I2Cx_SPEED_FAST						(FREQ_100kHz << 2)
 // I2C SCL Clock Frequency
 #define I2Cx_SCL_FREQ_4MHz					(0x04)
 #define I2Cx_SCL_FREQ_8MHz					(0x08)
@@ -972,14 +910,6 @@ typedef enum {
 // ADC Sample Time Decoding
 #define ADC_SAMPLE_TIME(ADC_SAMPLEx)		((uint8_t)((ADC_SAMPLEx) & 0x0F))
 
-/*
-// Error Checking MACROS
-#define IS_VALID_ADC_CHANNEL(CHx)			(((CHx) == ADC_CHANNEL_0) || ((CHx) == ADC_CHANNEL_1) || \
-											 ((CHx) == ADC_CHANNEL_2) || ((CHx) == ADC_CHANNEL_3) || \
-											 ((CHx) == ADC_CHANNEL_4) || ((CHx) == ADC_CHANNEL_5) || \
-											 ((CHx) == ADC_CHANNEL_6) || ((CHx) == ADC_CHANNEL_7) || \
-											 ((CHx) == ADC_CHANNEL_8) || ((CHx) == ADC_CHANNEL_9))
-*/
 /*********************************************** ADC MACROS ***********************************************/
 
 /*********************************************** USART MACROS ***********************************************/
@@ -1080,7 +1010,7 @@ typedef enum {
 
 /*********************************************** Helper Functions ***********************************************/
 // Size of an array
-// #define SIZEOF(X)							(sizeof((X))/sizeof((X)[0]))
+#define SIZEOF(X)							(sizeof((X))/sizeof((X)[0]))
 
 /**
  * @brief Check if a number is a power of 2

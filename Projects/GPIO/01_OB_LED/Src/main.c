@@ -9,11 +9,11 @@
 int main(){
 	// Configure LEDs
 	gpio_config_t multiLedConfig = {
-		.pin = (RED_LED_GPIO_PIN | YELLOW_LED_GPIO_PIN),
+		.pin = (RED_LED_PIN | YELLOW_LED_PIN),
 	};
-	GPIO_LED_Init(RED_LED_GPIO_PORT, &multiLedConfig);
-	GPIO_Set(RED_LED_GPIO_PORT, RED_LED_GPIO_PIN);
-	GPIO_Reset(YELLOW_LED_GPIO_PORT, YELLOW_LED_GPIO_PIN);
+	GPIO_LED_Init(RED_LED_PORT, &multiLedConfig);
+	GPIO_Set(RED_LED_PORT, RED_LED_PIN);
+	GPIO_Reset(YELLOW_LED_PORT, YELLOW_LED_PIN);
 
 	// Infinite Loop
 	while(1){
@@ -22,8 +22,8 @@ int main(){
 		// Loop Delay
 		delay_ms(LOOP_DELAY_MS);
 		// Toggle LEDs
-		GPIO_Toggle(RED_LED_GPIO_PORT, RED_LED_GPIO_PIN);
-		GPIO_Toggle(YELLOW_LED_GPIO_PORT, YELLOW_LED_GPIO_PIN);
+		GPIO_Toggle(RED_LED_PORT, RED_LED_PIN);
+		GPIO_Toggle(YELLOW_LED_PORT, YELLOW_LED_PIN);
 	}
 	// Return Value
 	return 0;

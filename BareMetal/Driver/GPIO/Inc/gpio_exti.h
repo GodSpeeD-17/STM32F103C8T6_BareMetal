@@ -10,10 +10,8 @@
 #define __GPIO_EXTI_H__
 
 /*********************************************** Includes ***********************************************/
-// Register Mapping
-#include "reg_map.h"
-// GPIO
-#include "gpio.h"
+// GPIO Configuration
+#include "gpio_config.h"
 // Global Interrupt
 #include "nvic.h"
 
@@ -74,7 +72,7 @@ __STATIC_INLINE__ uint32_t* __GPIO_EXTI_GetCR__(const gpio_pin_t pin){
  * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
  * @note Pass only one pin at a time
  */
-void GPIO_EXTI_MapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg);
+void GPIO_EXTI_MapPort(const gpio_port_t gpio, const gpio_pin_t pin, uint32_t* extiConfigReg);
 
 /**
  * @brief Unmaps the EXTI Source Port from Interrupt
@@ -83,46 +81,46 @@ void GPIO_EXTI_MapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiCon
  * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
  * @note Pass only one pin at a time
  */
-void GPIO_EXTI_UnmapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg);
+void GPIO_EXTI_UnmapPort(const gpio_port_t gpio, const gpio_pin_t pin, uint32_t* extiConfigReg);
 
 /**
  * @brief Sets the EXTI Trigger Selection
  * @param pin Refer to `gpio_pin_t` enum
- * @param trigger Refer to `exti_trigger_t` enum
+ * @param trigger Refer to `gpio_exti_trigger_t` enum
  */
-void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger);
+void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
 /**
  * @brief Resets the EXTI Trigger Selection
  * @param pin Refer to `gpio_pin_t` enum
- * @param trigger Refer to `exti_trigger_t` enum
+ * @param trigger Refer to `gpio_exti_trigger_t` enum
  */
-void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger);
+void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
 /**
  * @brief Initializes the External Interrupt
  * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
- * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
  * @note - Failing to do so may cause driver to misbehave
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger);
+driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
 /**
  * @brief Deinitialize the External Interrupt
  * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
- * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
  * @note - Failing to do so may cause driver to misbehave
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger);
+driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
 #endif /* __GPIO_EXTI_H__ */

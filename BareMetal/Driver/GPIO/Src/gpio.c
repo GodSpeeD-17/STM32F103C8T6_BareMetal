@@ -2,7 +2,7 @@
 #include "gpio.h"
 
 /*********************************************** MACROs ***********************************************/
-#define IS_PULL_CONFIG(cfg) 		((cfg) == GPIO_CNF_IN_PULL_UP || (cfg) == GPIO_CNF_IN_PULL_DOWN)
+#define IS_PULL_CONFIG(cfg) 		((cfg) == GPIO_PIN_CNF_IN_PULL_UP || (cfg) == GPIO_PIN_CNF_IN_PULL_DOWN)
 #define GPIO_CRL_UPDATED 			((uint8_t) 0x01)
 #define GPIO_CRH_UPDATED 			((uint8_t) 0x02)
 #define GPIO_ODR_UPDATED 			((uint8_t) 0x04)
@@ -25,7 +25,7 @@ driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	// Enable Clock for GPIO Port
 	__GPIO_enableClock__(gpio);
 	// Enable AFIO Clock
-	if((gpioConfig->config == GPIO_CNF_OUT_AF_PP) || (gpioConfig->config == GPIO_CNF_OUT_AF_OD)){
+	if((gpioConfig->config == GPIO_PIN_CNF_OUT_AF_PP) || (gpioConfig->config == GPIO_PIN_CNF_OUT_AF_OD)){
 		RCC_AFIO_Clk_Enable();
 	}
 	// Local Variables
@@ -135,7 +135,7 @@ driver_status_t GPIO_LED_Init(gpio_port_t gpio, gpio_config_t* gpioConfig){
 	}
 	// Update the GPIO Configuration Structure for LED
 	gpioConfig->mode = GPIO_MODE_OUTPUT_10MHz;
-	gpioConfig->config = GPIO_CNF_OUT_GP_PP;
+	gpioConfig->config = GPIO_PIN_CNF_OUT_GP_PP;
 	// Call GPIO Config()
 	return GPIO_Init(gpio, gpioConfig);
 }
@@ -151,7 +151,7 @@ driver_status_t OB_LED_Init(void){
 	gpio_config_t obLedConfig = {
 		.pin = GPIO_PIN_OB_LED,
 		.mode = GPIO_MODE_OUTPUT_2MHz, // Refer datasheet for this speed selection
-		.config = GPIO_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
+		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
 	return GPIO_Init(GPIO_PORT_OB_LED, &obLedConfig);
@@ -168,7 +168,7 @@ driver_status_t OB_LED_Deinit(void){
 	gpio_config_t obLedConfig = {
 		.pin = GPIO_PIN_OB_LED,
 		.mode = GPIO_MODE_OUTPUT_2MHz, // Refer datasheet for this speed selection
-		.config = GPIO_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
+		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
 	return GPIO_Deinit(GPIO_PORT_OB_LED, &obLedConfig);

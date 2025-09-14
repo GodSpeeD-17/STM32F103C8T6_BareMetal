@@ -35,14 +35,14 @@ static const uint8_t EXTI_IRQn[EXTI_IRQn_COUNT] = {
 };
 
 // Lookup Table for EXTI Source
-static const exti_port_t EXTI_Source_Port[EXTI_SOURCE_PORT_COUNT] = {
-	AF_EXTI_PORT_A, 
-	AF_EXTI_PORT_B, 
-	AF_EXTI_PORT_C,
-	AF_EXTI_PORT_D,
-	AF_EXTI_PORT_E,
-	AF_EXTI_PORT_F,
-	AF_EXTI_PORT_G
+static const gpio_exti_port_t EXTI_Source_Port[EXTI_SOURCE_PORT_COUNT] = {
+	GPIO_EXTI_PORT_A, 
+	GPIO_EXTI_PORT_B, 
+	GPIO_EXTI_PORT_C,
+	GPIO_EXTI_PORT_D,
+	GPIO_EXTI_PORT_E,
+	GPIO_EXTI_PORT_F,
+	GPIO_EXTI_PORT_G
 };
 
 /*********************************************** Driver APIs ***********************************************/
@@ -53,16 +53,16 @@ static const exti_port_t EXTI_Source_Port[EXTI_SOURCE_PORT_COUNT] = {
  * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
  * @note Pass only one pin at a time
  */
-void GPIO_EXTI_MapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg){
+void GPIO_EXTI_MapPort(const gpio_port_t gpio, const gpio_pin_t pin, uint32_t* extiConfigReg){
 	// Get the Pin Number
-	pin = __GPIO_getPin__(pin);
+	uint8_t pinMask = __GPIO_getPin__(pin);
 	// Wrap the pin to 0-3
-	pin &= 0x03;
+	pinMask &= 0x03;
 	// Shift to the relevant position
-	pin <<= 2;
+	pinMask <<= 2;
 	// Set the relevant port
-	*extiConfigReg &= ~(0x0F << pin);
-	*extiConfigReg |= (EXTI_Source_Port[gpio] << pin);
+	*extiConfigReg &= ~(0x0F << pinMask);
+	*extiConfigReg |= (EXTI_Source_Port[gpio] << pinMask);
 }
 
 /**
@@ -74,28 +74,28 @@ void GPIO_EXTI_MapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiCon
  */
 void GPIO_EXTI_UnmapPort(const gpio_port_t gpio, gpio_pin_t pin, uint32_t* extiConfigReg){
 	// Get the Pin Number
-	pin = __GPIO_getPin__(pin);
+	uint8_t pinMask = __GPIO_getPin__(pin);
 	// Wrap the pin to 0-3
-	pin &= 0x03;
+	pinMask &= 0x03;
 	// Shift to the relevant position
-	pin <<= 2;
-	// Set the relevant port
-	*extiConfigReg &= ~(0x0F << pin);
-	*extiConfigReg |= (EXTI_Source_Port[0] << pin);
+	pinMask <<= 2;
+	// Reset the relevant port
+	*extiConfigReg &= ~(0x0F << pinMask);
+	*extiConfigReg |= (EXTI_Source_Port[0] << pinMask);
 }
 
 /**
  * @brief Sets the EXTI Trigger Selection
  * @param pin Refer to `gpio_pin_t` enum
- * @param trigger Refer to `exti_trigger_t` enum
+ * @param trigger Refer to `gpio_exti_trigger_t` enum
  */
-void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger){
+void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 	// Falling Edge Trigger Selection
-	if(trigger & EXTI_TRIGGER_FALLING){
+	if(trigger & GPIO_EXTI_TRIGGER_FALLING){
 		EXTI->FTSR.REG |= pin;
 	}
 	// Rising Edge Trigger Selection
-	if(trigger & EXTI_TRIGGER_RISING){
+	if(trigger & GPIO_EXTI_TRIGGER_RISING){
 		EXTI->RTSR.REG |= pin;
 	}
 }
@@ -103,15 +103,15 @@ void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger){
 /**
  * @brief Resets the EXTI Trigger Selection
  * @param pin Refer to `gpio_pin_t` enum
- * @param trigger Refer to `exti_trigger_t` enum
+ * @param trigger Refer to `gpio_exti_trigger_t` enum
  */
-void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger){
+void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 	// Falling Edge Trigger Selection
-	if(trigger & EXTI_TRIGGER_FALLING){
+	if(trigger & GPIO_EXTI_TRIGGER_FALLING){
 		EXTI->FTSR.REG &= ~(pin);
 	}
 	// Rising Edge Trigger Selection
-	if(trigger & EXTI_TRIGGER_RISING){
+	if(trigger & GPIO_EXTI_TRIGGER_RISING){
 		EXTI->RTSR.REG &= ~(pin);
 	}
 }
@@ -120,14 +120,14 @@ void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const exti_trigger_t trigger){
  * @brief Initialize the External Interrupt
  * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
- * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
  * @note - Failing to do so may cause driver to misbehave
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger){
+driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 	// Check hardware compatibility
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -178,14 +178,14 @@ driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, con
  * @brief Deinitialize the External Interrupt
  * @param gpio GPIO Port (Refer to `gpio_port_t` enum)
  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
- * @param trigger GPIO Trigger (Refer to `exti_trigger_t` enum)
+ * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
  * @note - Failing to do so may cause driver to misbehave
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const exti_trigger_t trigger){
+driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 	// Check hardware compatibility
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){

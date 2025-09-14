@@ -362,6 +362,7 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "startup.h": "c"
+        "startup.h": "c",
+        "cstdint": "c"
     }
 }
