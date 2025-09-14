@@ -21,7 +21,7 @@ void ADC_config(adc_config_t* ADC_CONFIGx){
 	// Disable the ADC if already ON
 	ADC_disable(ADC_CONFIGx->ADCx);
 	// Configure GPIO
-	GPIO_Config(ADC_CONFIGx->GPIOx_CONFIG);
+	GPIO_Init(ADC_CONFIGx->GPIOx_CONFIG);
 
 	// Reset Registers
 	ADC_CONFIGx->ADCx->SR.REG = (uint32_t) 0x00000000;

@@ -10,14 +10,14 @@ int main(){
 	gpio_config_t ledConfig = {
 		.pin = (RED_LED_GPIO_PIN | YELLOW_LED_GPIO_PIN),
 	};
-	GPIO_LED_Config(RED_LED_GPIO_PORT, &ledConfig);
+	GPIO_LED_Init(RED_LED_GPIO_PORT, &ledConfig);
 	// Initialization of Push Button
 	gpio_config_t pbConfig = {
 		.pin = PUSH_BUTTON_PIN,
 		.mode = GPIO_MODE_INPUT,
 		.config = GPIO_CNF_IN_FLOAT
 	};
-	GPIO_Config(PUSH_BUTTON_PORT, &pbConfig);
+	GPIO_Init(PUSH_BUTTON_PORT, &pbConfig);
 
 	// Infinite Loop
 	while(1){

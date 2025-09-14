@@ -16,7 +16,7 @@ typedef struct {
 	gpio_cnf_t config: 2;
 } gpio_config_t;
 
-/*********************************************** Helper Functions ***********************************************/
+/*********************************************** Helper APIs ***********************************************/
 /**
  * @brief Enables the clock for the specified GPIO port
  * @param thisPort GPIO Port Enumeration `gpio_port_t`
@@ -58,6 +58,7 @@ __STATIC_INLINE__ void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32
 	*gpioODRReg &= ~(pinMask);
 }
 
+/*********************************************** Driver APIs ***********************************************/
 /**
  * @brief Retrieves the GPIO Port structure based on port enumeration
  * @param thisPort GPIO Port Enumeration `gpio_port_t` 

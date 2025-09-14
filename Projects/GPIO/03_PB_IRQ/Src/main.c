@@ -28,7 +28,7 @@ int main(){
 	GPIO_Config_LED(&LED_Red);
 	GPIO_Config_LED(&LED_Yellow);
 	// Push Button IRQ
-	EXTI_Config(&Push_Button, EXTI_TRIG_FALLING); 
+	GPIO_EXTI_Init(&Push_Button, EXTI_TRIG_FALLING); 
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
@@ -47,7 +47,7 @@ int main(){
  */
 void EXTI1_IRQHandler(void){
 	// Check if the Interrupt is from the Push Button
-	if(EXTI_IRQ_Get_Pending(Push_Button.PIN)){
+	if(GPIO_EXTI_IsTriggered(Push_Button.PIN)){
 		// Eliminate Debounce Time
 		if(SysTick_Get_Ticks() - time_now > DEBOUNCE_TIME_MS){
 			time_now = SysTick_Get_Ticks();

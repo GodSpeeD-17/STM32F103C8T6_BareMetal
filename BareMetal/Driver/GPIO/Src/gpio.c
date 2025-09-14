@@ -1,13 +1,13 @@
-// Includes
+/*********************************************** Includes ***********************************************/
 #include "gpio.h"
 
-/*********************************************** Config Status MACROS ***********************************************/
+/*********************************************** MACROs ***********************************************/
 #define IS_PULL_CONFIG(cfg) 		((cfg) == GPIO_CNF_IN_PULL_UP || (cfg) == GPIO_CNF_IN_PULL_DOWN)
 #define GPIO_CRL_UPDATED 			((uint8_t) 0x01)
 #define GPIO_CRH_UPDATED 			((uint8_t) 0x02)
 #define GPIO_ODR_UPDATED 			((uint8_t) 0x04)
 
-/*********************************************** Function Definition ***********************************************/
+/*********************************************** Driver APIs ***********************************************/
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
  * @param gpio GPIO Port (Refer `gpio_port_t`)
@@ -16,7 +16,7 @@
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -63,6 +63,7 @@ driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig){
 		GPIOx->CRL.REG = gpioX_CRL;
 	if(regStatus & GPIO_ODR_UPDATED)
 		GPIOx->ODR.REG = gpioX_ODR;
+	// Return Success
 	return DRIVER_SUCCESS;
 }
 
@@ -74,7 +75,7 @@ driver_status_t GPIO_Config(gpio_port_t gpio, gpio_config_t* const gpioConfig){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Deconfig(gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Deinit(gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -126,7 +127,7 @@ driver_status_t GPIO_Deconfig(gpio_port_t gpio, gpio_config_t* const gpioConfig)
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_LED_Config(gpio_port_t gpio, gpio_config_t* gpioConfig){
+driver_status_t GPIO_LED_Init(gpio_port_t gpio, gpio_config_t* gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -136,7 +137,7 @@ driver_status_t GPIO_LED_Config(gpio_port_t gpio, gpio_config_t* gpioConfig){
 	gpioConfig->mode = GPIO_MODE_OUTPUT_10MHz;
 	gpioConfig->config = GPIO_CNF_OUT_GP_PP;
 	// Call GPIO Config()
-	return GPIO_Config(gpio, gpioConfig);
+	return GPIO_Init(gpio, gpioConfig);
 }
 
 /**
@@ -145,7 +146,7 @@ driver_status_t GPIO_LED_Config(gpio_port_t gpio, gpio_config_t* gpioConfig){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t OB_LED_Config(void){
+driver_status_t OB_LED_Init(void){
 	// On-board (OB) LED Configuration Structure
 	gpio_config_t obLedConfig = {
 		.pin = GPIO_PIN_OB_LED,
@@ -153,7 +154,7 @@ driver_status_t OB_LED_Config(void){
 		.config = GPIO_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
-	return GPIO_Config(GPIO_PORT_OB_LED, &obLedConfig);
+	return GPIO_Init(GPIO_PORT_OB_LED, &obLedConfig);
 }
 
 /**
@@ -162,7 +163,7 @@ driver_status_t OB_LED_Config(void){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t OB_LED_Deconfig(void){
+driver_status_t OB_LED_Deinit(void){
 	// On-board (OB) LED Configuration Structure
 	gpio_config_t obLedConfig = {
 		.pin = GPIO_PIN_OB_LED,
@@ -170,5 +171,5 @@ driver_status_t OB_LED_Deconfig(void){
 		.config = GPIO_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
-	return GPIO_Deconfig(GPIO_PORT_OB_LED, &obLedConfig);
+	return GPIO_Deinit(GPIO_PORT_OB_LED, &obLedConfig);
 }

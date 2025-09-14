@@ -1,4 +1,4 @@
-// Includes
+/*********************************************** Includes ***********************************************/
 #include "gpio_config.h"
 
 /*********************************************** Lookup Table ***********************************************/
@@ -13,7 +13,7 @@ static GPIO_TypeDef* const gpio_ports[7] = {
 	GPIOG
 };
 
-/*********************************************** Helper Functions ***********************************************/
+/*********************************************** Driver APIs ***********************************************/
 /**
  * @brief Retrieves the GPIO Port structure based on port enumeration
  * @param thisPort GPIO Port Enumeration `gpio_port_t` 

@@ -11,7 +11,7 @@ int main(){
 	gpio_config_t multiLedConfig = {
 		.pin = (RED_LED_GPIO_PIN | YELLOW_LED_GPIO_PIN),
 	};
-	GPIO_LED_Config(RED_LED_GPIO_PORT, &multiLedConfig);
+	GPIO_LED_Init(RED_LED_GPIO_PORT, &multiLedConfig);
 	GPIO_Set(RED_LED_GPIO_PORT, RED_LED_GPIO_PIN);
 	GPIO_Reset(YELLOW_LED_GPIO_PORT, YELLOW_LED_GPIO_PIN);
 
