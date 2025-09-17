@@ -25,6 +25,7 @@ set(MCU_MODEL STM32F103C8T6)
 set(MCU_CPU cortex-m3)
 set(C_STD gnu11)
 set(OPTIMIZATION_LEVEL 0)
+set(FLASH_ADDRESS 0x08000000)
 
 # ---------------------- Paths ----------------------
 get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
@@ -33,6 +34,9 @@ set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
 set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
 set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
 set(LINKER_FILE ${PROJ_DIR}/Startup/stm32f1_ls.ld)
+set(VSCODE_DIR ${PROJ_DIR}/.vscode)
+set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
+set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
 
 # ---------------------- Output directories ----------------------
 file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
@@ -74,15 +78,15 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
 # ---------------------- Flags ----------------------
 # For the executable
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-    -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
+	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm
 	-std=${C_STD} -O${OPTIMIZATION_LEVEL} -Wall
-    -fstack-usage -fdata-sections -ffunction-sections 
+	-fstack-usage -fdata-sections -ffunction-sections 
 	-D${MCU_MODEL} -MMD -MP -g -gdwarf-2
 )
 
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-    $<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
+	$<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm -x assembler-with-cpp -MMD -MP>
 )
 
@@ -95,10 +99,190 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin
-	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex
+	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> BINARY_FILE
+	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> HEX_FILE
 	COMMAND ${CMAKE_SIZE}    $<TARGET_FILE:${PROJECT_NAME}.elf>
 	COMMENT "Generating .bin/.hex and printing size"
+)
+
+# ---------------------- VSCode Configuration Generation ----------------------
+# This section auto-generates VSCode configuration files (launch.json,
+# settings.json, tasks.json, and c_cpp_properties.json) from CMake.
+# Each file has its own custom target, and a master target `vscode_files`
+# depends on all of them.-
+
+# -----------------------------------------------------------------------------
+# Helper function: create a generator script
+# -----------------------------------------------------------------------------
+# For each VSCode file, we generate a small .cmake script in the build dir.
+# That script is later executed by a custom target to actually write the file.
+# -----------------------------------------------------------------------------
+function(create_vscode_script name content)
+	set(script "${CMAKE_CURRENT_BINARY_DIR}/gen_${name}.cmake")
+	file(WRITE ${script} "${content}")
+endfunction()
+
+
+# -----------------------------------------------------------------------------
+# Generator script: launch.json
+# -----------------------------------------------------------------------------
+# - Configures Cortex-Debug to run with OpenOCD for STM32F103C8T6
+# - Points to the .elf binary
+# - Includes SVD file for peripheral registers
+# - By default runs to 'main', but 'Reset_Handler' is provided as an option
+# -----------------------------------------------------------------------------
+create_vscode_script(launch_json "
+file(WRITE ${VSCODE_DIR}/launch.json \"{
+  \\\"version\\\": \\\"0.2.0\\\",
+  \\\"configurations\\\": [
+	{
+	  \\\"name\\\": \\\"Debug: ${PROJECT_NAME}\\\",
+	  \\\"executable\\\": \\\"${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.elf\\\",
+	  \\\"request\\\": \\\"launch\\\",
+	  \\\"type\\\": \\\"cortex-debug\\\",
+	  \\\"servertype\\\": \\\"openocd\\\",
+	  \\\"device\\\": \\\"STM32F103C8\\\",
+	  \\\"configFiles\\\": [
+		\\\"${CORE_ROOT}/Src/stlink.cfg\\\",
+		\\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\"
+	  ],
+	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/STM32F103.svd\\\",
+	  \\\"runToEntryPoint\\\": \\\"main\\\", // Entry point is main
+	  // \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Entry point is Reset_Handler
+	  \\\"preLaunchTask\\\": \\\"Build Project\\\"
+	}
+  ]
+}\")
+")
+
+# -----------------------------------------------------------------------------
+# Generator script: settings.json
+# -----------------------------------------------------------------------------
+# - Defines paths for gdb-multiarch, openocd, and st-util
+# - Controls variable formatting in Cortex-Debug
+# -----------------------------------------------------------------------------
+create_vscode_script(settings_json "
+file(WRITE ${VSCODE_DIR}/settings.json \"{
+  \\\"cortex-debug.gdbPath\\\": \\\"/usr/bin/gdb-multiarch\\\",
+  \\\"cortex-debug.openocdPath\\\": \\\"/usr/local/bin/openocd\\\",
+  \\\"cortex-debug.stutilPath\\\": \\\"/usr/bin/st-util\\\",
+  \\\"cortex-debug.variableUseNaturalFormat\\\": false
+}\")
+")
+
+# -----------------------------------------------------------------------------
+# Generator script: tasks.json
+# -----------------------------------------------------------------------------
+# - Defines build and clean tasks using CMake
+# - Integrates with VSCode's build system (`Ctrl+Shift+B`)
+# -----------------------------------------------------------------------------
+create_vscode_script(tasks_json "
+file(WRITE ${VSCODE_DIR}/tasks.json \"{
+  \\\"version\\\": \\\"2.0.0\\\",
+  \\\"tasks\\\": [
+	{
+	  \\\"label\\\": \\\"Build Project\\\",
+	  \\\"type\\\": \\\"shell\\\",
+	  \\\"command\\\": \\\"cmake\\\",
+	  \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\"],
+	  \\\"group\\\": { \\\"kind\\\": \\\"build\\\", \\\"isDefault\\\": true },
+	  \\\"problemMatcher\\\": [\\\"\\$gcc\\\"],
+	  \\\"detail\\\": \\\"Build the current project using CMake\\\"
+	},
+	{
+	  \\\"label\\\": \\\"Clean Project\\\",
+	  \\\"type\\\": \\\"shell\\\",
+	  \\\"command\\\": \\\"cmake\\\",
+	  \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\", \\\"--target\\\", \\\"clean_all\\\"],
+	  \\\"group\\\": \\\"build\\\",
+	  \\\"problemMatcher\\\": [],
+	  \\\"detail\\\": \\\"Clean the build directory\\\"
+	}
+  ]
+}\")
+")
+
+# -----------------------------------------------------------------------------
+# Generator script: c_cpp_properties.json
+# -----------------------------------------------------------------------------
+# - Configures IntelliSense for STM32 project
+# - Defines include paths, compiler, and standards
+# -----------------------------------------------------------------------------
+create_vscode_script(cpp_properties_json "
+file(WRITE ${VSCODE_DIR}/c_cpp_properties.json \"{
+  \\\"configurations\\\": [
+	{
+	  \\\"name\\\": \\\"Linux\\\",
+	  \\\"includePath\\\": [
+		\\\"${CORE_ROOT}/Inc/**\\\",
+		\\\"${DRIVER_ROOT}/*/Inc/**\\\",
+		\\\"${PROJ_DIR}/Inc/**\\\"
+	  ],
+	  \\\"defines\\\": [\\\"STM32F103C8T6\\\"],
+	  \\\"compilerPath\\\": \\\"/usr/bin/arm-none-eabi-gcc\\\",
+	  \\\"cStandard\\\": \\\"c11\\\",
+	  \\\"cppStandard\\\": \\\"gnu++17\\\",
+	  \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"
+	}
+  ],
+  \\\"version\\\": 4
+}\")
+")
+
+# -----------------------------------------------------------------------------
+# Per-file custom targets
+# -----------------------------------------------------------------------------
+# Each target calls its respective generator script.
+# You can run them individually (e.g. `make launch_json`) or all together.
+# -----------------------------------------------------------------------------
+add_custom_target(launch_json
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_launch_json.cmake
+	COMMENT "Generating launch.json"
+)
+
+add_custom_target(settings_json
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_settings_json.cmake
+	COMMENT "Generating settings.json"
+)
+
+add_custom_target(tasks_json
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_tasks_json.cmake
+	COMMENT "Generating tasks.json"
+)
+
+add_custom_target(c_cpp_properties_json
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_cpp_properties_json.cmake
+	COMMENT "Generating c_cpp_properties.json"
+)
+
+# -----------------------------------------------------------------------------
+# Master target
+# -----------------------------------------------------------------------------
+# The `vscode_files` target depends on all of the above.
+# Running `make vscode_files` regenerates *all* VSCode configuration files.
+# -----------------------------------------------------------------------------
+add_custom_target(vscode_files
+	DEPENDS 
+	launch_json 
+	settings_json 
+	tasks_json 
+	c_cpp_properties_json
+)
+
+# -----------------------------------------------------------------------------
+# Debug target
+# -----------------------------------------------------------------------------
+add_custom_target(debug
+	DEPENDS ${PROJECT_NAME}.elf
+	DEPENDS vscode_files
+	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
+	COMMAND ${CMAKE_COMMAND} -E echo "Debug Configurations Ready!"
+	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
+	COMMENT "Preparing debug environment"
 )
 
 # ---------------------- Custom Targets ----------------------
@@ -108,66 +292,59 @@ add_custom_target(flash
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU 🚀               ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_FLASH} --reset write ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin 0x08000000
+	COMMAND ${ST_FLASH} --reset write BINARY_FILE FLASH_ADDRESS
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMENT "Flashing binary to MCU"
 )
 
-# Clean Target
+# -----------------------------------------------------------------------------
+# Clean Project (delete Build and .vscode safely)
+# -----------------------------------------------------------------------------
 add_custom_target(clean_all
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJ_DIR}/.vscode
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║                    🧹 Project Cleaned                    ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Cleaning project"
+    # Print banner first
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                    🧹 Project Cleaned                    ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    # Remove Build directory by shifting one level up
+    COMMAND /bin/sh -c "rm -rf ./*"
+    # Remove .vscode folder (absolute path works)
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
+    COMMENT "Cleaning project"
 )
 
+# -----------------------------------------------------------------------------
 # ST-Link Information
+# -----------------------------------------------------------------------------
 add_custom_target(info
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║             🔍 ST-Link Debug Probe Info                  ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╠══════════════════════════════════════════════════════════╣"
-	COMMAND ${ST_INFO} --probe
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Showing ST-Link info"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                  🔍 ST-Link Debug Probe Info             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${ST_INFO} --probe
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Showing ST-Link debug probe info"
 )
 
+# -----------------------------------------------------------------------------
 # Flash Erase
+# -----------------------------------------------------------------------------
 add_custom_target(erase_flash
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║              💥 Flash Erased Successfully! 💥            ║"
-	COMMAND ${ST_FLASH} erase
-	COMMAND ${CMAKE_COMMAND} -E echo "║            ✔✔✔ MCU Flash memory wiped clean              ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║            💡 Ready to program with: make flash          ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Erasing flash memory"
-)
-
-# Generate VSCode configuration files
-add_custom_target(vscode_files
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJ_DIR}/.vscode
-	COMMAND ${CMAKE_COMMAND} -E echo "Generating VSCode configuration files..."
-	COMMAND ${CMAKE_COMMAND} 
-		-DPROJECT_NAME=${PROJECT_NAME}
-		-DBUILD_OUTPUT_DIR=${BUILD_OUTPUT_DIR}
-		-DCORE_ROOT=${CORE_ROOT}
-		-DDRIVER_ROOT=${DRIVER_ROOT}
-		-DPROJ_DIR=${PROJ_DIR}
-		-P ${CMAKE_CURRENT_SOURCE_DIR}/generate_vscode.cmake
-)
-
-# Debug target
-add_custom_target(debug
-	DEPENDS ${PROJECT_NAME}.elf
-	DEPENDS vscode_files
-	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
-	COMMAND ${CMAKE_COMMAND} -E echo "Debug Configurations Ready!"
-	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
-	COMMENT "Preparing debug environment"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                💥 Erasing STM32 Flash Memory 💥          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${ST_FLASH} erase
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run 'make flash' to program         ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Erasing flash memory"
 )
 
 # ---------------------- Make Targets Available ----------------------
@@ -182,25 +359,25 @@ add_custom_target(debug_config DEPENDS debug)
 # Function to create a replace target
 function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
 	# Create Custom Target
-    add_custom_target(${TARGET_NAME}
-        # Display header
-        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-        COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing ${FILE_PATH} in all projects        ║"
-        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	add_custom_target(${TARGET_NAME}
+		# Display header
+		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+		COMMAND ${CMAKE_COMMAND} -E echo "║         🔄 Replacing ${FILE_PATH} in all projects        ║"
+		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 
-        # Count files to be replaced
-        COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
-        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" | wc -l
-        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}"
+		# Count files to be replaced
+		COMMAND ${CMAKE_COMMAND} -E echo "Files being replaced:"
+		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" | wc -l
+		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}"
 
-        # Replace files using xargs
-        COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
+		# Replace files using xargs
+		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
 
-        # Display footer
-        COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-        COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
-        COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    )
+		# Display footer
+		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
+		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	)
 endfunction()
 
 
