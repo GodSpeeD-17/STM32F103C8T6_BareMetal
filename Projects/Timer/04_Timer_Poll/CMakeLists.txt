@@ -2,9 +2,9 @@
 cmake_minimum_required(VERSION 3.28)
 
 # ---------------------- Project ----------------------
-# Get the current source directory name (last folder name)
+# Get the current source directory name
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-project(${PROJECT_NAME} C ASM)
+project(${PROJECT_NAME} C CXX ASM)
 
 # ---------------------- Cross Compilation ----------------------
 set(CMAKE_SYSTEM_NAME Generic)
@@ -43,16 +43,68 @@ file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
+set(SELECTED_DRIVER_SOURCES "")
+
 # ---------------------- Sources ----------------------
+set(SELECTED_DRIVER_SOURCES "")
+set(SELECTED_DRIVER_INCLUDES "")
+
+# Function to add a driver module
+function(add_driver_module module_name)
+	set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
+	if(EXISTS ${DRIVER_MODULE_DIR})
+		# Collect sources
+		file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+		list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
+
+		# Collect includes
+		if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+			list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
+		endif()
+
+		# Push lists to parent scope
+		set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
+		set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
+
+		# ---------------- Pretty print tree ----------------
+		message(STATUS "-- ${module_name}")
+
+		if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+			message(STATUS "   |-- Inc")
+			file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
+			foreach(hdr IN LISTS MODULE_HEADERS)
+				message(STATUS "   |    |-- ${hdr}")
+			endforeach()
+			message(STATUS "   |")
+		endif()
+
+		if(EXISTS ${DRIVER_MODULE_DIR}/Src)
+			message(STATUS "   |-- Src")
+			file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+			foreach(src IN LISTS MODULE_SOURCES)
+				message(STATUS "        |-- ${src}")
+			endforeach()
+		endif()
+	else()
+		message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
+	endif()
+endfunction()
+
+# ---------------------- Gather sources ----------------------
 file(GLOB_RECURSE PROJECT_SOURCES "${PROJ_DIR}/Src/*.c")
-file(GLOB_RECURSE DRIVER_SOURCES "${DRIVER_ROOT}/*/Src/*.c") 
 file(GLOB_RECURSE CORE_SOURCES "${CORE_ROOT}/Src/*.c")
+
+# Add only the driver modules you need for this project
+add_driver_module(GPIO)
+add_driver_module(RCC)
+add_driver_module(Timer)
+
+# Final list of all sources
 set(ALL_SOURCES
 	${PROJECT_SOURCES}
-	${DRIVER_SOURCES}
+	${SELECTED_DRIVER_SOURCES}
 	${CORE_SOURCES}
 )
-message(STATUS "All sources: ${ALL_SOURCES}")
 
 # ---------------------- Executable ----------------------
 add_executable(${PROJECT_NAME}.elf
@@ -60,20 +112,24 @@ add_executable(${PROJECT_NAME}.elf
 )
 
 # ---------------------- Include Dirs ----------------------
-file(GLOB DRIVER_DIR "${DRIVER_ROOT}")
-message(STATUS "Driver directory: ${DRIVER_DIR}")
-file(GLOB DRIVER_INC_DIRS "${DRIVER_ROOT}/*/Inc")
-message(STATUS "Driver include directories: ${DRIVER_INC_DIRS}")
-file(GLOB CORE_INC_DIRS "${CORE_ROOT}/Inc")
-message(STATUS "Core include directory: ${CORE_INC_DIRS}")
-file(GLOB PROJECT_INC_DIRS "${PROJ_DIR}/Inc")
-message(STATUS "Project include directory: ${PROJECT_INC_DIRS}")
-target_include_directories(${PROJECT_NAME}.elf PRIVATE
-	${CORE_INC_DIRS}
-	${DRIVER_DIR}
-	${DRIVER_INC_DIRS}
-	${PROJECT_INC_DIRS}
+set(ALL_INCLUDE_DIRS
+	${PROJ_DIR}/Inc
+	${CORE_ROOT}/Inc
+	${DRIVER_ROOT}
+	${SELECTED_DRIVER_INCLUDES}
 )
+
+target_include_directories(${PROJECT_NAME}.elf 
+	PRIVATE 
+	${ALL_INCLUDE_DIRS}
+)
+
+# Pretty print only the global/common include dirs
+# message(STATUS "")
+# message(STATUS "-- Global Include Directories")
+# message(STATUS "   |-- ${PROJ_DIR}/Inc")
+# message(STATUS "   |-- ${CORE_ROOT}/Inc")
+# message(STATUS "   |-- ${DRIVER_ROOT}")
 
 # ---------------------- Flags ----------------------
 # For the executable
@@ -99,8 +155,8 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> BINARY_FILE
-	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> HEX_FILE
+	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
+	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
 	COMMAND ${CMAKE_SIZE}    $<TARGET_FILE:${PROJECT_NAME}.elf>
 	COMMENT "Generating .bin/.hex and printing size"
 )
@@ -303,48 +359,45 @@ add_custom_target(flash
 # Clean Project (delete Build and .vscode safely)
 # -----------------------------------------------------------------------------
 add_custom_target(clean_all
-    # Print banner first
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║                    🧹 Project Cleaned                    ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    # Remove Build directory by shifting one level up
-    COMMAND /bin/sh -c "rm -rf ./*"
-    # Remove .vscode folder (absolute path works)
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
-    COMMENT "Cleaning project"
+	COMMAND ${CMAKE_COMMAND} -E echo ""
+	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	COMMAND ${CMAKE_COMMAND} -E echo "║                    🧹 Project Cleaned                    ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
+	COMMENT "Cleaning project"
 )
 
 # -----------------------------------------------------------------------------
 # ST-Link Information
 # -----------------------------------------------------------------------------
 add_custom_target(info
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║                  🔍 ST-Link Debug Probe Info             ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    COMMAND ${ST_INFO} --probe
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    COMMENT "Showing ST-Link debug probe info"
+	COMMAND ${CMAKE_COMMAND} -E echo ""
+	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	COMMAND ${CMAKE_COMMAND} -E echo "║                  🔍 ST-Link Debug Probe Info             ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND ${ST_INFO} --probe
+	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMENT "Showing ST-Link debug probe info"
 )
 
 # -----------------------------------------------------------------------------
 # Flash Erase
 # -----------------------------------------------------------------------------
 add_custom_target(erase_flash
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║                💥 Erasing STM32 Flash Memory 💥          ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    COMMAND ${ST_FLASH} erase
-    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-    COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run 'make flash' to program         ║"
-    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-    COMMENT "Erasing flash memory"
+	COMMAND ${CMAKE_COMMAND} -E echo ""
+	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	COMMAND ${CMAKE_COMMAND} -E echo "║                💥 Erasing STM32 Flash Memory 💥          ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND ${ST_FLASH} erase
+	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run 'make flash' to program         ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMENT "Erasing flash memory"
 )
 
 # ---------------------- Make Targets Available ----------------------
