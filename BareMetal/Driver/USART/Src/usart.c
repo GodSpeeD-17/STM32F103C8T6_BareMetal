@@ -498,4 +498,202 @@ driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq){
 	return status;
 }
 
+/**
+ * @brief Ensuring precision & width in %X
+ * @param format Pointer to pointer to string
+ * @return Precision Value
+ * @note Helper Function for `USART_printf()`
+ */
+static uint8_t __parse_precision__(const char** format){
+	// Calculated precision value
+    uint8_t precision = 0;
+    if (**format == '.') {
+        // Skip the '.'
+		(*format)++;
+        // Parse precision digits
+        while (**format >= '0' && **format <= '9') {
+            precision = precision * 10 + (**format - '0');
+            (*format)++;
+        }
+    }
+    // Return precision value
+    return precision;
+}
+
+/**
+ * @brief Transmits formatted data on USART
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param format Formatted string
+ * @note `float` decimal restricted max to 6 places
+ */
+void USART_printf(const usart_t usart, const char* format, ...){
+	// Starts Variable Argument List
+	va_list args;
+	va_start(args, format);
+	// Data Present
+	while (*format) {
+		// Format Specifier Encountered
+		if(*format == '%'){
+			// Move to the next character
+			format++;
+			// Character
+			if(*format == 'c'){
+				char c = (char)va_arg(args, int);
+				USART_sendByte(usart, c);
+			}
+			// String
+			else if(*format == 's'){
+				char* str = va_arg(args, char*);
+				// Send the whole string
+				while (*str){
+					USART_sendByte(usart, *str++);
+				}
+			} 
+			// Integer
+			else if(*format == 'd'){
+				// Handle integer
+				int32_t num = va_arg(args, int);
+				// Storing the integer value after converting it to character
+				char buffer[10];
+				// Buffer Index
+				uint8_t i = 0;
+				// Negative Number Indicator
+				char isNegative = 0;
+				// Negative Number
+				if (num < 0) {
+					isNegative = 1;
+					num = -num;
+				}
+				// `int` to `char` (Reverse Storing)
+				do {
+					buffer[i++] = (num % 10) + '0';
+					num /= 10;
+				} while (num > 0);
+				// Add negative sign if required
+				if (isNegative) buffer[i++] = '-';
+				// Print it in reverse order
+				while (i > 0) {
+					USART_sendByte(usart, buffer[--i]);
+				}
+			}
+			// Float Handling
+			else if(*format == '.' || *format == 'f' || *format == 'X' || *format == 'x'){
+				// Default precision
+				uint8_t precision = 4;
+				// Update Precision
+				if(*format == '.'){
+					// Go to next position
+					format++;
+					precision = (*format - '0');
+					// Wrap precision if greater than 6 
+					precision = (precision > 6)? 6 : precision;
+					// Go to next position
+					format++;
+				}
+				// Confirmation for float
+				if(*format == 'f'){
+					// Get float value
+					float f = (float)va_arg(args, double);
+					// Handle negative numbers
+					uint8_t is_negative = 0;
+					if(f < 0) {
+						is_negative = 1;
+						f = -f;
+					}
+					// Split into integer and fractional parts
+					int32_t int_part = (int32_t)f;
+					float frac_part = f - int_part;
+					// Convert fractional part to fixed-point integer
+					uint32_t frac_fixed = 0;
+					for(uint8_t i = 0; i < precision; i++) {
+						frac_part *= 10.0f;
+						frac_fixed = frac_fixed * 10 + (uint32_t)frac_part;
+						frac_part -= (uint32_t)frac_part;
+					}
+					// Print sign
+					if(is_negative) 
+						USART_sendByte(usart, '-');
+					// Print integer part
+					char int_buf[12] = {'\0'};
+					uint8_t idx = 0;
+					do {
+						int_buf[idx++] = (int_part % 10) + '0';
+						int_part /= 10;
+					} while(int_part > 0);
+					// Print on the console
+					while(idx > 0) {
+						USART_sendByte(usart, int_buf[--idx]);
+					}
+					// Print decimal point
+					USART_sendByte(usart, '.');
+					// Print fractional part using fixed-point math
+					char frac_buf[6] = {'\0'};
+					for(uint8_t i = 0; i < precision; i++) {
+						frac_buf[i] = (frac_fixed % 10) + '0';
+						frac_fixed /= 10;
+					}
+					for(int8_t i = precision - 1; i >= 0; i--) {
+						USART_sendByte(usart, frac_buf[i]);
+					}
+				}
+				// Hexadecimal
+				else if(*format == 'X' || *format == 'x'){
+					// Parse precision if present (e.g., %.4X)
+					uint8_t precision = __parse_precision__(&format);
+					// If no precision specified, default behavior
+					if (precision == 0) {
+						// Minimum 2 digit
+						precision = 2;
+					}
+					uint32_t num = va_arg(args, uint32_t);
+					char buffer[8] = {'0'};
+					uint8_t i = 0;
+					// Handle zero case with precision
+					if (num == 0) {
+						for (uint8_t j = 0; j < precision; j++) {
+							buffer[i++] = '0';
+						}
+					} 
+					else {
+						// Convert to hexadecimal (reverse order)
+						uint8_t digits_converted = 0;
+						do {
+							uint8_t digit = (num & 0x0F);
+							buffer[i++] = (digit < 10) ? (digit + '0') : 
+										((digit - 10) + ((*format == 'X') ? 'A' : 'a'));
+							num >>= 4;
+							digits_converted++;
+						} while (num > 0);
+						
+						// Add leading zeros to meet precision requirement
+						while (digits_converted < precision) {
+							buffer[i++] = '0';
+							digits_converted++;
+						}
+					}
+					// Print in reverse order
+					while(i > 0){
+						USART_sendByte(usart, buffer[--i]);
+					}
+				}
+				// Handle unknown format specifier
+				else {
+					const char* unknown_msg = "Unknown format specifier\n";
+					while (*unknown_msg) {
+						USART_sendByte(usart, *unknown_msg++);
+					}
+				}
+			}
+		}
+		// Non-format specifier character
+		else {
+			USART_sendByte(usart, *format);
+		}
+		// Go to next character
+		format++;
+		// Ends the VA
+		va_end(args);
+	}
+}
+
 #endif /* __OLD_GPIO_METHOD__ */

@@ -373,6 +373,19 @@ __STATIC_INLINE__ uint8_t USART_RX_Byte(const usart_t usart){
 }
 
 /**
+ * @brief Blocking USART transmit byte
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param character Character to be transmitted
+ * @note Blocking Function which takes care of USART TX
+ */
+__STATIC_INLINE__ void USART_sendByte(const usart_t usart, const uint8_t character){
+	// Wait till TX Buffer is Empty
+	while(USART_TX_Ready(usart) != 0x01);
+	// Transmit the data
+	USART_TX_Byte(usart, character);
+}
+
+/**
  * @brief Configures the following by default:
  * @brief - Data Bits: 8
  * @brief - Parity Bits: None
@@ -451,6 +464,14 @@ driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
  * @returns - DRIVER_SUCCESS: Success
  */
 driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq);
+
+/**
+ * @brief Transmits formatted data on USART
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param format Formatted string
+ * @note `float` decimal restricted max to 6 places
+ */
+void USART_printf(const usart_t usart, const char* format, ...);
 
 #endif /* __OLD_GPIO_METHOD__ */
 

@@ -108,6 +108,7 @@ add_driver_module(
 	GPIO 
 	RCC
 	Timer
+	USART
 )
 
 # ---------------------- Executable ----------------------
