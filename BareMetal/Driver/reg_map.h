@@ -140,127 +140,6 @@ typedef enum {
 #define DMA2_Channel5						((DMA_Channel_TypeDef *) (DMA2_BASE_ADDR + 0x00000058))
 /*********************************************** Address Mapping ***********************************************/
 
-/*********************************************** GPIO MACROS ***********************************************/
-// Generic
-#define BIT_SET								(0x01)
-#define BIT_RESET							(0x00)
-
-/**
- * @brief GPIO Port Enumeration
- * @note Used to specify the port of a GPIO
- */
-typedef enum {
-	// GPIO Port A
-	GPIO_PORT_A = (uint8_t) 0x00,
-	// GPIO Port B
-	GPIO_PORT_B = (uint8_t) 0x01,
-	// GPIO Port C
-	GPIO_PORT_C = (uint8_t) 0x02,
-	// GPIO Port D
-	GPIO_PORT_D = (uint8_t) 0x03,
-	// GPIO Port E
-	GPIO_PORT_E = (uint8_t) 0x04,
-	// GPIO Port F
-	GPIO_PORT_F = (uint8_t) 0x05,
-	// GPIO Port G
-	GPIO_PORT_G = (uint8_t) 0x06,
-	// On-board (OB) LED Port
-	GPIO_PORT_OB_LED = GPIO_PORT_C
-} gpio_port_t;
-
-/**
- * @brief GPIO Pin Enumeration
- * @note Used to specify the pin number of a GPIO
- */
-typedef enum {
-	GPIO_PIN_0 = (uint16_t) 0x0001,
-	GPIO_PIN_1 = (uint16_t) 0x0002,
-	GPIO_PIN_2 = (uint16_t) 0x0004,
-	GPIO_PIN_3 = (uint16_t) 0x0008,
-	GPIO_PIN_4 = (uint16_t) 0x0010,
-	GPIO_PIN_5 = (uint16_t) 0x0020,
-	GPIO_PIN_6 = (uint16_t) 0x0040,
-	GPIO_PIN_7 = (uint16_t) 0x0080,
-	GPIO_PIN_8 = (uint16_t) 0x0100,
-	GPIO_PIN_9 = (uint16_t) 0x0200,
-	GPIO_PIN_10 = (uint16_t) 0x0400,
-	GPIO_PIN_11 = (uint16_t) 0x0800,
-	GPIO_PIN_12 = (uint16_t) 0x1000,
-	GPIO_PIN_13 = (uint16_t) 0x2000,
-	GPIO_PIN_14 = (uint16_t) 0x4000,
-	GPIO_PIN_15 = (uint16_t) 0x8000,
-	GPIO_PIN_ALL = (uint16_t) 0xFFFF,
-	GPIO_PIN_OB_LED = GPIO_PIN_13
-} gpio_pin_t;
-
-/**
- * @brief GPIO Mode Enumeration
- * @brief Used to specify the mode of a GPIO
- */
-typedef enum {
-	// GPIO as Input
-	GPIO_MODE_INPUT = (uint8_t) 0x00,
-	// GPIO as Output @10MHz
-	GPIO_MODE_OUTPUT_10MHz = (uint8_t) 0x01,
-	// GPIO as Output @2MHz
-	GPIO_MODE_OUTPUT_2MHz = (uint8_t) 0x02,
-	// GPIO as Output @50MHz
-	GPIO_MODE_OUTPUT_50MHz = (uint8_t) 0x03
-} gpio_mode_t;
-
-/**
- * @brief GPIO Pin Configuration Enumeration
- * @note Configuration options vary based on whether the pin is set as input or output
- */
-typedef enum {
-	GPIO_PIN_CNF_IN_ANALOG = (uint8_t) 0x00,
-	GPIO_PIN_CNF_IN_FLOAT = (uint8_t) 0x01,
-	GPIO_PIN_CNF_IN_PULL_DOWN = (uint8_t) 0x02,
-	GPIO_PIN_CNF_IN_PULL_UP = (uint8_t) 0x03,
-	GPIO_PIN_CNF_OUT_GP_PP = (uint8_t) 0x00,
-	GPIO_PIN_CNF_OUT_GP_OD = (uint8_t) 0x01,
-	GPIO_PIN_CNF_OUT_AF_PP = (uint8_t) 0x02,
-	GPIO_PIN_CNF_OUT_AF_OD = (uint8_t) 0x03
-} gpio_pin_cnf_t;
-
-typedef enum {
-	GPIO_ANALOG = 0x00,
-	GPIO_FLOATING = 0x01,
-	GPIO_PULL_DOWN = 0x03,
-	GPIO_PULL_UP = 0x04,
-} gpio_state_input_t;
-
-typedef enum {
-	GPIO_GP_PUSH_PULL = 0x00,
-	GPIO_GP_OPEN_DRAIN = 0x01,
-	GPIO_AF_PUSH_PULL = 0x02,
-	GPIO_AF_OPEN_DRAIN = 0x03
-} gpio_state_output_t;
-
-/**
- * @brief External Interrupt Trigger Enumeration
- */
-typedef enum {
-	GPIO_EXTI_TRIGGER_FALLING = (uint8_t) 0x01,
-	GPIO_EXTI_TRIGGER_RISING = (uint8_t) 0x02,
-	GPIO_EXTI_TRIGGER_BOTH = (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
-} gpio_exti_trigger_t;
-
-/**
- * @brief External Interrupt Source Port Enumeration
- */
-typedef enum {
-	GPIO_EXTI_PORT_A = (uint8_t) 0x00,
-	GPIO_EXTI_PORT_B = (uint8_t) 0x01,
-	GPIO_EXTI_PORT_C = (uint8_t) 0x02,
-	GPIO_EXTI_PORT_D = (uint8_t) 0x03,
-	GPIO_EXTI_PORT_E = (uint8_t) 0x04,
-	GPIO_EXTI_PORT_F = (uint8_t) 0x05,
-	GPIO_EXTI_PORT_G = (uint8_t) 0x06
-} gpio_exti_port_t;
-
-/*********************************************** GPIO MACROS ***********************************************/
-
 /*********************************************** RCC MACROS ***********************************************/
 // Generic Frequencies
 #define FREQ_12Hz							((uint32_t) 12)   
@@ -350,6 +229,7 @@ typedef enum {
 
 /*********************************************** NVIC MACROS ***********************************************/
 // IRQn Number
+typedef uint8_t irq_t
 #define WWDG_IRQn							(0)
 #define PVD_IRQn							(1)
 #define TAMPER_IRQn							(2)

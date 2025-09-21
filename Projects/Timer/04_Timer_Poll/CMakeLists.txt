@@ -50,65 +50,71 @@ set(SELECTED_DRIVER_SOURCES "")
 set(SELECTED_DRIVER_INCLUDES "")
 
 # Function to add a driver module
-function(add_driver_module module_name)
-	set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
-	if(EXISTS ${DRIVER_MODULE_DIR})
-		# Collect sources
-		file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-		list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
+function(add_driver_module)
+	# Iterate over each module name passed as argument
+	foreach(module_name IN LISTS ARGN)
+		# Construct module path
+		set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
+		# Check if directory exists
+		if(EXISTS ${DRIVER_MODULE_DIR})
+			# Collect sources & append to list
+			file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+			list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
 
-		# Collect includes
-		if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-			list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
-		endif()
+			# Collect includes & append to list
+			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+				list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
+			endif()
 
-		# Push lists to parent scope
-		set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
-		set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
+			# Push lists to parent scope
+			set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
+			set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
 
-		# ---------------- Pretty print tree ----------------
-		message(STATUS "-- ${module_name}")
+			# ------------------------ Pretty print tree ------------------------
+			message(STATUS "-- ${module_name}")
 
-		if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+			# Header File Tree
+			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
 			message(STATUS "   |-- Inc")
 			file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
 			foreach(hdr IN LISTS MODULE_HEADERS)
-				message(STATUS "   |    |-- ${hdr}")
+			message(STATUS "   |    |-- ${hdr}")
 			endforeach()
 			message(STATUS "   |")
+			endif()
+			
+			# Source File Tree
+			if(EXISTS ${DRIVER_MODULE_DIR}/Src)
+				message(STATUS "   |-- Src")
+				file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+				foreach(src IN LISTS MODULE_SOURCES)
+					message(STATUS "        |-- ${src}")
+				endforeach()
+			endif()
+		else()
+			message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
 		endif()
-
-		if(EXISTS ${DRIVER_MODULE_DIR}/Src)
-			message(STATUS "   |-- Src")
-			file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-			foreach(src IN LISTS MODULE_SOURCES)
-				message(STATUS "        |-- ${src}")
-			endforeach()
-		endif()
-	else()
-		message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
-	endif()
+	endforeach()
 endfunction()
 
-# ---------------------- Gather sources ----------------------
+# ---------------------- Includes & Sources ----------------------
+# Project Source Files
 file(GLOB_RECURSE PROJECT_SOURCES "${PROJ_DIR}/Src/*.c")
+# Core Source Files (if any)
 file(GLOB_RECURSE CORE_SOURCES "${CORE_ROOT}/Src/*.c")
 
-# Add only the driver modules you need for this project
-add_driver_module(GPIO)
-add_driver_module(RCC)
-add_driver_module(Timer)
-
-# Final list of all sources
-set(ALL_SOURCES
-	${PROJECT_SOURCES}
-	${SELECTED_DRIVER_SOURCES}
-	${CORE_SOURCES}
+# ----------------------------------- Add driver modules -----------------------------------
+add_driver_module(
+	GPIO 
+	RCC
+	Timer
 )
 
 # ---------------------- Executable ----------------------
 add_executable(${PROJECT_NAME}.elf
-	${ALL_SOURCES}
+	${PROJECT_SOURCES}
+	${SELECTED_DRIVER_SOURCES}
+	${CORE_SOURCES}
 )
 
 # ---------------------- Include Dirs ----------------------
@@ -123,16 +129,9 @@ target_include_directories(${PROJECT_NAME}.elf
 	PRIVATE 
 	${ALL_INCLUDE_DIRS}
 )
-
-# Pretty print only the global/common include dirs
-# message(STATUS "")
-# message(STATUS "-- Global Include Directories")
-# message(STATUS "   |-- ${PROJ_DIR}/Inc")
-# message(STATUS "   |-- ${CORE_ROOT}/Inc")
-# message(STATUS "   |-- ${DRIVER_ROOT}")
-
 # ---------------------- Flags ----------------------
-# For the executable
+
+# For the .elf target (C Language)
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm
@@ -141,6 +140,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	-D${MCU_MODEL} -MMD -MP -g -gdwarf-2
 )
 
+# For the .elf target (Assembly Language)
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	$<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
 	--specs=nano.specs -lc -lm -x assembler-with-cpp -MMD -MP>
@@ -155,10 +155,11 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
-	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-	COMMAND ${CMAKE_SIZE}    $<TARGET_FILE:${PROJECT_NAME}.elf>
-	COMMENT "Generating .bin/.hex and printing size"
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Generating .bin/.hex and printing size"
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --black
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
 )
 
 # ---------------------- VSCode Configuration Generation ----------------------
@@ -177,7 +178,6 @@ function(create_vscode_script name content)
 	set(script "${CMAKE_CURRENT_BINARY_DIR}/gen_${name}.cmake")
 	file(WRITE ${script} "${content}")
 endfunction()
-
 
 # -----------------------------------------------------------------------------
 # Generator script: launch.json
@@ -432,7 +432,6 @@ function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
 		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	)
 endfunction()
-
 
 # Replace main.h
 add_replace_target(replace_main_h "main.h" "${PROJ_DIR}/Inc")

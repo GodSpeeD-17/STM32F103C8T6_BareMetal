@@ -6,18 +6,16 @@
 	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
 	// Placeholders with the same ids are connected.
 	"Header Guards": {
-        "prefix": "reg_map_HG",
-        "body": [
-            "// Header Guards",
-            "#ifndef __${1:HEADER_FILE}__",
-            "#define __${1:HEADER_FILE}__",
-            "",
-            "// Core C Library",
-            "#include <stdint.h>",
-            "",
+		"prefix": "header_guards",
+		"body": [
+			"// Header Guards",
+			"#ifndef __${1:HEADER_FILE}__",
+			"#define __${1:HEADER_FILE}__",
 			"",
-            "#endif /* __${1:HEADER_FILE}__ */"
-        ],
-        "description": "Creates a Header Guard Template"
-    }
+			"",
+			"",
+			"#endif /* __${1:HEADER_FILE}__ */"
+		],
+		"description": "Creates a Header Guard Template"
+	}
 }
