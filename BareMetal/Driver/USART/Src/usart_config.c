@@ -1,7 +1,7 @@
 /**
  * @file usart_config.c
  * @author Shrey Shah
- * @brief USART Configuration
+ * @brief USART Lookup Table Configuration
  * @version 1.0
  * @date 21-09-2025
  */
@@ -143,14 +143,14 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 };
 
 /*********************************************** USART IRQn Mapping ***********************************************/
-static const irq_t __usartDriverIRQnMapping__[] = {
+const irq_t __usartDriverIRQnMapping__[] = {
 	[USART_1] = USART1_IRQn,
 	[USART_2] = USART2_IRQn,
 	[USART_3] = USART3_IRQn
 };
 
 /*********************************************** USART Register Mapping ***********************************************/
-static const USART_TypeDef* __usartDriverRegisterMapping__[] = {
+const USART_TypeDef* __usartDriverRegisterMapping__[] = {
 	[USART_1] = USART1,
 	[USART_2] = USART2,
 	[USART_3] = USART3
@@ -216,24 +216,3 @@ usart_pin_t* USART_CK_Get_GPIO_Config(const usart_t thisUSART){
 	// USART CK GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].CK;
 }
-
-/**
- * @brief Retrieves the USART IRQn Number
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return irq_t IRQ Number
- */
-irq_t USART_Get_IRQn(const usart_t thisUSART){
-	// USART IRQn
-	return __usartDriverIRQnMapping__[thisUSART];
-}
-
-/**
- * @brief Retrieves the USART Register Mapping Structure
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return GPIO_TypeDef* Pointer to USART Register Mapping Structure
- */
-USART_TypeDef* USART_Get_Mapping(const usart_t thisUSART){
-	// USART Register
-	return __usartDriverRegisterMapping__[thisUSART];
-}
-

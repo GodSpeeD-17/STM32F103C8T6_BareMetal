@@ -289,7 +289,10 @@ void USART_RX_Buffer_Append(const char* str, uint8_t length);
 
 #else
 /*********************************************** Includes ***********************************************/
+// USART Configuration
 #include "usart_config.h"
+// va_list
+#include <stdarg.h>
 
 /*********************************************** USART Interrupt ***********************************************/
 typedef enum {
@@ -313,7 +316,76 @@ typedef enum {
 	USART_IRQ_ERRORS = USART_IRQ_PE,
 } usart_irq_t;
 
-/*********************************************** APIs ***********************************************/
+/*********************************************** Helper APIs ***********************************************/
+/**
+ * @brief Checks if USART TX Buffer is Empty
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @returns Status of USART TX Buffer
+ * @return - 0: TX Buffer Full
+ * @return - 1: TX Buffer Empty
+ * @note Check status using this function before using `USART_Send_Char()`
+ */
+__STATIC_INLINE__ uint8_t USART_TX_Ready(const usart_t usart){
+	uint32_t usartTXReady = 0x00;
+	usartTXReady = (USART_Get_Mapping(usart)->SR.REG & USART_SR_TXE);
+	return (uint8_t)(usartTXReady >> USART_SR_TXE_Pos);
+}
+
+/**
+ * @brief Transmits a character on USART
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param character Character to be transmitted
+ * @note Check status using `USART_TX_Ready()` before using this function
+ */
+__STATIC_INLINE__ void USART_Send_Char(const usart_t usart, const char character){
+	// Transfer the data 
+	USART_Get_Mapping(usart)->DR.REG = (character & 0x000000FF);
+}
+
+/**
+ * @brief Checks if USART RX Buffer is Full
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @returns Status of USART RX Buffer
+ * @return - 0: RX Buffer Empty
+ * @return - 1: RX Buffer Full
+ * @note Check status using this function before using `USART_Recv_Char()`
+ */
+__STATIC_INLINE__ uint8_t USART_RX_Ready(const usart_t usart){
+	uint32_t usartRXReady = 0x00;
+	usartRXReady = (USART_Get_Mapping(usart)->SR.REG & USART_SR_RXNE);
+	return (uint8_t)(usartRXReady >> USART_SR_RXNE_Pos);
+}
+
+/**
+ * @brief Receives a character on USART
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @note Check status using `USART_RX_Ready()` before using this function
+ */
+__STATIC_INLINE__ uint8_t USART_Recv_Char(const usart_t usart){
+	// Receive the data 
+	uint8_t recvData = USART_Get_Mapping(usart)->DR.REG;
+	return (recvData & 0xFF);
+}
+
+/**
+ * @brief Configures the following by default:
+ * @brief - Data Bits: 8
+ * @brief - Parity Bits: None
+ * @brief - Stop Bits: 1
+ * @brief - Baud Rate: 9600
+ * @brief - Hardware Pins: TX+RX Enable
+ * @param usartConfig pointer to USART Configuration Structure. Refer `usart_config_t`
+ */
+__STATIC_INLINE__ void USART_Default_Config(usart_config_t* usartConfig){
+	// USART Communication Configuration
+	usartConfig->config = USART_CONFIG_8N1;
+	// USART Baud Rate Configuration
+	usartConfig->baud_rate = USART_BAUD_9600;
+	// USART Hardware Pins
+	usartConfig->hardware = USART_TX_RX_ENABLE;
+}
+
+/*********************************************** USART APIs ***********************************************/
 /**
  * @brief USART Hardware Pins Configure
  * @param hardware Refer `usart_hardware_enable_t`

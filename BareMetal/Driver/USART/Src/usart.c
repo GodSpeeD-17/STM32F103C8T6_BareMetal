@@ -7,15 +7,6 @@
 // Dependency
 #include "usart.h"
 
-/**
- * @brief Assert Status
- */
-#define ASSERT_DRIVER_STATUS(status)  		\
-	do {									\
-		if ((status) != DRIVER_SUCCESS){	\
-			return (status);				\
-		}									\
-	} while(0)
 
 #ifdef  __OLD_GPIO_METHOD__
 
@@ -280,6 +271,18 @@ void USART_load_default(usart_config_t* USART_CONFIGx){
 
 #else
 
+// USART Driver Baud Rate Lookup Table
+const static uint32_t __usartDriverBaudRateMapping__[] = {
+	[USART_BAUD_9600] = 9600,
+	[USART_BAUD_19200] = 19200,
+	[USART_BAUD_38400] = 38400,
+	[USART_BAUD_57600] = 57600,
+	[USART_BAUD_115200] = 115200,
+	[USART_BAUD_230400] = 230400,
+	[USART_BAUD_460800] = 460800,
+	[USART_BAUD_921600] = 921600,
+};
+
 /**
  * @brief USART Hardware Pins Configure
  * @param hardware Refer `usart_hardware_enable_t`
@@ -335,7 +338,8 @@ driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudR
 		return status;
 	uint32_t clockFreq = (usart == USART_1)? RCC_Get_APB2Clock() : RCC_Get_APB1Clock();
 	// Update Baud Rate Register Value
-	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(baudRate));
+	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(__usartDriverBaudRateMapping__[baudRate]));
+	// Return status
 	status = DRIVER_SUCCESS;
 	return status;
 }

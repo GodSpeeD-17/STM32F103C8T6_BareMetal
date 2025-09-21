@@ -57,6 +57,17 @@ typedef enum {
 	DRIVER_SUCCESS = (uint8_t) 0x00,
 	DRIVER_FAIL = (uint8_t) 0x01
 } driver_status_t;
+
+/**
+ * @brief Assert Status
+ */
+#define ASSERT_DRIVER_STATUS(status)  		\
+	do {									\
+		if ((status) != DRIVER_SUCCESS){	\
+			return (status);				\
+		}									\
+	} while(0)
+
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
