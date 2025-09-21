@@ -24,7 +24,6 @@ set(ST_INFO st-info)
 set(MCU_MODEL STM32F103C8T6)
 set(MCU_CPU cortex-m3)
 set(C_STD gnu11)
-set(CPP_STD gnu++17)
 set(OPTIMIZATION_LEVEL 0)
 set(FLASH_ADDRESS 0x08000000)
 
@@ -109,6 +108,7 @@ add_driver_module(
 	GPIO 
 	RCC
 	Timer
+	USART
 )
 
 # ---------------------- Executable ----------------------
@@ -118,19 +118,20 @@ add_executable(${PROJECT_NAME}.elf
 	${CORE_SOURCES}
 )
 
-# Make elf target depend on c_cpp_properties.json generation
-add_dependencies(${PROJECT_NAME}.elf c_cpp_properties_json settings_json)
-
 # ---------------------- Include Dirs ----------------------
-target_include_directories(${PROJECT_NAME}.elf 
-	PRIVATE 
+set(ALL_INCLUDE_DIRS
 	${PROJ_DIR}/Inc
 	${CORE_ROOT}/Inc
 	${DRIVER_ROOT}
 	${SELECTED_DRIVER_INCLUDES}
 )
 
+target_include_directories(${PROJECT_NAME}.elf 
+	PRIVATE 
+	${ALL_INCLUDE_DIRS}
+)
 # ---------------------- Flags ----------------------
+
 # For the .elf target (C Language)
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
@@ -146,7 +147,6 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	--specs=nano.specs -lc -lm -x assembler-with-cpp -MMD -MP>
 )
 
-# Generate .map file
 target_link_options(${PROJECT_NAME}.elf PRIVATE
 	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft
 	-T${LINKER_FILE} -lc -lm
@@ -156,10 +156,11 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --blue "Generating .bin/.hex and printing size"
-	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
-	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-	COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Generating .bin/.hex and printing size"
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --black
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
 )
 
 # ---------------------- VSCode Configuration Generation ----------------------
@@ -222,17 +223,7 @@ file(WRITE ${VSCODE_DIR}/settings.json \"{
   \\\"cortex-debug.gdbPath\\\": \\\"/usr/bin/gdb-multiarch\\\",
   \\\"cortex-debug.openocdPath\\\": \\\"/usr/local/bin/openocd\\\",
   \\\"cortex-debug.stutilPath\\\": \\\"/usr/bin/st-util\\\",
-  \\\"cortex-debug.variableUseNaturalFormat\\\": false,
-  \\\"files.associations\\\": {
-    \\\"*.h\\\": \\\"c\\\",
-    \\\"*.hpp\\\": \\\"cpp\\\",
-    \\\"**/*.h\\\": \\\"c\\\",
-    \\\"**/*.hpp\\\": \\\"cpp\\\",
-    \\\"*.c\\\": \\\"c\\\",
-    \\\"*.cpp\\\": \\\"cpp\\\",
-    \\\"**/*.c\\\": \\\"c\\\",
-    \\\"**/*.cpp\\\": \\\"cpp\\\"
-  }
+  \\\"cortex-debug.variableUseNaturalFormat\\\": false
 }\")
 ")
 
@@ -284,21 +275,10 @@ file(WRITE ${VSCODE_DIR}/c_cpp_properties.json \"{
 		\\\"${DRIVER_ROOT}/*/Inc/**\\\",
 		\\\"${PROJ_DIR}/Inc/**\\\"
 	  ],
-	  \\\"browse\\\": {
-		\\\"path\\\": [
-		  \\\"${PROJ_DIR}/Inc\\\",
-		  \\\"${CORE_ROOT}/Inc\\\",
-		  \\\"${DRIVER_ROOT}\\\"
-		],
-		\\\"limitSymbolsToIncludedHeaders\\\": true
-	  },
-	  \\\"defines\\\": [
-	  	\\\"${MCU_MODEL}\\\",
-		\\\"${MCU_CPU}\\\"
-	  ],
+	  \\\"defines\\\": [\\\"STM32F103C8T6\\\"],
 	  \\\"compilerPath\\\": \\\"/usr/bin/arm-none-eabi-gcc\\\",
-	  \\\"cStandard\\\": \\\"${C_STD}\\\",
-	  \\\"cppStandard\\\": \\\"${CPP_STD}\\\",
+	  \\\"cStandard\\\": \\\"c11\\\",
+	  \\\"cppStandard\\\": \\\"gnu++17\\\",
 	  \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"
 	}
   ],
@@ -369,7 +349,7 @@ add_custom_target(flash
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU 🚀               ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_FLASH} --reset write BINARY_FILE FLASH_ADDRESS
+	COMMAND ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
@@ -416,12 +396,13 @@ add_custom_target(erase_flash
 	COMMAND ${ST_FLASH} erase
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run 'make flash' to program         ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run make flash to program           ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMENT "Erasing flash memory"
 )
 
 # ---------------------- Make Targets Available ----------------------
+# Use different names for custom targets to avoid conflicts with CMake reserved names
 add_custom_target(flash_mcu DEPENDS flash)
 add_custom_target(clean_project DEPENDS clean_all)
 add_custom_target(stlink_info DEPENDS info)

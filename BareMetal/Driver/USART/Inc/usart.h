@@ -326,8 +326,9 @@ typedef enum {
  * @note Check status using this function before using `USART_Send_Char()`
  */
 __STATIC_INLINE__ uint8_t USART_TX_Ready(const usart_t usart){
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart); 
 	uint32_t usartTXReady = 0x00;
-	usartTXReady = (USART_Get_Mapping(usart)->SR.REG & USART_SR_TXE);
+	usartTXReady = (thisUsart->SR.REG & USART_SR_TXE);
 	return (uint8_t)(usartTXReady >> USART_SR_TXE_Pos);
 }
 
@@ -337,9 +338,10 @@ __STATIC_INLINE__ uint8_t USART_TX_Ready(const usart_t usart){
  * @param character Character to be transmitted
  * @note Check status using `USART_TX_Ready()` before using this function
  */
-__STATIC_INLINE__ void USART_Send_Char(const usart_t usart, const char character){
-	// Transfer the data 
-	USART_Get_Mapping(usart)->DR.REG = (character & 0x000000FF);
+__STATIC_INLINE__ void USART_TX_Byte(const usart_t usart, const uint8_t character){
+	// Transfer the data
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->DR.REG = character;
 }
 
 /**
@@ -351,19 +353,22 @@ __STATIC_INLINE__ void USART_Send_Char(const usart_t usart, const char character
  * @note Check status using this function before using `USART_Recv_Char()`
  */
 __STATIC_INLINE__ uint8_t USART_RX_Ready(const usart_t usart){
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	uint32_t usartRXReady = 0x00;
-	usartRXReady = (USART_Get_Mapping(usart)->SR.REG & USART_SR_RXNE);
+	usartRXReady = (thisUsart->SR.REG & USART_SR_RXNE);
 	return (uint8_t)(usartRXReady >> USART_SR_RXNE_Pos);
 }
 
 /**
  * @brief Receives a character on USART
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @return 8-bits data read in the `USARTx->DR`
  * @note Check status using `USART_RX_Ready()` before using this function
  */
-__STATIC_INLINE__ uint8_t USART_Recv_Char(const usart_t usart){
-	// Receive the data 
-	uint8_t recvData = USART_Get_Mapping(usart)->DR.REG;
+__STATIC_INLINE__ uint8_t USART_RX_Byte(const usart_t usart){
+	// Receive the data
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	uint8_t recvData = thisUsart->DR.REG;
 	return (recvData & 0xFF);
 }
 
@@ -394,7 +399,7 @@ __STATIC_INLINE__ void USART_Default_Config(usart_config_t* usartConfig){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig);
+driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig);
 
 /**
  * @brief Set USART Baud Rate
@@ -404,7 +409,7 @@ driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success 
  */
-driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudRate);
+driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudRate);
 
 /**
  * @brief Sets the USART Communication Configuration
@@ -415,7 +420,7 @@ driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudR
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success 
  */
-driver_status_t USART_Set_DataConfig(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig);
+driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig);
 
 /**
  * @brief Configures the USART Module

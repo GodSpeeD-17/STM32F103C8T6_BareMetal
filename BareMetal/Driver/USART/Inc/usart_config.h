@@ -11,7 +11,6 @@
 #define __USART_CONFIG_H__
 
 /*********************************************** Includes ***********************************************/
-#include "reg_map.h"
 #include "gpio.h"
 
 /*********************************************** USART MACROs ***********************************************/
@@ -212,164 +211,162 @@ typedef struct {
 } usart_config_t;
 
 /*********************************************** USART Lookup Table ***********************************************/
-extern const USART_TypeDef* __usartDriverRegisterMapping__[];
 extern const irq_t __usartDriverIRQnMapping__[];
-
+extern const USART_TypeDef* __usartDriverRegisterMapping__[];
 /*********************************************** USART Clock APIs ***********************************************/
 /**
  * @brief Enables the USART Clock
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void __USART_enableClock__(const usart_t thisUSART){
+__STATIC_INLINE__ void __USART_enableClock__(const usart_t usart){
 	// USART 1
-	if(thisUSART == USART_1){
+	if(usart == USART_1){
 		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
 	}
 	// USART2~5
 	else {
-		RCC->APB1ENR.REG |= (1 << ((thisUSART - USART_2) + RCC_APB1ENR_USART2EN_Pos));
+		RCC->APB1ENR.REG |= (1 << ((usart - USART_2) + RCC_APB1ENR_USART2EN_Pos));
 	}
 }
 
 /**
  * @brief Disables the USART Clock
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void __USART_disableClock__(const usart_t thisUSART){
+__STATIC_INLINE__ void __USART_disableClock__(const usart_t usart){
 	// USART 1
-	if(thisUSART == USART_1){
+	if(usart == USART_1){
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
 	}
 	// USART2~5
 	else {
-		RCC->APB1ENR.REG &= ~(1 << ((thisUSART - USART_2) + RCC_APB1ENR_USART2EN_Pos));
+		RCC->APB1ENR.REG &= ~(1 << ((usart - USART_2) + RCC_APB1ENR_USART2EN_Pos));
 	}
 }
 
 /*********************************************** USART Module APIs ***********************************************/
 /**
- * @brief Enables the USART Module
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @brief Retrieves the USART Register Mapping Structure
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @return Pointer to USART Register Mapping Structure
  */
-__STATIC_INLINE__ void USART_Enable(const usart_t thisUSART){
+__STATIC_INLINE__ USART_TypeDef* USART_Get_Mapping(const usart_t usart){
+	// USART Register Mapping
+	return (__usartDriverRegisterMapping__[usart]);
+}
+
+/**
+ * @brief Enables the USART Module
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ */
+__STATIC_INLINE__ void USART_Enable(const usart_t usart){
 	// Enable the USART Module
-	USART_Get_Mapping(thisUSART)->CR1.REG |= USART_CR1_UE;
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR1.REG |= USART_CR1_UE;
 }
 
 /**
  * @brief Disables the USART Module
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void USART_Disable(const usart_t thisUSART){
+__STATIC_INLINE__ void USART_Disable(const usart_t usart){
 	// Disable the USART Module
-	USART_Get_Mapping(thisUSART)->CR1.REG &= ~USART_CR1_UE;
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR1.REG &= ~USART_CR1_UE;
 }
 
 /*********************************************** USART Module APIs ***********************************************/
 /**
  * @brief Enables the TX using DMA
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Enable(const usart_t thisUSART){
+__STATIC_INLINE__ void USART_DMA_TX_Enable(const usart_t usart){
 	// Enable the DMA TX
-	USART_Get_Mapping(thisUSART)->CR3.REG |= USART_CR3_DMAT;
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR3.REG |= USART_CR3_DMAT;
 }
 
 /**
  * @brief Disables the TX using DMA
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_TX_Disable(const usart_t thisUSART){
+__STATIC_INLINE__ void USART_DMA_TX_Disable(const usart_t usart){
 	// Disable the DMA TX
-	USART_Get_Mapping(thisUSART)->CR3.REG &= ~USART_CR3_DMAT;
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR3.REG &= ~USART_CR3_DMAT;
 }
 
 /**
  * @brief Enables the RX using DMA
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_RX_Enable(const usart_t thisUSART){
+__STATIC_INLINE__ void USART_DMA_RX_Enable(const usart_t usart){
 	// Enable the DMA RX
-	USART_Get_Mapping(thisUSART)->CR3.REG |= USART_CR3_DMAR;
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR3.REG |= USART_CR3_DMAR;
 }
 
 /**
  * @brief Disables the RX using DMA
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_RX_Disable(const usart_t thisUSART){
+__STATIC_INLINE__ void USART_DMA_RX_Disable(const usart_t usart){
 	// Disable the DMA RX
-	USART_Get_Mapping(thisUSART)->CR3.REG &= ~USART_CR3_DMAR;
-}
-
-/**
- * @brief Retrieves the USART Register Mapping Structure
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return GPIO_TypeDef* Pointer to USART Register Mapping Structure
- */
-__STATIC_INLINE__ USART_TypeDef* USART_Get_Mapping(const usart_t thisUSART){
-	// USART Register Mapping
-	return __usartDriverRegisterMapping__[thisUSART];
+	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
+	thisUsart->CR3.REG &= ~USART_CR3_DMAR;
 }
 
 /**
  * @brief Retrieves the USART IRQn Number
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @return irq_t IRQ Number
  */
-__STATIC_INLINE__ irq_t USART_Get_IRQn(const usart_t thisUSART){
+__STATIC_INLINE__ irq_t USART_Get_IRQn(const usart_t usart){
 	// USART IRQn
-	return __usartDriverIRQnMapping__[thisUSART];
+	return __usartDriverIRQnMapping__[usart];
 }
 
 /*********************************************** USART Configuration Retrieving APIs ***********************************************/
 /**
- * @brief Retrieves the USART Register Mapping Structure
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return GPIO_TypeDef* Pointer to USART Register Mapping Structure
- */
-USART_TypeDef* USART_Get_Mapping(const usart_t thisUSART);
-
-/**
  * @brief Retrieves USART GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_gpio_t* Pointer to USART GPIO Configuration Structure
  */
-usart_gpio_t* USART_Get_GPIO_Config(const usart_t thisUSART);
+const usart_gpio_t* USART_GPIO_Config_Get(const usart_t usart);
 
 /**
  * @brief Retrieves USART TX Pin GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART TX GPIO Configuration Structure
  */
-usart_pin_t* USART_TX_Get_GPIO_Config(const usart_t thisUSART);
+const usart_pin_t* USART_TX_GPIO_Config_Get(const usart_t usart);
 
 /**
  * @brief Retrieves USART RX Pin GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART RX GPIO Configuration Structure
  */
-usart_pin_t* USART_RX_Get_GPIO_Config(const usart_t thisUSART);
+const usart_pin_t* USART_RX_GPIO_Config_Get(const usart_t usart);
 
 /**
  * @brief Retrieves USART RTS Pin GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART RTS GPIO Configuration Structure
  */
-usart_pin_t* USART_RTS_Get_GPIO_Config(const usart_t thisUSART);
+const usart_pin_t* USART_RTS_GPIO_Config_Get(const usart_t usart);
 
 /**
  * @brief Retrieves USART CTS Pin GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART CTS GPIO Configuration Structure
  */
-usart_pin_t* USART_CTS_Get_GPIO_Config(const usart_t thisUSART);
+const usart_pin_t* USART_CTS_GPIO_Config_Get(const usart_t usart);
 
 /**
  * @brief Retrieves USART CK Pin GPIO Configuration
- * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART CK GPIO Configuration Structure
  */
-usart_pin_t* USART_CK_Get_GPIO_Config(const usart_t thisUSART);
+const usart_pin_t* USART_CK_GPIO_Config_Get(const usart_t usart);
 
 #endif /* __USART_CONFIG_H__ */

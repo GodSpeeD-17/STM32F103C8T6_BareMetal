@@ -108,6 +108,7 @@ add_driver_module(
 	GPIO 
 	RCC
 	Timer
+	USART
 )
 
 # ---------------------- Executable ----------------------
@@ -348,7 +349,7 @@ add_custom_target(flash
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU 🚀               ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_FLASH} --reset write BINARY_FILE FLASH_ADDRESS
+	COMMAND ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
@@ -395,7 +396,7 @@ add_custom_target(erase_flash
 	COMMAND ${ST_FLASH} erase
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run 'make flash' to program         ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run make flash to program           ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMENT "Erasing flash memory"
 )

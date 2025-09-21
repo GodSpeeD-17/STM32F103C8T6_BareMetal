@@ -131,7 +131,6 @@ target_include_directories(${PROJECT_NAME}.elf
 	${ALL_INCLUDE_DIRS}
 )
 # ---------------------- Flags ----------------------
-
 # For the .elf target (C Language)
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
@@ -428,9 +427,9 @@ function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
 		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
 
 		# Display footer
-		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
-		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+		COMMAND ${CMAKE_COMMAND} -E echo "╔═══════════════════════════════════════════════════════════╗"
+		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!               ║"
+		COMMAND ${CMAKE_COMMAND} -E echo "╚═══════════════════════════════════════════════════════════╝"
 	)
 endfunction()
 

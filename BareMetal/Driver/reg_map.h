@@ -239,7 +239,7 @@ typedef enum {
 
 /*********************************************** NVIC MACROS ***********************************************/
 // IRQn Number
-typedef uint8_t irq_t
+typedef uint8_t irq_t;
 #define WWDG_IRQn							(0)
 #define PVD_IRQn							(1)
 #define TAMPER_IRQn							(2)

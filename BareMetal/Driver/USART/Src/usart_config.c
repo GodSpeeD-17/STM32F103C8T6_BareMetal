@@ -9,7 +9,8 @@
 /*********************************************** Includes ***********************************************/
 #include "usart_config.h"
 
-/*********************************************** USART GPIO Mapping ***********************************************/
+/*********************************************** USART Lookup Table ***********************************************/
+// GPIO Mapping
 static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	// USART1 GPIO Mapping
 	[USART_1] = {
@@ -141,28 +142,26 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 		}
 	},
 };
-
-/*********************************************** USART IRQn Mapping ***********************************************/
+// IRQ Mapping
 const irq_t __usartDriverIRQnMapping__[] = {
 	[USART_1] = USART1_IRQn,
 	[USART_2] = USART2_IRQn,
 	[USART_3] = USART3_IRQn
 };
-
-/*********************************************** USART Register Mapping ***********************************************/
+// USART Mapping
 const USART_TypeDef* __usartDriverRegisterMapping__[] = {
 	[USART_1] = USART1,
 	[USART_2] = USART2,
 	[USART_3] = USART3
 };
 
-/*********************************************** APIs ***********************************************/
+/*********************************************** USART Helper APIs ***********************************************/
 /**
  * @brief Retrieves USART GPIO Configuration
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_gpio_t* Pointer to USART GPIO Configuration Structure
  */
-usart_gpio_t* USART_Get_GPIO_Config(const usart_t thisUSART){
+const usart_gpio_t* USART_GPIO_Config_Get(const usart_t thisUSART){
 	// USART GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART];
 }
@@ -172,7 +171,7 @@ usart_gpio_t* USART_Get_GPIO_Config(const usart_t thisUSART){
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART TX GPIO Configuration Structure
  */
-usart_pin_t* USART_TX_Get_GPIO_Config(const usart_t thisUSART){
+const usart_pin_t* USART_TX_GPIO_Config_Get(const usart_t thisUSART){
 	// USART TX GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].TX;
 }
@@ -182,7 +181,7 @@ usart_pin_t* USART_TX_Get_GPIO_Config(const usart_t thisUSART){
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART RX GPIO Configuration Structure
  */
-usart_pin_t* USART_RX_Get_GPIO_Config(const usart_t thisUSART){
+const usart_pin_t* USART_RX_GPIO_Config_Get(const usart_t thisUSART){
 	// USART RX GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].RX;
 }
@@ -192,7 +191,7 @@ usart_pin_t* USART_RX_Get_GPIO_Config(const usart_t thisUSART){
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART RTS GPIO Configuration Structure
  */
-usart_pin_t* USART_RTS_Get_GPIO_Config(const usart_t thisUSART){
+const usart_pin_t* USART_RTS_GPIO_Config_Get(const usart_t thisUSART){
 	// USART RTS GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].RTS;
 }
@@ -202,7 +201,7 @@ usart_pin_t* USART_RTS_Get_GPIO_Config(const usart_t thisUSART){
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART CTS GPIO Configuration Structure
  */
-usart_pin_t* USART_CTS_Get_GPIO_Config(const usart_t thisUSART){
+const usart_pin_t* USART_CTS_GPIO_Config_Get(const usart_t thisUSART){
 	// USART CTS GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].CTS;
 }
@@ -212,7 +211,7 @@ usart_pin_t* USART_CTS_Get_GPIO_Config(const usart_t thisUSART){
  * @param thisUSART USART Instance: `USART_1`, `USART_2`, `USART_3`  
  * @return usart_pin_t* Pointer to USART CK GPIO Configuration Structure
  */
-usart_pin_t* USART_CK_Get_GPIO_Config(const usart_t thisUSART){
+const usart_pin_t* USART_CK_GPIO_Config_Get(const usart_t thisUSART){
 	// USART CK GPIO Configuration
 	return &__usartDriverGPIOMapping__[thisUSART].CK;
 }

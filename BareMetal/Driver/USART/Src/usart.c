@@ -1,6 +1,6 @@
 /***************************************************************************************
- *  File: uart.h
- *  Created on: 19/12/2024
+ *  File: usart.h
+ *  Created on: 21/09/2025
  *  Author: Shrey Shah
  ***************************************************************************************/
 
@@ -291,7 +291,7 @@ const static uint32_t __usartDriverBaudRateMapping__[] = {
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig){
+driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig){
 	// Status
 	driver_status_t status = DRIVER_FAIL;
 	// Configure TX Pin
@@ -331,7 +331,7 @@ driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success 
  */
-driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudRate){
+driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudRate){
 	// Get Clock Frequency
 	driver_status_t status = DRIVER_FAIL;
 	if((usart < USART_MIN) || (usart > USART_MAX))
@@ -406,14 +406,13 @@ static void __USART_updateCR2__(const usart_hardware_enable_t hardware, const us
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success 
  */
-driver_status_t USART_Set_DataConfig(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig){
+driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig){
 	// Status
 	driver_status_t status = DRIVER_FAIL;
 	// Validate Parameters
 	if((usart < USART_MIN) || (usart > USART_MAX))
 		return status;
 	uint32_t tempReg = 0x00000000;
-	uint8_t customDataConfig = 0x00;
 	// Get USART Mapping 
 	USART_TypeDef* USART = USART_Get_Mapping(usart);
 	// Read USARTx->CR1
@@ -449,16 +448,18 @@ driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartCon
 	// Enable Clock to USART
 	__USART_enableClock__(usart);
 	// Configure the GPIO
-	usart_gpio_t* usartGpioConfig = USART_Get_GPIO_Config(usart);
+	usart_gpio_t* usartGpioConfig = USART_GPIO_Config_Get(usart);
 	// Configure USART GPIO
-	status = USART_Config_GPIO(usartConfig->hardware, usartGpioConfig);
+	status = USART_GPIO_Config(usartConfig->hardware, usartGpioConfig);
 	ASSERT_DRIVER_STATUS(status);
 	// Set USART Baud Rate
-	status = USART_Set_BaudRate(usart, usartConfig->baud_rate);
+	status = USART_BaudRate_Set(usart, usartConfig->baud_rate);
 	ASSERT_DRIVER_STATUS(status);
 	// Set USART Communication Configuration
-	status = USART_Set_DataConfig(usart, usartConfig->hardware, usartConfig->config);
+	status = USART_DataConfig_Set(usart, usartConfig->hardware, usartConfig->config);
 	ASSERT_DRIVER_STATUS(status);
+	// Return status
+	return status;
 }
 
 /**
