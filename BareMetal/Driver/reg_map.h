@@ -44,7 +44,6 @@
 /*********************************************** Core C ***********************************************/
 
 /*********************************************** Custom Declaration ***********************************************/
-// #define NULL            					((void *) 0)
 #define __INLINE__							__attribute__((always_inline)) inline
 #define __STATIC__							static
 #define __STATIC_INLINE__					__STATIC__ __INLINE__

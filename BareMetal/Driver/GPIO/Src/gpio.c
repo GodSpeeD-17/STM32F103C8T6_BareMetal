@@ -16,7 +16,7 @@
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -75,7 +75,7 @@ driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Deinit(gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){
@@ -127,7 +127,7 @@ driver_status_t GPIO_Deinit(gpio_port_t gpio, gpio_config_t* const gpioConfig){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_LED_Init(gpio_port_t gpio, gpio_config_t* gpioConfig){
+driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* gpioConfig){
 	// Validate GPIO Port Support on Hardware
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
 	if(GPIOx == NULL){

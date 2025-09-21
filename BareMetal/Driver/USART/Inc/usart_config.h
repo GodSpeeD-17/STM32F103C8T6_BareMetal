@@ -14,6 +14,10 @@
 #include "reg_map.h"
 #include "gpio.h"
 
+/*********************************************** USART MACROs ***********************************************/
+#define USART_MIN						USART_1
+#define USART_MAX						USART_3
+
 /*********************************************** USART1 MACROs ***********************************************/
 #define USART1_CK_GPIO					GPIO_PORT_A
 #define USART1_CK_PIN					GPIO_PIN_8
@@ -61,6 +65,17 @@
 #define USART_CTS_PIN_CONFIG			GPIO_PIN_CNF_OUT_AF_PP
 #define USART_CK_PIN_MODE				GPIO_MODE_OUTPUT_10MHz
 #define USART_CK_PIN_CONFIG				GPIO_PIN_CNF_OUT_AF_PP
+
+/*********************************************** USART Data Configuration ***********************************************/
+#define USART_DATA_BITS_SHIFT_Pos		(4)
+#define USART_DATA_BITS_Mask			(0x01 << USART_DATA_BITS_SHIFT_Pos)
+#define USART_EXTRACT_DATA_BITS(X)		(((X) & USART_DATA_BITS_Mask) >> USART_DATA_BITS_SHIFT_Pos)
+#define USART_PARITY_SHIFT_Pos			(2)
+#define USART_PARITY_Mask				(0x03 << USART_PARITY_SHIFT_Pos)
+#define USART_EXTRACT_PARITY(X)			(((X) & USART_PARITY_Mask) >> USART_PARITY_SHIFT_Pos)
+#define USART_STOP_BITS_SHIFT_Pos		(0)
+#define USART_STOP_BITS_Mask			(0x03 << USART_STOP_BITS_SHIFT_Pos)
+#define USART_EXTRACT_STOP_BITS(X)		(((X) & USART_STOP_BITS_Mask) >> USART_STOP_BITS_SHIFT_Pos)
 
 /*********************************************** USART Instances ***********************************************/
 typedef enum {
@@ -123,9 +138,9 @@ typedef enum {
 
 /*********************************************** USART Parity Bits ***********************************************/
 typedef enum {
-	USART_PARITY_EVEN = (uint8_t) 0x00,
-	USART_PARITY_ODD = (uint8_t) 0x01,
-	USART_PARITY_NONE = (uint8_t) 0x03,
+	USART_PARITY_NONE = (uint8_t) 0x00,
+	USART_PARITY_EVEN = (uint8_t) 0x02,
+	USART_PARITY_ODD = (uint8_t) 0x03
 } usart_parity_t;
 
 /*********************************************** USART Stop Bits ***********************************************/
@@ -138,31 +153,53 @@ typedef enum {
 
 /*********************************************** USART Data Configuration ***********************************************/
 typedef enum {
-	USART_8N1 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_8N0_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_8N1_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_8N2 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_2 << 0)),
-	USART_8E1 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_8E0_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_8E1_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_8E2 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_2 << 0)),
-	USART_8O1 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_8O0_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_8O1_5 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_8O2 = (uint8_t) ((USART_8_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_2 << 0)),
-	USART_9N1 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_9N0_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_9N1_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_9N2 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_NONE << 2) | (USART_STOP_BIT_2 << 0)),
-	USART_9E1 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_9E0_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_9E1_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_9E2 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_EVEN << 2) | (USART_STOP_BIT_2 << 0)),
-	USART_9O1 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_1 << 0)),
-	USART_9O0_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_0_5 << 0)),
-	USART_9O1_5 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_1_5 << 0)),
-	USART_9O2 = (uint8_t) ((USART_9_BITS << 4) | (USART_PARITY_ODD << 2) | (USART_STOP_BIT_2 << 0)),
+	USART_8N1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8N0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8N1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8N2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8E1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8E0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8E1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8E2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8O1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8O0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8O1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_8O2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9N1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9N0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9N1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9N2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9E1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9E0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9E1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9E2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9O1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9O0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9O1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
+	USART_9O2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
 } usart_data_config_t;
+
+/*********************************************** Custom USART Hardware Mapping Structure ***********************************************/
+typedef struct {
+	// GPIO Port
+	gpio_port_t GPIO;
+	// GPIO Pin Configuration
+	gpio_config_t setup;
+} usart_pin_t;
+
+/*********************************************** USART GPIO Mapping Structure ***********************************************/
+typedef struct {
+	// USART TX Pin
+	usart_pin_t TX;
+	// USART RX Pin
+	usart_pin_t RX;
+	// USART RTS Pin
+	usart_pin_t RTS;
+	// USART CTS Pin
+	usart_pin_t CTS;
+	// USART Clock
+	usart_pin_t CK;
+} usart_gpio_t;
 
 /*********************************************** USART Configuration Structure ***********************************************/
 typedef struct {

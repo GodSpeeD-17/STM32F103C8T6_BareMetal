@@ -1,7 +1,7 @@
 /***************************************************************************************
- *  File: uart.h
- *  Created on: 19/12/2024
+ *  File: usart.h
  *  Author: Shrey Shah
+ *  Created on: 21/09/2025
  ***************************************************************************************/
 // Header Guards
 #ifndef __USART_H__
@@ -287,6 +287,93 @@ void USART_TX_Buffer_Append(const char* str, uint8_t length);
  */
 void USART_RX_Buffer_Append(const char* str, uint8_t length);
 
+#else
+/*********************************************** Includes ***********************************************/
+#include "usart_config.h"
+
+/*********************************************** USART Interrupt ***********************************************/
+typedef enum {
+	USART_IRQ_NONE = 0x00,
+	// IDLE Interrupt
+	USART_IRQ_IDLE = 0x01,
+	// RX Data Interrupt
+	USART_IRQ_RX = 0x02,
+	// TX Complete Interrupt
+	USART_IRQ_TC = 0x04,
+	// TX Data Register Empty Interrupt
+	USART_IRQ_TX = 0x08,
+	// Parity Error Interrupt
+	USART_IRQ_PE = 0x10,
+	// Common combinations
+	USART_IRQ_RX_TX = (USART_IRQ_RX | USART_IRQ_TX),
+	// Typical UART configurations
+	USART_IRQ_STANDARD = (USART_IRQ_RX | USART_IRQ_TX | USART_IRQ_PE),
+	USART_IRQ_FULL = (USART_IRQ_IDLE | USART_IRQ_RX | USART_IRQ_TC | USART_IRQ_TX | USART_IRQ_PE),
+	// Error interrupts
+	USART_IRQ_ERRORS = USART_IRQ_PE,
+} usart_irq_t;
+
+/*********************************************** APIs ***********************************************/
+/**
+ * @brief USART Hardware Pins Configure
+ * @param hardware Refer `usart_hardware_enable_t`
+ * @param usartGpioConfig Refer `usart_gpio_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig);
+
+/**
+ * @brief Set USART Baud Rate
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param baudRate Refer `usart_baud_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success 
+ */
+driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudRate);
+
+/**
+ * @brief Sets the USART Communication Configuration
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
+ * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success 
+ */
+driver_status_t USART_Set_DataConfig(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig);
+
+/**
+ * @brief Configures the USART Module
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param usartConfig Pointer to USART Configuration Structure
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig);
+
+/**
+ * @brief Enable USART Interrupts
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param irq USART IRQ Combinations. Refer `usart_irq_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
+
+/**
+ * @brief Disables USART Interrupts
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param irq USART IRQ Combinations. Refer `usart_irq_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq);
 
 #endif /* __OLD_GPIO_METHOD__ */
 

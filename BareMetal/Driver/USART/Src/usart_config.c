@@ -9,28 +9,6 @@
 /*********************************************** Includes ***********************************************/
 #include "usart_config.h"
 
-/*********************************************** Custom USART Hardware Mapping Structure ***********************************************/
-typedef struct {
-	// GPIO Port
-	gpio_port_t GPIO;
-	// GPIO Pin Configuration
-	gpio_config_t setup;
-} usart_pin_t;
-
-/*********************************************** USART GPIO Mapping Structure ***********************************************/
-typedef struct {
-	// USART TX Pin
-	usart_pin_t TX;
-	// USART RX Pin
-	usart_pin_t RX;
-	// USART RTS Pin
-	usart_pin_t RTS;
-	// USART CTS Pin
-	usart_pin_t CTS;
-	// USART Clock
-	usart_pin_t CK;
-} usart_gpio_t;
-
 /*********************************************** USART GPIO Mapping ***********************************************/
 static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	// USART1 GPIO Mapping

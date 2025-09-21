@@ -7,6 +7,16 @@
 // Dependency
 #include "usart.h"
 
+/**
+ * @brief Assert Status
+ */
+#define ASSERT_DRIVER_STATUS(status)  		\
+	do {									\
+		if ((status) != DRIVER_SUCCESS){	\
+			return (status);				\
+		}									\
+	} while(0)
+
 #ifdef  __OLD_GPIO_METHOD__
 
 /**
@@ -243,14 +253,14 @@ uint16_t USART_receive(usart_config_t* USART_CONFIGx){
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
 void USART_load_default(usart_config_t* USART_CONFIGx){
-    // Load default GPIO Configuration
-    USART_CONFIGx->TX.MODE = GPIOx_MODE_OUT_50MHz;
-    USART_CONFIGx->TX.CNF = GPIOx_CNF_OUT_AF_PP;
-    USART_CONFIGx->RX.MODE = GPIOx_MODE_IN;
-    USART_CONFIGx->RX.CNF = GPIOx_CNF_IN_FLOAT;
-    // Set Baud Rate to 9600
-    USART_CONFIGx->baud_rate = USARTx_BAUD_9600;
-    // Set Stop Bit to 1
+	// Load default GPIO Configuration
+	USART_CONFIGx->TX.MODE = GPIOx_MODE_OUT_50MHz;
+	USART_CONFIGx->TX.CNF = GPIOx_CNF_OUT_AF_PP;
+	USART_CONFIGx->RX.MODE = GPIOx_MODE_IN;
+	USART_CONFIGx->RX.CNF = GPIOx_CNF_IN_FLOAT;
+	// Set Baud Rate to 9600
+	USART_CONFIGx->baud_rate = USARTx_BAUD_9600;
+	// Set Stop Bit to 1
 	USART_CONFIGx->stop_bits = USARTx_STOP_1_BIT;
 	// Word Length
 	USART_CONFIGx->word_length = USARTx_WORD_8_BITS;
@@ -266,6 +276,221 @@ void USART_load_default(usart_config_t* USART_CONFIGx){
 	USART_CONFIGx->TXE = USARTx_TX_ENABLE;
 	// Enable RX
 	USART_CONFIGx->RXE = USARTx_RX_ENABLE;
+}
+
+#else
+
+/**
+ * @brief USART Hardware Pins Configure
+ * @param hardware Refer `usart_hardware_enable_t`
+ * @param usartGpioConfig Refer `usart_gpio_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_Config_GPIO(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig){
+	// Status
+	driver_status_t status = DRIVER_FAIL;
+	// Configure TX Pin
+	if(hardware & USART_TX_ENABLE){
+		status = GPIO_Init(usartGpioConfig->TX.GPIO, &usartGpioConfig->TX.setup); 
+		ASSERT_DRIVER_STATUS(status);
+	}
+	// Configure RX Pin
+	if(hardware & USART_RX_ENABLE){
+		status = GPIO_Init(usartGpioConfig->RX.GPIO, &usartGpioConfig->RX.setup);
+		ASSERT_DRIVER_STATUS(status);
+	}
+	// Configure RTS Pin
+	if(hardware & USART_RTS_ENABLE){
+		status = GPIO_Init(usartGpioConfig->RTS.GPIO, &usartGpioConfig->RTS.setup);
+		ASSERT_DRIVER_STATUS(status);
+	}
+	// Configure CTS Pin
+	if(hardware & USART_CTS_ENABLE){
+		status = GPIO_Init(usartGpioConfig->CTS.GPIO, &usartGpioConfig->CTS.setup);
+		ASSERT_DRIVER_STATUS(status);
+	}
+	// Configure CK Pin
+	if(hardware & USART_CK_ENABLE){
+		status = GPIO_Init(usartGpioConfig->CK.GPIO, &usartGpioConfig->CK.setup);
+		ASSERT_DRIVER_STATUS(status);
+	}
+	// Status
+	return status;
+}
+
+/**
+ * @brief Set USART Baud Rate
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param baudRate Refer `usart_baud_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success 
+ */
+driver_status_t USART_Set_BaudRate(const usart_t usart, const usart_baud_t baudRate){
+	// Get Clock Frequency
+	driver_status_t status = DRIVER_FAIL;
+	if((usart < USART_MIN) || (usart > USART_MAX))
+		return status;
+	uint32_t clockFreq = (usart == USART_1)? RCC_Get_APB2Clock() : RCC_Get_APB1Clock();
+	// Update Baud Rate Register Value
+	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(baudRate));
+	status = DRIVER_SUCCESS;
+	return status;
+}
+
+/**
+ * @brief Private function to update `USARTx->CR1` in input register as per hardware & data configuration
+ * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
+ * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
+ * @param reg Pointer to Register which contains the `USARTx->CR1` Register Value
+ */
+static void __USART_updateCR1__(const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig, uint32_t *tempReg){
+	// Temporary Variable
+	uint8_t customDataConfig = 0x00;
+	// Update TX status based on Configuration
+	if(hardware & USART_TX_ENABLE){
+		*tempReg |= USART_CR1_TE;
+	}
+	else{
+		*tempReg &= ~USART_CR1_TE;
+	}
+	// Update RX status based on Configuration
+	if(hardware & USART_RX_ENABLE){
+		*tempReg |= USART_CR1_RE;
+	}
+	else{
+		*tempReg &= ~USART_CR1_RE;
+	}
+	// Disable Parity Control & Even Parity Selection
+	*tempReg &= ~(USART_CR1_PCE | USART_CR1_PS);
+	// Determine Parity Bit Configuration
+	customDataConfig = USART_EXTRACT_PARITY(dataConfig); 
+	*tempReg |= (customDataConfig << USART_CR1_PS_Pos);
+	// USART Data Bit Configuration
+	*tempReg &= ~(USART_CR1_M);
+	customDataConfig = USART_EXTRACT_DATA_BITS(dataConfig);
+	*tempReg |= (customDataConfig << USART_CR1_M_Pos);
+}
+
+/**
+ * @brief Private function to update `USARTx->CR2` in input register as per hardware & data configuration
+ * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
+ * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
+ * @param reg Pointer to Register which contains the `USARTx->CR2` Register Value
+ */
+static void __USART_updateCR2__(const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig, uint32_t *tempReg){
+	uint8_t customDataConfig = 0x00;
+	// Update Clock Enable functionality
+	*tempReg &= ~USART_CR2_CLKEN;
+	if(hardware & USART_CK_ENABLE){
+		*tempReg |= USART_CR2_CLKEN;
+	}
+	// Stop Bits Configuration
+	*tempReg &= ~(USART_CR2_STOP_Msk);
+	customDataConfig = USART_EXTRACT_STOP_BITS(dataConfig);
+	*tempReg |= (customDataConfig << USART_CR2_STOP_Pos);
+}
+
+/**
+ * @brief Sets the USART Communication Configuration
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
+ * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success 
+ */
+driver_status_t USART_Set_DataConfig(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig){
+	// Status
+	driver_status_t status = DRIVER_FAIL;
+	// Validate Parameters
+	if((usart < USART_MIN) || (usart > USART_MAX))
+		return status;
+	uint32_t tempReg = 0x00000000;
+	uint8_t customDataConfig = 0x00;
+	// Get USART Mapping 
+	USART_TypeDef* USART = USART_Get_Mapping(usart);
+	// Read USARTx->CR1
+	tempReg = USART->CR1.REG;
+	__USART_updateCR1__(hardware, dataConfig, &tempReg);
+	// Write USARTx->CR1
+	USART->CR1.REG = tempReg;
+	// Read USARTx->CR2
+	tempReg = USART->CR2.REG;
+	__USART_updateCR2__(hardware, dataConfig, &tempReg);
+	// Write USARTx->CR2
+	USART->CR2.REG = tempReg;
+	// Return status
+	status = DRIVER_SUCCESS;
+	return status;
+}
+
+/**
+ * @brief Configures the USART Module
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
+ * @param usartConfig Pointer to USART Configuration Structure
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig){
+	// Status
+	driver_status_t status = DRIVER_FAIL;
+	// Validate Parameters
+	if((usart < USART_MIN) || (usart > USART_MAX) || (usartConfig == NULL)){
+		return status;
+	}
+	// Enable Clock to USART
+	__USART_enableClock__(usart);
+	// Configure the GPIO
+	usart_gpio_t* usartGpioConfig = USART_Get_GPIO_Config(usart);
+	// Configure USART GPIO
+	status = USART_Config_GPIO(usartConfig->hardware, usartGpioConfig);
+	ASSERT_DRIVER_STATUS(status);
+	// Set USART Baud Rate
+	status = USART_Set_BaudRate(usart, usartConfig->baud_rate);
+	ASSERT_DRIVER_STATUS(status);
+	// Set USART Communication Configuration
+	status = USART_Set_DataConfig(usart, usartConfig->hardware, usartConfig->config);
+	ASSERT_DRIVER_STATUS(status);
+}
+
+/**
+ * @brief Enable USART Interrupts
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param irq USART IRQ Combinations. Refer `usart_irq_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq){
+	// Status
+	driver_status_t status = DRIVER_FAIL;
+	USART_Get_Mapping(usart)->CR1.REG |= (uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos);
+	NVIC_IRQ_Enable(USART_Get_IRQn(usart));
+	// Return Status
+	status = DRIVER_SUCCESS;
+	return status;
+}
+
+/**
+ * @brief Disables USART Interrupts
+ * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
+ * @param irq USART IRQ Combinations. Refer `usart_irq_t`
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq){
+	// Status
+	driver_status_t status = DRIVER_FAIL;
+	USART_Get_Mapping(usart)->CR1.REG &= ~((uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos));
+	NVIC_IRQ_Enable(USART_Get_IRQn(usart));
+	// Return status
+	status = DRIVER_SUCCESS;
+	return status;
 }
 
 #endif /* __OLD_GPIO_METHOD__ */

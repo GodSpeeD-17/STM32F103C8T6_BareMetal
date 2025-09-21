@@ -86,7 +86,7 @@ __STATIC_INLINE__ void OB_LED_Toggle(void){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig);
+driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig);
 
 /**
  * @brief Configures the LED connected to the specified GPIO Port and Pin
@@ -96,7 +96,7 @@ driver_status_t GPIO_Init(gpio_port_t gpio, gpio_config_t* const gpioConfig);
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_LED_Init(gpio_port_t gpio, gpio_config_t* gpioConfig);
+driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* gpioConfig);
 
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
@@ -106,7 +106,7 @@ driver_status_t GPIO_LED_Init(gpio_port_t gpio, gpio_config_t* gpioConfig);
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Deinit(gpio_port_t gpio, gpio_config_t* const gpioConfig);
+driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioConfig);
 
 /**
  * @brief Configures the On-board LED
