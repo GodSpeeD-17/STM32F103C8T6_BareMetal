@@ -44,23 +44,23 @@
 /*********************************************** Core C ***********************************************/
 
 /*********************************************** Custom Declaration ***********************************************/
-#define __INLINE__ __attribute__((always_inline)) inline
-#define __STATIC__ static
-#define __STATIC_INLINE__ __STATIC__ __INLINE__
-#define __IO volatile
-#define __PACKED__ __attribute__((__packed__))
+#define __INLINE__ 								__attribute__((always_inline)) inline
+#define __STATIC__ 								static
+#define __STATIC_INLINE__ 						__STATIC__ __INLINE__
+#define __IO 									volatile
+#define __PACKED__ 								__attribute__((__packed__))
 
 /**
  * @brief Enumeration for Success/Failure for Driver return
  */
-typedef enum
+typedef const enum
 {
 	DRIVER_SUCCESS = (uint8_t)0x00,
 	DRIVER_FAIL = (uint8_t)0x01
 } driver_status_t;
 
 /**
- * @brief Assert Status
+ * @brief Assert Driver Functionality Status
  */
 #define ASSERT_DRIVER_STATUS(status)    \
 	do                                  \
@@ -74,14 +74,17 @@ typedef enum
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM CORTEX M3 ***********************************************/
+#ifdef __CORTEX_M3__
 #include "arm_reg_map.h"
 #include "flash_reg_map.h"
 #include "nvic_reg_map.h"
 #include "systick_reg_map.h"
 #include "wwdg_reg_map.h"
+#endif /* __CORTEX_M3__ */
 /*********************************************** ARM CORTEX M3 ***********************************************/
 
 /*********************************************** STM32F103C8T6 ***********************************************/
+#ifdef __STM32F103C8T6__
 #include "adc_reg_map.h"
 #include "advtim_reg_map.h"
 #include "afio_reg_map.h"
@@ -92,90 +95,92 @@ typedef enum
 #include "timer_reg_map.h"
 #include "rcc_reg_map.h"
 #include "usart_reg_map.h"
+#endif /* __STM32F103C8T6__ */
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
-#define SysTick_BASE_ADDR 0xE000E010
-#define NVIC_BASE_ADDR 0xE000E100
-#define CPU_ID_BASE_ADDR 0xE000ED00
-#define APB1_BASE_ADDR 0x40000000
-#define APB2_BASE_ADDR 0x40010000
-#define AHB_BASE_ADDR 0x40018000
-#define FLASH_BASE_ADDR 0x40022000
-#define DMA1_BASE_ADDR (AHB_BASE_ADDR + 0x00008000)
-#define DMA2_BASE_ADDR (DMA1_BASE_ADDR + 0x00000400)
+#define SysTick_BASE_ADDR 						0xE000E010
+#define NVIC_BASE_ADDR 							0xE000E100
+#define CPU_ID_BASE_ADDR 						0xE000ED00
+#define APB1_BASE_ADDR 							0x40000000
+#define APB2_BASE_ADDR 							0x40010000
+#define AHB_BASE_ADDR 							0x40018000
+#define FLASH_BASE_ADDR 						0x40022000
+#define DMA1_BASE_ADDR 							(AHB_BASE_ADDR + 0x00008000)
+#define DMA2_BASE_ADDR 							(DMA1_BASE_ADDR + 0x00000400)
 
 // Address Mapping
-#define SysTick ((SysTick_TypeDef *)(SysTick_BASE_ADDR))
-#define NVIC ((NVIC_TypeDef *)(NVIC_BASE_ADDR))
-#define FLASH ((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
-#define WWDG ((WWDG_REG_STRUCT *)(APB1_BASE_ADDR + 0x00002C00))
-#define RCC ((RCC_REG_STRUCT *)(AHB_BASE_ADDR + 0x00009000))
-#define GPIOA ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000800))
-#define GPIOB ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000C00))
-#define GPIOC ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001000))
-#define GPIOD ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001400))
-#define GPIOE ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001800))
-#define GPIOF ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001C00))
-#define GPIOG ((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00002000))
-#define AFIO ((AFIO_TypeDef *)(APB2_BASE_ADDR))
-#define TIM1 ((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00002C00))
-#define TIM2 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000000))
-#define TIM3 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000400))
-#define TIM4 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000800))
-#define TIM5 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000C00))
-#define TIM6 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001000))
-#define TIM7 ((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001400))
-#define TIM8 ((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00003400))
-#define ADC1 ((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002400))
-#define ADC2 ((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002800))
-#define ADC3 ((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00003C00))
-#define USART1 ((USART_TypeDef *)(APB2_BASE_ADDR + 0x00003800))
-#define USART2 ((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004400))
-#define USART3 ((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004800))
-#define EXTI ((EXTI_REG_STRUCT *)(APB2_BASE_ADDR + 0x00000400))
-#define I2C1 ((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005400))
-#define I2C2 ((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005800))
-#define DMA1 ((DMA_TypeDef *)DMA1_BASE_ADDR)
-#define DMA1_Channel1 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000008))
-#define DMA1_Channel2 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x0000001C))
-#define DMA1_Channel3 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000030))
-#define DMA1_Channel4 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000044))
-#define DMA1_Channel5 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000058))
-#define DMA1_Channel6 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x0000006C))
-#define DMA1_Channel7 ((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000080))
-#define DMA2 ((DMA_TypeDef *)DMA2_BASE_ADDR)
-#define DMA2_Channel1 ((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000008))
-#define DMA2_Channel2 ((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x0000001C))
-#define DMA2_Channel3 ((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000030))
-#define DMA2_Channel4 ((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000044))
-#define DMA2_Channel5 ((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000058))
+#define SysTick 								((SysTick_TypeDef *)(SysTick_BASE_ADDR))
+#define NVIC 									((NVIC_TypeDef *)(NVIC_BASE_ADDR))
+#define FLASH 									((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
+#define WWDG 									((WWDG_REG_STRUCT *)(APB1_BASE_ADDR + 0x00002C00))
+#define RCC 									((RCC_TypeDef *)(AHB_BASE_ADDR + 0x00009000))
+#define GPIOA 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000800))
+#define GPIOB 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00000C00))
+#define GPIOC 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001000))
+#define GPIOD 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001400))
+#define GPIOE 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001800))
+#define GPIOF 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00001C00))
+#define GPIOG 									((GPIO_TypeDef *)(APB2_BASE_ADDR + 0x00002000))
+#define AFIO 									((AFIO_TypeDef *)(APB2_BASE_ADDR))
+#define TIM1 									((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00002C00))
+#define TIM2 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000000))
+#define TIM3 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000400))
+#define TIM4 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000800))
+#define TIM5 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00000C00))
+#define TIM6 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001000))
+#define TIM7 									((TIM_TypeDef *)(APB1_BASE_ADDR + 0x00001400))
+#define TIM8 									((Adv_TIM_TypeDef *)(APB2_BASE_ADDR + 0x00003400))
+#define ADC1 									((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002400))
+#define ADC2 									((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00002800))
+#define ADC3 									((ADC_TypeDef *)(APB2_BASE_ADDR + 0x00003C00))
+#define USART1 									((USART_TypeDef *)(APB2_BASE_ADDR + 0x00003800))
+#define USART2 									((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004400))
+#define USART3 									((USART_TypeDef *)(APB1_BASE_ADDR + 0x00004800))
+#define EXTI 									((EXTI_REG_STRUCT *)(APB2_BASE_ADDR + 0x00000400))
+#define I2C1 									((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005400))
+#define I2C2 									((I2C_TypeDef *)(APB1_BASE_ADDR + 0x00005800))
+#define DMA1 									((DMA_TypeDef *)DMA1_BASE_ADDR)
+#define DMA1_Channel1 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000008))
+#define DMA1_Channel2 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x0000001C))
+#define DMA1_Channel3 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000030))
+#define DMA1_Channel4 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000044))
+#define DMA1_Channel5 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000058))
+#define DMA1_Channel6 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x0000006C))
+#define DMA1_Channel7 							((DMA_Channel_TypeDef *)(DMA1_BASE_ADDR + 0x00000080))
+#define DMA2 									((DMA_TypeDef *) DMA2_BASE_ADDR)
+#define DMA2_Channel1 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000008))
+#define DMA2_Channel2 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x0000001C))
+#define DMA2_Channel3 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000030))
+#define DMA2_Channel4 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000044))
+#define DMA2_Channel5 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000058))
 /*********************************************** Address Mapping ***********************************************/
 
 /*********************************************** RCC MACROS ***********************************************/
 // Generic Frequencies
-#define FREQ_12Hz ((uint32_t)12)
-#define FREQ_25Hz ((uint32_t)25)
-#define FREQ_50Hz ((uint32_t)50)
-#define FREQ_100Hz ((uint32_t)100)
-#define FREQ_500Hz ((uint32_t)500)
-#define FREQ_1kHz ((uint32_t)1000)
-#define FREQ_2kHz ((uint32_t)2000)
-#define FREQ_5kHz ((uint32_t)5000)
-#define FREQ_10kHz ((uint32_t)10000)
-#define FREQ_50kHz ((uint32_t)50000)
-#define FREQ_72kHz ((uint32_t)72000)
-#define FREQ_100kHz ((uint32_t)100000)
-#define FREQ_200kHz ((uint32_t)200000)
-#define FREQ_1MHz ((uint32_t)1000000)
-#define FREQ_10MHz ((uint32_t)10000000)
+typedef uint32_t freq_t;
+#define FREQ_12Hz 								((freq_t) 12)
+#define FREQ_25Hz 								((freq_t) 25)
+#define FREQ_50Hz 								((freq_t) 50)
+#define FREQ_100Hz 								((freq_t) 100)
+#define FREQ_500Hz 								((freq_t) 500)
+#define FREQ_1kHz 								((freq_t) 1000)
+#define FREQ_2kHz 								((freq_t) 2000)
+#define FREQ_5kHz 								((freq_t) 5000)
+#define FREQ_10kHz 								((freq_t) 10000)
+#define FREQ_50kHz 								((freq_t) 50000)
+#define FREQ_72kHz 								((freq_t) 72000)
+#define FREQ_100kHz 							((freq_t) 100000)
+#define FREQ_200kHz 							((freq_t) 200000)
+#define FREQ_1MHz 								((freq_t) 1000000)
+#define FREQ_10MHz 								((freq_t) 10000000)
 
 // Clock Speed
-#define HSI_FREQ ((uint32_t)8000000)
-#define HSE_FREQ ((uint32_t)8000000)
-#define PLL_MIN_FREQ ((uint32_t)16000000)
-#define PLL_MAX_FREQ ((uint32_t)72000000)
+#define HSI_FREQ 								((freq_t) 8000000)
+#define HSE_FREQ 								((freq_t) 8000000)
+#define PLL_MIN_FREQ 							((freq_t) 16000000)
+#define PLL_MAX_FREQ 							((freq_t) 72000000)
 
 // Clock Source
 #define RCCx_SW_CLK_HSI (0x00)

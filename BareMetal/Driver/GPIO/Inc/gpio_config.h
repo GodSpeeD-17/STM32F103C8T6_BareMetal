@@ -1,3 +1,13 @@
+/**
+ * @file gpio_config.h
+ * @author Shrey Shah
+ * @brief GPIO Configuration File
+ * @version 1.1
+ * @date 27-09-2025
+ * @note Logs till v1.1:
+ * @note - Aborted usage of `enums` as it consumes a lot of space
+ * @note - Shifted to use combination of `typedef` & macros
+ */
 // Header Guards
 #ifndef __GPIO_CONFIG_H__
 #define __GPIO_CONFIG_H__
@@ -6,126 +16,116 @@
 #include "reg_map.h"
 #include "rcc.h"
 
-
-/*********************************************** GPIO Enum MACROS ***********************************************/
+/*********************************************** GPIO Port ***********************************************/
 /**
- * @brief GPIO Port Enumeration
- * @note Used to specify the port of a GPIO
+ * @brief GPIO Port TypeDef
+ * @note Used to specify GPIO Port
  */
-typedef enum {
-	// GPIO Port A
-	GPIO_PORT_A = (uint8_t) 0x00,
-	// GPIO Port B
-	GPIO_PORT_B = (uint8_t) 0x01,
-	// GPIO Port C
-	GPIO_PORT_C = (uint8_t) 0x02,
-	// GPIO Port D
-	GPIO_PORT_D = (uint8_t) 0x03,
-	// GPIO Port E
-	GPIO_PORT_E = (uint8_t) 0x04,
-	// GPIO Port F
-	GPIO_PORT_F = (uint8_t) 0x05,
-	// GPIO Port G
-	GPIO_PORT_G = (uint8_t) 0x06,
-	// On-board (OB) LED Port
-	GPIO_PORT_OB_LED = GPIO_PORT_C
-} gpio_port_t;
+typedef uint8_t gpio_port_t;
+#define GPIO_PORT_A								((gpio_port_t) 0x00)
+#define GPIO_PORT_B								((gpio_port_t) 0x01)
+#define GPIO_PORT_C								((gpio_port_t) 0x02)
+#define GPIO_PORT_D								((gpio_port_t) 0x03)
+#define GPIO_PORT_E								((gpio_port_t) 0x04)
+#define GPIO_PORT_F								((gpio_port_t) 0x05)
+#define GPIO_PORT_G								((gpio_port_t) 0x06)
 
+/*********************************************** GPIO Pin ***********************************************/
 /**
- * @brief GPIO Pin Enumeration
- * @note Used to specify the pin number of a GPIO
+ * @brief GPIO Pin TypeDef
+ * @note Used to specify GPIO Pin
  */
-typedef enum {
-	GPIO_PIN_0 = (uint16_t) 0x0001,
-	GPIO_PIN_1 = (uint16_t) 0x0002,
-	GPIO_PIN_2 = (uint16_t) 0x0004,
-	GPIO_PIN_3 = (uint16_t) 0x0008,
-	GPIO_PIN_4 = (uint16_t) 0x0010,
-	GPIO_PIN_5 = (uint16_t) 0x0020,
-	GPIO_PIN_6 = (uint16_t) 0x0040,
-	GPIO_PIN_7 = (uint16_t) 0x0080,
-	GPIO_PIN_8 = (uint16_t) 0x0100,
-	GPIO_PIN_9 = (uint16_t) 0x0200,
-	GPIO_PIN_10 = (uint16_t) 0x0400,
-	GPIO_PIN_11 = (uint16_t) 0x0800,
-	GPIO_PIN_12 = (uint16_t) 0x1000,
-	GPIO_PIN_13 = (uint16_t) 0x2000,
-	GPIO_PIN_14 = (uint16_t) 0x4000,
-	GPIO_PIN_15 = (uint16_t) 0x8000,
-	GPIO_PIN_ALL = (uint16_t) 0xFFFF,
-	GPIO_PIN_OB_LED = GPIO_PIN_13
-} gpio_pin_t;
+typedef uint16_t gpio_pin_t;
+#define GPIO_PIN_0								((gpio_pin_t) 0x0001)
+#define GPIO_PIN_1								((gpio_pin_t) 0x0002)
+#define GPIO_PIN_2								((gpio_pin_t) 0x0004)
+#define GPIO_PIN_3								((gpio_pin_t) 0x0008)
+#define GPIO_PIN_4								((gpio_pin_t) 0x0010)
+#define GPIO_PIN_5								((gpio_pin_t) 0x0020)
+#define GPIO_PIN_6								((gpio_pin_t) 0x0040)
+#define GPIO_PIN_7								((gpio_pin_t) 0x0080)
+#define GPIO_PIN_8								((gpio_pin_t) 0x0100)
+#define GPIO_PIN_9								((gpio_pin_t) 0x0200)
+#define GPIO_PIN_10								((gpio_pin_t) 0x0400)
+#define GPIO_PIN_11								((gpio_pin_t) 0x0800)
+#define GPIO_PIN_12								((gpio_pin_t) 0x1000)
+#define GPIO_PIN_13								((gpio_pin_t) 0x2000)
+#define GPIO_PIN_14								((gpio_pin_t) 0x4000)
+#define GPIO_PIN_15								((gpio_pin_t) 0x8000)
+#define GPIO_PIN_ALL							((gpio_pin_t) 0xFFFF)
+#define GPIO_PIN_NONE							((gpio_pin_t) 0x0000) 
 
+/*********************************************** GPIO Pin Mode ***********************************************/
 /**
- * @brief GPIO Mode Enumeration
- * @brief Used to specify the mode of a GPIO
+ * @brief GPIO Pin Mode TypeDef
+ * @note Used to specify the mode of a pin
  */
-typedef enum {
-	// GPIO as Input
-	GPIO_MODE_INPUT = (uint8_t) 0x00,
-	// GPIO as Output @10MHz
-	GPIO_MODE_OUTPUT_10MHz = (uint8_t) 0x01,
-	// GPIO as Output @2MHz
-	GPIO_MODE_OUTPUT_2MHz = (uint8_t) 0x02,
-	// GPIO as Output @50MHz
-	GPIO_MODE_OUTPUT_50MHz = (uint8_t) 0x03
-} gpio_mode_t;
+typedef uint8_t gpio_pin_mode_t;
+#define	GPIO_MODE_INPUT 						((gpio_pin_mode_t) 0x00)
+#define	GPIO_MODE_OUTPUT_10MHz 					((gpio_pin_mode_t) 0x01)
+#define	GPIO_MODE_OUTPUT_2MHz 					((gpio_pin_mode_t) 0x02)
+#define	GPIO_MODE_OUTPUT_50MHz 					((gpio_pin_mode_t) 0x03)
 
+/*********************************************** GPIO Pin Configuration ***********************************************/
 /**
- * @brief GPIO Pin Configuration Enumeration
- * @note Configuration options vary based on whether the pin is set as input or output
+ * @brief GPIO Pin Configuration TypeDef
+ * @note Used to configure the pin
  */
-typedef enum {
-	GPIO_PIN_CNF_IN_ANALOG = (uint8_t) 0x00,
-	GPIO_PIN_CNF_IN_FLOAT = (uint8_t) 0x01,
-	GPIO_PIN_CNF_IN_PULL_DOWN = (uint8_t) 0x02,
-	GPIO_PIN_CNF_IN_PULL_UP = (uint8_t) 0x03,
-	GPIO_PIN_CNF_OUT_GP_PP = (uint8_t) 0x00,
-	GPIO_PIN_CNF_OUT_GP_OD = (uint8_t) 0x01,
-	GPIO_PIN_CNF_OUT_AF_PP = (uint8_t) 0x02,
-	GPIO_PIN_CNF_OUT_AF_OD = (uint8_t) 0x03
-} gpio_pin_cnf_t;
+typedef uint8_t gpio_pin_cnf_t;
+#define GPIO_PIN_CNF_IN_ANALOG 					((gpio_pin_cnf_t) 0x00)
+#define GPIO_PIN_CNF_IN_FLOAT 					((gpio_pin_cnf_t) 0x01)
+#define GPIO_PIN_CNF_IN_PULL_DOWN 				((gpio_pin_cnf_t) 0x02)
+#define GPIO_PIN_CNF_IN_PULL_UP 				((gpio_pin_cnf_t) 0x03)
+#define GPIO_PIN_CNF_OUT_GP_PP 					((gpio_pin_cnf_t) 0x00)
+#define GPIO_PIN_CNF_OUT_GP_OD 					((gpio_pin_cnf_t) 0x01)
+#define GPIO_PIN_CNF_OUT_AF_PP 					((gpio_pin_cnf_t) 0x02)
+#define GPIO_PIN_CNF_OUT_AF_OD 					((gpio_pin_cnf_t) 0x03)
 
+/*********************************************** GPIO Pin Interrupt Trigger ***********************************************/
 /**
- * @brief External Interrupt Trigger Enumeration
- * @note Defines the Interrupt Trigger
+ * @brief External Interrupt Trigger TypeDef
+ * @note Used to configure the external Interrupt Trigger for the pin
  */
-typedef enum {
-	GPIO_EXTI_TRIGGER_FALLING = (uint8_t) 0x01,
-	GPIO_EXTI_TRIGGER_RISING = (uint8_t) 0x02,
-	GPIO_EXTI_TRIGGER_BOTH = (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
-} gpio_exti_trigger_t;
+typedef uint8_t gpio_exti_trigger_t;
+#define GPIO_EXTI_TRIGGER_FALLING 				((gpio_exti_trigger_t) 0x01)
+#define GPIO_EXTI_TRIGGER_RISING 				((gpio_exti_trigger_t) 0x02)
+#define GPIO_EXTI_TRIGGER_BOTH 					(GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
 
+/*********************************************** GPIO Port Interrupt Trigger ***********************************************/
 /**
- * @brief External Interrupt Source Port Enumeration
- * @note Configures the Source Port for Interrupt at a particular pin
+ * @brief External Interrupt Source Port TypeDef
+ * @note Used to configure the Source Port for Interrupt for the pin
  */
-typedef enum {
-	GPIO_EXTI_PORT_A = (uint8_t) 0x00,
-	GPIO_EXTI_PORT_B = (uint8_t) 0x01,
-	GPIO_EXTI_PORT_C = (uint8_t) 0x02,
-	GPIO_EXTI_PORT_D = (uint8_t) 0x03,
-	GPIO_EXTI_PORT_E = (uint8_t) 0x04,
-	GPIO_EXTI_PORT_F = (uint8_t) 0x05,
-	GPIO_EXTI_PORT_G = (uint8_t) 0x06
-} gpio_exti_port_t;
+typedef uint8_t gpio_exti_port_t;
+#define GPIO_EXTI_PORT_A 						((gpio_exti_port_t) 0x00)
+#define GPIO_EXTI_PORT_B 						((gpio_exti_port_t) 0x01)
+#define GPIO_EXTI_PORT_C 						((gpio_exti_port_t) 0x02)
+#define GPIO_EXTI_PORT_D 						((gpio_exti_port_t) 0x03)
+#define GPIO_EXTI_PORT_E 						((gpio_exti_port_t) 0x04)
+#define GPIO_EXTI_PORT_F 						((gpio_exti_port_t) 0x05)
+#define GPIO_EXTI_PORT_G 						((gpio_exti_port_t) 0x06)
 
 /*********************************************** GPIO Configuration Structure ***********************************************/
-typedef struct {
+typedef struct
+{
 	// GPIO Pin
-	gpio_pin_t pin: 16;
+	gpio_pin_t pin;
 	// GPIO Mode
-	gpio_mode_t mode: 2;
+	gpio_pin_mode_t mode : 2;
 	// GPIO Configuration
-	gpio_pin_cnf_t config: 2;
+	gpio_pin_cnf_t config : 2;
 } gpio_config_t;
+
+/*********************************************** Extern Mapping ***********************************************/
+extern const GPIO_TypeDef* const __gpioDriverMapping__[7];
 
 /*********************************************** Helper APIs ***********************************************/
 /**
  * @brief Enables the clock for the specified GPIO port
  * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort){
+__STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort)
+{
 	// Enable Clock for GPIO Port
 	RCC->APB2ENR.REG |= (1 << (2 + thisPort));
 }
@@ -134,9 +134,20 @@ __STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort){
  * @brief Disables the clock for the specified GPIO port
  * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort){
+__STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort)
+{
 	// Disables Clock for GPIO Port
 	RCC->APB2ENR.REG &= ~(1 << (2 + thisPort));
+}
+
+/**
+ * @brief Retrieves the GPIO Port structure based on port enumeration
+ * @param thisPort GPIO Port Enumeration `gpio_port_t` 
+ * @return GPIO_TypeDef* Pointer to the GPIO Port structure
+ */
+__STATIC_INLINE__ GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort){
+	// Return Pointer to GPIO Port Structure
+	return __gpioDriverMapping__[thisPort];
 }
 
 /**
@@ -144,41 +155,33 @@ __STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort){
  * @param pinMask Mask representing the specific GPIO pin
  * @return GPIO Pin Number
  */
-__STATIC_INLINE__ uint8_t __GPIO_getPin__(const gpio_pin_t pinMask){
+__STATIC_INLINE__ uint8_t __GPIO_getPin__(const gpio_pin_t pinMask)
+{
 	// Retrieve Pin Position (0-15)
-	if(pinMask == 0x00)
-		return (uint8_t) 0x00;
-	else
-		return (uint8_t) __builtin_ctz(pinMask);
+	return ((uint8_t) ((pinMask == GPIO_PIN_NONE)? (0x00) : (__builtin_ctz(pinMask))));
 }
 
 /**
  * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
  * @param pinMask Mask representing the specific GPIO pin to be configured
  * @param gpioODRReg Pointer to the output data register (ODR) to be updated
- * @note Pass only single pin not logical combination of Pins 
+ * @note Pass only single pin not logical combination of Pins
  */
-__STATIC_INLINE__ void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32_t* gpioODRReg){
+__STATIC_INLINE__ void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32_t *gpioODRReg)
+{
 	*gpioODRReg &= ~(pinMask);
 }
 
 /*********************************************** Driver APIs ***********************************************/
 /**
- * @brief Retrieves the GPIO Port structure based on port enumeration
- * @param thisPort GPIO Port Enumeration `gpio_port_t` 
- * @return GPIO_TypeDef* Pointer to the GPIO Port structure
- */
-GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort);
-
-/**
  * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
  * @param pinMask Mask representing the specific GPIO pin to be configured
- * @param gpioMode GPIO Mode Enumeration `gpio_mode_t`
+ * @param gpioMode GPIO Mode Enumeration `gpio_pin_mode_t`
  * @param gpioCnf GPIO Configuration Enumeration `gpio_pin_cnf_t`
  * @param gpioCtrlReg Pointer to the control register (CRL or CRH) to be updated
- * @note Pass only single pin not logical combination of Pins 
+ * @note Pass only single pin not logical combination of Pins
  */
-void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, gpio_mode_t gpioMode, gpio_pin_cnf_t gpioCnf, uint32_t* gpioCtrlReg);
+void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, const gpio_pin_mode_t gpioMode, gpio_pin_cnf_t gpioCnf, uint32_t *gpioCtrlReg);
 
 /**
  * @brief Resets the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
@@ -186,15 +189,15 @@ void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, gpio_mode_t gpioMode,
  * @param gpioCtrlReg Pointer to the control register (CRL or CRH) to be updated
  * @note Pass only single pin not logical combination of Pins
  */
-void __GPIO_resetCtrlRegister__(const gpio_pin_t pinMask, uint32_t* gpioCtrlReg);
+void __GPIO_resetCtrlRegister__(const gpio_pin_t pinMask, uint32_t *gpioCtrlReg);
 
 /**
  * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
  * @param pinMask Mask representing the specific GPIO pin to be configured
  * @param gpioCnf GPIO Configuration Enumeration `gpio_pin_cnf_t`
  * @param gpioODRReg Pointer to the output data register (ODR) to be updated
- * @note Pass only single pin not logical combination of Pins 
+ * @note Pass only single pin not logical combination of Pins
  */
-void __GPIO_updatePullConfig__(const gpio_pin_t pinMask, gpio_pin_cnf_t gpioCnf, uint32_t* gpioODRReg);
+void __GPIO_updatePullConfig__(const gpio_pin_t pinMask, gpio_pin_cnf_t gpioCnf, uint32_t *gpioODRReg);
 
 #endif /* __GPIO_CONFIG_H__ */

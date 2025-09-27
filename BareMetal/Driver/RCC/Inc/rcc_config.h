@@ -1,11 +1,22 @@
+/**
+ * @file rcc_config.h
+ * @author Shrey Shah
+ * @brief Reset & Clock Control Configuration
+ * @version 1.1
+ * @date 27-09-2025
+ * @note Logs till v1.1:
+ * @note - Aborted usage of `enums` as it consumes a lot of space
+ * @note - Shifted to use combination of `typedef` & macros
+ */
+
 // Header Guards
 #ifndef __RCC_CONFIG_H__
 #define __RCC_CONFIG_H__
 
-// Register Address Mapping
+/*********************************************** Includes ***********************************************/
 #include "reg_map.h"
 
-// Bus Prescaler Configuration
+/*********************************************** Bus Configuration Structure ***********************************************/
 typedef struct {
 	// APB1 Bus Prescaler 
 	// - Max Freq: 36MHz

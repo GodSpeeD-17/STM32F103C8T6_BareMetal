@@ -265,7 +265,7 @@ typedef struct {
             volatile uint32_t LPWRRSTF: 1;
         } BIT;
     } CSR;
-} RCC_REG_STRUCT;
+} RCC_TypeDef;
 
 
 #endif /* __RCC_REG_MAP_H__ */

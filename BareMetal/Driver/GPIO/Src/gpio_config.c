@@ -3,43 +3,25 @@
 
 /*********************************************** Lookup Table ***********************************************/
 // GPIO Port Lookup Table
-static GPIO_TypeDef* const gpio_ports[7] = {
-	GPIOA, 
-	GPIOB, 
-	GPIOC, 
-	GPIOD, 
-	GPIOE, 
-	GPIOF, 
+const GPIO_TypeDef* const __gpioDriverMapping__[7] = {
+	GPIOA, GPIOB, GPIOC, 
+	GPIOD, GPIOE, GPIOF, 
 	GPIOG
 };
 
 /*********************************************** Driver APIs ***********************************************/
 /**
- * @brief Retrieves the GPIO Port structure based on port enumeration
- * @param thisPort GPIO Port Enumeration `gpio_port_t` 
- * @return GPIO_TypeDef* Pointer to the GPIO Port structure
- */
-GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort){
-	// Validate Port
-	if(thisPort < GPIO_PORT_A || thisPort > GPIO_PORT_D){
-		return NULL;
-	}
-	// Return Pointer to GPIO Port Structure
-	return gpio_ports[thisPort];
-}
-
-/**
  * @brief Updates the control register (CRL or CRH) for a specific GPIO pin based on the provided configuration
  * @param pinMask Mask representing the specific GPIO pin to be configured
- * @param gpioMode GPIO Mode Enumeration `gpio_mode_t`
+ * @param gpioMode GPIO Mode Enumeration `gpio_pin_mode_t`
  * @param gpioCnf GPIO Configuration Enumeration `gpio_pin_cnf_t`
  * @param gpioCtrlReg Pointer to the control register (CRL or CRH) to be updated
  * @note Pass only single pin not logical combination of Pins
  */
-void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, gpio_mode_t gpioMode, gpio_pin_cnf_t gpioCnf, uint32_t* gpioCtrlReg){
+void __GPIO_updateCtrlRegister__(const gpio_pin_t pinMask, const gpio_pin_mode_t gpioMode, gpio_pin_cnf_t gpioCnf, uint32_t* gpioCtrlReg){
 	// Local Variables
 	uint8_t maskPos = __GPIO_getPin__(pinMask);
-	maskPos = ((maskPos < (uint8_t)8) ? (maskPos) : (maskPos - 8));
+	maskPos = ((maskPos < (uint8_t) 8) ? (maskPos) : (maskPos - 8));
 	maskPos <<= 2;
 	// Clear existing configuration
 	*gpioCtrlReg &= ~(0x0F << maskPos);

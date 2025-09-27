@@ -5,9 +5,9 @@
             "includePath": [
                 "/home/shrey_shah/Desktop/STM32F103C8T6_BareMetal/BareMetal/Core/Inc/**",
                 "/home/shrey_shah/Desktop/STM32F103C8T6_BareMetal/BareMetal/Driver/*/Inc/*",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/BareMetal/Driver"
             ],
-            "defines": [],
+            "defines": ["__CORTEX_M3__", "__STM32F103C8T6__"],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "gnu++17",

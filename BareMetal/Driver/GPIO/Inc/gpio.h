@@ -6,6 +6,13 @@
 #include "gpio_config.h"
 #include "gpio_exti.h"
 /*********************************************** Helper APIs ***********************************************/
+
+#ifdef __STM32F103C8T6__
+#define GPIO_PORT_OB_LED						GPIO_PORT_C
+#define GPIO_PIN_OB_LED							GPIO_PIN_13
+#endif /* __STM32F103C8T6__ */
+
+
 /**
  * @brief Sets the GPIO 
  * @param gpioPort GPIO Port 
@@ -14,8 +21,9 @@
  */
 __STATIC_INLINE__ void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
-	if(GPIOx != NULL)
+	if(GPIOx != NULL){
 		GPIOx->BSRR.REG |= gpioPin;
+	}
 }
 
 /**

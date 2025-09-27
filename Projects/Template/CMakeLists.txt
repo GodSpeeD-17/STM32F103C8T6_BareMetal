@@ -10,10 +10,10 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # ---------------------- Toolchain ----------------------
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
-set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
-set(CMAKE_SIZE arm-none-eabi-size)
+set(CMAKE_C_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
+set(CMAKE_ASM_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
+set(CMAKE_OBJCOPY ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-objcopy)
+set(CMAKE_SIZE ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(ST_FLASH st-flash)
 set(OPENOCD openocd)
@@ -21,14 +21,15 @@ set(ST_INFO st-info)
 set(ST_UART_FLASH stm32flash)
 
 # ---------------------- C/C++ Flags ----------------------
-set(MCU_MODEL STM32F103C8T6)
+set(MCU_DEFINE __STM32F103C8T6__)
+set(MCU_CPU_DEFINE __CORTEX_M3__)
 set(MCU_CPU cortex-m3)
 set(C_STD gnu11)
 set(CXX_STD c++17)
 set(OPTIMIZATION_LEVEL 0)
 set(FLASH_ADDRESS 0x08000000)
 set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP)
-set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_MODEL}  -g -gdwarf-2 )
+set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_DEFINE} -D${MCU_CPU_DEFINE} -g -gdwarf-2 )
 
 # C specific flags
 set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
@@ -39,7 +40,7 @@ set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
 
 # ---------------------- Paths ----------------------
 get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
-get_filename_component(REPO_ROOT "${PROJ_DIR}/../../" ABSOLUTE)
+get_filename_component(REPO_ROOT "${PROJ_DIR}/../../../" ABSOLUTE) # Adjust this as per project structure
 set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
 set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
 set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
