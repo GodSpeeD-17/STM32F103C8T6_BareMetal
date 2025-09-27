@@ -18,6 +18,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(ST_FLASH st-flash)
 set(OPENOCD openocd)
 set(ST_INFO st-info)
+set(ST_UART_FLASH stm32flash)
 
 # ---------------------- C/C++ Flags ----------------------
 set(MCU_MODEL STM32F103C8T6)
@@ -29,9 +30,9 @@ set(FLASH_ADDRESS 0x08000000)
 set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP)
 set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_MODEL}  -g -gdwarf-2 )
 
-# C-specific flags
+# C specific flags
 set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
-# C++-specific flags
+# C++ specific flags
 set(CXX_FLAGS ${COMMON_FLAGS} -std=${CXX_STD} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
 # Assembly-specific flags
 set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
@@ -42,7 +43,8 @@ get_filename_component(REPO_ROOT "${PROJ_DIR}/../../" ABSOLUTE)
 set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
 set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
 set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
-set(LINKER_FILE ${PROJ_DIR}/Startup/stm32f1_ls.ld)
+# Replace this for customer linker file
+set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)
 set(VSCODE_DIR ${PROJ_DIR}/.vscode)
 set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
 set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
@@ -197,7 +199,7 @@ file(WRITE ${VSCODE_DIR}/launch.json \"{
 		\\\"${CORE_ROOT}/Src/stlink.cfg\\\",
 		\\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\"
 	  ],
-	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/STM32F103.svd\\\",
+	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\",
 	  \\\"runToEntryPoint\\\": \\\"main\\\", // Entry point is main
 	  // \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Entry point is Reset_Handler
 	  \\\"preLaunchTask\\\": \\\"Build Project\\\"
@@ -337,7 +339,9 @@ add_custom_target(debug
 )
 
 # ---------------------- Custom Targets ----------------------
-# Flash Binary to MCU
+# -----------------------------------------------------------------------------
+# Flash target (ST-Linkv2 st-flash)
+# -----------------------------------------------------------------------------
 add_custom_target(flash
 	DEPENDS ${PROJECT_NAME}.elf
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
@@ -351,27 +355,24 @@ add_custom_target(flash
 )
 
 # -----------------------------------------------------------------------------
+# Flash target (UART bootloader via stm32flash)
+# -----------------------------------------------------------------------------
+add_custom_target(uart_flash
+	DEPENDS ${PROJECT_NAME}.bin
+	COMMAND ${CMAKE_COMMAND} -E echo "🔌 Flashing via UART bootloader..."
+	COMMAND ${ST_UART_FLASH} -w ${PROJECT_NAME}.bin -v -g 0x0
+	COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 over UART"
+)
+
+# -----------------------------------------------------------------------------
 # Clean Project (delete Build and .vscode safely)
 # -----------------------------------------------------------------------------
-# add_custom_target(clean_all
-# 	COMMAND ${CMAKE_COMMAND} -E echo ""
-# 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-# 	COMMAND ${CMAKE_COMMAND} -E echo "║                   🧹 Project Cleaned                     ║"
-# 	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
-# 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-# 	COMMAND ${CMAKE_COMMAND} -E chdir .. 
-# 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
-# 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
-# 	COMMENT "Cleaning project"
-# )
-
 add_custom_target(clean_all
 	COMMAND ${CMAKE_COMMAND} -E echo ""
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
 	COMMAND ${CMAKE_COMMAND} -E echo "║                   🧹 Project Cleaned                     ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND bash -c "cd .."
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
 	COMMENT "Cleaning project"

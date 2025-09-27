@@ -2,9 +2,8 @@
 cmake_minimum_required(VERSION 3.28)
 
 # ---------------------- Project ----------------------
-# Get the current source directory name
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-project(${PROJECT_NAME} C CXX ASM)
+project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES C CXX ASM)
 
 # ---------------------- Cross Compilation ----------------------
 set(CMAKE_SYSTEM_NAME Generic)
@@ -14,26 +13,38 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
-set(CMAKE_SIZE    arm-none-eabi-size)
+set(CMAKE_SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(ST_FLASH st-flash)
 set(OPENOCD openocd)
 set(ST_INFO st-info)
+set(ST_UART_FLASH stm32flash)
 
-# ---------------------- C Flags ----------------------
+# ---------------------- C/C++ Flags ----------------------
 set(MCU_MODEL STM32F103C8T6)
 set(MCU_CPU cortex-m3)
 set(C_STD gnu11)
+set(CXX_STD c++17)
 set(OPTIMIZATION_LEVEL 0)
 set(FLASH_ADDRESS 0x08000000)
+set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP)
+set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_MODEL}  -g -gdwarf-2 )
+
+# C specific flags
+set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
+# C++ specific flags
+set(CXX_FLAGS ${COMMON_FLAGS} -std=${CXX_STD} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+# Assembly-specific flags
+set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
 
 # ---------------------- Paths ----------------------
 get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
-get_filename_component(REPO_ROOT "${PROJ_DIR}/../../../" ABSOLUTE)
+get_filename_component(REPO_ROOT "${PROJ_DIR}/../../" ABSOLUTE)
 set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
 set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
 set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
-set(LINKER_FILE ${PROJ_DIR}/Startup/stm32f1_ls.ld)
+# Replace this for customer linker file
+set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)
 set(VSCODE_DIR ${PROJ_DIR}/.vscode)
 set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
 set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
@@ -108,7 +119,6 @@ add_driver_module(
 	GPIO 
 	RCC
 	Timer
-	USART
 )
 
 # ---------------------- Executable ----------------------
@@ -126,41 +136,28 @@ set(ALL_INCLUDE_DIRS
 	${SELECTED_DRIVER_INCLUDES}
 )
 
-target_include_directories(${PROJECT_NAME}.elf 
-	PRIVATE 
-	${ALL_INCLUDE_DIRS}
-)
+target_include_directories(${PROJECT_NAME}.elf PRIVATE ${ALL_INCLUDE_DIRS})
 # ---------------------- Flags ----------------------
-# For the .elf target (C Language)
+
+# Apply flags to target based on language
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
-	--specs=nano.specs -lc -lm
-	-std=${C_STD} -O${OPTIMIZATION_LEVEL} -Wall
-	-fstack-usage -fdata-sections -ffunction-sections 
-	-D${MCU_MODEL} -MMD -MP -g -gdwarf-2
+	$<$<COMPILE_LANGUAGE:C>:${C_FLAGS}>
+	$<$<COMPILE_LANGUAGE:CXX>:${CXX_FLAGS}>
+	$<$<COMPILE_LANGUAGE:ASM>:${ASM_FLAGS}>
 )
 
-# For the .elf target (Assembly Language)
-target_compile_options(${PROJECT_NAME}.elf PRIVATE
-	$<$<COMPILE_LANGUAGE:ASM>:-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft 
-	--specs=nano.specs -lc -lm -x assembler-with-cpp -MMD -MP>
-)
-
+# Enhanced linker options
 target_link_options(${PROJECT_NAME}.elf PRIVATE
-	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft
-	-T${LINKER_FILE} -lc -lm
-	-Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map
-	-Wl,--gc-sections
+	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft -T${LINKER_FILE}
+	-lc -lm -Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map
+	-Wl,--gc-sections -Wl,--print-memory-usage -Wl,--stats -Wl,--cref
+	-static -nostartfiles -nodefaultlibs -nostdlib
 )
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Generating .bin/.hex and printing size"
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
-    COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --black
-    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
-)
+	COMMAND ${CMAKE_SIZE} --format=berkeley ${PROJECT_NAME}.elf
+	COMMENT "Size of sections (.text, .data, .bss)")
 
 # ---------------------- VSCode Configuration Generation ----------------------
 # This section auto-generates VSCode configuration files (launch.json,
@@ -202,7 +199,7 @@ file(WRITE ${VSCODE_DIR}/launch.json \"{
 		\\\"${CORE_ROOT}/Src/stlink.cfg\\\",
 		\\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\"
 	  ],
-	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/STM32F103.svd\\\",
+	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\",
 	  \\\"runToEntryPoint\\\": \\\"main\\\", // Entry point is main
 	  // \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Entry point is Reset_Handler
 	  \\\"preLaunchTask\\\": \\\"Build Project\\\"
@@ -342,7 +339,9 @@ add_custom_target(debug
 )
 
 # ---------------------- Custom Targets ----------------------
-# Flash Binary to MCU
+# -----------------------------------------------------------------------------
+# Flash target (ST-Linkv2 st-flash)
+# -----------------------------------------------------------------------------
 add_custom_target(flash
 	DEPENDS ${PROJECT_NAME}.elf
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
@@ -356,12 +355,22 @@ add_custom_target(flash
 )
 
 # -----------------------------------------------------------------------------
+# Flash target (UART bootloader via stm32flash)
+# -----------------------------------------------------------------------------
+add_custom_target(uart_flash
+	DEPENDS ${PROJECT_NAME}.bin
+	COMMAND ${CMAKE_COMMAND} -E echo "🔌 Flashing via UART bootloader..."
+	COMMAND ${ST_UART_FLASH} -w ${PROJECT_NAME}.bin -v -g 0x0
+	COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 over UART"
+)
+
+# -----------------------------------------------------------------------------
 # Clean Project (delete Build and .vscode safely)
 # -----------------------------------------------------------------------------
 add_custom_target(clean_all
 	COMMAND ${CMAKE_COMMAND} -E echo ""
 	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║                    🧹 Project Cleaned                    ║"
+	COMMAND ${CMAKE_COMMAND} -E echo "║                   🧹 Project Cleaned                     ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
@@ -427,9 +436,9 @@ function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
 		COMMAND find ${REPO_ROOT}/Projects -name "${FILE_PATH}" -not -path "${IN_PROJECT_DIR}/${FILE_PATH}" -print0 | xargs -0 -I {} cp "${IN_PROJECT_DIR}/${FILE_PATH}" "{}"
 
 		# Display footer
-		COMMAND ${CMAKE_COMMAND} -E echo "╔═══════════════════════════════════════════════════════════╗"
-		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!               ║"
-		COMMAND ${CMAKE_COMMAND} -E echo "╚═══════════════════════════════════════════════════════════╝"
+		COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+		COMMAND ${CMAKE_COMMAND} -E echo "║         ✅ All ${FILE_PATH} files replaced!              ║"
+		COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	)
 endfunction()
 
