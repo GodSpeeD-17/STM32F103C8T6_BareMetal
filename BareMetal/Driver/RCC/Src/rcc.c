@@ -15,7 +15,7 @@
 /**
  * @brief System frequency Summary
  */
-static rcc_clk_freq_t systemFrequency = {
+rcc_clk_freq_t __systemFrequency__ = {
 	.Core = HSI_FREQ,
 	.AHB = HSI_FREQ,
 	.APB1 = HSI_FREQ,
@@ -120,7 +120,6 @@ driver_status_t RCC_Config(const rcc_config_t* rccConfig){
 	ASSERT_DRIVER_STATUS(status);
 	// Flash Access Control Register Write
 	FLASH->ACR.REG = reg;
-
 	// RCC Configuration Register Read
 	reg = RCC->CFGR.REG;
 	// Turn ON HSE if required
@@ -150,20 +149,87 @@ driver_status_t RCC_Config(const rcc_config_t* rccConfig){
 	}
 	// System Clock Source
 	RCC_SysClkSrc_Set(rccConfig->system.clk_src);
-	
-	// Update the Frequency (NOTE: Order of Updation is Important)
-	RCC_CoreClockFreq_Update(&systemFrequency.Core);
-	RCC_Update_AHBClock();
-	RCC_Update_APB1Clock();
-	RCC_Update_APB2Clock();
+	// Update the Frequency
+	status = RCC_ClockFreq_Update(&__systemFrequency__);
+	ASSERT_DRIVER_STATUS(status);
+	// Return Status
+	return status;
 }
 
-
-void RCC_72MHz_DefaultConfig(rcc_config_t* rccConfig){
-	// Deafult Configuration
-	rccConig->flash.latency = FLASH_ACR_LATENCY_2;
-	rccConig->flash.prefetch = FLASH_ACR_PRFTBE_Msk;
+/**
+ * @brief Sets default flash configuration for 72MHz
+ * @param flashConfig Pointer to Flash Configuration Structure 
+ */
+void RCC_72MHz_FlashDefaultConfig(rcc_flash_config_t* flashConfig){
+	// Wait state for 2 states
+	flashConfig->latency = FLASH_ACR_LATENCY_2;
+	// Enable Prefetch Buffer (Enhanced Performance)
+	flashConfig->prefetch = FLASH_ACR_PRFTBE_Msk;
 }
+
+/**
+ * @brief PLL Default Configuration for 72MHz
+ * @param pllConfig Pointer to PLL Configuration Structure
+ */
+void RCC_72MHz_PLLDefaultConfig(rcc_pll_config_t* pllConfig){
+	// PLL Clock Source
+	pllConfig->src = RCC_PLL_SRC_HSE;
+	// PLL Clock Source Prescaler
+	pllConfig->src_prescaler = RCC_PLL_SRC_HSE_DIV_1;
+	// PLL Multiplication Factor
+	pllConfig->mul_fact = RCC_PLL_MUL_9;
+}
+
+/**
+ * @brief Sets System Configuration for 72MHz Clock
+ * @param sysClkConfig Pointer to System Clock
+ */
+void RCC_72MHz_SystemDefaultConfig(rcc_sys_clk_config_t* sysClkConfig){
+	// Set PLL as System Clock Source
+	sysClkConfig->clk_src = RCC_SYS_CLK_PLL;
+	// Set PLL Configuration
+	RCC_72MHz_PLLDefaultConfig(&sysClkConfig->pll);
+}
+
+/**
+ * @brief Sets Bus Prescaler for 72MHz
+ * @param busPrescalerConfig Pointer to Bus Prescaler Configuration Structure
+ */
+void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_prescaler_config_t* busPrescalerConfig){
+	// Set AHB Prescaler (Max 72MHz)
+	busPrescalerConfig->AHB = RCC_AHB_DIV_1;
+	// Set APB1 Prescaler (Max 36MHz)
+	busPrescalerConfig->APB1 = RCC_APB1_DIV_2;
+	// Set APB2 Prescaler (Max 72MHz)
+	busPrescalerConfig->APB2 = RCC_APB2_DIV_1;
+}
+
+/**
+ * @brief Sets Component Prescaler for 72MHz
+ * @param componentPrescalerConfig Pointer to Component Prescaler Configuration Structure
+ */
+void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_prescaler_config_t* componentPrescalerConfig){
+	// Set ADC Prescaler (Max 14MHz)
+	componentPrescalerConfig->ADC = RCC_ADC_DIV_6;
+	// Set USB Prescaler (Max 48MHz)
+	componentPrescalerConfig->USB = RCC_USB_DIV_1_5;
+}
+
+/**
+ * @brief Sets RCC Configuration 72MHz
+ * @param rccConfig RCC Configuration Structure 
+ */
+void RCC_72MHz_LoadDefaultConfig(rcc_config_t* rccConfig){
+	// Deafult Configuration for Flash
+	RCC_72MHz_FlashDefaultConfig(&rccConfig->flash);
+	// Default System Configuration 
+	RCC_72MHz_SystemDefaultConfig(&rccConfig->system);
+	// Default Bus Prescaler Configuration
+	RCC_72MHz_BusPrescalerDefaultConfig(&rccConfig->bus_prescaler);
+	// Default Component Prescaler Configuration
+	RCC_72MHz_ComponentPrescalerDefaultConfig(&rccConfig->component_prescaler);
+}
+
 
 #ifdef __OLD_RCC_METHOD__
 

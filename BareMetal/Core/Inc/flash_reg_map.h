@@ -78,5 +78,4 @@ typedef struct {
     } WRPR;
 } FLASH_REG_STRUCT;
 
-
 #endif /* __FLASH_REG_MAP_H__ */

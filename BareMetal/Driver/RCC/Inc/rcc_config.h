@@ -220,7 +220,7 @@ typedef struct {
 	 * @note This parameter defines the PLL Configuration to be set.
 	 */
 	rcc_pll_config_t pll;
-} rcc_sys_clk_t;
+} rcc_sys_clk_config_t;
 
 /*********************************************** RCC Configuration Structure ***********************************************/
 /**
@@ -230,7 +230,7 @@ typedef struct {
 	// Bus Prescaler Configuration
 	rcc_bus_prescaler_config_t bus_prescaler;
 	// System Clock
-	rcc_sys_clk_t system;
+	rcc_sys_clk_config_t system;
 	// Flash Configuration
 	rcc_flash_config_t flash;
 	// Components Prescaler
@@ -487,21 +487,21 @@ driver_status_t RCC_APB1ClockFreq_Update(freq_t* apb1ClockFrequencyHz);
 driver_status_t RCC_APB2ClockFreq_Update(freq_t* apb2ClockFrequencyHz);
 
 /**
- * @brief Retrives the System AHB Clock Frequency
+ * @brief Updates the System AHB Clock Frequency
  * @param coreClockFrequencyHz Core Clock frequency
  * @param ahbClockFrequencyHz Pointer to variable which shall hold the AHB Clock frequency
  */
-__STATIC_INLINE__ void RCC_AHBClockFreqFromCoreClock_Get(const freq_t coreClockFrequencyHz, freq_t* ahbClockFrequencyHz){
+__STATIC_INLINE__ void RCC_AHBClockFreqFromCoreClock_Update(const freq_t coreClockFrequencyHz, freq_t* ahbClockFrequencyHz){
 	// Account for AHB Prescaler
 	*ahbClockFrequencyHz = (coreClockFrequencyHz >> __RCC_AHBPscRightShift_Get__());
 }
 
 /**
- * @brief Retrives the System APB1 Clock Frequency
+ * @brief Update the System APB1 Clock Frequency
  * @param ahbClockFrequencyHz AHB Clock frequency
  * @param apb1ClockFrequencyHz Pointer to variable which shall hold the APB1 Clock frequency
  */
-__STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Get(const freq_t ahbClockFrequencyHz, freq_t* apb1ClockFrequencyHz){
+__STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb1ClockFrequencyHz){
 	// Account for APB1 Prescaler
 	*apb1ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB1PscRightShift_Get__());
 }
@@ -511,7 +511,7 @@ __STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Get(const freq_t ahbClockFr
  * @param ahbClockFrequencyHz AHB Clock frequency
  * @param apb2ClockFrequencyHz Pointer to variable which shall hold the APB2 Clock frequency
  */
-__STATIC_INLINE__ void RCC_APB2ClockFreqFromAHBClock_Get(const freq_t ahbClockFrequencyHz, freq_t* apb2ClockFrequencyHz){
+__STATIC_INLINE__ void RCC_APB2ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb2ClockFrequencyHz){
 	// Account for APB2 Prescaler
 	*apb2ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB2PscRightShift_Get__());
 }

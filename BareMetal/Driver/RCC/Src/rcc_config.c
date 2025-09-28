@@ -118,13 +118,13 @@ driver_status_t RCC_ClockFreq_Update(rcc_clk_freq_t* clkFreq){
 	driver_status_t status = DRIVER_FAIL;
 	// Fetch Core Clock
 	status = RCC_CoreClockFreq_Update(&clkFreq->Core);
-	ASSERT_DRIVER(status);
+	ASSERT_DRIVER_STATUS(status);
 	// Fetch AHB Clock
-	RCC_AHBClockFreqFromCoreClock_Get(clkFreq->Core, &clkFreq->AHB);
+	RCC_AHBClockFreqFromCoreClock_Update(clkFreq->Core, &clkFreq->AHB);
 	// Fetch APB1 Clock
-	RCC_APB1ClockFreqFromCoreClock_Get(clkFreq->Core, &clkFreq->APB1);
+	RCC_APB1ClockFreqFromAHBClock_Update(clkFreq->Core, &clkFreq->APB1);
 	// Fetch APB2 Clock
-	RCC_APB2ClockFreqFromCoreClock_Get(clkFreq->Core, &clkFreq->APB2);
+	RCC_APB2ClockFreqFromAHBClock_Update(clkFreq->Core, &clkFreq->APB2);
 	// Return Status
 	return status;
 }
