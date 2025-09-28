@@ -37,6 +37,11 @@
 #ifndef __REG_MAP_H__
 #define __REG_MAP_H__
 
+// C++ Safeguard
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /*********************************************** Core C ***********************************************/
 #include <stdint.h>
 #include <string.h>
@@ -49,6 +54,15 @@
 #define __STATIC_INLINE__ 						__STATIC__ __INLINE__
 #define __IO 									volatile
 #define __PACKED__ 								__attribute__((__packed__))
+#define BIT_MASK(X)								((uint32_t) (0x01 << (X)))
+#define CONSECUTIVE_BIT1_MASK()					((uint32_t)(0x01))
+#define CONSECUTIVE_BIT2_MASK()					((uint32_t)(0x03))
+#define CONSECUTIVE_BIT3_MASK()					((uint32_t)(0x07))
+#define CONSECUTIVE_BIT4_MASK()					((uint32_t)(0x0F))
+#define CONSECUTIVE_BIT5_MASK()					((uint32_t)(0x1F))
+#define CONSECUTIVE_BIT6_MASK()					((uint32_t)(0x3F))
+#define CONSECUTIVE_BIT7_MASK()					((uint32_t)(0x7F))
+#define CONSECUTIVE_BIT8_MASK()					((uint32_t)(0xFF))
 
 /**
  * @brief Enumeration for Success/Failure for Driver return
@@ -892,5 +906,10 @@ __STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x)
 }
 
 /*********************************************** Helper Functions ***********************************************/
+
+// C++ Safeguard
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __REG_MAP_H__ */

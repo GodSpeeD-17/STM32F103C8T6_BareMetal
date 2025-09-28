@@ -1,8 +1,13 @@
-/**************************************************************************************
- * 	File: rcc.c
- *  Author: Shrey Shah
- *  Date: 14/09/2024
- ***************************************************************************************/
+/**
+ * @file rcc.c
+ * @author Shrey Shah
+ * @brief Reset & Clock Control Configuration
+ * @version 1.1
+ * @date 28-09-2025
+ * @note Logs till v1.1:
+ * @note - Aborted usage of `enums` as it consumes a lot of space
+ * @note - Shifted to use combination of `typedef` & macros
+ */
 
 // Header File
 #include "rcc.h"
@@ -19,21 +24,83 @@ static rcc_clk_freq_t systemFrequency = {
 
 /**
  * @brief RCC Flash Configuration
- * @param flash Flash Configuration Structure `flash_config_t` 
+ * @param flash Flash Configuration Structure `rcc_flash_config_t` 
  * @param reg Pointer to `FLASH->ACR.REG`
  * @return Status of operation
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success
  */
-static driver_status_t __RCC_FlashConfig__(const flash_config_t flash, uint32_t* reg){
+driver_status_t RCC_FlashConfig(const rcc_flash_config_t flash, uint32_t* reg){
 	// Clear
 	*reg &= (uint32_t)(FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY);
-	// Write
+	// Update
 	*reg |= (uint32_t)(
 		((flash.prefetch & 0x01) << FLASH_ACR_PRFTBE_Pos) | 
 		((flash.latency & 0x07) << FLASH_ACR_LATENCY_Pos)
 	);
 	// Return Success
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief RCC PLL Configuration
+ * @param pllConfig  PLL Configuration Structure
+ * @param reg Pointer to `RCC->CFGR.REG`
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_PLLConfig(const rcc_pll_config_t pllConfig, uint32_t* reg){
+	// Clear 
+	*reg &= ~(uint32_t)(RCC_CFGR_PLLMULL_Msk | RCC_CFGR_PLLXTPRE_Msk | RCC_CFGR_PLLSRC_Msk);
+	// Update
+	*reg |= (uint32_t)(
+		((pllConfig.mul_fact & 0x0F) << RCC_CFGR_PLLMULL_Pos) | 
+		((pllConfig.src & 0x01) << RCC_CFGR_PLLSRC_Pos) | 
+		((pllConfig.src_prescaler & 0x01) << RCC_CFGR_PLLXTPRE_Pos)
+	);
+	// Return Success
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief RCC Bus Prescaler Configuration
+ * @param busConfig Bus Configuration Structure 
+ * @param reg Pointer to `RCC->CFGR.REG`
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success 
+ */
+driver_status_t RCC_BusConfig(const rcc_bus_prescaler_config_t busPrescalerConfig, uint32_t* reg){
+	// Clear
+	*reg &= ~(uint32_t)(RCC_CFGR_PPRE2 | RCC_CFGR_PPRE1 | RCC_CFGR_HPRE);
+	// Update
+	*reg |= (uint32_t)(
+			((busPrescalerConfig.APB2 & 0x07) << RCC_CFGR_PPRE2_Pos) | 
+			((busPrescalerConfig.APB1 & 0x07) << RCC_CFGR_PPRE1_Pos) | 
+			((busPrescalerConfig.AHB & 0x0F) << RCC_CFGR_HPRE_Pos)
+	);
+	// Return
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief RCC Component Configuration - ADC, USB
+ * @param componentPrescalerConfig Compoennt Prescaler Configuration Structure  
+ * @param reg Pointer to `RCC->CFGR.REG`
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success 
+ */
+driver_status_t RCC_ComponentConfig(const rcc_component_prescaler_config_t componentPrescalerConfig, uint32_t* reg){
+	// Clear
+	*reg &= ~(uint32_t)(RCC_CFGR_ADCPRE | RCC_CFGR_USBPRE);
+	// Update
+	*reg |= (uint32_t)(
+			((componentPrescalerConfig.USB & 0x01) << RCC_CFGR_USBPRE_Pos) | 
+			((componentPrescalerConfig.ADC & 0x03) << RCC_CFGR_ADCPRE_Pos)
+	);
+	// Return Status
 	return DRIVER_SUCCESS;
 }
 
@@ -47,45 +114,55 @@ static driver_status_t __RCC_FlashConfig__(const flash_config_t flash, uint32_t*
 driver_status_t RCC_Config(const rcc_config_t* rccConfig){
 	// Local Variable
 	driver_status_t status = DRIVER_FAIL;
+	// Flash Access Control Register Read
 	uint32_t reg = FLASH->ACR.REG;
-	// Flash Configuration
-	status = __RCC_FlashConfig__(rccConfig->flash, &reg);
+	status = RCC_FlashConfig(rccConfig->flash, &reg);
+	ASSERT_DRIVER_STATUS(status);
+	// Flash Access Control Register Write
+	FLASH->ACR.REG = reg;
+
+	// RCC Configuration Register Read
 	reg = RCC->CFGR.REG;
-	// HSE ON
-	RCC->CR.REG |= RCC_CR_HSEON;
-	while((RCC->CR.REG & RCC_CR_HSERDY) != 0x01);
+	// Turn ON HSE if required
+	if(rccConfig->system.clk_src != RCC_SYS_CLK_HSI){
+		// Check for PLL Source Clock
+		if((rccConfig->system.clk_src == RCC_SYS_CLK_PLL) && (rccConfig->system.pll.src == RCC_SYS_CLK_HSI)){
+			return;
+		}
+		// HSE ON
+		RCC_HSE_ON();
+	}
 	// PLL Configuration
-	reg |= (uint32_t)(
-			((rccConfig->system.pll.mul_fact & 0x0F) << RCC_CFGR_PLLMULL_Pos) | 
-			((rccConfig->system.pll.src_prescaler & 0x01) << RCC_CFGR_PLLXTPRE_Pos) |
-			((rccConfig->system.pll.src & 0x01) << RCC_CFGR_PLLSRC_Pos)
-	);
+	status = RCC_PLLConfig(rccConfig->system.pll, &reg);
+	ASSERT_DRIVER_STATUS(status);
 	// Bus Prescaler Configuration
-	reg |= (uint32_t)(
-			((rccConfig->bus_prescaler.APB2 & 0x07) << RCC_CFGR_PPRE2_Pos) | 
-			((rccConfig->bus_prescaler.APB1 & 0x07) << RCC_CFGR_PPRE1_Pos) | 
-			((rccConfig->bus_prescaler.AHB & 0x0F) << RCC_CFGR_HPRE_Pos)
-	);
+	status = RCC_BusConfig(rccConfig->bus_prescaler, &reg);
+	ASSERT_DRIVER_STATUS(status);
 	// Component Prescaler Configuration
-	reg |= (uint32_t)(
-			((rccConfig->component_prescaler.USB & 0x01) << RCC_CFGR_USBPRE_Pos) | 
-			((rccConfig->component_prescaler.ADC & 0x03) << RCC_CFGR_ADCPRE_Pos)
-	);
-	// Update the CFGR Register
+	status = RCC_ComponentConfig(rccConfig->component_prescaler, &reg);
+	ASSERT_DRIVER_STATUS(status);
+	// RCC Configuration Register Write
 	RCC->CFGR.REG = reg;
 	// PLL ON
 	if(rccConfig->system.clk_src == RCC_SYS_CLK_PLL){
-		RCC->CR.REG |= RCC_CR_PLLON;
-		while(!(RCC->CR.REG & RCC_CR_PLLRDY));
+		// PLL Clock ON
+		RCC_PLL_ON();
 	}
 	// System Clock Source
-	RCC->CFGR.REG |= (uint32_t)(((rccConfig->system.clk_src & 0x03) << RCC_CFGR_SW_Pos));
-	while(((RCC->CFGR.REG & RCC_CFGR_SWS) != ((rccConfig->system.clk_src & 0x03) << RCC_CFGR_SWS_Pos)));
+	RCC_SysClkSrc_Set(rccConfig->system.clk_src);
+	
 	// Update the Frequency (NOTE: Order of Updation is Important)
-	RCC_Update_CoreClock();
+	RCC_CoreClockFreq_Update(&systemFrequency.Core);
 	RCC_Update_AHBClock();
 	RCC_Update_APB1Clock();
 	RCC_Update_APB2Clock();
+}
+
+
+void RCC_72MHz_DefaultConfig(rcc_config_t* rccConfig){
+	// Deafult Configuration
+	rccConig->flash.latency = FLASH_ACR_LATENCY_2;
+	rccConig->flash.prefetch = FLASH_ACR_PRFTBE_Msk;
 }
 
 #ifdef __OLD_RCC_METHOD__

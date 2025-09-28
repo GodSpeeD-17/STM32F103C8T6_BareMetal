@@ -13,6 +13,11 @@
 #ifndef __RCC_CONFIG_H__
 #define __RCC_CONFIG_H__
 
+// C++ Safeguard
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /*********************************************** Includes ***********************************************/
 #include "reg_map.h"
 
@@ -46,58 +51,58 @@ typedef uint32_t freq_t;
 #define RCC_SYS_CLK_PLL 						((system_clock_t) 0x02)
 
 /*********************************************** AHB Prescaler ***********************************************/
-#define RCC_AHB_DIV_1 							((bus_prescaler_t) 0x00)
-#define RCC_AHB_DIV_2 							((bus_prescaler_t) 0x08)
-#define RCC_AHB_DIV_4 							((bus_prescaler_t) 0x09)
-#define RCC_AHB_DIV_8 							((bus_prescaler_t) 0x0A)
-#define RCC_AHB_DIV_16 							((bus_prescaler_t) 0x0B)
-#define RCC_AHB_DIV_64 							((bus_prescaler_t) 0x0C)
-#define RCC_AHB_DIV_128 						((bus_prescaler_t) 0x0D)
-#define RCC_AHB_DIV_256 						((bus_prescaler_t) 0x0E)
-#define RCC_AHB_DIV_512 						((bus_prescaler_t) 0x0F)
+#define RCC_AHB_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+#define RCC_AHB_DIV_2 							((rcc_bus_prescaler_t) 0x08)
+#define RCC_AHB_DIV_4 							((rcc_bus_prescaler_t) 0x09)
+#define RCC_AHB_DIV_8 							((rcc_bus_prescaler_t) 0x0A)
+#define RCC_AHB_DIV_16 							((rcc_bus_prescaler_t) 0x0B)
+#define RCC_AHB_DIV_64 							((rcc_bus_prescaler_t) 0x0C)
+#define RCC_AHB_DIV_128 						((rcc_bus_prescaler_t) 0x0D)
+#define RCC_AHB_DIV_256 						((rcc_bus_prescaler_t) 0x0E)
+#define RCC_AHB_DIV_512 						((rcc_bus_prescaler_t) 0x0F)
 
 /*********************************************** APB1 Prescaler ***********************************************/
-#define RCC_APB1_DIV_1 							((bus_prescaler_t) 0x00)
-#define RCC_APB1_DIV_2 							((bus_prescaler_t) 0x04)
-#define RCC_APB1_DIV_4 							((bus_prescaler_t) 0x05)
-#define RCC_APB1_DIV_8 							((bus_prescaler_t) 0x06)
-#define RCC_APB1_DIV_16 						((bus_prescaler_t) 0x07)
+#define RCC_APB1_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+#define RCC_APB1_DIV_2 							((rcc_bus_prescaler_t) 0x04)
+#define RCC_APB1_DIV_4 							((rcc_bus_prescaler_t) 0x05)
+#define RCC_APB1_DIV_8 							((rcc_bus_prescaler_t) 0x06)
+#define RCC_APB1_DIV_16 						((rcc_bus_prescaler_t) 0x07)
 
 /*********************************************** APB2 Prescaler ***********************************************/
-#define RCC_APB2_DIV_1 							((bus_prescaler_t) 0x00)
-#define RCC_APB2_DIV_2 							((bus_prescaler_t) 0x04)
-#define RCC_APB2_DIV_4 							((bus_prescaler_t) 0x05)
-#define RCC_APB2_DIV_8 							((bus_prescaler_t) 0x06)
-#define RCC_APB2_DIV_16 						((bus_prescaler_t) 0x07)
+#define RCC_APB2_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+#define RCC_APB2_DIV_2 							((rcc_bus_prescaler_t) 0x04)
+#define RCC_APB2_DIV_4 							((rcc_bus_prescaler_t) 0x05)
+#define RCC_APB2_DIV_8 							((rcc_bus_prescaler_t) 0x06)
+#define RCC_APB2_DIV_16 						((rcc_bus_prescaler_t) 0x07)
 
 /*********************************************** PLL Clock Source ***********************************************/
-#define RCC_PLL_SRC_HSI_DIV_2 					((pll_src_t) 0x00)
-#define RCC_PLL_SRC_HSE 						((pll_src_t) 0x01)
-#define RCC_PLL_SRC_NOT_USED					((pll_src_t) 0x00) // Reset State
+#define RCC_PLL_SRC_HSI 						((rcc_pll_src_t) 0x00)
+#define RCC_PLL_SRC_HSE 						((rcc_pll_src_t) 0x01)
+#define RCC_PLL_SRC_NOT_USED					((rcc_pll_src_t) 0x00) // Reset State
 
 /*********************************************** PLL Clock Source ***********************************************/
-#define RCC_PLL_SRC_HSE_DIV_1 					((pll_src_prescaler_t) 0x00)
-#define RCC_PLL_SRC_HSE_DIV_2 					((pll_src_prescaler_t) 0x01)
-#define RCC_PLL_SRC_HSI_DIV_2 					((pll_src_prescaler_t) 0x00)
-#define RCC_PLL_SRC_NOT_USED					((pll_src_prescaler_t) 0x00) // Reset State
+#define RCC_PLL_SRC_HSE_DIV_1 					((rcc_pll_src_prescaler_t) 0x00)
+#define RCC_PLL_SRC_HSE_DIV_2 					((rcc_pll_src_prescaler_t) 0x01)
+#define RCC_PLL_SRC_HSI_DIV_2 					((rcc_pll_src_prescaler_t) 0x01)
+#define RCC_PLL_SRC_PRE_NOT_USED				((rcc_pll_src_prescaler_t) 0x00) // Reset State
 
 /*********************************************** PLL Multiplication Factor ***********************************************/
-#define RCC_PLL_MUL_2 							((pll_mul_t) 0x00)
-#define RCC_PLL_MUL_3 							((pll_mul_t) 0x01)
-#define RCC_PLL_MUL_4 							((pll_mul_t) 0x02)
-#define RCC_PLL_MUL_5 							((pll_mul_t) 0x03)
-#define RCC_PLL_MUL_6 							((pll_mul_t) 0x04)
-#define RCC_PLL_MUL_7 							((pll_mul_t) 0x05)
-#define RCC_PLL_MUL_8 							((pll_mul_t) 0x06)
-#define RCC_PLL_MUL_9 							((pll_mul_t) 0x07)
-#define RCC_PLL_MUL_10 							((pll_mul_t) 0x08)
-#define RCC_PLL_MUL_11 							((pll_mul_t) 0x09)
-#define RCC_PLL_MUL_12 							((pll_mul_t) 0x0A)
-#define RCC_PLL_MUL_13 							((pll_mul_t) 0x0B)
-#define RCC_PLL_MUL_14 							((pll_mul_t) 0x0C)
-#define RCC_PLL_MUL_15 							((pll_mul_t) 0x0D)
-#define RCC_PLL_MUL_16 							((pll_mul_t) 0x0E)
-#define RCC_PLL_MUL_NOT_USED					((pll_mul_t) 0x00) // Reset State
+#define RCC_PLL_MUL_2 							((rcc_pll_mul_t) 0x00)
+#define RCC_PLL_MUL_3 							((rcc_pll_mul_t) 0x01)
+#define RCC_PLL_MUL_4 							((rcc_pll_mul_t) 0x02)
+#define RCC_PLL_MUL_5 							((rcc_pll_mul_t) 0x03)
+#define RCC_PLL_MUL_6 							((rcc_pll_mul_t) 0x04)
+#define RCC_PLL_MUL_7 							((rcc_pll_mul_t) 0x05)
+#define RCC_PLL_MUL_8 							((rcc_pll_mul_t) 0x06)
+#define RCC_PLL_MUL_9 							((rcc_pll_mul_t) 0x07)
+#define RCC_PLL_MUL_10 							((rcc_pll_mul_t) 0x08)
+#define RCC_PLL_MUL_11 							((rcc_pll_mul_t) 0x09)
+#define RCC_PLL_MUL_12 							((rcc_pll_mul_t) 0x0A)
+#define RCC_PLL_MUL_13 							((rcc_pll_mul_t) 0x0B)
+#define RCC_PLL_MUL_14 							((rcc_pll_mul_t) 0x0C)
+#define RCC_PLL_MUL_15 							((rcc_pll_mul_t) 0x0D)
+#define RCC_PLL_MUL_16 							((rcc_pll_mul_t) 0x0E)
+#define RCC_PLL_MUL_NOT_USED					((rcc_pll_mul_t) 0x00) // Reset State
 
 /*********************************************** ADC Prescaler ***********************************************/
 #define RCC_ADC_DIV_2 							((component_prescaler_t) 0x00)
@@ -119,10 +124,10 @@ typedef struct {
 	// 0: Prefetch is disabled
 	// 1: Prefetch is enabled
 	uint8_t prefetch: 5;
-} flash_config_t;
+} rcc_flash_config_t;
 
 /*********************************************** Bus Configuration Structure ***********************************************/
-typedef uint8_t bus_prescaler_t;
+typedef uint8_t rcc_bus_prescaler_t;
 /**
  * @brief Bus Prescaler Configuration Structure
  */
@@ -132,25 +137,25 @@ typedef struct {
 	 * @param AHB AHB Prescalar Values Refer `RCC_AHB_DIV_*`
 	 * @note Max frequency = 72MHz
 	 */
-	bus_prescaler_t AHB: 4;
+	rcc_bus_prescaler_t AHB: 4;
 	/**
 	 * @brief APB1 Bus Prescaler
 	 * @param APB1 APB1 Prescalar Values Refer `RCC_APB1_DIV_*`
 	 * @note Max frequency = 36MHz
 	 */
-	bus_prescaler_t APB1: 3;
+	rcc_bus_prescaler_t APB1: 3;
 	/**
 	 * @brief APB2 Bus Prescaler
 	 * @param APB2 APB2 Prescalar Values Refer `RCC_APB2_DIV_*`
 	 * @note Max frequency = 72MHz
 	 */
-	bus_prescaler_t APB2: 3;
-} bus_prescaler_config_t;
+	rcc_bus_prescaler_t APB2: 3;
+} rcc_bus_prescaler_config_t;
 
 /*********************************************** PLL Configuration ***********************************************/
-typedef uint8_t pll_src_t;
-typedef uint8_t pll_mul_t;
-typedef uint8_t pll_src_prescaler_t;
+typedef uint8_t rcc_pll_src_t;
+typedef uint8_t rcc_pll_mul_t;
+typedef uint8_t rcc_pll_src_prescaler_t;
 /**
  * @brief PLL Configuration Structure
  */
@@ -162,25 +167,25 @@ typedef struct {
 	 * @note - Max frequency: 72MHz
 	 * @note - Do not use `0x0F` for setting the multiplication factor to 16
 	 */
-	pll_mul_t mul_fact: 4;
+	rcc_pll_mul_t mul_fact: 4;
 	/**
 	 * @brief PLL Source Configuration
 	 * @note - Determines the input to PLL
 	 * @note - For STM32F1xx, the HSI is always divided by 2 
 	 */
-	pll_src_t src: 1;
+	rcc_pll_src_t src: 1;
 	/**
 	 * @brief PLL Source Prescaler Configuration
 	 * @note - Determines the prescaler to PLL Source
 	 * @note - For STM32F1xx, the HSI does not have prescaler configuration
 	 */
-	pll_src_prescaler_t src_prescaler: 1;
-} pll_config_t;
+	rcc_pll_src_prescaler_t src_prescaler: 1;
+} rcc_pll_config_t;
 
 /*********************************************** Internal Components Clock Configuration ***********************************************/
 typedef uint8_t component_prescaler_t;
 /**
- * @brief Component Prescaler Configuration Structure
+ * @brief Component Prescaler Configu()ration Structure
  */
 typedef struct {
 	/**
@@ -195,7 +200,7 @@ typedef struct {
 	 * @note - Clock Source: `PLL`
 	 */
 	component_prescaler_t USB: 1;
-} component_prescaler_config_t;
+} rcc_component_prescaler_config_t;
 
 /*********************************************** System Clock Structure ***********************************************/
 typedef uint8_t system_clock_t;
@@ -211,11 +216,11 @@ typedef struct {
 	system_clock_t clk_src;
 	/**
 	 * @brief Phase Lock Loop (PLL) Configuration Structure
-	 * @param pll Refer `pll_config_t`
+	 * @param pll Refer `rcc_pll_config_t`
 	 * @note This parameter defines the PLL Configuration to be set.
 	 */
-	pll_config_t pll;
-} sys_clk_t;
+	rcc_pll_config_t pll;
+} rcc_sys_clk_t;
 
 /*********************************************** RCC Configuration Structure ***********************************************/
 /**
@@ -223,13 +228,13 @@ typedef struct {
  */
 typedef struct {
 	// Bus Prescaler Configuration
-	bus_prescaler_config_t bus_prescaler;
+	rcc_bus_prescaler_config_t bus_prescaler;
 	// System Clock
-	sys_clk_t system;
+	rcc_sys_clk_t system;
 	// Flash Configuration
-	flash_config_t flash;
+	rcc_flash_config_t flash;
 	// Components Prescaler
-	component_prescaler_config_t component_prescaler;
+	rcc_component_prescaler_config_t component_prescaler;
 } rcc_config_t;
 
 /*********************************************** RCC Clock Frequency ***********************************************/
@@ -248,9 +253,10 @@ typedef struct {
 } rcc_clk_freq_t;
 
 /*********************************************** Prescaler Lookup Table ***********************************************/
-extern const bus_prescaler_t __ahbPrescalerDriverMapping__[8];
-extern const bus_prescaler_t __apbPrescalerDriverMapping__[4];
+extern const rcc_bus_prescaler_t __ahbPrescalerDriverMapping__[8];
+extern const rcc_bus_prescaler_t __apbPrescalerDriverMapping__[4];
 
+/*********************************************** Helper APIs ***********************************************/
 /**
  * @brief Enables Clock for Alternate Function (AFIO)
  */
@@ -268,26 +274,285 @@ __STATIC_INLINE__ void RCC_AFIO_Clk_Disable(void){
 }
 
 /**
+ * @brief Turn ON High Speed External Clock (HSE)
+ * @note Blocking Function waits for Clock to be ready
+ */
+__STATIC_INLINE__ void RCC_HSE_ON(void){
+	// Turn ON HSE
+	RCC->CR.REG |= RCC_CR_HSEON;
+	// Blocking: Wait for Clock to be ready
+	while(!(RCC->CR.REG & RCC_CR_HSERDY));
+}
+
+/**
+ * @brief Turn OFF High Speed External Clock (HSE)
+ * @note Blocking Function waits for Clock to be OFF
+ */
+__STATIC_INLINE__ void RCC_HSE_OFF(void){
+	// Turn OFF HSE
+	RCC->CR.REG &= ~RCC_CR_HSEON;
+	// Blocking: Wait for Clock to be OFF
+	while(RCC->CR.REG & RCC_CR_HSERDY);
+}
+
+/**
+ * @brief Turn On Phase Lock Loop (PLL)
+ * @note Blocking Function waits for Clock to be ready
+ */
+__STATIC_INLINE__ void RCC_PLL_ON(void){
+	// Turn ON PLL
+	RCC->CR.REG |= RCC_CR_PLLON;
+	// Blocking: Wait for Clock to be ready
+	while(!(RCC->CR.REG & RCC_CR_PLLRDY));
+}
+
+/**
+ * @brief Turn OFF Phase Lock Loop (PLL)
+ * @note Blocking Function waits for Clock to be OFF
+ */
+__STATIC_INLINE__ void RCC_PLL_OFF(void){
+	// Turn OFF PLL
+	RCC->CR.REG &= ~RCC_CR_PLLON;
+	// Blocking: Wait for Clock to be OFF
+	while(RCC->CR.REG & RCC_CR_PLLRDY);
+}
+
+/**
+ * @brief Updates the System Clock Source
+ * @param systemClk System Clock Source: `RCC_SYS_CLK_HSI`, `RCC_SYS_CLK_HSE`, `RCC_SYS_CLK_PLL`
+ * @note Blocking Function waits for confirmation from Hardware regarding status 
+ */
+__STATIC_INLINE__ void RCC_SysClkSrc_Set(const system_clock_t systemClk){
+	// Update the Register
+	RCC->CFGR.REG |= (uint32_t)(((systemClk & 0x03) << RCC_CFGR_SW_Pos));
+	// Blocking: Waits for hardware confirmation
+	while((RCC->CFGR.REG & RCC_CFGR_SWS) != ((systemClk & 0x03) << RCC_CFGR_SWS_Pos));
+}
+
+/**
+ * @brief Retrieves the System Clock Source
+ * @note Reads the `RCC->CFGR.REG`
+ */
+__STATIC_INLINE__ system_clock_t RCC_SysClkSrc_Get(void){
+	// System Clock Source (feedback from hardware)
+	return ((system_clock_t) ((RCC->CFGR.REG & RCC_CFGR_SWS) >> RCC_CFGR_SWS_Pos));
+}
+
+/**
+ * @brief Retrieves the PLL Clock Source
+ * @note Reads the `RCC->CFGR.REG`
+ * @returns PLL Clock Source
+ */
+__STATIC_INLINE__ rcc_pll_src_t RCC_PLLClkSrc_Get(void){
+	// Returns PLL Clock Source
+	return ((rcc_pll_src_t) ((RCC->CFGR.REG & RCC_CFGR_PLLSRC) >> RCC_CFGR_PLLSRC_Pos));
+}
+
+/**
+ * @brief Retrieves the PLL External Clock Src Prescaler (in form of bits to be right shifted)
+ * @return Prescaler in form of bits to be right shifted for PLL External Clock Source Prescaler 
+ * @note Takes care of only: `RCC_PLL_SRC_HSE`
+ */
+__STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLExtClkSrcPscRightShift_Get(void){
+	// Return the External Clock Src Prescaler
+	return ((rcc_pll_src_prescaler_t) ((RCC->CFGR.REG & RCC_CFGR_PLLXTPRE) >> RCC_CFGR_PLLXTPRE_Pos));
+}
+
+/**
+ * @brief Retrieves the PLL Prescaler (in form of bits to be right shifted)
+ * @returns Prescaler in form of bits to be right shifted for PLL Clock
+ * @note Takes care of both the cases: `RCC_PLL_SRC_HSI`, `RCC_PLL_SRC_HSE`
+ */
+__STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLClkSrcPscRightShift_Get(void){
+	// Get PLL Clock Source
+	rcc_pll_src_t rccPLLSrc = RCC_PLLClkSrc_Get();
+	// Final Prescaler Value
+	rcc_pll_src_prescaler_t rccPLLSrcPrescaler = RCC_PLL_SRC_PRE_NOT_USED;
+	// PLL Clock Source
+	switch(rccPLLSrc){
+		// HSI
+		case RCC_PLL_SRC_HSI:
+			// Right shift by 1 (/2)
+			rccPLLSrcPrescaler = RCC_PLL_SRC_HSI_DIV_2;
+		break;
+		// HSE
+		case RCC_PLL_SRC_HSE:
+			// Right shift by equibalent bits
+			rccPLLSrcPrescaler = RCC_PLLExtClkSrcPscRightShift_Get();
+		break;
+	}
+	// Returns PLL Clock Source
+	return rccPLLSrcPrescaler;
+}
+
+/**
+ * @brief Retrieves the PLL Multiplication Factor
+ * @return RCC Multiplication Factor
+ * @note Reads `RCC->CFGR.REG`
+ */
+__STATIC_INLINE__ rcc_pll_mul_t RCC_PLLMulFactor_Get(void){
+	// Retrives the PLL Multiplication Factor
+	return ((rcc_pll_mul_t) (((RCC->CFGR.REG & RCC_CFGR_PLLMULL) >> RCC_CFGR_PLLMULL_Pos) + 2));
+}
+
+/**
+ * @brief Retrieves the AHB Prescaler (in form of bits to be right shifted)
+ * @return Prescaler in form of bits to be right shifted for AHB Clock
+ */
+__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_AHBPscRightShift_Get__(void){
+	// AHB Prescaler Index for `__ahbPrescalerDriverMapping__[8]`
+	rcc_bus_prescaler_t index = RCC_AHB_DIV_1;
+	// Extract AHB Prescaler Bit Value
+	uint8_t reg = ((RCC->CFGR.REG & RCC_CFGR_HPRE) >> RCC_CFGR_HPRE_Pos);
+	// Prescaler != 0x01
+	if(reg >= RCC_AHB_DIV_2){
+		// Wrap around 8 (Subtracting the value from 8)
+		index = (reg & 0x07);
+	}
+	// Return the right shifting bits
+	return __ahbPrescalerDriverMapping__[index];
+}
+
+/**
+ * @brief Retrieves the APB1 Prescaler (in form of bits to be right shifted)
+ * @return Prescaler in form of bits to be right shifted for APB1 Clock
+ */
+__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_APB1PscRightShift_Get__(void){
+	// APB1 Prescaler Index for `__apbPrescalerDriverMapping__[4]`
+	rcc_bus_prescaler_t index = RCC_APB1_DIV_1;
+	// Extract APB1 Prescaler Bit Value
+	uint8_t reg = ((RCC->CFGR.REG & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos);
+	// Prescaler != 0x01
+	if(reg >= RCC_APB1_DIV_2){
+		// Wrap around 4 (Subtracting the value from 4)
+		index = (reg & 0x03);
+	}
+	// Return the right shifting bits
+	return __apbPrescalerDriverMapping__[index];
+}
+
+/**
+ * @brief Retrieves the APB2 Prescaler (in form of bits to be right shifted)
+ * @return Prescaler in form of bits to be right shifted for APB2 Clock
+ */
+__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_APB2PscRightShift_Get__(void){
+	// APB2 Prescaler Index for `__apbPrescalerDriverMapping__[4]`
+	rcc_bus_prescaler_t index = RCC_APB2_DIV_1;
+	// Extract APB2 Prescaler Bit Value
+	uint8_t reg = ((RCC->CFGR.REG & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos);
+	// Prescaler != 0x01
+	if(reg >= RCC_APB2_DIV_2){
+		// Wrap around 4 (Subtracting the value from 4)
+		index = (reg & 0x03);
+	}
+	// Return the right shifting bits
+	return __apbPrescalerDriverMapping__[index];
+}
+
+/*********************************************** Driver APIs ***********************************************/
+/**
+ * @brief Updates the System Core Clock Frequency
+ * @param coreClockFrequencyHz Pointer to variable which shall hold the Core Clock frequency
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_CoreClockFreq_Update(freq_t* coreClockFrequencyHz);
+
+/**
+ * @brief Updates the System AHB Clock Frequency
+ * @param ahbClockFrequencyHz Pointer to variable which shall hold the AHB Clock frequency
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_AHBClockFreq_Update(freq_t* ahbClockFrequencyHz);
+
+/**
+ * @brief Updates the System APB1 Clock Frequency
+ * @param apb1ClockFrequencyHz Pointer to variable which shall hold the APB1 Clock frequency
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_APB1ClockFreq_Update(freq_t* apb1ClockFrequencyHz);
+
+/**
+ * @brief Updates the System APB2 Clock Frequency
+ * @param apb1ClockFrequencyHz Pointer to variable which shall hold the APB2 Clock frequency
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_APB2ClockFreq_Update(freq_t* apb2ClockFrequencyHz);
+
+/**
+ * @brief Retrives the System AHB Clock Frequency
+ * @param coreClockFrequencyHz Core Clock frequency
+ * @param ahbClockFrequencyHz Pointer to variable which shall hold the AHB Clock frequency
+ */
+__STATIC_INLINE__ void RCC_AHBClockFreqFromCoreClock_Get(const freq_t coreClockFrequencyHz, freq_t* ahbClockFrequencyHz){
+	// Account for AHB Prescaler
+	*ahbClockFrequencyHz = (coreClockFrequencyHz >> __RCC_AHBPscRightShift_Get__());
+}
+
+/**
+ * @brief Retrives the System APB1 Clock Frequency
+ * @param ahbClockFrequencyHz AHB Clock frequency
+ * @param apb1ClockFrequencyHz Pointer to variable which shall hold the APB1 Clock frequency
+ */
+__STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Get(const freq_t ahbClockFrequencyHz, freq_t* apb1ClockFrequencyHz){
+	// Account for APB1 Prescaler
+	*apb1ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB1PscRightShift_Get__());
+}
+
+/**
+ * @brief Retrives the System APB2 Clock Frequency
+ * @param ahbClockFrequencyHz AHB Clock frequency
+ * @param apb2ClockFrequencyHz Pointer to variable which shall hold the APB2 Clock frequency
+ */
+__STATIC_INLINE__ void RCC_APB2ClockFreqFromAHBClock_Get(const freq_t ahbClockFrequencyHz, freq_t* apb2ClockFrequencyHz){
+	// Account for APB2 Prescaler
+	*apb2ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB2PscRightShift_Get__());
+}
+
+/**
+ * @brief Retrieves the System Clock Frequency (in Hz) 
+ * @param clkFreq Pointer to System Clock Frequency 
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_ClockFreq_Update(rcc_clk_freq_t* clkFreq);
+
+/**
+ * @brief Computes the AHB Clock Divisor from prescaler
+ * @param prescaler Refer `RCC_AHB_DIV_*`
+ * @return Computed Prescaler Value
+ */
+__STATIC_INLINE__ rcc_bus_prescaler_t RCC_AHBComputePrescaler(const rcc_bus_prescaler_t prescaler){
+	return ((rcc_bus_prescaler_t) (0x01 << __RCC_AHBPscRightShift_Get__()));
+}
+
+/**
  * @brief Computes the APB1 Clock Divisor from prescaler
  * @param prescaler Refer `RCC_APB1_DIV_*`
- * @return Computed Divisor Value
+ * @return Computed Prescaler Value
  */
-__STATIC_INLINE__ uint8_t RCC_APB1ComputePrescaler(const bus_prescaler_t prescaler){
-	return ((uint8_t)((prescaler == RCC_APB1_DIV_1)? (0x01) : (0x01 << (__apbPrescalerDriverMapping__[prescaler]))));
+__STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB1ComputePrescaler(const rcc_bus_prescaler_t prescaler){
+	return ((rcc_bus_prescaler_t) (0x01 << __RCC_APB1PscRightShift_Get__()));
 }
 
 /**
  * @brief Computes the APB2 Clock Divisor from prescaler
  * @param prescaler Refer `RCC_APB2_DIV_*`
- * @return Computed Divisor Value
+ * @return Computed Prescaler Value
  */
-__STATIC_INLINE__ uint8_t RCC_APB2ComputePrescaler(const bus_prescaler_t prescaler){
-	return ((uint8_t)((prescaler == RCC_APB2_DIV_1)? (0x01) : (0x01 << (__apbPrescalerDriverMapping__[prescaler]))));
+__STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB2ComputePrescaler(const rcc_bus_prescaler_t prescaler){
+	return ((rcc_bus_prescaler_t) (0x01 << __RCC_APB2PscRightShift_Get__()));;
 }
 
-__STATIC_INLINE__ uint16_t RCC_AHBComputePrescaler(const bus_prescaler_t prescaler){
-	return ((uint16_t)((prescaler == RCC_AHB_DIV_1)? (0x01) : (0x01 << __ahbPrescalerDriverMapping__[prescaler])));
-}
+
 
 #ifdef __OLD_RCC_METHOD__
 /**
@@ -362,5 +627,11 @@ uint32_t RCC_Get_APB1Clock();
 uint32_t RCC_Get_APB2Clock();
 
 #endif /* __OLD_RCC_METHOD__ */
+
+
+// C++ Safeguard
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __RCC_CONFIG_H__ */
