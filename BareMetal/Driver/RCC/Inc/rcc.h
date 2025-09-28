@@ -1,19 +1,30 @@
-/***************************************************************************************
- *  File: rcc.h
- *  Created on: 14/09/2024
- *  Author: Shrey Shah
- ***************************************************************************************/
+/**
+ * @file rcc.h
+ * @author Shrey Shah
+ * @brief Reset & Clock Control Configuration
+ * @version 1.1
+ * @date 28-09-2025
+ * @note Logs till v1.1:
+ * @note - Aborted usage of `enums` as it consumes a lot of space
+ * @note - Shifted to use combination of `typedef` & macros
+ */
 
-// Header Guards
+/*********************************************** Header Guards ***********************************************/
 #ifndef __RCC_H__
 #define __RCC_H__
 
-// Header File
+// C++ Safeguard
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+/*********************************************** Header File ***********************************************/
 #include "rcc_config.h"
 
-// System Frequency Tracker
+/*********************************************** System Frequency Tracker ***********************************************/
 extern rcc_clk_freq_t __systemFrequency__;
 
+/*********************************************** Driver APIs ***********************************************/
 /**
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure `rcc_flash_config_t` 
@@ -99,6 +110,7 @@ void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_prescaler_config_t*
  */
 void RCC_72MHz_LoadDefaultConfig(rcc_config_t* rccConfig);
 
+/*********************************************** Helper APIs ***********************************************/
 /**
  * @brief Shortcut Function to set Clock Frequency to 72MHz
  */
@@ -142,23 +154,9 @@ __STATIC_INLINE__ freq_t RCC_APB2ClockFreq_Get(void){
 	return (__systemFrequency__.APB2);
 }
 
-#ifdef __OLD_RCC_METHOD__
-/**
- * @brief Configures RCC
- * @param configX RCC Configuration Structure
- */
-void RCC_Config(rcc_config_t* configX);
-
-/**
- * @brief Loads `rcc_config_t` with PLL 72MHz configuration
- * @param configX Pointer to `rcc_config_t` structure to be configured
- */
-void RCC_Config_Load_72MHz(rcc_config_t* configX);
-
-/**
- * @brief Configures System to run at 72MHz
- */
-void RCC_Config_72MHz();
-#endif /* __OLD_RCC_METHOD__ */
+// C++ Safeguard
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* __RCC_H__ */

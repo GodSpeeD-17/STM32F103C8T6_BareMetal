@@ -3,7 +3,6 @@
 
 // Timer Delay Configuration
 #ifndef __SYSTICK_DELAY__
-#include "timer.h"
 /*-------------------------------- Local Variables ------------------------*/
 // Timer Configuration Structure
 static timer_config_t TIM_Configuration = {

@@ -9,7 +9,7 @@
  * @note - Shifted to use combination of `typedef` & macros
  */
 
-// Header Guards
+/*********************************************** Header Guards ***********************************************/
 #ifndef __RCC_CONFIG_H__
 #define __RCC_CONFIG_H__
 
@@ -551,83 +551,6 @@ __STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB1ComputePrescaler(const rcc_bus_pre
 __STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB2ComputePrescaler(const rcc_bus_prescaler_t prescaler){
 	return ((rcc_bus_prescaler_t) (0x01 << __RCC_APB2PscRightShift_Get__()));;
 }
-
-
-
-#ifdef __OLD_RCC_METHOD__
-/**
- * @brief AHB Prescaler
- */
-uint8_t RCC_Get_AHB_Prescaler(void);
-
-/**
- * @brief APB1 Prescaler
- */
-uint8_t RCC_Get_APB1_Prescaler(void);
-
-/**
- * @brief APB2 Prescaler
- */
-uint8_t RCC_Get_APB2_Prescaler(void);
-
-/**
- * @brief Updates the Core Clock
- * @note This function should be called after any change in the RCC configuration
- * @note Max Frequency: 72MHz 
- */
-void RCC_Update_CoreClock();
-
-/**
- * @brief Updates the AHB Clock based upon AHB prescaler (`HPRE`)
- * @note This function should be called after any change in the RCC configuration
- * @note Max Frequency: 72MHz
- */
-void RCC_Update_AHBClock();
-
-/**
- * @brief Updates the APB1 Clock based upon APB1 prescaler (`PPRE1`)
- * @note This function should be called after any change in the RCC configuration
- * @note Max Frequency: 36MHz 
- */
-void RCC_Update_APB1Clock();
-
-/**
- * @brief Updates the APB2 Clock based upon APB2 prescaler (`PPRE2`)
- * @note This function should be called after any change in the RCC configuration
- * @note Max Frequency: 72MHz 
- */
-void RCC_Update_APB2Clock();
-
-/**
- * @brief Retrieves the Core Clock Frequency
- * @return Core Clock Frequency 
- * @note Max Frequency: 72MHz 
- */
-uint32_t RCC_Get_CoreClock();
-
-/**
- * @brief Retrieves the AHB Clock Frequency
- * @return AHB Frequency 
- * @note Max Frequency: 72MHz 
- */
-uint32_t RCC_Get_AHBClock();
-
-/**
- * @brief Retrieves the APB1 Clock Frequency
- * @return APB1 Frequency 
- * @note Max Frequency: 36MHz
- */
-uint32_t RCC_Get_APB1Clock();
-
-/**
- * @brief Retrieves the APB2 Clock Frequency
- * @return APB2 Frequency 
- * @note Max Frequency: 72MHz 
- */
-uint32_t RCC_Get_APB2Clock();
-
-#endif /* __OLD_RCC_METHOD__ */
-
 
 // C++ Safeguard
 #ifdef __cplusplus

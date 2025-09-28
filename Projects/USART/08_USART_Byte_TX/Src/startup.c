@@ -3,7 +3,6 @@
 
 // Timer Delay Configuration
 #ifndef __SYSTICK_DELAY__
-#include "timer.h"
 /*-------------------------------- Local Variables ------------------------*/
 // Timer Configuration Structure
 static timer_config_t TIM_Configuration = {
@@ -164,7 +163,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 		SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
 	#else
 		// SysTick: Resolution 1ms
-		SysTick_Config(((RCC_Get_AHBClock())/FREQ_1kHz));
+		SysTick_Config(((RCC_AHBClockFreq_Get())/FREQ_1kHz));
 		// TIM Configuration for 1us resolution
 		TIM_1MHz_Load_Default(&TIM_Configuration);
 		// Configure TIM with the parameters

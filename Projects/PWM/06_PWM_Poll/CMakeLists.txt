@@ -19,6 +19,7 @@ set(ST_FLASH st-flash)
 set(OPENOCD openocd)
 set(ST_INFO st-info)
 set(ST_UART_FLASH stm32flash)
+set(ST_UART_FLASH_PORT /dev/ttyUSB0)
 
 # ---------------------- C/C++ Flags ----------------------
 set(MCU_DEFINE __STM32F103C8T6__)
@@ -28,7 +29,7 @@ set(C_STD gnu11)
 set(CXX_STD c++17)
 set(OPTIMIZATION_LEVEL 0)
 set(FLASH_ADDRESS 0x08000000)
-set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP)
+set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP -save-temps)
 set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_DEFINE} -D${MCU_CPU_DEFINE} -g -gdwarf-2 )
 
 # C specific flags
@@ -157,8 +158,11 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 
 # ---------------------- Size Command ----------------------
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
+	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
 	COMMAND ${CMAKE_SIZE} --format=berkeley ${PROJECT_NAME}.elf
-	COMMENT "Size of sections (.text, .data, .bss)")
+	COMMENT "Size of sections (.text, .data, .bss)"
+)
 
 # ---------------------- VSCode Configuration Generation ----------------------
 # This section auto-generates VSCode configuration files (launch.json,
@@ -358,10 +362,16 @@ add_custom_target(flash
 # -----------------------------------------------------------------------------
 # Flash target (UART bootloader via stm32flash)
 # -----------------------------------------------------------------------------
-add_custom_target(uart_flash
-	DEPENDS ${PROJECT_NAME}.bin
-	COMMAND ${CMAKE_COMMAND} -E echo "🔌 Flashing via UART bootloader..."
-	COMMAND ${ST_UART_FLASH} -w ${PROJECT_NAME}.bin -v -g 0x0
+add_custom_target(flash_uart
+	DEPENDS ${PROJECT_NAME}.elf
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU (UART) 🚀        ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║				✔✔ Ensure BOOT0 is pulled high!				 ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND sudo ${ST_UART_FLASH} -w ${BINARY_FILE} -v -g 0x0 ${ST_UART_FLASH_PORT}
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 over UART"
 )
 
@@ -394,6 +404,18 @@ add_custom_target(info
 	COMMENT "Showing ST-Link debug probe info"
 )
 
+add_custom_target(info_uart
+	COMMENT ""
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║           🔍 ST-Link Debug Probe Info (UART)             ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND sudo ${ST_UART_FLASH} ${ST_UART_FLASH_PORT}
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMENT "Showing ST-Link debug probe info"
+)
+
 # -----------------------------------------------------------------------------
 # Flash Erase
 # -----------------------------------------------------------------------------
@@ -408,6 +430,23 @@ add_custom_target(erase_flash
 	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run make flash to program           ║"
 	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
 	COMMENT "Erasing flash memory"
+)
+
+
+# -----------------------------------------------------------------------------
+# Flash Erase (UART)
+# -----------------------------------------------------------------------------
+add_custom_target(erase_flash_uart
+	COMMENT ""
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║         💥 Erasing STM32 Flash Memory (UART) 💥          ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMAND sudo ${ST_UART_FLASH} -o ${ST_UART_FLASH_PORT}
+	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "║     💡 Next step: run make flash_uart to program         ║"
+	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+	COMMENT "Erasing flash memory...."
 )
 
 # ---------------------- Make Targets Available ----------------------
