@@ -5,16 +5,6 @@
 // MACROS
 #include "common.h"
 
-typedef struct {
-    // 0 < SYSCLK <= 24MHz -> Zero wait state
-    // 24MHz < SYSCLK <= 48MHz -> One wait state
-    // 48MHz < SYSCLK <= 72MHz -> Two wait states
-	uint8_t latency;
-    // 0: Prefetch is disabled
-    // 1: Prefetch is enabled
-    uint8_t prefetch;
-} flash_config_t;
-
 // Flash Structure
 typedef struct {
     // Flash Access Control Register (ACR)

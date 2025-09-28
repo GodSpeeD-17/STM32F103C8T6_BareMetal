@@ -2,9 +2,15 @@
 #include "rcc_config.h"
 
 // AHB Prescaler 
-static const uint8_t AHB_prescaler[8] = {1, 2, 3, 4, 6, 7, 8, 9};
+const bus_prescaler_t __ahbPrescalerDriverMapping__[8] = {1, 2, 3, 4, 6, 7, 8, 9};
 // APBx Prescaler 
-static const uint8_t APB_prescaler[4] = {1, 2, 3, 4};
+const bus_prescaler_t __apbPrescalerDriverMapping__[4] = {1, 2, 3, 4};
+
+
+
+
+
+#ifdef __OLD_RCC_METHOD__
 
 // System Clock Frequencies
 volatile static rcc_clk_t System = {
@@ -66,7 +72,7 @@ void RCC_Update_AHBClock(){
 	int8_t prescaler = (((int32_t)(RCC->CFGR.REG & RCC_CFGR_HPRE)) - ((int32_t)RCC_CFGR_HPRE_DIV2)) >> RCC_CFGR_HPRE_Pos;
 	// Positive Offset indicates a prescaler
 	if(prescaler >= 0){
-		AHB_Clock >>= AHB_prescaler[prescaler];
+		AHB_Clock >>= __ahbPrescalerDriverMapping__[prescaler];
 	}
 	// Assign the AHB Clock Value
 	System.AHBClock = AHB_Clock; 
@@ -84,7 +90,7 @@ void RCC_Update_APB1Clock(){
 	int8_t prescaler = (((int32_t)(RCC->CFGR.REG & RCC_CFGR_PPRE1)) - ((int32_t)RCC_CFGR_PPRE1_DIV2)) >> RCC_CFGR_PPRE1_Pos;
 	// Positive Offset indicates a prescaler
 	if(prescaler >= 0)
-		APB1_Clock >>= APB_prescaler[prescaler];
+		APB1_Clock >>= __apbPrescalerDriverMapping__[prescaler];
 	// Assign the APB1 Clock Value
 	System.APB1Clock = APB1_Clock;
 }
@@ -101,7 +107,7 @@ void RCC_Update_APB2Clock(){
 	int8_t prescaler = (((int32_t)(RCC->CFGR.REG & RCC_CFGR_PPRE2)) - ((int32_t)RCC_CFGR_PPRE2_DIV2)) >> RCC_CFGR_PPRE2_Pos;
 	// Positive Offset indicates a prescaler
 	if(prescaler >= 0)
-		APB2_Clock >>= APB_prescaler[prescaler];
+		APB2_Clock >>= __apbPrescalerDriverMapping__[prescaler];
 	// Assign the APB1 Clock Value
 	System.APB2Clock = APB2_Clock;
 }
@@ -160,7 +166,7 @@ uint32_t RCC_Get_APB2Clock(){
 uint8_t RCC_Get_AHB_Prescaler(void){
 	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_HPRE) >> RCC_CFGR_HPRE_Pos);
 	if(index > 0x07)
-		return (1 << APB_prescaler[(index & 0x07)]);
+		return (1 << __apbPrescalerDriverMapping__[(index & 0x07)]);
 	else
 		return 1;
 }
@@ -171,7 +177,7 @@ uint8_t RCC_Get_AHB_Prescaler(void){
 uint8_t RCC_Get_APB1_Prescaler(void){
 	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos);
 	if(index > 0x03)
-		return (1 << APB_prescaler[(index & 0x03)]);
+		return (1 << __apbPrescalerDriverMapping__[(index & 0x03)]);
 	else
 		return 1;
 }
@@ -182,8 +188,9 @@ uint8_t RCC_Get_APB1_Prescaler(void){
 uint8_t RCC_Get_APB2_Prescaler(void){
 	uint8_t index = ((RCC->CFGR.REG & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos);
 	if(index > 0x03)
-		return (1 << APB_prescaler[(index & 0x03)]);
+		return (1 << __apbPrescalerDriverMapping__[(index & 0x03)]);
 	else
 		return 1;
 }
 
+#endif /* __OLD_RCC_METHOD__ */
