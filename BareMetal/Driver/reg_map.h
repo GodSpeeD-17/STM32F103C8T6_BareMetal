@@ -91,7 +91,8 @@ typedef enum
 #ifdef __CORTEX_M3__
 #include "arm_reg_map.h"
 #include "flash_reg_map.h"
-#include "nvic_reg_map.h"
+#include "stm32f1xx_nvic.h"
+#include "stm32f1xx_scb.h"
 #include "systick_reg_map.h"
 #include "wwdg_reg_map.h"
 #endif /* __CORTEX_M3__ */
@@ -116,7 +117,8 @@ typedef enum
 // Memory Mapping
 #define SysTick_BASE_ADDR 						0xE000E010
 #define NVIC_BASE_ADDR 							0xE000E100
-#define CPU_ID_BASE_ADDR 						0xE000ED00
+#define SCB_BASE_ADDR                           0xE000ED00
+#define CoreDebug_BASE_ADDR                     0xE000EDF0
 #define APB1_BASE_ADDR 							0x40000000
 #define APB2_BASE_ADDR 							0x40010000
 #define AHB_BASE_ADDR 							0x40018000
@@ -127,6 +129,8 @@ typedef enum
 // Address Mapping
 #define SysTick 								((SysTick_TypeDef *)(SysTick_BASE_ADDR))
 #define NVIC 									((NVIC_TypeDef *)(NVIC_BASE_ADDR))
+#define SCB										((SCB_TypeDef *)(SCB_BASE_ADDR))
+#define CoreDebug								((CoreDebug_TypeDef *)(CoreDebug_BASE_ADDR))
 #define FLASH 									((FLASH_REG_STRUCT *)(FLASH_BASE_ADDR))
 #define WWDG 									((WWDG_REG_STRUCT *)(APB1_BASE_ADDR + 0x00002C00))
 #define RCC 									((RCC_TypeDef *)(AHB_BASE_ADDR + 0x00009000))
@@ -171,57 +175,78 @@ typedef enum
 #define DMA2_Channel5 							((DMA_Channel_TypeDef *)(DMA2_BASE_ADDR + 0x00000058))
 /*********************************************** Address Mapping ***********************************************/
 
-/*********************************************** NVIC MACROS ***********************************************/
-// IRQn Number
+/*********************************************** IRQn MACROS ***********************************************/
+/**
+ * @brief Interrupt Request (IRQ) numbers
+ */
 typedef uint8_t irq_t;
-#define WWDG_IRQn (0)
-#define PVD_IRQn (1)
-#define TAMPER_IRQn (2)
-#define RTC_IRQn (3)
-#define FLASH_IRQn (4)
-#define RCC_IRQn (5)
-#define EXTI0_IRQn (6)
-#define EXTI1_IRQn (7)
-#define EXTI2_IRQn (8)
-#define EXTI3_IRQn (9)
-#define EXTI4_IRQn (10)
-#define DMA1_Channel1_IRQn (11)
-#define DMA1_Channel2_IRQn (12)
-#define DMA1_Channel3_IRQn (13)
-#define DMA1_Channel4_IRQn (14)
-#define DMA1_Channel5_IRQn (15)
-#define DMA1_Channel6_IRQn (16)
-#define DMA1_Channel7_IRQn (17)
-#define ADC1_2_IRQn (18)
-#define USB_HP_CAN_TX_IRQ (19)
-#define USB_LP_CAN_RX0_IRQ (20)
-#define CAN_RX1_IRQ (21)
-#define CAN_SCE_IRQ (22)
-#define EXTI9_5_IRQn (23)
-#define TIM1_BRK_IRQn (24)
-#define TIM1_UP_IRQn (25)
-#define TIM1_TRG_COM_IRQn (26)
-#define TIM1_CC_IRQn (27)
-#define TIM2_IRQn (28)
-#define TIM3_IRQn (29)
-#define TIM4_IRQn (30)
-#define I2C1_EV_IRQn (31)
-#define I2C1_ER_IRQn (32)
-#define I2C2_EV_IRQn (33)
-#define I2C2_ER_IRQn (34)
-#define SPI1_IRQn (35)
-#define SPI2_IRQn (36)
-#define USART1_IRQn (37)
-#define USART2_IRQn (38)
-#define USART3_IRQn (39)
-#define EXTI15_10_IRQn (40)
-#define RTC_Alarm_IRQn (41)
-#define ADC3_IRQn (47)
-#define DMA2_Channel1_IRQn (56)
-#define DMA2_Channel2_IRQn (57)
-#define DMA2_Channel3_IRQn (58)
-#define DMA2_Channel4_5_IRQn (59)
-/*********************************************** NVIC MACROS ***********************************************/
+#define WWDG_IRQn								((irq_t) 0)
+#define PVD_IRQn								((irq_t) 1)
+#define TAMPER_IRQn								((irq_t) 2)
+#define RTC_IRQn								((irq_t) 3)
+#define FLASH_IRQn								((irq_t) 4)
+#define RCC_IRQn								((irq_t) 5)
+#define EXTI0_IRQn								((irq_t) 6)
+#define EXTI1_IRQn								((irq_t) 7)
+#define EXTI2_IRQn								((irq_t) 8)
+#define EXTI3_IRQn								((irq_t) 9)
+#define EXTI4_IRQn								((irq_t) 10)
+#define DMA1_Channel1_IRQn						((irq_t) 11)
+#define DMA1_Channel2_IRQn						((irq_t) 12)
+#define DMA1_Channel3_IRQn						((irq_t) 13)
+#define DMA1_Channel4_IRQn						((irq_t) 14)
+#define DMA1_Channel5_IRQn						((irq_t) 15)
+#define DMA1_Channel6_IRQn						((irq_t) 16)
+#define DMA1_Channel7_IRQn						((irq_t) 17)
+#define ADC1_2_IRQn								((irq_t) 18)
+#define USB_HP_CAN_TX_IRQ						((irq_t) 19)
+#define USB_LP_CAN_RX0_IRQ						((irq_t) 20)
+#define CAN_RX1_IRQ								((irq_t) 21)
+#define CAN_SCE_IRQ								((irq_t) 22)
+#define EXTI9_5_IRQn							((irq_t) 23)
+#define TIM1_BRK_IRQn							((irq_t) 24)
+#define TIM1_UP_IRQn							((irq_t) 25)
+#define TIM1_TRG_COM_IRQn						((irq_t) 26)
+#define TIM1_CC_IRQn							((irq_t) 27)
+#define TIM2_IRQn								((irq_t) 28)
+#define TIM3_IRQn								((irq_t) 29)
+#define TIM4_IRQn								((irq_t) 30)
+#define I2C1_EV_IRQn							((irq_t) 31)
+#define I2C1_ER_IRQn							((irq_t) 32)
+#define I2C2_EV_IRQn							((irq_t) 33)
+#define I2C2_ER_IRQn							((irq_t) 34)
+#define SPI1_IRQn								((irq_t) 35)
+#define SPI2_IRQn								((irq_t) 36)
+#define USART1_IRQn								((irq_t) 37)
+#define USART2_IRQn								((irq_t) 38)
+#define USART3_IRQn								((irq_t) 39)
+#define EXTI15_10_IRQn							((irq_t) 40)
+#define RTC_Alarm_IRQn							((irq_t) 41)
+#define USBWakeUp_IRQn							((irq_t) 42)
+#define TIM8_BRK_IRQn							((irq_t) 43)
+#define TIM8_UP_IRQn							((irq_t) 44)
+#define TIM8_TRG_COM_IRQn						((irq_t) 45)
+#define TIM8_CC_IRQn							((irq_t) 46)
+#define ADC3_IRQn								((irq_t) 47)
+#define FMSC_IRQn								((irq_t) 48)
+#define SPI3_IRQn								((irq_t) 49)
+#define UART4_IRQn								((irq_t) 50)
+#define UART5_IRQn								((irq_t) 51)
+#define TIM6_IRQn								((irq_t) 52)
+#define TIM7_IRQn								((irq_t) 53)
+#define DMA2_Channel1_IRQn						((irq_t) 56)
+#define DMA2_Channel2_IRQn						((irq_t) 57)
+#define DMA2_Channel3_IRQn						((irq_t) 58)
+#define DMA2_Channel4_5_IRQn					((irq_t) 59)
+#define ETH_IRQn								((irq_t) 61)
+#define ETH_WakeUp_IRQn							((irq_t) 62)
+#define CAN2_TX_IRQn							((irq_t) 63)
+#define CAN2_RX0_IRQn							((irq_t) 64)
+#define CAN2_RX1_IRQn							((irq_t) 65)
+#define CAN2_SCE_IRQn							((irq_t) 66)
+#define OTG_FS_IRQn								((irq_t) 67)
+
+/*********************************************** IRQn MACROS ***********************************************/
 
 /*********************************************** I2C MACROS ***********************************************/
 // I2C Speed

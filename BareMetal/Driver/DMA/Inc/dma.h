@@ -1,4 +1,12 @@
-// Header Guards
+/**
+ * @file dma.h
+ * @author Shrey Shah
+ * @brief DMA API Driver
+ * @version 1.0
+ * @date 04-10-2025
+ */
+
+ // Header Guards
 #ifndef __DMA_H__
 #define __DMA_H__
 
@@ -6,7 +14,7 @@
 #include "reg_map.h"
 #include "nvic.h"		// IRQ
 
-
+#ifdef __OLD_DMA_METHOD__
 #define DMA_I2C1_TX_Config()				DMA_Config(&DMA_I2C1_TX_Configuration)
 
 //------------------------------------------------------------------------------
@@ -245,5 +253,6 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance);
  * @param[in] instance DMA Configuration Structure
  */
 void DMA_Load_Default_MEM2PER(dma_config_t* instance);
+#endif /* __OLD_DMA_METHOD__ */
 
 #endif /* __DMA_H__ */
