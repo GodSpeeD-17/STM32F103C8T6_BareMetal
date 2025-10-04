@@ -8,7 +8,7 @@
 
  /*
 ===============================================================================
-                            DMA THEORY REFERENCE
+							DMA THEORY REFERENCE
 ===============================================================================
 
 DMA (Direct Memory Access) is a hardware engine that moves data directly
@@ -39,9 +39,9 @@ CCR BITFIELDS
 - HTIE   : Half Transfer interrupt enable.
 - TEIE   : Transfer Error interrupt enable.
 - DIR    : Transfer direction.
-           0 = Peripheral → Memory
-           1 = Memory → Peripheral
-           In MEM2MEM mode: selects which endpoint is source/destination.
+		   0 = Peripheral → Memory
+		   1 = Memory → Peripheral
+		   In MEM2MEM mode: selects which endpoint is source/destination.
 - CIRC   : Circular mode (auto-reload NDTR when it hits zero).
 - PINC   : Increment peripheral address after each transfer.
 - MINC   : Increment memory address after each transfer.
@@ -109,11 +109,87 @@ extern "C" {
 
 // ---- Includes ---- //
 #include "nvic.h"
-#include "reg_map.h"
 
-// --- Configuration Structure --- //
+// --- Data Type Definitions --- //
+typedef uint8_t dma_channel_priority_t;
+typedef uint8_t dma_transfer_dir_t;
+typedef uint8_t dma_endpoint_data_size_t;
+typedef uint8_t dma_endpoint_address_increment_t;
+typedef uint8_t dma_circular_mode_t;
+typedef uint8_t dma_mem2mem_mode_t;
+
+// --- DMA Transfer Direction --- //
+#define DMA_DIR_PERIPHERAL_TO_MEMORY				((dma_transfer_dir_t) 0x00)
+#define DMA_DIR_MEMORY_TO_PERIPHERAL				((dma_transfer_dir_t) 0x01)
+#define DMA_DIR_MEMORY_TO_MEMEORY					((dma_transfer_dir_t) 0x02)
+
+// --- DMA Priority levels --- //
+#define DMA_PRIORITY_LOW							((dma_channel_priority_t) 0x00)
+#define DMA_PRIORITY_MEDIUM							((dma_channel_priority_t) 0x01)
+#define DMA_PRIORITY_HIGH							((dma_channel_priority_t) 0x02)
+#define DMA_PRIORITY_VERY_HIGH						((dma_channel_priority_t) 0x03)
+
+// --- DMA Circular Mode --- //
+#define DMA_MODE_CIRCULAR_DISABLE					((dma_circular_mode_t) 0x00)
+#define DMA_MODE_CIRCULAR_ENABLE					((dma_circular_mode_t) 0x01)
+
+// --- DMA MEM2MEM Mode --- //
+#define DMA_MODE_MEM2MEM_DISABLE					((dma_mem2mem_mode_t) 0x00)
+#define DMA_MODE_MEM2MEM_ENABLE						((dma_mem2mem_mode_t) 0x01)
+
+/**
+ * @brief DMA Endpoint Configuration Structure
+ * @note Provides configuration for data size & address increment
+ */
 typedef struct {
+	// Data Size
+	dma_endpoint_data_size_t size: 2;
+	// Increment Address
+	dma_endpoint_address_increment_t increment: 1;
+} dma_endpoint_t;
 
+/**
+ * @brief DMA Mode Configuration Structure
+ * @note Provides mode configuration for Circular & `MEM2MEM` Mode
+ */
+typedef struct {
+	// Circular Mode
+	dma_circular_mode_t circular: 1;
+	// Memeory to Memory Transfer Mode
+	dma_mem2mem_mode_t mem2mem: 1;
+} dma_mode_t;
+
+//TODO: <<<< Optimize naming ????
+/**
+ * @brief DMA Transfer Configuration Structure
+ * @note Defines the memory and peripheral pointers and the transfer length
+ */
+typedef struct {
+	// Peripheral address
+	void* peripheral;
+	// Memory address
+	void* memory;
+	// Number of data items to transfer (max 65535)
+	uint16_t size;
+} dma_transfer_config_t;
+
+/**
+ * @brief DMA Configuration Structure
+ * @note Controls transfer direction, priority, and addressing
+ */
+typedef struct {
+	// Channel priority level
+	dma_channel_priority_t priority: 2;
+	// Transfer direction
+	dma_transfer_dir_t direction: 1;
+	// Source Descriptor
+	dma_endpoint_t memory;
+	// Destination Descriptor
+	dma_endpoint_t peripheral;
+	// DMA Mode Configuration
+	dma_mode_t mode;
+	// Transfer Configuration
+	dma_transfer_config_t transfer;
 } dma_config_t;
 
 #ifdef __cplusplus

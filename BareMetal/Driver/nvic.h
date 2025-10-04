@@ -259,7 +259,7 @@ __STATIC_INLINE__ void NVIC_ConfigPriority(irq_t IRQn, priority_t priority, sub_
  * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__STATIC_INLINE__ void NVIC_IRQ_Enable(uint8_t IRQn){
+__STATIC_INLINE__ void NVIC_IRQEnable(uint8_t IRQn){
 	// Enable the IRQn
 	NVIC->ISER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
 }
@@ -269,7 +269,7 @@ __STATIC_INLINE__ void NVIC_IRQ_Enable(uint8_t IRQn){
  * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__STATIC_INLINE__ void NVIC_IRQ_Disable(uint8_t IRQn){
+__STATIC_INLINE__ void NVIC_IRQDisable(uint8_t IRQn){
 	// Disable the IRQn
 	NVIC->ICER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
 }
@@ -278,7 +278,7 @@ __STATIC_INLINE__ void NVIC_IRQ_Disable(uint8_t IRQn){
  * @brief Software IRQ Trigger
  * @param IRQn The Interrupt Number
  */
-__STATIC_INLINE__ void NVIC_IRQ_Software_Trigger(uint8_t IRQn){
+__STATIC_INLINE__ void NVIC_IRQ_SoftwareTrigger(uint8_t IRQn){
 	// Set Pending Register
 	NVIC->ISPR[(IRQn >> 5)] |= (uint32_t) (1 << (IRQn & 0x1F));
 }

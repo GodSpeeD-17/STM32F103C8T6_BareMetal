@@ -309,7 +309,7 @@ void TIM_IRQ_Enable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
 	// Update reg with calculation
 	reg = (((uint32_t)TIMx - (uint32_t)TIM2) >> 10);
 	// Enable NVIC Interrupt
-	NVIC_IRQ_Enable(TIMx_IRQn[reg]);
+	NVIC_IRQEnable(TIMx_IRQn[reg]);
 }
 
 /**
@@ -341,7 +341,7 @@ void TIM_IRQ_Disable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
 	// Update reg with calculation
 	reg = (((uint32_t)TIMx - (uint32_t)TIM2) >> 10);
 	// Enable NVIC Interrupt
-	NVIC_IRQ_Disable(TIMx_IRQn[reg]);
+	NVIC_IRQDisable(TIMx_IRQn[reg]);
 }
 
 /**

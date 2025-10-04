@@ -155,7 +155,7 @@ driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, con
 		GPIO_EXTI_MapPort(gpio, currentPinMask, &extiConfigReg[(currentPin >> 2)]);
 		AFIOExtiCRStatus |= (0x01 << (currentPin >> 2));
 		// Enable NVIC (Global) Interrupt
-		NVIC_IRQ_Enable(EXTI_IRQn[currentPin]);
+		NVIC_IRQEnable(EXTI_IRQn[currentPin]);
 		// Clear the current pin from the pin number
 		pinMask &= ~currentPinMask;
 	}
@@ -213,7 +213,7 @@ driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, c
 		GPIO_EXTI_UnmapPort(gpio, currentPinMask, &extiConfigReg[(currentPin >> 2)]);
 		AFIOExtiCRStatus |= (0x01 << (currentPin >> 2));
 		// Disable NVIC (Global) Interrupt
-		NVIC_IRQ_Disable(EXTI_IRQn[currentPin]);
+		NVIC_IRQDisable(EXTI_IRQn[currentPin]);
 		// Clear the current pin from the pin number
 		pinMask &= ~currentPinMask;
 	}
