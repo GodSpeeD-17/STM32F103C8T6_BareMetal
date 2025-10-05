@@ -16,12 +16,15 @@
 #include "reg_map.h"
 #include "rcc.h"
 
-/*********************************************** GPIO Port ***********************************************/
-/**
- * @brief GPIO Port TypeDef
- * @note Used to specify GPIO Port
- */
+/*********************************************** GPIO DataType Definitions ***********************************************/
 typedef uint8_t gpio_port_t;
+typedef uint16_t gpio_pin_t;
+typedef uint8_t gpio_pin_mode_t;
+typedef uint8_t gpio_pin_cnf_t;
+typedef uint8_t gpio_exti_trigger_t;
+typedef uint8_t gpio_exti_port_t;
+
+/*********************************************** GPIO Port ***********************************************/
 #define GPIO_PORT_A								((gpio_port_t) 0x00)
 #define GPIO_PORT_B								((gpio_port_t) 0x01)
 #define GPIO_PORT_C								((gpio_port_t) 0x02)
@@ -31,11 +34,6 @@ typedef uint8_t gpio_port_t;
 #define GPIO_PORT_G								((gpio_port_t) 0x06)
 
 /*********************************************** GPIO Pin ***********************************************/
-/**
- * @brief GPIO Pin TypeDef
- * @note Used to specify GPIO Pin
- */
-typedef uint16_t gpio_pin_t;
 #define GPIO_PIN_0								((gpio_pin_t) 0x0001)
 #define GPIO_PIN_1								((gpio_pin_t) 0x0002)
 #define GPIO_PIN_2								((gpio_pin_t) 0x0004)
@@ -56,22 +54,12 @@ typedef uint16_t gpio_pin_t;
 #define GPIO_PIN_NONE							((gpio_pin_t) 0x0000) 
 
 /*********************************************** GPIO Pin Mode ***********************************************/
-/**
- * @brief GPIO Pin Mode TypeDef
- * @note Used to specify the mode of a pin
- */
-typedef uint8_t gpio_pin_mode_t;
 #define	GPIO_MODE_INPUT 						((gpio_pin_mode_t) 0x00)
 #define	GPIO_MODE_OUTPUT_10MHz 					((gpio_pin_mode_t) 0x01)
 #define	GPIO_MODE_OUTPUT_2MHz 					((gpio_pin_mode_t) 0x02)
 #define	GPIO_MODE_OUTPUT_50MHz 					((gpio_pin_mode_t) 0x03)
 
 /*********************************************** GPIO Pin Configuration ***********************************************/
-/**
- * @brief GPIO Pin Configuration TypeDef
- * @note Used to configure the pin
- */
-typedef uint8_t gpio_pin_cnf_t;
 #define GPIO_PIN_CNF_IN_ANALOG 					((gpio_pin_cnf_t) 0x00)
 #define GPIO_PIN_CNF_IN_FLOAT 					((gpio_pin_cnf_t) 0x01)
 #define GPIO_PIN_CNF_IN_PULL_DOWN 				((gpio_pin_cnf_t) 0x02)
@@ -82,21 +70,11 @@ typedef uint8_t gpio_pin_cnf_t;
 #define GPIO_PIN_CNF_OUT_AF_OD 					((gpio_pin_cnf_t) 0x03)
 
 /*********************************************** GPIO Pin Interrupt Trigger ***********************************************/
-/**
- * @brief External Interrupt Trigger TypeDef
- * @note Used to configure the external Interrupt Trigger for the pin
- */
-typedef uint8_t gpio_exti_trigger_t;
 #define GPIO_EXTI_TRIGGER_FALLING 				((gpio_exti_trigger_t) 0x01)
 #define GPIO_EXTI_TRIGGER_RISING 				((gpio_exti_trigger_t) 0x02)
 #define GPIO_EXTI_TRIGGER_BOTH 					(GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
 
 /*********************************************** GPIO Port Interrupt Trigger ***********************************************/
-/**
- * @brief External Interrupt Source Port TypeDef
- * @note Used to configure the Source Port for Interrupt for the pin
- */
-typedef uint8_t gpio_exti_port_t;
 #define GPIO_EXTI_PORT_A 						((gpio_exti_port_t) 0x00)
 #define GPIO_EXTI_PORT_B 						((gpio_exti_port_t) 0x01)
 #define GPIO_EXTI_PORT_C 						((gpio_exti_port_t) 0x02)

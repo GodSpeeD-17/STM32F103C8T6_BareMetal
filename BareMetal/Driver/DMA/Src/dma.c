@@ -1,6 +1,54 @@
-// Library
+// --- Includes --- //
 #include "dma.h"
 
+/**
+ * @brief DMA Channel Configuration
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @param dmaConfig Pointer to DMA Channel Configuration Structure
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_channel_config_t* const dmaConfig)
+{	
+	// Start the DMA Channel
+	_DMA_startChannel(dmaChannel);
+	// Read CCR
+	uint32_t reg = _DMA_getChannelConfiguration(dmaChannel);
+	// Endpoint Configuration
+	_DMA_configEndPoint(dmaConfig->peripheral, dmaConfig->memory, &reg);
+	// Channel Mode Configuration
+	_DMA_configChannelMode(&dmaConfig->config, &reg);
+	// Update the CCR Register_DMA_configChannelMode
+	_DMA_setChannelConfiguration(dmaChannel, reg);
+	// Return Success
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief Configures transfer for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaTransfer DMA Transfer
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaTransfer)
+{
+	// DMA Disable Channel
+	_DMA_disableChannel(dmaChannel);
+	// DMA Channel Configuration
+	_DMA_configTransfer(dmaChannel, dmaTransfer);
+	// Enable DMA Channel
+	_DMA_enableChannel(dmaChannel);
+	// Return Success
+	return DRIVER_SUCCESS;
+}
+
+
+
+
+#ifdef ____OLD_DMA_METHOD__
 /**
  * @brief DMA Configuration
  * @param[in] instance DMA Configuration Structure
@@ -149,3 +197,4 @@ void DMA_Load_Default_MEM2PER(dma_config_t* instance){
 	instance->channel.priority = DMAx_PRIORITY_HIGH;	
 }
 
+#endif /* __OLD_DMA_METHOD__ */

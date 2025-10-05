@@ -3,9 +3,14 @@
 
 /*********************************************** Lookup Table ***********************************************/
 // GPIO Port Lookup Table
-const GPIO_TypeDef* const __gpioDriverMapping__[7] = {
-	GPIOA, GPIOB, GPIOC, 
-	GPIOD, GPIOE, GPIOF, 
+const GPIO_TypeDef* const __gpioDriverMapping__[7] = 
+{
+	GPIOA, 
+	GPIOB, 
+	GPIOC, 
+	GPIOD, 
+	GPIOE, 
+	GPIOF, 
 	GPIOG
 };
 

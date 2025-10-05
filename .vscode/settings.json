@@ -366,5 +366,5 @@
         "utility": "c",
         "startup.h": "c",
         "cstdint": "c"
-    }
+	},
 }

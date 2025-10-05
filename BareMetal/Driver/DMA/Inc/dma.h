@@ -2,17 +2,71 @@
  * @file dma.h
  * @author Shrey Shah
  * @brief DMA API Driver
- * @version 1.0
- * @date 04-10-2025
+ * @version 1.1
+ * @date 05-10-2025
  */
 
  // Header Guards
-#ifndef __DMA_H__
-#define __DMA_H__
+#ifndef DRIVER_DMA_H
+#define DRIVER_DMA_H
 
-// Dependency
-#include "reg_map.h"
-#include "nvic.h"		// IRQ
+// --- Includes ---
+#include "dma_low_level.h"
+
+/**
+ * @brief DMA Channel Configuration
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @param dmaConfig Pointer to DMA Channel Configuration Structure
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_channel_config_t* const dmaConfig);
+
+/**
+ * @brief Configures transfer for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaTransfer DMA Transfer
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaTransfer);
+
+/**
+ * @brief Enable IRQ for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ Any logical combination of:
+ * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_TRANSFER_ERROR`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+__STATIC_INLINE__ driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+{
+	_DMA_enableIRQ(dmaChannel, dmaIRQ);
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief Disable IRQ for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ Any logical combination of:
+ * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_TRANSFER_ERROR`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+__STATIC_INLINE__ driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+{
+	_DMA_disableIRQ(dmaChannel, dmaIRQ);
+	return DRIVER_SUCCESS;
+}
+
 
 #ifdef __OLD_DMA_METHOD__
 #define DMA_I2C1_TX_Config()				DMA_Config(&DMA_I2C1_TX_Configuration)
@@ -255,4 +309,4 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance);
 void DMA_Load_Default_MEM2PER(dma_config_t* instance);
 #endif /* __OLD_DMA_METHOD__ */
 
-#endif /* __DMA_H__ */
+#endif /* DRIVER_DMA_H */
