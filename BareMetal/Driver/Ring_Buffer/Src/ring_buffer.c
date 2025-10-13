@@ -25,7 +25,8 @@
  */
 uint8_t Ring_Buffer_Enqueue(ring_buffer_t* ring_buff, uint8_t src_data){
 	// Ring Buffer is full
-	if(Ring_Buffer_Is_Full(ring_buff) != 0x01){
+	if(Ring_Buffer_Is_Full(ring_buff) != 0x01)
+	{
 		// No space available in the ring buffer
 		return 0x00;
 	}

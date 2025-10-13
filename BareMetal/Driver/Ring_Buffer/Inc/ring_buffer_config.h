@@ -18,16 +18,20 @@
 #include <string.h>
 #include "reg_map.h"
 
+// Typedefs
+typedef uint16_t ring_buffer_size_t;
+typedef uint16_t ring_buffer_index_t;
+
 // Ring Buffer Structure
 typedef struct {
 	// Pointer to the buffer
 	uint8_t* buffer;
 	// Index of the head of the buffer
-	uint16_t head;
+	ring_buffer_index_t head;
 	// Index of the tail of the buffer
-	uint16_t tail;
-    // Size of the buffer
-    uint16_t size;
+	ring_buffer_index_t tail;
+	// Size of the buffer
+	ring_buffer_size_t size;
 } ring_buffer_t;
 
 /**

@@ -94,7 +94,7 @@ typedef enum
 #include "stm32f1xx_nvic.h"
 #include "stm32f1xx_scb.h"
 #include "systick_reg_map.h"
-#include "wwdg_reg_map.h"
+#include "wdg_reg_map.h"
 #endif /* __CORTEX_M3__ */
 /*********************************************** ARM Cortex-M3 ***********************************************/
 
@@ -125,6 +125,8 @@ typedef enum
 #define FLASH_BASE_ADDR 						0x40022000
 #define DMA1_BASE_ADDR 							(AHB_BASE_ADDR + 0x00008000)
 #define DMA2_BASE_ADDR 							(DMA1_BASE_ADDR + 0x00000400)
+#define WWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00002000)
+#define IWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00003000)
 
 // Address Mapping
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
@@ -159,6 +161,8 @@ typedef enum
 #define EXTI 									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + 0x00000400))
 #define I2C1 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005400))
 #define I2C2 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005800))
+#define IWDG									((IWDG_TypeDef *) IWDG_BASE_ADDR)
+#define WWDG									((WWDG_TypeDef *) WWDG_BASE_ADDR)
 #define DMA1 									((DMA_TypeDef *) DMA1_BASE_ADDR)
 #define DMA1_Channel1 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[0]))
 #define DMA1_Channel2 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[1]))
