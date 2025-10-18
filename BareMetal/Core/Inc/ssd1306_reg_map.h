@@ -301,4 +301,10 @@ static const uint8_t SSD1306_initCmd[SSD1306_INIT_CMD_SIZE] = {
 	SSD1306_CMD_DISPLAY_ON
 };
 /* ------------------------------------------------------------------------------------ */
+
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* SSD1306_REG_MAP_H_ */

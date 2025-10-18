@@ -54,4 +54,9 @@ typedef struct {
 	uint32_t AFSR;
 } SCB_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_SCB_H__ */

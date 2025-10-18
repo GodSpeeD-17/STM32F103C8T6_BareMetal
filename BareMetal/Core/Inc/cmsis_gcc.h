@@ -25,6 +25,11 @@
 #ifndef CMSIS_GCC
 #define CMSIS_GCC
 
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* uint32_t */
 #include <stdint.h>
 
@@ -2084,5 +2089,10 @@ __STATIC_FORCEINLINE int32_t __SMMLA (int32_t op1, int32_t op2, int32_t op3)
 
 
 #pragma GCC diagnostic pop
+
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* CMSIS_GCC */

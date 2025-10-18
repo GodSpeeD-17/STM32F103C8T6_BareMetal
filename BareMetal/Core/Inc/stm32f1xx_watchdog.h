@@ -119,6 +119,7 @@ typedef struct {
 	} SR;
 } WWDG_TypeDef;
 
+// C++ Safeguards
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -277,4 +277,9 @@ typedef struct {
     volatile uint32_t DMAR;
 } Adv_TIM_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_ADVTIM_H_ */

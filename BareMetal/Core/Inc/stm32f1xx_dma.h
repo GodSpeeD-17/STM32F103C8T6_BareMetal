@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef STM32F1XX_DMA_H__
-#define STM32F1XX_DMA_H__
+#ifndef STM32F1XX_DMA_H_
+#define STM32F1XX_DMA_H_
 
 // C++ Safeguards
 #ifdef __cplusplus
@@ -241,4 +241,4 @@ typedef struct {
     DMA_Channel_TypeDef CHANNEL[7];
 } DMA_TypeDef;
 
-#endif /* STM32F1XX_DMA_H__ */
+#endif /* STM32F1XX_DMA_H_ */

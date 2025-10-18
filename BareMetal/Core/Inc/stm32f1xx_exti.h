@@ -1,6 +1,11 @@
 // Header Guards
-#ifndef STM32F1XX_EXTI_H__
-#define STM32F1XX_EXTI_H__
+#ifndef STM32F1XX_EXTI_H_
+#define STM32F1XX_EXTI_H_
+
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 // Includes
 #include <stdint.h>
@@ -184,4 +189,9 @@ typedef struct
     } PR;
 } EXTI_REG_STRUCT;
 
-#endif /* STM32F1XX_EXTI_H__ */
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* STM32F1XX_EXTI_H_ */

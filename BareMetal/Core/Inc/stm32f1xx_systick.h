@@ -47,4 +47,9 @@ typedef struct {
 	} CALIB;
 } SysTick_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_SYSTICK_H__ */ 

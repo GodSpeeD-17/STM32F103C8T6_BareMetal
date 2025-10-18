@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef STM32F1XX_ADC_H__
-#define STM32F1XX_ADC_H__
+#ifndef STM32F1XX_ADC_H_
+#define STM32F1XX_ADC_H_
 
 // C++ Safeguards
 #ifdef __cplusplus
@@ -338,4 +338,9 @@ typedef struct
 	} DR;
 } ADC_TypeDef;
 
-#endif /* STM32F1XX_ADC_H__ */
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* STM32F1XX_ADC_H_ */

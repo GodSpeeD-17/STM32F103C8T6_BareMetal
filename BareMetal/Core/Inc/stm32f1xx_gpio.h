@@ -203,4 +203,9 @@ typedef struct {
     } LCKR;
 } GPIO_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_GPIO_H_ */

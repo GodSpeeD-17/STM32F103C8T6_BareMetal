@@ -2,8 +2,13 @@
 #ifndef STM32F1XX_FLASH_H_
 #define STM32F1XX_FLASH_H_
 
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 // Includes
-#include "common.h"
+#include <stdint.h>
 
 // Flash Structure
 typedef struct {
@@ -77,5 +82,10 @@ typedef struct {
         } BIT;
     } WRPR;
 } FLASH_TypeDef;
+
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* STM32F1XX_FLASH_H_ */

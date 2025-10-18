@@ -2,8 +2,13 @@
 #ifndef ARM_REG_MAP_H__
 #define ARM_REG_MAP_H__
 
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /*********************************************** Custom Declaration ***********************************************/ // Common Libraries
-#include "common.h"
+#include <stdint.h>
 /*********************************************** Custom Declaration ***********************************************/ // Common Libraries
 
 #ifdef CORTEX_M3__
@@ -68,5 +73,10 @@
 // 	} SCR;
 // } SCR_TypeDef;
 #endif /* CORTEX_M3__ */
+
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* ARM_REG_MAP_H__ */

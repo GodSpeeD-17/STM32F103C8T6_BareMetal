@@ -2,6 +2,11 @@
 #ifndef STM32F1XX_HELPER_H__
 #define STM32F1XX_HELPER_H__
 
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 // Includes
 #include <stdint.h>
 
@@ -9751,5 +9756,10 @@
 #define RCC_HSE_MAX        16000000U
 
 #define RCC_MAX_FREQUENCY  72000000U
+
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* STM32F1XX_HELPER_H__ */ 

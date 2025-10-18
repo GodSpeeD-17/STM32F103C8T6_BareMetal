@@ -107,4 +107,9 @@ typedef struct {
     } EXTICR4;
 } AFIO_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_AFIO_H_ */

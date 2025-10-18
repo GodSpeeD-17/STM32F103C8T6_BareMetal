@@ -136,6 +136,7 @@ typedef struct {
 } USART_TypeDef;
 
 
+// C++ Safeguards
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

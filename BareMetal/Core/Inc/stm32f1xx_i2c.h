@@ -171,4 +171,9 @@ typedef struct {
 	} TRISE;
 } I2C_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_I2C_H_ */
