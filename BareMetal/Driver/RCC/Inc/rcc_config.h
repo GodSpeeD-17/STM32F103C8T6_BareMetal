@@ -260,7 +260,7 @@ extern const rcc_bus_prescaler_t __apbPrescalerDriverMapping__[4];
 /**
  * @brief Enables Clock for Alternate Function (AFIO)
  */
-__STATIC_INLINE__ void RCC_AFIO_Clk_Enable(void){
+__STATIC_FORCEINLINE void RCC_AFIO_Clk_Enable(void){
 	// Enable AFIO Clock
 	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
 }
@@ -268,7 +268,7 @@ __STATIC_INLINE__ void RCC_AFIO_Clk_Enable(void){
 /**
  * @brief Disables Clock for Alternate Function (AFIO)
  */
-__STATIC_INLINE__ void RCC_AFIO_Clk_Disable(void){
+__STATIC_FORCEINLINE void RCC_AFIO_Clk_Disable(void){
 	// Disable AFIO Clock
 	RCC->APB2ENR.REG &= ~RCC_APB2ENR_AFIOEN;
 }
@@ -277,7 +277,7 @@ __STATIC_INLINE__ void RCC_AFIO_Clk_Disable(void){
  * @brief Turn ON High Speed External Clock (HSE)
  * @note Blocking Function waits for Clock to be ready
  */
-__STATIC_INLINE__ void RCC_HSE_ON(void){
+__STATIC_FORCEINLINE void RCC_HSE_ON(void){
 	// Turn ON HSE
 	RCC->CR.REG |= RCC_CR_HSEON;
 	// Blocking: Wait for Clock to be ready
@@ -288,7 +288,7 @@ __STATIC_INLINE__ void RCC_HSE_ON(void){
  * @brief Turn OFF High Speed External Clock (HSE)
  * @note Blocking Function waits for Clock to be OFF
  */
-__STATIC_INLINE__ void RCC_HSE_OFF(void){
+__STATIC_FORCEINLINE void RCC_HSE_OFF(void){
 	// Turn OFF HSE
 	RCC->CR.REG &= ~RCC_CR_HSEON;
 	// Blocking: Wait for Clock to be OFF
@@ -299,7 +299,7 @@ __STATIC_INLINE__ void RCC_HSE_OFF(void){
  * @brief Turn On Phase Lock Loop (PLL)
  * @note Blocking Function waits for Clock to be ready
  */
-__STATIC_INLINE__ void RCC_PLL_ON(void){
+__STATIC_FORCEINLINE void RCC_PLL_ON(void){
 	// Turn ON PLL
 	RCC->CR.REG |= RCC_CR_PLLON;
 	// Blocking: Wait for Clock to be ready
@@ -310,7 +310,7 @@ __STATIC_INLINE__ void RCC_PLL_ON(void){
  * @brief Turn OFF Phase Lock Loop (PLL)
  * @note Blocking Function waits for Clock to be OFF
  */
-__STATIC_INLINE__ void RCC_PLL_OFF(void){
+__STATIC_FORCEINLINE void RCC_PLL_OFF(void){
 	// Turn OFF PLL
 	RCC->CR.REG &= ~RCC_CR_PLLON;
 	// Blocking: Wait for Clock to be OFF
@@ -322,7 +322,7 @@ __STATIC_INLINE__ void RCC_PLL_OFF(void){
  * @param systemClk System Clock Source: `RCC_SYS_CLK_HSI`, `RCC_SYS_CLK_HSE`, `RCC_SYS_CLK_PLL`
  * @note Blocking Function waits for confirmation from Hardware regarding status 
  */
-__STATIC_INLINE__ void RCC_SysClkSrc_Set(const system_clock_t systemClk){
+__STATIC_FORCEINLINE void RCC_SysClkSrc_Set(const system_clock_t systemClk){
 	// Update the Register
 	RCC->CFGR.REG |= (uint32_t)(((systemClk & 0x03) << RCC_CFGR_SW_Pos));
 	// Blocking: Waits for hardware confirmation
@@ -333,7 +333,7 @@ __STATIC_INLINE__ void RCC_SysClkSrc_Set(const system_clock_t systemClk){
  * @brief Retrieves the System Clock Source
  * @note Reads the `RCC->CFGR.REG`
  */
-__STATIC_INLINE__ system_clock_t RCC_SysClkSrc_Get(void){
+__STATIC_FORCEINLINE system_clock_t RCC_SysClkSrc_Get(void){
 	// System Clock Source (feedback from hardware)
 	return ((system_clock_t) ((RCC->CFGR.REG & RCC_CFGR_SWS) >> RCC_CFGR_SWS_Pos));
 }
@@ -343,7 +343,7 @@ __STATIC_INLINE__ system_clock_t RCC_SysClkSrc_Get(void){
  * @note Reads the `RCC->CFGR.REG`
  * @returns PLL Clock Source
  */
-__STATIC_INLINE__ rcc_pll_src_t RCC_PLLClkSrc_Get(void){
+__STATIC_FORCEINLINE rcc_pll_src_t RCC_PLLClkSrc_Get(void){
 	// Returns PLL Clock Source
 	return ((rcc_pll_src_t) ((RCC->CFGR.REG & RCC_CFGR_PLLSRC) >> RCC_CFGR_PLLSRC_Pos));
 }
@@ -353,7 +353,7 @@ __STATIC_INLINE__ rcc_pll_src_t RCC_PLLClkSrc_Get(void){
  * @return Prescaler in form of bits to be right shifted for PLL External Clock Source Prescaler 
  * @note Takes care of only: `RCC_PLL_SRC_HSE`
  */
-__STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLExtClkSrcPscRightShift_Get(void){
+__STATIC_FORCEINLINE rcc_pll_src_prescaler_t RCC_PLLExtClkSrcPscRightShift_Get(void){
 	// Return the External Clock Src Prescaler
 	return ((rcc_pll_src_prescaler_t) ((RCC->CFGR.REG & RCC_CFGR_PLLXTPRE) >> RCC_CFGR_PLLXTPRE_Pos));
 }
@@ -363,7 +363,7 @@ __STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLExtClkSrcPscRightShift_Get(void
  * @returns Prescaler in form of bits to be right shifted for PLL Clock
  * @note Takes care of both the cases: `RCC_PLL_SRC_HSI`, `RCC_PLL_SRC_HSE`
  */
-__STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLClkSrcPscRightShift_Get(void){
+__STATIC_FORCEINLINE rcc_pll_src_prescaler_t RCC_PLLClkSrcPscRightShift_Get(void){
 	// Get PLL Clock Source
 	rcc_pll_src_t rccPLLSrc = RCC_PLLClkSrc_Get();
 	// Final Prescaler Value
@@ -390,7 +390,7 @@ __STATIC_INLINE__ rcc_pll_src_prescaler_t RCC_PLLClkSrcPscRightShift_Get(void){
  * @return RCC Multiplication Factor
  * @note Reads `RCC->CFGR.REG`
  */
-__STATIC_INLINE__ rcc_pll_mul_t RCC_PLLMulFactor_Get(void){
+__STATIC_FORCEINLINE rcc_pll_mul_t RCC_PLLMulFactor_Get(void){
 	// Retrives the PLL Multiplication Factor
 	return ((rcc_pll_mul_t) (((RCC->CFGR.REG & RCC_CFGR_PLLMULL) >> RCC_CFGR_PLLMULL_Pos) + 2));
 }
@@ -399,7 +399,7 @@ __STATIC_INLINE__ rcc_pll_mul_t RCC_PLLMulFactor_Get(void){
  * @brief Retrieves the AHB Prescaler (in form of bits to be right shifted)
  * @return Prescaler in form of bits to be right shifted for AHB Clock
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_AHBPscRightShift_Get__(void){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t __RCC_AHBPscRightShift_Get__(void){
 	// AHB Prescaler Index for `__ahbPrescalerDriverMapping__[8]`
 	rcc_bus_prescaler_t index = RCC_AHB_DIV_1;
 	// Extract AHB Prescaler Bit Value
@@ -417,7 +417,7 @@ __STATIC_INLINE__ rcc_bus_prescaler_t __RCC_AHBPscRightShift_Get__(void){
  * @brief Retrieves the APB1 Prescaler (in form of bits to be right shifted)
  * @return Prescaler in form of bits to be right shifted for APB1 Clock
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_APB1PscRightShift_Get__(void){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t __RCC_APB1PscRightShift_Get__(void){
 	// APB1 Prescaler Index for `__apbPrescalerDriverMapping__[4]`
 	rcc_bus_prescaler_t index = RCC_APB1_DIV_1;
 	// Extract APB1 Prescaler Bit Value
@@ -435,7 +435,7 @@ __STATIC_INLINE__ rcc_bus_prescaler_t __RCC_APB1PscRightShift_Get__(void){
  * @brief Retrieves the APB2 Prescaler (in form of bits to be right shifted)
  * @return Prescaler in form of bits to be right shifted for APB2 Clock
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t __RCC_APB2PscRightShift_Get__(void){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t __RCC_APB2PscRightShift_Get__(void){
 	// APB2 Prescaler Index for `__apbPrescalerDriverMapping__[4]`
 	rcc_bus_prescaler_t index = RCC_APB2_DIV_1;
 	// Extract APB2 Prescaler Bit Value
@@ -491,7 +491,7 @@ driver_status_t RCC_APB2ClockFreq_Update(freq_t* apb2ClockFrequencyHz);
  * @param coreClockFrequencyHz Core Clock frequency
  * @param ahbClockFrequencyHz Pointer to variable which shall hold the AHB Clock frequency
  */
-__STATIC_INLINE__ void RCC_AHBClockFreqFromCoreClock_Update(const freq_t coreClockFrequencyHz, freq_t* ahbClockFrequencyHz){
+__STATIC_FORCEINLINE void RCC_AHBClockFreqFromCoreClock_Update(const freq_t coreClockFrequencyHz, freq_t* ahbClockFrequencyHz){
 	// Account for AHB Prescaler
 	*ahbClockFrequencyHz = (coreClockFrequencyHz >> __RCC_AHBPscRightShift_Get__());
 }
@@ -501,7 +501,7 @@ __STATIC_INLINE__ void RCC_AHBClockFreqFromCoreClock_Update(const freq_t coreClo
  * @param ahbClockFrequencyHz AHB Clock frequency
  * @param apb1ClockFrequencyHz Pointer to variable which shall hold the APB1 Clock frequency
  */
-__STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb1ClockFrequencyHz){
+__STATIC_FORCEINLINE void RCC_APB1ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb1ClockFrequencyHz){
 	// Account for APB1 Prescaler
 	*apb1ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB1PscRightShift_Get__());
 }
@@ -511,7 +511,7 @@ __STATIC_INLINE__ void RCC_APB1ClockFreqFromAHBClock_Update(const freq_t ahbCloc
  * @param ahbClockFrequencyHz AHB Clock frequency
  * @param apb2ClockFrequencyHz Pointer to variable which shall hold the APB2 Clock frequency
  */
-__STATIC_INLINE__ void RCC_APB2ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb2ClockFrequencyHz){
+__STATIC_FORCEINLINE void RCC_APB2ClockFreqFromAHBClock_Update(const freq_t ahbClockFrequencyHz, freq_t* apb2ClockFrequencyHz){
 	// Account for APB2 Prescaler
 	*apb2ClockFrequencyHz = (ahbClockFrequencyHz >> __RCC_APB2PscRightShift_Get__());
 }
@@ -530,7 +530,7 @@ driver_status_t RCC_ClockFreq_Update(rcc_clk_freq_t* clkFreq);
  * @param prescaler Refer `RCC_AHB_DIV_*`
  * @return Computed Prescaler Value
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t RCC_AHBComputePrescaler(const rcc_bus_prescaler_t prescaler){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_AHBComputePrescaler(const rcc_bus_prescaler_t prescaler){
 	return ((rcc_bus_prescaler_t) (0x01 << __RCC_AHBPscRightShift_Get__()));
 }
 
@@ -539,7 +539,7 @@ __STATIC_INLINE__ rcc_bus_prescaler_t RCC_AHBComputePrescaler(const rcc_bus_pres
  * @param prescaler Refer `RCC_APB1_DIV_*`
  * @return Computed Prescaler Value
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB1ComputePrescaler(const rcc_bus_prescaler_t prescaler){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_APB1ComputePrescaler(const rcc_bus_prescaler_t prescaler){
 	return ((rcc_bus_prescaler_t) (0x01 << __RCC_APB1PscRightShift_Get__()));
 }
 
@@ -548,7 +548,7 @@ __STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB1ComputePrescaler(const rcc_bus_pre
  * @param prescaler Refer `RCC_APB2_DIV_*`
  * @return Computed Prescaler Value
  */
-__STATIC_INLINE__ rcc_bus_prescaler_t RCC_APB2ComputePrescaler(const rcc_bus_prescaler_t prescaler){
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_APB2ComputePrescaler(const rcc_bus_prescaler_t prescaler){
 	return ((rcc_bus_prescaler_t) (0x01 << __RCC_APB2PscRightShift_Get__()));;
 }
 

@@ -74,7 +74,7 @@ uint16_t SSD1306_RB_Decode_Frame(ssd1306_config_t* ssd1306, uint8_t* buffer, con
  * @return 	- `0x00`: Failure
  * @return 	- `0x01`: Success  
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD(ssd1306_config_t* ssd1306, uint8_t command){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Encode_CMD(ssd1306_config_t* ssd1306, uint8_t command){
 	// Encode a Single Command
 	return (SSD1306_RB_Encode_Frame(ssd1306, 0x01, &command, 1));
 }
@@ -88,7 +88,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD(ssd1306_config_t* ssd1306, uint8
  * @return - `0x00`: Failure
  * @return - `0x01`: Success 
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD_Frame(ssd1306_config_t* ssd1306, const uint8_t* cmd_buffer, uint16_t cmd_len){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Encode_CMD_Frame(ssd1306_config_t* ssd1306, const uint8_t* cmd_buffer, uint16_t cmd_len){
 	// Encode the Command Frame
 	return (SSD1306_RB_Encode_Frame(ssd1306, 0x01, cmd_buffer, cmd_len));
 }
@@ -101,7 +101,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_CMD_Frame(ssd1306_config_t* ssd1306,
  * @return - `0x00`: Failure
  * @return - `0x01`: Success 
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data(ssd1306_config_t* ssd1306, uint8_t data){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Encode_Data(ssd1306_config_t* ssd1306, uint8_t data){
 	// Encode a Single Data
 	return (SSD1306_RB_Encode_Frame(ssd1306, 0x00, &data, 1));
 }
@@ -115,7 +115,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data(ssd1306_config_t* ssd1306, uint
  * @return - `0x00`: Failure
  * @return - `0x01`: Success 
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306, const uint8_t* data_buffer, uint16_t data_len){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306, const uint8_t* data_buffer, uint16_t data_len){
 	// Encode the Data Frame
 	return (SSD1306_RB_Encode_Frame(ssd1306, 0x00, data_buffer, data_len));
 }
@@ -127,7 +127,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Encode_Data_Frame(ssd1306_config_t* ssd1306
  * @return - `0x00`: Mismatch in Frame
  * @return - `0x01`: Frame Aligned
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
 	// Check if Tail is aligned with Frame Start
 	uint8_t tail = Ring_Buffer_Peek_Tail(&ssd1306->i2c_rb); 
 	return ((tail == SSD1306_CMD_INDICATOR) || (tail == SSD1306_DATA_INDICATOR));
@@ -139,7 +139,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Aligned(ssd1306_config_t* ssd1306){
  * @return Length of Local I2C Buffer required
  * @note Checks alignment of the Frame as well
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Frame_Get_Size(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Frame_Get_Size(ssd1306_config_t* ssd1306){
 	if(SSD1306_RB_Frame_Aligned(ssd1306) != 0x01){
 		// Failure
 		return 0x00;

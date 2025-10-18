@@ -65,7 +65,7 @@
  * @brief Occupies the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__STATIC_INLINE__ void SSD1306_I2C_Start(I2C_TypeDef* I2Cx){
+__STATIC_FORCEINLINE void SSD1306_I2C_Start(I2C_TypeDef* I2Cx){
 	// Local Variable
 	uint32_t temp = 0x00;
 	// Wait till bus is ready
@@ -90,7 +90,7 @@ __STATIC_INLINE__ void SSD1306_I2C_Start(I2C_TypeDef* I2Cx){
  * @param[in] isCMD 0: Data, 1: Command, else: data
  * @param[in] data Data to be sent
  */
-__STATIC_INLINE__ void SSD1306_writeByte(I2C_TypeDef* I2Cx, uint8_t isCMD, uint8_t data){
+__STATIC_FORCEINLINE void SSD1306_writeByte(I2C_TypeDef* I2Cx, uint8_t isCMD, uint8_t data){
 	
 	if(isCMD == 1){
 		// Command transmission
@@ -120,7 +120,7 @@ __STATIC_INLINE__ void SSD1306_writeByte(I2C_TypeDef* I2Cx, uint8_t isCMD, uint8
  * @param[in] array Pointer to array to be sent 
  * @param[in] arrayLength Length of array to be sent 
  */
-__STATIC_INLINE__ void SSD1306_writeBytes(I2C_TypeDef* I2Cx, uint8_t isCMD, uint8_t* array, uint16_t arrayLength){
+__STATIC_FORCEINLINE void SSD1306_writeBytes(I2C_TypeDef* I2Cx, uint8_t isCMD, uint8_t* array, uint16_t arrayLength){
 	
 	if(isCMD == 1){
 		// Command transmission
@@ -148,7 +148,7 @@ __STATIC_INLINE__ void SSD1306_writeBytes(I2C_TypeDef* I2Cx, uint8_t isCMD, uint
  * @brief Frees the I2C Bus
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__STATIC_INLINE__ void SSD1306_I2C_End(I2C_TypeDef* I2Cx){
+__STATIC_FORCEINLINE void SSD1306_I2C_End(I2C_TypeDef* I2Cx){
 	// Generate STOP condition
 	I2C_sendStop(I2Cx);
 	// Wait until STOP condition is generated
@@ -159,7 +159,7 @@ __STATIC_INLINE__ void SSD1306_I2C_End(I2C_TypeDef* I2Cx){
  * @brief Initializes the SSD1306 display
  * @param[in] I2Cx I2C Instance: `I2C1`, `I2C2`
  */
-__STATIC_INLINE__ void SSD1306_Init(I2C_TypeDef* I2Cx){
+__STATIC_FORCEINLINE void SSD1306_Init(I2C_TypeDef* I2Cx){
 	// Internal Array
 	SSD1306_I2C_cmdArray(I2Cx, SSD1306_initCmd, (sizeof(SSD1306_initCmd)/sizeof(SSD1306_initCmd[0])));
 }

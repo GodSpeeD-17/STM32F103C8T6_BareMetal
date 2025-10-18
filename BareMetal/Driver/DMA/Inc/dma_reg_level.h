@@ -1,4 +1,4 @@
-// Header Guards
+/*********************************************** Header Guards ***********************************************/
 #ifndef DMA_REG_LEVEL
 #define DMA_REG_LEVEL
 
@@ -30,7 +30,7 @@
  * @brief Enable DMA Clock
  * @param dmaX DMA Controller: `DMA1`/`DMA2`
  */
-__STATIC_INLINE__ void __DMA_enableClock(DMA_TypeDef* dmaX)
+__STATIC_FORCEINLINE void __DMA_enableClock(DMA_TypeDef* dmaX)
 {
 	if(dmaX == DMA1)
 	{
@@ -46,7 +46,7 @@ __STATIC_INLINE__ void __DMA_enableClock(DMA_TypeDef* dmaX)
  * @brief Disbale DMA Clock
  * @param dmaX DMA Controller: `DMA1`/`DMA2`
  */
-__STATIC_INLINE__ void __DMA_disableClock(DMA_TypeDef* dmaX)
+__STATIC_FORCEINLINE void __DMA_disableClock(DMA_TypeDef* dmaX)
 {
 	if(dmaX == DMA1)
 	{
@@ -62,7 +62,7 @@ __STATIC_INLINE__ void __DMA_disableClock(DMA_TypeDef* dmaX)
  * @brief Enable DMA Clock
  * @param dmaXChannelY DMA Channel: `DMAxChannelY`
  */
-__STATIC_INLINE__ void __DMA_enableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE void __DMA_enableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	__DMA_enableClock(GET_DMA_CONTROLLER(dmaXChannelY));
 }
@@ -71,7 +71,7 @@ __STATIC_INLINE__ void __DMA_enableClockFromChannel(DMA_Channel_TypeDef* dmaXCha
  * @brief Disbale DMA Clock
  * @param dmaXChannelY DMA Channel: `DMAxChannelY`
  */
-__STATIC_INLINE__ void __DMA_disableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE void __DMA_disableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	__DMA_disableClock(GET_DMA_CONTROLLER(dmaXChannelY));
 }
@@ -80,7 +80,7 @@ __STATIC_INLINE__ void __DMA_disableClockFromChannel(DMA_Channel_TypeDef* dmaXCh
  * @brief Enable DMA Channel
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  */
-__STATIC_INLINE__ void __DMA_enableChannel(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE void __DMA_enableChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	dmaXChannelY->CCR.REG |= DMA_CCR_EN;
 }
@@ -89,88 +89,90 @@ __STATIC_INLINE__ void __DMA_enableChannel(DMA_Channel_TypeDef* dmaXChannelY)
  * @brief Disable DMA Channel
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  */
-__STATIC_INLINE__ void __DMA_disableChannel(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE void __DMA_disableChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	dmaXChannelY->CCR.REG &= ~DMA_CCR_EN;
 }
 
 /**
- * @brief Read from CCR
+ * @brief Read from Channel Configuration Register (CCR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @return CCR value
  */
-__STATIC_INLINE__ uint32_t __DMA_getCCR(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE uint32_t __DMA_getChannelCCR(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	return dmaXChannelY->CCR.REG;
 }
 
 /**
- * @brief Write to CCR
+ * @brief Write to Channel Configuration Register (CCR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @param value Updated CCR Value
  * @return CCR value
  */
-__STATIC_INLINE__ uint32_t __DMA_setCCR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
+__STATIC_FORCEINLINE uint32_t __DMA_setChannelCCR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
 {
 	dmaXChannelY->CCR.REG = value;
 }
 
 /**
- * @brief Read Peripheral Address 
+ * @brief Read Channel Peripheral Address Register (CPAR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @return CPAR Value
  */
-__STATIC_INLINE__ uint32_t __DMA_getCPAR(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE uint32_t __DMA_getChannelCPAR(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	return dmaXChannelY->CPAR.REG;
 }
 
 /**
- * @brief Set Peripheral Address
+ * @brief Set Channel Peripheral Address Register (CPAR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @param value Modified register value
  */
-__STATIC_INLINE__ void __DMA_setCPAR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
+__STATIC_FORCEINLINE void __DMA_setChannelCPAR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
 {
 	dmaXChannelY->CPAR.REG = value;
 }
 
 /**
- * @brief Read Memory Address 
+ * @brief Read Channel Memory Address Register (CMAR) 
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @return CMAR Value
  */
-__STATIC_INLINE__ uint32_t __DMA_getCMAR(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE uint32_t __DMA_getChannelCMAR(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	return dmaXChannelY->CMAR.REG;
 }
 
 /**
- * @brief Set Memory Address
+ * @brief Set Channel Memory Address Register (CMAR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @param value Modified register value
  */
-__STATIC_INLINE__ void __DMA_setCMAR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
+__STATIC_FORCEINLINE void __DMA_setChannelCMAR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
 {
 	dmaXChannelY->CMAR.REG = value;
 }
 
 /**
- * @brief Read number of data register for transfer 
+ * @brief Read Channel Number of Data Register (CNDTR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @return CNDTR Value
+ * @note Number of data left for transfer 
  */
-__STATIC_INLINE__ uint32_t __DMA_getCNDTR(DMA_Channel_TypeDef* dmaXChannelY)
+__STATIC_FORCEINLINE uint32_t __DMA_getChannelCNDTR(DMA_Channel_TypeDef* dmaXChannelY)
 {
 	return dmaXChannelY->CNDTR.REG;
 }
 
 /**
- * @brief Set number of data register for transfer
+ * @brief Set Channel Number of Data Register (CNDTR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @param value Modified register value
+ * @note Number of data to transfer 
  */
-__STATIC_INLINE__ void __DMA_setCNDTR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
+__STATIC_FORCEINLINE void __DMA_setChannelCNDTR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
 {
 	dmaXChannelY->CNDTR.REG = value;
 }

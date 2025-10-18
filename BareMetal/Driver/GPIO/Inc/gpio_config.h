@@ -102,7 +102,7 @@ extern const GPIO_TypeDef* const __gpioDriverMapping__[7];
  * @brief Enables the clock for the specified GPIO port
  * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort)
+__STATIC_FORCEINLINE void __GPIO_enableClock__(const gpio_port_t thisPort)
 {
 	// Enable Clock for GPIO Port
 	RCC->APB2ENR.REG |= (1 << (2 + thisPort));
@@ -112,7 +112,7 @@ __STATIC_INLINE__ void __GPIO_enableClock__(const gpio_port_t thisPort)
  * @brief Disables the clock for the specified GPIO port
  * @param thisPort GPIO Port Enumeration `gpio_port_t`
  */
-__STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort)
+__STATIC_FORCEINLINE void __GPIO_disableClock__(const gpio_port_t thisPort)
 {
 	// Disables Clock for GPIO Port
 	RCC->APB2ENR.REG &= ~(1 << (2 + thisPort));
@@ -123,7 +123,7 @@ __STATIC_INLINE__ void __GPIO_disableClock__(const gpio_port_t thisPort)
  * @param thisPort GPIO Port Enumeration `gpio_port_t` 
  * @return GPIO_TypeDef* Pointer to the GPIO Port structure
  */
-__STATIC_INLINE__ GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort){
+__STATIC_FORCEINLINE GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort){
 	// Return Pointer to GPIO Port Structure
 	return __gpioDriverMapping__[thisPort];
 }
@@ -133,7 +133,7 @@ __STATIC_INLINE__ GPIO_TypeDef* __GPIO_getPort__(const gpio_port_t thisPort){
  * @param pinMask Mask representing the specific GPIO pin
  * @return GPIO Pin Number
  */
-__STATIC_INLINE__ uint8_t __GPIO_getPin__(const gpio_pin_t pinMask)
+__STATIC_FORCEINLINE uint8_t __GPIO_getPin__(const gpio_pin_t pinMask)
 {
 	// Retrieve Pin Position (0-15)
 	return ((uint8_t) ((pinMask == GPIO_PIN_NONE)? (0x00) : (__builtin_ctz(pinMask))));
@@ -145,7 +145,7 @@ __STATIC_INLINE__ uint8_t __GPIO_getPin__(const gpio_pin_t pinMask)
  * @param gpioODRReg Pointer to the output data register (ODR) to be updated
  * @note Pass only single pin not logical combination of Pins
  */
-__STATIC_INLINE__ void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32_t *gpioODRReg)
+__STATIC_FORCEINLINE void __GPIO_resetPullConfig__(const gpio_pin_t pinMask, uint32_t *gpioODRReg)
 {
 	*gpioODRReg &= ~(pinMask);
 }

@@ -1,10 +1,15 @@
 // Header Guards
-#ifndef __SSD1306_REG_MAP_H__
-#define __SSD1306_REG_MAP_H__
+#ifndef SSD1306_REG_MAP_H_
+#define SSD1306_REG_MAP_H_
+
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /* ------------------------------------------------------------------------------------ */
 // Includes
-#include "reg_map.h"
+#include <stdint.h>
 /* ------------------------------------------------------------------------------------ */
 // SSD1306 I2C Address
 #ifndef SA0
@@ -296,4 +301,4 @@ static const uint8_t SSD1306_initCmd[SSD1306_INIT_CMD_SIZE] = {
 	SSD1306_CMD_DISPLAY_ON
 };
 /* ------------------------------------------------------------------------------------ */
-#endif  /* __SSD1306_REG_MAP_H__ */
+#endif /* SSD1306_REG_MAP_H_ */

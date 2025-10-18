@@ -16,7 +16,7 @@
  * @param cursor_X X-coordinate: 0 - `SSD1306_WIDTH_MAX`
  * @param cursor_Y Y-coordinate: 0 - `SSD1306_HEIGHT_MAX`
  */
-__STATIC_INLINE__ void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
+__STATIC_FORCEINLINE void __ssd1306_structure_update_cursor__(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
 	// Wrap the cursor around the display if it's out of bounds
 	cursor_X = SSD1306_WRAP_X(cursor_X);
 	cursor_Y = SSD1306_WRAP_Y(cursor_Y);

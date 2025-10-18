@@ -5,11 +5,16 @@
  * @version 1.0
  * @date 04-10-2025
  */
-#ifndef __STM32F1XX_SCB_H__
-#define __STM32F1XX_SCB_H__
+#ifndef STM32F1XX_SCB_H__
+#define STM32F1XX_SCB_H__
+
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 // ---- Includes ---- //
-#include "common.h"
+#include <stdint.h>
 
 /**
  * @brief System Control Block (SCB) - CPU Core Registers
@@ -49,4 +54,4 @@ typedef struct {
 	uint32_t AFSR;
 } SCB_TypeDef;
 
-#endif /* __STM32F1XX_SCB_H__ */
+#endif /* STM32F1XX_SCB_H__ */

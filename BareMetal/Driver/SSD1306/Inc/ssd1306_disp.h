@@ -34,7 +34,7 @@
  * @param ssd1306 Pointer to the SSD1306 Configuration Structure
  * @return Current Page of the SSD1306 Display
  */
-__STATIC_INLINE__ uint8_t SSD1306_Disp_Get_Page(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_Disp_Get_Page(ssd1306_config_t* ssd1306){
 	return (ssd1306->display.page);
 }
 
@@ -43,7 +43,7 @@ __STATIC_INLINE__ uint8_t SSD1306_Disp_Get_Page(ssd1306_config_t* ssd1306){
  * @param ssd1306 Pointer to the SSD1306 Configuration Structure
  * @return Current Column of the SSD1306 Display
  */
-__STATIC_INLINE__ uint8_t SSD1306_Disp_Get_Column(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_Disp_Get_Column(ssd1306_config_t* ssd1306){
 	return (ssd1306->display.col);
 }
 
@@ -52,7 +52,7 @@ __STATIC_INLINE__ uint8_t SSD1306_Disp_Get_Column(ssd1306_config_t* ssd1306){
  * @param ssd1306 Pointer to the SSD1306 configuration structure
  * @param cell Vertical pixel byte present at the current page and column
  */
-__STATIC_INLINE__ void SSD1306_Disp_Set_Cell(ssd1306_config_t* ssd1306, const uint8_t cell){
+__STATIC_FORCEINLINE void SSD1306_Disp_Set_Cell(ssd1306_config_t* ssd1306, const uint8_t cell){
 	ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col] = cell;
 }
 
@@ -60,7 +60,7 @@ __STATIC_INLINE__ void SSD1306_Disp_Set_Cell(ssd1306_config_t* ssd1306, const ui
  * @brief Retrieves the cell from the SSD1306 OLED Display Buffer
  * @param ssd1306 Pointer to the SSD1306 configuration structure
  */
-__STATIC_INLINE__ uint8_t SSD1306_Disp_Get_Cell(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_Disp_Get_Cell(ssd1306_config_t* ssd1306){
 	return (ssd1306->display.buffer[ssd1306->display.page][ssd1306->display.col]);
 }
 // ------------------------------------------------------------- DISPLAY HELPER FUNCTION END ------------------------------------------------------------- //

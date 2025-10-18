@@ -84,7 +84,7 @@ typedef struct {
  * @note - If not, it will be rounded up to the next power of 2
  * @note - The updated Buffer Size will be used for the ring buffer
  */
-__STATIC_INLINE__ void SSD1306_Config_RB(ssd1306_config_t* ssd1306, uint8_t* i2c_buffer, uint16_t i2c_buff_size){
+__STATIC_FORCEINLINE void SSD1306_Config_RB(ssd1306_config_t* ssd1306, uint8_t* i2c_buffer, uint16_t i2c_buff_size){
 	// Configure the I2C Ring Buffer
 	Ring_Buffer_Config(&ssd1306->i2c_rb, i2c_buffer, i2c_buff_size);
 }
@@ -97,7 +97,7 @@ __STATIC_INLINE__ void SSD1306_Config_RB(ssd1306_config_t* ssd1306, uint8_t* i2c
  * @note - The buffer will have `SSD1306_PAGE` rows
  * @note - The buffer will have `SSD1306_WIDTH` columns
  */
-__STATIC_INLINE__ void SSD1306_Config_Disp(ssd1306_config_t* ssd1306, uint8_t (*buffer)[SSD1306_WIDTH]){
+__STATIC_FORCEINLINE void SSD1306_Config_Disp(ssd1306_config_t* ssd1306, uint8_t (*buffer)[SSD1306_WIDTH]){
 	// Set the Display Buffer
 	ssd1306->display.buffer = buffer;
 	// Initialize the Cursor Position

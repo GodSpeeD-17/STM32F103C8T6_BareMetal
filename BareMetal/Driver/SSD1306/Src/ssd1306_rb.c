@@ -15,7 +15,7 @@
  * @param X X-coordinate (0-`SSD1306_WIDTH_MAX`)
  * @param Y Y-coordinate (0-`SSD1306_HEIGHT_MAX`)
  */
-__STATIC_INLINE__ void __SSD1306_RB_Cursor_Wrap_Store__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+__STATIC_FORCEINLINE void __SSD1306_RB_Cursor_Wrap_Store__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Wrap & store the Cursor Position
 	ssd1306->cursor.X = SSD1306_WRAP_X(X);
 	ssd1306->cursor.Y = SSD1306_WRAP_Y(Y);
@@ -30,7 +30,7 @@ __STATIC_INLINE__ void __SSD1306_RB_Cursor_Wrap_Store__(ssd1306_config_t* ssd130
  * @note - It is called after the cursor position is updated
  * @note - It calculates the page and column based on the Y-coordinate and X-coordinate respectively
  */
-__STATIC_INLINE__ void __SSD1306_RB_Page_Column_Update__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+__STATIC_FORCEINLINE void __SSD1306_RB_Page_Column_Update__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Wrap X & Y coordinates
 	X = SSD1306_WRAP_X(X);
 	Y = SSD1306_WRAP_Y(Y);
@@ -45,7 +45,7 @@ __STATIC_INLINE__ void __SSD1306_RB_Page_Column_Update__(ssd1306_config_t* ssd13
  * @param X X-coordinate (0-`SSD1306_WIDTH_MAX`)
  * @param Y Y-coordinate (0-`SSD1306_HEIGHT_MAX`)
  */
-__STATIC_INLINE__ void __SSD1306_RB_Enqueue_Cursor_Position__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+__STATIC_FORCEINLINE void __SSD1306_RB_Enqueue_Cursor_Position__(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Wrap the X and Y coordinates
 	X = SSD1306_WRAP_X(X);
 	Y = SSD1306_WRAP_Y(Y);

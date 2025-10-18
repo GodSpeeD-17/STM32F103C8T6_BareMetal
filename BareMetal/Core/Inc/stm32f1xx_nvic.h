@@ -1,9 +1,14 @@
 // --- Header Guards --- //
-#ifndef __STM32F1XX_NVIC_H__
-#define __STM32F1XX_NVIC_H__
+#ifndef STM32F1XX_NVIC_H_
+#define STM32F1XX_NVIC_H_
+
+// C++ Safeguards
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 // ---- Includes ---- //
-#include "common.h"
+#include <stdint.h>
 
 /**
  * @brief NVIC Register Structure
@@ -38,4 +43,4 @@ typedef struct {
 	uint32_t STIR;
 } NVIC_TypeDef;
 
-#endif /* __STM32F1XX_NVIC_H__ */
+#endif /* STM32F1XX_NVIC_H_ */

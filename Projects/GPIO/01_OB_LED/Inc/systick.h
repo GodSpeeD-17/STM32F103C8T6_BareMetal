@@ -7,7 +7,7 @@
 // RCC Configuration
 #include "rcc.h"
 // Delay Substitute
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 #include "timer.h"
 #endif
 
@@ -37,7 +37,7 @@ typedef struct {
 /**
  * @brief Enables SysTick Counter
  */
-__STATIC_INLINE__ void SysTick_Enable(void){
+__STATIC_FORCEINLINE void SysTick_Enable(void){
 	// Disable Interrupts
 	__disable_irq();
 	// Enable SysTick
@@ -49,7 +49,7 @@ __STATIC_INLINE__ void SysTick_Enable(void){
 /**
  * @brief Disables SysTick Counter
  */
-__STATIC_INLINE__ void SysTick_Disable(void){
+__STATIC_FORCEINLINE void SysTick_Disable(void){
 	// Disable Interrupts
 	__disable_irq();
 	// Disable SysTick
@@ -80,7 +80,7 @@ void SysTick_Set_Ticks(uint32_t tick_value);
 void SysTick_Config(uint32_t reloadValue);
 
 // Delay using SysTick
-#ifdef __SYSTICK_DELAY__
+#ifdef SYSTICK_DELAY__
 /**
  * @brief Accurate us delay generation
  * @param delayTime Delay in microseconds (us)
@@ -94,7 +94,7 @@ void delay_us(uint32_t delayTime);
  * @note Based upon SysTick Timer
  */
 void delay_ms(uint32_t delayTime);
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /**
  * @brief ISR for SysTick

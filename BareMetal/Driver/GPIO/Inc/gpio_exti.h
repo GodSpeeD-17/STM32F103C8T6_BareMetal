@@ -20,7 +20,7 @@
  * @brief Enables the External Interrupt
  * @param pin Refer to `gpio_pin_t` enum
  */
-__STATIC_INLINE__ void GPIO_EXTI_Enable(const gpio_pin_t pin){
+__STATIC_FORCEINLINE void GPIO_EXTI_Enable(const gpio_pin_t pin){
 	// Unmask the IRQ
 	EXTI->IMR.REG |= pin;
 }
@@ -29,7 +29,7 @@ __STATIC_INLINE__ void GPIO_EXTI_Enable(const gpio_pin_t pin){
  * @brief Disables the External Interrupt
  * @param pin Refer to `gpio_pin_t` enum
  */
-__STATIC_INLINE__ void GPIO_EXTI_Disable(const gpio_pin_t pin){
+__STATIC_FORCEINLINE void GPIO_EXTI_Disable(const gpio_pin_t pin){
 	// Unmask the IRQ
 	EXTI->IMR.REG &= ~(pin);
 }
@@ -39,7 +39,7 @@ __STATIC_INLINE__ void GPIO_EXTI_Disable(const gpio_pin_t pin){
  * @param pin Refer to `gpio_pin_t` enum
  * @returns Pending Bit Status for Input Pin
  */
-__STATIC_INLINE__ uint16_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin){
+__STATIC_FORCEINLINE uint16_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin){
 	// Return the value
 	return (uint16_t) (EXTI->PR.REG & pin);
 }
@@ -48,7 +48,7 @@ __STATIC_INLINE__ uint16_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin){
  * @brief Acknowledge the Pending Bit of External Interrupt
  * @param pin Refer to `gpio_pin_t` enum
  */
-__STATIC_INLINE__ void GPIO_EXTI_Ack(const gpio_pin_t pin){
+__STATIC_FORCEINLINE void GPIO_EXTI_Ack(const gpio_pin_t pin){
 	// Acknowledge the Pending Bit
 	EXTI->PR.REG |= pin;
 }
@@ -59,7 +59,7 @@ __STATIC_INLINE__ void GPIO_EXTI_Ack(const gpio_pin_t pin){
  * @return Pointer to the relevant EXTI Configuration Register
  * @note Pass only one pin at a time
  */
-__STATIC_INLINE__ uint32_t* __GPIO_EXTI_GetCR__(const gpio_pin_t pin){
+__STATIC_FORCEINLINE uint32_t* __GPIO_EXTI_GetCR__(const gpio_pin_t pin){
 	// Return the Register Address
 	return (uint32_t *) (&AFIO->EXTICR1.REG + (__GPIO_getPin__(pin) >> 2));
 }

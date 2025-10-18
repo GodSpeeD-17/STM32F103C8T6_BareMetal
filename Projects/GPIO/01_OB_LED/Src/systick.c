@@ -51,7 +51,7 @@ void SysTick_Config(uint32_t reloadValue){
 }
 
 // Delay using SysTick
-#ifdef __SYSTICK_DELAY__
+#ifdef SYSTICK_DELAY__
 /**
  * @brief Accurate us delay generation
  * @param delayTime Delay in microseconds (us)
@@ -73,7 +73,7 @@ void delay_ms(uint32_t delayTime){
 	// Calculate the delay time
 	delay_us(delayTime * 1000);
 }
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /**
  * @brief ISR for SysTick

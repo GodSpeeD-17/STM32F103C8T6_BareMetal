@@ -82,7 +82,7 @@ uint8_t SSD1306_RB_Set_Disp_Pattern(ssd1306_config_t* ssd1306, const uint8_t pat
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Screen(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Clear_Screen(ssd1306_config_t* ssd1306){
 	// Set the Display Pattern to Black
 	return SSD1306_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_BLACK);
 }
@@ -96,7 +96,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Screen(ssd1306_config_t* ssd1306){
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Torch_Screen(ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Torch_Screen(ssd1306_config_t* ssd1306){
 	// Set the Display Pattern to White
 	return SSD1306_RB_Set_Disp_Pattern(ssd1306, SSD1306_PATTERN_WHITE);
 }
@@ -110,7 +110,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Torch_Screen(ssd1306_config_t* ssd1306){
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Go to mentioned pixel 
 	if(SSD1306_RB_Goto_XY(ssd1306, X, Y) != 0x01){
 		return 0x00;
@@ -133,7 +133,7 @@ __STATIC_INLINE__ uint8_t SSD1306_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_
  * @return - 0x00: Failure
  * @return - 0x01: Success
  */
-__STATIC_INLINE__ uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
+__STATIC_FORCEINLINE uint8_t SSD1306_RB_Clear_Pixel(ssd1306_config_t* ssd1306, uint8_t X, uint8_t Y){
 	// Go to mentioned pixel 
 	if(SSD1306_RB_Goto_XY(ssd1306, X, Y) != 0x01){
 		return 0x00;

@@ -99,7 +99,7 @@ static usart_config_t USART1_Configuration = {
  * @brief Enables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_clk_enable(usart_config_t* USART_CONFIGx) {
+__STATIC_FORCEINLINE void USART_clk_enable(usart_config_t* USART_CONFIGx) {
 	// Enable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
@@ -113,7 +113,7 @@ __STATIC_INLINE__ void USART_clk_enable(usart_config_t* USART_CONFIGx) {
  * @brief Disables the Clock to USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
+__STATIC_FORCEINLINE void USART_clk_disable(usart_config_t* USART_CONFIGx) {
 	// Disable Clock based upon USART
 	if(USART_CONFIGx->USARTx == USART1)
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
@@ -127,7 +127,7 @@ __STATIC_INLINE__ void USART_clk_disable(usart_config_t* USART_CONFIGx) {
  * @brief Starts USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_Enable(usart_config_t* USART_CONFIGx) {
+__STATIC_FORCEINLINE void USART_Enable(usart_config_t* USART_CONFIGx) {
 	// Enable USART
 	USART_CONFIGx->USARTx->CR1.REG |= USART_CR1_UE;
 }
@@ -136,7 +136,7 @@ __STATIC_INLINE__ void USART_Enable(usart_config_t* USART_CONFIGx) {
  * @brief Stops USART Module
  * @param[in] USART_CONFIGx USART Configuration Structure
  */
-__STATIC_INLINE__ void USART_Disable(usart_config_t* USART_CONFIGx) {
+__STATIC_FORCEINLINE void USART_Disable(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
 }
@@ -146,7 +146,7 @@ __STATIC_INLINE__ void USART_Disable(usart_config_t* USART_CONFIGx) {
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  * @return IRQn for the corresponding USART
  */
-__STATIC_INLINE__ uint8_t USART_get_IRQn(USART_TypeDef* USARTx){
+__STATIC_FORCEINLINE uint8_t USART_get_IRQn(USART_TypeDef* USARTx){
 	// Retrieves the IRQ Number for NVIC
 	if(USARTx == USART1)
 		return USART1_IRQn;
@@ -195,7 +195,7 @@ void USART_load_default(usart_config_t* USART_CONFIGx);
  * @param[in] c Character to be printed
  * @param[in] length The length of character to be printed
  */
-__STATIC_INLINE__ void sep(usart_config_t* USART_CONFIGx, char c, uint8_t length){
+__STATIC_FORCEINLINE void sep(usart_config_t* USART_CONFIGx, char c, uint8_t length){
 	// Print character
 	while(length--){
 		// Print character
@@ -230,7 +230,7 @@ uint16_t USART_receive(usart_config_t* USART_CONFIGx);
  * @param[in] USART_CONFIGx USART Configuration Structure
  * @param[in] rx_char Character to be displayed on Screen
  */
-__STATIC_INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
+__STATIC_FORCEINLINE void USART_echo(usart_config_t* USART_CONFIGx, const char rx_char){
 	// Print on Serial Console
 	USART_printf(USART_CONFIGx, "%c", rx_char);
 }
@@ -239,7 +239,7 @@ __STATIC_INLINE__ void USART_echo(usart_config_t* USART_CONFIGx, const char rx_c
  * @brief Enables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Enable(USART_TypeDef* USARTx){
+__STATIC_FORCEINLINE void USART_DMA_TX_Enable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAT;
 }
@@ -248,7 +248,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Enable(USART_TypeDef* USARTx){
  * @brief Disables the TX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Disable(USART_TypeDef* USARTx){
+__STATIC_FORCEINLINE void USART_DMA_TX_Disable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAT;
 }
@@ -257,7 +257,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Disable(USART_TypeDef* USARTx){
  * @brief Enables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_RX_Enable(USART_TypeDef* USARTx){
+__STATIC_FORCEINLINE void USART_DMA_RX_Enable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG |= USART_CR3_DMAR;
 }
@@ -266,7 +266,7 @@ __STATIC_INLINE__ void USART_DMA_RX_Enable(USART_TypeDef* USARTx){
  * @brief Disables the RX using DMA
  * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
  */
-__STATIC_INLINE__ void USART_DMA_RX_Disable(USART_TypeDef* USARTx){
+__STATIC_FORCEINLINE void USART_DMA_RX_Disable(USART_TypeDef* USARTx){
 	// Enable the DMA TX
 	USARTx->CR3.REG &= ~USART_CR3_DMAR;
 }
@@ -325,7 +325,7 @@ typedef enum {
  * @return - 1: TX Buffer Empty
  * @note Check status using this function before using `USART_Send_Char()`
  */
-__STATIC_INLINE__ uint8_t USART_TX_Ready(const usart_t usart){
+__STATIC_FORCEINLINE uint8_t USART_TX_Ready(const usart_t usart){
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart); 
 	uint32_t usartTXReady = 0x00;
 	usartTXReady = (thisUsart->SR.REG & USART_SR_TXE);
@@ -338,7 +338,7 @@ __STATIC_INLINE__ uint8_t USART_TX_Ready(const usart_t usart){
  * @param character Character to be transmitted
  * @note Check status using `USART_TX_Ready()` before using this function
  */
-__STATIC_INLINE__ void USART_TX_Byte(const usart_t usart, const uint8_t character){
+__STATIC_FORCEINLINE void USART_TX_Byte(const usart_t usart, const uint8_t character){
 	// Transfer the data
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->DR.REG = character;
@@ -352,7 +352,7 @@ __STATIC_INLINE__ void USART_TX_Byte(const usart_t usart, const uint8_t characte
  * @return - 1: RX Buffer Full
  * @note Check status using this function before using `USART_Recv_Char()`
  */
-__STATIC_INLINE__ uint8_t USART_RX_Ready(const usart_t usart){
+__STATIC_FORCEINLINE uint8_t USART_RX_Ready(const usart_t usart){
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	uint32_t usartRXReady = 0x00;
 	usartRXReady = (thisUsart->SR.REG & USART_SR_RXNE);
@@ -365,7 +365,7 @@ __STATIC_INLINE__ uint8_t USART_RX_Ready(const usart_t usart){
  * @return 8-bits data read in the `USARTx->DR`
  * @note Check status using `USART_RX_Ready()` before using this function
  */
-__STATIC_INLINE__ uint8_t USART_RX_Byte(const usart_t usart){
+__STATIC_FORCEINLINE uint8_t USART_RX_Byte(const usart_t usart){
 	// Receive the data
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	uint8_t recvData = thisUsart->DR.REG;
@@ -378,7 +378,7 @@ __STATIC_INLINE__ uint8_t USART_RX_Byte(const usart_t usart){
  * @param character Character to be transmitted
  * @note Blocking Function which takes care of USART TX
  */
-__STATIC_INLINE__ void USART_sendByte(const usart_t usart, const uint8_t character){
+__STATIC_FORCEINLINE void USART_sendByte(const usart_t usart, const uint8_t character){
 	// Wait till TX Buffer is Empty
 	while(USART_TX_Ready(usart) != 0x01);
 	// Transmit the data
@@ -394,7 +394,7 @@ __STATIC_INLINE__ void USART_sendByte(const usart_t usart, const uint8_t charact
  * @brief - Hardware Pins: TX+RX Enable
  * @param usartConfig pointer to USART Configuration Structure. Refer `usart_config_t`
  */
-__STATIC_INLINE__ void USART_Default_Config(usart_config_t* usartConfig){
+__STATIC_FORCEINLINE void USART_Default_Config(usart_config_t* usartConfig){
 	// USART Communication Configuration
 	usartConfig->config = USART_CONFIG_8N1;
 	// USART Baud Rate Configuration

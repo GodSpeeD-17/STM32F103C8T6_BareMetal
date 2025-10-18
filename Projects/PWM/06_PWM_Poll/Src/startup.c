@@ -2,7 +2,7 @@
 #include "startup.h"
 
 // Timer Delay Configuration
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 /*-------------------------------- Local Variables ------------------------*/
 // Timer Configuration Structure
 static timer_config_t TIM_Configuration = {
@@ -18,7 +18,7 @@ static timer_config_t TIM_Configuration = {
 	.channel.instance = DELAY_TIMER_CHANNEL,
 	#endif /* __OLD_TIMER_METHOD__ */
 };
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------- Heap Pointer ---------------------------*/
 static uint8_t *heap_ptr = &_sheap;
@@ -158,7 +158,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 	// Step 4: Configure SysTick & Timer
-	#ifdef __SYSTICK_DELAY__
+	#ifdef SYSTICK_DELAY__
 		// SysTick: Resolution 1us
 		SysTick_Config(((RCC_Get_AHBClock())/FREQ_1MHz));
 	#else
@@ -170,7 +170,7 @@ __attribute__((weak, naked, noreturn)) void Reset_Handler(void){
 		TIM_Config(&TIM_Configuration);
 		// Configure TIM Interrupt for Overflow
 		TIM_IRQ_Enable(DELAY_TIMER, TIMx_IRQ_OVF_UVF);
-	#endif /* __SYSTICK_DELAY__ */
+	#endif /* SYSTICK_DELAY__ */
 	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick
 	OB_LED_Init();
@@ -207,7 +207,7 @@ void hard_fault_handler_c(uint32_t *stack) {
 
 /*-------------------------------- Timer Handler ------------------------*/
 // Timer Delay Functions
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 // Delay Counter
 static volatile uint8_t delayCompleted = 0x00;
 
@@ -268,4 +268,4 @@ void DELAY_TIMER_IRQHandler(void){
 	}
 }
 
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */

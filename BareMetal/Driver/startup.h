@@ -18,9 +18,9 @@
 // GPIO Configuration
 #include "gpio.h"
 // Use Timer for Delay
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 #include "timer.h"
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------------------- MACROS ----------------------------------*/
 #define ARM_IRQ									(11)
@@ -28,17 +28,17 @@
 #define STM32F103C8_IRQ							(59)
 
 // Uncomment this to achieve delay from SysTick
-// #define __SYSTICK_DELAY__
+// #define SYSTICK_DELAY__
 
 // Use Timer for Delay
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 // Timer used for Delay
 #define DELAY_TIMER							TIM4
 // Channel for Timer used for Delay
 #define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_NONE
 // Timer Interrupt Handler
 #define DELAY_TIMER_IRQHandler				TIM4_IRQHandler
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /*----------------------------------- Linker Script --------------------------------------------*/
 // Start address of initialized data in Flash
@@ -101,14 +101,14 @@ __attribute__((weak, alias("Default_Handler"))) void TIM1_TRG_COM_IRQHandler(voi
 __attribute__((weak, alias("Default_Handler"))) void TIM1_CC_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM3_IRQHandler(void);
-#ifdef __SYSTICK_DELAY__
+#ifdef SYSTICK_DELAY__
 __attribute__((weak, alias("Default_Handler"))) void TIM4_IRQHandler(void);
 #else
 /**
  * @brief Delay Timer Interrupt Handler
  */
 void TIM4_IRQHandler(void);
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 __attribute__((weak, alias("Default_Handler"))) void I2C1_EV_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C1_ER_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C2_EV_IRQHandler(void);
@@ -139,7 +139,7 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel3_IRQHandler(vo
 __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(void);
 
 /*-------------------------------- Delay Function Prototypes ---------------------*/
-#ifndef __SYSTICK_DELAY__
+#ifndef SYSTICK_DELAY__
 /**
  * @brief Provides a blocking delay in microseconds using TIMx
  * @param delayUs Delay time in microseconds
@@ -161,7 +161,7 @@ void delay_us(uint32_t delayUs);
  * @note - Uses polling method to check for delay completion
  */
 void delay_ms(uint32_t delayMs);
-#endif /* __SYSTICK_DELAY__ */
+#endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------- Main Entry -----------------------------*/
 extern int main(void);

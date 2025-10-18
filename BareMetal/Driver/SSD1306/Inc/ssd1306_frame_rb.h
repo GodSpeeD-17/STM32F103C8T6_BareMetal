@@ -86,7 +86,7 @@ uint8_t SSD1306_Frame_RB_Manipulate_Pixel(ssd1306_config_t* ssd1306, uint8_t isC
  * @return - 0: Failure  
  * @return - 1: Success  
  */
-__STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
+__STATIC_FORCEINLINE uint8_t SSD1306_Frame_RB_Set_Pixel(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
 	// Set the Pixel
 	return (SSD1306_Frame_RB_Manipulate_Pixel(ssd1306, 0x00, cursor_X, cursor_Y));
 }
@@ -100,7 +100,7 @@ __STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Pixel(ssd1306_config_t* ssd1306, 
  * @return - 0: Failure  
  * @return - 1: Success  
  */
-__STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Reset_Pixel(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
+__STATIC_FORCEINLINE uint8_t SSD1306_Frame_RB_Reset_Pixel(ssd1306_config_t* ssd1306, uint8_t cursor_X, uint8_t cursor_Y){
 	// Reset the Pixel
 	return (SSD1306_Frame_RB_Manipulate_Pixel(ssd1306, 0x01, cursor_X, cursor_Y));
 }
@@ -124,7 +124,7 @@ uint8_t SSD1306_Frame_RB_Set_Page_Pattern(ssd1306_config_t* ssd1306, uint8_t pag
  * @return - 0: Failure
  * @return - 1: Success
  */
-__STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306_config_t* ssd1306, const uint8_t pattern){
+__STATIC_FORCEINLINE uint8_t SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306_config_t* ssd1306, const uint8_t pattern){
 	// Iterate through loops
 	for(uint8_t page = 0; page < SSD1306_PAGE; page++){
 		// Set the Page Pattern
@@ -142,7 +142,7 @@ __STATIC_INLINE__ uint8_t SSD1306_Frame_RB_Set_Disp_Pattern(ssd1306_config_t* ss
  * @param ssd1306 Pointer to SSD1306 Configuration Structure
  * @return Filled Space in the Frame Buffer
  */
-__STATIC_INLINE__ uint16_t SSD1306_Frame_RB_Get_Filled_Space(const ssd1306_config_t* ssd1306){
+__STATIC_FORCEINLINE uint16_t SSD1306_Frame_RB_Get_Filled_Space(const ssd1306_config_t* ssd1306){
 	return Ring_Buffer_Filled_Space(&ssd1306->i2c_rb);
 }
 

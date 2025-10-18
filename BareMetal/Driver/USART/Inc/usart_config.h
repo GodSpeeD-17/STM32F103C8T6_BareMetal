@@ -218,7 +218,7 @@ extern const USART_TypeDef* __usartDriverRegisterMapping__[];
  * @brief Enables the USART Clock
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void __USART_enableClock__(const usart_t usart){
+__STATIC_FORCEINLINE void __USART_enableClock__(const usart_t usart){
 	// USART 1
 	if(usart == USART_1){
 		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
@@ -233,7 +233,7 @@ __STATIC_INLINE__ void __USART_enableClock__(const usart_t usart){
  * @brief Disables the USART Clock
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void __USART_disableClock__(const usart_t usart){
+__STATIC_FORCEINLINE void __USART_disableClock__(const usart_t usart){
 	// USART 1
 	if(usart == USART_1){
 		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
@@ -250,7 +250,7 @@ __STATIC_INLINE__ void __USART_disableClock__(const usart_t usart){
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @return Pointer to USART Register Mapping Structure
  */
-__STATIC_INLINE__ USART_TypeDef* USART_Get_Mapping(const usart_t usart){
+__STATIC_FORCEINLINE USART_TypeDef* USART_Get_Mapping(const usart_t usart){
 	// USART Register Mapping
 	return (__usartDriverRegisterMapping__[usart]);
 }
@@ -259,7 +259,7 @@ __STATIC_INLINE__ USART_TypeDef* USART_Get_Mapping(const usart_t usart){
  * @brief Enables the USART Module
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void USART_Enable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_Enable(const usart_t usart){
 	// Enable the USART Module
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR1.REG |= USART_CR1_UE;
@@ -269,7 +269,7 @@ __STATIC_INLINE__ void USART_Enable(const usart_t usart){
  * @brief Disables the USART Module
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
  */
-__STATIC_INLINE__ void USART_Disable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_Disable(const usart_t usart){
 	// Disable the USART Module
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR1.REG &= ~USART_CR1_UE;
@@ -280,7 +280,7 @@ __STATIC_INLINE__ void USART_Disable(const usart_t usart){
  * @brief Enables the TX using DMA
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  */
-__STATIC_INLINE__ void USART_DMA_TX_Enable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_DMA_TX_Enable(const usart_t usart){
 	// Enable the DMA TX
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR3.REG |= USART_CR3_DMAT;
@@ -290,7 +290,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Enable(const usart_t usart){
  * @brief Disables the TX using DMA
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_TX_Disable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_DMA_TX_Disable(const usart_t usart){
 	// Disable the DMA TX
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR3.REG &= ~USART_CR3_DMAT;
@@ -300,7 +300,7 @@ __STATIC_INLINE__ void USART_DMA_TX_Disable(const usart_t usart){
  * @brief Enables the RX using DMA
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_RX_Enable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_DMA_RX_Enable(const usart_t usart){
 	// Enable the DMA RX
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR3.REG |= USART_CR3_DMAR;
@@ -310,7 +310,7 @@ __STATIC_INLINE__ void USART_DMA_RX_Enable(const usart_t usart){
  * @brief Disables the RX using DMA
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  */
-__STATIC_INLINE__ void USART_DMA_RX_Disable(const usart_t usart){
+__STATIC_FORCEINLINE void USART_DMA_RX_Disable(const usart_t usart){
 	// Disable the DMA RX
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR3.REG &= ~USART_CR3_DMAR;
@@ -321,7 +321,7 @@ __STATIC_INLINE__ void USART_DMA_RX_Disable(const usart_t usart){
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @return irq_t IRQ Number
  */
-__STATIC_INLINE__ irq_t USART_Get_IRQn(const usart_t usart){
+__STATIC_FORCEINLINE irq_t USART_Get_IRQn(const usart_t usart){
 	// USART IRQn
 	return __usartDriverIRQnMapping__[usart];
 }

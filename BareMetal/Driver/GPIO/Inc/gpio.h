@@ -7,10 +7,10 @@
 #include "gpio_exti.h"
 /*********************************************** Helper APIs ***********************************************/
 
-#ifdef __STM32F103C8T6__
+#ifdef STM32F103C8T6__
 #define GPIO_PORT_OB_LED						GPIO_PORT_C
 #define GPIO_PIN_OB_LED							GPIO_PIN_13
-#endif /* __STM32F103C8T6__ */
+#endif /* STM32F103C8T6__ */
 
 
 /**
@@ -19,7 +19,7 @@
  * @param gpioPin GPIO Pin
  * @note Atomicity
  */
-__STATIC_INLINE__ void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+__STATIC_FORCEINLINE void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
 	if(GPIOx != NULL){
 		GPIOx->BSRR.REG |= gpioPin;
@@ -32,7 +32,7 @@ __STATIC_INLINE__ void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
  * @param gpioPin GPIO Pin
  * @note Atomicity
  */
-__STATIC_INLINE__ void GPIO_Reset(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+__STATIC_FORCEINLINE void GPIO_Reset(gpio_port_t gpioPort, gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
 	if(GPIOx != NULL)
 		GPIOx->BRR.REG |= gpioPin;
@@ -43,7 +43,7 @@ __STATIC_INLINE__ void GPIO_Reset(gpio_port_t gpioPort, gpio_pin_t gpioPin){
  * @param gpioPort GPIO Port 
  * @param gpioPin GPIO Pin
  */
-__STATIC_INLINE__ void GPIO_Toggle(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+__STATIC_FORCEINLINE void GPIO_Toggle(gpio_port_t gpioPort, gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
 	if(GPIOx != NULL)
 		GPIOx->ODR.REG ^= gpioPin;
@@ -54,7 +54,7 @@ __STATIC_INLINE__ void GPIO_Toggle(gpio_port_t gpioPort, gpio_pin_t gpioPin){
  * @param gpioPort GPIO Port 
  * @param gpioPin GPIO Pin
  */
-__STATIC_INLINE__ uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+__STATIC_FORCEINLINE uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
 	if(GPIOx != NULL){
 		return ((uint8_t) ((GPIOx->IDR.REG & gpioPin) ? (0x01) : (0x00)));
@@ -65,7 +65,7 @@ __STATIC_INLINE__ uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin){
  * @brief Sets the On-board (OB) LED
  * @note OB LED is active LOW
  */
-__STATIC_INLINE__ void OB_LED_Set(void){
+__STATIC_FORCEINLINE void OB_LED_Set(void){
 	GPIO_Reset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
@@ -73,7 +73,7 @@ __STATIC_INLINE__ void OB_LED_Set(void){
  * @brief Resets the On-board (OB) LED
  * @note OB LED is active LOW
  */
-__STATIC_INLINE__ void OB_LED_Reset(void){
+__STATIC_FORCEINLINE void OB_LED_Reset(void){
 	GPIO_Set(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
@@ -81,7 +81,7 @@ __STATIC_INLINE__ void OB_LED_Reset(void){
  * @brief Toggles the On-board (OB) LED
  * @note OB LED is active LOW
  */
-__STATIC_INLINE__ void OB_LED_Toggle(void){
+__STATIC_FORCEINLINE void OB_LED_Toggle(void){
 	GPIO_Toggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 

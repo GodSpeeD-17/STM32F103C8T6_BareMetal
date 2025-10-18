@@ -41,7 +41,7 @@ typedef struct {
  * @returns - 0: Ring Buffer is Not Empty
  * @returns - 1: Ring Buffer is Empty  
  */
-__STATIC_INLINE__ uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer){
+__STATIC_FORCEINLINE uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer){
     // Check if Ring Buffer is Empty
 	return (ring_buffer->head == ring_buffer->tail);
 }
@@ -53,7 +53,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Is_Empty(const ring_buffer_t *ring_buffer)
  * @returns - 0: Ring Buffer is Not Full
  * @returns - 1: Ring Buffer is Full
  */
-__STATIC_INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer){
+__STATIC_FORCEINLINE uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer){
     // Check if Ring Buffer is Full
 	return (((ring_buffer->head + 1) & (ring_buffer->size - 1)) == ring_buffer->tail);
 }
@@ -63,7 +63,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Is_Full(const ring_buffer_t *ring_buffer){
  * @param ring_buff Pointer to the ring buffer structure
  * @returns Available Spaces currently in the ring buffer
  */
-__STATIC_INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring_buff){
+__STATIC_FORCEINLINE uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring_buff){
 	// Provides Empty Spaces currently in the ring buffer
     return (((ring_buff->size + ring_buff->tail) - (ring_buff->head + 1)) & (ring_buff->size - 1));
 }
@@ -73,7 +73,7 @@ __STATIC_INLINE__ uint16_t Ring_Buffer_Available_Space(const ring_buffer_t *ring
  * @param ring_buff Pointer to the ring buffer structure
  * @return Filled Spaces currently in the ring buffer
  */
-__STATIC_INLINE__ uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_buff){
+__STATIC_FORCEINLINE uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_buff){
 	// Provides Filled Spaces currently in the ring buffer
     return (((ring_buff->size + ring_buff->head) - ring_buff->tail) & (ring_buff->size - 1));
 }
@@ -85,7 +85,7 @@ __STATIC_INLINE__ uint16_t Ring_Buffer_Filled_Space(const ring_buffer_t* ring_bu
  * @note - It only retrieves the data at the head of the ring buffer
  * @note - The data at the head of the ring buffer is not removed from the buffer
  */
-__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Head(const ring_buffer_t* ring_buff){
+__STATIC_FORCEINLINE uint8_t Ring_Buffer_Peek_Head(const ring_buffer_t* ring_buff){
 	// Peek the data at the head of the ring buffer
 	return (ring_buff->buffer[ring_buff->head]);
 }
@@ -97,7 +97,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Head(const ring_buffer_t* ring_buff){
  * @note - It only retrieves the data at the tail of the ring buffer
  * @note - The data at the tail of the ring buffer is not removed from the buffer
  */
-__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
+__STATIC_FORCEINLINE uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
 	// Peek the data at the head of the ring buffer
 	return (ring_buff->buffer[ring_buff->tail]);
 }
@@ -110,7 +110,7 @@ __STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail(const ring_buffer_t* ring_buff){
  * @note - It only retrieves the data at the tail of the ring buffer
  * @note - The data at the tail of the ring buffer is not removed from the buffer
  */
-__STATIC_INLINE__ uint8_t Ring_Buffer_Peek_Tail_Offset(const ring_buffer_t* ring_buff, uint16_t position){
+__STATIC_FORCEINLINE uint8_t Ring_Buffer_Peek_Tail_Offset(const ring_buffer_t* ring_buff, uint16_t position){
 	// Peek the data at the offset location from the tail of the ring buffer
 	return (ring_buff->buffer[((ring_buff->tail + position) & (ring_buff->size - 1))]);
 }

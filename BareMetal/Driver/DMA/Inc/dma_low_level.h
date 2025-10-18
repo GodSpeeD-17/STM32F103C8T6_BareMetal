@@ -21,7 +21,7 @@ extern const irq_t _driverDMAIRQMapping[];
  * @param channel DMA Channel `DMA_x_Channel_Y`
  * @return DMA Controller: `DMA*` 
  */
-__STATIC_INLINE__ DMA_TypeDef* _DMA_getController(const dma_channel_t channel)
+__STATIC_FORCEINLINE DMA_TypeDef* _DMA_getController(const dma_channel_t channel)
 {
 	if(channel >= DMA_1_Channel_1 && channel <= DMA_1_Channel_7)
 	{
@@ -38,7 +38,7 @@ __STATIC_INLINE__ DMA_TypeDef* _DMA_getController(const dma_channel_t channel)
  * @param channel DMA Channel `DMA_x_Channel_Y`
  * @return DMA Channel: `DMA*_Channel*` 
  */
-__STATIC_INLINE__ DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t channel)
+__STATIC_FORCEINLINE DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t channel)
 {
 	return _driverDMAChannelMapping[channel];
 }
@@ -48,7 +48,7 @@ __STATIC_INLINE__ DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t chann
  * @param channel DMA Channel `DMA_x_Channel_Y`
  * @return IRQ Number. Refer `irq_t` 
  */
-__STATIC_INLINE__ irq_t _DMA_getIRQ(const dma_channel_t channel)
+__STATIC_FORCEINLINE irq_t _DMA_getIRQ(const dma_channel_t channel)
 {
 	return _driverDMAIRQMapping[channel];
 }
@@ -57,7 +57,7 @@ __STATIC_INLINE__ irq_t _DMA_getIRQ(const dma_channel_t channel)
  * @brief DMA Clock Enable Helper API
  * @param channel DMA Channel `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_enableClock(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_enableClock(const dma_channel_t channel)
 {
 	__DMA_enableClock(_DMA_getController(channel));
 }
@@ -66,7 +66,7 @@ __STATIC_INLINE__ void _DMA_enableClock(const dma_channel_t channel)
  * @brief DMA Clock Disable Helper API
  * @param channel DMA Channel `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_disableClock(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_disableClock(const dma_channel_t channel)
 {
 	__DMA_disableClock(_DMA_getController(channel));
 }
@@ -75,7 +75,7 @@ __STATIC_INLINE__ void _DMA_disableClock(const dma_channel_t channel)
  * @brief Enable DMA Channel 
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_enableChannel(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_enableChannel(const dma_channel_t channel)
 {
 	__DMA_enableChannel(_DMA_getChannel(channel));
 }
@@ -84,7 +84,7 @@ __STATIC_INLINE__ void _DMA_enableChannel(const dma_channel_t channel)
  * @brief Disable DMA Channel 
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_disableChannel(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_disableChannel(const dma_channel_t channel)
 {
 	__DMA_disableChannel(_DMA_getChannel(channel));
 }
@@ -93,7 +93,7 @@ __STATIC_INLINE__ void _DMA_disableChannel(const dma_channel_t channel)
  * @brief DMA Channel Start Sequence 
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_startChannel(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_startChannel(const dma_channel_t channel)
 {
 	DMA_Channel_TypeDef* dmaXChannelY = _DMA_getChannel(channel);
 	__DMA_enableClockFromChannel(dmaXChannelY);
@@ -104,7 +104,7 @@ __STATIC_INLINE__ void _DMA_startChannel(const dma_channel_t channel)
  * @brief Stop DMA Channel 
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_stopChannel(const dma_channel_t channel)
+__STATIC_FORCEINLINE void _DMA_stopChannel(const dma_channel_t channel)
 {
 	DMA_Channel_TypeDef* dmaXChannelY = _DMA_getChannel(channel);
 	__DMA_disableChannel(dmaXChannelY);
@@ -116,9 +116,9 @@ __STATIC_INLINE__ void _DMA_stopChannel(const dma_channel_t channel)
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  * @return CCR Register Value
  */
-__STATIC_INLINE__ uint32_t _DMA_getChannelConfiguration(const dma_channel_t channel)
+__STATIC_FORCEINLINE uint32_t _DMA_getChannelConfiguration(const dma_channel_t channel)
 {
-	return __DMA_getCCR(_DMA_getChannel(channel));
+	return __DMA_getChannelCCR(_DMA_getChannel(channel));
 }
 
 /**
@@ -130,9 +130,9 @@ __STATIC_INLINE__ uint32_t _DMA_getChannelConfiguration(const dma_channel_t chan
  * @returns - `DMA_CHANNEL_PRIORITY_HIGH`
  * @returns - `DMA_CHANNEL_PRIORITY_VERY_HIGH`
  */
-__STATIC_INLINE__ dma_channel_priority_t _DMA_getChannelPriority(const dma_channel_t channel)
+__STATIC_FORCEINLINE dma_channel_priority_t _DMA_getChannelPriority(const dma_channel_t channel)
 {
-	return (dma_channel_priority_t) ((__DMA_getCCR(_DMA_getChannel(channel)) & DMA_CCR_PL_Msk) >> DMA_CCR_PL_Pos);
+	return (dma_channel_priority_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_PL_Msk) >> DMA_CCR_PL_Pos);
 }
 
 /**
@@ -142,9 +142,9 @@ __STATIC_INLINE__ dma_channel_priority_t _DMA_getChannelPriority(const dma_chann
  * @returns - `DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY`
  * @returns - `DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL`
  */
-__STATIC_INLINE__ dma_transfer_dir_t _DMA_getChannelDirection(const dma_channel_t channel)
+__STATIC_FORCEINLINE dma_transfer_dir_t _DMA_getChannelDirection(const dma_channel_t channel)
 {
-	return (dma_transfer_dir_t) ((__DMA_getCCR(_DMA_getChannel(channel)) & DMA_CCR_DIR_Msk) >> DMA_CCR_DIR_Pos);
+	return (dma_transfer_dir_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_DIR_Msk) >> DMA_CCR_DIR_Pos);
 }
 
 /**
@@ -154,9 +154,9 @@ __STATIC_INLINE__ dma_transfer_dir_t _DMA_getChannelDirection(const dma_channel_
  * @returns - `DMA_CHANNEL_CIRCULAR_MODE_DISABLE` 
  * @returns - `DMA_CHANNEL_CIRCULAR_MODE_ENABLE` 
  */ 
-__STATIC_INLINE__ dma_circular_mode_t _DMA_getChannelCircularMode(const dma_channel_t channel)
+__STATIC_FORCEINLINE dma_circular_mode_t _DMA_getChannelCircularMode(const dma_channel_t channel)
 {
-	return (dma_circular_mode_t) ((__DMA_getCCR(_DMA_getChannel(channel)) & DMA_CCR_CIRC_Msk) >> DMA_CCR_CIRC_Pos);
+	return (dma_circular_mode_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_CIRC_Msk) >> DMA_CCR_CIRC_Pos);
 }
 
 /**
@@ -166,18 +166,18 @@ __STATIC_INLINE__ dma_circular_mode_t _DMA_getChannelCircularMode(const dma_chan
  * @returns - `DMA_CHANNEL_MEM2MEM_MODE_DISABLE`
  * @returns - `DMA_CHANNEL_MEM2MEM_MODE_ENABLE`
  */ 
-__STATIC_INLINE__ dma_mem2mem_mode_t _DMA_getChannelMEM2MEM(const dma_channel_t channel)
+__STATIC_FORCEINLINE dma_mem2mem_mode_t _DMA_getChannelMEM2MEM(const dma_channel_t channel)
 {
-	return (dma_mem2mem_mode_t) ((__DMA_getCCR(_DMA_getChannel(channel)) & DMA_CCR_MEM2MEM_Msk) >> DMA_CCR_MEM2MEM_Pos);
+	return (dma_mem2mem_mode_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_MEM2MEM_Msk) >> DMA_CCR_MEM2MEM_Pos);
 }
 
 /**
  * @brief Fetches DMA Channel Configurations
  * @param channel DMA Channel: `DMA_x_Channel_Y`
  */
-__STATIC_INLINE__ void _DMA_setChannelConfiguration(const dma_channel_t channel, const uint32_t value)
+__STATIC_FORCEINLINE void _DMA_setChannelConfiguration(const dma_channel_t channel, const uint32_t value)
 {
-	__DMA_setCCR(_DMA_getChannel(channel), value);
+	__DMA_setChannelCCR(_DMA_getChannel(channel), value);
 }
 
 /*********************************************** Driver APIs ***********************************************/

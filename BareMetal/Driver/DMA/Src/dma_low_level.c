@@ -38,13 +38,13 @@ const irq_t _driverDMAIRQMapping[] =
 	[DMA_1_Channel_5] = DMA1_Channel5_IRQn,
 	[DMA_1_Channel_6] = DMA1_Channel6_IRQn,
 	[DMA_1_Channel_7] = DMA1_Channel7_IRQn
-	#ifndef __STM32F103C8T6__
+	#ifndef STM32F103C8T6__
 	,[DMA_2_Channel_1] = DMA2_Channel1_IRQn,
 	[DMA_2_Channel_2] = DMA2_Channel2_IRQn,
 	[DMA_2_Channel_3] = DMA2_Channel3_IRQn,
 	[DMA_2_Channel_4] = DMA2_Channel4_5_IRQn,
 	[DMA_2_Channel_5] = DMA2_Channel4_5_IRQn
-	#endif /* __STM32F103C8T6__ */
+	#endif /* STM32F103C8T6__ */
 };
 
 /*********************************************** Helper Low Level Driver APIs ***********************************************/
@@ -141,17 +141,17 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t dm
 	// Default Case - RX (Into Memory)
 	if(_DMA_getChannelDirection(dmaChannel) == DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY)
 	{
-		__DMA_setCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
-		__DMA_setCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
+		__DMA_setChannelCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
+		__DMA_setChannelCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
 	}
 	// Different Case - TX (Into Peripheral)
 	else
 	{
-		__DMA_setCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
-		__DMA_setCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
+		__DMA_setChannelCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
+		__DMA_setChannelCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
 	}
 	// Set the data size
-	__DMA_setNDTR(_DMA_getChannel(dmaChannel), dmaTransfer.size);
+	__DMA_setChannelCNDTR(_DMA_getChannel(dmaChannel), dmaTransfer.size);
 }
 
 /**
@@ -164,9 +164,9 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t dm
  */
 void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
-	uint32_t reg = __DMA_getCCR(_DMA_getChannel(dmaChannel));
+	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg |= (uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
-	__DMA_setCCR(_DMA_getChannel(dmaChannel), reg);
+	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
 }
 
 /**
@@ -179,8 +179,8 @@ void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
  */
 void _DMA_disableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
-	uint32_t reg = __DMA_getCCR(_DMA_getChannel(dmaChannel));
+	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg &= ~(uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
-	__DMA_setCCR(_DMA_getChannel(dmaChannel), reg);
+	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
 }
 

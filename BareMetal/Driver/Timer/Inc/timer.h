@@ -68,7 +68,7 @@ void TIM_Config(timer_config_t* TIMx_CONFIG);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-__STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ){
+__STATIC_FORCEINLINE uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Capture the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -97,7 +97,7 @@ __STATIC_INLINE__ uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ){
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered
  */
-__STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* TIMx){
+__STATIC_FORCEINLINE uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* TIMx){
 	// Get the Status Register Value
 	return (TIMx->SR.REG & 0x01);
 }
@@ -107,7 +107,7 @@ __STATIC_INLINE__ uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-__STATIC_INLINE__ void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ){
+__STATIC_FORCEINLINE void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ){
 	// Get the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -133,7 +133,7 @@ __STATIC_INLINE__ void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ){
  * @brief Acknowledges the Overflow/Underflow Interrupt Status
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  */
-__STATIC_INLINE__ void TIM_IRQ_Ack_OVF_UVF(TIM_TypeDef* TIMx){
+__STATIC_FORCEINLINE void TIM_IRQ_Ack_OVF_UVF(TIM_TypeDef* TIMx){
 	// Acknowledge the Interrupt Flag
 	TIMx->SR.REG &= ~TIM_SR_UIF;
 }

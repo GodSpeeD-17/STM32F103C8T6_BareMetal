@@ -7,8 +7,8 @@
  */
 
  // Header Guards
-#ifndef DRIVER_DMA_H
-#define DRIVER_DMA_H
+#ifndef DRIVER_DMA_H__
+#define DRIVER_DMA_H__
 
 // --- Includes ---
 #include "dma_low_level.h"
@@ -44,7 +44,7 @@ driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaT
  * @returns - `DRIVER_FAIL`: Failure
  * @returns - `DRIVER_SUCCESS`: Success
  */
-__STATIC_INLINE__ driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+__STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
 	_DMA_enableIRQ(dmaChannel, dmaIRQ);
 	return DRIVER_SUCCESS;
@@ -61,7 +61,7 @@ __STATIC_INLINE__ driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaCh
  * @returns - `DRIVER_FAIL`: Failure
  * @returns - `DRIVER_SUCCESS`: Success
  */
-__STATIC_INLINE__ driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+__STATIC_FORCEINLINE driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
 	_DMA_disableIRQ(dmaChannel, dmaIRQ);
 	return DRIVER_SUCCESS;
@@ -175,7 +175,7 @@ static dma_config_t DMA_I2C1_TX_Configuration = {
  * @brief Enables the main DMA Clock
  * @param[in] DMA_channelX DMA Channel 
  */
-__STATIC_INLINE__ void DMA_clk_enable(DMA_Channel_TypeDef* DMA_channelX){
+__STATIC_FORCEINLINE void DMA_clk_enable(DMA_Channel_TypeDef* DMA_channelX){
 	// Use Register
 	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
@@ -197,7 +197,7 @@ __STATIC_INLINE__ void DMA_clk_enable(DMA_Channel_TypeDef* DMA_channelX){
  * @brief Disables the main DMA Clock
  * @param[in] DMA_channelX DMA Channel 
  */
-__STATIC_INLINE__ void DMA_clk_disable(DMA_Channel_TypeDef* DMA_channelX){
+__STATIC_FORCEINLINE void DMA_clk_disable(DMA_Channel_TypeDef* DMA_channelX){
 	// Use Register
 	uint32_t reg = RCC->AHBENR.REG;
 	// Enable DMA1 Clock
@@ -219,7 +219,7 @@ __STATIC_INLINE__ void DMA_clk_disable(DMA_Channel_TypeDef* DMA_channelX){
  * @brief Enable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  */
-__STATIC_INLINE__ void DMA_CH_enable(DMA_Channel_TypeDef* DMA_channelX){
+__STATIC_FORCEINLINE void DMA_CH_enable(DMA_Channel_TypeDef* DMA_channelX){
 	// Enable the Channel
 	DMA_channelX->CCR.REG |= DMA_CCR_EN;
 }
@@ -228,7 +228,7 @@ __STATIC_INLINE__ void DMA_CH_enable(DMA_Channel_TypeDef* DMA_channelX){
  * @brief Disable the DMA Channel
  * @param[in] DMA_channelX DMA Channel
  */
-__STATIC_INLINE__ void DMA_CH_disable(DMA_Channel_TypeDef* DMA_channelX){
+__STATIC_FORCEINLINE void DMA_CH_disable(DMA_Channel_TypeDef* DMA_channelX){
 	// Disable the Channel
 	DMA_channelX->CCR.REG &= ~DMA_CCR_EN;
 }
@@ -238,7 +238,7 @@ __STATIC_INLINE__ void DMA_CH_disable(DMA_Channel_TypeDef* DMA_channelX){
  * @param[in] DMA_channelX DMA Channel Number
  * @returns The DMA Channel IRQ Number
  */
-__STATIC_INLINE__ uint8_t DMA_CH_get_IRQn(DMA_Channel_TypeDef* DMA_channelX){
+__STATIC_FORCEINLINE uint8_t DMA_CH_get_IRQn(DMA_Channel_TypeDef* DMA_channelX){
 	// Return the IRQn
 	if(DMA_channelX == DMA1_Channel1){
 		return DMA1_Channel1_IRQn;
@@ -309,4 +309,4 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance);
 void DMA_Load_Default_MEM2PER(dma_config_t* instance);
 #endif /* __OLD_DMA_METHOD__ */
 
-#endif /* DRIVER_DMA_H */
+#endif /* DRIVER_DMA_H__ */

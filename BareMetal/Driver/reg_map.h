@@ -34,8 +34,8 @@
 */
 
 // Header Guards
-#ifndef __REG_MAP_H__
-#define __REG_MAP_H__
+#ifndef REG_MAP_H__
+#define REG_MAP_H__
 
 // C++ Safeguard
 #ifdef __cplusplus
@@ -49,11 +49,6 @@ extern "C" {
 /*********************************************** Core C ***********************************************/
 
 /*********************************************** Custom Declaration ***********************************************/
-#define __INLINE__ 								__attribute__((always_inline)) inline
-#define __STATIC__ 								static
-#define __STATIC_INLINE__ 						__STATIC__ __INLINE__
-#define __IO 									volatile
-#define __PACKED__ 								__attribute__((__packed__))
 #define BIT_MASK(X)								((uint32_t) (0x01 << (X)))
 #define CONSECUTIVE_BIT1_MASK()					((uint32_t)(0x01))
 #define CONSECUTIVE_BIT2_MASK()					((uint32_t)(0x03))
@@ -69,8 +64,8 @@ extern "C" {
  */
 typedef enum
 {
-	DRIVER_SUCCESS = (uint8_t)0x00,
-	DRIVER_FAIL = (uint8_t)0x01
+	DRIVER_SUCCESS = (uint8_t) 0x00,
+	DRIVER_FAIL = (uint8_t) 0x01
 } driver_status_t;
 
 /**
@@ -88,29 +83,29 @@ typedef enum
 /*********************************************** Custom Declaration ***********************************************/
 
 /*********************************************** ARM Cortex-M3 ***********************************************/
-#ifdef __CORTEX_M3__
-#include "arm_reg_map.h"
-#include "flash_reg_map.h"
-#include "stm32f1xx_nvic.h"
-#include "stm32f1xx_scb.h"
-#include "systick_reg_map.h"
-#include "wdg_reg_map.h"
-#endif /* __CORTEX_M3__ */
+#ifdef CORTEX_M3__
+	#include "arm_reg_map.h"
+	#include "stm32f1xx_flash.h"
+	#include "stm32f1xx_scb.h"
+	#include "stm32f1xx_nvic.h"
+	#include "systick_reg_map.h"
+	#include "wdg_reg_map.h"
+#endif /* CORTEX_M3__ */
 /*********************************************** ARM Cortex-M3 ***********************************************/
 
 /*********************************************** STM32F103C8T6 ***********************************************/
-#ifdef __STM32F103C8T6__
-#include "adc_reg_map.h"
-#include "advtim_reg_map.h"
-#include "afio_reg_map.h"
-#include "dma_reg_map.h"
-#include "exti_reg_map.h"
-#include "gpio_reg_map.h"
-#include "i2c_reg_map.h"
-#include "timer_reg_map.h"
-#include "rcc_reg_map.h"
-#include "usart_reg_map.h"
-#endif /* __STM32F103C8T6__ */
+#ifdef STM32F103C8T6__
+	#include "adc_reg_map.h"
+	#include "advtim_reg_map.h"
+	#include "afio_reg_map.h"
+	#include "dma_reg_map.h"
+	#include "exti_reg_map.h"
+	#include "gpio_reg_map.h"
+	#include "i2c_reg_map.h"
+	#include "timer_reg_map.h"
+	#include "rcc_reg_map.h"
+	#include "usart_reg_map.h"
+#endif /* STM32F103C8T6__ */
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Address Mapping ***********************************************/
@@ -129,12 +124,11 @@ typedef enum
 #define IWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00003000)
 
 // Address Mapping
-#define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
-#define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
 #define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
-#define CoreDebug								((CoreDebug_TypeDef *) (CoreDebug_BASE_ADDR))
-#define FLASH 									((FLASH_REG_STRUCT *) (FLASH_BASE_ADDR))
-#define WWDG 									((WWDG_REG_STRUCT *) (APB1_BASE_ADDR + 0x00002C00))
+#define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
+#define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
+#define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
+#define WWDG 									((WWDG_TypeDef *) (APB1_BASE_ADDR + 0x00002C00))
 #define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000))
 #define GPIOA 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000800))
 #define GPIOB 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000C00))
@@ -258,34 +252,34 @@ typedef uint8_t irq_t;
 #define I2Cx_SPEED_STD (FREQ_100kHz)
 #define I2Cx_SPEED_FAST (FREQ_100kHz << 2)
 // I2C SCL Clock Frequency
-#define I2Cx_SCL_FREQ_4MHz (0x04)
-#define I2Cx_SCL_FREQ_8MHz (0x08)
-#define I2Cx_SCL_FREQ_16MHz (0x10)
-#define I2Cx_SCL_FREQ_32MHz (0x20)
-#define I2Cx_SCL_FREQ_DEFAULT RCC_Get_APB1Clock()
+#define I2Cx_SCL_FREQ_4MHz						(0x04)
+#define I2Cx_SCL_FREQ_8MHz						(0x08)
+#define I2Cx_SCL_FREQ_16MHz						(0x10)
+#define I2Cx_SCL_FREQ_32MHz						(0x20)
+#define I2Cx_SCL_FREQ_DEFAULT 					RCC_Get_APB1Clock()
 // I2C Mode
-#define I2Cx_MODE_STD (0x00)
-#define I2Cx_MODE_FAST (0x01)
+#define I2Cx_MODE_STD 							(0x00)
+#define I2Cx_MODE_FAST 							(0x01)
 // I2C Interrupt Mapping
-#define I2Cx_IRQ_EVENT (0x01)
-#define I2Cx_IRQ_BUFFER (0x02)
-#define I2Cx_IRQ_ERROR (0x04)
-#define I2Cx_IRQ_ALL (I2Cx_IRQ_EVENT | I2Cx_IRQ_BUFFER | I2Cx_IRQ_ERROR)
+#define I2Cx_IRQ_EVENT 							(0x01)
+#define I2Cx_IRQ_BUFFER 						(0x02)
+#define I2Cx_IRQ_ERROR 							(0x04)
+#define I2Cx_IRQ_ALL 							(I2Cx_IRQ_EVENT | I2Cx_IRQ_BUFFER | I2Cx_IRQ_ERROR)
 // I2C Fast Mode Duty
-#define I2Cx_DUTY_NORMAL (0x00)
-#define I2Cx_DUTY_FAST (0x01)
+#define I2Cx_DUTY_NORMAL						(0x00)
+#define I2Cx_DUTY_FAST							(0x01)
 // I2C Slave R/W Definitions
-#define I2Cx_WRITE (0x00)
-#define I2Cx_READ (0x01)
+#define I2Cx_WRITE								(0x00)
+#define I2Cx_READ								(0x01)
 // I2C Peripheral Definitions
-#define I2C1_SCL_GPIO (GPIOB)
-#define I2C1_SCL_PIN (GPIOx_PIN_6)
-#define I2C1_SDA_GPIO (GPIOB)
-#define I2C1_SDA_PIN (GPIOx_PIN_7)
-#define I2C2_SCL_GPIO (GPIOB)
-#define I2C2_SCL_PIN (GPIOx_PIN_10)
-#define I2C2_SDA_GPIO (GPIOB)
-#define I2C2_SDA_PIN (GPIOx_PIN_11)
+#define I2C1_SCL_GPIO 							(GPIOB)
+#define I2C1_SCL_PIN 							(GPIOx_PIN_6)
+#define I2C1_SDA_GPIO 							(GPIOB)
+#define I2C1_SDA_PIN 							(GPIOx_PIN_7)
+#define I2C2_SCL_GPIO 							(GPIOB)
+#define I2C2_SCL_PIN 							(GPIOx_PIN_10)
+#define I2C2_SDA_GPIO 							(GPIOB)
+#define I2C2_SDA_PIN 							(GPIOx_PIN_11)
 /*********************************************** I2C MACROS ***********************************************/
 
 /*********************************************** SysTick MACROS ***********************************************/
@@ -886,7 +880,7 @@ typedef enum
  * @returns 0: Not a power of 2
  * @returns 1: Power of 2
  */
-__STATIC_INLINE__ uint8_t Is_Power_Of_2(uint16_t num)
+__STATIC_FORCEINLINE uint8_t Is_Power_Of_2(uint16_t num)
 {
 	// Check if the number is a power of two
 	return (num && (!(num & (num - 1))));
@@ -897,7 +891,7 @@ __STATIC_INLINE__ uint8_t Is_Power_Of_2(uint16_t num)
  * @param n The number to round up
  * @return Rounded up power of 2
  */
-__STATIC_INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n)
+__STATIC_FORCEINLINE uint16_t Logical_Round_Up_Power_Of_2(uint16_t n)
 {
 	// Input = 0 -> Output = 1
 	if (n == 0)
@@ -919,7 +913,7 @@ __STATIC_INLINE__ uint16_t Logical_Round_Up_Power_Of_2(uint16_t n)
  * @param n The number to round up
  * @return Rounded up power of 2
  */
-__STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x)
+__STATIC_FORCEINLINE uint32_t Round_Up_Power_of_2(uint32_t x)
 {
 	// If x is 0, return 1 (2^0)
 	if (x == 0)
@@ -942,4 +936,4 @@ __STATIC_INLINE__ uint32_t Round_Up_Power_of_2(uint32_t x)
 }
 #endif /* __cplusplus */
 
-#endif /* __REG_MAP_H__ */
+#endif /* REG_MAP_H__ */

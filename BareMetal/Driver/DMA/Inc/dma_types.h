@@ -139,7 +139,7 @@ typedef uint16_t dma_size_t;
 #define DMA_2_Channel_5								((dma_channel_t) 0x0B)
 
 /*********************************************** STM32F103C8T6 ***********************************************/
-#if defined(__STM32F103C8T6__)
+#if defined(STM32F103C8T6__)
 // --- DMA 1 Channel 1 ---- //
 #define DMA_ADC1_Channel							DMA1_Channel1
 #define DMA_TIM2_CH3_Channel						DMA1_Channel1
@@ -184,7 +184,7 @@ typedef uint16_t dma_size_t;
 #define DMA_TIM2_CH2_Channel						DMA1_Channel7
 #define DMA_TIM2_CH4_Channel						DMA1_Channel7
 #define DMA_TIM4_UP_Channel							DMA1_Channel7
-#endif /* __STM32F103C8T6__ */
+#endif /* STM32F103C8T6__ */
 /******************************** STM32F103C8T6 ********************************/
 
 

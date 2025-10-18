@@ -77,8 +77,8 @@
  ***************************************************************************************/
 
 // ---- Header Guards ---- // 
-#ifndef __NVIC_H__
-#define __NVIC_H__
+#ifndef NVIC_H__
+#define NVIC_H__
 
 // ---- Main Library ---- //
 #include "reg_map.h"
@@ -88,11 +88,11 @@
 #define _IRQn_GET_IPR_REG_INDEX(X)					(((X) & 0x03) << 3)
 
 // --- STM32F103C8T6 --- //
-#ifdef __STM32F103C8T6__
-#define SCB_AICR_WRITE_VALUE						0x5FA
-#else
-#define SCB_AICR_WRITE_VALUE						0x000
-#endif /* __STM32F103C8T6__ */
+#ifdef STM32F103C8T6__
+	#define SCB_AICR_WRITE_VALUE						(0x5FA)
+	#else
+	#define SCB_AICR_WRITE_VALUE						(0x000)
+#endif /* STM32F103C8T6__ */
 
 // ----- tyepdefs ----- //
 typedef uint8_t priority_group_t;
@@ -182,7 +182,7 @@ typedef uint32_t scb_exception_t;
  * @brief Set the priority grouping using bit manipulation only
  * @param PriorityGroup Priority grouping field (0-4)
  */
-__STATIC_INLINE__ void NVIC_SetPriorityGrouping(priority_group_t priorityGroup)
+__STATIC_FORCEINLINE void NVIC_SetPriorityGrouping(priority_group_t priorityGroup)
 {
 	uint32_t reg = SCB->AIRCR;
 	// Writing to this register requires 0x5FA in the VECTKEY field
@@ -196,7 +196,7 @@ __STATIC_INLINE__ void NVIC_SetPriorityGrouping(priority_group_t priorityGroup)
  * @brief Get the current priority grouping
  * @return Current priority grouping (0-4)
  */
-__STATIC_INLINE__ priority_group_t NVIC_GetPriorityGrouping(void)
+__STATIC_FORCEINLINE priority_group_t NVIC_GetPriorityGrouping(void)
 {
 	uint32_t reg = SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk;
 	reg >>= SCB_AIRCR_PRIGROUP_Pos;
@@ -207,7 +207,7 @@ __STATIC_INLINE__ priority_group_t NVIC_GetPriorityGrouping(void)
  * @brief Quick enable for common system exceptions
  * @param Exception: System exception number
  */
-__STATIC_INLINE__ void SCB_EnableException(scb_exception_t exception)
+__STATIC_FORCEINLINE void SCB_EnableException(scb_exception_t exception)
 {
 	// Enable system exceptions via SHCSR
 	SCB->SHCSR |= exception;
@@ -218,7 +218,7 @@ __STATIC_INLINE__ void SCB_EnableException(scb_exception_t exception)
  * @param IRQn Interrupt number
  * @return Current priority value (0-255)
  */
-__STATIC_INLINE__ priority_t NVIC_GetPriority(const irq_t IRQn)
+__STATIC_FORCEINLINE priority_t NVIC_GetPriority(const irq_t IRQn)
 {
 	uint32_t reg = NVIC->IPR[_IRQn_GET_IPR_REG(IRQn)];
 	reg >>= _IRQn_GET_IPR_REG_INDEX(IRQn);
@@ -233,7 +233,7 @@ __STATIC_INLINE__ priority_t NVIC_GetPriority(const irq_t IRQn)
  * @note - `priority` permissible Values: 0 - 255 
  * @note - Lower Value implies higher priority
  */
-__STATIC_INLINE__ void NVIC_SetPriority(const irq_t IRQn, const priority_t priority)
+__STATIC_FORCEINLINE void NVIC_SetPriority(const irq_t IRQn, const priority_t priority)
 {
 	uint32_t reg = NVIC->IPR[_IRQn_GET_IPR_REG(IRQn)];
 	reg &= ~(0xFF << _IRQn_GET_IPR_REG_INDEX(IRQn));
@@ -248,7 +248,7 @@ __STATIC_INLINE__ void NVIC_SetPriority(const irq_t IRQn, const priority_t prior
  * @param SubPriority Sub-priority (0-15) 
  * @param PriorityGroup Priority grouping (0-4)
  */
-__STATIC_INLINE__ void NVIC_ConfigPriority(irq_t IRQn, priority_t priority, sub_priority_t subPriority)
+__STATIC_FORCEINLINE void NVIC_ConfigPriority(irq_t IRQn, priority_t priority, sub_priority_t subPriority)
 {
 	priority_t priorityGroup = NVIC_GetPriorityGrouping();
 	NVIC_SetPriority(IRQn, (uint8_t) ((priority << (4 + priorityGroup)) | (subPriority << (4 - priorityGroup))));
@@ -259,7 +259,7 @@ __STATIC_INLINE__ void NVIC_ConfigPriority(irq_t IRQn, priority_t priority, sub_
  * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__STATIC_INLINE__ void NVIC_IRQEnable(uint8_t IRQn){
+__STATIC_FORCEINLINE void NVIC_IRQEnable(uint8_t IRQn){
 	// Enable the IRQn
 	NVIC->ISER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
 }
@@ -269,7 +269,7 @@ __STATIC_INLINE__ void NVIC_IRQEnable(uint8_t IRQn){
  * @param IRQn The Interrupt Number
  * @note Global Interrupt Configuration
  */
-__STATIC_INLINE__ void NVIC_IRQDisable(uint8_t IRQn){
+__STATIC_FORCEINLINE void NVIC_IRQDisable(uint8_t IRQn){
 	// Disable the IRQn
 	NVIC->ICER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
 }
@@ -278,9 +278,9 @@ __STATIC_INLINE__ void NVIC_IRQDisable(uint8_t IRQn){
  * @brief Software IRQ Trigger
  * @param IRQn The Interrupt Number
  */
-__STATIC_INLINE__ void NVIC_IRQ_SoftwareTrigger(uint8_t IRQn){
+__STATIC_FORCEINLINE void NVIC_IRQ_SoftwareTrigger(uint8_t IRQn){
 	// Set Pending Register
 	NVIC->ISPR[(IRQn >> 5)] |= (uint32_t) (1 << (IRQn & 0x1F));
 }
 
-#endif /* __NVIC_H__ */
+#endif /* NVIC_H__ */
