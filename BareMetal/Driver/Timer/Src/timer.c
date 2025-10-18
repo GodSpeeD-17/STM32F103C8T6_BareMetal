@@ -77,7 +77,7 @@ uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value)
  * @brief Helper Function for Timer Configuration
  * @param TIMx_CONFIG Pointer to timer configuration structure
  */
-__STATIC__ void __TIM__Config_Default__(timer_config_t *TIMx_CONFIG)
+__STATIC void __TIM__Config_Default__(timer_config_t *TIMx_CONFIG)
 {
 	// !<< Timer Parameter Configuration >>!
 	// CMS Mode Selection (Edge Mode Selection)

@@ -34,30 +34,52 @@
 */
 
 // Header Guards
-#ifndef REG_MAP_H__
-#define REG_MAP_H__
+#ifndef REG_MAP_H_
+#define REG_MAP_H_
 
 // C++ Safeguard
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/*********************************************** Core C ***********************************************/
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-/*********************************************** Core C ***********************************************/
+/*********************************************** ARM Cortex-M3 ***********************************************/
+#include "cmsis_gcc.h"
+#include "stm32f1xx_helper.h"
+
+#ifdef CORTEX_M3__
+	#include "stm32f1xx_flash.h"
+	#include "stm32f1xx_scb.h"
+	#include "stm32f1xx_nvic.h"
+	#include "stm32f1xx_systick.h"
+	#include "stm32f1xx_watchdog.h"
+#endif /* CORTEX_M3__ */
+/*********************************************** ARM Cortex-M3 ***********************************************/
+
+/*********************************************** STM32F103C8T6 ***********************************************/
+#ifdef STM32F103C8T6__
+	#include "stm32f1xx_adc.h"
+	#include "stm32f1xx_advtim.h"
+	#include "stm32f1xx_afio.h"
+	#include "stm32f1xx_dma.h"
+	#include "stm32f1xx_exti.h"
+	#include "stm32f1xx_gpio.h"
+	#include "stm32f1xx_i2c.h"
+	#include "stm32f1xx_timer.h"
+	#include "stm32f1xx_rcc.h"
+	#include "stm32f1xx_usart.h"
+#endif /* STM32F103C8T6__ */
+/*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Custom Declaration ***********************************************/
 #define BIT_MASK(X)								((uint32_t) (0x01 << (X)))
-#define CONSECUTIVE_BIT1_MASK()					((uint32_t)(0x01))
-#define CONSECUTIVE_BIT2_MASK()					((uint32_t)(0x03))
-#define CONSECUTIVE_BIT3_MASK()					((uint32_t)(0x07))
-#define CONSECUTIVE_BIT4_MASK()					((uint32_t)(0x0F))
-#define CONSECUTIVE_BIT5_MASK()					((uint32_t)(0x1F))
-#define CONSECUTIVE_BIT6_MASK()					((uint32_t)(0x3F))
-#define CONSECUTIVE_BIT7_MASK()					((uint32_t)(0x7F))
-#define CONSECUTIVE_BIT8_MASK()					((uint32_t)(0xFF))
+#define CONSECUTIVE_BIT1_MASK()					((uint32_t) (0x01))
+#define CONSECUTIVE_BIT2_MASK()					((uint32_t) (0x03))
+#define CONSECUTIVE_BIT3_MASK()					((uint32_t) (0x07))
+#define CONSECUTIVE_BIT4_MASK()					((uint32_t) (0x0F))
+#define CONSECUTIVE_BIT5_MASK()					((uint32_t) (0x1F))
+#define CONSECUTIVE_BIT6_MASK()					((uint32_t) (0x3F))
+#define CONSECUTIVE_BIT7_MASK()					((uint32_t) (0x7F))
+#define CONSECUTIVE_BIT8_MASK()					((uint32_t) (0xFF))
 
 /**
  * @brief Enumeration for Success/Failure for Driver return
@@ -82,32 +104,6 @@ typedef enum
 
 /*********************************************** Custom Declaration ***********************************************/
 
-/*********************************************** ARM Cortex-M3 ***********************************************/
-#ifdef CORTEX_M3__
-	#include "arm_reg_map.h"
-	#include "stm32f1xx_flash.h"
-	#include "stm32f1xx_scb.h"
-	#include "stm32f1xx_nvic.h"
-	#include "systick_reg_map.h"
-	#include "wdg_reg_map.h"
-#endif /* CORTEX_M3__ */
-/*********************************************** ARM Cortex-M3 ***********************************************/
-
-/*********************************************** STM32F103C8T6 ***********************************************/
-#ifdef STM32F103C8T6__
-	#include "adc_reg_map.h"
-	#include "advtim_reg_map.h"
-	#include "afio_reg_map.h"
-	#include "dma_reg_map.h"
-	#include "exti_reg_map.h"
-	#include "gpio_reg_map.h"
-	#include "i2c_reg_map.h"
-	#include "timer_reg_map.h"
-	#include "rcc_reg_map.h"
-	#include "usart_reg_map.h"
-#endif /* STM32F103C8T6__ */
-/*********************************************** STM32F103C8T6 ***********************************************/
-
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
 #define SysTick_BASE_ADDR 						0xE000E010
@@ -128,7 +124,6 @@ typedef enum
 #define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
-#define WWDG 									((WWDG_TypeDef *) (APB1_BASE_ADDR + 0x00002C00))
 #define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000))
 #define GPIOA 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000800))
 #define GPIOB 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000C00))
@@ -936,4 +931,4 @@ __STATIC_FORCEINLINE uint32_t Round_Up_Power_of_2(uint32_t x)
 }
 #endif /* __cplusplus */
 
-#endif /* REG_MAP_H__ */
+#endif /* REG_MAP_H_ */

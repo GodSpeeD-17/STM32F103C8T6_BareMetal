@@ -23,7 +23,7 @@ set(ST_UART_FLASH_PORT /dev/ttyUSB0)
 
 # ---------------------- C/C++ Flags ----------------------
 set(MCU_DEFINE STM32F103C8T6__)
-set(MCU_CPU_DEFINE __CORTEX_M3__)
+set(MCU_CPU_DEFINE CORTEX_M3__)
 set(MCU_CPU cortex-m3)
 set(C_STD gnu11)
 set(CXX_STD c++17)
@@ -121,6 +121,7 @@ add_driver_module(
 	GPIO 
 	RCC
 	Timer
+	DMA
 )
 
 # ---------------------- Executable ----------------------
