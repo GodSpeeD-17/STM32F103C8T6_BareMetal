@@ -100,8 +100,8 @@ DESIGN PRINCIPLES
 */
 
 /*********************************************** Header Guards ***********************************************/
-#ifndef DMA_TYPES_H
-#define DMA_TYPES_H
+#ifndef DMA_TYPES_H_
+#define DMA_TYPES_H_
 
 // C++ Compatibility
 #ifdef __cplusplus
@@ -140,50 +140,50 @@ typedef uint16_t dma_size_t;
 
 /*********************************************** STM32F103C8T6 ***********************************************/
 #if defined(STM32F103C8T6__)
-// --- DMA 1 Channel 1 ---- //
-#define DMA_ADC1_Channel							DMA1_Channel1
-#define DMA_TIM2_CH3_Channel						DMA1_Channel1
-#define DMA_TIM4_CH1_Channel						DMA1_Channel1
-// --- DMA 1 Channel 2 ---- //
-#define DMA_SPI1_RX_Channel							DMA1_Channel2
-#define DMA_USART3_TX_Channel						DMA1_Channel2
-#define DMA_TIM1_CH1_Channel						DMA1_Channel2
-#define DMA_TIM2_UP_Channel							DMA1_Channel2
-#define DMA_TIM3_CH3_Channel						DMA1_Channel2
-// --- DMA 1 Channel 3 ---- //
-#define DMA_SPI1_TX_Channel							DMA1_Channel3
-#define DMA_USART3_RX_Channel						DMA1_Channel3
-#define DMA_TIM3_CH4_Channel						DMA1_Channel3
-#define DMA_TIM3_UP_Channel							DMA1_Channel3
-// --- DMA 1 Channel 4 ---- //
-#define DMA_SPI2_RX_Channel							DMA1_Channel4
-#define DMA_I2S2_RX_Channel							DMA1_Channel4
-#define DMA_USART1_TX_Channel						DMA1_Channel4
-#define DMA_I2C2_TX_Channel							DMA1_Channel4
-#define DMA_TIM1_CH4_Channel						DMA1_Channel4
-#define DMA_TIM1_TRIG_Channel						DMA1_Channel4
-#define DMA_TIM1_COM_Channel						DMA1_Channel4
-#define DMA_TIM4_CH2_Channel						DMA1_Channel4
-// --- DMA 1 Channel 5 ---- //
-#define DMA_SPI2_TX_Channel							DMA1_Channel5
-#define DMA_I2S2_TX_Channel							DMA1_Channel5
-#define DMA_USART1_RX_Channel						DMA1_Channel5
-#define DMA_I2C2_RX_Channel							DMA1_Channel5
-#define DMA_TIM1_UP_Channel							DMA1_Channel5
-#define DMA_TIM2_CH1_Channel						DMA1_Channel5
-#define DMA_TIM4_CH3_Channel						DMA1_Channel5
-// --- DMA 1 Channel 6 ---- //
-#define DMA_USART2_RX_Channel						DMA1_Channel6
-#define DMA_I2C1_TX_Channel							DMA1_Channel6
-#define DMA_TIM1_CH3_Channel						DMA1_Channel6
-#define DMA_TIM3_CH1_Channel						DMA1_Channel6
-#define DMA_TIM3_TRIG_Channel						DMA1_Channel6
-// --- DMA 1 Channel 7 ---- //
-#define DMA_USART2_TX_Channel						DMA1_Channel7
-#define DMA_I2C1_RX_Channel							DMA1_Channel7
-#define DMA_TIM2_CH2_Channel						DMA1_Channel7
-#define DMA_TIM2_CH4_Channel						DMA1_Channel7
-#define DMA_TIM4_UP_Channel							DMA1_Channel7
+	// --- DMA 1 Channel 1 ---- //
+	#define DMA_ADC1_Channel							DMA1_Channel1
+	#define DMA_TIM2_CH3_Channel						DMA1_Channel1
+	#define DMA_TIM4_CH1_Channel						DMA1_Channel1
+	// --- DMA 1 Channel 2 ---- //
+	#define DMA_SPI1_RX_Channel							DMA1_Channel2
+	#define DMA_USART3_TX_Channel						DMA1_Channel2
+	#define DMA_TIM1_CH1_Channel						DMA1_Channel2
+	#define DMA_TIM2_UP_Channel							DMA1_Channel2
+	#define DMA_TIM3_CH3_Channel						DMA1_Channel2
+	// --- DMA 1 Channel 3 ---- //
+	#define DMA_SPI1_TX_Channel							DMA1_Channel3
+	#define DMA_USART3_RX_Channel						DMA1_Channel3
+	#define DMA_TIM3_CH4_Channel						DMA1_Channel3
+	#define DMA_TIM3_UP_Channel							DMA1_Channel3
+	// --- DMA 1 Channel 4 ---- //
+	#define DMA_SPI2_RX_Channel							DMA1_Channel4
+	#define DMA_I2S2_RX_Channel							DMA1_Channel4
+	#define DMA_USART1_TX_Channel						DMA1_Channel4
+	#define DMA_I2C2_TX_Channel							DMA1_Channel4
+	#define DMA_TIM1_CH4_Channel						DMA1_Channel4
+	#define DMA_TIM1_TRIG_Channel						DMA1_Channel4
+	#define DMA_TIM1_COM_Channel						DMA1_Channel4
+	#define DMA_TIM4_CH2_Channel						DMA1_Channel4
+	// --- DMA 1 Channel 5 ---- //
+	#define DMA_SPI2_TX_Channel							DMA1_Channel5
+	#define DMA_I2S2_TX_Channel							DMA1_Channel5
+	#define DMA_USART1_RX_Channel						DMA1_Channel5
+	#define DMA_I2C2_RX_Channel							DMA1_Channel5
+	#define DMA_TIM1_UP_Channel							DMA1_Channel5
+	#define DMA_TIM2_CH1_Channel						DMA1_Channel5
+	#define DMA_TIM4_CH3_Channel						DMA1_Channel5
+	// --- DMA 1 Channel 6 ---- //
+	#define DMA_USART2_RX_Channel						DMA1_Channel6
+	#define DMA_I2C1_TX_Channel							DMA1_Channel6
+	#define DMA_TIM1_CH3_Channel						DMA1_Channel6
+	#define DMA_TIM3_CH1_Channel						DMA1_Channel6
+	#define DMA_TIM3_TRIG_Channel						DMA1_Channel6
+	// --- DMA 1 Channel 7 ---- //
+	#define DMA_USART2_TX_Channel						DMA1_Channel7
+	#define DMA_I2C1_RX_Channel							DMA1_Channel7
+	#define DMA_TIM2_CH2_Channel						DMA1_Channel7
+	#define DMA_TIM2_CH4_Channel						DMA1_Channel7
+	#define DMA_TIM4_UP_Channel							DMA1_Channel7
 #endif /* STM32F103C8T6__ */
 /******************************** STM32F103C8T6 ********************************/
 
@@ -207,6 +207,9 @@ typedef uint16_t dma_size_t;
 #define DMA_CHANNEL_MEM2MEM_MODE_ENABLE				((dma_mem2mem_mode_t) 0x01)
 
 /*********************************************** DMA ENDPOINT DATA SIZE ***********************************************/
+/** @def DMA_ENDPOINT_DATA_SIZE_8_BIT
+ * @brief Sets transfer data width to 8-bits
+ */
 #define DMA_ENDPOINT_DATA_SIZE_8_BIT				((dma_endpoint_data_size_t) 0x00)
 #define DMA_ENDPOINT_DATA_SIZE_16_BIT				((dma_endpoint_data_size_t) 0x01)
 #define DMA_ENDPOINT_DATA_SIZE_32_BIT				((dma_endpoint_data_size_t) 0x02)
@@ -227,8 +230,13 @@ typedef uint16_t dma_size_t;
  */
 typedef struct {
 	// Data Size
+	// - `DMA_ENDPOINT_DATA_SIZE_8_BIT`
+	// - `DMA_ENDPOINT_DATA_SIZE_16_BIT`
+	// - `DMA_ENDPOINT_DATA_SIZE_32_BIT`
 	dma_endpoint_data_size_t size: 2;
 	// Increment Address
+	// - `DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE`
+	// - `DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE`
 	dma_endpoint_memory_increment_t increment: 1;
 } dma_endpoint_t;
 
@@ -245,21 +253,20 @@ typedef struct {
 	dma_channel_priority_t priority: 2;
 	
 	// Transfer direction
-	// - DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY: Read from peripheral, write to memory
-	// - DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL: Read from memory, write to peripheral  
-	// - DMA_DIR_MEMORY_TO_MEMORY: Memory copy operation
+	// - `DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY`: Read from peripheral, write to memory (Default)
+	// - `DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL`: Read from memory, write to peripheral  
 	dma_transfer_dir_t direction: 1;
 	
 	// Circular Mode
-	// - DMA_CHANNEL_CIRCULAR_MODE_DISABLE: One-time transfer
-	// - DMA_CHANNEL_CIRCULAR_MODE_ENABLE: Continuous/loop transfer
+	// - `DMA_CHANNEL_CIRCULAR_MODE_DISABLE`: One-time transfer
+	// - `DMA_CHANNEL_CIRCULAR_MODE_ENABLE`: Continuous/loop transfer
 	dma_circular_mode_t circular: 1;
 	
 	// Memory to Memory Transfer Mode
-	// - DMA_CHANNEL_MEM2MEM_MODE_DISABLE: Peripheral involved in transfer
-	// - DMA_CHANNEL_MEM2MEM_MODE_ENABLE: Pure memory copy operation
+	// - `DMA_CHANNEL_MEM2MEM_MODE_DISABLE`: Peripheral involved in transfer
+	// - `DMA_CHANNEL_MEM2MEM_MODE_ENABLE`: Pure memory copy operation
 	dma_mem2mem_mode_t mem2mem: 1;
-} dma_channel_mode_config_t;
+} dma_channel_properties_t;
 
 /**
  * @brief DMA Data Transfer Structure
@@ -314,20 +321,20 @@ typedef struct {
 	// - Data transfer direction
 	// - Circular Mode
 	// - MEM2MEM Mode
-	dma_channel_mode_config_t config;
+	dma_channel_properties_t properties;
 
 	// Memory Endpoint Configuration
 	// - Controls data size and address increment for memory side
-	// - Used as SOURCE in Memory→Peripheral transfers
-	// - Used as DESTINATION in Peripheral→Memory transfers  
-	// - Used as BOTH in Memory→Memory transfers
+	// - Used as `SOURCE` in Memory → Peripheral transfers
+	// - Used as `DESTINATION` in Peripheral → Memory transfers  
+	// - Used as `BOTH` in Memory → Memory transfers
 	dma_endpoint_t memory;
 	
 	// Peripheral Endpoint Configuration
 	// - Controls data size and address increment for peripheral side
-	// - Used as DESTINATION in Memory→Peripheral transfers
-	// - Used as SOURCE in Peripheral→Memory transfers
-	// - Typically has increment DISABLED for fixed peripheral registers
+	// - Used as `DESTINATION` in Memory → Peripheral transfers
+	// - Used as `SOURCE` in Peripheral → Memory transfers
+	// - Typically has increment `DISABLED` for fixed peripheral registers
 	dma_endpoint_t peripheral;
 } dma_channel_config_t;
 
@@ -335,4 +342,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* DMA_TYPES_H */
+#endif /* DMA_TYPES_H_ */

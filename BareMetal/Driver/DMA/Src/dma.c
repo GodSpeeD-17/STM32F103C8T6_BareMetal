@@ -1,6 +1,8 @@
 // --- Includes --- //
 #include "dma.h"
 
+/*********************************************** DMA Channel Configuration API ***********************************************/
+
 /**
  * @brief DMA Channel Configuration
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
@@ -18,13 +20,56 @@ driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_chan
 	// Endpoint Configuration
 	_DMA_configEndPoint(dmaConfig->peripheral, dmaConfig->memory, &reg);
 	// Channel Mode Configuration
-	_DMA_configChannelMode(&dmaConfig->config, &reg);
+	_DMA_configChannelProperties(&dmaConfig->properties, &reg);
 	// Update the CCR Register_DMA_configChannelMode
 	_DMA_setChannelConfiguration(dmaChannel, reg);
 	// Return Success
 	return DRIVER_SUCCESS;
 }
 
+/**
+ * @brief Configures the DMA Channel for memory to memory transfer mode
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForMem2Mem(const dma_channel_t dmaChannel)
+{
+	dma_channel_config_t mem2memChannelConfig;
+	DMA_LoadDefaultConfigForMEM2MEM(&mem2memChannelConfig);
+	return DMA_ConfigChannel(dmaChannel, &mem2memChannelConfig);
+}
+
+/**
+ * @brief Configures the DMA Channel for peripheral to memory transfer mode (RX)
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForPer2Mem(const dma_channel_t dmaChannel)
+{
+	dma_channel_config_t per2memChannelConfig;
+	DMA_LoadDefaultConfigForPER2MEM(&per2memChannelConfig);
+	return DMA_ConfigChannel(dmaChannel, &per2memChannelConfig);
+}
+
+/**
+ * @brief Configures the DMA Channel for memory to peripheral transfer mode (TX)
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel)
+{
+	dma_channel_config_t mem2perChannelConfig;
+	DMA_LoadDefaultConfigForMEM2PER(&mem2perChannelConfig);
+	return DMA_ConfigChannel(dmaChannel, &mem2perChannelConfig);
+}
+
+/*********************************************** DMA Channel Transfer API ***********************************************/
 /**
  * @brief Configures transfer for DMA Channel
  * @param dmaChannel DMA Channel
@@ -44,7 +89,6 @@ driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaT
 	// Return Success
 	return DRIVER_SUCCESS;
 }
-
 
 
 

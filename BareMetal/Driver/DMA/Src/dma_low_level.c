@@ -116,10 +116,10 @@ void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* reg)
 
 /**
  * @brief DMA Channel Mode Configuration
- * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_mode_config_t` 
+ * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_properties_t` 
  * @param reg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelMode(const dma_channel_mode_config_t* const mode, uint32_t* reg)
+void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* reg)
 {
 	// Priority
 	_DMA_configChannelPriority(mode->priority, reg);
@@ -164,9 +164,12 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t dm
  */
 void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
+	// DMA Level
 	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg |= (uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
+	// Global Level
+	NVIC_IRQEnable(_driverDMAIRQMapping[dmaChannel]);
 }
 
 /**
@@ -179,8 +182,11 @@ void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
  */
 void _DMA_disableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
+	// DMA Level
 	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg &= ~(uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
+	// Global Level
+	NVIC_IRQDisable(_driverDMAIRQMapping[dmaChannel]);
 }
 

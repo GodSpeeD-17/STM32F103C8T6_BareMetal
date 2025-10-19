@@ -14,6 +14,174 @@
 #include "dma_low_level.h"
 
 /**
+ * @brief DMA Channel Endpoint Configuration
+ * @param endpointConfig Pointer to Endpoint Configuration Structure `dma_endpoint_t`
+ * @param size Data Size to be transfered.  
+ * 	@par \c `DMA_ENDPOINT_DATA_SIZE_8_BIT` 8-bit data transfer
+ * 	@par \c `DMA_ENDPOINT_DATA_SIZE_16_BIT` 16-bit data transfer
+ * 	@par \c `DMA_ENDPOINT_DATA_SIZE_32_BIT` 32-bit data transfer
+ * @param increment Address Increment
+ * 	@par \c `DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE` Address Remains Constant
+ * 	@par \c `DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE` Address Increment after each transfer
+ */
+__STATIC_FORCEINLINE void DMA_ConfigureChannelEndPoint
+(
+    dma_endpoint_t* const endpointConfig,
+    const dma_endpoint_data_size_t size, 
+    const dma_endpoint_memory_increment_t increment
+)
+{
+    endpointConfig->size = size;
+    endpointConfig->increment = increment;
+}
+
+/**
+ * @brief DMA Channel Properties Configuration
+ * @param channelPropertiesConfig Pointer to Channel Properties Configuration Structure. Refer `dma_channel_properties_t`
+ * @param priority DMA Channel Priority
+ * 	@sa DMA_CHANNEL_PRIORITY_LOW 
+ * 	@sa DMA_CHANNEL_PRIORITY_MEDIUM
+ * 	@sa DMA_CHANNEL_PRIORITY_HIGH
+ * 	@sa DMA_CHANNEL_PRIORITY_VERY_HIGH
+ * @param direction DMA Channel Transfer Direction
+ * 	@par \c `DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY` From Peripheral to Memory (RX - Default)
+ * 	@par \c `DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL` From Memory to Peripheral (TX)
+ * @param circular DMA Channel Circular Mode Transfer
+ * 	@par \c `DMA_CHANNEL_CIRCULAR_MODE_DISABLE` Circular Mode (Constant RX/TX) Disabled
+ * 	@par \c `DMA_CHANNEL_CIRCULAR_MODE_ENABLE` Circular Mode (Constant RX/TX) Enabled
+ * @param mem2mem DMA Channel Memory to Memory Transfer
+ * 	@par \c `DMA_CHANNEL_MEM2MEM_MODE_DISABLE` Memory to Memory Transfer Disabled
+ * 	@par \c `DMA_CHANNEL_MEM2MEM_MODE_ENABLE` Memory to Memory Transfer Enabled
+ */
+__STATIC_FORCEINLINE void DMA_ConfigureChannelProperties
+(
+	dma_channel_properties_t* const channelPropertiesConfig,
+	const dma_channel_priority_t priority,
+	const dma_transfer_dir_t direction,
+	const dma_circular_mode_t circular,
+	const dma_mem2mem_mode_t mem2mem
+)
+{
+	channelPropertiesConfig->priority = priority;
+	channelPropertiesConfig->direction = direction;
+	channelPropertiesConfig->circular = circular;
+	channelPropertiesConfig->mem2mem = mem2mem;
+}
+
+/**
+ * @brief Configures for MEM2MEM Mode for transferring 8-bit data
+ * @param dmaConfig Pointer to DMA Channel Configuration Structure
+ * @note Assumes the following:
+ * @note - Priority: Medium
+ * @note - Direction: Peripheral to Memory
+ * @note - Circular: Disabled
+ * @note - Data Size: 8 bits
+ * @note - Memory: Increment
+ */
+__STATIC_FORCEINLINE void DMA_LoadDefaultConfigForMEM2MEM(dma_channel_config_t* const dmaConfig)
+{
+	// DMA Channel Properties
+	DMA_ConfigureChannelProperties
+	(
+		&dmaConfig->properties,
+		DMA_CHANNEL_PRIORITY_MEDIUM,
+		DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY,
+		DMA_CHANNEL_CIRCULAR_MODE_DISABLE,
+		DMA_CHANNEL_MEM2MEM_MODE_ENABLE
+	);
+	// Peripheral Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->peripheral,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
+	);
+	// Memory Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->memory,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
+	);
+}
+
+/**
+ * @brief Configures DMA Channel for 8-bit Peripheral-to-Memory transfers (RX)
+ * @param dmaConfig Pointer to DMA Channel configuration structure
+ * @note Default configuration:
+ * @note - Priority: Medium
+ * @note - Direction: Peripheral to Memory  
+ * @note - Circular: Disabled
+ * @note - Data Size: 8 bits (both ends)
+ * @note - Peripheral: Fixed address
+ * @note - Memory: Increment address
+ */
+__STATIC_FORCEINLINE void DMA_LoadDefaultConfigForPER2MEM(dma_channel_config_t* const dmaConfig)
+{
+	// DMA Channel Properties
+	DMA_ConfigureChannelProperties
+	(
+		&dmaConfig->properties,
+		DMA_CHANNEL_PRIORITY_MEDIUM,
+		DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY,
+		DMA_CHANNEL_CIRCULAR_MODE_DISABLE,
+		DMA_CHANNEL_MEM2MEM_MODE_DISABLE
+	);
+	// Source: Peripheral Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->peripheral,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE
+	);
+	// Destination: Memory Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->memory,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
+	);
+}
+
+/**
+ * @brief Configures DMA Channel for 8-bit Memory-to-Peripheral transfers (TX)
+ * @param dmaConfig Pointer to DMA Channel configuration structure
+ * @note Default configuration:
+ * @note - Priority: Medium
+ * @note - Direction: Peripheral to Memory  
+ * @note - Circular: Disabled
+ * @note - Data Size: 8 bits (both ends)
+ * @note - Peripheral: Fixed address
+ * @note - Memory: Increment address
+ */
+__STATIC_FORCEINLINE void DMA_LoadDefaultConfigForMEM2PER(dma_channel_config_t* const dmaConfig)
+{
+	// DMA Channel Properties
+	DMA_ConfigureChannelProperties
+	(
+		&dmaConfig->properties,
+		DMA_CHANNEL_PRIORITY_MEDIUM,
+		DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL,
+		DMA_CHANNEL_CIRCULAR_MODE_DISABLE,
+		DMA_CHANNEL_MEM2MEM_MODE_DISABLE
+	);
+	// Destination: Peripheral Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->peripheral,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE
+	);
+	// Source: Memory Configuration
+	DMA_ConfigureEndPoint
+	(
+		&dmaConfig->memory,
+		DMA_ENDPOINT_DATA_SIZE_8_BIT,
+		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
+	);
+}
+
+/**
  * @brief DMA Channel Configuration
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @param dmaConfig Pointer to DMA Channel Configuration Structure
@@ -22,6 +190,33 @@
  * @returns - `DRIVER_SUCCESS`: Success
  */
 driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_channel_config_t* const dmaConfig);
+
+/**
+ * @brief Configures the DMA Channel for memory to memory transfer mode
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForMem2Mem(const dma_channel_t dmaChannel);
+
+/**
+ * @brief Configures the DMA Channel for peripheral to memory transfer mode (RX)
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForPer2Mem(const dma_channel_t dmaChannel);
+
+/**
+ * @brief Configures the DMA Channel for memory to peripheral transfer mode (TX)
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel);
 
 /**
  * @brief Configures transfer for DMA Channel

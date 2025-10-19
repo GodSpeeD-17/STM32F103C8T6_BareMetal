@@ -63,22 +63,28 @@ Few GitHub Repositories that I had used for learning purpose during development 
 ---
 ## ***Repository Structure***
 ```
-STM32F103C8T6
-		├── BareMetal      # Main Bare Metal Codes
-		│   ├── Core       ## Core Files: Register Structure + Debugging Configurations
-		│   └── Driver     ## Driver Files: RCC, GPIO, USART, I2C, SSD1306 OLED, etc.
-		├── Projects       # User Specific Application
-		│   ├── GPIO       ## GPIO Application
-		│   ├── Timer      ## Timer Application
-		│   ├── USART      ## USART Application
-		│   ├── I2C        ## I2C Application
-		│   ├── SSD1306    ## SSD1306 OLED Application
-		│   ├── ADC        ## ADC Application
-		│   ├── DMA        ## DMA Application
-		│   ├── PWM        ## PWM Application
-		│   └── Template   ## Reference Template
-		├── README.md      # Documentation
-		└── Reference_Docs # Contains the Reference Documentations useful for STM32F103
+.
+├── BareMetal
+│   ├── Core
+│   └── Driver
+├── Projects
+│   ├── DMA
+│   ├── GPIO
+│   ├── PWM
+│   ├── Template
+│   ├── Timer
+│   └── USART
+├── README.md
+└── Reference_Docs
+    ├── Arm Cortex M3 Reference.pdf
+    ├── Blue_Pill_Pinout.gif
+    ├── MAX30102_TD.pdf
+    ├── OLED SSD1306.pdf
+    ├── STM32F103C8T6_Datasheet.pdf
+    ├── STM32F103C_Flash_Programming_Manual.pdf
+    ├── STM32F103C_Reference_Manual.pdf
+    ├── STM32F103xx_Flash_Reference_Manual.pdf
+    └── The STM32F103 Arm Microcontroller_Majizidi.pdf
 ```
 
 ## ***Driver Structure***

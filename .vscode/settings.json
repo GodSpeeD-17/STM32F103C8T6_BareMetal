@@ -367,4 +367,25 @@
         "startup.h": "c",
         "cstdint": "c"
 	},
+	"C_Cpp.commentContinuationPatterns": [
+        "/**",
+        "/*!",
+        "///",
+        "//!"
+    ],
+	"C_Cpp.doxygen.sectionTags": [
+		"attention",
+		"tparam",
+		"param",
+		"result",
+		"returns",
+		"retval",
+		"exception",
+		"deprecated",
+		"warning",
+		"note"
+	],
+	"C_Cpp.doxygen.generateOnType": true,
+	"C_Cpp.default.recursiveIncludes.priority": "afterSystemIncludes",
+	"doxdocgen.generic.paramTemplate": "@param {param} description\n\t@par \\c `VALUE1` \n\t@par \\c `VALUE2`\n",
 }

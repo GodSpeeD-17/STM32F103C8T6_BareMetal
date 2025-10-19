@@ -11,10 +11,8 @@
 
 /*********************************************** Includes ***********************************************/
 #include "dma_reg_level.h"
+#include "nvic.h"
 
-/*********************************************** External ***********************************************/
-extern const DMA_Channel_TypeDef* _driverDMAChannelMapping[]; 
-extern const irq_t _driverDMAIRQMapping[];
 /*********************************************** Driver Helper APIs ***********************************************/
 /**
  * @brief DMA Mapping Helper API
@@ -40,6 +38,7 @@ __STATIC_FORCEINLINE DMA_TypeDef* _DMA_getController(const dma_channel_t channel
  */
 __STATIC_FORCEINLINE DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t channel)
 {
+	extern const DMA_Channel_TypeDef* _driverDMAChannelMapping[]; 
 	return _driverDMAChannelMapping[channel];
 }
 
@@ -50,6 +49,7 @@ __STATIC_FORCEINLINE DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t ch
  */
 __STATIC_FORCEINLINE irq_t _DMA_getIRQ(const dma_channel_t channel)
 {
+	extern const irq_t _driverDMAIRQMapping[];
 	return _driverDMAIRQMapping[channel];
 }
 
@@ -219,10 +219,10 @@ void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* reg)
 
 /**
  * @brief DMA Channel Mode Configuration
- * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_mode_config_t` 
+ * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_properties_t` 
  * @param reg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelMode(const dma_channel_mode_config_t* const mode, uint32_t* reg);
+void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* reg);
 
 /**
  * @brief Configures the transfer for DMA
