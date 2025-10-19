@@ -6,13 +6,22 @@
  * @date 05-10-2025
  */
 
-#ifndef DMA_LOW_LEVEL_H
-#define DMA_LOW_LEVEL_H
+#ifndef DMA_LOW_LEVEL_H_
+#define DMA_LOW_LEVEL_H_
 
 /*********************************************** Includes ***********************************************/
 #include "dma_reg_level.h"
-#include "nvic.h"
 
+/*********************************************** Macros ***********************************************/
+/**
+ * @brief Determines DMA Channel Number
+ * @param CHANNEL DMA Channel. Refer `DMAX_ChannelY`
+ */
+#define _DMA_GET_CHANNEL_NUMBER(CHANNEL)																\
+(																										\
+	(_IS_DMA1_CHANNEL(CHANNEL)) ? ((CHANNEL - DMA1_Channel1)/sizeof(DMA_Channel_TypeDef)) : 			\
+	((_IS_DMA2_CHANNEL(CHANNEL)) ? ((CHANNEL - DMA2_Channel1)/sizeof(DMA_Channel_TypeDef)): NULL) 		\
+)
 /*********************************************** Driver Helper APIs ***********************************************/
 /**
  * @brief DMA Mapping Helper API
@@ -180,6 +189,42 @@ __STATIC_FORCEINLINE void _DMA_setChannelConfiguration(const dma_channel_t chann
 	__DMA_setChannelCCR(_DMA_getChannel(channel), value);
 }
 
+/**
+ * @brief Retrieves the IRQ Status for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ DMA IRQ Combination
+ * 	@par \c `DMA_IRQ_NONE` 
+ * 	@par \c `DMA_IRQ_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_TRANSFER_ERROR`
+ * @return Status of the IRQs in the logical combination of:
+ * @return - `DMA_IRQ_STATUS_NONE`
+ * @return - `DMA_IRQ_STATUS_TRANSFER_COMPLETE`
+ * @return - `DMA_IRQ_STATUS_HALF_TRANSFER_COMPLETE`
+ * @return - `DMA_IRQ_STATUS_TRANSFER_ERROR`
+ */
+__STATIC_FORCEINLINE dma_irq_status_t _DMA_getIRQStatus(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+{
+	uint32_t reg = __DMA_getISR(_DMA_getChannel(dmaChannel));
+	reg >>= ((dmaChannel - ((dmaChannel < DMA_2_Channel_1) ? DMA_1_Channel_1 : DMA_2_Channel_1)) << 2);
+	return ((uint8_t) (reg & dmaIRQ));
+}
+
+/**
+ * @brief Acknowledges the IRQ for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ DMA IRQ Combination
+ * 	@par \c `DMA_IRQ_NONE` 
+ * 	@par \c `DMA_IRQ_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_TRANSFER_ERROR`
+ */
+__STATIC_FORCEINLINE void _DMA_ackIRQStatus(const dma_channel_t dmaChannel, const dma_irq_t dmaIRQ)
+{
+	DMA_Channel_TypeDef* dmaXChannelY = _DMA_getChannel(dmaChannel);
+	__DMA_setIFCR(_DMA_GET_CONTROLLER(dmaXChannelY), _DMA_GET_CHANNEL_NUMBER(dmaXChannelY), dmaIRQ);
+}
+
 /*********************************************** Driver APIs ***********************************************/
 /**
  * @brief DMA Endpoint Configuration
@@ -229,7 +274,7 @@ void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, ui
  * @param dmaChannel DMA Channel 
  * @param dmaTransfer DMA Transfer configuration
  */
-void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t dmaTransfer);
+void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer);
 
 /**
  * @brief Enables IRQ for DMA 
@@ -251,4 +296,4 @@ void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ);
  */
 void _DMA_disableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ);
 
-#endif /* DMA_LOW_LEVEL_H */
+#endif /* DMA_LOW_LEVEL_H_ */

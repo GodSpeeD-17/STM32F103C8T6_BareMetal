@@ -120,9 +120,11 @@ typedef uint8_t dma_circular_mode_t;
 typedef uint8_t dma_mem2mem_mode_t;
 typedef uint8_t dma_channel_t;
 typedef uint8_t dma_irq_t;
+typedef uint8_t dma_irq_status_t;
 typedef void* dma_src_t;
 typedef void* dma_dst_t;
 typedef uint16_t dma_size_t;
+typedef uint8_t dma_channel_number_t;
 
 /*********************************************** DMA Channel ***********************************************/
 #define DMA_1_Channel_1								((dma_channel_t) 0x00)
@@ -219,9 +221,16 @@ typedef uint16_t dma_size_t;
 #define DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE		((dma_endpoint_memory_increment_t) 0x01)
 
 /*********************************************** DMA IRQ ***********************************************/
+#define DMA_IRQ_NONE								((dma_irq_t) 0x00)
 #define DMA_IRQ_TRANSFER_COMPLETE					((dma_irq_t) 0x01)
 #define DMA_IRQ_HALF_TRANSFER_COMPLETE				((dma_irq_t) 0x02)
 #define DMA_IRQ_TRANSFER_ERROR						((dma_irq_t) 0x04)
+
+/*********************************************** DMA IRQ Status ***********************************************/
+#define DMA_IRQ_STATUS_NONE							((dma_irq_status_t) 0x00)
+#define DMA_IRQ_STATUS_TRANSFER_COMPLETE			((dma_irq_status_t) 0x01)
+#define DMA_IRQ_STATUS_HALF_TRANSFER_COMPLETE		((dma_irq_status_t) 0x02)
+#define DMA_IRQ_STATUS_TRANSFER_ERROR				((dma_irq_status_t) 0x04)
 
 /*********************************************** Configuration Structure ***********************************************/
 /**

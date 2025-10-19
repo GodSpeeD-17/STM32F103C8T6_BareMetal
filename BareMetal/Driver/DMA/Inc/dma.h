@@ -7,8 +7,8 @@
  */
 
  // Header Guards
-#ifndef DRIVER_DMA_H__
-#define DRIVER_DMA_H__
+#ifndef DMA_H_
+#define DMA_H_
 
 // --- Includes ---
 #include "dma_low_level.h"
@@ -90,14 +90,14 @@ __STATIC_FORCEINLINE void DMA_LoadDefaultConfigForMEM2MEM(dma_channel_config_t* 
 		DMA_CHANNEL_MEM2MEM_MODE_ENABLE
 	);
 	// Peripheral Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->peripheral,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
 		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
 	);
 	// Memory Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->memory,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
@@ -128,14 +128,14 @@ __STATIC_FORCEINLINE void DMA_LoadDefaultConfigForPER2MEM(dma_channel_config_t* 
 		DMA_CHANNEL_MEM2MEM_MODE_DISABLE
 	);
 	// Source: Peripheral Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->peripheral,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
 		DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE
 	);
 	// Destination: Memory Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->memory,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
@@ -166,19 +166,65 @@ __STATIC_FORCEINLINE void DMA_LoadDefaultConfigForMEM2PER(dma_channel_config_t* 
 		DMA_CHANNEL_MEM2MEM_MODE_DISABLE
 	);
 	// Destination: Peripheral Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->peripheral,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
 		DMA_ENDPOINT_MEMORY_INCREMENT_DISABLE
 	);
 	// Source: Memory Configuration
-	DMA_ConfigureEndPoint
+	DMA_ConfigureChannelEndPoint
 	(
 		&dmaConfig->memory,
 		DMA_ENDPOINT_DATA_SIZE_8_BIT,
 		DMA_ENDPOINT_MEMORY_INCREMENT_ENABLE
 	);
+}
+
+/**
+ * @brief Polls the DMA Channel for Transfer Completion
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
+ */
+__STATIC_FORCEINLINE void DMA_PollForTransferCompletion(const dma_channel_t dmaChannel)
+{
+	// Wait for completion
+	while(_DMA_getIRQStatus(dmaChannel, DMA_IRQ_TRANSFER_COMPLETE) != DMA_IRQ_STATUS_TRANSFER_COMPLETE);
+	// Acknowledge the IRQ
+	_DMA_ackIRQStatus(dmaChannel, DMA_IRQ_TRANSFER_COMPLETE);
+}
+
+/**
+ * @brief Enable IRQ for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ Any logical combination of:
+ * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_TRANSFER_ERROR`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+__STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+{
+	_DMA_enableIRQ(dmaChannel, dmaIRQ);
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief Disable IRQ for DMA Channel
+ * @param dmaChannel DMA Channel
+ * @param dmaIRQ Any logical combination of:
+ * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 				 - `DMA_IRQ_TRANSFER_ERROR`
+ * @return Status of Driver Operation
+ * @returns - `DRIVER_FAIL`: Failure
+ * @returns - `DRIVER_SUCCESS`: Success
+ */
+__STATIC_FORCEINLINE driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
+{
+	_DMA_disableIRQ(dmaChannel, dmaIRQ);
+	return DRIVER_SUCCESS;
 }
 
 /**
@@ -226,42 +272,7 @@ driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel);
  * @returns - `DRIVER_FAIL`: Failure
  * @returns - `DRIVER_SUCCESS`: Success
  */
-driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaTransfer);
-
-/**
- * @brief Enable IRQ for DMA Channel
- * @param dmaChannel DMA Channel
- * @param dmaIRQ Any logical combination of:
- * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
- * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
- * 				 - `DMA_IRQ_TRANSFER_ERROR`
- * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
- */
-__STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
-{
-	_DMA_enableIRQ(dmaChannel, dmaIRQ);
-	return DRIVER_SUCCESS;
-}
-
-/**
- * @brief Disable IRQ for DMA Channel
- * @param dmaChannel DMA Channel
- * @param dmaIRQ Any logical combination of:
- * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
- * 				 - `DMA_IRQ_HALF_TRANSFER_COMPLETE`
- * 				 - `DMA_IRQ_TRANSFER_ERROR`
- * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
- */
-__STATIC_FORCEINLINE driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
-{
-	_DMA_disableIRQ(dmaChannel, dmaIRQ);
-	return DRIVER_SUCCESS;
-}
-
+driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer);
 
 #ifdef __OLD_DMA_METHOD__
 #define DMA_I2C1_TX_Config()				DMA_Config(&DMA_I2C1_TX_Configuration)
@@ -504,4 +515,4 @@ void DMA_Load_Default_PER2MEM(dma_config_t* instance);
 void DMA_Load_Default_MEM2PER(dma_config_t* instance);
 #endif /* __OLD_DMA_METHOD__ */
 
-#endif /* DRIVER_DMA_H__ */
+#endif /* DMA_H_ */

@@ -20,8 +20,9 @@ const DMA_Channel_TypeDef* _driverDMAChannelMapping[] =
 	[DMA_1_Channel_4] = DMA1_Channel4,
 	[DMA_1_Channel_5] = DMA1_Channel5,
 	[DMA_1_Channel_6] = DMA1_Channel6,
-	[DMA_1_Channel_7] = DMA1_Channel7
-	,[DMA_2_Channel_1] = DMA2_Channel1, 
+	[DMA_1_Channel_7] = DMA1_Channel7,
+	
+	[DMA_2_Channel_1] = DMA2_Channel1, 
 	[DMA_2_Channel_2] = DMA2_Channel2, 
 	[DMA_2_Channel_3] = DMA2_Channel3, 
 	[DMA_2_Channel_4] = DMA2_Channel4, 
@@ -133,29 +134,30 @@ void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, ui
 
 /**
  * @brief Configures the transfer for DMA
- * @param dmaChannel DMA Channel 
+ * @param dmaChannel DMA Channel
  * @param dmaTransfer DMA Transfer configuration
  */
-void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t dmaTransfer)
+void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer)
 {
 	// Default Case - RX (Into Memory)
+	DMA_Channel_TypeDef* dmaXChannelY = _DMA_getChannel(dmaChannel); 
 	if(_DMA_getChannelDirection(dmaChannel) == DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY)
 	{
-		__DMA_setChannelCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
-		__DMA_setChannelCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
+		__DMA_setChannelCPAR(dmaXChannelY, (uint32_t) dmaTransfer->src);
+		__DMA_setChannelCMAR(dmaXChannelY, (uint32_t) dmaTransfer->dst);
 	}
 	// Different Case - TX (Into Peripheral)
 	else
 	{
-		__DMA_setChannelCMAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.src);
-		__DMA_setChannelCPAR(_DMA_getChannel(dmaChannel), (uint32_t) dmaTransfer.dst);
+		__DMA_setChannelCMAR(dmaXChannelY, (uint32_t) dmaTransfer->src);
+		__DMA_setChannelCPAR(dmaXChannelY, (uint32_t) dmaTransfer->dst);
 	}
 	// Set the data size
-	__DMA_setChannelCNDTR(_DMA_getChannel(dmaChannel), dmaTransfer.size);
+	__DMA_setChannelCNDTR(dmaXChannelY, dmaTransfer->size);
 }
 
 /**
- * @brief Enables IRQ for DMA 
+ * @brief Enables IRQ for DMA
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`

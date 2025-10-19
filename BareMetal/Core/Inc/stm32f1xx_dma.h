@@ -241,4 +241,9 @@ typedef struct {
     DMA_Channel_TypeDef CHANNEL[7];
 } DMA_TypeDef;
 
+// C++ Safeguards
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* STM32F1XX_DMA_H_ */

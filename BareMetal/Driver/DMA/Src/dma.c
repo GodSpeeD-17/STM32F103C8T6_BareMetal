@@ -1,8 +1,7 @@
-// --- Includes --- //
+/*********************************************** Includes ***********************************************/
 #include "dma.h"
 
 /*********************************************** DMA Channel Configuration API ***********************************************/
-
 /**
  * @brief DMA Channel Configuration
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
@@ -72,13 +71,13 @@ driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel)
 /*********************************************** DMA Channel Transfer API ***********************************************/
 /**
  * @brief Configures transfer for DMA Channel
- * @param dmaChannel DMA Channel
+ * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @param dmaTransfer DMA Transfer
  * @return Status of Driver Operation
  * @returns - `DRIVER_FAIL`: Failure
  * @returns - `DRIVER_SUCCESS`: Success
  */
-driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaTransfer)
+driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer)
 {
 	// DMA Disable Channel
 	_DMA_disableChannel(dmaChannel);
@@ -89,8 +88,6 @@ driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, dma_transfer_t dmaT
 	// Return Success
 	return DRIVER_SUCCESS;
 }
-
-
 
 #ifdef ____OLD_DMA_METHOD__
 /**

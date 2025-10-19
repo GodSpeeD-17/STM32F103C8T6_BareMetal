@@ -8,22 +8,25 @@
 /*********************************************** MACROs ***********************************************/
 /**
  * @brief Determines if the input channel belongs to DMA1
+ * @param CHANNEL DMA Channel. Refer `DMAX_ChannelY`
  */
-#define IS_DMA1_CHANNEL(CHANNEL) \
+#define _IS_DMA1_CHANNEL(CHANNEL) \
 	((((uint32_t) (CHANNEL)) >= (uint32_t) DMA1_Channel1) && \
 	(((uint32_t) (CHANNEL)) <= (uint32_t) DMA1_Channel7))
 /**
  * @brief Determines if the input channel belongs to DMA2
+ * @param CHANNEL DMA Channel. Refer `DMAX_ChannelY` 
  */
-#define IS_DMA2_CHANNEL(CHANNEL) \
+#define _IS_DMA2_CHANNEL(CHANNEL) \
 	((((uint32_t) (CHANNEL)) >= (uint32_t) DMA2_Channel1) && \
 	(((uint32_t) (CHANNEL)) <= (uint32_t) DMA2_Channel5))
 /**
  * @brief Determines DMA1/DMA2 based on input channel
+ * @param CHANNEL DMA Channel. Refer `DMAX_ChannelY`
  */
-#define GET_DMA_CONTROLLER(CHANNEL) \
-	(IS_DMA1_CHANNEL((CHANNEL)) ? DMA1 : \
-	IS_DMA2_CHANNEL((CHANNEL)) ? DMA2 : NULL)
+#define _DMA_GET_CONTROLLER(CHANNEL) \
+	(_IS_DMA1_CHANNEL((CHANNEL)) ? DMA1 : \
+	_IS_DMA2_CHANNEL((CHANNEL)) ? DMA2 : NULL)
 
 /*********************************************** Helpers ***********************************************/
 /**
@@ -64,7 +67,7 @@ __STATIC_FORCEINLINE void __DMA_disableClock(DMA_TypeDef* dmaX)
  */
 __STATIC_FORCEINLINE void __DMA_enableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
-	__DMA_enableClock(GET_DMA_CONTROLLER(dmaXChannelY));
+	__DMA_enableClock(_DMA_GET_CONTROLLER(dmaXChannelY));
 }
 
 /**
@@ -73,7 +76,7 @@ __STATIC_FORCEINLINE void __DMA_enableClockFromChannel(DMA_Channel_TypeDef* dmaX
  */
 __STATIC_FORCEINLINE void __DMA_disableClockFromChannel(DMA_Channel_TypeDef* dmaXChannelY)
 {
-	__DMA_disableClock(GET_DMA_CONTROLLER(dmaXChannelY));
+	__DMA_disableClock(_DMA_GET_CONTROLLER(dmaXChannelY));
 }
 
 /**
@@ -95,6 +98,31 @@ __STATIC_FORCEINLINE void __DMA_disableChannel(DMA_Channel_TypeDef* dmaXChannelY
 }
 
 /**
+ * @brief Read from DMA Interrupt Status Register (ISR)
+ * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
+ * @return ISR value
+ */
+__STATIC_FORCEINLINE uint32_t __DMA_getISR(DMA_Channel_TypeDef* dmaXChannelY)
+{
+	return _DMA_GET_CONTROLLER(dmaXChannelY)->ISR.REG;
+}
+
+/**
+ * @brief Set the DMA Interrupt Flag Clear Register (IFCR)
+ * @param dmaX DMA Controller: `DMA1`/`DMA2`
+ * @param channelY Channel Number Offset from Channel 1: 0 - 6
+ * @param dmaIrqAck DMA IRQ Combination
+ * 	@par \c `DMA_IRQ_NONE` 
+ * 	@par \c `DMA_IRQ_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_HALF_TRANSFER_COMPLETE`
+ * 	@par \c `DMA_IRQ_TRANSFER_ERROR`
+ */
+__STATIC_FORCEINLINE void __DMA_setIFCR(DMA_TypeDef* dmaX, const dma_channel_number_t channelY, const dma_irq_t dmaIrqAck)
+{
+	dmaX->IFCR.REG |= (dmaIrqAck << (channelY << 2));
+}
+
+/**
  * @brief Read from Channel Configuration Register (CCR)
  * @param dmaXChannelY DMA Channel: `DMAX_ChannelY`
  * @return CCR value
@@ -110,7 +138,7 @@ __STATIC_FORCEINLINE uint32_t __DMA_getChannelCCR(DMA_Channel_TypeDef* dmaXChann
  * @param value Updated CCR Value
  * @return CCR value
  */
-__STATIC_FORCEINLINE uint32_t __DMA_setChannelCCR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
+__STATIC_FORCEINLINE void __DMA_setChannelCCR(DMA_Channel_TypeDef* dmaXChannelY, const uint32_t value)
 {
 	dmaXChannelY->CCR.REG = value;
 }
