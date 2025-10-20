@@ -1,5 +1,0 @@
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c:19:17:GPIO_Init	48	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c:78:17:GPIO_Deinit	48	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c:130:17:GPIO_LED_Init	24	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c:149:17:OB_LED_Init	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c:166:17:OB_LED_Deinit	16	static

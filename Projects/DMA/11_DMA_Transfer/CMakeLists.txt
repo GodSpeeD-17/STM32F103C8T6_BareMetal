@@ -462,9 +462,6 @@ add_custom_target(vscode_launch
   COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
   COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": \\\"0.2.0\\\","          >> ${VSCODE_DIR}/launch.json
-#   COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.objdumpPath\\\": \\\"${CMAKE_OBJDUMP}\\\"," >> ${VSCODE_DIR}/launch.json
-#   COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.nmPath\\\": \\\"${CMAKE_NM}\\\"," >> ${VSCODE_DIR}/launch.json
-#   COMMAND ${CMAKE_COMMAND} -E echo "  \\\"toolchainPrefix\\\": \\\"${CMAKE_SYSTEM_TOOLCHAIN_PREFIX}\\\"," >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "  \\\"configurations\\\": ["                >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"name\\\": \\\"Debug: ${PROJECT_NAME}\\\"," >> ${VSCODE_DIR}/launch.json
@@ -479,7 +476,12 @@ add_custom_target(vscode_launch
   COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // Reset_Handler" >> ${VSCODE_DIR}/launch.json
-  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": [" 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\"," 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"load\\\"," 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset halt\\\"" 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      ]" 									>> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "  ]"                                        >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/launch.json

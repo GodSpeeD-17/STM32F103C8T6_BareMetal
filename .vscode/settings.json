@@ -394,7 +394,7 @@
 		"terminal.background": "#1D0224",
         "terminal.foreground": "#FFFF00",
 	},
-	"terminal.integrated.cursorWidth": 3,
+	"terminal.integrated.cursorWidth": 2,
 	"terminal.integrated.cursorStyle": "line",
 	"cortex-debug.toolchainPrefix": "arm-none-eabi",
 	"cortex-debug.gdbmultiarchPath": "/usr/bin/gdb-multiarch",

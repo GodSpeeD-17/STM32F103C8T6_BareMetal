@@ -1,9 +1,0 @@
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:58:6:_DMA_configEndPoint	24	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:79:6:_DMA_configChannelPriority	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:90:6:_DMA_configChannelDirection	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:101:6:_DMA_configChannelCircularMode	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:112:6:_DMA_configChannelMEM2MEM	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:123:6:_DMA_configChannelProperties	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:140:6:_DMA_configTransfer	72	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:167:6:_DMA_enableIRQ	48	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c:185:6:_DMA_disableIRQ	48	static

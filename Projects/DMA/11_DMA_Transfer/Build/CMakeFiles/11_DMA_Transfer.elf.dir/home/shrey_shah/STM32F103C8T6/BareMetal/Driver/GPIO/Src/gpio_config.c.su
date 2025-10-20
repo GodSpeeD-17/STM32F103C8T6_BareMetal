@@ -1,3 +1,0 @@
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c:26:6:__GPIO_updateCtrlRegister__	24	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c:51:6:__GPIO_updatePullConfig__	16	static
-/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c:68:6:__GPIO_resetCtrlRegister__	24	static
