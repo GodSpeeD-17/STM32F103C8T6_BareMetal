@@ -1,0 +1,11 @@
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:35:17:RCC_FlashConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:55:17:RCC_PLLConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:76:17:RCC_BusConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:97:17:RCC_ComponentConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:116:17:RCC_Config	24	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:166:6:RCC_72MHz_FlashDefaultConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:177:6:RCC_72MHz_PLLDefaultConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:190:6:RCC_72MHz_SystemDefaultConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:201:6:RCC_72MHz_BusPrescalerDefaultConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:214:6:RCC_72MHz_ComponentPrescalerDefaultConfig	16	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c:225:6:RCC_72MHz_LoadDefaultConfig	16	static

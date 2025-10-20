@@ -1,0 +1,5 @@
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c:13:17:DMA_ConfigChannel	72	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c:36:17:DMA_ConfigChannelForMem2Mem	32	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c:50:17:DMA_ConfigChannelForPer2Mem	32	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c:64:17:DMA_ConfigChannelForMem2Per	32	static
+/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c:80:17:DMA_Transfer	32	static

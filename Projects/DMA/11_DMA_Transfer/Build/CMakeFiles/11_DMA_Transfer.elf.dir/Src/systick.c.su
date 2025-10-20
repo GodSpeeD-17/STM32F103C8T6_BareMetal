@@ -1,0 +1,4 @@
+/home/shrey_shah/STM32F103C8T6/Projects/DMA/11_DMA_Transfer/Src/systick.c:16:10:SysTick_Get_Ticks	4	static
+/home/shrey_shah/STM32F103C8T6/Projects/DMA/11_DMA_Transfer/Src/systick.c:26:6:SysTick_Set_Ticks	16	static
+/home/shrey_shah/STM32F103C8T6/Projects/DMA/11_DMA_Transfer/Src/systick.c:43:6:SysTick_Config	16	static
+/home/shrey_shah/STM32F103C8T6/Projects/DMA/11_DMA_Transfer/Src/systick.c:83:6:SysTick_Handler	4	static

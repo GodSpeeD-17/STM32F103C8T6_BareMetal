@@ -1,0 +1,752 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .text.Default_Handler
+                0x00000000        0x8 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .data.heap_ptr
+                0x00000000        0x4 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .text._sbrk    0x00000000       0x4c CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .text.SysTick_Get_Ticks
+                0x00000000       0x14 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .text.SysTick_Set_Ticks
+                0x00000000       0x60 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .text.GPIO_Deinit
+                0x00000000      0x158 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .text.GPIO_LED_Init
+                0x00000000       0x54 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .text.OB_LED_Deinit
+                0x00000000       0x24 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .text.__GPIO_resetCtrlRegister__
+                0x00000000       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .rodata.EXTI_IRQn
+                0x00000000       0x10 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .rodata.EXTI_Source_Port
+                0x00000000        0x7 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_MapPort
+                0x00000000       0x74 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_UnmapPort
+                0x00000000       0x6c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_SetTrigger
+                0x00000000       0x4c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_ResetTrigger
+                0x00000000       0x54 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_Init
+                0x00000000      0x1a8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text.GPIO_EXTI_Deinit
+                0x00000000      0x1b4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_info    0x00000000     0x30a8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_abbrev  0x00000000      0x2cc CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_loc     0x00000000      0x212 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_aranges
+                0x00000000       0x48 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_ranges  0x00000000       0x38 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_line    0x00000000      0x5df CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_str     0x00000000      0xdd0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .comment       0x00000000       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .debug_frame   0x00000000       0xfc CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .ARM.attributes
+                0x00000000       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .text.RCC_AHBClockFreq_Update
+                0x00000000       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .text.RCC_APB1ClockFreq_Update
+                0x00000000       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .text.RCC_APB2ClockFreq_Update
+                0x00000000       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_Calc_Prescaler
+                0x00000000       0x68 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_10kHz_Load_Default
+                0x00000000       0x2c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_delay_us
+                0x00000000       0x96 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_delay_ms
+                0x00000000       0x2a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_IRQ_Disable
+                0x00000000       0xf4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_Get_Frequency
+                0x00000000       0x68 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .text.DMA_ConfigChannelForPer2Mem
+                0x00000000       0xa0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .text.DMA_ConfigChannelForMem2Per
+                0x00000000       0xa0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .text          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+ .data          0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+ .rodata._driverDMAIRQMapping
+                0x00000000        0x7 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+ .text._DMA_enableIRQ
+                0x00000000       0x9c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+ .text._DMA_disableIRQ
+                0x00000000       0xa8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+FLASH            0x08000000         0x00010000         xr
+RAM              0x20000000         0x00005000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /opt/arm-gnu-toolchain-14.3/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc_nano.a
+LOAD /opt/arm-gnu-toolchain-14.3/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libm.a
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+LOAD CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x20005000                        _estack = (ORIGIN (RAM) + LENGTH (RAM))
+                0x00000400                        _Min_Heap_Size = 0x400
+                0x00000400                        _Min_Stack_Size = 0x400
+
+.text           0x08000000     0x17c4
+                0x08000000                        . = ALIGN (0x4)
+ *(.isr_vector)
+ .isr_vector    0x08000000      0x130 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                0x08000000                vector_table
+ *(.text*)
+ .text.Default_Handler
+                0x08000130        0x8 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                0x08000130                RTC_Alarm_IRQHandler
+                0x08000130                EXTI2_IRQHandler
+                0x08000130                TIM8_TRG_COM_IRQHandler
+                0x08000130                TIM8_CC_IRQHandler
+                0x08000130                DebugMon_Handler
+                0x08000130                TIM1_CC_IRQHandler
+                0x08000130                HardFault_Handler
+                0x08000130                TIM6_IRQHandler
+                0x08000130                PVD_IRQHandler
+                0x08000130                SDIO_IRQHandler
+                0x08000130                PendSV_Handler
+                0x08000130                NMI_Handler
+                0x08000130                EXTI3_IRQHandler
+                0x08000130                USB_HP_CAN_TX_IRQHandler
+                0x08000130                EXTI0_IRQHandler
+                0x08000130                I2C2_EV_IRQHandler
+                0x08000130                UsageFault_Handler
+                0x08000130                ADC1_2_IRQHandler
+                0x08000130                SPI1_IRQHandler
+                0x08000130                CAN_SCE_IRQHandler
+                0x08000130                TAMPER_IRQHandler
+                0x08000130                TIM8_UP_IRQHandler
+                0x08000130                DMA2_Channel2_IRQHandler
+                0x08000130                DMA1_Channel4_IRQHandler
+                0x08000130                USART3_IRQHandler
+                0x08000130                RTC_IRQHandler
+                0x08000130                DMA1_Channel7_IRQHandler
+                0x08000130                UART5_IRQHandler
+                0x08000130                ADC3_IRQHandler
+                0x08000130                CAN_RX1_IRQHandler
+                0x08000130                DMA2_Channel1_IRQHandler
+                0x08000130                I2C1_EV_IRQHandler
+                0x08000130                DMA1_Channel6_IRQHandler
+                0x08000130                UART4_IRQHandler
+                0x08000130                TIM3_IRQHandler
+                0x08000130                RCC_IRQHandler
+                0x08000130                TIM1_TRG_COM_IRQHandler
+                0x08000130                DMA1_Channel1_IRQHandler
+                0x08000130                Default_Handler
+                0x08000130                EXTI15_10_IRQHandler
+                0x08000130                TIM7_IRQHandler
+                0x08000130                TIM5_IRQHandler
+                0x08000130                EXTI9_5_IRQHandler
+                0x08000130                SPI2_IRQHandler
+                0x08000130                USB_LP_CAN_RX0_IRQHandler
+                0x08000130                MemManage_Handler
+                0x08000130                SVC_Handler
+                0x08000130                DMA1_Channel5_IRQHandler
+                0x08000130                EXTI4_IRQHandler
+                0x08000130                DMA1_Channel3_IRQHandler
+                0x08000130                FSMC_IRQHandler
+                0x08000130                TIM1_UP_IRQHandler
+                0x08000130                WWDG_IRQHandler
+                0x08000130                TIM2_IRQHandler
+                0x08000130                TIM1_BRK_IRQHandler
+                0x08000130                EXTI1_IRQHandler
+                0x08000130                DMA2_Channel4_5_IRQHandler
+                0x08000130                USART2_IRQHandler
+                0x08000130                I2C2_ER_IRQHandler
+                0x08000130                DMA1_Channel2_IRQHandler
+                0x08000130                TIM8_BRK_IRQHandler
+                0x08000130                FLASH_IRQHandler
+                0x08000130                BusFault_Handler
+                0x08000130                USART1_IRQHandler
+                0x08000130                SPI3_IRQHandler
+                0x08000130                I2C1_ER_IRQHandler
+                0x08000130                DMA2_Channel3_IRQHandler
+ .text.main     0x08000138      0x1c8 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                0x08000138                main
+ .text.Reset_Handler
+                0x08000300       0xd8 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                0x08000300                Reset_Handler
+ .text.delay_us
+                0x080003d8       0xa0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                0x080003d8                delay_us
+ .text.delay_ms
+                0x08000478       0x26 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                0x08000478                delay_ms
+ *fill*         0x0800049e        0x2 
+ .text.TIM4_IRQHandler
+                0x080004a0       0x44 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                0x080004a0                TIM4_IRQHandler
+ .text.SysTick_Config
+                0x080004e4       0x48 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+                0x080004e4                SysTick_Config
+ .text.SysTick_Handler
+                0x0800052c       0x1c CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+                0x0800052c                SysTick_Handler
+ .text.GPIO_Init
+                0x08000548      0x1c8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+                0x08000548                GPIO_Init
+ .text.OB_LED_Init
+                0x08000710       0x24 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+                0x08000710                OB_LED_Init
+ .text.__GPIO_updateCtrlRegister__
+                0x08000734       0xaa CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                0x08000734                __GPIO_updateCtrlRegister__
+ .text.__GPIO_updatePullConfig__
+                0x080007de       0x42 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                0x080007de                __GPIO_updatePullConfig__
+ .text.RCC_FlashConfig
+                0x08000820       0x44 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000820                RCC_FlashConfig
+ .text.RCC_PLLConfig
+                0x08000864       0x4e CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000864                RCC_PLLConfig
+ .text.RCC_BusConfig
+                0x080008b2       0x52 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x080008b2                RCC_BusConfig
+ .text.RCC_ComponentConfig
+                0x08000904       0x46 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000904                RCC_ComponentConfig
+ *fill*         0x0800094a        0x2 
+ .text.RCC_Config
+                0x0800094c      0x15c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x0800094c                RCC_Config
+ .text.RCC_72MHz_FlashDefaultConfig
+                0x08000aa8       0x2a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000aa8                RCC_72MHz_FlashDefaultConfig
+ .text.RCC_72MHz_PLLDefaultConfig
+                0x08000ad2       0x32 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000ad2                RCC_72MHz_PLLDefaultConfig
+ .text.RCC_72MHz_SystemDefaultConfig
+                0x08000b04       0x20 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000b04                RCC_72MHz_SystemDefaultConfig
+ .text.RCC_72MHz_BusPrescalerDefaultConfig
+                0x08000b24       0x32 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000b24                RCC_72MHz_BusPrescalerDefaultConfig
+ .text.RCC_72MHz_ComponentPrescalerDefaultConfig
+                0x08000b56       0x28 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000b56                RCC_72MHz_ComponentPrescalerDefaultConfig
+ .text.RCC_72MHz_LoadDefaultConfig
+                0x08000b7e       0x36 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x08000b7e                RCC_72MHz_LoadDefaultConfig
+ .text.RCC_CoreClockFreq_Update
+                0x08000bb4       0xec CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+                0x08000bb4                RCC_CoreClockFreq_Update
+ .text.RCC_ClockFreq_Update
+                0x08000ca0      0x138 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+                0x08000ca0                RCC_ClockFreq_Update
+ .text.__TIM__Config_Default__
+                0x08000dd8       0x78 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .text.TIM_1MHz_Load_Default
+                0x08000e50       0x2a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08000e50                TIM_1MHz_Load_Default
+ .text.TIM_Channel_CCMRx_Config
+                0x08000e7a       0xde CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08000e7a                TIM_Channel_CCMRx_Config
+ .text.TIM_Channel_Config
+                0x08000f58       0xb8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08000f58                TIM_Channel_Config
+ .text.TIM_Config
+                0x08001010      0x170 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08001010                TIM_Config
+ .text.TIM_IRQ_Enable
+                0x08001180       0xe8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08001180                TIM_IRQ_Enable
+ .text.TIM_Reset
+                0x08001268       0xa8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x08001268                TIM_Reset
+ .text.DMA_ConfigChannel
+                0x08001310      0x130 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                0x08001310                DMA_ConfigChannel
+ .text.DMA_ConfigChannelForMem2Mem
+                0x08001440       0xa0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                0x08001440                DMA_ConfigChannelForMem2Mem
+ .text.DMA_Transfer
+                0x080014e0       0x68 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                0x080014e0                DMA_Transfer
+ .text._DMA_configEndPoint
+                0x08001548       0x5a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x08001548                _DMA_configEndPoint
+ .text._DMA_configChannelPriority
+                0x080015a2       0x34 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x080015a2                _DMA_configChannelPriority
+ .text._DMA_configChannelDirection
+                0x080015d6       0x34 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x080015d6                _DMA_configChannelDirection
+ .text._DMA_configChannelCircularMode
+                0x0800160a       0x34 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x0800160a                _DMA_configChannelCircularMode
+ .text._DMA_configChannelMEM2MEM
+                0x0800163e       0x34 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x0800163e                _DMA_configChannelMEM2MEM
+ .text._DMA_configChannelProperties
+                0x08001672       0x5a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x08001672                _DMA_configChannelProperties
+ .text._DMA_configTransfer
+                0x080016cc       0xbc CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x080016cc                _DMA_configTransfer
+ *(.rodata*)
+ .rodata        0x08001788        0xc CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .rodata        0x08001794        0x4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .rodata.__gpioDriverMapping__
+                0x08001798       0x1c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                0x08001798                __gpioDriverMapping__
+ .rodata.__ahbPrescalerDriverMapping__
+                0x080017b4        0x8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+                0x080017b4                __ahbPrescalerDriverMapping__
+ .rodata.__apbPrescalerDriverMapping__
+                0x080017bc        0x4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+                0x080017bc                __apbPrescalerDriverMapping__
+ .rodata.TIMx_IRQn
+                0x080017c0        0x3 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                0x080017c4                        . = ALIGN (0x4)
+ *fill*         0x080017c3        0x1 
+                0x080017c4                        _etext = .
+
+.glue_7         0x080017c4        0x0
+ .glue_7        0x080017c4        0x0 linker stubs
+
+.glue_7t        0x080017c4        0x0
+ .glue_7t       0x080017c4        0x0 linker stubs
+
+.vfp11_veneer   0x080017c4        0x0
+ .vfp11_veneer  0x080017c4        0x0 linker stubs
+
+.v4_bx          0x080017c4        0x0
+ .v4_bx         0x080017c4        0x0 linker stubs
+
+.iplt           0x080017c4        0x0
+ .iplt          0x080017c4        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+
+.rel.dyn        0x080017c4        0x0
+ .rel.iplt      0x080017c4        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+
+.data           0x20000000      0x118 load address 0x080017c4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        _sdata = .
+ *(.data*)
+ .data.srcData  0x20000000       0x64 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                0x20000000                srcData
+ .data.dstData  0x20000064       0x64 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                0x20000064                dstData
+ .data.TIM_Configuration
+                0x200000c8       0x10 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .data.__systemFrequency__
+                0x200000d8       0x10 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                0x200000d8                __systemFrequency__
+ .data._driverDMAChannelMapping
+                0x200000e8       0x30 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                0x200000e8                _driverDMAChannelMapping
+                0x20000118                        . = ALIGN (0x4)
+                0x20000118                        _edata = .
+                0x080017c4                        _sidata = LOADADDR (.data)
+
+.igot.plt       0x20000118        0x0 load address 0x080018dc
+ .igot.plt      0x20000118        0x0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+
+.bss            0x20000118       0x10 load address 0x080018dc
+                0x20000118                        . = ALIGN (0x4)
+                0x20000118                        _sbss = .
+ *(.bss*)
+ .bss.delayCompleted
+                0x20000118        0x1 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ *fill*         0x20000119        0x3 
+ .bss.rcc72MHzConfig.0
+                0x2000011c        0x6 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ *fill*         0x20000122        0x2 
+ .bss.tickCount
+                0x20000124        0x4 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ *(COMMON)
+                0x20000128                        _ebss = .
+
+.heap           0x20000128      0x400 load address 0x080018dc
+                0x20000128                        . = ALIGN (0x4)
+                0x20000128                        _sheap = .
+                0x20000528                        . = (. + _Min_Heap_Size)
+ *fill*         0x20000128      0x400 
+                0x20000528                        . = ALIGN (0x4)
+                0x20000528                        _eheap = .
+
+.stack          0x20000128      0x400 load address 0x080018dc
+                0x20000128                        . = ALIGN (0x8)
+                0x20000128                        _sstack = .
+                0x20000528                        . = (. + _Min_Stack_Size)
+ *fill*         0x20000128      0x400 
+                0x20000528                        . = ALIGN (0x8)
+                0x20005000                        _estack = (ORIGIN (RAM) + LENGTH (RAM))
+                0x20000528                        _end = .
+                [!provide]                        PROVIDE (end = _eheap)
+OUTPUT(11_DMA_Transfer.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x00000000    0x1135a
+ .debug_info    0x00000000     0x1d94 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_info    0x00001d94     0x2503 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_info    0x00004297      0x33e CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_info    0x000045d5     0x1faa CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_info    0x0000657f      0xd93 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_info    0x00007312     0x17de CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_info    0x00008af0     0x164c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_info    0x0000a13c     0x355b CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_info    0x0000d697     0x2647 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_info    0x0000fcde     0x167c CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_abbrev   0x00000000     0x198b
+ .debug_abbrev  0x00000000      0x2c1 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_abbrev  0x000002c1      0x305 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_abbrev  0x000005c6      0x168 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_abbrev  0x0000072e      0x261 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_abbrev  0x0000098f      0x17d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_abbrev  0x00000b0c      0x2a5 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_abbrev  0x00000db1      0x2b2 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_abbrev  0x00001063      0x3eb CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_abbrev  0x0000144e      0x29f CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_abbrev  0x000016ed      0x29e CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_loc      0x00000000     0x1470
+ .debug_loc     0x00000000       0x66 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_loc     0x00000066      0x184 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_loc     0x000001ea      0x140 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_loc     0x0000032a      0x190 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_loc     0x000004ba      0x114 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_loc     0x000005ce      0x3d0 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_loc     0x0000099e      0x19e CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_loc     0x00000b3c      0x470 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_loc     0x00000fac      0x192 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_loc     0x0000113e      0x332 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_aranges  0x00000000      0x2e8
+ .debug_aranges
+                0x00000000       0x28 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_aranges
+                0x00000028       0x48 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_aranges
+                0x00000070       0x38 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_aranges
+                0x000000a8       0x40 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_aranges
+                0x000000e8       0x30 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_aranges
+                0x00000118       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_aranges
+                0x00000188       0x40 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_aranges
+                0x000001c8       0x80 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_aranges
+                0x00000248       0x40 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_aranges
+                0x00000288       0x60 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_ranges   0x00000000      0x248
+ .debug_ranges  0x00000000       0x18 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_ranges  0x00000018       0x38 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_ranges  0x00000050       0x28 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_ranges  0x00000078       0x30 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_ranges  0x000000a8       0x20 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_ranges  0x000000c8       0x60 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_ranges  0x00000128       0x30 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_ranges  0x00000158       0x70 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_ranges  0x000001c8       0x30 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_ranges  0x000001f8       0x50 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_line     0x00000000     0x2df5
+ .debug_line    0x00000000      0x487 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_line    0x00000487      0x4f3 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_line    0x0000097a      0x28a CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_line    0x00000c04      0x48e CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_line    0x00001092      0x29e CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_line    0x00001330      0x4ab CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_line    0x000017db      0x4d7 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_line    0x00001cb2      0x83a CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_line    0x000024ec      0x450 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_line    0x0000293c      0x4b9 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_str      0x00000000     0x2849
+ .debug_str     0x00000000     0x2849 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                                0x993 (size before relaxing)
+ .debug_str     0x00002849     0x10ad CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_str     0x00002849      0x2eb CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_str     0x00002849      0xa97 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_str     0x00002849      0x4ee CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_str     0x00002849      0xa26 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_str     0x00002849      0x9eb CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_str     0x00002849     0x11c8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_str     0x00002849      0xe1f CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_str     0x00002849      0x8b6 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.comment        0x00000000       0x46
+ .comment       0x00000000       0x46 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                                 0x47 (size before relaxing)
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .comment       0x00000046       0x47 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.ARM.attributes
+                0x00000000       0x2d
+ .ARM.attributes
+                0x00000000       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .ARM.attributes
+                0x0000002d       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .ARM.attributes
+                0x0000005a       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .ARM.attributes
+                0x00000087       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .ARM.attributes
+                0x000000b4       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .ARM.attributes
+                0x000000e1       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .ARM.attributes
+                0x0000010e       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .ARM.attributes
+                0x0000013b       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .ARM.attributes
+                0x00000168       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .ARM.attributes
+                0x00000195       0x2d CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+.debug_frame    0x00000000      0x9cc
+ .debug_frame   0x00000000       0x48 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ .debug_frame   0x00000048       0xd0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+ .debug_frame   0x00000118       0xa0 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+ .debug_frame   0x000001b8       0xc4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+ .debug_frame   0x0000027c       0x88 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+ .debug_frame   0x00000304      0x1bc CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+ .debug_frame   0x000004c0       0xc8 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+ .debug_frame   0x00000588      0x208 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+ .debug_frame   0x00000790       0xc4 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+ .debug_frame   0x00000854      0x178 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+
+Cross Reference Table
+
+Symbol                                            File
+ADC1_2_IRQHandler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+ADC3_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+BusFault_Handler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+CAN_RX1_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+CAN_SCE_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel1_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel2_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel3_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel4_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel5_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel6_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA1_Channel7_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA2_Channel1_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA2_Channel2_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA2_Channel3_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA2_Channel4_5_IRQHandler                        CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA_ConfigChannel                                 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+DMA_ConfigChannelForMem2Mem                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DMA_ConfigChannelForMem2Per                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+DMA_ConfigChannelForPer2Mem                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+DMA_Transfer                                      CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+DebugMon_Handler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+Default_Handler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI0_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI15_10_IRQHandler                              CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI1_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI2_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI3_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI4_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+EXTI9_5_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+FLASH_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+FSMC_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+GPIO_Deinit                                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+GPIO_EXTI_Deinit                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_EXTI_Init                                    CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_EXTI_MapPort                                 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_EXTI_ResetTrigger                            CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_EXTI_SetTrigger                              CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_EXTI_UnmapPort                               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+GPIO_Init                                         CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+GPIO_LED_Init                                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+HardFault_Handler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+I2C1_ER_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+I2C1_EV_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+I2C2_ER_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+I2C2_EV_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+MemManage_Handler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+NMI_Handler                                       CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+OB_LED_Deinit                                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+OB_LED_Init                                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+PVD_IRQHandler                                    CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+PendSV_Handler                                    CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+RCC_72MHz_BusPrescalerDefaultConfig               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_72MHz_ComponentPrescalerDefaultConfig         CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_72MHz_FlashDefaultConfig                      CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_72MHz_LoadDefaultConfig                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+RCC_72MHz_PLLDefaultConfig                        CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_72MHz_SystemDefaultConfig                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_AHBClockFreq_Update                           CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+RCC_APB1ClockFreq_Update                          CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+RCC_APB2ClockFreq_Update                          CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+RCC_BusConfig                                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_ClockFreq_Update                              CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_ComponentConfig                               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_Config                                        CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+RCC_CoreClockFreq_Update                          CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+RCC_FlashConfig                                   CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RCC_IRQHandler                                    CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+RCC_PLLConfig                                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+RTC_Alarm_IRQHandler                              CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+RTC_IRQHandler                                    CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+Reset_Handler                                     CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+SDIO_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SPI1_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SPI2_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SPI3_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SVC_Handler                                       CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SysTick_Config                                    CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+SysTick_Get_Ticks                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+SysTick_Handler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+SysTick_Set_Ticks                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/systick.c.obj
+TAMPER_IRQHandler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM1_BRK_IRQHandler                               CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM1_CC_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM1_TRG_COM_IRQHandler                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM1_UP_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM2_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM3_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM4_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+TIM5_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM6_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM7_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM8_BRK_IRQHandler                               CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM8_CC_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM8_TRG_COM_IRQHandler                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM8_UP_IRQHandler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+TIM_10kHz_Load_Default                            CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_1MHz_Load_Default                             CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+TIM_Calc_Prescaler                                CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_Channel_CCMRx_Config                          CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_Channel_Config                                CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_Config                                        CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+TIM_Get_Frequency                                 CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_IRQ_Disable                                   CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_IRQ_Enable                                    CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+TIM_Reset                                         CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_delay_ms                                      CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+TIM_delay_us                                      CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+UART4_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+UART5_IRQHandler                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+USART1_IRQHandler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+USART2_IRQHandler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+USART3_IRQHandler                                 CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+USB_HP_CAN_TX_IRQHandler                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+USB_LP_CAN_RX0_IRQHandler                         CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+UsageFault_Handler                                CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+WWDG_IRQHandler                                   CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+_DMA_configChannelCircularMode                    CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_DMA_configChannelDirection                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_DMA_configChannelMEM2MEM                         CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_DMA_configChannelPriority                        CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_DMA_configChannelProperties                      CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+_DMA_configEndPoint                               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+_DMA_configTransfer                               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+_DMA_disableIRQ                                   CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_DMA_enableIRQ                                    CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+__GPIO_resetCtrlRegister__                        CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+__GPIO_updateCtrlRegister__                       CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+__GPIO_updatePullConfig__                         CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+__ahbPrescalerDriverMapping__                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+__apbPrescalerDriverMapping__                     CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc_config.c.obj
+__errno                                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+__gpioDriverMapping__                             CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_config.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+__systemFrequency__                               CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_driverDMAChannelMapping                          CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+_driverDMAIRQMapping                              CMakeFiles/11_DMA_Transfer.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/DMA/Src/dma_low_level.c.obj
+_ebss                                             CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_edata                                            CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_eheap                                            CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_estack                                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_sbrk                                             CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_sbss                                             CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_sdata                                            CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_sheap                                            CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+_sidata                                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+delay_ms                                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+delay_us                                          CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+dstData                                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+main                                              CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+                                                  CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj
+srcData                                           CMakeFiles/11_DMA_Transfer.elf.dir/Src/main.c.obj
+vector_table                                      CMakeFiles/11_DMA_Transfer.elf.dir/Src/startup.c.obj

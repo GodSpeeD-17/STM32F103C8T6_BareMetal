@@ -222,7 +222,7 @@ file(WRITE ${VSCODE_DIR}/launch.json \"{
 # -----------------------------------------------------------------------------
 create_vscode_script(settings_json "
 file(WRITE ${VSCODE_DIR}/settings.json \"{
-  \\\"cortex-debug.gdbPath\\\": \\\"/usr/bin/gdb-multiarch\\\",
+  \\\"cortex-debug.gdbPath\\\": \\\"${GDB_MULTU}\\\",
   \\\"cortex-debug.openocdPath\\\": \\\"/usr/local/bin/openocd\\\",
   \\\"cortex-debug.stutilPath\\\": \\\"/usr/bin/st-util\\\",
   \\\"cortex-debug.variableUseNaturalFormat\\\": false

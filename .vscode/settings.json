@@ -390,6 +390,20 @@
 	"C_Cpp.autoAddFileAssociations": true,
 	"C_Cpp.autocomplete": "default",
 	"C_Cpp.enhancedColorization": "enabled",
-	"cortex-debug.armToolchainPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gdb",
-	"cortex-debug.gdbPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gdb",
+	"workbench.colorCustomizations": {
+		"terminal.background": "#1D0224",
+        "terminal.foreground": "#FFFF00",
+	},
+	"terminal.integrated.cursorWidth": 3,
+	"terminal.integrated.cursorStyle": "line",
+	"cortex-debug.toolchainPrefix": "arm-none-eabi",
+	"cortex-debug.gdbmultiarchPath": "/usr/bin/gdb-multiarch",
+	"cortex-debug.nmPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-nm",
+	"cortex-debug.compilerPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc",
+	"cortex-debug.armToolchainPath": "/opt/arm-gnu-toolchain-14.3/bin/",
+	"cortex-debug.gdbPath": "/opt/arm-gnu-toolchain-14.3/bin/gdb",
+	"cortex-debug.openocdPath": "/usr/bin/openocd",
+	"cortex-debug.stutilPath": "/usr/bin/st-util",
+	"cortex-debug.variableUseNaturalFormat": false, // Hex
+	"cortex-debug.objdumpPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-objdump",
 }
