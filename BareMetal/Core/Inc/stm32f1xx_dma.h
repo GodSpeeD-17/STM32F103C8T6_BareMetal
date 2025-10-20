@@ -143,6 +143,8 @@ typedef struct {
 			volatile uint32_t MA31: 1;
 		} BIT;
 	} CMAR;
+	// Refer Datasheet - (Page 289-291)
+	const uint32_t _reserved;
 } DMA_Channel_TypeDef;
 
 // DMA Register Structure
@@ -237,7 +239,7 @@ typedef struct {
 			volatile uint32_t RESERVED: 4;
 		} BIT;
 	} IFCR;
-	// DMA channels (7 channels × 20 bytes each)
+	// DMA channels (7 channels × (16 + 4 = 20) bytes each)
     DMA_Channel_TypeDef CHANNEL[7];
 } DMA_TypeDef;
 

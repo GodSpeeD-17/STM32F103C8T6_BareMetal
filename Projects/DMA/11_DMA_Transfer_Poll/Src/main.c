@@ -26,9 +26,9 @@ int main()
 {
 	// Initialisation
 	DMA_ConfigChannelForMem2Mem(DMA_CHANNEL);
-	_DMA_enableChannel(DMA_CHANNEL);
 	// Transfer Configure
-	dma_transfer_t transferConfig = {
+	dma_transfer_t transferConfig = 
+	{
 		.src = (dma_src_t) srcData,
 		.dst = (dma_dst_t) dstData,
 		.size = (dma_size_t) DMA_DATA_COUNT

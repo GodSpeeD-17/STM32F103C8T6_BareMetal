@@ -30,11 +30,11 @@
  */
 __STATIC_FORCEINLINE DMA_TypeDef* _DMA_getController(const dma_channel_t channel)
 {
-	if(channel >= DMA_1_Channel_1 && channel <= DMA_1_Channel_7)
+	if((channel >= DMA_1_Channel_1) && (channel <= DMA_1_Channel_7))
 	{
 		return DMA1;
 	}
-	else if(channel >= DMA_2_Channel_1 && channel <= DMA_2_Channel_5)
+	else if((channel >= DMA_2_Channel_1) && (channel <= DMA_2_Channel_5))
 	{
 		return DMA2;
 	}
