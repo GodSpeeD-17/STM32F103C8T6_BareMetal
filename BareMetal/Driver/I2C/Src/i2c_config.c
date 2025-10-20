@@ -12,7 +12,7 @@ uint8_t I2C_Calc_tRISE(uint8_t i2cMode){
 	// Local Value
 	uint8_t calc_TRISE = 0;
 	// Get APB1 Clock (in MHz)
-	calc_TRISE = (RCC_Get_APB1Clock()/FREQ_1MHz);
+	calc_TRISE = (RCC_APB1ClockFreq_Get()/FREQ_1MHz);
 	// Fast I2C Mode: 400kHz
 	if(i2cMode == I2Cx_MODE_FAST){
 		calc_TRISE *= 3;
@@ -114,7 +114,7 @@ void I2C1_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C Fast Mode Duty
 	I2C_CONFIGx->duty = I2Cx_DUTY_NORMAL;
 	// I2C Frequency
-	I2C_CONFIGx->freq_MHz = (RCC_Get_APB1Clock()/FREQ_1MHz);
+	I2C_CONFIGx->freq_MHz = (RCC_APB1ClockFreq_Get()/FREQ_1MHz);
 	// I2C Rise Time Configuration
 	I2C_CONFIGx->TRISE = I2C_Calc_tRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register
@@ -143,7 +143,7 @@ void I2C2_Load_Default(i2c_config_t* I2C_CONFIGx){
 	// I2C Fast Mode Duty
 	I2C_CONFIGx->duty = I2Cx_DUTY_NORMAL;
 	// I2C Frequency
-	I2C_CONFIGx->freq_MHz = (RCC_Get_APB1Clock()/FREQ_1MHz);
+	I2C_CONFIGx->freq_MHz = (RCC_APB1ClockFreq_Get()/FREQ_1MHz);
 	// I2C Rise Time Configuration
 	I2C_CONFIGx->TRISE = I2C_Calc_tRISE(I2C_CONFIGx->mode);
 	// I2C Clock Control Register

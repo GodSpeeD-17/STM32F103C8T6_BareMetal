@@ -46,7 +46,8 @@
 #define TIMx_CCMR2_STATUS 0xF0
 
 // Lookup Table for Timer IRQn
-static const uint8_t TIMx_IRQn[3] = {
+static const uint8_t TIMx_IRQn[3] = 
+{
 	TIM2_IRQn,
 	TIM3_IRQn,
 	TIM4_IRQn,
@@ -61,10 +62,10 @@ static const uint8_t TIMx_IRQn[3] = {
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value)
 {
 	// Final Value
-	uint32_t prescaler_value = RCC_Get_APB1Clock();
+	uint32_t prescaler_value = RCC_APB1ClockFreq_Get();
 	// Calculate the Timer Frequency
 	if (RCC_Get_APB1_Prescaler() != RCC_CFGR_PPRE1_DIV1)
-		prescaler_value = (RCC_Get_APB1Clock() << 1);
+		prescaler_value = (RCC_APB1ClockFreq_Get() << 1);
 	// Update the value based upon the desired frequency
 	prescaler_value /= freq_Hz;
 	// Update the value based upon the ARR Value
@@ -401,7 +402,7 @@ uint32_t TIM_Get_Frequency(TIM_TypeDef *TIMx)
 	if (TIMx != TIM1 && TIMx != TIM8)
 	{
 		// APB1 Clock Frequency
-		timer_freq_Hz = RCC_Get_APB1Clock();
+		timer_freq_Hz = RCC_APB1ClockFreq_Get();
 		// APB1 Clock Prescaler
 		prescaler = RCC_Get_APB1_Prescaler();
 		// Actual Timer Frequency

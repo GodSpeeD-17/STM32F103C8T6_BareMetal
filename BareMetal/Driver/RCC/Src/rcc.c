@@ -128,7 +128,8 @@ driver_status_t RCC_Config(const rcc_config_t* rccConfig){
 	if(rccConfig->system.clk_src != RCC_SYS_CLK_HSI){
 		// Check for PLL Source Clock
 		if((rccConfig->system.clk_src == RCC_SYS_CLK_PLL) && (rccConfig->system.pll.src == RCC_SYS_CLK_HSI)){
-			return;
+			status = DRIVER_FAIL;
+			return status;
 		}
 		// HSE ON
 		RCC_HSE_ON();

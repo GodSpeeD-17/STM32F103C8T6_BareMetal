@@ -10,8 +10,8 @@
  */
 
 /*********************************************** Header Guards ***********************************************/
-#ifndef __RCC_H__
-#define __RCC_H__
+#ifndef RCC_H_
+#define RCC_H_
 
 // C++ Safeguard
 #ifdef __cplusplus
@@ -114,7 +114,8 @@ void RCC_72MHz_LoadDefaultConfig(rcc_config_t* rccConfig);
 /**
  * @brief Shortcut Function to set Clock Frequency to 72MHz
  */
-__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void){
+__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
+{
 	static rcc_config_t rcc72MHzConfig = {0};
 	RCC_72MHz_LoadDefaultConfig(&rcc72MHzConfig);
 	driver_status_t status = RCC_Config(&rcc72MHzConfig);
@@ -126,7 +127,8 @@ __STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void){
  * @brief Retrieves RCC Core Clock Frequency in Hz
  * @note This is the clock which is being fed to AHB Prescaler 
  */
-__STATIC_FORCEINLINE freq_t RCC_CoreClockFreq_Get(void){
+__STATIC_FORCEINLINE freq_t RCC_CoreClockFreq_Get(void)
+{
 	return (__systemFrequency__.Core); 
 }
 
@@ -134,7 +136,8 @@ __STATIC_FORCEINLINE freq_t RCC_CoreClockFreq_Get(void){
  * @brief Retrieves RCC AHB Clock Frequency in Hz
  * @note This is the clock which is being fed to APB1/APB2 Prescaler 
  */
-__STATIC_FORCEINLINE freq_t RCC_AHBClockFreq_Get(void){
+__STATIC_FORCEINLINE freq_t RCC_AHBClockFreq_Get(void)
+{
 	return (__systemFrequency__.AHB);
 }
 
@@ -142,7 +145,8 @@ __STATIC_FORCEINLINE freq_t RCC_AHBClockFreq_Get(void){
  * @brief Retrieves RCC APB1 Clock Frequency in Hz
  * @note This is the clock which is being fed to APB1 Peripherals 
  */
-__STATIC_FORCEINLINE freq_t RCC_APB1ClockFreq_Get(void){
+__STATIC_FORCEINLINE freq_t RCC_APB1ClockFreq_Get(void)
+{
 	return (__systemFrequency__.APB1);
 }
 
@@ -150,7 +154,8 @@ __STATIC_FORCEINLINE freq_t RCC_APB1ClockFreq_Get(void){
  * @brief Retrieves RCC APB2 Clock Frequency in Hz
  * @note This is the clock which is being fed to APB2 Peripherals 
  */
-__STATIC_FORCEINLINE freq_t RCC_APB2ClockFreq_Get(void){
+__STATIC_FORCEINLINE freq_t RCC_APB2ClockFreq_Get(void)
+{
 	return (__systemFrequency__.APB2);
 }
 
@@ -159,4 +164,4 @@ __STATIC_FORCEINLINE freq_t RCC_APB2ClockFreq_Get(void){
 }
 #endif /* __cplusplus */
 
-#endif /* __RCC_H__ */
+#endif /* RCC_H_ */

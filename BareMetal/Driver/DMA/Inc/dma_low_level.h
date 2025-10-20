@@ -20,7 +20,7 @@
 #define _DMA_GET_CHANNEL_NUMBER(CHANNEL)																\
 (																										\
 	(_IS_DMA1_CHANNEL(CHANNEL)) ? ((CHANNEL - DMA1_Channel1)/sizeof(DMA_Channel_TypeDef)) : 			\
-	((_IS_DMA2_CHANNEL(CHANNEL)) ? ((CHANNEL - DMA2_Channel1)/sizeof(DMA_Channel_TypeDef)): NULL) 		\
+	((_IS_DMA2_CHANNEL(CHANNEL)) ? ((CHANNEL - DMA2_Channel1)/sizeof(DMA_Channel_TypeDef)): 0) 		\
 )
 /*********************************************** Driver Helper APIs ***********************************************/
 /**
@@ -222,7 +222,7 @@ __STATIC_FORCEINLINE dma_irq_status_t _DMA_getIRQStatus(const dma_channel_t dmaC
 __STATIC_FORCEINLINE void _DMA_ackIRQStatus(const dma_channel_t dmaChannel, const dma_irq_t dmaIRQ)
 {
 	DMA_Channel_TypeDef* dmaXChannelY = _DMA_getChannel(dmaChannel);
-	__DMA_setIFCR(_DMA_GET_CONTROLLER(dmaXChannelY), _DMA_GET_CHANNEL_NUMBER(dmaXChannelY), dmaIRQ);
+	__DMA_setIFCR(_DMA_GET_CONTROLLER(dmaXChannelY), (dma_channel_number_t) _DMA_GET_CHANNEL_NUMBER(dmaXChannelY), dmaIRQ);
 }
 
 /*********************************************** Driver APIs ***********************************************/

@@ -19,7 +19,7 @@
 #include "gpio.h"
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
-#include "timer.h"
+	#include "timer.h"
 #endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------------------- MACROS ----------------------------------*/
@@ -27,17 +27,15 @@
 #define RESERVED								(6)
 #define STM32F103C8_IRQ							(59)
 
-// Uncomment this to achieve delay from SysTick
-// #define SYSTICK_DELAY__
-
+// #define SYSTICK_DELAY__			// Uncomment this to achieve delay from SysTick
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
-// Timer used for Delay
-#define DELAY_TIMER							TIM4
-// Channel for Timer used for Delay
-#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_NONE
+	// Timer used for Delay
+	#define DELAY_TIMER							TIM4
+	// Channel for Timer used for Delay
+	#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_NONE
 // Timer Interrupt Handler
-#define DELAY_TIMER_IRQHandler				TIM4_IRQHandler
+#define DELAY_TIMER_IRQHandler					TIM4_IRQHandler
 #endif /* SYSTICK_DELAY__ */
 
 /*----------------------------------- Linker Script --------------------------------------------*/
@@ -59,7 +57,20 @@ extern uint8_t _sheap;
 extern uint8_t _eheap;
 
 /*-------------------------------- Handler Prototypes ---------------------*/
-__attribute__((weak)) void Default_Handler(void);
+/*-------------------------------- Default Handler ---------------------*/
+/**
+ * @brief Default interrupt handler for unhandled interrupts
+ */
+__attribute__((weak)) void Default_Handler(void)
+{
+	// Infinite Loop
+	while (1) 
+	{
+		// Optional: Add a breakpoint for debugging
+		// __asm__("bkpt #0");
+	}
+}
+
 __attribute__((weak, naked, noreturn)) void Reset_Handler(void);
 
 /*-------------------------------- Function Prototypes ---------------------*/
@@ -71,6 +82,7 @@ __attribute__((weak, alias("Default_Handler"))) void UsageFault_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void SVC_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void DebugMon_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void PendSV_Handler(void);
+__attribute__((weak, alias("Default_Handler"))) void SysTick_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void WWDG_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void PVD_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TAMPER_IRQHandler(void);
@@ -101,14 +113,16 @@ __attribute__((weak, alias("Default_Handler"))) void TIM1_TRG_COM_IRQHandler(voi
 __attribute__((weak, alias("Default_Handler"))) void TIM1_CC_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM3_IRQHandler(void);
+
 #ifdef SYSTICK_DELAY__
-__attribute__((weak, alias("Default_Handler"))) void TIM4_IRQHandler(void);
+	__attribute__((weak, alias("Default_Handler"))) void TIM4_IRQHandler(void);
 #else
-/**
- * @brief Delay Timer Interrupt Handler
- */
-void TIM4_IRQHandler(void);
+	/**
+	 * @brief Delay Timer Interrupt Handler
+	 */
+	void TIM4_IRQHandler(void);
 #endif /* SYSTICK_DELAY__ */
+
 __attribute__((weak, alias("Default_Handler"))) void I2C1_EV_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C1_ER_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C2_EV_IRQHandler(void);
@@ -140,29 +154,29 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(
 
 /*-------------------------------- Delay Function Prototypes ---------------------*/
 #ifndef SYSTICK_DELAY__
-/**
- * @brief Provides a blocking delay in microseconds using TIMx
- * @param delayUs Delay time in microseconds
- * @note Maximum delay achievable is 4,294,967 us (~4.29 seconds)
- * @note - Assumes 1MHz timer frequency
- * @note - Timer is configured in Upcounting Mode
- * @note - Timer is disabled after delay is complete
- * @note - Uses polling method to check for delay completion
- */
-void delay_us(uint32_t delayUs);
+	/**
+	 * @brief Provides a blocking delay in microseconds using TIMx
+	 * @param delayUs Delay time in microseconds
+	 * @note Maximum delay achievable is 4,294,967 us (~4.29 seconds)
+	 * @note - Assumes 1MHz timer frequency
+	 * @note - Timer is configured in Upcounting Mode
+	 * @note - Timer is disabled after delay is complete
+	 * @note - Uses polling method to check for delay completion
+	 */
+	void delay_us(uint32_t delayUs);
 
-/**
- * @brief Provides a blocking delay in milliseconds using TIMx
- * @param delayMs Delay time in milliseconds
- * @note Maximum delay achievable is 4,294,967 ms (~4294 seconds or ~71 minutes)
- * @note - Assumes 1MHz timer frequency
- * @note - Timer is configured in Upcounting Mode
- * @note - Timer is disabled after delay is complete
- * @note - Uses polling method to check for delay completion
- */
-void delay_ms(uint32_t delayMs);
+	/**
+	 * @brief Provides a blocking delay in milliseconds using TIMx
+	 * @param delayMs Delay time in milliseconds
+	 * @note Maximum delay achievable is 4,294,967 ms (~4294 seconds or ~71 minutes)
+	 * @note - Assumes 1MHz timer frequency
+	 * @note - Timer is configured in Upcounting Mode
+	 * @note - Timer is disabled after delay is complete
+	 * @note - Uses polling method to check for delay completion
+	 */
+	void delay_ms(uint32_t delayMs);
+
 #endif /* SYSTICK_DELAY__ */
-
 /*-------------------------------- Main Entry -----------------------------*/
 extern int main(void);
 

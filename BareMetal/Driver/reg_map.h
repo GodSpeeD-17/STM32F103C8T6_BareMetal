@@ -251,7 +251,7 @@ typedef uint8_t irq_t;
 #define I2Cx_SCL_FREQ_8MHz						(0x08)
 #define I2Cx_SCL_FREQ_16MHz						(0x10)
 #define I2Cx_SCL_FREQ_32MHz						(0x20)
-#define I2Cx_SCL_FREQ_DEFAULT 					RCC_Get_APB1Clock()
+#define I2Cx_SCL_FREQ_DEFAULT 					RCC_APB1ClockFreq_Get()
 // I2C Mode
 #define I2Cx_MODE_STD 							(0x00)
 #define I2Cx_MODE_FAST 							(0x01)
