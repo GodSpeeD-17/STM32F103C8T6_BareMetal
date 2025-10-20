@@ -1,52 +1,141 @@
 # ---------------------- Minimum CMake Version ----------------------
 cmake_minimum_required(VERSION 3.28)
 
-# ---------------------- Project ----------------------
-get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES C CXX ASM)
-
-# ---------------------- Cross Compilation ----------------------
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-
-# ---------------------- Toolchain ----------------------
-set(CMAKE_C_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
-set(CMAKE_ASM_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
-set(CMAKE_OBJCOPY ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-objcopy)
-set(CMAKE_SIZE ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-size)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(ST_FLASH st-flash)
-set(OPENOCD openocd)
-set(ST_INFO st-info)
-set(ST_UART_FLASH stm32flash)
-set(ST_UART_FLASH_PORT /dev/ttyUSB0)
-
-# ---------------------- C/C++ Flags ----------------------
-set(MCU_DEFINE STM32F103C8T6__)
-set(MCU_CPU_DEFINE CORTEX_M3__)
-set(MCU_CPU cortex-m3)
-set(C_STD gnu11)
-set(CXX_STD c++17)
-set(OPTIMIZATION_LEVEL 0)
-set(FLASH_ADDRESS 0x08000000)
-set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP -save-temps)
-set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_DEFINE} -D${MCU_CPU_DEFINE} -g -gdwarf-2 )
-
-# C specific flags
-set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
-# C++ specific flags
-set(CXX_FLAGS ${COMMON_FLAGS} -std=${CXX_STD} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
-# Assembly-specific flags
-set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
-
 # ---------------------- Paths ----------------------
 get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(REPO_ROOT "${PROJ_DIR}/../../../" ABSOLUTE) # Adjust this as per project structure
 set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
 set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
 set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
-# Replace this for customer linker file
-set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)
+
+# ---------------------- Cross Compilation ----------------------
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(TOOLCHAIN_PATH /opt/arm-gnu-toolchain-14.3/bin)
+
+# ---------------------- Toolchain ----------------------
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
+set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_PROCESSOR}-none-eabi-g++)
+set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_PROCESSOR}-none-eabi-objcopy)
+set(CMAKE_SIZE ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_PROCESSOR}-none-eabi-size)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(ST_FLASH st-flash)
+set(ST_FLASH_PATH /usr/bin/st-flash)
+set(GDB_PATH_MULTIARCH_PATH "/usr/bin/gdb-multiarch")
+set(OPENOCD openocd)
+set(OPENOCD_PATH /usr/bin/openocd)
+set(ST_INFO st-info)
+set(ST_UTIL_PATH /usr/bin/st-util)
+set(ST_UART_FLASH stm32flash)
+set(ST_UART_FLASH_PORT /dev/ttyUSB0)
+
+# =============================================================================
+# Project
+# =============================================================================
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES C CXX ASM)
+
+# =============================================================================
+# MCU Configuration
+# =============================================================================
+set(MCU_DEFINE STM32F103C8T6__)
+set(MCU_CPU_DEFINE CORTEX_M3__)
+set(MCU_CPU cortex-m3)
+set(FLASH_ADDRESS 0x08000000)
+
+# =============================================================================
+# Language Standards
+# =============================================================================
+set(C_STD gnu11)
+set(CXX_STD c++17)
+
+# =============================================================================
+# Optimization & Debugging
+# =============================================================================
+set(OPTIMIZATION_LEVEL 0)  # 0: Debug, 1: Balanced, 2: Performance, 3: Size
+set(DEBUG_LEVEL 2)         # 0: None, 1: Minimal, 2: Standard, 3: Maximum
+
+# =============================================================================
+# Base Compiler Flags
+# =============================================================================
+set(DEFAULT_FLAGS 
+    -mcpu=${MCU_CPU}
+    -mthumb
+    -mfloat-abi=soft
+    --specs=nano.specs    # Use reduced libc
+    --specs=nosys.specs   # No system calls
+    -lc -lm
+    -MMD -MP              # Dependency generation
+    -save-temps           # Keep intermediate files
+)
+
+# =============================================================================
+# Common Flags (C & C++)
+# =============================================================================
+set(COMMON_FLAGS ${DEFAULT_FLAGS}
+    -O${OPTIMIZATION_LEVEL}
+    -Wall                 # All standard warnings
+    -Wextra               # Extra warnings
+    -Wpedantic            # Strict ISO compliance
+    -fstack-usage         # Generate stack usage info
+    -fdata-sections       # Enable data section garbage collection
+    -ffunction-sections   # Enable function section garbage collection
+    -D${MCU_DEFINE}       # MCU-specific define
+    -D${MCU_CPU_DEFINE}   # CPU architecture define
+    -g -gdwarf-2          # Debug info with DWARF2 format
+)
+
+# =============================================================================
+# Language-Specific Flags
+# =============================================================================
+
+# C specific flags
+set(C_FLAGS ${COMMON_FLAGS}
+    -std=${C_STD}
+    -Wstrict-prototypes   # Warn about non-ANSI function prototypes
+    -Wmissing-prototypes  # Warn about missing function prototypes
+)
+
+# C++ specific flags  
+set(CXX_FLAGS 
+	${COMMON_FLAGS}
+    -std=${CXX_STD}
+    -fno-exceptions       # Disable exception handling
+    -fno-rtti             # Disable RTTI
+    -fno-use-cxa-atexit   # Use atexit() instead of __cxa_atexit
+    -fno-threadsafe-statics # Disable thread-safe static initialization
+    -Wold-style-cast      # Warn about C-style casts in C++
+    -Woverloaded-virtual  # Warn about overloaded virtual functions
+)
+
+# Assembly-specific flags
+set(ASM_FLAGS 
+	${DEFAULT_FLAGS}
+    -x assembler-with-cpp # Preprocess assembly files
+    -Wa,--warn            # Enable assembler warnings
+)
+
+
+# set(MCU_DEFINE STM32F103C8T6__)
+# set(MCU_CPU_DEFINE CORTEX_M3__)
+# set(MCU_CPU cortex-m3)
+# set(C_STD gnu11)
+# set(CXX_STD c++17)
+# set(OPTIMIZATION_LEVEL 0)
+# set(FLASH_ADDRESS 0x08000000)
+# set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP -save-temps)
+# set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_DEFINE} -D${MCU_CPU_DEFINE} -g -gdwarf-2 )
+
+# # C specific flags
+# set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
+# # C++ specific flags
+# set(CXX_FLAGS ${COMMON_FLAGS} -std=${CXX_STD} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+# # Assembly-specific flags
+# set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
+
+# ---------------------- Paths ----------------------
+set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld) # Replace this for customer linker file
 set(VSCODE_DIR ${PROJ_DIR}/.vscode)
 set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
 set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
@@ -56,93 +145,122 @@ file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(SELECTED_DRIVER_SOURCES "")
 
-# ---------------------- Sources ----------------------
+# ---------------------- Listing Function ----------------------
 set(SELECTED_DRIVER_SOURCES "")
 set(SELECTED_DRIVER_INCLUDES "")
 
 # Function to add a driver module
 function(add_driver_module)
-	# Iterate over each module name passed as argument
-	foreach(module_name IN LISTS ARGN)
-		# Construct module path
-		set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
-		# Check if directory exists
-		if(EXISTS ${DRIVER_MODULE_DIR})
-			# Collect sources & append to list
-			file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-			list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
+    # Parse arguments - first argument can be SHOW_FULL_PATH or SHOW_FILENAME_ONLY
+    set(show_full_path OFF)
+    set(module_names "")
+    
+    foreach(arg IN LISTS ARGN)
+        if(arg STREQUAL "SHOW_FULL_PATH")
+            set(show_full_path ON)
+        elseif(arg STREQUAL "SHOW_FILENAME_ONLY")
+            set(show_full_path OFF)
+        else()
+            list(APPEND module_names ${arg})
+        endif()
+    endforeach()
 
-			# Collect includes & append to list
-			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-				list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
-			endif()
+    # Iterate over each module name
+    foreach(module_name IN LISTS module_names)
+        # Construct module path
+        set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
+        # Check if directory exists
+        if(EXISTS ${DRIVER_MODULE_DIR})
+            # Collect sources & append to list
+            file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+            list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
 
-			# Push lists to parent scope
-			set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
-			set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
+            # Collect includes & append to list
+            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+                list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
+            endif()
 
-			# ------------------------ Pretty print tree ------------------------
-			message(STATUS "-- ${module_name}")
+            # Push lists to parent scope
+            set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
+            set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
 
-			# Header File Tree
-			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-			message(STATUS "   |-- Inc")
-			file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
-			foreach(hdr IN LISTS MODULE_HEADERS)
-			message(STATUS "   |    |-- ${hdr}")
-			endforeach()
-			message(STATUS "   |")
-			endif()
-			
-			# Source File Tree
-			if(EXISTS ${DRIVER_MODULE_DIR}/Src)
-				message(STATUS "   |-- Src")
-				file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-				foreach(src IN LISTS MODULE_SOURCES)
-					message(STATUS "        |-- ${src}")
-				endforeach()
-			endif()
-		else()
-			message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
-		endif()
-	endforeach()
+            # ------------------------ Pretty print tree ------------------------
+            message(STATUS "-- ${module_name}")
+
+            # Header File Tree
+            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+                message(STATUS "   |-- Inc")
+                file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
+                foreach(hdr IN LISTS MODULE_HEADERS)
+                    if(show_full_path)
+                        message(STATUS "   |    |-- ${hdr}")
+                    else()
+                        get_filename_component(filename ${hdr} NAME)
+                        message(STATUS "   |    |-- ${filename}")
+                    endif()
+                endforeach()
+                message(STATUS "   |")
+            endif()
+            
+            # Source File Tree
+            if(EXISTS ${DRIVER_MODULE_DIR}/Src)
+                message(STATUS "   |-- Src")
+                file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+                foreach(src IN LISTS MODULE_SOURCES)
+                    if(show_full_path)
+                        message(STATUS "        |-- ${src}")
+                    else()
+                        get_filename_component(filename ${src} NAME)
+                        message(STATUS "        |-- ${filename}")
+                    endif()
+                endforeach()
+            endif()
+        else()
+            message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
+        endif()
+    endforeach()
 endfunction()
 
-# ---------------------- Includes & Sources ----------------------
+# ---------------------- Sources ----------------------
 # Project Source Files
 file(GLOB_RECURSE PROJECT_SOURCES "${PROJ_DIR}/Src/*.c")
 # Core Source Files (if any)
 file(GLOB_RECURSE CORE_SOURCES "${CORE_ROOT}/Src/*.c")
 
 # ----------------------------------- Add driver modules -----------------------------------
-add_driver_module(
-	GPIO 
+# First Argument Option: SHOW_FULL_PATH / SHOW_FILENAME_ONLY
+add_driver_module(SHOW_FILENAME_ONLY
+	GPIO
 	RCC
 	Timer
 	DMA
 )
 
-# ---------------------- Executable ----------------------
-add_executable(${PROJECT_NAME}.elf
+set(
+	ALL_SOURCE_FILES
 	${PROJECT_SOURCES}
 	${SELECTED_DRIVER_SOURCES}
 	${CORE_SOURCES}
 )
 
+# ---------------------- Executable ----------------------
+add_executable(
+	${PROJECT_NAME}.elf
+	${ALL_SOURCE_FILES}
+)
+
 # ---------------------- Include Dirs ----------------------
 set(ALL_INCLUDE_DIRS
-	${PROJ_DIR}/Inc
 	${CORE_ROOT}/Inc
 	${DRIVER_ROOT}
 	${SELECTED_DRIVER_INCLUDES}
+	${PROJ_DIR}/Inc
 )
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE ${ALL_INCLUDE_DIRS})
 # ---------------------- Flags ----------------------
 
-# Apply flags to target based on language
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	$<$<COMPILE_LANGUAGE:C>:${C_FLAGS}>
 	$<$<COMPILE_LANGUAGE:CXX>:${CXX_FLAGS}>
@@ -222,9 +340,9 @@ file(WRITE ${VSCODE_DIR}/launch.json \"{
 # -----------------------------------------------------------------------------
 create_vscode_script(settings_json "
 file(WRITE ${VSCODE_DIR}/settings.json \"{
-  \\\"cortex-debug.gdbPath\\\": \\\"/usr/bin/gdb-multiarch\\\",
-  \\\"cortex-debug.openocdPath\\\": \\\"/usr/local/bin/openocd\\\",
-  \\\"cortex-debug.stutilPath\\\": \\\"/usr/bin/st-util\\\",
+  \\\"cortex-debug.gdbPath\\\": \\\"${GDB_PATH_MULTIARCH_PATH}\\\",
+  \\\"cortex-debug.openocdPath\\\": \\\"${OPENOCD_PATH}\\\",
+  \\\"cortex-debug.stutilPath\\\": \\\"${ST_UTIL_PATH}\\\",
   \\\"cortex-debug.variableUseNaturalFormat\\\": false
 }\")
 ")
@@ -273,14 +391,15 @@ file(WRITE ${VSCODE_DIR}/c_cpp_properties.json \"{
 	{
 	  \\\"name\\\": \\\"Linux\\\",
 	  \\\"includePath\\\": [
-		\\\"${CORE_ROOT}/Inc/**\\\",
-		\\\"${DRIVER_ROOT}/*/Inc/**\\\",
-		\\\"${PROJ_DIR}/Inc/**\\\"
+		\\\"${CORE_ROOT}/**\\\",
+		\\\"${DRIVER_ROOT}/**\\\",
+		\\\"${PROJ_DIR}/**\\\",
+		\\\"${ALL_INCLUDE_DIRS}\\\",
 	  ],
-	  \\\"defines\\\": [\\\"STM32F103C8T6\\\"],
-	  \\\"compilerPath\\\": \\\"/usr/bin/arm-none-eabi-gcc\\\",
-	  \\\"cStandard\\\": \\\"c11\\\",
-	  \\\"cppStandard\\\": \\\"gnu++17\\\",
+	  \\\"defines\\\": [\\\"STM32F103C8T6__\\\", \\\"CORTEX_M3__\\\"],
+	  \\\"compilerPath\\\": \\\"${CMAKE_C_COMPILER}\\\",
+	  \\\"cStandard\\\": \\\"${C_STD}\\\",
+	  \\\"cppStandard\\\": \\\"${CXX_STD}\\\",
 	  \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"
 	}
   ],

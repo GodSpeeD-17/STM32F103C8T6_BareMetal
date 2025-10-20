@@ -4,6 +4,7 @@
 
 /*-------------------------------------------------------------------------------*/
 // Headers
+#include "startup.h"
 #include "gpio.h"
 #include "systick.h"
 #include "dma.h"
