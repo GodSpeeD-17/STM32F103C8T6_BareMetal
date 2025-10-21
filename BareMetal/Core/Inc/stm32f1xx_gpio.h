@@ -1,12 +1,11 @@
 /**
  * @file    stm32f1xx_gpio.h
  * @author  Shrey Shah
- * @brief   STM32F1xx General-Purpose Input/Output (GPIO) Peripheral Address Structure
+ * @brief   STM32F1xx General-Purpose Input/Output (GPIO) Peripheral Structure
  * @version v1.2
  * @date    21-10-2025
  *
  * @defgroup GPIO General Purpose Input/Ouptut (GPIO)
- * @brief    Hardware abstraction layer for STM32F1xx GPIO peripherals
  * 
  * @details This module provides complete access to GPIO peripherals including:
  *          - Register mapping and memory addresses
@@ -37,8 +36,8 @@ extern "C" {
 
 /**
  * @brief    GPIO Peripheral Registers
- * @ingroup  GPIO
  * @defgroup GPIO_RegisterMap GPIO Register Structure
+ * @ingroup  GPIO
  * @{
  */
 
@@ -56,7 +55,8 @@ typedef struct {
 	 * @brief GPIO Port Configuration Register Low (CRL)
 	 * @details Configures pins 0-7 for mode and output type/speed
 	 */
-	union {
+	union CRL 
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t MODE0  : 2;  ///< Pin 0 mode (00=Input, 01=Output 10MHz, 10=Output 2MHz, 11=Output 50MHz)
@@ -82,7 +82,8 @@ typedef struct {
 	 * @brief GPIO Port Configuration Register High (CRH)  
 	 * @details Configures pins 8-15 for mode and output type/speed
 	 */
-	union {
+	union CRH
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t MODE8  : 2;  ///< Pin 8 mode
@@ -108,7 +109,8 @@ typedef struct {
 	 * @brief GPIO Port Input Data Register (IDR)
 	 * @details Read-only register containing current state of input pins
 	 */
-	union {
+	union IDR
+	{
 		volatile const uint32_t REG;  ///< Read-only 32-bit register access
 		struct {
 			volatile const uint32_t IDR0   : 1;  ///< Pin 0 input state
@@ -135,7 +137,8 @@ typedef struct {
 	 * @brief GPIO Port Output Data Register (ODR)
 	 * @details Sets output state for pins configured as output
 	 */
-	union {
+	union ODR 
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t ODR0   : 1;  ///< Pin 0 output state
@@ -162,7 +165,8 @@ typedef struct {
 	 * @brief GPIO Port Bit Set/Reset Register (BSRR)
 	 * @details Atomic set/reset operations (bits 0-15 set, bits 16-31 reset)
 	 */
-	union {
+	union BSRR
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t BS0    : 1;  ///< Set Pin 0 (write 1 to set)
@@ -204,7 +208,8 @@ typedef struct {
 	 * @brief GPIO Port Bit Reset Register (BRR)
 	 * @details Reset-only register (alternative to BSRR reset bits)
 	 */
-	union {
+	union BRR
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t BR0    : 1;  ///< Reset Pin 0
@@ -231,7 +236,8 @@ typedef struct {
 	 * @brief GPIO Port Configuration Lock Register (LCKR)
 	 * @details Locks pin configuration until next reset
 	 */
-	union {
+	union LCKR
+	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
 			volatile uint32_t LCK0   : 1;  ///< Lock Pin 0 configuration

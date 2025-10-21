@@ -367,8 +367,9 @@ endfunction()
 # =============================================================================
 # First Argument Option: SHOW_FULL_PATH / SHOW_FILENAME_ONLY
 add_driver_module(SHOW_FILENAME_ONLY
-    GPIO
-    RCC 
+    NVIC
+	GPIO
+    RCC
     Timer
     DMA 
 )

@@ -77,105 +77,16 @@
  ***************************************************************************************/
 
 // ---- Header Guards ---- // 
-#ifndef NVIC_H__
-#define NVIC_H__
+#ifndef NVIC_H_
+#define NVIC_H_
 
 // ---- Main Library ---- //
 #include "stm32f1xx.h"
+#include "nvic_types.h"
 
-// --- Helper Macros --- //
-#define _IRQn_GET_IPR_REG(X)						((X) >> 2)
-#define _IRQn_GET_IPR_REG_INDEX(X)					(((X) & 0x03) << 3)
 
-// --- STM32F103C8T6 --- //
-#ifdef STM32F103C8T6__
-	#define SCB_AICR_WRITE_VALUE						(0x5FA)
-	#else
-	#define SCB_AICR_WRITE_VALUE						(0x000)
-#endif /* STM32F103C8T6__ */
 
-// ----- tyepdefs ----- //
-typedef uint8_t priority_group_t;
-typedef uint8_t priority_t;
-typedef uint8_t sub_priority_t;
-typedef uint32_t scb_exception_t;
 
-// ------ Priority ------ //
-/**
- * @brief Priority group configurations for NVIC priority grouping
- * 
- * @note Priority grouping determines how the 8-bit priority field is split
- *       between preemption priority and sub-priority bits
- */
-/** 
- * @brief Group 0: 
- * @brief - 0 bits preemption
- * @brief - 4 bits sub-priority
- * @details 0 preemption levels, 16 sub-priority levels
- * @note - Cooperative systems where no interrupt can preempt others
- * @note - Simple applications, no real-time requirements
- */
-#define NVIC_PRIO_GROUP_0							((priority_group_t) 0x00)
-/** 
- * @brief Group 1: 
- * @brief - 1 bit preemption
- * @brief - 3 bits sub-priority  
- * @details 2 preemption levels, 8 sub-priority levels
- * @note - Basic two-level system (critical vs normal)
- * @note - Systems with one critical task category
- */
-#define NVIC_PRIO_GROUP_1							((priority_group_t) 0x01)
-/** 
- * @brief Group 2: 
- * @brief - 2 bits preemption
- * @brief - 2 bits sub-priority
- * @details 4 preemption levels, 4 sub-priority levels
- * @note - Balanced preemption control with good flexibility
- * @note - Most embedded systems - recommended default
- */
-#define NVIC_PRIO_GROUP_2							((priority_group_t) 0x02)
-/** 
- * @brief Group 3: 
- * @brief - 3 bits preemption
- * @brief - 1 bit sub-priority
- * @details 8 preemption levels, 2 sub-priority levels  
- * @note - Many preemption levels with minimal sub-priority
- * @note - Complex real-time systems with many priority levels
- */
-#define NVIC_PRIO_GROUP_3							((priority_group_t) 0x03)
-/** 
- * @brief Group 4: 
- * @brief - 4 bits preemption
- * @brief - 0 bits sub-priority
- * @details 16 preemption levels, no sub-priority
- * @note - Maximum preemption control, no same-level ordering
- * @note - Hard real-time systems, medical, automotive safety
- */
-#define NVIC_PRIO_GROUP_4							((priority_group_t) 0x04)
-
-/**
- * @brief Sub-priority values (0-15) - lower = higher priority
- */
-// Highest sub-priority
-#define NVIC_SUB_PRIO_0								((sub_priority_t) 0)
-// Second highest sub-priority
-#define NVIC_SUB_PRIO_1								((sub_priority_t) 1)
-#define NVIC_SUB_PRIO_2								((sub_priority_t) 2)
-#define NVIC_SUB_PRIO_3								((sub_priority_t) 3)
-#define NVIC_SUB_PRIO_4								((sub_priority_t) 4)
-#define NVIC_SUB_PRIO_5								((sub_priority_t) 5)
-#define NVIC_SUB_PRIO_6								((sub_priority_t) 6)
-#define NVIC_SUB_PRIO_7								((sub_priority_t) 7)
-#define NVIC_SUB_PRIO_8								((sub_priority_t) 8)
-#define NVIC_SUB_PRIO_9								((sub_priority_t) 9)
-#define NVIC_SUB_PRIO_10         					((sub_priority_t) 10)
-#define NVIC_SUB_PRIO_11         					((sub_priority_t) 11)
-#define NVIC_SUB_PRIO_12         					((sub_priority_t) 12)
-#define NVIC_SUB_PRIO_13         					((sub_priority_t) 13)
-// Second lowest sub-priority
-#define NVIC_SUB_PRIO_14         					((sub_priority_t) 14)
-// Lowest sub-priority
-#define NVIC_SUB_PRIO_15         					((sub_priority_t) 15)
 
 
 /**
@@ -283,4 +194,4 @@ __STATIC_FORCEINLINE void NVIC_IRQ_SoftwareTrigger(uint8_t IRQn){
 	NVIC->ISPR[(IRQn >> 5)] |= (uint32_t) (1 << (IRQn & 0x1F));
 }
 
-#endif /* NVIC_H__ */
+#endif /* NVIC_H_ */

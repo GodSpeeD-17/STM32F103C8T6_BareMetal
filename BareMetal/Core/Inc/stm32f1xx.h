@@ -6,7 +6,6 @@
  * @date    2024
  *
  * @defgroup Peripheral_Map Peripheral Register Map
- * @brief    Memory-mapped peripheral instances for STM32 families
  *
  * @details This file provides centralized memory mapping for all peripherals across
  *          different STM32 microcontroller families. The architecture supports:
@@ -14,24 +13,7 @@
  *          - Easy scalability to new MCU families
  *          - Compiler-optimized memory access
  *          - Family-specific configuration via preprocessor
- *
- * @usage
- * @code
- * #include "stm32f1xx.h"
- *
- * // Access any peripheral directly
- * GPIOA->ODR |= GPIO_PIN_13;    		// Set PA13
- * RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;  // Enable GPIOA clock
- * USART1->DR = 'A';             		// Send character via USART1
- * @endcode
- *
- * @note Include this file after family-specific configuration
- * @warning Peripheral availability varies by STM32 family and package
- *
- */
-
-/*
-****************************************************************************************************************
+ * ****************************************************************************************************************
 *	Basic Notes:-
 *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
 *	`uint32_t` inside every BIT struct because of padding alignment
@@ -62,8 +44,20 @@
 *   uint8_t zeros = __builtin_clz(val);      // → 28
 *   uint8_t set   = __builtin_popcount(val); // → 4
 *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
-*
-*/
+ *
+ * @code
+ * #include "stm32f1xx.h"
+ *
+ * // Access any peripheral directly
+ * GPIOA->ODR |= GPIO_PIN_13;				// Set PA13
+ * RCC->APB2ENR &= ~RCC_APB2ENR_IOPAEN;		// Reset GPIOA clock
+ * USART1->DR = 'A';						// Send character via USART1
+ * @endcode
+ *
+ * @note Include this file after family-specific configuration
+ * @warning Peripheral availability varies by STM32 family and package
+ *
+ */
 
 // Header Guards
 #ifndef STM32F1XX_H_
@@ -76,7 +70,6 @@ extern "C" {
 
 // STM32F103C8T6
 #ifdef STM32F103C8T6__
-
 
 /*********************************************** ARM Cortex-M3 ***********************************************/
 #include "cmsis_gcc.h"
@@ -135,21 +128,6 @@ typedef enum
 
 /*********************************************** Custom Declaration ***********************************************/
 
-/*********************************************** Address Mapping ***********************************************/
-// Memory Mapping
-// #define SysTick_BASE_ADDR 						0xE000E010
-// #define NVIC_BASE_ADDR 							0xE000E100
-// #define SCB_BASE_ADDR                           0xE000ED00
-// #define CoreDebug_BASE_ADDR                     0xE000EDF0
-// #define APB1_BASE_ADDR 							0x40000000
-// #define APB2_BASE_ADDR 							0x40010000
-// #define AHB_BASE_ADDR 							0x40018000
-// #define FLASH_BASE_ADDR 						0x40022000
-// #define DMA1_BASE_ADDR 							(AHB_BASE_ADDR + 0x00008000)
-// #define DMA2_BASE_ADDR 							(DMA1_BASE_ADDR + 0x00000400)
-// #define WWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00002000)
-// #define IWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00003000)
-
 /*********************************************** Memory Bus Base Addresses ***********************************************/
 
 /**
@@ -187,12 +165,12 @@ typedef enum
 /*********************************************** GPIO Peripheral Instances ***********************************************/
 
 /**
- * @brief	Memory-mapped GPIO port instances for STM32F1xx
- * @defgroup GPIO_MemoryAddress
- * @ingroup	GPIO
+ * @brief		Memory-mapped GPIO port instances for STM32F1xx
+ * @defgroup 	GPIO_MemoryAddress GPIO Memory Address Mapping
+ * @ingroup		GPIO
  *
- * @details GPIO Instances based on GPIO Register Mapping Structure (`GPIO_TypeDef`)
- * 			Clocked from APB2 Bus (`APB2_BASE_ADDR`)
+ * @details GPIO Instances based on GPIO Register Mapping Structure (GPIO_TypeDef)
+ * 			Clocked from APB2 Bus (APB2_BASE_ADDR)
  * @note	Clock must be enabled before accessing GPIO registers
  * @see		Reference Manual RM0008 - Section 9.2 GPIO Registers
  * @see		Datasheet - Section 4 Memory Mapping
@@ -271,7 +249,9 @@ typedef enum
  */
 #define GPIOG                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00002000))
 
-/** @} */ // End of GPIO_MemoryAddress
+/** 
+ * @} // End of GPIO_MemoryAddress
+ */
 
 #define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
 #define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00))
@@ -310,78 +290,7 @@ typedef enum
 
 /*********************************************** Address Mapping ***********************************************/
 
-/*********************************************** IRQn MACROS ***********************************************/
-/**
- * @brief Interrupt Request (IRQ) numbers
- */
-typedef uint8_t irq_t;
-#define WWDG_IRQn								((irq_t) 0)
-#define PVD_IRQn								((irq_t) 1)
-#define TAMPER_IRQn								((irq_t) 2)
-#define RTC_IRQn								((irq_t) 3)
-#define FLASH_IRQn								((irq_t) 4)
-#define RCC_IRQn								((irq_t) 5)
-#define EXTI0_IRQn								((irq_t) 6)
-#define EXTI1_IRQn								((irq_t) 7)
-#define EXTI2_IRQn								((irq_t) 8)
-#define EXTI3_IRQn								((irq_t) 9)
-#define EXTI4_IRQn								((irq_t) 10)
-#define DMA1_Channel1_IRQn						((irq_t) 11)
-#define DMA1_Channel2_IRQn						((irq_t) 12)
-#define DMA1_Channel3_IRQn						((irq_t) 13)
-#define DMA1_Channel4_IRQn						((irq_t) 14)
-#define DMA1_Channel5_IRQn						((irq_t) 15)
-#define DMA1_Channel6_IRQn						((irq_t) 16)
-#define DMA1_Channel7_IRQn						((irq_t) 17)
-#define ADC1_2_IRQn								((irq_t) 18)
-#define USB_HP_CAN_TX_IRQ						((irq_t) 19)
-#define USB_LP_CAN_RX0_IRQ						((irq_t) 20)
-#define CAN_RX1_IRQ								((irq_t) 21)
-#define CAN_SCE_IRQ								((irq_t) 22)
-#define EXTI9_5_IRQn							((irq_t) 23)
-#define TIM1_BRK_IRQn							((irq_t) 24)
-#define TIM1_UP_IRQn							((irq_t) 25)
-#define TIM1_TRG_COM_IRQn						((irq_t) 26)
-#define TIM1_CC_IRQn							((irq_t) 27)
-#define TIM2_IRQn								((irq_t) 28)
-#define TIM3_IRQn								((irq_t) 29)
-#define TIM4_IRQn								((irq_t) 30)
-#define I2C1_EV_IRQn							((irq_t) 31)
-#define I2C1_ER_IRQn							((irq_t) 32)
-#define I2C2_EV_IRQn							((irq_t) 33)
-#define I2C2_ER_IRQn							((irq_t) 34)
-#define SPI1_IRQn								((irq_t) 35)
-#define SPI2_IRQn								((irq_t) 36)
-#define USART1_IRQn								((irq_t) 37)
-#define USART2_IRQn								((irq_t) 38)
-#define USART3_IRQn								((irq_t) 39)
-#define EXTI15_10_IRQn							((irq_t) 40)
-#define RTC_Alarm_IRQn							((irq_t) 41)
-#define USBWakeUp_IRQn							((irq_t) 42)
-#define TIM8_BRK_IRQn							((irq_t) 43)
-#define TIM8_UP_IRQn							((irq_t) 44)
-#define TIM8_TRG_COM_IRQn						((irq_t) 45)
-#define TIM8_CC_IRQn							((irq_t) 46)
-#define ADC3_IRQn								((irq_t) 47)
-#define FMSC_IRQn								((irq_t) 48)
-#define SPI3_IRQn								((irq_t) 49)
-#define UART4_IRQn								((irq_t) 50)
-#define UART5_IRQn								((irq_t) 51)
-#define TIM6_IRQn								((irq_t) 52)
-#define TIM7_IRQn								((irq_t) 53)
-#define DMA2_Channel1_IRQn						((irq_t) 56)
-#define DMA2_Channel2_IRQn						((irq_t) 57)
-#define DMA2_Channel3_IRQn						((irq_t) 58)
-#define DMA2_Channel4_5_IRQn					((irq_t) 59)
-#define ETH_IRQn								((irq_t) 61)
-#define ETH_WakeUp_IRQn							((irq_t) 62)
-#define CAN2_TX_IRQn							((irq_t) 63)
-#define CAN2_RX0_IRQn							((irq_t) 64)
-#define CAN2_RX1_IRQn							((irq_t) 65)
-#define CAN2_SCE_IRQn							((irq_t) 66)
-#define OTG_FS_IRQn								((irq_t) 67)
 
-/*********************************************** IRQn MACROS ***********************************************/
 
 /*********************************************** I2C MACROS ***********************************************/
 // I2C Speed

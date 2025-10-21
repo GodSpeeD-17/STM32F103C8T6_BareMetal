@@ -1,51 +1,205 @@
-// --- Header Guards --- //
+/**
+ * @file    stm32f1xx_nvic.h
+ * @author  Shrey Shah
+ * @brief   STM32F1xx Nested Vectored Interrupt Controller (NVIC) Peripheral Structure
+ * @version v1.2
+ * @date    25-10-2025
+ *
+ * @defgroup NVIC Nested Vectored Interrupt Controller (NVIC)
+ * @brief    Cortex-M3 NVIC Peripheral Register Structure
+ *
+ * @details 
+ * - This module provides the register mapping for the Nested Vectored Interrupt Controller (NVIC)
+ * - It manages all exception and interrupt handling on the STM32F1xx Cortex-M3 processor
+ *
+ * @note The NVIC is a Cortex-M3 core peripheral, not STM32-specific
+ * @see Cortex-M3 Technical Reference Manual - Section 4.3 Nested Vectored Interrupt Controller
+ * @see Reference Manual RM0008 - Section 10.2 Nested vectored interrupt controller
+ *
+ */
+
 #ifndef STM32F1XX_NVIC_H_
 #define STM32F1XX_NVIC_H_
 
-// C++ Safeguards
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
-// ---- Includes ---- //
 #include <stdint.h>
+
+/*********************************************** NVIC Register Structure ***********************************************/
+
+/**
+ * @brief    NVIC Peripheral Register Structure Definition
+ * @defgroup NVIC_RegisterMap NVIC Registers
+ * @ingroup  NVIC
+ *
+ * @details Complete register mapping for the Nested Vectored Interrupt Controller.
+ *          The NVIC provides flexible interrupt management with hardware nesting support.
+ *
+ * @note 	Register addresses are relative to the NVIC base address (`NVIC_BASE_ADDR`)
+ * @warning Some registers are read-only or have specific access requirements
+ * @see 	Cortex-M3 TRM - Section 4.3.4 NVIC register descriptions
+ * @{
+ */
 
 /**
  * @brief NVIC Register Structure
- * @brief Contains register sequencing
+ * 
+ * @details This structure maps the complete NVIC register set in memory.
+ *          The NVIC supports up to 240 external interrupts with 8 priority levels
+ *
+ * @note Array sizes are designed for maximum STM32F1xx interrupt count
+ * @see Reference Manual RM0008 - Table 63 for STM32F1xx interrupt mapping
  */
 typedef struct {
-	// Interrupt Set-Enable Registers (ISER)
-	uint32_t ISER[8];
-	// Reserved
+	/**
+	 * @brief Interrupt Set-Enable Registers (ISER)
+	 * @details Enable interrupts by setting corresponding bits
+	 * 
+	 * - ISER[0]: Enables interrupts 0 to 31
+	 * - ISER[1]: Enables interrupts 32 to 63  
+	 * - ISER[2]: Enables interrupts 64 to 95
+	 * - ISER[3]: Enables interrupts 96 to 127
+	 * - ISER[4-7]: Reserved for future use
+	 * 
+	 * @note - 1: Enable
+	 * @note - 0: Disable
+	 * @see Cortex-M3 TRM - Section 4.3.6 NVIC register map
+	 */
+	volatile uint32_t ISER[8];
+	
+	/**
+	 * @brief Reserved space between ISER and ICER
+	 * @details 24 reserved words (0x060 - 0x0BC)
+	 */
 	uint32_t RESERVED_0[24];
-	// Interrupt Clear-Enable Registers (ICER)
-	uint32_t ICER[8];
-	// Reserved
+	
+	/**
+	 * @brief Interrupt Clear-Enable Registers (ICER)
+	 * @details Disable interrupts by setting corresponding bits
+	 * 
+	 * - ICER[0]: Disables interrupts 0 to 31
+	 * - ICER[1]: Disables interrupts 32 to 63
+	 * - ICER[2]: Disables interrupts 64 to 95
+	 * - ICER[3]: Disables interrupts 96 to 127
+	 * - ICER[4-7]: Reserved for future use
+	 * 
+	 * @note - 1: Acknowledge
+	 * @note - 0: No Effect
+	 */
+	volatile uint32_t ICER[8];
+	
+	/**
+	 * @brief Reserved space between ICER and ISPR
+	 * @details 24 reserved words (0x120 - 0x17C)
+	 */
 	uint32_t RESERVED_1[24];
-	// Interrupt Set-Pending Register (ISPR)
-	uint32_t ISPR[8];
-	// Reserved
+	
+	/**
+	 * @brief Interrupt Set-Pending Registers (ISPR)
+	 * @details Force interrupts into pending state
+	 * 
+	 * - ISPR[0]: Sets pending for interrupts 0 to 31
+	 * - ISPR[1]: Sets pending for interrupts 32 to 63
+	 * - ISPR[2]: Sets pending for interrupts 64 to 95
+	 * - ISPR[3]: Sets pending for interrupts 96 to 127
+	 * - ISPR[4-7]: Reserved for future use
+	 * 
+	 * @note - 1: Software Trigger
+	 * @note - 0: No Effect
+	 */
+	volatile uint32_t ISPR[8];
+	
+	/**
+	 * @brief Reserved space between ISPR and ICPR
+	 * @details 24 reserved words (0x1E0 - 0x23C)
+	 */
 	uint32_t RESERVED_2[24];
-	// Interrupt Clear-Pending Register (ICPR)
-	uint32_t ICPR[8];
-	// Reserved
+	
+	/**
+	 * @brief Interrupt Clear-Pending Registers (ICPR)
+	 * @details Remove pending status from interrupts
+	 * 
+	 * - ICPR[0]: Clears pending for interrupts 0 to 31
+	 * - ICPR[1]: Clears pending for interrupts 32 to 63
+	 * - ICPR[2]: Clears pending for interrupts 64 to 95
+	 * - ICPR[3]: Clears pending for interrupts 96 to 127
+	 * - ICPR[4-7]: Reserved for future use
+	 * 
+	 * @note - 1: Acknowledge Software Trigger
+	 * @note - 0: No Effect
+	 */
+	volatile uint32_t ICPR[8];
+	
+	/**
+	 * @brief Reserved space between ICPR and IABR
+	 * @details 24 reserved words (0x2A0 - 0x2FC)
+	 */
 	uint32_t RESERVED_3[24];
-	// Interrupt Active Bit Register (IABR)
-	uint32_t IABR[8];
-	// Reserved
+	
+	/**
+	 * @brief Interrupt Active Bit Registers (IABR)
+	 * @details Read-only registers showing currently active interrupts
+	 * 
+	 * - IABR[0]: Active status for interrupts 0 to 31
+	 * - IABR[1]: Active status for interrupts 32 to 63
+	 * - IABR[2]: Active status for interrupts 64 to 95
+	 * - IABR[3]: Active status for interrupts 96 to 127
+	 * - IABR[4-7]: Reserved for future use
+	 * 
+	 * @note Read-only
+	 * @note Set when interrupt is active
+	 */
+	volatile const uint32_t IABR[8];
+	
+	/**
+	 * @brief Reserved space between IABR and IPR
+	 * @details 56 reserved words (0x320 - 0x3FC)
+	 */
 	uint32_t RESERVED_4[56];
-	// Interrupt Priority Registers (IPR)
-	uint32_t IPR[60];
-	// Reserved
+	
+	/**
+	 * @brief Interrupt Priority Registers (IPR)
+	 * @details Configure priority levels for each interrupt
+	 * 
+	 * - Each IPR register contains 4 interrupt priorities
+	 * - Each priority field is 8 bits, but only top 4 bits are implemented
+	 * - Priority levels: 0 (highest) to 15 (lowest)
+	 * - IPR[0]: Priorities for interrupts 0-3
+	 * - IPR[1]: Priorities for interrupts 4-7
+	 * - ... up to IPR[59] for interrupts 236-239
+	 * 
+	 * @note Only bits [7:4] are implemented in Cortex-M3
+	 * @see Cortex-M3 TRM - Section 4.3.8 Interrupt Priority Registers
+	 */
+	volatile uint32_t IPR[60];
+	
+	/**
+	 * @brief Reserved space between IPR and STIR
+	 * @details 644 reserved words (0x4F0 - 0xBF8)
+	 */
 	uint32_t RESERVED_5[644];
-	// Software Trigger Interrupt Register (STIR)
-	uint32_t STIR;
+	
+	/**
+	 * @brief Software Trigger Interrupt Register (STIR)
+	 * @details Generate software interrupts by writing interrupt number
+	 * 
+	 * - Write interrupt number (0-239) to generate software interrupt
+	 * - Interrupt must be enabled and prioritized
+	 * - Useful for testing and software synchronization
+	 * 
+	 * @note Only bits [8:0] are used for interrupt number
+	 * @warning Requires privileged access to write
+	 */
+	volatile uint32_t STIR;
+
 } NVIC_TypeDef;
 
-// C++ Safeguards
+/** @} */ // End of NVIC_RegisterMap
+
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
 #endif /* STM32F1XX_NVIC_H_ */

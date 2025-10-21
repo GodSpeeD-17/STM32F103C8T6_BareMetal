@@ -1,457 +1,759 @@
-# ---------------------- Minimum CMake Version ----------------------
+# =============================================================================
+# Minimum CMake Version
+# =============================================================================
 cmake_minimum_required(VERSION 3.28)
 
-# ---------------------- Project ----------------------
+# =============================================================================
+# Project Structure & Path Configuration
+# =============================================================================
+
+# ---------------------- Project Root Paths ----------------------
+get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
+get_filename_component(REPO_ROOT "${PROJ_DIR}/../../../" ABSOLUTE)
+message(STATUS "==========================================")
+message(STATUS "Project Paths")
+message(STATUS "==========================================")
+message(STATUS "Project Directory: ${PROJ_DIR}")
+message(STATUS "Repository Root: ${REPO_ROOT}")
+
+# ---------------------- Source Code Directories ----------------------
+set(DRIVER_ROOT			${REPO_ROOT}/BareMetal/Driver) 		# Hardware abstraction layer
+set(CORE_ROOT			${REPO_ROOT}/BareMetal/Core)  	  	# Core system files
+set(BUILD_OUTPUT_DIR	${PROJ_DIR}/Build)					# Build artifacts directory
+
+# Verify critical directories exist
+foreach(dir IN ITEMS ${DRIVER_ROOT} ${CORE_ROOT})
+	if(NOT EXISTS ${dir})
+		message(WARNING "Directory not found: ${dir}")
+	endif()
+endforeach()
+
+# =============================================================================
+# Cross-Compilation Configuration
+# =============================================================================
+set(CMAKE_SYSTEM_NAME Generic)								# Bare-metal target (no OS)
+set(CMAKE_SYSTEM_PROCESSOR arm)								# Target processor architecture
+set(CMAKE_SYSTEM_TOOLCHAIN_PREFIX ${CMAKE_SYSTEM_PROCESSOR}-none-eabi)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)			# Required for cross-compilation
+
+# =============================================================================
+# Toolchain Configuration
+# =============================================================================
+
+# ---------------------- Toolchain Installation Path ----------------------
+set(TOOLCHAIN_PATH "/opt/arm-gnu-toolchain-14.3/bin")
+if(NOT EXISTS ${TOOLCHAIN_PATH})
+    message(FATAL_ERROR "Toolchain path not found: ${TOOLCHAIN_PATH}")
+endif()
+set(TOOLCHAIN_PREFIX ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_TOOLCHAIN_PREFIX})
+
+# ---------------------- Compiler Executables ----------------------
+set(CMAKE_C_COMPILER	${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_ASM_COMPILER	${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_CXX_COMPILER	${TOOLCHAIN_PREFIX}-g++)
+
+# ---------------------- Binary Utilities ----------------------
+set(CMAKE_OBJCOPY		${TOOLCHAIN_PREFIX}-objcopy)
+set(CMAKE_OBJDUMP		${TOOLCHAIN_PREFIX}-objdump)
+set(CMAKE_NM			${TOOLCHAIN_PREFIX}-nm)
+set(CMAKE_SIZE			${TOOLCHAIN_PREFIX}-size)
+
+# Verify toolchain executables exist
+foreach(tool IN ITEMS
+    CMAKE_C_COMPILER 
+	CMAKE_ASM_COMPILER 
+	CMAKE_CXX_COMPILER 
+    CMAKE_OBJCOPY
+	CMAKE_OBJDUMP
+	CMAKE_NM
+	CMAKE_SIZE
+)
+    if(NOT EXISTS ${${tool}})
+        message(FATAL_ERROR "Tool not found: ${${tool}}")
+    endif()
+endforeach()
+
+# =============================================================================
+# Flashing & Debugging Tools Configuration
+# =============================================================================
+
+# ---------------------- ST-Link Tools (SWD Programming) ----------------------
+set(ST_FLASH      st-flash)							# ST-Link command line flasher
+set(ST_FLASH_PATH "/usr/bin/st-flash")				# Full path to st-flash
+set(ST_INFO       st-info)							# ST-Link device information
+set(ST_UTIL_PATH  "/usr/bin/st-util")				# ST-Link GDB server
+
+# ---------------------- OpenOCD (JTAG/SWD Debugging) ----------------------
+set(OPENOCD      	openocd)						# OpenOCD command
+set(OPENOCD_PATH	"/usr/bin/openocd")				# Full path to OpenOCD
+
+# ---------------------- Serial Flashing Tools ----------------------
+set(ST_UART_FLASH		stm32flash)          		# UART-based flasher
+set(ST_UART_FLASH_PORT	"/dev/ttyUSB0")      		# Default UART port for flashing
+
+# ---------------------- Debugging Tools ----------------------
+set(GDB_PATH_MULTIARCH_PATH "/usr/bin/gdb-multiarch")  # ARM GDB debugger
+
+# =============================================================================
+# Tool Verification & Diagnostics
+# =============================================================================
+
+# Function to verify tool availability
+function(verify_tool tool_name tool_path)
+    if(EXISTS ${tool_path})
+        message(STATUS "${tool_name}: ${tool_path}")
+    else()
+        message(FATAL_ERROR "${tool_name} not found: ${tool_path}")
+    endif()
+endfunction()
+
+# Verify all external tools
+message(STATUS "==========================================")
+message(STATUS "Toolchain Verification")
+message(STATUS "==========================================")
+verify_tool("GCC Compiler"        ${CMAKE_C_COMPILER})
+verify_tool("G++ Compiler"        ${CMAKE_CXX_COMPILER})
+verify_tool("Objcopy"             ${CMAKE_OBJCOPY})
+verify_tool("Size Utility"        ${CMAKE_SIZE})
+verify_tool("ST-Flash"            ${ST_FLASH_PATH})
+verify_tool("OpenOCD"             ${OPENOCD_PATH})
+verify_tool("GDB Multiarch"       ${GDB_PATH_MULTIARCH_PATH})
+verify_tool("ST-Util"             ${ST_UTIL_PATH})
+
+# =============================================================================
+# Build Output Configuration
+# =============================================================================
+
+# Create build output directory
+if(NOT EXISTS ${BUILD_OUTPUT_DIR})
+    file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
+endif()
+
+# Set build artifacts location
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR}) 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
+
+# =============================================================================
+# Configuration Summary
+# =============================================================================
+message(STATUS "==========================================")
+message(STATUS "Build Environment Configuration Summary")
+message(STATUS "==========================================")
+message(STATUS "Target: ${CMAKE_SYSTEM_PROCESSOR}-none-eabi")
+message(STATUS "Toolchain: ${TOOLCHAIN_PATH}")
+message(STATUS "Build Output: ${BUILD_OUTPUT_DIR}")
+message(STATUS "Flashing Port: ${ST_UART_FLASH_PORT}")
+
+# =============================================================================
+# Project
+# =============================================================================
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES C CXX ASM)
 
-# ---------------------- Cross Compilation ----------------------
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-
-# ---------------------- Toolchain ----------------------
-set(CMAKE_C_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
-set(CMAKE_ASM_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-gcc)
-set(CMAKE_OBJCOPY ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-objcopy)
-set(CMAKE_SIZE ${CMAKE_SYSTEM_PROCESSOR}-none-eabi-size)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(ST_FLASH st-flash)
-set(OPENOCD openocd)
-set(ST_INFO st-info)
-set(ST_UART_FLASH stm32flash)
-set(ST_UART_FLASH_PORT /dev/ttyUSB0)
-
-# ---------------------- C/C++ Flags ----------------------
+# =============================================================================
+# MCU Configuration
+# =============================================================================
 set(MCU_DEFINE STM32F103C8T6__)
 set(MCU_CPU_DEFINE CORTEX_M3__)
 set(MCU_CPU cortex-m3)
+set(FLASH_ADDRESS 0x08000000)
+
+# =============================================================================
+# Language Standards
+# =============================================================================
 set(C_STD gnu11)
 set(CXX_STD c++17)
-set(OPTIMIZATION_LEVEL 0)
-set(FLASH_ADDRESS 0x08000000)
-set (DEFAULT_FLAGS -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft --specs=nano.specs -lc -lm -MMD -MP -save-temps)
-set(COMMON_FLAGS ${DEFAULT_FLAGS} -O${OPTIMIZATION_LEVEL} -Wall -fstack-usage -fdata-sections -ffunction-sections -D${MCU_DEFINE} -D${MCU_CPU_DEFINE} -g -gdwarf-2 )
+
+# =============================================================================
+# Optimization & Debugging
+# =============================================================================
+set(OPTIMIZATION_LEVEL 0)  # 0: Debug, 1: Balanced, 2: Performance, 3: Size
+set(DEBUG_LEVEL 2)         # 0: None, 1: Minimal, 2: Standard, 3: Maximum
+
+# =============================================================================
+# Base Compiler Flags
+# =============================================================================
+set(DEFAULT_FLAGS 
+    -mcpu=${MCU_CPU}
+    -mthumb
+    -mfloat-abi=soft
+    --specs=nano.specs    # Use reduced libc
+    --specs=nosys.specs   # No system calls
+    -lc -lm
+    -MMD -MP              # Dependency generation
+    -save-temps           # Keep intermediate files
+)
+
+# =============================================================================
+# Common Flags (C & C++)
+# =============================================================================
+set(COMMON_FLAGS ${DEFAULT_FLAGS}
+    -O${OPTIMIZATION_LEVEL}
+    -Wall                 # All standard warnings
+    -Wextra               # Extra warnings
+    -Wpedantic            # Strict ISO compliance
+    -fstack-usage         # Generate stack usage info
+    -fdata-sections       # Enable data section garbage collection
+    -ffunction-sections   # Enable function section garbage collection
+    -D${MCU_DEFINE}       # MCU-specific define
+    -D${MCU_CPU_DEFINE}   # CPU architecture define
+    -g -gdwarf-2          # Debug info with DWARF2 format
+)
+
+# =============================================================================
+# Language-Specific Flags
+# =============================================================================
 
 # C specific flags
-set(C_FLAGS ${COMMON_FLAGS} -std=${C_STD})
-# C++ specific flags
-set(CXX_FLAGS ${COMMON_FLAGS} -std=${CXX_STD} -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+set(C_FLAGS ${COMMON_FLAGS}
+    -std=${C_STD}
+    -Wstrict-prototypes   # Warn about non-ANSI function prototypes
+    -Wmissing-prototypes  # Warn about missing function prototypes
+)
+
+# C++ specific flags  
+set(CXX_FLAGS 
+	${COMMON_FLAGS}
+    -std=${CXX_STD}
+    -fno-exceptions       # Disable exception handling
+    -fno-rtti             # Disable RTTI
+    -fno-use-cxa-atexit   # Use atexit() instead of __cxa_atexit
+    -fno-threadsafe-statics # Disable thread-safe static initialization
+    -Wold-style-cast      # Warn about C-style casts in C++
+    -Woverloaded-virtual  # Warn about overloaded virtual functions
+)
+
 # Assembly-specific flags
-set(ASM_FLAGS ${DEFAULT_FLAGS} -x assembler-with-cpp)
+set(ASM_FLAGS 
+	${DEFAULT_FLAGS}
+    -x assembler-with-cpp # Preprocess assembly files
+    -Wa,--warn            # Enable assembler warnings
+)
 
-# ---------------------- Paths ----------------------
-get_filename_component(PROJ_DIR "${CMAKE_SOURCE_DIR}" ABSOLUTE)
-get_filename_component(REPO_ROOT "${PROJ_DIR}/../../../" ABSOLUTE) # Adjust this as per project structure
-set(DRIVER_ROOT ${REPO_ROOT}/BareMetal/Driver)
-set(CORE_ROOT ${REPO_ROOT}/BareMetal/Core)
-set(BUILD_OUTPUT_DIR ${PROJ_DIR}/Build)
-# Replace this for customer linker file
-set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)
-set(VSCODE_DIR ${PROJ_DIR}/.vscode)
-set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
-set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
+# =============================================================================
+# File & Path Configuration
+# =============================================================================
 
-# ---------------------- Output directories ----------------------
-file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(SELECTED_DRIVER_SOURCES "")
+# ---------------------- Linker Script Configuration ----------------------
+set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)  # Default linker script
+message(STATUS "Linker Script: ${LINKER_FILE}")
 
-# ---------------------- Sources ----------------------
-set(SELECTED_DRIVER_SOURCES "")
-set(SELECTED_DRIVER_INCLUDES "")
+# Verify linker script exists
+if(NOT EXISTS ${LINKER_FILE})
+    message(FATAL_ERROR "Default linker script not found: ${LINKER_FILE}")
+    message(STATUS "  → Replace LINKER_FILE variable for custom linker script")
+endif()
 
-# Function to add a driver module
+# ---------------------- IDE & Development Tools ----------------------
+set(VSCODE_DIR ${PROJ_DIR}/.vscode)  # VSCode configuration directory
+if(NOT EXISTS ${VSCODE_DIR})
+	file(MAKE_DIRECTORY ${VSCODE_DIR})
+    message(STATUS "VSCode directory: ${VSCODE_DIR}")
+endif()
+
+# ---------------------- Build Artifacts ----------------------
+set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)  # Raw binary output
+set(HEX_FILE    ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)  # Intel HEX output
+
+# =============================================================================
+# Build Output Configuration
+# =============================================================================
+
+# ---------------------- Ensure Build Directory Exists ----------------------
+if(NOT EXISTS ${BUILD_OUTPUT_DIR})
+    file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
+	get_filename_component(filename ${BUILD_OUTPUT_DIR} NAME)
+    message(STATUS "Created build directory: ${filename}")
+else()
+	get_filename_component(filename ${BUILD_OUTPUT_DIR} NAME)
+    message(STATUS "Build directory: ${filename}")
+endif()
+
+# ---------------------- CMake Output Directories ----------------------
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${BUILD_OUTPUT_DIR})  # Executables
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${BUILD_OUTPUT_DIR})  # Static libraries
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${BUILD_OUTPUT_DIR})  # Shared libraries
+
+# =============================================================================
+# Source Code Management
+# =============================================================================
+
+# ---------------------- Driver Module Collections ----------------------
+# These lists will be populated by the `add_driver_module()` function
+set(SELECTED_DRIVER_SOURCES  "")  # Collection of driver source files
+set(SELECTED_DRIVER_INCLUDES "")  # Collection of driver include directories
+
+# =============================================================================
+# Driver Module Management
+# =============================================================================
 function(add_driver_module)
-	# Iterate over each module name passed as argument
-	foreach(module_name IN LISTS ARGN)
-		# Construct module path
-		set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
-		# Check if directory exists
-		if(EXISTS ${DRIVER_MODULE_DIR})
-			# Collect sources & append to list
-			file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-			list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
-
-			# Collect includes & append to list
-			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-				list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
-			endif()
-
-			# Push lists to parent scope
-			set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
-			set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
-
-			# ------------------------ Pretty print tree ------------------------
-			message(STATUS "-- ${module_name}")
-
-			# Header File Tree
-			if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-			message(STATUS "   |-- Inc")
-			file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
-			foreach(hdr IN LISTS MODULE_HEADERS)
-			message(STATUS "   |    |-- ${hdr}")
-			endforeach()
-			message(STATUS "   |")
-			endif()
-			
-			# Source File Tree
-			if(EXISTS ${DRIVER_MODULE_DIR}/Src)
-				message(STATUS "   |-- Src")
-				file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
-				foreach(src IN LISTS MODULE_SOURCES)
-					message(STATUS "        |-- ${src}")
-				endforeach()
-			endif()
-		else()
-			message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
-		endif()
+    # Parse arguments - first argument can be SHOW_FULL_PATH or SHOW_FILENAME_ONLY
+    set(show_full_path OFF)
+    set(module_names "")
+    
+    foreach(arg IN LISTS ARGN)
+        if(arg STREQUAL "SHOW_FULL_PATH")
+            set(show_full_path ON)
+        elseif(arg STREQUAL "SHOW_FILENAME_ONLY")
+            set(show_full_path OFF)
+        else()
+            list(APPEND module_names ${arg})
+        endif()
 	endforeach()
+	# Information
+	message(STATUS "==========================================")
+	message(STATUS "Library")
+	message(STATUS "==========================================")
+	# Iterate over each module name
+    foreach(module_name IN LISTS module_names)
+        # Construct module path
+        set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
+        # Check if directory exists
+        if(EXISTS ${DRIVER_MODULE_DIR})
+            # Collect sources & append to list
+            file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+            list(APPEND SELECTED_DRIVER_SOURCES ${MODULE_SOURCES})
+
+            # Collect includes & append to list
+            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+                list(APPEND SELECTED_DRIVER_INCLUDES ${DRIVER_MODULE_DIR}/Inc)
+            endif()
+
+            # Push lists to parent scope
+            set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
+            set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
+
+            # ------------------------ Pretty print tree ------------------------
+            message(STATUS "-- ${module_name}")
+
+            # Header File Tree
+            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
+                message(STATUS "   |-- Inc")
+                file(GLOB MODULE_HEADERS ${DRIVER_MODULE_DIR}/Inc/*.h)
+                foreach(hdr IN LISTS MODULE_HEADERS)
+                    if(show_full_path)
+                        message(STATUS "   |    |-- ${hdr}")
+                    else()
+                        get_filename_component(filename ${hdr} NAME)
+                        message(STATUS "   |    |-- ${filename}")
+                    endif()
+                endforeach()
+                message(STATUS "   |")
+            endif()
+            
+            # Source File Tree
+            if(EXISTS ${DRIVER_MODULE_DIR}/Src)
+                message(STATUS "   |-- Src")
+                file(GLOB MODULE_SOURCES ${DRIVER_MODULE_DIR}/Src/*.c)
+                foreach(src IN LISTS MODULE_SOURCES)
+                    if(show_full_path)
+                        message(STATUS "        |-- ${src}")
+                    else()
+                        get_filename_component(filename ${src} NAME)
+                        message(STATUS "        |-- ${filename}")
+                    endif()
+                endforeach()
+            endif()
+        else()
+            message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
+        endif()
+    endforeach()
+	message(STATUS "==========================================")
 endfunction()
 
-# ---------------------- Includes & Sources ----------------------
+# =============================================================================
+# Driver Module Registration
+# =============================================================================
+# First Argument Option: SHOW_FULL_PATH / SHOW_FILENAME_ONLY
+add_driver_module(SHOW_FILENAME_ONLY
+    NVIC
+	GPIO
+    RCC
+    Timer
+    DMA 
+)
+
+# =============================================================================
+# Source File
+# =============================================================================
 # Project Source Files
 file(GLOB_RECURSE PROJECT_SOURCES "${PROJ_DIR}/Src/*.c")
 # Core Source Files (if any)
 file(GLOB_RECURSE CORE_SOURCES "${CORE_ROOT}/Src/*.c")
-
-# ----------------------------------- Add driver modules -----------------------------------
-add_driver_module(
-	GPIO 
-	RCC
-	Timer
-	DMA
+# Compiled Source File List
+set(ALL_SOURCE_FILES
+    ${PROJECT_SOURCES}				# Application code
+    ${SELECTED_DRIVER_SOURCES}		# Hardware drivers
+    ${CORE_SOURCES}					# System core files
 )
 
-# ---------------------- Executable ----------------------
-add_executable(${PROJECT_NAME}.elf
-	${PROJECT_SOURCES}
-	${SELECTED_DRIVER_SOURCES}
-	${CORE_SOURCES}
-)
+# =============================================================================
+# Executable Target Definition
+# =============================================================================
+add_executable(${PROJECT_NAME}.elf ${ALL_SOURCE_FILES})
 
-# ---------------------- Include Dirs ----------------------
+# =============================================================================
+# Include Directory Configuration
+# =============================================================================
 set(ALL_INCLUDE_DIRS
-	${PROJ_DIR}/Inc
-	${CORE_ROOT}/Inc
-	${DRIVER_ROOT}
-	${SELECTED_DRIVER_INCLUDES}
+    ${CORE_ROOT}/Inc					# Core system headers
+    ${DRIVER_ROOT}						# Driver root directory
+    ${SELECTED_DRIVER_INCLUDES}			# Module-specific includes
+    ${PROJ_DIR}/Inc						# Project-specific headers
 )
-
 target_include_directories(${PROJECT_NAME}.elf PRIVATE ${ALL_INCLUDE_DIRS})
-# ---------------------- Flags ----------------------
 
-# Apply flags to target based on language
+# =============================================================================
+# Compiler Flags Configuration
+# =============================================================================
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
-	$<$<COMPILE_LANGUAGE:C>:${C_FLAGS}>
-	$<$<COMPILE_LANGUAGE:CXX>:${CXX_FLAGS}>
-	$<$<COMPILE_LANGUAGE:ASM>:${ASM_FLAGS}>
+    $<$<COMPILE_LANGUAGE:C>:${C_FLAGS}>		# C source flags
+    $<$<COMPILE_LANGUAGE:CXX>:${CXX_FLAGS}>	# C++ source flags  
+    $<$<COMPILE_LANGUAGE:ASM>:${ASM_FLAGS}>	# Assembly source flags
 )
 
-# Enhanced linker options
+# =============================================================================
+# Linker Configuration
+# =============================================================================
 target_link_options(${PROJECT_NAME}.elf PRIVATE
-	-mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft -T${LINKER_FILE}
-	-lc -lm -Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map
-	-Wl,--gc-sections -Wl,--print-memory-usage -Wl,--stats -Wl,--cref
-	-static -nostartfiles -nodefaultlibs -nostdlib
+    # MCU architecture options
+    -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft
+    # Linker script and map file
+    -T${LINKER_FILE} -Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map
+    # Standard libraries (nano version for size)
+    -lc -lm --specs=nano.specs
+    # Optimization and analysis
+    -Wl,--gc-sections          # Remove unused sections
+    -Wl,--print-memory-usage   # Display memory usage
+    -Wl,--stats                # Linker statistics
+    -Wl,--cref                 # Cross-reference table
+    # Bare-metal environment
+    -static -nostartfiles -nodefaultlibs -nostdlib
 )
 
-# ---------------------- Size Command ----------------------
+# =============================================================================
+# Post-Build Operations
+# =============================================================================
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
-	COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-	COMMAND ${CMAKE_SIZE} --format=berkeley ${PROJECT_NAME}.elf
-	COMMENT "Size of sections (.text, .data, .bss)"
+    # Generate binary file for flashing
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
+    # Generate HEX file for alternative programmers
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+    # Display memory section sizes
+    COMMAND ${CMAKE_SIZE} --format=berkeley ${PROJECT_NAME}.elf
+    COMMENT "Generating binary artifacts and memory report..."
 )
 
-# ---------------------- VSCode Configuration Generation ----------------------
-# This section auto-generates VSCode configuration files (launch.json,
-# settings.json, tasks.json, and c_cpp_properties.json) from CMake.
-# Each file has its own custom target, and a master target `vscode_files`
-# depends on all of them.-
+# =============================================================================
+# VSCode Configuration Generation
+# =============================================================================
+# This section auto-generates VSCode configuration files for seamless
+# development experience. Files generated:
+# - launch.json    : Debug configuration for Cortex-Debug extension
+# - settings.json  : Tool paths and debug settings  
+# - tasks.json     : Build and clean tasks
+# - c_cpp_properties.json : IntelliSense configuration
+# =============================================================================
 
 # -----------------------------------------------------------------------------
-# Helper function: create a generator script
+# VSCode: launch.json (Debug Configuration)
 # -----------------------------------------------------------------------------
-# For each VSCode file, we generate a small .cmake script in the build dir.
-# That script is later executed by a custom target to actually write the file.
-# -----------------------------------------------------------------------------
-function(create_vscode_script name content)
-	set(script "${CMAKE_CURRENT_BINARY_DIR}/gen_${name}.cmake")
-	file(WRITE ${script} "${content}")
-endfunction()
-
-# -----------------------------------------------------------------------------
-# Generator script: launch.json
-# -----------------------------------------------------------------------------
-# - Configures Cortex-Debug to run with OpenOCD for STM32F103C8T6
-# - Points to the .elf binary
-# - Includes SVD file for peripheral registers
-# - By default runs to 'main', but 'Reset_Handler' is provided as an option
-# -----------------------------------------------------------------------------
-create_vscode_script(launch_json "
-file(WRITE ${VSCODE_DIR}/launch.json \"{
-  \\\"version\\\": \\\"0.2.0\\\",
-  \\\"configurations\\\": [
-	{
-	  \\\"name\\\": \\\"Debug: ${PROJECT_NAME}\\\",
-	  \\\"executable\\\": \\\"${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.elf\\\",
-	  \\\"request\\\": \\\"launch\\\",
-	  \\\"type\\\": \\\"cortex-debug\\\",
-	  \\\"servertype\\\": \\\"openocd\\\",
-	  \\\"device\\\": \\\"STM32F103C8\\\",
-	  \\\"configFiles\\\": [
-		\\\"${CORE_ROOT}/Src/stlink.cfg\\\",
-		\\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\"
-	  ],
-	  \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\",
-	  \\\"runToEntryPoint\\\": \\\"main\\\", // Entry point is main
-	  // \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Entry point is Reset_Handler
-	  \\\"preLaunchTask\\\": \\\"Build Project\\\"
-	}
-  ]
-}\")
-")
-
-# -----------------------------------------------------------------------------
-# Generator script: settings.json
-# -----------------------------------------------------------------------------
-# - Defines paths for gdb-multiarch, openocd, and st-util
-# - Controls variable formatting in Cortex-Debug
-# -----------------------------------------------------------------------------
-create_vscode_script(settings_json "
-file(WRITE ${VSCODE_DIR}/settings.json \"{
-  \\\"cortex-debug.gdbPath\\\": \\\"${GDB_MULTU}\\\",
-  \\\"cortex-debug.openocdPath\\\": \\\"/usr/local/bin/openocd\\\",
-  \\\"cortex-debug.stutilPath\\\": \\\"/usr/bin/st-util\\\",
-  \\\"cortex-debug.variableUseNaturalFormat\\\": false
-}\")
-")
-
-# -----------------------------------------------------------------------------
-# Generator script: tasks.json
-# -----------------------------------------------------------------------------
-# - Defines build and clean tasks using CMake
-# - Integrates with VSCode's build system (`Ctrl+Shift+B`)
-# -----------------------------------------------------------------------------
-create_vscode_script(tasks_json "
-file(WRITE ${VSCODE_DIR}/tasks.json \"{
-  \\\"version\\\": \\\"2.0.0\\\",
-  \\\"tasks\\\": [
-	{
-	  \\\"label\\\": \\\"Build Project\\\",
-	  \\\"type\\\": \\\"shell\\\",
-	  \\\"command\\\": \\\"cmake\\\",
-	  \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\"],
-	  \\\"group\\\": { \\\"kind\\\": \\\"build\\\", \\\"isDefault\\\": true },
-	  \\\"problemMatcher\\\": [\\\"\\$gcc\\\"],
-	  \\\"detail\\\": \\\"Build the current project using CMake\\\"
-	},
-	{
-	  \\\"label\\\": \\\"Clean Project\\\",
-	  \\\"type\\\": \\\"shell\\\",
-	  \\\"command\\\": \\\"cmake\\\",
-	  \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\", \\\"--target\\\", \\\"clean_all\\\"],
-	  \\\"group\\\": \\\"build\\\",
-	  \\\"problemMatcher\\\": [],
-	  \\\"detail\\\": \\\"Clean the build directory\\\"
-	}
-  ]
-}\")
-")
-
-# -----------------------------------------------------------------------------
-# Generator script: c_cpp_properties.json
-# -----------------------------------------------------------------------------
-# - Configures IntelliSense for STM32 project
-# - Defines include paths, compiler, and standards
-# -----------------------------------------------------------------------------
-create_vscode_script(cpp_properties_json "
-file(WRITE ${VSCODE_DIR}/c_cpp_properties.json \"{
-  \\\"configurations\\\": [
-	{
-	  \\\"name\\\": \\\"Linux\\\",
-	  \\\"includePath\\\": [
-		\\\"${CORE_ROOT}/Inc/**\\\",
-		\\\"${DRIVER_ROOT}/*/Inc/**\\\",
-		\\\"${PROJ_DIR}/Inc/**\\\"
-	  ],
-	  \\\"defines\\\": [\\\"STM32F103C8T6\\\"],
-	  \\\"compilerPath\\\": \\\"/usr/bin/arm-none-eabi-gcc\\\",
-	  \\\"cStandard\\\": \\\"c11\\\",
-	  \\\"cppStandard\\\": \\\"gnu++17\\\",
-	  \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"
-	}
-  ],
-  \\\"version\\\": 4
-}\")
-")
-
-# -----------------------------------------------------------------------------
-# Per-file custom targets
-# -----------------------------------------------------------------------------
-# Each target calls its respective generator script.
-# You can run them individually (e.g. `make launch_json`) or all together.
-# -----------------------------------------------------------------------------
-add_custom_target(launch_json
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_launch_json.cmake
-	COMMENT "Generating launch.json"
-)
-
-add_custom_target(settings_json
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_settings_json.cmake
-	COMMENT "Generating settings.json"
-)
-
-add_custom_target(tasks_json
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_tasks_json.cmake
-	COMMENT "Generating tasks.json"
-)
-
-add_custom_target(c_cpp_properties_json
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/gen_cpp_properties_json.cmake
-	COMMENT "Generating c_cpp_properties.json"
+add_custom_target(vscode_launch
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": \\\"0.2.0\\\","          >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"configurations\\\": ["                >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"name\\\": \\\"Debug: ${PROJECT_NAME}\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"executable\\\": \\\"${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.elf\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"request\\\": \\\"launch\\\","     >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"cortex-debug\\\","  >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"servertype\\\": \\\"openocd\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"device\\\": \\\"STM32F103C8\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"configFiles\\\": ["               >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stlink.cfg\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\""  >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // Reset_Handler" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": [" 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\"," 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"load\\\"," 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset halt\\\"" 		>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      ]" 									>> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  ]"                                        >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/launch.json
+  COMMENT "----------------------------------- launch.json -----------------------------------"
 )
 
 # -----------------------------------------------------------------------------
-# Master target
+# VSCode: settings.json (Tool Paths)
 # -----------------------------------------------------------------------------
-# The `vscode_files` target depends on all of the above.
-# Running `make vscode_files` regenerates *all* VSCode configuration files.
+add_custom_target(vscode_settings
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/settings.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.gdbPath\\\": \\\"${GDB_PATH_MULTIARCH_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.openocdPath\\\": \\\"${OPENOCD_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.stutilPath\\\": \\\"${ST_UTIL_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.variableUseNaturalFormat\\\": true" >> ${VSCODE_DIR}/settings.json
+  COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/settings.json
+  COMMENT "----------------------------------- settings.json -----------------------------------"
+)
+
 # -----------------------------------------------------------------------------
+# VSCode: tasks.json (Build Tasks)
+# -----------------------------------------------------------------------------
+add_custom_target(vscode_tasks
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": \\\"2.0.0\\\","          >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"tasks\\\": ["                         >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"label\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"shell\\\","         >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"command\\\": \\\"cmake\\\","      >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\"]," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"group\\\": { \\\"kind\\\": \\\"build\\\", \\\"isDefault\\\": true }," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"problemMatcher\\\": [\\\"\\$gcc\\\"]," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"detail\\\": \\\"Build the current project using CMake\\\"" >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    },"                                     >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"label\\\": \\\"Clean Project\\\"," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"shell\\\","         >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"command\\\": \\\"cmake\\\","      >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\", \\\"--target\\\", \\\"clean_all\\\"]," >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"group\\\": \\\"build\\\","        >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"problemMatcher\\\": [],"          >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"detail\\\": \\\"Clean the build directory\\\"" >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "  ]"                                        >> ${VSCODE_DIR}/tasks.json
+  COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/tasks.json
+  COMMENT "----------------------------------- tasks.json -----------------------------------"
+)
+
+# -----------------------------------------------------------------------------
+# VSCode: c_cpp_properties.json
+# -----------------------------------------------------------------------------
+add_custom_target(vscode_c_cpp_properties
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"configurations\\\": ["                >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"name\\\": \\\"Linux\\\","         >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"includePath\\\": ["               >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Inc/**\\\","		>> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${DRIVER_ROOT}/**\\\","			>> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${PROJ_DIR}/Inc/**\\\""			>> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"defines\\\": [\\\"${MCU_DEFINE}\\\", \\\"${MCU_CPU_DEFINE}\\\"]," >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"compilerPath\\\": \\\"${CMAKE_C_COMPILER}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"cStandard\\\": \\\"${C_STD}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"cppStandard\\\": \\\"${CXX_STD}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"" >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "  ],"                                       >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": 4"                       >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> "${VSCODE_DIR}/c_cpp_properties.json"
+  COMMENT "----------------------------------- c_cpp_properties.json -----------------------------------"
+)
+  
+# Master target that generates all VSCode configuration files
 add_custom_target(vscode_files
 	DEPENDS 
-	launch_json 
-	settings_json 
-	tasks_json 
-	c_cpp_properties_json
+		# vscode_settings
+		vscode_launch 
+		vscode_tasks 
+		vscode_c_cpp_properties
+	COMMENT "----------------------------------- Generating vscode files -----------------------------------"
 )
 
 # -----------------------------------------------------------------------------
-# Debug target
+# Debug Environment Setup Target
+# -----------------------------------------------------------------------------
+# Prepares the development environment by building the project and
+# generating VSCode configuration files for seamless debugging experience.
 # -----------------------------------------------------------------------------
 add_custom_target(debug
-	DEPENDS ${PROJECT_NAME}.elf
-	DEPENDS vscode_files
-	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
-	COMMAND ${CMAKE_COMMAND} -E echo "Debug Configurations Ready!"
-	COMMAND ${CMAKE_COMMAND} -E echo "***********************************************************************"
-	COMMENT "Preparing debug environment"
+    DEPENDS ${PROJECT_NAME}.elf vscode_files
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║               🛠️  Debug Environment Ready!                ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  • Project built successfully                            ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  • VSCode configurations generated                       ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  • Ready for debugging in VSCode                         ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Setting up debug environment: building project and generating VSCode configs"
 )
 
-# ---------------------- Custom Targets ----------------------
 # -----------------------------------------------------------------------------
-# Flash target (ST-Linkv2 st-flash)
+# ST-Link Flashing Target
+# -----------------------------------------------------------------------------
+# Flashes the compiled binary to the STM32 MCU using ST-Link v2 debug probe
+# via SWD interface. This is the primary flashing method for development.
 # -----------------------------------------------------------------------------
 add_custom_target(flash
-	DEPENDS ${PROJECT_NAME}.elf
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU 🚀               ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Flashing binary to MCU"
+    DEPENDS ${PROJECT_NAME}.elf
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                🚀 Flashing via ST-Link v2                ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Target: ${PROJECT_NAME}.bin                             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Address: ${FLASH_ADDRESS}                               ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Method: ST-Link (SWD)                                   ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                  ✅ Flashing Complete!                   ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Firmware successfully programmed to STM32               ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  MCU automatically reset and running                     ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 via ST-Link v2"
 )
 
 # -----------------------------------------------------------------------------
-# Flash target (UART bootloader via stm32flash)
+# UART Bootloader Flashing Target
+# -----------------------------------------------------------------------------
+# Flashes the compiled binary using the built-in UART bootloader.
+# Requires BOOT0 pin to be pulled high before reset for bootloader entry.
 # -----------------------------------------------------------------------------
 add_custom_target(flash_uart
-	DEPENDS ${PROJECT_NAME}.elf
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║         🚀 Flashing Binary to STM32 MCU (UART) 🚀        ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║				✔✔ Ensure BOOT0 is pulled high!				 ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND sudo ${ST_UART_FLASH} -w ${BINARY_FILE} -v -g 0x0 ${ST_UART_FLASH_PORT}
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║           🎯 Your binary is now on the STM32 MCU!        ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 over UART"
+    DEPENDS ${PROJECT_NAME}.elf
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║               🔄 Flashing via UART Bootloader            ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  ⚠️   Ensure BOOT0 is pulled HIGH before proceeding!     ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Target: ${PROJECT_NAME}.bin                             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Port: ${ST_UART_FLASH_PORT}                             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Method: UART Bootloader                                 ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND sudo ${ST_UART_FLASH} -w ${BINARY_FILE} -v -g 0x0 ${ST_UART_FLASH_PORT}
+    COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 via UART bootloader"
 )
 
 # -----------------------------------------------------------------------------
-# Clean Project (delete Build and .vscode safely)
+# Project Cleanup Target
+# -----------------------------------------------------------------------------
+# Safely removes all build artifacts and generated configuration files.
+# Use this to start with a completely clean build environment.
 # -----------------------------------------------------------------------------
 add_custom_target(clean_all
-	COMMAND ${CMAKE_COMMAND} -E echo ""
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║                   🧹 Project Cleaned                     ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║      ✔✔✔ Build files and VSCode configs removed ✔✔✔      ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
-	COMMENT "Cleaning project"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                     🧹 Project Cleanup                   ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Removing:                                               ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║    • Build directory: ${BUILD_OUTPUT_DIR}                ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║    • VSCode configs: ${VSCODE_DIR}                       ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║    • Generated binaries and objects                      ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                  ✅ Cleanup Complete!                    ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  All build artifacts and configurations removed          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Ready for fresh build                                   ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Completely cleaning project: build artifacts and VSCode configurations"
 )
 
 # -----------------------------------------------------------------------------
-# ST-Link Information
+# ST-Link Information Target
+# -----------------------------------------------------------------------------
+# Displays information about connected ST-Link debug probes and their status.
+# Useful for verifying hardware connections and probe functionality.
 # -----------------------------------------------------------------------------
 add_custom_target(info
-	COMMAND ${CMAKE_COMMAND} -E echo ""
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║                  🔍 ST-Link Debug Probe Info             ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_INFO} --probe
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Showing ST-Link debug probe info"
-)
-
-add_custom_target(info_uart
-	COMMENT ""
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║           🔍 ST-Link Debug Probe Info (UART)             ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND sudo ${ST_UART_FLASH} ${ST_UART_FLASH_PORT}
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║        📡 Probe details displayed successfully!          ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Showing ST-Link debug probe info"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                 🔍 ST-Link Probe Information             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Querying connected ST-Link debug probes...              ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${ST_INFO} --probe
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                📡 Probe Information Complete             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Displaying ST-Link debug probe information and status"
 )
 
 # -----------------------------------------------------------------------------
-# Flash Erase
+# UART Device Information Target
+# -----------------------------------------------------------------------------
+# Queries UART-connected STM32 devices for information using the bootloader.
+# Useful for verifying UART connections and device presence.
+# -----------------------------------------------------------------------------
+add_custom_target(info_uart
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║               🔍 UART Device Information                 ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Querying UART port: ${ST_UART_FLASH_PORT}               ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  ⚠️   Ensure BOOT0 is pulled HIGH for bootloader mode    ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND sudo ${ST_UART_FLASH} ${ST_UART_FLASH_PORT}
+    COMMENT "Querying STM32 device information via UART bootloader"
+)
+
+# -----------------------------------------------------------------------------
+# Flash Memory Erase Target (ST-Link)
+# -----------------------------------------------------------------------------
+# Erases the entire flash memory of the STM32 MCU using ST-Link.
+# Useful for complete firmware removal or when starting fresh.
 # -----------------------------------------------------------------------------
 add_custom_target(erase_flash
-	COMMAND ${CMAKE_COMMAND} -E echo ""
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║                💥 Erasing STM32 Flash Memory 💥          ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND ${ST_FLASH} erase
-	COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "║        💡 Next step: run make flash to program           ║"
-	COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Erasing flash memory"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                 💥 Flash Memory Erase                    ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Erasing entire flash memory via ST-Link...              ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND ${ST_FLASH} erase
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                  ✅ Erase Complete!                      ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Flash memory successfully erased                        ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Next: Run 'make flash' to program new firmware          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMENT "Erasing entire STM32 flash memory via ST-Link"
 )
 
-
 # -----------------------------------------------------------------------------
-# Flash Erase (UART)
+# Flash Memory Erase Target (UART)
+# -----------------------------------------------------------------------------
+# Erases the flash memory using the UART bootloader interface.
+# Requires BOOT0 pin to be pulled high for bootloader mode.
 # -----------------------------------------------------------------------------
 add_custom_target(erase_flash_uart
-	COMMENT ""
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║         💥 Erasing STM32 Flash Memory (UART) 💥          ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMAND sudo ${ST_UART_FLASH} -o ${ST_UART_FLASH_PORT}
-	# COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║        ✔ Flash memory successfully erased!               ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "║     💡 Next step: run make flash_uart to program         ║"
-	# COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
-	COMMENT "Erasing flash memory...."
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "╔══════════════════════════════════════════════════════════╗"
+    COMMAND ${CMAKE_COMMAND} -E echo "║              💥 Flash Erase via UART                     ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║                                                          ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  ⚠️   Ensure BOOT0 is pulled HIGH for bootloader mode    ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "║  Port: ${ST_UART_FLASH_PORT}                             ║"
+    COMMAND ${CMAKE_COMMAND} -E echo "╚══════════════════════════════════════════════════════════╝"
+    COMMAND sudo ${ST_UART_FLASH} -o ${ST_UART_FLASH_PORT}
+    COMMENT "Erasing STM32 flash memory via UART bootloader"
 )
 
-# ---------------------- Make Targets Available ----------------------
-# Use different names for custom targets to avoid conflicts with CMake reserved names
+# =============================================================================
+# Alias Targets for Better Usability
+# =============================================================================
+# These targets provide alternative names for better command-line experience
+# and to avoid potential conflicts with CMake reserved target names.
+# -----------------------------------------------------------------------------
+
 add_custom_target(flash_mcu DEPENDS flash)
 add_custom_target(clean_project DEPENDS clean_all)
 add_custom_target(stlink_info DEPENDS info)
