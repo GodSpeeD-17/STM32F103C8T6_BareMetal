@@ -3,7 +3,7 @@
 #define __I2C_DMA_H__
 
 // Address Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 
 /**
  * @brief Enables I2C DMA Configuration

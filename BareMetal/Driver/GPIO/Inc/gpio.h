@@ -1,6 +1,14 @@
+/**
+ * @file gpio.h
+ * @author Shrey Shah
+ * @brief GPIO Header File
+ * @version v1.2
+ * @date 14-09-2025
+ */
+
 // Header Guards
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef GPIO_H_
+#define GPIO_H_
 
 /*********************************************** Includes ***********************************************/
 #include "gpio_config.h"
@@ -8,8 +16,8 @@
 /*********************************************** Helper APIs ***********************************************/
 
 #ifdef STM32F103C8T6__
-#define GPIO_PORT_OB_LED						GPIO_PORT_C
-#define GPIO_PIN_OB_LED							GPIO_PIN_13
+	#define GPIO_PORT_OB_LED						GPIO_PORT_C
+	#define GPIO_PIN_OB_LED							GPIO_PIN_13
 #endif /* STM32F103C8T6__ */
 
 
@@ -19,9 +27,10 @@
  * @param gpioPin GPIO Pin
  * @note Atomicity
  */
-__STATIC_FORCEINLINE void GPIO_Set(gpio_port_t gpioPort, gpio_pin_t gpioPin){
+__STATIC_FORCEINLINE void GPIO_Set(const gpio_port_t gpioPort, const gpio_pin_t gpioPin){
 	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpioPort);
-	if(GPIOx != NULL){
+	if(GPIOx != NULL)
+	{
 		GPIOx->BSRR.REG |= gpioPin;
 	}
 }
@@ -132,4 +141,4 @@ driver_status_t OB_LED_Init(void);
  */
 driver_status_t OB_LED_Deinit(void);
 
-#endif /* __GPIO_H__ */
+#endif /* GPIO_H_ */

@@ -3,7 +3,7 @@
 #define __I2C_CONFIG_H__
 
 // Address Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 // For GPIO pin configuration
 #include "gpio.h"
 // Clock Configuration

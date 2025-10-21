@@ -140,7 +140,7 @@ Driver
 │   └── Src
 │       ├── rcc.c
 │       └── rcc_config.c
-├── reg_map.h
+├── stm32f1xx.h
 ├── Ring_Buffer
 │   ├── Inc
 │   │   ├── ring_buffer_config.h

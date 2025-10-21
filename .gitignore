@@ -4,3 +4,4 @@
 .vscode-ctags
 # Doxygen documentation output
 Documentation/
+.doxygen

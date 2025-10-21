@@ -10,7 +10,7 @@
 #ifdef  __OLD_GPIO_METHOD__
 
 /*************************************** Dependency ********************************************/
-#include "reg_map.h"
+#include "stm32f1xx.h"
 // Clocks (APB1/APB2)
 #include "rcc.h"
 // GPIO Struct

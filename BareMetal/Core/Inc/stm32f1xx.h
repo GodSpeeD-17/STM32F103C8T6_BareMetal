@@ -1,3 +1,35 @@
+/**
+ * @file    stm32f1xx.h
+ * @author  Shrey Shah
+ * @brief   Peripheral Register Memory Mapping for STM32 Microcontrollers
+ * @version v1.2
+ * @date    2024
+ *
+ * @defgroup Peripheral_Map Peripheral Register Map
+ * @brief    Memory-mapped peripheral instances for STM32 families
+ *
+ * @details This file provides centralized memory mapping for all peripherals across
+ *          different STM32 microcontroller families. The architecture supports:
+ *          - Single include point for all peripheral instances
+ *          - Easy scalability to new MCU families
+ *          - Compiler-optimized memory access
+ *          - Family-specific configuration via preprocessor
+ *
+ * @usage
+ * @code
+ * #include "stm32f1xx.h"
+ *
+ * // Access any peripheral directly
+ * GPIOA->ODR |= GPIO_PIN_13;    		// Set PA13
+ * RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;  // Enable GPIOA clock
+ * USART1->DR = 'A';             		// Send character via USART1
+ * @endcode
+ *
+ * @note Include this file after family-specific configuration
+ * @warning Peripheral availability varies by STM32 family and package
+ *
+ */
+
 /*
 ****************************************************************************************************************
 *	Basic Notes:-

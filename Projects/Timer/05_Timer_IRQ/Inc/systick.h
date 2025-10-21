@@ -3,7 +3,7 @@
 #define __SYSTICK_H__
 
 // Register Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 // RCC Configuration
 #include "rcc.h"
 // GPIO Configuration

@@ -3,7 +3,7 @@
 #define __TIMER_CONFIG_H__
 
 // Register Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 // APB1 Clock Frequency
 #include "rcc.h"
 // IRQ Enable/Disable

@@ -1,13 +1,14 @@
-/***************************************************************************************
- *  File: gpio_exti.h
- *  Version: v1.2
- *  Created on: 14/09/2025
- *  Author: Shrey Shah
- ***************************************************************************************/
+/**
+ * @file gpio_exti.h
+ * @author Shrey Shah
+ * @brief GPIO Interrupt APIs
+ * @version v1.2
+ * @date 14-09-2025
+ */
 
 // Header Guards
-#ifndef __GPIO_EXTI_H__
-#define __GPIO_EXTI_H__
+#ifndef GPIO_EXTI_H_
+#define GPIO_EXTI_H_
 
 /*********************************************** Includes ***********************************************/
 // GPIO Configuration
@@ -123,4 +124,4 @@ driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, con
  */
 driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
-#endif /* __GPIO_EXTI_H__ */
+#endif /* GPIO_EXTI_H_ */

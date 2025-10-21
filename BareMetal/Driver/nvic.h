@@ -81,7 +81,7 @@
 #define NVIC_H__
 
 // ---- Main Library ---- //
-#include "reg_map.h"
+#include "stm32f1xx.h"
 
 // --- Helper Macros --- //
 #define _IRQn_GET_IPR_REG(X)						((X) >> 2)

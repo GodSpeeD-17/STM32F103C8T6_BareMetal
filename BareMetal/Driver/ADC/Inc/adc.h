@@ -11,7 +11,7 @@
 #ifdef  __OLD_GPIO_METHOD__
 
 // Dependency
-#include "reg_map.h"
+#include "stm32f1xx.h"
 #include "gpio.h"			// For Configuration
 #include "nvic.h"			// For IRQ Handling
 

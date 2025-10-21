@@ -16,7 +16,7 @@
 
 // Includes
 #include <string.h>
-#include "reg_map.h"
+#include "stm32f1xx.h"
 
 // Typedefs
 typedef uint16_t ring_buffer_size_t;

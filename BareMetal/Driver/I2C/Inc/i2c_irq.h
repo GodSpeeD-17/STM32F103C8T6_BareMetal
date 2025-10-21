@@ -3,7 +3,7 @@
 #define __I2C_IRQ_H__
 
 // Address Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 #include "i2c_config.h"
 // Interrupt Configuration
 #include "nvic.h"

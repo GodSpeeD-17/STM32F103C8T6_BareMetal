@@ -7,7 +7,7 @@
 // Memory Copy
 #include <string.h>
 // Register Mapping
-#include "reg_map.h"
+#include "stm32f1xx.h"
 // GPIO Configuration
 #include "gpio.h"
 // Timer Configuration

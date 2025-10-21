@@ -18,7 +18,7 @@
 
 #ifdef __OLD__
 // Includes
-#include "reg_map.h"
+#include "stm32f1xx.h"
 #include "i2c.h"
 #include "ssd1306_config.h"
 #include "ssd1306_font.h"
