@@ -66,40 +66,39 @@
 */
 
 // Header Guards
-#ifndef REG_MAP_H_
-#define REG_MAP_H_
+#ifndef STM32F1XX_H_
+#define STM32F1XX_H_
 
 // C++ Safeguard
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+// STM32F103C8T6
+#ifdef STM32F103C8T6__
+
+
 /*********************************************** ARM Cortex-M3 ***********************************************/
 #include "cmsis_gcc.h"
 #include "stm32f1xx_helper.h"
-
-#ifdef CORTEX_M3__
-	#include "stm32f1xx_flash.h"
-	#include "stm32f1xx_scb.h"
-	#include "stm32f1xx_nvic.h"
-	#include "stm32f1xx_systick.h"
-	#include "stm32f1xx_watchdog.h"
-#endif /* CORTEX_M3__ */
+#include "stm32f1xx_flash.h"
+#include "stm32f1xx_scb.h"
+#include "stm32f1xx_nvic.h"
+#include "stm32f1xx_systick.h"
+#include "stm32f1xx_watchdog.h"
 /*********************************************** ARM Cortex-M3 ***********************************************/
 
 /*********************************************** STM32F103C8T6 ***********************************************/
-#ifdef STM32F103C8T6__
-	#include "stm32f1xx_adc.h"
-	#include "stm32f1xx_advtim.h"
-	#include "stm32f1xx_afio.h"
-	#include "stm32f1xx_dma.h"
-	#include "stm32f1xx_exti.h"
-	#include "stm32f1xx_gpio.h"
-	#include "stm32f1xx_i2c.h"
-	#include "stm32f1xx_timer.h"
-	#include "stm32f1xx_rcc.h"
-	#include "stm32f1xx_usart.h"
-#endif /* STM32F103C8T6__ */
+#include "stm32f1xx_adc.h"
+#include "stm32f1xx_advtim.h"
+#include "stm32f1xx_afio.h"
+#include "stm32f1xx_dma.h"
+#include "stm32f1xx_exti.h"
+#include "stm32f1xx_gpio.h"
+#include "stm32f1xx_i2c.h"
+#include "stm32f1xx_timer.h"
+#include "stm32f1xx_rcc.h"
+#include "stm32f1xx_usart.h"
 /*********************************************** STM32F103C8T6 ***********************************************/
 
 /*********************************************** Custom Declaration ***********************************************/
@@ -138,18 +137,45 @@ typedef enum
 
 /*********************************************** Address Mapping ***********************************************/
 // Memory Mapping
-#define SysTick_BASE_ADDR 						0xE000E010
-#define NVIC_BASE_ADDR 							0xE000E100
-#define SCB_BASE_ADDR                           0xE000ED00
-#define CoreDebug_BASE_ADDR                     0xE000EDF0
-#define APB1_BASE_ADDR 							0x40000000
-#define APB2_BASE_ADDR 							0x40010000
-#define AHB_BASE_ADDR 							0x40018000
-#define FLASH_BASE_ADDR 						0x40022000
-#define DMA1_BASE_ADDR 							(AHB_BASE_ADDR + 0x00008000)
-#define DMA2_BASE_ADDR 							(DMA1_BASE_ADDR + 0x00000400)
-#define WWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00002000)
-#define IWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00003000)
+// #define SysTick_BASE_ADDR 						0xE000E010
+// #define NVIC_BASE_ADDR 							0xE000E100
+// #define SCB_BASE_ADDR                           0xE000ED00
+// #define CoreDebug_BASE_ADDR                     0xE000EDF0
+// #define APB1_BASE_ADDR 							0x40000000
+// #define APB2_BASE_ADDR 							0x40010000
+// #define AHB_BASE_ADDR 							0x40018000
+// #define FLASH_BASE_ADDR 						0x40022000
+// #define DMA1_BASE_ADDR 							(AHB_BASE_ADDR + 0x00008000)
+// #define DMA2_BASE_ADDR 							(DMA1_BASE_ADDR + 0x00000400)
+// #define WWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00002000)
+// #define IWDG_BASE_ADDR 							(APB1_BASE_ADDR + 0x00003000)
+
+/*********************************************** Memory Bus Base Addresses ***********************************************/
+
+/**
+ * @defgroup Memory_Bus_Base Memory Bus Base Addresses
+ * @brief    Base addresses for different memory buses in STM32F1xx
+ * @ingroup  STM32F1xx
+ *
+ * @details STM32F1xx uses Harvard architecture with separate buses for different peripherals.
+ * @see Reference Manual RM0008 - Section 3.2 Memory Map
+ * @{
+ */
+
+#define SysTick_BASE_ADDR                       0xE000E010  /**< @brief System Timer Base (Cortex-M3 Core Peripheral) */
+#define NVIC_BASE_ADDR                          0xE000E100  /**< @brief Nested Vectored Interrupt Controller Base */
+#define SCB_BASE_ADDR                           0xE000ED00  /**< @brief System Control Block Base */
+#define CoreDebug_BASE_ADDR                     0xE000EDF0  /**< @brief Core Debug Registers Base */
+#define APB1_BASE_ADDR                          0x40000000  /**< @brief APB1 Peripheral Base (Low-speed peripherals) */
+#define APB2_BASE_ADDR                          0x40010000  /**< @brief APB2 Peripheral Base (High-speed peripherals) */
+#define AHB_BASE_ADDR                           0x40018000  /**< @brief AHB Peripheral Base (Memory, DMA, CRC) */
+#define FLASH_BASE_ADDR                         0x40022000  /**< @brief Flash Memory Interface Base */
+#define DMA1_BASE_ADDR                          (AHB_BASE_ADDR + 0x00008000)  /**< @brief DMA1 Controller Base */
+#define DMA2_BASE_ADDR                          (DMA1_BASE_ADDR + 0x00000400) /**< @brief DMA2 Controller Base */
+#define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000) /**< @brief Window Watchdog Base */
+#define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000) /**< @brief Independent Watchdog Base */
+
+/** @} */ // End of Memory_Bus_Base
 
 // Address Mapping
 #define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
@@ -157,13 +183,96 @@ typedef enum
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
 #define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000))
-#define GPIOA 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000800))
-#define GPIOB 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000C00))
-#define GPIOC 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001000))
-#define GPIOD 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001400))
-#define GPIOE 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001800))
-#define GPIOF 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001C00))
-#define GPIOG 									((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00002000))
+
+/*********************************************** GPIO Peripheral Instances ***********************************************/
+
+/**
+ * @brief	Memory-mapped GPIO port instances for STM32F1xx
+ * @defgroup GPIO_MemoryAddress
+ * @ingroup	GPIO
+ *
+ * @details GPIO Instances based on GPIO Register Mapping Structure (`GPIO_TypeDef`)
+ * 			Clocked from APB2 Bus (`APB2_BASE_ADDR`)
+ * @note	Clock must be enabled before accessing GPIO registers
+ * @see		Reference Manual RM0008 - Section 9.2 GPIO Registers
+ * @see		Datasheet - Section 4 Memory Mapping
+ * @see @ref GPIO_RegisterMap
+ * @see @ref Memory_Bus_Base
+ * @{
+ */
+
+/**
+ * @brief GPIO Port A
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: All packages
+ * - Pins: PA0-PA15 (all available)
+ * - Common uses: USART2, TIM2, ADC1, etc.
+ */
+#define GPIOA                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000800))
+
+/**
+ * @brief GPIO Port B
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: All packages
+ * - Pins: PB0-PB15 (all available)
+ * - Common uses: I2C1, SPI1, TIM3, etc.
+ */
+#define GPIOB                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000C00))
+
+/**
+ * @brief GPIO Port C
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: All packages
+ * - Pins: PC13-PC15 (all packages), PC0-PC12 (64-pin+ packages)
+ * - Common uses: LED (PC13), Tamper, RTC, etc.
+ */
+#define GPIOC                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001000))
+
+/**
+ * @brief GPIO Port D
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: 64-pin and larger packages
+ * - Pins: PD0-PD15 (availability varies by package)
+ * - Common uses: FSMC, OSC_IN/OUT, etc.
+ */
+#define GPIOD                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001400))
+
+/**
+ * @brief GPIO Port E
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: 100-pin packages only
+ * - Pins: PE0-PE15 (all available on 100-pin)
+ * - Common uses: FSMC, additional I/Os
+ */
+#define GPIOE                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001800))
+
+/**
+ * @brief GPIO Port F
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: Connectivity line devices only
+ * - Pins: PF0-PF15 (connectivity line only)
+ * - Common uses: Additional I/Os on high-density devices
+ */
+#define GPIOF                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001C00))
+
+/**
+ * @brief GPIO Port G
+ * @details 
+ * - Reference: RM0008 Section 9.4.1 GPIO register map
+ * - Available on: Connectivity line devices only
+ * - Pins: PG0-PG15 (connectivity line only)
+ * - Common uses: Additional I/Os on high-density devices
+ */
+#define GPIOG                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00002000))
+
+/** @} */ // End of GPIO_MemoryAddress
+
 #define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
 #define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00))
 #define TIM2 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000000))
@@ -958,9 +1067,11 @@ __STATIC_FORCEINLINE uint32_t Round_Up_Power_of_2(uint32_t x)
 
 /*********************************************** Helper Functions ***********************************************/
 
+#endif /* STM32F103C8T6__ */
+
 // C++ Safeguard
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* REG_MAP_H_ */
+#endif /* STM32F1XX_H_ */

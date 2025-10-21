@@ -5,7 +5,7 @@
  * @version v1.2
  * @date    21-10-2025
  *
- * @defgroup GPIO GPIO
+ * @defgroup GPIO General Purpose Input/Ouptut (GPIO)
  * @brief    Hardware abstraction layer for STM32F1xx GPIO peripherals
  * 
  * @details This module provides complete access to GPIO peripherals including:
@@ -16,10 +16,10 @@
  * 
  * The module is organized as follows:
  * @subpage gpio_organization "GPIO Module Organization"
+ * @subpage gpio_addresses "GPIO Memory Address"
  * 
- * @note All GPIO operations require enabled RCC clock for the corresponding GPIO port
+ * @note 	All GPIO operations require enabled RCC clock for the corresponding GPIO port
  * @warning Direct register access should only be used when performance is critical
- * 
  * 
  */
 
@@ -36,14 +36,14 @@ extern "C" {
 #include <stdint.h>
 
 /**
+ * @brief    GPIO Peripheral Registers
  * @ingroup  GPIO
- * @defgroup GPIO_RegisterMap GPIO Register Mapping Structure
- * @brief    GPIO Peripheral Register definitions and memory mapping
+ * @defgroup GPIO_RegisterMap GPIO Register Structure
  * @{
  */
 
 /**
- * @brief General-Purpose Input/Output (GPIO) Register Mapping Structure
+ * @brief GPIO Register Structure
  * 
  * @details This structure represents the complete register set for a single GPIO port.
  * It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
