@@ -200,4 +200,4 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_PeekWrite(const ring_buffer_t* c
  * @}
  */ // RingBuffer_API
 
-#endif /* RING_BUFFER_H_ */ 
+#endif /* RING_BUFFER_H_ */

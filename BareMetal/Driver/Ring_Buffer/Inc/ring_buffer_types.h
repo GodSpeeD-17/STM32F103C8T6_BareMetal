@@ -1,7 +1,7 @@
 /**
  * @file ring_buffer_types.h
  * @author Shrey Shah
- * @defgroup RingBuffer Ring Buffer Documentation
+ * @defgroup RingBuffer Ring Buffer
  * @brief This module provides a brief on Ring Buffer Usage
  * @version v1.2
  * @date 22-10-2025
