@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/shrey_shah/STM32F103C8T6/Projects/DMA/11_DMA_Transfer_Poll/Build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
