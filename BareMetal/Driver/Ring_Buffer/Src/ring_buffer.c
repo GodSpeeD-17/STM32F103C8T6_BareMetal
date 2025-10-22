@@ -128,7 +128,7 @@ void Ring_Buffer_Config(ring_buffer_t* ring_buff, uint8_t* buffer, uint16_t size
 	ring_buff->head = 0;
 	ring_buff->tail = 0;
 	// Ensure the size is a power of 2
-	if (!Is_Power_Of_2(size)) {
+	if (!_isPowerOf2(size)) {
 		size = Round_Up_Power_of_2(size);
 	}
 	// Update the size of the ring buffer & provide it back to user

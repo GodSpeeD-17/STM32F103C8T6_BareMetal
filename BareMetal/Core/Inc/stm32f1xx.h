@@ -867,64 +867,7 @@ typedef enum
 
 /*----------------------------------------------- DMA MACROS -----------------------------------------------*/
 
-/*----------------------------------------------- Helper Functions -----------------------------------------------*/
-// Size of an array
-#define SIZEOF(X) (sizeof((X)) / sizeof((X)[0]))
 
-/**
- * @brief Check if a number is a power of 2
- * @param num The number to check
- * @returns 0: Not a power of 2
- * @returns 1: Power of 2
- */
-__STATIC_FORCEINLINE uint8_t Is_Power_Of_2(uint16_t num)
-{
-	// Check if the number is a power of two
-	return (num && (!(num & (num - 1))));
-}
-
-/**
- * @brief Rounds up a number to the next power of 2
- * @param n The number to round up
- * @return Rounded up power of 2
- */
-__STATIC_FORCEINLINE uint16_t Logical_Round_Up_Power_Of_2(uint16_t n)
-{
-	// Input = 0 -> Output = 1
-	if (n == 0)
-		return 1;
-	// Step 1: Subtract 1 to handle exact powers of 2
-	n--;
-	// Step 2: Propagate highest bit to the right
-	// NOTE: No need for >>16 because uint16_t is only 16 bits
-	n |= n >> 1;
-	n |= n >> 2;
-	n |= n >> 4;
-	n |= n >> 8;
-	// Step 3: Add 1 to get the next power of 2
-	return n + 1;
-}
-
-/**
- * @brief Rounds up a number to the next power of 2
- * @param n The number to round up
- * @return Rounded up power of 2
- */
-__STATIC_FORCEINLINE uint32_t Round_Up_Power_of_2(uint32_t x)
-{
-	// If x is 0, return 1 (2^0)
-	if (x == 0)
-		return 0x00000001;
-	/**
-	 * 		Expression						Meaning
-	 *		__builtin_clz(x)				Count leading zeros of 32-bit integer
-	 * 		32 - __builtin_clz(x)			log₂(x) rounded up to nearest power
-	 * 		1 << (32 - __builtin_clz(x))	Next power of 2
-	 *  NOTE: clz() returns 32 for input 0, which is undefined behavior — so we always use (size - 1) to avoid that
-	 */
-	// Calculate the next power of 2 greater than or equal to x
-	return (1 << (32 - __builtin_clz(x - 1)));
-}
 
 /*----------------------------------------------- Helper Functions -----------------------------------------------*/
 

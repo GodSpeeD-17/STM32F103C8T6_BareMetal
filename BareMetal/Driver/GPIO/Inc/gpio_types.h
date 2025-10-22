@@ -8,8 +8,8 @@
  */
 
 // Header Guards
-#ifndef GPIO_TYPES_H_
-#define GPIO_TYPES_H_
+#ifndef GPIO_TYPES
+#define GPIO_TYPES
 
 /*********************************************** Includes ***********************************************/
 /** 
@@ -338,4 +338,4 @@ typedef struct
  * @}
  */ // GPIO_ConfigStruct
 
-#endif /* GPIO_TYPES_H_ */
+#endif /* GPIO_TYPES */
