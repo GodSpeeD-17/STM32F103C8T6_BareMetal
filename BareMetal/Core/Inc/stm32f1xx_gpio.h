@@ -1,61 +1,55 @@
 /**
  * @file    stm32f1xx_gpio.h
  * @author  Shrey Shah
- * @brief   STM32F1xx General-Purpose Input/Output (GPIO) Peripheral Structure
  * @version v1.2
  * @date    21-10-2025
- *
+ * 
  * @defgroup GPIO General Purpose Input/Ouptut (GPIO)
  * 
- * @details This module provides complete access to GPIO peripherals including:
- *          - Register mapping and memory addresses
- *          - Configuration structures and enumerations  
- *          - Hardware abstraction APIs
- *          - Pin control and management functions
- * 
- * The module is organized as follows:
- * @subpage gpio_organization "GPIO Module Organization"
- * @subpage gpio_addresses "GPIO Memory Address"
+ * @brief STM32F1xx General-Purpose Input/Output (GPIO)
+ * @details 
+ * This module provides complete access to GPIO peripherals including:
+ * - Register mapping and memory addresses
+ * - Configuration structures and enumerations  
+ * - Hardware abstraction APIs
+ * - Pin control and management functions
  * 
  * @note 	All GPIO operations require enabled RCC clock for the corresponding GPIO port
- * @warning Direct register access should only be used when performance is critical
- * 
+ * @warning Direct register access should only be used when performance is critical 
  */
 
 // Header Guards
 #ifndef STM32F1XX_GPIO_H_
 #define STM32F1XX_GPIO_H_
 
-// C++ Safeguard
+// C++ Header Guards
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 // Includes
 #include <stdint.h>
-
+ 
 /**
- * @brief    GPIO Peripheral Registers
- * @defgroup GPIO_RegisterMap GPIO Register Structure
+ * @defgroup GPIO_RegisterMap GPIO Register
  * @ingroup  GPIO
+ * @brief 	 GPIO Registers
+ * @details 
+ * - This structure represents the complete register set for a single GPIO port.
+ * - It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
+ * @note The structure uses unions to provide both bit-level and register-level access
+ * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
+ * 
  * @{
  */
 
-/**
- * @brief GPIO Register Structure
- * 
- * @details This structure represents the complete register set for a single GPIO port.
- * It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
- * 
- * @note The structure uses unions to provide both bit-level and register-level access
- * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
- */
-typedef struct {
+typedef struct _GPIO_TypeDef
+{
 	/**
 	 * @brief GPIO Port Configuration Register Low (CRL)
 	 * @details Configures pins 0-7 for mode and output type/speed
 	 */
-	union CRL 
+	union _CRL 
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -76,13 +70,13 @@ typedef struct {
 			volatile uint32_t MODE7  : 2;  ///< Pin 7 mode
 			volatile uint32_t CNF7   : 2;  ///< Pin 7 configuration
 		} BIT;
-	} CRL;
+	} CRL; /**< @brief GPIO Port Configuration Register Low (CRL) */
 
 	/**
 	 * @brief GPIO Port Configuration Register High (CRH)  
 	 * @details Configures pins 8-15 for mode and output type/speed
 	 */
-	union CRH
+	union _CRH
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -103,13 +97,13 @@ typedef struct {
 			volatile uint32_t MODE15 : 2;  ///< Pin 15 mode
 			volatile uint32_t CNF15  : 2;  ///< Pin 15 configuration
 		} BIT;
-	} CRH;
+	} CRH; /**< @brief GPIO Port Configuration Register High (CRH) */
 
 	/**
 	 * @brief GPIO Port Input Data Register (IDR)
 	 * @details Read-only register containing current state of input pins
 	 */
-	union IDR
+	union _IDR
 	{
 		volatile const uint32_t REG;  ///< Read-only 32-bit register access
 		struct {
@@ -131,13 +125,13 @@ typedef struct {
 			volatile const uint32_t IDR15  : 1;  ///< Pin 15 input state
 			volatile const uint32_t RESERVED_IDR : 16; ///< Reserved bits
 		} BIT;
-	} IDR;
+	} IDR; /**< @brief GPIO Port Input Data Register (IDR) */ 
 
 	/**
 	 * @brief GPIO Port Output Data Register (ODR)
 	 * @details Sets output state for pins configured as output
 	 */
-	union ODR 
+	union _ODR 
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -159,13 +153,13 @@ typedef struct {
 			volatile uint32_t ODR15  : 1;  ///< Pin 15 output state
 			volatile uint32_t RESERVED_ODR : 16; ///< Reserved bits
 		} BIT;
-	} ODR;
+	} ODR; /**< @brief GPIO Port Output Data Register (ODR) */
 
 	/**
 	 * @brief GPIO Port Bit Set/Reset Register (BSRR)
 	 * @details Atomic set/reset operations (bits 0-15 set, bits 16-31 reset)
 	 */
-	union BSRR
+	union _BSRR
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -202,13 +196,13 @@ typedef struct {
 			volatile uint32_t BR14   : 1;  ///< Reset Pin 14
 			volatile uint32_t BR15   : 1;  ///< Reset Pin 15
 		} BIT;
-	} BSRR;
+	} BSRR; /**< @brief GPIO Port Bit Set/Reset Register (BSRR) */
 
 	/**
 	 * @brief GPIO Port Bit Reset Register (BRR)
 	 * @details Reset-only register (alternative to BSRR reset bits)
 	 */
-	union BRR
+	union _BRR
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -230,13 +224,13 @@ typedef struct {
 			volatile uint32_t BR15   : 1;  ///< Reset Pin 15
 			volatile uint32_t RESERVED_BRR : 16; ///< Reserved bits
 		} BIT;
-	} BRR;
+	} BRR; /**< @brief GPIO Port Bit Reset Register (BRR) */
 
 	/**
 	 * @brief GPIO Port Configuration Lock Register (LCKR)
 	 * @details Locks pin configuration until next reset
 	 */
-	union LCKR
+	union _LCKR
 	{
 		volatile uint32_t REG;  ///< Full 32-bit register access
 		struct {
@@ -259,13 +253,16 @@ typedef struct {
 			volatile uint32_t LCKK   : 1;  ///< Lock key (write sequence required)
 			volatile uint32_t RESERVED_LCKR : 15; ///< Reserved bits
 		} BIT;
-	} LCKR;
+	} LCKR; /**< @brief GPIO Port Configuration Lock Register (LCKR) */
 } GPIO_TypeDef;
 
-/** @} */ // End of GPIO_RegisterMap
+/** 
+ * @}
+ */ // GPIO_RegisterMap
 
+// C++ Header Guards
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif /* STM32F1XX_GPIO_H_ */

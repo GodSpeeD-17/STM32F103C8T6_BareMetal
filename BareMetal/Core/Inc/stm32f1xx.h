@@ -1,62 +1,62 @@
 /**
  * @file    stm32f1xx.h
  * @author  Shrey Shah
- * @brief   Peripheral Register Memory Mapping for STM32 Microcontrollers
  * @version v1.2
- * @date    2024
+ * @date    21-10-2025
  *
- * @defgroup Peripheral_Map Peripheral Register Map
+ ******************************************************************************************************************
+ *	Basic Notes:-
+ *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
+ *	`uint32_t` inside every BIT struct because of padding alignment
+ *	`volatile` used for ensuring no further optimization by compiler
+ *	`: x` indicates only x bit(s) to be used from that 32-bit
+ ****************************************************************************************************************
+ *                            🔧 Bit Manipulation Built-ins (GCC)
+ * -------------------------------------------------------------------------------------
+ * | Built-in Function        | Description                                           |
+ * |--------------------------|--------------------------------------------------------|
+ * | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
+ * | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
+ * | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
+ * | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
+ * | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
+ * | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
+ * | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
+ * | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
+ * -------------------------------------------------------------------------------------
+ * Notes:
+ * - All __builtin_* functions are evaluated at compile-time if argument is constant.
+ * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
+ * - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
+ * - Use with uint32_t or cast explicitly to avoid type promotion issues.
  *
- * @details This file provides centralized memory mapping for all peripherals across
- *          different STM32 microcontroller families. The architecture supports:
- *          - Single include point for all peripheral instances
- *          - Easy scalability to new MCU families
- *          - Compiler-optimized memory access
- *          - Family-specific configuration via preprocessor
- * ****************************************************************************************************************
-*	Basic Notes:-
-*	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
-*	`uint32_t` inside every BIT struct because of padding alignment
-*	`volatile` used for ensuring no further optimization by compiler
-*	`: x` indicates only x bit(s) to be used from that 32-bit
-****************************************************************************************************************
-*                            🔧 Bit Manipulation Built-ins (GCC)
-* -------------------------------------------------------------------------------------
-* | Built-in Function        | Description                                           |
-* |--------------------------|--------------------------------------------------------|
-* | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
-* | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
-* | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
-* | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
-* | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
-* | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
-* | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
-* | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
-* -------------------------------------------------------------------------------------
-* Notes:
-* - All __builtin_* functions are evaluated at compile-time if argument is constant.
-* - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
-* - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
-* - Use with uint32_t or cast explicitly to avoid type promotion issues.
-*
-* Example Usage:
-*   uint32_t val = 0x0000000F;
-*   uint8_t zeros = __builtin_clz(val);      // → 28
-*   uint8_t set   = __builtin_popcount(val); // → 4
-*   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
+ * Example Usage:
+ *   uint32_t val = 0x0000000F;
+ *   uint8_t zeros = __builtin_clz(val);      // → 28
+ *   uint8_t set   = __builtin_popcount(val); // → 4
+ *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
+ * 
+ * @defgroup STM32F1xx STM32F1xx Peripherals
+ * 
+ * @brief   STM32F1xx - Peripheral Register Mapping
+ *
+ * @details 
+ * This file provides centralized memory mapping for all peripherals for STM32F1xx Seriess
  *
  * @code
+ * 
+ * // STM32F1xx Series Peripheral Address Mapping
  * #include "stm32f1xx.h"
  *
- * // Access any peripheral directly
- * GPIOA->ODR |= GPIO_PIN_13;				// Set PA13
- * RCC->APB2ENR &= ~RCC_APB2ENR_IOPAEN;		// Reset GPIOA clock
- * USART1->DR = 'A';						// Send character via USART1
+ * // Set PA13
+ * GPIOA->ODR.REG |= GPIO_PIN_13;
+ * // Reset GPIOA clock
+ * RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;
+ * // Send character via USART1
+ * USART1->DR = 'A';
+ * 
  * @endcode
- *
- * @note Include this file after family-specific configuration
- * @warning Peripheral availability varies by STM32 family and package
- *
+ *  
  */
 
 // Header Guards
@@ -71,7 +71,7 @@ extern "C" {
 // STM32F103C8T6
 #ifdef STM32F103C8T6__
 
-/*********************************************** ARM Cortex-M3 ***********************************************/
+/*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
 #include "cmsis_gcc.h"
 #include "stm32f1xx_helper.h"
 #include "stm32f1xx_flash.h"
@@ -79,9 +79,9 @@ extern "C" {
 #include "stm32f1xx_nvic.h"
 #include "stm32f1xx_systick.h"
 #include "stm32f1xx_watchdog.h"
-/*********************************************** ARM Cortex-M3 ***********************************************/
+/*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
 
-/*********************************************** STM32F103C8T6 ***********************************************/
+/*----------------------------------------------- STM32F103C8T6 -----------------------------------------------*/
 #include "stm32f1xx_adc.h"
 #include "stm32f1xx_advtim.h"
 #include "stm32f1xx_afio.h"
@@ -92,9 +92,9 @@ extern "C" {
 #include "stm32f1xx_timer.h"
 #include "stm32f1xx_rcc.h"
 #include "stm32f1xx_usart.h"
-/*********************************************** STM32F103C8T6 ***********************************************/
+/*----------------------------------------------- STM32F103C8T6 -----------------------------------------------*/
 
-/*********************************************** Custom Declaration ***********************************************/
+/*----------------------------------------------- Custom Declaration -----------------------------------------------*/
 #define BIT_MASK(X)								((uint32_t) (0x01 << (X)))
 #define CONSECUTIVE_BIT1_MASK()					((uint32_t) (0x01))
 #define CONSECUTIVE_BIT2_MASK()					((uint32_t) (0x03))
@@ -105,9 +105,7 @@ extern "C" {
 #define CONSECUTIVE_BIT7_MASK()					((uint32_t) (0x7F))
 #define CONSECUTIVE_BIT8_MASK()					((uint32_t) (0xFF))
 
-/**
- * @brief Enumeration for Success/Failure for Driver return
- */
+
 typedef enum
 {
 	DRIVER_SUCCESS = (uint8_t) 0x00,
@@ -126,17 +124,19 @@ typedef enum
 		}                               \
 	} while (0)
 
-/*********************************************** Custom Declaration ***********************************************/
+/*----------------------------------------------- Custom Declaration -----------------------------------------------*/
 
-/*********************************************** Memory Bus Base Addresses ***********************************************/
+/*----------------------------------------------- Memory Bus Base Addresses -----------------------------------------------*/
 
 /**
- * @defgroup Memory_Bus_Base Memory Bus Base Addresses
+ * @defgroup Memory_BusBase Memory Bus Base Addresses
+ * @addtogroup  STM32F1xx
  * @brief    Base addresses for different memory buses in STM32F1xx
- * @ingroup  STM32F1xx
  *
- * @details STM32F1xx uses Harvard architecture with separate buses for different peripherals.
+ * @details 
+ * STM32F1xx Base Memory Addresses Offsets
  * @see Reference Manual RM0008 - Section 3.2 Memory Map
+ * 
  * @{
  */
 
@@ -153,105 +153,57 @@ typedef enum
 #define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000) /**< @brief Window Watchdog Base */
 #define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000) /**< @brief Independent Watchdog Base */
 
-/** @} */ // End of Memory_Bus_Base
+/** 
+ * @}
+ */  // Memory_BusBase 
 
-// Address Mapping
+
 #define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
 #define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
 #define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000))
 
-/*********************************************** GPIO Peripheral Instances ***********************************************/
+/*----------------------------------------------- GPIO Peripheral Instances -----------------------------------------------*/
 
 /**
- * @brief		Memory-mapped GPIO port instances for STM32F1xx
- * @defgroup 	GPIO_MemoryAddress GPIO Memory Address Mapping
- * @ingroup		GPIO
+ * @defgroup GPIO_MemoryAddress GPIO Memory Address
+ * @addtogroup GPIO
+ * @brief	 STM32F1xx - Memory-mapped GPIO
  *
- * @details GPIO Instances based on GPIO Register Mapping Structure (GPIO_TypeDef)
- * 			Clocked from APB2 Bus (APB2_BASE_ADDR)
- * @note	Clock must be enabled before accessing GPIO registers
- * @see		Reference Manual RM0008 - Section 9.2 GPIO Registers
- * @see		Datasheet - Section 4 Memory Mapping
- * @see @ref GPIO_RegisterMap
- * @see @ref Memory_Bus_Base
+ * @details 
+ * - GPIO Instances based on GPIO Register Mapping Structure (GPIO_TypeDef)
+ * - Clocked from APB2 Bus (APB2_BASE_ADDR)
+ * @see Reference Manual RM0008 - Section 9.2 GPIO Registers
+ * @see Datasheet - Section 4 Memory Mapping
+ * 
  * @{
  */
 
-/**
- * @brief GPIO Port A
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: All packages
- * - Pins: PA0-PA15 (all available)
- * - Common uses: USART2, TIM2, ADC1, etc.
- */
+/**< @brief GPIO Port A Memory Address */
 #define GPIOA                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000800))
 
-/**
- * @brief GPIO Port B
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: All packages
- * - Pins: PB0-PB15 (all available)
- * - Common uses: I2C1, SPI1, TIM3, etc.
- */
+/**< @brief GPIO Port B Memory Address */
 #define GPIOB                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00000C00))
 
-/**
- * @brief GPIO Port C
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: All packages
- * - Pins: PC13-PC15 (all packages), PC0-PC12 (64-pin+ packages)
- * - Common uses: LED (PC13), Tamper, RTC, etc.
- */
+/**< @brief GPIO Port C Memory Address */
 #define GPIOC                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001000))
 
-/**
- * @brief GPIO Port D
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: 64-pin and larger packages
- * - Pins: PD0-PD15 (availability varies by package)
- * - Common uses: FSMC, OSC_IN/OUT, etc.
- */
+/**< @brief GPIO Port D Memory Address */
 #define GPIOD                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001400))
 
-/**
- * @brief GPIO Port E
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: 100-pin packages only
- * - Pins: PE0-PE15 (all available on 100-pin)
- * - Common uses: FSMC, additional I/Os
- */
+/**< @brief GPIO Port E Memory Address */
 #define GPIOE                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001800))
 
-/**
- * @brief GPIO Port F
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: Connectivity line devices only
- * - Pins: PF0-PF15 (connectivity line only)
- * - Common uses: Additional I/Os on high-density devices
- */
+/**< @brief GPIO Port F Memory Address */
 #define GPIOF                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00001C00))
 
-/**
- * @brief GPIO Port G
- * @details 
- * - Reference: RM0008 Section 9.4.1 GPIO register map
- * - Available on: Connectivity line devices only
- * - Pins: PG0-PG15 (connectivity line only)
- * - Common uses: Additional I/Os on high-density devices
- */
+/**< @brief GPIO Port G Memory Address */
 #define GPIOG                                   ((GPIO_TypeDef *) (APB2_BASE_ADDR + 0x00002000))
 
 /** 
- * @} // End of GPIO_MemoryAddress
- */
+ * @}
+ */ // GPIO_MemoryAddress
 
 #define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
 #define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00))
@@ -288,11 +240,11 @@ typedef enum
 #define DMA2_Channel4 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[3]))
 #define DMA2_Channel5 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[4]))
 
-/*********************************************** Address Mapping ***********************************************/
+/*----------------------------------------------- Address Mapping -----------------------------------------------*/
 
 
 
-/*********************************************** I2C MACROS ***********************************************/
+/*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed
 #define I2Cx_SPEED_STD (FREQ_100kHz)
 #define I2Cx_SPEED_FAST (FREQ_100kHz << 2)
@@ -325,9 +277,9 @@ typedef enum
 #define I2C2_SCL_PIN 							(GPIOx_PIN_10)
 #define I2C2_SDA_GPIO 							(GPIOB)
 #define I2C2_SDA_PIN 							(GPIOx_PIN_11)
-/*********************************************** I2C MACROS ***********************************************/
+/*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 
-/*********************************************** SysTick MACROS ***********************************************/
+/*----------------------------------------------- SysTick MACROS -----------------------------------------------*/
 // SysTick Clock Selection
 #define SYSTICK_CLK_EXT (0x00)
 #define SYSTICK_CLK_CORE (0x01)
@@ -337,9 +289,9 @@ typedef enum
 #define SYSTICK_DELAY_2_US (SYSTICK_DELAY_1_US << 1)
 #define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / FREQ_1kHz)
 #define SYSTICK_DELAYS_2_MS (SYSTICK_DELAY_1_MS << 1)
-/*********************************************** SysTick MACROS ***********************************************/
+/*----------------------------------------------- SysTick MACROS -----------------------------------------------*/
 
-/*********************************************** Timer MACROS ***********************************************/
+/*----------------------------------------------- Timer MACROS -----------------------------------------------*/
 // - Prescaler
 // |-> Timer Frequency: 10kHz
 // |-> (PSC + 1) = (7199 + 1) = (7200)
@@ -576,9 +528,9 @@ typedef enum
 #define TIMx_DMA_CC3DE (0x08)
 #define TIMx_DMA_CC4DE (0x10)
 
-/*********************************************** Timer MACROS ***********************************************/
+/*----------------------------------------------- Timer MACROS -----------------------------------------------*/
 
-/*********************************************** PWM MACROS ***********************************************/
+/*----------------------------------------------- PWM MACROS -----------------------------------------------*/
 // PWM Min Duty Cycle: 1%
 #define PWM_MIN_DUTY_CYCLE (1)
 // PWM Max Duty Cycle: 100%
@@ -772,9 +724,9 @@ typedef enum
 // Max Counter Value for PWM
 #define PWM_DEFAULT_ARR ((uint16_t)999)
 
-/*********************************************** PWM MACROS ***********************************************/
+/*----------------------------------------------- PWM MACROS -----------------------------------------------*/
 
-/*********************************************** ADC MACROS ***********************************************/
+/*----------------------------------------------- ADC MACROS -----------------------------------------------*/
 // ADC Max Value
 #define MAX_ADC_VALUE ((uint16_t)0x0FFF)
 
@@ -817,9 +769,9 @@ typedef enum
 // ADC Sample Time Decoding
 #define ADC_SAMPLE_TIME(ADC_SAMPLEx) ((uint8_t)((ADC_SAMPLEx) & 0x0F))
 
-/*********************************************** ADC MACROS ***********************************************/
+/*----------------------------------------------- ADC MACROS -----------------------------------------------*/
 
-/*********************************************** USART MACROS ***********************************************/
+/*----------------------------------------------- USART MACROS -----------------------------------------------*/
 // TX
 #define USARTx_TX_DISABLE (0x00)
 #define USARTx_TX_ENABLE (0x01)
@@ -865,9 +817,9 @@ typedef enum
 
 // Local Delay
 #define USARTx_STRING_TX_DELAY ((uint16_t)3000)
-/*********************************************** USART MACROS ***********************************************/
+/*----------------------------------------------- USART MACROS -----------------------------------------------*/
 
-/*********************************************** DMA MACROS ***********************************************/
+/*----------------------------------------------- DMA MACROS -----------------------------------------------*/
 // DMA Direction
 #define DMAx_DIR_READ_PER (0x00)
 #define DMAx_DIR_READ_MEM (0x01)
@@ -913,9 +865,9 @@ typedef enum
 #define DMA_TIM2_CH4 (DMA1_Channel7)
 #define DMA_TIM4_UP (DMA1_Channel7)
 
-/*********************************************** DMA MACROS ***********************************************/
+/*----------------------------------------------- DMA MACROS -----------------------------------------------*/
 
-/*********************************************** Helper Functions ***********************************************/
+/*----------------------------------------------- Helper Functions -----------------------------------------------*/
 // Size of an array
 #define SIZEOF(X) (sizeof((X)) / sizeof((X)[0]))
 
@@ -974,7 +926,7 @@ __STATIC_FORCEINLINE uint32_t Round_Up_Power_of_2(uint32_t x)
 	return (1 << (32 - __builtin_clz(x - 1)));
 }
 
-/*********************************************** Helper Functions ***********************************************/
+/*----------------------------------------------- Helper Functions -----------------------------------------------*/
 
 #endif /* STM32F103C8T6__ */
 

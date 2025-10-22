@@ -7,7 +7,6 @@
  * @note Logs till v1.1:
  * @note - Aborted usage of `enums` as it consumes a lot of space
  * @note - Shifted to use combination of `typedef` & macros
- * @ingroup GPIO
  */
 // Header Guards
 #ifndef GPIO_CONFIG_H_
