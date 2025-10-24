@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef STM32F1XX_HELPER_H_
-#define STM32F1XX_HELPER_H_
+#ifndef STM32F1XX_DEFINES_H_
+#define STM32F1XX_DEFINES_H_
 
 // C++ Safeguards
 #ifdef __cplusplus
@@ -9762,4 +9762,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* STM32F1XX_HELPER_H_ */ 
+#endif /* STM32F1XX_DEFINES_H_ */ 

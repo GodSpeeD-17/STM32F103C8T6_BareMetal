@@ -41,58 +41,110 @@
  * @brief Interrupt Request Number Type
  * @details 8-bit type representing interrupt numbers (0-67 for STM32F103xx)
  */
-typedef 										uint8_t irq_t;
+typedef uint8_t 								irq_t;
 
-/* System and Window Watchdog */
-#define WWDG_IRQn                               ((irq_t) 0)   /**< @brief Window Watchdog interrupt */
-#define PVD_IRQn                                ((irq_t) 1)   /**< @brief PVD through EXTI line detection */
-#define TAMPER_IRQn                             ((irq_t) 2)   /**< @brief Tamper interrupt */
-#define RTC_IRQn                                ((irq_t) 3)   /**< @brief RTC global interrupt */
-#define FLASH_IRQn                              ((irq_t) 4)   /**< @brief Flash global interrupt */
-#define RCC_IRQn                                ((irq_t) 5)   /**< @brief RCC global interrupt */
+/**
+ * @addtogroup NVIC_IRQn
+ * @section NVIC_IRQn_0 System and Window Watchdog
+ * @{
+ */
 
-/* External Interrupts */
-#define EXTI0_IRQn                              ((irq_t) 6)   /**< @brief EXTI Line0 interrupt */
-#define EXTI1_IRQn                              ((irq_t) 7)   /**< @brief EXTI Line1 interrupt */
-#define EXTI2_IRQn                              ((irq_t) 8)   /**< @brief EXTI Line2 interrupt */
-#define EXTI3_IRQn                              ((irq_t) 9)   /**< @brief EXTI Line3 interrupt */
-#define EXTI4_IRQn                              ((irq_t) 10)  /**< @brief EXTI Line4 interrupt */
+/** @brief Window Watchdog interrupt */
+#define WWDG_IRQn                               ((irq_t) 0)
+/** @brief PVD through EXTI line detection */
+#define PVD_IRQn                                ((irq_t) 1)
+/** @brief Tamper interrupt */
+#define TAMPER_IRQn                             ((irq_t) 2)
+/** @brief RTC global interrupt */
+#define RTC_IRQn                                ((irq_t) 3)
+/** @brief Flash global interrupt */
+#define FLASH_IRQn                              ((irq_t) 4)
+/** @brief RCC global interrupt */
+#define RCC_IRQn                                ((irq_t) 5)
+/**
+ * @}
+ */ // NVIC_IRQn_0
+
+/**
+ * @addtogroup NVIC_IRQn 
+ * @defgroup NVIC_IRQn_1 External Interrupts
+ * @{
+ */
+/** @brief EXTI Line0 interrupt */
+#define EXTI0_IRQn                              ((irq_t) 6)
+/** @brief EXTI Line1 interrupt */
+#define EXTI1_IRQn                              ((irq_t) 7)
+/** @brief EXTI Line2 interrupt */
+#define EXTI2_IRQn                              ((irq_t) 8)
+/** @brief EXTI Line3 interrupt */
+#define EXTI3_IRQn                              ((irq_t) 9)
+/** @brief EXTI Line4 interrupt */
+#define EXTI4_IRQn                              ((irq_t) 10)
+/**
+ * @}
+ */ // NVIC_IRQn_1
 
 /* DMA Interrupts */
-#define DMA1_Channel1_IRQn                      ((irq_t) 11)  /**< @brief DMA1 Channel1 global interrupt */
-#define DMA1_Channel2_IRQn                      ((irq_t) 12)  /**< @brief DMA1 Channel2 global interrupt */
-#define DMA1_Channel3_IRQn                      ((irq_t) 13)  /**< @brief DMA1 Channel3 global interrupt */
-#define DMA1_Channel4_IRQn                      ((irq_t) 14)  /**< @brief DMA1 Channel4 global interrupt */
-#define DMA1_Channel5_IRQn                      ((irq_t) 15)  /**< @brief DMA1 Channel5 global interrupt */
-#define DMA1_Channel6_IRQn                      ((irq_t) 16)  /**< @brief DMA1 Channel6 global interrupt */
-#define DMA1_Channel7_IRQn                      ((irq_t) 17)  /**< @brief DMA1 Channel7 global interrupt */
+/** @brief DMA1 Channel1 global interrupt */
+#define DMA1_Channel1_IRQn                      ((irq_t) 11)
+/** @brief DMA1 Channel2 global interrupt */
+#define DMA1_Channel2_IRQn                      ((irq_t) 12)
+/** @brief DMA1 Channel3 global interrupt */
+#define DMA1_Channel3_IRQn                      ((irq_t) 13)
+/** @brief DMA1 Channel4 global interrupt */
+#define DMA1_Channel4_IRQn                      ((irq_t) 14)
+/** @brief DMA1 Channel5 global interrupt */
+#define DMA1_Channel5_IRQn                      ((irq_t) 15)
+/** @brief DMA1 Channel6 global interrupt */
+#define DMA1_Channel6_IRQn                      ((irq_t) 16)
+/** @brief DMA1 Channel7 global interrupt */
+#define DMA1_Channel7_IRQn                      ((irq_t) 17)
 
 /* Analog and USB/CAN Interrupts */
-#define ADC1_2_IRQn                             ((irq_t) 18)  /**< @brief ADC1 and ADC2 global interrupts */
-#define USB_HP_CAN_TX_IRQ                       ((irq_t) 19)  /**< @brief USB High Priority or CAN TX interrupts */
-#define USB_LP_CAN_RX0_IRQ                      ((irq_t) 20)  /**< @brief USB Low Priority or CAN RX0 interrupts */
-#define CAN_RX1_IRQ                             ((irq_t) 21)  /**< @brief CAN RX1 interrupt */
-#define CAN_SCE_IRQ                             ((irq_t) 22)  /**< @brief CAN SCE interrupt */
+/** @brief ADC1 and ADC2 global interrupts */
+#define ADC1_2_IRQn                             ((irq_t) 18)
+/** @brief USB High Priority or CAN TX interrupts */
+#define USB_HP_CAN_TX_IRQ                       ((irq_t) 19)
+/** @brief USB Low Priority or CAN RX0 interrupts */
+#define USB_LP_CAN_RX0_IRQ                      ((irq_t) 20)
+/** @brief CAN RX1 interrupt */
+#define CAN_RX1_IRQ                             ((irq_t) 21)
+/** @brief CAN SCE interrupt */
+#define CAN_SCE_IRQ                             ((irq_t) 22)
 
-/* External Interrupt Groups */
-#define EXTI9_5_IRQn                            ((irq_t) 23)  /**< @brief EXTI Line[9:5] interrupts */
+// External Interrupt Groups
+/** @brief EXTI Line[9:5] interrupts */
+#define EXTI9_5_IRQn                            ((irq_t) 23)
 
-/* Timer Interrupts */
-#define TIM1_BRK_IRQn                           ((irq_t) 24)  /**< @brief TIM1 Break interrupt */
-#define TIM1_UP_IRQn                            ((irq_t) 25)  /**< @brief TIM1 Update interrupt */
-#define TIM1_TRG_COM_IRQn                       ((irq_t) 26)  /**< @brief TIM1 Trigger and Commutation */
-#define TIM1_CC_IRQn                            ((irq_t) 27)  /**< @brief TIM1 Capture Compare interrupt */
-#define TIM2_IRQn                               ((irq_t) 28)  /**< @brief TIM2 global interrupt */
-#define TIM3_IRQn                               ((irq_t) 29)  /**< @brief TIM3 global interrupt */
-#define TIM4_IRQn                               ((irq_t) 30)  /**< @brief TIM4 global interrupt */
+// Timer Interrupts
+/** @brief TIM1 Break interrupt */
+#define TIM1_BRK_IRQn                           ((irq_t) 24)
+/** @brief TIM1 Update interrupt */
+#define TIM1_UP_IRQn                            ((irq_t) 25)
+/** @brief TIM1 Trigger and Commutation */
+#define TIM1_TRG_COM_IRQn                       ((irq_t) 26)
+/** @brief TIM1 Capture Compare interrupt */
+#define TIM1_CC_IRQn                            ((irq_t) 27)
+/** @brief TIM2 global interrupt */
+#define TIM2_IRQn                               ((irq_t) 28)
+/** @brief TIM3 global interrupt */
+#define TIM3_IRQn                               ((irq_t) 29)
+/** @brief TIM4 global interrupt */
+#define TIM4_IRQn                               ((irq_t) 30)
 
 /* Communication Interface Interrupts */
-#define I2C1_EV_IRQn                            ((irq_t) 31)  /**< @brief I2C1 event interrupt */
-#define I2C1_ER_IRQn                            ((irq_t) 32)  /**< @brief I2C1 error interrupt */
-#define I2C2_EV_IRQn                            ((irq_t) 33)  /**< @brief I2C2 event interrupt */
-#define I2C2_ER_IRQn                            ((irq_t) 34)  /**< @brief I2C2 error interrupt */
-#define SPI1_IRQn                               ((irq_t) 35)  /**< @brief SPI1 global interrupt */
-#define SPI2_IRQn                               ((irq_t) 36)  /**< @brief SPI2 global interrupt */
+/** @brief I2C1 event interrupt */
+#define I2C1_EV_IRQn                            ((irq_t) 31)
+/** @brief I2C1 error interrupt */
+#define I2C1_ER_IRQn                            ((irq_t) 32)
+/** @brief I2C2 event interrupt */
+#define I2C2_EV_IRQn                            ((irq_t) 33)
+/** @brief I2C2 error interrupt */
+#define I2C2_ER_IRQn                            ((irq_t) 34)
+/** @brief SPI1 global interrupt */
+#define SPI1_IRQn                               ((irq_t) 35)
+/** @brief SPI2 global interrupt */
+#define SPI2_IRQn                               ((irq_t) 36)
 
 /* USART Interrupts */
 #define USART1_IRQn                             ((irq_t) 37)  /**< @brief USART1 global interrupt */

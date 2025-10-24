@@ -8,12 +8,13 @@
  */
 
 // Header Guards
-#ifndef GPIO_TYPES
-#define GPIO_TYPES
+#ifndef GPIO_TYPES_H_
+#define GPIO_TYPES_H_
 
-/*********************************************** Includes ***********************************************/
+/*---------------------------------------------- Includes ----------------------------------------------*/
 /** 
- * @brief For register mapping base types 
+ * @brief For register mapping base types
+ * @include Test
  */
 #include "stm32f1xx.h"
 /** 
@@ -21,11 +22,11 @@
  */
 #include "rcc.h"
 
-/*********************************************** GPIO Port Definitions ***********************************************/
+/*---------------------------------------------- GPIO Port Definitions ----------------------------------------------*/
 
 /**
  * @brief    Available GPIO ports on STM32F103C8T6
- * @defgroup GPIO_Ports GPIO Port
+ * @defgroup 02_GPIO_Ports GPIO Port
  * @ingroup  GPIO
  * 
  * @details These constants identify specific GPIO ports. 
@@ -33,27 +34,33 @@
  * 			STM32F103C8T6 has ports A, B, and C fully available.
  * 
  * @see STM32F103C8T6 Datasheet - Section 4 Memory mapping
+ * 
  * @{
  */
-typedef uint8_t  	   gpio_port_t;		 	 /**< @brief GPIO port identifier type */
-#define GPIO_PORT_A    ((gpio_port_t) 0x00)  /**< @brief GPIO Port A */
-#define GPIO_PORT_B    ((gpio_port_t) 0x01)  /**< @brief GPIO Port B */
-#define GPIO_PORT_C    ((gpio_port_t) 0x02)  /**< @brief GPIO Port C */
-#define GPIO_PORT_D    ((gpio_port_t) 0x03)  /**< @brief GPIO Port D */
-#define GPIO_PORT_E    ((gpio_port_t) 0x04)  /**< @brief GPIO Port E */
-#define GPIO_PORT_F    ((gpio_port_t) 0x05)  /**< @brief GPIO Port F */
-#define GPIO_PORT_G    ((gpio_port_t) 0x06)  /**< @brief GPIO Port G */
+/** @brief GPIO port identifier type */
+typedef uint8_t  	   gpio_port_t;
+/** @brief GPIO Port A */
+#define GPIO_PORT_A    ((gpio_port_t) 0x00)
+/** @brief GPIO Port B */
+#define GPIO_PORT_B    ((gpio_port_t) 0x01)
+/** @brief GPIO Port C */
+#define GPIO_PORT_C    ((gpio_port_t) 0x02)
+/** @brief GPIO Port D */
+#define GPIO_PORT_D    ((gpio_port_t) 0x03)
+/** @brief GPIO Port E */
+#define GPIO_PORT_E    ((gpio_port_t) 0x04)
+/** @brief GPIO Port F */
+#define GPIO_PORT_F    ((gpio_port_t) 0x05)
+/** @brief GPIO Port G */
+#define GPIO_PORT_G    ((gpio_port_t) 0x06)
 
-/** 
- * @} 
- */ // GPIO_Ports
+/** @} */ // 03_GPIO_Ports
 
-/*********************************************** GPIO Pin Definitions ***********************************************/
-
+/*---------------------------------------------- GPIO Pin Definitions ----------------------------------------------*/
 /**
  * @brief    GPIO Pin Selection
  * @ingroup  GPIO
- * @defgroup GPIO_Pins GPIO Pin
+ * @defgroup 03_GPIO_Pins GPIO Pins
  * 
  * @details These constants represent individual pins as bitmasks. 
  * 			Thus, allowing multiple pins to be selected using bitwise OR operations.
@@ -64,90 +71,118 @@ typedef uint8_t  	   gpio_port_t;		 	 /**< @brief GPIO port identifier type */
  * @warning Not all pins are available on all ports - check device datasheet
  * @{
  */
-typedef uint16_t 		 gpio_pin_t;          /**< @brief GPIO pin bitmask type */
-#define GPIO_PIN_0     ((gpio_pin_t) 0x0001)  /**< @brief Pin 0 bitmask */
-#define GPIO_PIN_1     ((gpio_pin_t) 0x0002)  /**< @brief Pin 1 bitmask */
-#define GPIO_PIN_2     ((gpio_pin_t) 0x0004)  /**< @brief Pin 2 bitmask */
-#define GPIO_PIN_3     ((gpio_pin_t) 0x0008)  /**< @brief Pin 3 bitmask */
-#define GPIO_PIN_4     ((gpio_pin_t) 0x0010)  /**< @brief Pin 4 bitmask */
-#define GPIO_PIN_5     ((gpio_pin_t) 0x0020)  /**< @brief Pin 5 bitmask */
-#define GPIO_PIN_6     ((gpio_pin_t) 0x0040)  /**< @brief Pin 6 bitmask */
-#define GPIO_PIN_7     ((gpio_pin_t) 0x0080)  /**< @brief Pin 7 bitmask */
-#define GPIO_PIN_8     ((gpio_pin_t) 0x0100)  /**< @brief Pin 8 bitmask */
-#define GPIO_PIN_9     ((gpio_pin_t) 0x0200)  /**< @brief Pin 9 bitmask */
-#define GPIO_PIN_10    ((gpio_pin_t) 0x0400)  /**< @brief Pin 10 bitmask */
-#define GPIO_PIN_11    ((gpio_pin_t) 0x0800)  /**< @brief Pin 11 bitmask */
-#define GPIO_PIN_12    ((gpio_pin_t) 0x1000)  /**< @brief Pin 12 bitmask */
-#define GPIO_PIN_13    ((gpio_pin_t) 0x2000)  /**< @brief Pin 13 bitmask */
-#define GPIO_PIN_14    ((gpio_pin_t) 0x4000)  /**< @brief Pin 14 bitmask */
-#define GPIO_PIN_15    ((gpio_pin_t) 0x8000)  /**< @brief Pin 15 bitmask */
+/** @typedef GPIO pin bitmask type */
+typedef uint16_t				gpio_pin_t;
+ /** @brief No pins bitmask */
+#define GPIO_PIN_NONE			((gpio_pin_t) 0x0000)
+/** @brief Pin 0 bitmask */
+#define GPIO_PIN_0				((gpio_pin_t) 0x0001)
+/** @brief Pin 1 bitmask */
+#define GPIO_PIN_1				((gpio_pin_t) 0x0002)
+/** @brief Pin 2 bitmask */
+#define GPIO_PIN_2				((gpio_pin_t) 0x0004)
+/** @brief Pin 3 bitmask */
+#define GPIO_PIN_3				((gpio_pin_t) 0x0008)
+/** @brief Pin 4 bitmask */
+#define GPIO_PIN_4				((gpio_pin_t) 0x0010)
+/** @brief Pin 5 bitmask */
+#define GPIO_PIN_5				((gpio_pin_t) 0x0020)
+/** @brief Pin 6 bitmask */
+#define GPIO_PIN_6				((gpio_pin_t) 0x0040)
+/** @brief Pin 7 bitmask */
+#define GPIO_PIN_7				((gpio_pin_t) 0x0080)
+/** @brief Pin 8 bitmask */
+#define GPIO_PIN_8				((gpio_pin_t) 0x0100)
+/** @brief Pin 9 bitmask */
+#define GPIO_PIN_9				((gpio_pin_t) 0x0200)
+/** @brief Pin 10 bitmask */
+#define GPIO_PIN_10				((gpio_pin_t) 0x0400)
+/** @brief Pin 11 bitmask */
+#define GPIO_PIN_11				((gpio_pin_t) 0x0800)
+/** @brief Pin 12 bitmask */
+#define GPIO_PIN_12				((gpio_pin_t) 0x1000)
+/** @brief Pin 13 bitmask */
+#define GPIO_PIN_13				((gpio_pin_t) 0x2000)
+/** @brief Pin 14 bitmask */
+#define GPIO_PIN_14				((gpio_pin_t) 0x4000)
+/** @brief Pin 15 bitmask */
+#define GPIO_PIN_15				((gpio_pin_t) 0x8000)
+/** @brief All pins bitmask */
+#define GPIO_PIN_ALL			((gpio_pin_t) 0xFFFF)
 
-#define GPIO_PIN_ALL   ((gpio_pin_t) 0xFFFF)  /**< @brief All pins bitmask */
-#define GPIO_PIN_NONE  ((gpio_pin_t) 0x0000)  /**< @brief No pins bitmask */
+/** @} */ // 03_GPIO_Pins
 
-/** 
- * @} 
- */ // GPIO_Pins
-
-/*********************************************** GPIO Pin Mode Definitions ***********************************************/
+/*---------------------------------------------- GPIO Pin Mode Definitions ----------------------------------------------*/
 /**
  * @brief    GPIO pin operating modes
- * @ingroup  GPIO
- * @defgroup GPIO_Modes GPIO Pin Modes
+ * @ingroup  03_GPIO_Pins
+ * @defgroup 03_01_GPIO_PinModes GPIO Pin Modes
  * 
  * @details 
- * - The constants define the operational mode of GPIO_Pins 
+ * - The constants define the operational mode of GPIO Pins (@ref 03_GPIO_Pins) 
  * - The mode determines whether the pin is input/output and the output speed
  * 
  * @note Output speed affects both slew rate and power consumption
  * @see Reference Manual RM0008 - Section 9.1.1 GPIO port configuration
+ * 
  * @{
  */
-typedef uint8_t  				gpio_pin_mode_t;		  /**< @brief GPIO pin mode type */
-#define GPIO_MODE_INPUT         ((gpio_pin_mode_t) 0x00)  /**< @brief Input mode */
-#define GPIO_MODE_OUTPUT_10MHz  ((gpio_pin_mode_t) 0x01)  /**< @brief Output mode, max speed 10 MHz */
-#define GPIO_MODE_OUTPUT_2MHz   ((gpio_pin_mode_t) 0x02)  /**< @brief Output mode, max speed 2 MHz */
-#define GPIO_MODE_OUTPUT_50MHz  ((gpio_pin_mode_t) 0x03)  /**< @brief Output mode, max speed 50 MHz */
+/** @typedef gpio_pin_mode_t @brief GPIO Pin Mode */
+typedef uint8_t  				gpio_pin_mode_t;
+/** @brief Input mode */
+#define GPIO_MODE_INPUT			((gpio_pin_mode_t) 0x00)
+/** @brief Output mode, max speed 10 MHz */
+#define GPIO_MODE_OUTPUT_10MHz	((gpio_pin_mode_t) 0x01)
+/** @brief Output mode, max speed 2 MHz */
+#define GPIO_MODE_OUTPUT_2MHz	((gpio_pin_mode_t) 0x02)
+/** @brief Output mode, max speed 50 MHz */
+#define GPIO_MODE_OUTPUT_50MHz	((gpio_pin_mode_t) 0x03)
 
-/** 
- * @} 
- */ // GPIO_Modes
+/** @} */ // 03_01_GPIO_PinModes
 
-/*********************************************** GPIO Pin Configuration Definitions ***********************************************/
+/*---------------------------------------------- GPIO Pin Configuration Definitions ----------------------------------------------*/
 /**
  * @brief    GPIO pin configuration settings
- * @ingroup  GPIO
- * @defgroup GPIO_Configurations GPIO Pin Configurations
+ * @ingroup  03_GPIO_Pins
+ * @defgroup 03_02_GPIO_PinConfig GPIO Pin Configurations
  * 
  * @details 
  * - The constants define the electrical configuration of GPIO_Pins
  * - The configuration must be compatible with the selected mode
  * 
  * @warning Configuration must match mode:
- *          - Input modes: Use GPIO_PIN_CNF_IN_*  
- *          - Output modes: Use GPIO_PIN_CNF_OUT_*
+ *          - Input modes: Use `GPIO_PIN_CNF_IN_*`
+ *          - Output modes: Use `GPIO_PIN_CNF_OUT_*`
  * @see Reference Manual RM0008 - Section 9.1.1 GPIO port configuration
+ * 
  * @{
  */
-typedef uint8_t  				  gpio_pin_cnf_t;		   /**< @brief GPIO pin configuration type */
-#define GPIO_PIN_CNF_IN_ANALOG    ((gpio_pin_cnf_t) 0x00)  /**< @brief Analog input mode */
-#define GPIO_PIN_CNF_IN_FLOAT     ((gpio_pin_cnf_t) 0x01)  /**< @brief Floating input (no pull-up/down) */
-#define GPIO_PIN_CNF_IN_PULL_DOWN ((gpio_pin_cnf_t) 0x02)  /**< @brief Input with pull-down resistor */
-#define GPIO_PIN_CNF_IN_PULL_UP   ((gpio_pin_cnf_t) 0x03)  /**< @brief Input with pull-up resistor */
-#define GPIO_PIN_CNF_OUT_GP_PP    ((gpio_pin_cnf_t) 0x00)  /**< @brief General purpose output push-pull */
-#define GPIO_PIN_CNF_OUT_GP_OD    ((gpio_pin_cnf_t) 0x01)  /**< @brief General purpose output open-drain */
-#define GPIO_PIN_CNF_OUT_AF_PP    ((gpio_pin_cnf_t) 0x02)  /**< @brief Alternate function output push-pull */
-#define GPIO_PIN_CNF_OUT_AF_OD    ((gpio_pin_cnf_t) 0x03)  /**< @brief Alternate function output open-drain */
+/** @typedef gpio_pin_cnf_t GPIO Pin Configuration type */
+typedef uint8_t  				  gpio_pin_cnf_t;
+/** @brief Analog input mode */
+#define GPIO_PIN_CNF_IN_ANALOG    ((gpio_pin_cnf_t) 0x00)
+/** @brief Floating input (no pull-up/down) */
+#define GPIO_PIN_CNF_IN_FLOAT     ((gpio_pin_cnf_t) 0x01)
+/** @brief Input with pull-down resistor */
+#define GPIO_PIN_CNF_IN_PULL_DOWN ((gpio_pin_cnf_t) 0x02)
+/** @brief Input with pull-up resistor */
+#define GPIO_PIN_CNF_IN_PULL_UP   ((gpio_pin_cnf_t) 0x03)
+/** @brief General purpose output push-pull */
+#define GPIO_PIN_CNF_OUT_GP_PP    ((gpio_pin_cnf_t) 0x00)
+/** @brief General purpose output open-drain */
+#define GPIO_PIN_CNF_OUT_GP_OD    ((gpio_pin_cnf_t) 0x01)
+/** @brief Alternate function output push-pull */
+#define GPIO_PIN_CNF_OUT_AF_PP    ((gpio_pin_cnf_t) 0x02)
+/** @brief Alternate function output open-drain */
+#define GPIO_PIN_CNF_OUT_AF_OD    ((gpio_pin_cnf_t) 0x03)
 
-/** 
- * @}
- */ // GPIO_Configurations
+/** @} */ // 03_02_GPIO_PinConfig
 
-/*********************************************** GPIO External Interrupt Trigger Definitions ***********************************************/
+/*---------------------------------------------- GPIO External Interrupt Trigger Definitions ----------------------------------------------*/
 
 /**
- * @defgroup GPIO_EXTI_Triggers EXTI Trigger Types
  * @brief    External interrupt trigger configurations
+ * @defgroup 07_GPIO_EXTITriggers EXTI Trigger Types
  * @ingroup  GPIO
  * 
  * @details These constants define when an external interrupt should trigger.
@@ -156,20 +191,24 @@ typedef uint8_t  				  gpio_pin_cnf_t;		   /**< @brief GPIO pin configuration ty
  * @see Reference Manual RM0008 - Section 10.2.3 EXTI rising/falling trigger selection
  * @{
  */
-typedef uint8_t  					 gpio_exti_trigger_t;		 /**< @brief EXTI trigger type */
-#define GPIO_EXTI_TRIGGER_FALLING  ((gpio_exti_trigger_t) 0x01)  /**< @brief Trigger on falling edge */
-#define GPIO_EXTI_TRIGGER_RISING   ((gpio_exti_trigger_t) 0x02)  /**< @brief Trigger on rising edge */
-#define GPIO_EXTI_TRIGGER_BOTH     (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)  /**< @brief Trigger on both edges */
+/** @brief EXTI trigger type */
+typedef uint8_t						gpio_exti_trigger_t;
+/** @brief Trigger on falling edge */
+#define GPIO_EXTI_TRIGGER_FALLING  ((gpio_exti_trigger_t) 0x01)
+/** @brief Trigger on rising edge */
+#define GPIO_EXTI_TRIGGER_RISING   ((gpio_exti_trigger_t) 0x02)
+/** @brief Trigger on both edges */
+#define GPIO_EXTI_TRIGGER_BOTH     (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
 
 /** 
  * @}
- */ // GPIO_EXTI_Triggers
+ */ // 07_GPIO_EXTITriggers
 
-/*********************************************** GPIO EXTI Port Source Definitions ***********************************************/
+/*---------------------------------------------- GPIO EXTI Port Source Definitions ----------------------------------------------*/
 
 /**
- * @defgroup GPIO_EXTI_Ports EXTI Port Sources
  * @brief    EXTI port source selections
+ * @defgroup 08_GPIO_EXTIPorts EXTI Port Sources
  * @ingroup  GPIO
  * 
  * @details These constants define which GPIO port is connected to EXTI lines.
@@ -178,27 +217,35 @@ typedef uint8_t  					 gpio_exti_trigger_t;		 /**< @brief EXTI trigger type */
  * @see Reference Manual RM0008 - Section 9.2.5 AFIO_EXTICR1-4 registers
  * @{
  */
-typedef uint8_t  			gpio_exti_port_t;    	 /**< @brief EXTI port source type */
-#define GPIO_EXTI_PORT_A  ((gpio_exti_port_t) 0x00)  /**< @brief EXTI source: GPIO Port A */
-#define GPIO_EXTI_PORT_B  ((gpio_exti_port_t) 0x01)  /**< @brief EXTI source: GPIO Port B */
-#define GPIO_EXTI_PORT_C  ((gpio_exti_port_t) 0x02)  /**< @brief EXTI source: GPIO Port C */
-#define GPIO_EXTI_PORT_D  ((gpio_exti_port_t) 0x03)  /**< @brief EXTI source: GPIO Port D */
-#define GPIO_EXTI_PORT_E  ((gpio_exti_port_t) 0x04)  /**< @brief EXTI source: GPIO Port E */
-#define GPIO_EXTI_PORT_F  ((gpio_exti_port_t) 0x05)  /**< @brief EXTI source: GPIO Port F */
-#define GPIO_EXTI_PORT_G  ((gpio_exti_port_t) 0x06)  /**< @brief EXTI source: GPIO Port G */
+/** @brief EXTI port source type */
+typedef uint8_t  			gpio_exti_port_t;
+/** @brief EXTI source: GPIO Port A */
+#define GPIO_EXTI_PORT_A  ((gpio_exti_port_t) 0x00)
+/** @brief EXTI source: GPIO Port B */
+#define GPIO_EXTI_PORT_B  ((gpio_exti_port_t) 0x01)
+/** @brief EXTI source: GPIO Port C */
+#define GPIO_EXTI_PORT_C  ((gpio_exti_port_t) 0x02)
+/** @brief EXTI source: GPIO Port D */
+#define GPIO_EXTI_PORT_D  ((gpio_exti_port_t) 0x03)
+/** @brief EXTI source: GPIO Port E */
+#define GPIO_EXTI_PORT_E  ((gpio_exti_port_t) 0x04)
+/** @brief EXTI source: GPIO Port F */
+#define GPIO_EXTI_PORT_F  ((gpio_exti_port_t) 0x05)
+/** @brief EXTI source: GPIO Port G */
+#define GPIO_EXTI_PORT_G  ((gpio_exti_port_t) 0x06)
 
 /** 
  * @}
- */ // GPIO_EXTI_Ports
+ */ // 08_GPIO_EXTIPorts
 
-/*********************************************** GPIO Configuration Structure ***********************************************/
+/*---------------------------------------------- GPIO Configuration Structure ----------------------------------------------*/
 
-/*********************************************** GPIO Configuration Structure ***********************************************/
+/*---------------------------------------------- GPIO Configuration Structure ----------------------------------------------*/
 
 /**
  * @brief    GPIO configuration data structures
+ * @defgroup 09_GPIO_Config GPIO Configuration Structure
  * @ingroup  GPIO
- * @defgroup GPIO_ConfigStruct GPIO Configuration Structure
  * @{
  */
 
@@ -293,14 +340,18 @@ typedef struct
 	/**
 	 * @brief Pin selection bitmask
 	 * 
-	 * GPIO_PIN_0   - Pin 0
-	 * GPIO_PIN_1   - Pin 1
+	 * `GPIO_PIN_0`: Pin 0
+	 * `GPIO_PIN_1`: Pin 1
 	 * ...
-	 * GPIO_PIN_15  - Pin 15
-	 * GPIO_PIN_ALL - All pins
-	 * GPIO_PIN_NONE - No pins
+	 * `GPIO_PIN_15`: Pin 15
+	 * `GPIO_PIN_ALL`: All pins
+	 * `GPIO_PIN_NONE`: No pins
 	 * 
-	 * Multiple pins: GPIO_PIN_5 | GPIO_PIN_6
+	 * @example
+	 * @code
+	 * .pin = `GPIO_PIN_5` | `GPIO_PIN_6`;
+	 * @endcond
+	 * @ref 04_GPIO_Pins
 	 */
 	gpio_pin_t pin;
 	
@@ -311,6 +362,8 @@ typedef struct
 	 * GPIO_MODE_OUTPUT_10MHz - Output 10MHz
 	 * GPIO_MODE_OUTPUT_2MHz  - Output 2MHz
 	 * GPIO_MODE_OUTPUT_50MHz - Output 50MHz
+	 * 
+	 * @ref 03_01_GPIO_PinModes
 	 */
 	gpio_pin_mode_t mode : 2;
 	
@@ -336,6 +389,6 @@ typedef struct
 
 /** 
  * @}
- */ // GPIO_ConfigStruct
+ */ // 09_GPIO_Config
 
-#endif /* GPIO_TYPES */
+#endif /* GPIO_TYPES_H_ */
