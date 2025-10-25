@@ -124,15 +124,13 @@ extern "C" {
 typedef struct _GPIO_TypeDef
 {
 	/**
-	 * @brief GPIO Port Configuration Register Low (CRL): 
-	 * Configures pins 0-7 for mode and output type/speed
+	 * @section GPIO_Typdef_CRL GPIO Port Configuration Register Low (CRL)
+	 * @brief [R/W] Configures pins 0-7 for mode and output type/speed
 	 * @details
 	 * - Each pin uses 4 bits: 2 for MODE, 2 for CNF
 	 * - Pins are configured sequentially from bit 0 to bit 31
 	 * - Reset value: 0x4444 4444 (All pins in input floating mode)
-	 * - @see @ref GPIO_Pins_Mode "GPIO Pin Mode"
-	 * - @see @ref GPIO_Pins_Config "GPIO Pin Configuration"
-	 * - @see @ref GPIO_Pins_Summary "GPIO Pin Summary"
+	 * - @see @ref GPIO_Pins_Mode "GPIO Pin Mode" | @ref GPIO_Pins_Config "GPIO Pin Configuration" | @ref GPIO_Pins_Summary "GPIO Pin Summary"
 	 */
 	union GPIO_CRL
 	{
@@ -159,16 +157,14 @@ typedef struct _GPIO_TypeDef
 	} CRL;
 
 	/**
-	 * @brief GPIO Port Configuration Register High (CRH): 
-	 * Configures pins 8-15 for mode and output type/speed
+	 * @section GPIO_Typdef_CRH GPIO Port Configuration Register High (CRH)
+	 * @brief [R/W] Configures pins 8-15 for mode and output type/speed
 	 * @details Configures pins 8-15 for mode and output type/speed
+	 * - Same bit structure as CRL but for higher pins
 	 * - Each pin uses 4 bits: 2 for MODE, 2 for CNF  
 	 * - Pins are configured sequentially from bit 0 to bit 31
-	 * - Reset value: `0x44444444` (All pins in input floating mode)
-	 * - Same bit structure as CRL but for higher pins
-	 * @addtogroup 01_GPIO_RegisterMap_PinMode 
-	 * @addtogroup 01_GPIO_RegisterMap_PinConfig
-	 * @addtogroup 01_GPIO_RegisterMap_PinSummary
+	 * - Reset value: 0x4444 4444 (All pins in input floating mode)
+	 * - @see @ref GPIO_Pins_Mode "GPIO Pin Mode" | @ref GPIO_Pins_Config "GPIO Pin Configuration" | @ref GPIO_Pins_Summary "GPIO Pin Summary"
 	 */
 	union GPIO_CRH
 	{
@@ -195,7 +191,8 @@ typedef struct _GPIO_TypeDef
 	} CRH;
 
 	/**
-	 * @brief GPIO Port Input Data Register (IDR)
+	 * @section GPIO_Typdef_IDR GPIO Port Input Data Register (IDR)
+	 * @brief [R] Current State of GPIO Pins
 	 * @details Read-only register containing current state of input pins
 	 * - Each bit represents the logic level on the corresponding GPIO pin
 	 * - Only valid for pins configured as input
@@ -229,7 +226,8 @@ typedef struct _GPIO_TypeDef
 	} IDR;
 
 	/**
-	 * @brief GPIO Port Output Data Register (ODR)
+	 * @section GPIO_Typdef_ODR GPIO Port Output Data Register (ODR)
+	 * @brief [W] Output State of GPIO Pins
 	 * @details Sets output state for pins configured as output
 	 * - Each bit sets the logic level for the corresponding GPIO pin
 	 * - Only effective for pins configured as output
@@ -264,8 +262,9 @@ typedef struct _GPIO_TypeDef
 	} ODR;
 
 	/**
-	 * @brief GPIO Port Bit Set/Reset Register (BSRR)
-	 * @details Atomic set/reset operations (bits 0-15 set, bits 16-31 reset)
+	 * @section GPIO_Typdef_BSRR GPIO Port Bit Set/Reset Register (BSRR)
+	 * @brief [W] Atomic Set (0-15) + Atomic Reset (16-31) GPIO Pins
+	 * @details
 	 * - Write-only register for atomic pin control
 	 * - Bits 0-15: Set corresponding pin (write 1 to set high)
 	 * - Bits 16-31: Reset corresponding pin (write 1 to set low)
@@ -315,8 +314,9 @@ typedef struct _GPIO_TypeDef
 	} BSRR;
 
 	/**
-	 * @brief GPIO Port Bit Reset Register (BRR)
-	 * @details Reset-only register (alternative to BSRR reset bits)
+	 * @section GPIO_Typdef_BRR GPIO Port Bit Reset Register (BRR)
+	 * @brief [W] Atomic Reset for GPIO Pins
+	 * @details
 	 * - Write-only register for resetting pins
 	 * - Each bit resets the corresponding GPIO pin (write 1 to set low)
 	 * - Bits 16-31 are reserved and should be written as 0
@@ -350,8 +350,9 @@ typedef struct _GPIO_TypeDef
 	} BRR;
 
 	/**
-	 * @brief GPIO Port Configuration Lock Register (LCKR)
-	 * @details Locks pin configuration until next reset
+	 * @section GPIO_Typdef_LCKR GPIO Port Configuration Lock Register (LCKR)
+	 * @brief [W] Locks pin configuration until next reset
+	 * @details
 	 * - Prevents accidental modification of GPIO configuration
 	 * - Lock sequence: Write 1→0→1 to LCKK, then read LCKK until it becomes 1
 	 * - Once locked, CRL/CRH registers become read-only until reset

@@ -28,21 +28,17 @@ extern "C" {
 /*---------------------------------------------- Includes ----------------------------------------------*/
 #include "gpio_types.h"
 
-/*---------------------------------------------- Macros ----------------------------------------------*/
-#define GPIO_CLK_POS(GPIOx)						BIT_POS(GPIOx, GPIOA, GPIO_TypeDef)
-
 /*---------------------------------------------- GPIO Clock Control ----------------------------------------------*/
 /**
  * @section GPIO_LL_ClockAPI
- * @defgroup GPIO_LL_Clock GPIO LL Clock Control
+ * @defgroup 01_GPIO_LL_Clock GPIO Clock APIs
  * @ingroup GPIO_LL
- * @brief Direct RCC register access for GPIO clocks.
+ * @brief Direct RCC register access for GPIO clocks
  * @{
  */
 
 /**
  * @brief Enable GPIO peripheral clock
- *
  * @param[in] gpio Target GPIO port (`GPIOA` – `GPIOG`)
  */
 __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const gpio)
@@ -52,7 +48,6 @@ __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const gpio)
 
 /**
  * @brief Disable GPIO peripheral clock
- *
  * @param[in] gpio Target GPIO port (`GPIOA` – `GPIOG`)
  */
 __STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const gpio)
@@ -60,21 +55,20 @@ __STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const gpio)
 	RCC->APB2ENR.REG &= ~(0x01U << (RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(gpio)));
 }
 
-/** @} */ // GPIO_LL_Clock
+/** @} */ // 01_GPIO_LL_Clock
 
 /*---------------------------------------------- GPIO Configuration ----------------------------------------------*/
 /**
- * @defgroup GPIO_LL_Config GPIO LL Configuration
+ * @defgroup 02_GPIO_LL_CRx GPIO Configuration Register APIs
  * @ingroup GPIO_LL
  * @brief Direct pin mode and configuration access (CRL/CRH)
  * @{
  */
 
 /**
- * @brief Read CRL
- * @param[in] GPIOx    Target GPIO port
- * @returns CRL
- * 
+ * @brief 				Reads @ref GPIO_Typdef_CRL "CRL"
+ * @param[in] GPIOx		Target GPIO port
+ * @returns				CRL
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_ReadCRL(const GPIO_TypeDef* const GPIOx)
@@ -83,10 +77,9 @@ __STATIC_FORCEINLINE uint32_t _GPIO_ReadCRL(const GPIO_TypeDef* const GPIOx)
 }
 
 /**
- * @brief				Writes CRL
+ * @brief				Writes @ref GPIO_Typdef_CRL "CRL"
  * @param[in] GPIOx		Target GPIO port
  * @param[in] value		Updated Value to be written
- * 
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
 __STATIC_FORCEINLINE void _GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -95,10 +88,9 @@ __STATIC_FORCEINLINE void _GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint32
 }
 
 /**
- * @brief				Read CRH
+ * @brief				Reads @ref GPIO_Typdef_CRH "CRH"
  * @param[in] GPIOx		Target GPIO port 
  * @returns				CRH
- * 
  * @ref GPIO_Pins_Summary "GPIO Pin Summary" 
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_ReadCRH(const GPIO_TypeDef* const GPIOx)
@@ -107,11 +99,9 @@ __STATIC_FORCEINLINE uint32_t _GPIO_ReadCRH(const GPIO_TypeDef* const GPIOx)
 }
 
 /**
- * @brief				Writes CRH
- *
+ * @brief				Writes @ref GPIO_Typdef_CRH "CRH"
  * @param[in] GPIOx		Target GPIO port
  * @param[in] value		Updated Value to be written
- * 
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
 __STATIC_FORCEINLINE void _GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -119,117 +109,86 @@ __STATIC_FORCEINLINE void _GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint32
 	GPIOx->CRH.REG = value;
 }
 
-/** @} */ // GPIO_LL_Config
+/** @} */ // 02_GPIO_LL_CRx
 
 /*---------------------------------------------- GPIO Output Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_LL_Output GPIO LL Output
+ * @defgroup 03_GPIO_LL_Output GPIO Output APIs
  * @ingroup GPIO_LL
- * @brief Atomic pin and port write operations
- * 
+ * @brief Output write operations
  * @{
  */
 
 /**
- * @brief Sets specified GPIO pin
- *
- * @param[in] GPIOx Target GPIO port
- * @param[in] pin   Pin Number
- */
-__STATIC_FORCEINLINE void _GPIO_SetPin(GPIO_TypeDef *GPIOx, const uint8_t pin)
-{
-	GPIOx->BSRR.REG |= (uint32_t)(0x01UL << pin);
-}
-
-/**
- * @brief Toggles output pin
- *
- * @param[in] GPIOx Target GPIO port
- * @param[in] pin   Pin Number
- */
-__STATIC_FORCEINLINE void _GPIO_TogglePin(GPIO_TypeDef* const GPIOx, const uint8_t pin)
-{
-	GPIOx->ODR.REG ^= (uint32_t)(0x01UL <<pin);
-}
-
-/**
- * @brief Writes an entire pattern to GPIO Port
- *
+ * @brief Writes an entire pattern to @ref GPIO_Typdef_ODR "ODR"
  * @param[in] GPIOx Target GPIO port
  * @param[in] value 32-bit port output value
  */
-__STATIC_FORCEINLINE void _GPIO_WritePort(GPIO_TypeDef* const GPIOx, const uint32_t value)
+__STATIC_FORCEINLINE void _GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
 	GPIOx->ODR.REG = value;
 }
 
-/** @} */ // GPIO_LL_Output
+/**
+ * @brief Writes an entire pattern to @ref GPIO_Typdef_BSRR "BSRR"
+ * @param[in] GPIOx Target GPIO port
+ * @param[in] value 32-bit port output value
+ */
+__STATIC_FORCEINLINE void _GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BSRR.REG = value;
+}
+
+/**
+ * @brief Writes an entire pattern to @ref GPIO_Typdef_BRR "BRR"
+ * @param[in] GPIOx Target GPIO port
+ * @param[in] value 32-bit port output value
+ */
+__STATIC_FORCEINLINE void _GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BRR.REG = value;
+}
+
+/** @} */ // 03_GPIO_LL_Output
 
 /*---------------------------------------------- GPIO Input Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_LL_Input GPIO LL Input
+ * @defgroup 04_GPIO_LL_Input GPIO Input APIs
  * @ingroup GPIO_LL
  * @brief Reads current input state from GPIO pins
  * @{
  */
 
 /**
- * @brief Get specified GPIO pin status
- *
+ * @brief Reads an entire pattern from IDR
  * @param[in] GPIOx Target GPIO port
- * @param[in] pin   Pin Number
- * 
- * @returns Status of GPIO Pin:
- * @returns - `0x00`: GPIO Pin Reset 
- * @returns - `0x01`: GPIO Pin Set 
+ * @returns Status of GPIO Input
  */
-__STATIC_FORCEINLINE uint8_t _GPIO_GetPin(GPIO_TypeDef *GPIOx, const uint8_t pin)
-{
-	return ((uint8_t)((GPIOx->IDR.REG >> pin) & 0x01));
-}
- 
-/**
- * @brief Gets entire pattern of GPIO Port
- * @param[in] GPIOx Target GPIO port
- * @returns Status of GPIO Port
- */
-__STATIC_FORCEINLINE uint32_t _GPIO_GetPort(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE uint32_t _GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t)(GPIOx->IDR.REG);
 }
 
-/** @} */ // GPIO_LL_Input
+/** @} */ // 04_GPIO_LL_Input
 
-/*---------------------------------------------- GPIO Pull Control ----------------------------------------------*/
+/*---------------------------------------------- GPIO Lock Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_LL_Pull GPIO LL Pull Control
+ * @defgroup 05_GPIO_LL_Lock GPIO Lock APIs
  * @ingroup GPIO_LL
- * @brief Configure internal pull-up/pull-down resistors.
+ * @brief Locks the state of GPIO pins until next reset
  * @{
  */
 
 /**
- * @brief Enables pull-up resistor on selected pins
+ * @brief Writes an entire pattern from @ref GPIO_Typdef_LCKR "LCKR"
  * @param[in] GPIOx Target GPIO port
- * @param[in] pin   Bitmask of pins
  */
-__STATIC_FORCEINLINE void _GPIO_SetPullUp(GPIO_TypeDef* const GPIOx, const uint8_t pin)
+__STATIC_FORCEINLINE uint32_t _GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
-	GPIOx->BSRR.REG |= (uint32_t)(0x01UL << pin);
-}
+	GPIOx->LCKR.REG = value;
+} 
 
-/**
- * @brief Enables pull-down resistor on selected pins
- * @param[in] GPIOx Target GPIO port
- * @param[in] pin   Bitmask of pins
- */
-__STATIC_FORCEINLINE void _GPIO_SetPullDown(GPIO_TypeDef* const GPIOx, const uint8_t pin)
-{
-	GPIOx->BRR.REG |= (uint32_t)(0x01UL << pin);
-}
-
-/** @} */ // GPIO_LL_Pull
-
+/** @} */ // 05_GPIO_LL_Lock
 
 #ifdef __cplusplus
 }
