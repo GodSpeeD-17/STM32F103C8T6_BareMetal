@@ -2,10 +2,10 @@
 #include "gpio.h"
 
 /*********************************************** MACROs ***********************************************/
-#define IS_PULL_CONFIG(cfg) 		((cfg) == GPIO_PIN_CNF_IN_PULL_UP || (cfg) == GPIO_PIN_CNF_IN_PULL_DOWN)
-#define GPIO_CRL_UPDATED 			((uint8_t) 0x01)
-#define GPIO_CRH_UPDATED 			((uint8_t) 0x02)
-#define GPIO_ODR_UPDATED 			((uint8_t) 0x04)
+#define IS_PULL_CONFIG(cfg) ((cfg) == GPIO_PIN_CNF_IN_PULL_UP || (cfg) == GPIO_PIN_CNF_IN_PULL_DOWN)
+#define GPIO_CRL_UPDATED ((uint8_t)0x01)
+#define GPIO_CRH_UPDATED ((uint8_t)0x02)
+#define GPIO_ODR_UPDATED ((uint8_t)0x04)
 
 /*********************************************** Driver APIs ***********************************************/
 /**
@@ -16,16 +16,19 @@
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfig)
+{
 	// Validate GPIO Port Support on Hardware
-	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
-	if(GPIOx == NULL){
+	GPIO_TypeDef *GPIOx = __GPIO_getPort__(gpio);
+	if (GPIOx == NULL)
+	{
 		return DRIVER_FAIL;
 	}
 	// Enable Clock for GPIO Port
 	__GPIO_enableClock__(gpio);
 	// Enable AFIO Clock
-	if((gpioConfig->config == GPIO_PIN_CNF_OUT_AF_PP) || (gpioConfig->config == GPIO_PIN_CNF_OUT_AF_OD)){
+	if ((gpioConfig->config == GPIO_PIN_CNF_OUT_AF_PP) || (gpioConfig->config == GPIO_PIN_CNF_OUT_AF_OD))
+	{
 		RCC_AFIO_Clk_Enable();
 	}
 	// Local Variables
@@ -35,21 +38,25 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 	gpio_pin_t pinMask = gpioConfig->pin;
 	uint8_t regStatus = 0x00;
 	// Configure Each Pin
-	while(pinMask){
-		// Extract only the 1st bit set from LSB 
-		gpio_pin_t currentPin = (gpio_pin_t) (pinMask & -pinMask);
+	while (pinMask)
+	{
+		// Extract only the 1st bit set from LSB
+		gpio_pin_t currentPin = (gpio_pin_t)(pinMask & -pinMask);
 		// Configure the Control Register High
-		if(__GPIO_getPin__(currentPin) > 7){
+		if (__GPIO_getPin__(currentPin) > 7)
+		{
 			__GPIO_updateCtrlRegister__(currentPin, gpioConfig->mode, gpioConfig->config, &gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		// Configure the Control Register Low
-		else{
+		else
+		{
 			__GPIO_updateCtrlRegister__(currentPin, gpioConfig->mode, gpioConfig->config, &gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Pull-Up or Pull-Down Configuration
-		if((gpioConfig->mode == GPIO_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config))){
+		if ((gpioConfig->mode == GPIO_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config)))
+		{
 			__GPIO_updatePullConfig__(currentPin, gpioConfig->config, &gpioX_ODR);
 			regStatus |= GPIO_ODR_UPDATED;
 		}
@@ -57,11 +64,11 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 		pinMask &= ~currentPin;
 	}
 	// Write the data back to Registers
-	if(regStatus & GPIO_CRH_UPDATED)
+	if (regStatus & GPIO_CRH_UPDATED)
 		GPIOx->CRH.REG = gpioX_CRH;
-	if(regStatus & GPIO_CRL_UPDATED)
+	if (regStatus & GPIO_CRL_UPDATED)
 		GPIOx->CRL.REG = gpioX_CRL;
-	if(regStatus & GPIO_ODR_UPDATED)
+	if (regStatus & GPIO_ODR_UPDATED)
 		GPIOx->ODR.REG = gpioX_ODR;
 	// Return Success
 	return DRIVER_SUCCESS;
@@ -75,10 +82,12 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioConfig){
+driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t *const gpioConfig)
+{
 	// Validate GPIO Port Support on Hardware
-	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
-	if(GPIOx == NULL){
+	GPIO_TypeDef *GPIOx = __GPIO_getPort__(gpio);
+	if (GPIOx == NULL)
+	{
 		return DRIVER_FAIL;
 	}
 	// Local Variables
@@ -88,21 +97,25 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioCon
 	gpio_pin_t pinMask = gpioConfig->pin;
 	uint8_t regStatus = 0x00;
 	// Configure Each Pin
-	while(pinMask){
-		// Extract only the 1st bit set from LSB 
-		gpio_pin_t currentPin = (gpio_pin_t) (pinMask & -pinMask);
+	while (pinMask)
+	{
+		// Extract only the 1st bit set from LSB
+		gpio_pin_t currentPin = (gpio_pin_t)(pinMask & -pinMask);
 		// Configure the Control Register High
-		if(__GPIO_getPin__(currentPin) > 7){
+		if (__GPIO_getPin__(currentPin) > 7)
+		{
 			__GPIO_resetCtrlRegister__(currentPin, &gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		// Configure the Control Register Low
-		else{
+		else
+		{
 			__GPIO_resetCtrlRegister__(currentPin, &gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Pull-Up or Pull-Down Configuration
-		if((gpioConfig->mode == GPIO_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config))){
+		if ((gpioConfig->mode == GPIO_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config)))
+		{
 			__GPIO_resetPullConfig__(currentPin, &gpioX_ODR);
 			regStatus |= GPIO_ODR_UPDATED;
 		}
@@ -110,11 +123,11 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioCon
 		pinMask &= ~currentPin;
 	}
 	// Write the data back to Registers
-	if(regStatus & GPIO_CRH_UPDATED)
+	if (regStatus & GPIO_CRH_UPDATED)
 		GPIOx->CRH.REG = gpioX_CRH;
-	if(regStatus & GPIO_CRL_UPDATED)
+	if (regStatus & GPIO_CRL_UPDATED)
 		GPIOx->CRL.REG = gpioX_CRL;
-	if(regStatus & GPIO_ODR_UPDATED)
+	if (regStatus & GPIO_ODR_UPDATED)
 		GPIOx->ODR.REG = gpioX_ODR;
 	return DRIVER_SUCCESS;
 }
@@ -127,10 +140,12 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t* const gpioCon
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* gpioConfig){
+driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t *gpioConfig)
+{
 	// Validate GPIO Port Support on Hardware
-	GPIO_TypeDef* GPIOx = __GPIO_getPort__(gpio);
-	if(GPIOx == NULL){
+	GPIO_TypeDef *GPIOx = __GPIO_getPort__(gpio);
+	if (GPIOx == NULL)
+	{
 		return DRIVER_FAIL;
 	}
 	// Update the GPIO Configuration Structure for LED
@@ -146,11 +161,13 @@ driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* gpioConfig)
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t OB_LED_Init(void){
+driver_status_t OB_LED_Init(void)
+{
 	// On-board (OB) LED Configuration Structure
-	gpio_config_t obLedConfig = {
+	gpio_config_t obLedConfig = 
+	{
 		.pin = GPIO_PIN_OB_LED,
-		.mode = GPIO_MODE_OUTPUT_2MHz, // Refer datasheet for this speed selection
+		.mode = GPIO_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
 		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
@@ -163,11 +180,13 @@ driver_status_t OB_LED_Init(void){
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t OB_LED_Deinit(void){
+driver_status_t OB_LED_Deinit(void)
+{
 	// On-board (OB) LED Configuration Structure
-	gpio_config_t obLedConfig = {
+	gpio_config_t obLedConfig = 
+	{
 		.pin = GPIO_PIN_OB_LED,
-		.mode = GPIO_MODE_OUTPUT_2MHz, // Refer datasheet for this speed selection
+		.mode = GPIO_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
 		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()

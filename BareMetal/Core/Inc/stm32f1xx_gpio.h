@@ -29,38 +29,24 @@ extern "C" {
 #include <stdint.h>
 
 /**
- * @defgroup 01_GPIO_RegisterMap GPIO Register
- * @ingroup  GPIO
- * @brief    GPIO Registers
- * @details
- * - This structure represents the complete register set for a single GPIO port.
- * - It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
- * @note The structure uses unions to provide both bit-level and register-level access
- * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
- * 
- * @{
- */
-
-/**
  * @addtogroup 03_01_GPIO_PinModes
+ * 
  * @{
  * 
  * @details
- * @section Mode Description
- * - Defines the GPIO Pin Configuration
- * - Defines whether the pin to be either Input or Output@slewrate [MHz]
+ * @section GPIO_Pins_Mode Pin Mode Description
+ * - Defines the GPIO Pin Mode: Input / Output
+ * - Pattern: Input or Output@slewrate [MHz]
  * - `MODEx` settings:  
  *
- * | MODEx | Mode | Description |
- * |-------|------|-------------|
- * | 00    | Input | Input mode (reset state) |
- * | 01    | Output 10MHz | Output mode, max speed 10 MHz |
- * | 02    | Output 2MHz  | Output mode, max speed 2 MHz  |
- * | 03    | Output 50MHz | Output mode, max speed 50 MHz |
+ *   | MODEx | Mode | Description |
+ *   |-------|------|-------------|
+ *   | 00    | Input | Input mode (reset state) |
+ *   | 01    | Output 10MHz | Output mode, max speed 10 MHz |
+ *   | 02    | Output 2MHz  | Output mode, max speed 2 MHz  |
+ *   | 03    | Output 50MHz | Output mode, max speed 50 MHz |
  * 
- * - Defines the GPIO Pin Mode
- * - GPIO Pin Configuration already defines the pin to be either Input or Output
- * - This defines more in depth about GPIO settings
+
  * 
  * @}
  */ 
@@ -69,21 +55,20 @@ extern "C" {
  * @addtogroup 03_02_GPIO_PinConfig
  * 
  * @{
- * 
  * @details
- * @section Pin Configuration Description
- * - Determines if the GPIO Usage as per `MODEx`
+ * @section GPIO_Pins_Config Pin Configuration Description
+ * - Defines the GPIO Pin Configuration: Analog, Alternate Function, ...
+ * - Defines exact functionality of GPIO
+ * - `CNFx` Settings: ( )
  * 
- * - `CNFx` Settings:  
- *
- * Input Mode: (`CNFx` == `0x00`)  
+ * Input Mode: ( @ref GPIO_Pins_Mode "MODEx" == `0x00`)  
  * | CNFx  | Configuration | Description |
  * |-------|---------------|-------------|
  * | 00    | Analog        | Analog mode |
  * | 01    | Floating      | Floating input (reset state) |
  * | 10    | Pull-up/down  | Input with pull-up or pull-down |
  *
- * Output Mode: (`CNFx` != `0x00`)  
+ * Output Mode: (@ref GPIO_Pins_Mode "MODEx" != `0x00`)  
  * | CNFx  | Configuration | Description |
  * |-------|---------------|-------------|
  * | 00    | Push-pull     | General purpose output push-pull |
@@ -95,15 +80,14 @@ extern "C" {
  */ 
  
 /** 
- * @section 01_GPIO_RegisterMap_PinSummary GPIO Pin Configuration Summary
+ * @addtogroup 03_GPIO_Pins 03_01_GPIO_PinModes 03_02_GPIO_PinConfig
  * 
  * @{
  * 
- * @section Summary of Configuration
  * @details
- * Combined Summary:  
+ * @section GPIO_Pins_Summary Summary of Configuration
  *
- * | MODE[1:0] | CNF[1:0] | Configuration | Description |
+ * | @ref GPIO_Pins_Mode "MODEx" | @ref GPIO_Pins_Config "CNFx" | Configuration | Description |
  * |-----------|----------|---------------|-------------|
  * | 00 | 00 | Input Analog | Analog input mode |
  * | 00 | 01 | Input Floating | Floating input (reset state) |
@@ -124,7 +108,20 @@ extern "C" {
  * 
  * @}
  * 
- */  
+ */
+
+/**
+ * @defgroup 01_GPIO_RegisterMap GPIO Register
+ * @ingroup  GPIO
+ * @brief    GPIO Registers
+ * @details GPIO_Pins_Summary
+ * - This structure represents the complete register set for a single GPIO port.
+ * - It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
+ * @note The structure uses unions to provide both bit-level and register-level access
+ * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
+ * 
+ * @{
+ */
 
 typedef struct _GPIO_TypeDef
 {
@@ -135,9 +132,9 @@ typedef struct _GPIO_TypeDef
 	 * - Each pin uses 4 bits: 2 for MODE, 2 for CNF
 	 * - Pins are configured sequentially from bit 0 to bit 31
 	 * - Reset value: 0x4444 4444 (All pins in input floating mode)
-	 * @addtogroup 01_GPIO_RegisterMap_PinMode 
-	 * @addtogroup 01_GPIO_RegisterMap_PinConfig 
-	 * @addtogroup 01_GPIO_RegisterMap_PinSummary
+	 * - @see @ref GPIO_Pins_Mode "GPIO Pin Mode"
+	 * - @see @ref GPIO_Pins_Config "GPIO Pin Configuration"
+	 * - @see @ref GPIO_Pins_Summary "GPIO Pin Summary"
 	 */
 	union GPIO_CRL
 	{

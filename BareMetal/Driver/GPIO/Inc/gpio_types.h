@@ -25,10 +25,10 @@
 /*---------------------------------------------- GPIO Port Definitions ----------------------------------------------*/
 
 /**
- * @brief    Available GPIO ports on STM32F103C8T6
+ * @brief    API used GPIO ports on STM32F103C8T6
  * @defgroup 02_GPIO_Ports GPIO Port
  * @ingroup  GPIO
- * 
+ * @section GPIO Ports: API
  * @details These constants identify specific GPIO ports. 
  * 			Not all ports may be available on all STM32F1xx variants. 
  * 			STM32F103C8T6 has ports A, B, and C fully available.
@@ -37,7 +37,7 @@
  * 
  * @{
  */
-/** @brief GPIO port identifier type */
+/** @typedef gpio_port_t GPIO port identifier type */
 typedef uint8_t  	   gpio_port_t;
 /** @brief GPIO Port A */
 #define GPIO_PORT_A    ((gpio_port_t) 0x00)
@@ -54,7 +54,7 @@ typedef uint8_t  	   gpio_port_t;
 /** @brief GPIO Port G */
 #define GPIO_PORT_G    ((gpio_port_t) 0x06)
 
-/** @} */ // 03_GPIO_Ports
+/** @} */ // 02_GPIO_Ports
 
 /*---------------------------------------------- GPIO Pin Definitions ----------------------------------------------*/
 /**
