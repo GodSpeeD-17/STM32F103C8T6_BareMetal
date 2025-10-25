@@ -386,7 +386,7 @@
 		"note"
 	],
 	"C_Cpp.doxygen.generateOnType": true,
-	"doxdocgen.generic.paramTemplate": "@param {param} description\n\t@par \\c `VALUE1` \n\t@par \\c `VALUE2`\n",
+	// "doxdocgen.generic.paramTemplate": "@param {param} description\n\t@par \\c `VALUE1` \n\t@par \\c `VALUE2`\n",
 	"C_Cpp.autoAddFileAssociations": true,
 	"C_Cpp.autocomplete": "default",
 	"C_Cpp.enhancedColorization": "enabled",

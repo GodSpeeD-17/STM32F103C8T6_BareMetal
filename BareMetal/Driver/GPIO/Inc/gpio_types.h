@@ -37,22 +37,22 @@
  * 
  * @{
  */
-/** @typedef gpio_port_t GPIO port identifier type */
+/** @typedef gpio_port_t @brief GPIO port identifier type */
 typedef uint8_t  	   gpio_port_t;
 /** @brief GPIO Port A */
-#define GPIO_PORT_A    ((gpio_port_t) 0x00)
+#define GPIO_PORT_A    ((gpio_port_t) 0x01)
 /** @brief GPIO Port B */
-#define GPIO_PORT_B    ((gpio_port_t) 0x01)
+#define GPIO_PORT_B    ((gpio_port_t) 0x02)
 /** @brief GPIO Port C */
-#define GPIO_PORT_C    ((gpio_port_t) 0x02)
+#define GPIO_PORT_C    ((gpio_port_t) 0x04)
 /** @brief GPIO Port D */
-#define GPIO_PORT_D    ((gpio_port_t) 0x03)
+#define GPIO_PORT_D    ((gpio_port_t) 0x08)
 /** @brief GPIO Port E */
-#define GPIO_PORT_E    ((gpio_port_t) 0x04)
+#define GPIO_PORT_E    ((gpio_port_t) 0x10)
 /** @brief GPIO Port F */
-#define GPIO_PORT_F    ((gpio_port_t) 0x05)
+#define GPIO_PORT_F    ((gpio_port_t) 0x20)
 /** @brief GPIO Port G */
-#define GPIO_PORT_G    ((gpio_port_t) 0x06)
+#define GPIO_PORT_G    ((gpio_port_t) 0x40)
 
 /** @} */ // 02_GPIO_Ports
 

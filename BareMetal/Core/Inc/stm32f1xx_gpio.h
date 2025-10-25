@@ -46,8 +46,6 @@ extern "C" {
  *   | 02    | Output 2MHz  | Output mode, max speed 2 MHz  |
  *   | 03    | Output 50MHz | Output mode, max speed 50 MHz |
  * 
-
- * 
  * @}
  */ 
 

@@ -4,37 +4,6 @@
  * @version v1.2
  * @date    21-10-2025
  *
- ******************************************************************************************************************
- *	Basic Notes:-
- *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
- *	`uint32_t` inside every BIT struct because of padding alignment
- *	`volatile` used for ensuring no further optimization by compiler
- *	`: x` indicates only x bit(s) to be used from that 32-bit
- ****************************************************************************************************************
- *                            🔧 Bit Manipulation Built-ins (GCC)
- * -------------------------------------------------------------------------------------
- * | Built-in Function        | Description                                           |
- * |--------------------------|--------------------------------------------------------|
- * | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
- * | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
- * | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
- * | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
- * | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
- * | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
- * | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
- * | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
- * -------------------------------------------------------------------------------------
- * Notes:
- * - All __builtin_* functions are evaluated at compile-time if argument is constant.
- * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
- * - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
- * - Use with uint32_t or cast explicitly to avoid type promotion issues.
- *
- * Example Usage:
- *   uint32_t val = 0x0000000F;
- *   uint8_t zeros = __builtin_clz(val);      // → 28
- *   uint8_t set   = __builtin_popcount(val); // → 4
- *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
  * 
  * @defgroup STM32F1xx STM32F1xx Memory-HAL Interface
  * 
@@ -59,6 +28,49 @@
  *  
  */
 
+/**
+ * @brief Basic Utilities for Helper
+ * @defgroup Utilities 
+ * @ingroup STM32F1xx
+ * 
+ * @{
+ * 
+ * @details
+ *******************************************************************************************************************
+ *	Basic Notes:-
+ *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
+ *	`uint32_t` inside every BIT struct because of padding alignment
+ *	`volatile` used for ensuring no further optimization by compiler
+ *	`: x` indicates only x bit(s) to be used from that 32-bit
+ ****************************************************************************************************************
+ *                          🔧 Bit Manipulation Built-ins (GCC)
+ * -------------------------------------------------------------------------------------
+ * | Built-in Function        | Description                                           |
+ * |--------------------------|--------------------------------------------------------|
+ * | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
+ * | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
+ * | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
+ * | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
+ * | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
+ * | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
+ * | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
+ * | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
+ * -------------------------------------------------------------------------------------
+ * 
+ * @note
+ * - All __builtin_* functions are evaluated at compile-time if argument is constant.
+ * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
+ * - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
+ * - Use with uint32_t or cast explicitly to avoid type promotion issues.
+ *
+ * @example
+ * Example Usage:
+ *   uint32_t val = 0x0000000F;
+ *   uint8_t zeros = __builtin_clz(val);      // → 28
+ *   uint8_t set   = __builtin_popcount(val); // → 4
+ *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
+ */
+ 
 // Header Guards
 #ifndef STM32F1XX_H_
 #define STM32F1XX_H_
@@ -104,6 +116,64 @@ extern "C" {
 #define CONSECUTIVE_BIT6_MASK()					((uint32_t) (0x3F))
 #define CONSECUTIVE_BIT7_MASK()					((uint32_t) (0x7F))
 #define CONSECUTIVE_BIT8_MASK()					((uint32_t) (0xFF))
+
+/** 
+ * @brief Sets BIT at `POS`
+ * @param[in] POS Bit position
+ * @note Assumed 32-bits
+ */
+#define BIT_SET(POS)							((uint32_t) (0x01UL << (POS)))
+/**
+ * @brief   Compute peripheral index based on base addresses
+ * @addtogroup Utilities
+ * @ingroup STM32F1xx
+ *
+ * @details
+ * This macro computes the relative index (or bit position) of a peripheral 
+ * instance based on its memory-mapped base address, reference base address, 
+ * and register block type.
+ *
+ * It is primarily used to determine clock-enable bit positions or array indices
+ * for peripherals of the same type (e.g., GPIOA–GPIOG, USART1–USART3).
+ *
+ * @note
+ * - The computation uses pointer arithmetic on `uintptr_t` to ensure 
+ *   portability across 32-bit and 64-bit targets
+ * - The result assumes all peripheral instances of the given `type` 
+ *   are equally spaced in memory
+ * - No hardware access is performed by this macro; it performs 
+ *   pure compile-time address arithmetic when operands are constants
+ *
+ * @param[in] value   The address (or pointer) of the target peripheral instance  
+ *                    (e.g., `GPIOC`, `USART2`, `TIM4`).
+ * @param[in] base    The address (or pointer) of the first peripheral instance  
+ *                    of the same type (e.g., `GPIOA`, `USART1`, `TIM2`).
+ * @param[in] type    The peripheral structure type (e.g., `GPIO_TypeDef`, 
+ *                    `USART_TypeDef`).
+ *
+ * @return The peripheral index (zero-based)
+ *
+ * @pre The base and value must both point to valid peripherals of the same type.
+ *
+ * @warning The result is undefined if `base` and `value` do not belong to 
+ *          peripherals of the same structure layout or are not memory-aligned
+ *          as expected.
+ *
+ * @see @ref RCC_APB2ENR for example bit positioning of GPIO ports.
+ * @see @ref GPIO_TypeDef for structure size reference.
+ *
+ * @par Example:
+ * @code
+ * // Example: Compute GPIO port index
+ * uint32_t index = BIT_POS(GPIOC, GPIOA, GPIO_TypeDef);
+ * // index = 2 → GPIOC is the third port after GPIOA
+ *
+ * // Enable corresponding GPIO clock (bit = index + 2)
+ * RCC->APB2ENR |= (1U << (index + 2));
+ * @endcode
+ */
+#define BIT_POS(value, base, type) \
+	(((uintptr_t)((value)) - (uintptr_t)((base))) / (uintptr_t)(sizeof((type))))
 
 
 typedef enum
