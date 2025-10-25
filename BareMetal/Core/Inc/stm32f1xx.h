@@ -173,7 +173,7 @@ extern "C" {
  * @endcode
  */
 #define BIT_POS(value, base, type) \
-	(((uintptr_t)((value)) - (uintptr_t)((base))) / (uintptr_t)(sizeof((type))))
+	((unsigned long)(((uintptr_t)(value) - (uintptr_t)(base)) / (uintptr_t)(sizeof((type)))))
 
 
 typedef enum

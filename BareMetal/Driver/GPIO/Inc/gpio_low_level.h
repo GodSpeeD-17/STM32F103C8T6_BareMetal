@@ -14,8 +14,8 @@ extern "C" {
 #endif /* _cplusplus */
 
 /*---------------------------------------------- MACROs ----------------------------------------------*/
-#define GPIO_CLK_POS(gpio) \
-	BIT_POS((gpio), GPIOA, GPIO_TypeDef)
+#define GPIO_CLK_POS(inGpio) \
+	BIT_POS((inGpio), GPIOA, GPIO_TypeDef)
 
 /*---------------------------------------------- Includes ----------------------------------------------*/
 /**
@@ -29,7 +29,7 @@ extern "C" {
 /**
  * @section GPIO_Clocks GPIO Clocks
  * @defgroup 10_01_GPIO_API_Clock
- * @addtogroup  10_GPIO_API
+ * @addtogroup  02_GPIO_Ports
  * @brief Provides access to RCC Clocks for each GPIO
  * @{
  */
@@ -46,12 +46,18 @@ extern "C" {
  * 					- `GPIOF`
  * 					- `GPIOG`
  * 
+ * @note Only one Port Configured at a time
+ * 
  */
 __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const gpio)
 {
 	RCC->APB2ENR.REG |= (0x01 << (RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(gpio)));
 }
-__STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const gpio);
+__STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const gpio)
+{
+	RCC->APB2ENR.REG &= ~(0x01 << (RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(gpio)));
+
+}
 
 /** @} */ // 10_01_GPIO_API_Clock
 

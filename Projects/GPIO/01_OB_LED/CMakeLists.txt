@@ -32,11 +32,10 @@ set(GDB_PATH_MULTIARCH_PATH "/usr/bin/gdb-multiarch")					# ARM GDB debugger
 # =============================================================================
 set(DRIVER_MODULE_TREE SHOW_FILENAME_ONLY) # SHOW_FULL_PATH / SHOW_FILENAME_ONLY
 set(DRIVER_MODULES
-    NVIC
-    GPIO  
-    RCC
+	RCC
+    GPIO
+	NVIC  
     Timer
-    DMA
 )
 
 # =============================================================================
