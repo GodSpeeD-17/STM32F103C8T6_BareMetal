@@ -5,7 +5,7 @@
  * @date    21-10-2025
  *
  * 
- * @defgroup STM32F1xx STM32F1xx Memory-HAL Interface
+ * @defgroup STM32F1xx STM32F1 Memory Address Mapping
  * 
  * @brief   STM32F1xx - Peripheral Register Mapping
  *
@@ -30,7 +30,7 @@
 
 /**
  * @brief Basic Utilities for Helper
- * @defgroup Utilities 
+ * @defgroup 01_STM32F1xx_Utilities Utilities
  * @ingroup STM32F1xx
  * 
  * @{
@@ -69,6 +69,8 @@
  *   uint8_t zeros = __builtin_clz(val);      // → 28
  *   uint8_t set   = __builtin_popcount(val); // → 4
  *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
+ * 
+ * @}
  */
  
 // Header Guards
@@ -117,16 +119,22 @@ extern "C" {
 #define CONSECUTIVE_BIT7_MASK()					((uint32_t) (0x7F))
 #define CONSECUTIVE_BIT8_MASK()					((uint32_t) (0xFF))
 
+/**
+ * @addtogroup 01_STM32F1xx_Utilities
+ * 
+ * @{
+ */
+
 /** 
- * @brief Sets BIT at `POS`
+ * @brief Sets bit at `POS`
  * @param[in] POS Bit position
  * @note Assumed 32-bits
  */
 #define BIT_SET(POS)							((uint32_t) (0x01UL << (POS)))
+
 /**
  * @brief   Compute peripheral index based on base addresses
- * @addtogroup Utilities
- * @ingroup STM32F1xx
+ * @addtogroup 01_STM32F1xx_Utilities
  *
  * @details
  * This macro computes the relative index (or bit position) of a peripheral 
@@ -175,7 +183,9 @@ extern "C" {
 #define BIT_POS(value, base, type) \
 	((unsigned long)(((uintptr_t)(value) - (uintptr_t)(base)) / (uintptr_t)(sizeof((type)))))
 
-
+/**
+ * @brief Driver Status
+ */
 typedef enum
 {
 	DRIVER_SUCCESS = (uint8_t) 0x00,
@@ -194,12 +204,13 @@ typedef enum
 		}                               \
 	} while (0)
 
+/** @} */ // 01_STM32F1xx_Utilities
 /*----------------------------------------------- Custom Declaration -----------------------------------------------*/
 
 /*----------------------------------------------- Memory Bus Base Addresses -----------------------------------------------*/
 
 /**
- * @defgroup 01_STM32Fxx_MemoryBaseAddress Memory Bus Base Addresses
+ * @defgroup 02_STM32F1xx_BaseAddress Memory Base Addresses
  * @ingroup  STM32F1xx
  * @brief    Base addresses for different memory buses in STM32F1xx
  *
@@ -235,9 +246,7 @@ typedef enum
 /** @brief Independent Watchdog Base */
 #define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000)
 
-/** 
- * @}
- */  // 01_STM32Fxx_MemoryBaseAddress
+/** @} */  // 02_STM32F1xx_BaseAddress
 
 
 #define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
