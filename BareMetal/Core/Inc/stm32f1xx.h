@@ -181,7 +181,7 @@ extern "C" {
  * @endcode
  */
 #define BIT_POS(value, base, type) \
-	((unsigned long)(((uintptr_t)(value) - (uintptr_t)(base)) / (uintptr_t)(sizeof((type)))))
+	((unsigned long)((((uintptr_t)(value)) - ((uintptr_t)(base))) / ((uintptr_t)(sizeof((type))))))
 
 /**
  * @brief Driver Status
@@ -271,7 +271,7 @@ typedef enum
  * @{
  */
 
-/** 
+/**
  * @brief GPIO Port A offset from `APB2_BASE_ADDR`
  * @details `0x0800` offset from `APB2_BASE_ADDR`
  */
@@ -279,7 +279,6 @@ typedef enum
 
 /**
  * @brief GPIO Port A memory-mapped register structure
- * @details Provides access to all GPIOA registers through structured memory mapping
  */
 #define GPIOA									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOA_OFFSET))
 
