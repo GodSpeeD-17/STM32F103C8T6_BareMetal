@@ -24,35 +24,18 @@ verify_tool("Project Directory"			${PROJ_DIR})
 verify_tool("Repository Root"			${REPO_ROOT})
 verify_tool("Core Root"					${CORE_ROOT})
 verify_tool("Driver Root"				${DRIVER_ROOT})
+verify_tool("Linker Script"				${LINKER_FILE})
 
 # Modules registered
 if(NOT DRIVER_MODULES)
 	message(FATAL_ERROR "DRIVER_MODULES not set! Please set this in your project's CMakeLists.txt before including this template")
 endif()
 
-
-# =============================================================================
-# Cross-Compilation Configuration
-# =============================================================================
-set(CMAKE_SYSTEM_NAME Generic)								# Bare-metal target (no OS)
-set(CMAKE_SYSTEM_PROCESSOR arm)								# Target processor architecture
-set(CMAKE_SYSTEM_TOOLCHAIN_PREFIX ${CMAKE_SYSTEM_PROCESSOR}-none-eabi)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)			# Required for cross-compilation
-set(BUILD_OUTPUT_DIR	${PROJ_DIR}/Build)							# Build artifacts directory
-
-# =============================================================================
-# Toolchain Configuration
-# =============================================================================
 message(STATUS "==========================================")
 message(STATUS "Toolchain Verification")
 message(STATUS "==========================================")
 verify_tool("Toolchain Path"	  ${TOOLCHAIN_PATH})
 
-# ---------------------- Compiler Executables ----------------------
-set(TOOLCHAIN_PREFIX 			  ${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_TOOLCHAIN_PREFIX})
-set(CMAKE_C_COMPILER			  ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_ASM_COMPILER			  ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_CXX_COMPILER			  ${TOOLCHAIN_PREFIX}-g++)
 # ---------------------- Binary Utilities ----------------------
 set(CMAKE_OBJCOPY				  ${TOOLCHAIN_PREFIX}-objcopy)
 set(CMAKE_OBJDUMP				  ${TOOLCHAIN_PREFIX}-objdump)
@@ -85,13 +68,8 @@ set(ST_UART_FLASH				  stm32flash)          		# UART-based flasher
 
 # Create build output directory
 if(NOT EXISTS ${BUILD_OUTPUT_DIR})
-    file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
-endif()
-
-# Set build artifacts location
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR}) 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})		  
+    message(FATAL_ERROR "${BUILD_OUTPUT_DIR} Missing!")
+endif() 
 
 # =============================================================================
 # MCU Configuration
@@ -100,7 +78,6 @@ set(MCU STM32F103C8T6)
 set(MCU_DEFINE ${MCU}__)
 set(MCU_CPU_DEFINE CORTEX_M3__)
 set(MCU_CPU cortex-m3)
-set(FLASH_ADDRESS 0x08000000)
 
 # =============================================================================
 # Language Standards
@@ -177,10 +154,6 @@ set(ASM_FLAGS
 # =============================================================================
 # File & Path Configuration
 # =============================================================================
-
-# ---------------------- Linker Script Configuration ----------------------
-set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)  # Default linker script
-message(STATUS "Linker Script: ${LINKER_FILE}")
 
 # Verify linker script exists
 if(NOT EXISTS ${LINKER_FILE})
@@ -733,9 +706,6 @@ add_replace_target(replace_systick_c "systick.c" "${PROJ_DIR}/Src")
 
 # Replace startup.c
 add_replace_target(replace_startup_c "startup.c" "${PROJ_DIR}/Src")
-
-# Replace linker script
-add_replace_target(replace_linker "stm32f1_ls.ld" "${PROJ_DIR}/Startup")
 
 # Replace CMakeLists.txt
 add_replace_target(replace_cmake "CMakeLists.txt" "${PROJ_DIR}")
