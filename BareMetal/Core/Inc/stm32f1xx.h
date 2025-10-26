@@ -222,29 +222,29 @@ typedef enum
  */
 
 /** @brief System Timer Base (Cortex-M3 Core Peripheral) */
-#define SysTick_BASE_ADDR                       0xE000E010
+#define SysTick_BASE_ADDR                       0xE000E010UL
 /** @brief Nested Vectored Interrupt Controller Base */
-#define NVIC_BASE_ADDR                          0xE000E100
+#define NVIC_BASE_ADDR                          0xE000E100UL
 /** @brief System Control Block Base */
-#define SCB_BASE_ADDR                           0xE000ED00
+#define SCB_BASE_ADDR                           0xE000ED00UL
 /** @brief Core Debug Registers Base */
-#define CoreDebug_BASE_ADDR                     0xE000EDF0
-/** @brief APB1 Peripheral Base (Low-speed peripherals) */
-#define APB1_BASE_ADDR                          0x40000000
-/** @brief APB2 Peripheral Base (High-speed peripherals) */
-#define APB2_BASE_ADDR                          0x40010000
-/** @brief AHB Peripheral Base (Memory, DMA, CRC) */
-#define AHB_BASE_ADDR                           0x40018000
+#define CoreDebug_BASE_ADDR                     0xE000EDF0UL
+/** @brief APB1 Peripheral Base (Low-speed peripherals) @def APB1_BASE_ADDR */
+#define APB1_BASE_ADDR                          0x40000000UL
+/** @brief APB2 Peripheral Base (High-speed peripherals) @def APB2_BASE_ADDR */
+#define APB2_BASE_ADDR                          0x40010000UL
+/** @brief AHB Peripheral Base (Memory, DMA, CRC) @def AHB_BASE_ADDR */
+#define AHB_BASE_ADDR                           0x40018000UL
 /** @brief Flash Memory Interface Base */
-#define FLASH_BASE_ADDR                         0x40022000
+#define FLASH_BASE_ADDR                         0x40022000UL
 /** @brief DMA1 Controller Base */
-#define DMA1_BASE_ADDR                          (AHB_BASE_ADDR + 0x00008000)
+#define DMA1_BASE_ADDR                          (AHB_BASE_ADDR + 0x00008000UL)
 /** @brief DMA2 Controller Base */
-#define DMA2_BASE_ADDR                          (DMA1_BASE_ADDR + 0x00000400)
+#define DMA2_BASE_ADDR                          (DMA1_BASE_ADDR + 0x00000400UL)
 /** @brief Window Watchdog Base */
-#define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000)
+#define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000UL)
 /** @brief Independent Watchdog Base */
-#define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000)
+#define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000UL)
 
 /** @} */  // 02_STM32F1xx_BaseAddress
 
@@ -253,121 +253,88 @@ typedef enum
 #define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
-#define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000))
+#define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000UL))
 
 /*----------------------------------------------- GPIO Peripheral -----------------------------------------------*/
 
 /**
- * @addtogroup  02_GPIO_Ports
+ * @addtogroup  GPIO_01_Registers
  * @brief       STM32F1xx GPIO Memory Address Mapping
  * @details 
- * - GPIO peripheral instances based on GPIO register mapping structure (GPIO_TypeDef)
- * - All GPIO ports are clocked from APB2 bus (APB2_BASE_ADDR)
+ * - GPIO peripheral instances based on @ref 01_GPIO_01_Registers_Structure "GPIO Registers"
+ * - All GPIO ports are clocked from @ref APB2_BASE_ADDR "APB2 Bus"
  * - Each GPIO port occupies 0x400 bytes of address space
  * - Supports GPIO Port A through G on STM32F103C8T6
  * @see Reference Manual RM0008 - Section 9.2 GPIO Registers
  * @see Datasheet - Section 4 Memory Mapping
- * @section Memory Mapping
  * @{
  */
 
 /**
- * @brief GPIO Port A offset from `APB2_BASE_ADDR`
- * @details `0x0800` offset from `APB2_BASE_ADDR`
+ * @defgroup  GPIO_01_Registers_02_Offset GPIO Register Offset
+ * @brief GPIO Register Offset from Base Memory Address
+ * @ingroup GPIO_01_Registers
+ * @{
  */
-#define GPIOA_OFFSET                            0x00000800
+/** @brief GPIO Port A Offset @def GPIOA_OFFSET */
+#define GPIOA_OFFSET                            0x00000800UL
+/** @brief GPIO Port B Offset @def GPIOB_OFFSET */
+#define GPIOB_OFFSET                            0x00000C00UL
+/** @brief GPIO Port C Offset @def GPIOC_OFFSET */
+#define GPIOC_OFFSET                            0x00001000UL
+/** @brief GPIO Port D Offset @def GPIOD_OFFSET */
+#define GPIOD_OFFSET                            0x00001400UL
+/** @brief GPIO Port E Offset @def GPIOE_OFFSET */
+#define GPIOE_OFFSET                            0x00001800UL
+/** @brief GPIO Port F Offset @def GPIOF_OFFSET */
+#define GPIOF_OFFSET                            0x00001C00UL
+/** @brief GPIO Port G Offset @def GPIOG_OFFSET */
+#define GPIOG_OFFSET                            0x00002000UL
+
+/** @} */ // GPIO_01_Registers_02_Offset
 
 /**
- * @brief GPIO Port A memory-mapped register structure
+ * @defgroup  GPIO_03_Registers_03_Memory GPIO Register Memory Addess
+ * @ingroup GPIO_01_Registers
+ * @{
  */
+/** @brief GPIO Port A memory-mapped register structure @def GPIOA */
 #define GPIOA									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOA_OFFSET))
-
-/** 
- * @brief GPIO Port B offset from `APB2_BASE_ADDR`  
- * @details `0x0C00` offset from `APB2_BASE_ADDR`
- */
-#define GPIOB_OFFSET                            0x00000C00
-
-/**
- * @brief GPIO Port B memory-mapped register structure
- */
+/** @brief GPIO Port B memory-mapped register structure @def GPIOB */
 #define GPIOB									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOB_OFFSET))
-
-/** 
- * @brief GPIO Port C offset from `APB2_BASE_ADDR`
- * @details `0x1000` offset from `APB2_BASE_ADDR`
- */
-#define GPIOC_OFFSET                            0x00001000
-
-/**
- * @brief GPIO Port C memory-mapped register structure
- */
+/** @brief GPIO Port C memory-mapped register structure @def GPIOC */
 #define GPIOC									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOC_OFFSET))
-
-/** 
- * @brief GPIO Port D offset from `APB2_BASE_ADDR`
- * @details `0x1400` offset from `APB2_BASE_ADDR`
- */
-#define GPIOD_OFFSET                            0x00001400
-
-/**
- * @brief GPIO Port D memory-mapped register structure
- */
+/** @brief GPIO Port D memory-mapped register structure @def GPIOD */
 #define GPIOD									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOD_OFFSET))
-
-/** 
- * @brief GPIO Port E offset from `APB2_BASE_ADDR`
- * @details `0x1800` offset from `APB2_BASE_ADDR`
- */
-#define GPIOE_OFFSET                            0x00001800
-
-/**
- * @brief GPIO Port E memory-mapped register structure
- */
+/** @brief GPIO Port E memory-mapped register structure @def GPIOE */
 #define GPIOE									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOE_OFFSET))
-
-/** 
- * @brief GPIO Port F offset from `APB2_BASE_ADDR`
- * @details `0x1C00` offset from `APB2_BASE_ADDR`
- */
-#define GPIOF_OFFSET                            0x00001C00
-
-/**
- * @brief GPIO Port F memory-mapped register structure
- */
+/** @brief GPIO Port F memory-mapped register structure @def GPIOF */
 #define GPIOF									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOF_OFFSET))
-
-/** 
- * @brief GPIO Port G offset from `APB2_BASE_ADDR`
- * @details `0x2000` offset from `APB2_BASE_ADDR`
- */
-#define GPIOG_OFFSET                            0x00002000
-
-/**
- * @brief GPIO Port G memory-mapped register structure
- */
+/** @brief GPIO Port G memory-mapped register structure @def GPIOG */
 #define GPIOG									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOG_OFFSET))
 
-/** @} */ // 02_GPIO_Ports
+/** @} */ // GPIO_03_Registers_03_Memory
+
+/** @} */ // GPIO_01_Registers
 
 #define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
-#define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00))
-#define TIM2 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000000))
-#define TIM3 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000400))
-#define TIM4 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000800))
-#define TIM5 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000C00))
-#define TIM6 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001000))
-#define TIM7 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001400))
-#define TIM8 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00003400))
-#define ADC1 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002400))
-#define ADC2 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002800))
-#define ADC3 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00003C00))
-#define USART1 									((USART_TypeDef *) (APB2_BASE_ADDR + 0x00003800))
-#define USART2 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004400))
-#define USART3 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004800))
-#define EXTI 									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + 0x00000400))
-#define I2C1 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005400))
-#define I2C2 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005800))
+#define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00UL))
+#define TIM2 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000000UL))
+#define TIM3 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000400UL))
+#define TIM4 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000800UL))
+#define TIM5 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000C00UL))
+#define TIM6 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001000UL))
+#define TIM7 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001400UL))
+#define TIM8 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00003400UL))
+#define ADC1 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002400UL))
+#define ADC2 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002800UL))
+#define ADC3 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00003C00UL))
+#define USART1 									((USART_TypeDef *) (APB2_BASE_ADDR + 0x00003800UL))
+#define USART2 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004400UL))
+#define USART3 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004800UL))
+#define EXTI 									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + 0x00000400UL))
+#define I2C1 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005400UL))
+#define I2C2 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005800UL))
 #define IWDG									((IWDG_TypeDef *) IWDG_BASE_ADDR)
 #define WWDG									((WWDG_TypeDef *) WWDG_BASE_ADDR)
 #define DMA1 									((DMA_TypeDef *) DMA1_BASE_ADDR)

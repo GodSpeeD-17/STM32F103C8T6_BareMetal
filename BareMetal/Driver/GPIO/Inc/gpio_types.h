@@ -12,15 +12,7 @@
 #define GPIO_TYPES_H_
 
 /*---------------------------------------------- Includes ----------------------------------------------*/
-/** 
- * @brief For register mapping base types
- * @include Test
- */
-#include "stm32f1xx.h"
-/** 
- * @brief For Reset and Clock Control dependenciess 
- */
-#include "rcc.h"
+#include <stdint.h>
 
 /*---------------------------------------------- GPIO Port Definitions ----------------------------------------------*/
 
@@ -387,8 +379,12 @@ typedef struct
 	gpio_pin_cnf_t config : 2;
 } gpio_config_t;
 
-/** 
- * @}
- */ // 09_GPIO_Config
+/** @} */ // 09_GPIO_Config
+
+// Board Specific Configuration 
+#ifdef STM32F103C8T6__
+	#define GPIO_PORT_OB_LED						GPIO_PORT_C
+	#define GPIO_PIN_OB_LED							GPIO_PIN_13
+#endif /* STM32F103C8T6__ */ 
 
 #endif /* GPIO_TYPES_H_ */

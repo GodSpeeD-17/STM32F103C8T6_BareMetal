@@ -7,12 +7,13 @@
  * @defgroup GPIO General Purpose Input/Ouptut (GPIO)
  *
  * @brief STM32F1xx General-Purpose Input/Output (GPIO)
+ * 
  * @details
  * This module provides complete access to GPIO peripherals including:
- * - Register mapping and memory addresses
- * - Configuration structures and enumerations
- * - Hardware abstraction APIs
- * - Pin control and management functions
+ * - Register mapping (stm32f1xx_gpio.h)
+ * - Memory Address (stm32f1xx.h)
+ * - Low Level GPIO APIs (gpio_ll.h)
+ * - Driver APIs (gpio.h)
  *
  * @note    All GPIO operations require enabled RCC clock for the corresponding GPIO port
  * @warning Direct register access should only be used when performance is critical
@@ -27,6 +28,54 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+
+/**
+ * @brief Structure encapsuation of GPIO Registers
+ * @defgroup  GPIO_01_Registers GPIO Registers
+ * @ingroup GPIO
+ * 
+ * @{
+ * 
+ * @details
+ * - STM32F103C8T6 GPIO peripherals provide 16 digital I/O pins per port (GPIOA-GPIOG)
+ * - Each GPIO port has 7 registers that control configuration, data, and locking functions
+ * 
+ * - GPIO Register Map:
+ * 
+ * | Offset | Register | Name | Description |
+ * |--------|----------|------|-------------|
+ * | 0x00   | GPIOx_CRL  | Port Configuration Low | Controls mode/speed for pins 0-7 |
+ * | 0x04   | GPIOx_CRH  | Port Configuration High | Controls mode/speed for pins 8-15 |
+ * | 0x08   | GPIOx_IDR  | Input Data Register | Read input states of all pins |
+ * | 0x0C   | GPIOx_ODR  | Output Data Register | Set output states of all pins |
+ * | 0x10   | GPIOx_BSRR | Port Bit Set/Reset Register | Atomic set/reset operations |
+ * | 0x14   | GPIOx_BRR  | Port Bit Reset Register | Atomic reset operations (legacy) |
+ * | 0x18   | GPIOx_LCKR | Port Configuration Lock Register | Lock pin configurations |
+ * 
+ * - Key Features:
+ * <ul>
+ * <li> Each I/O pin individually configurable as:
+ * 	<ul>
+ *   <li> Digital input (floating, pull-up, pull-down) </li>
+ *   <li> Digital output (push-pull, open-drain) </li>
+ *   <li> Analog input (ADC) or alternate function </li>
+ * 	</ul
+ * </li>
+ * <li> Output speeds: 2 MHz, 10 MHz, 50 MHz </li>
+ * <li> Atomic set/reset operations for bit-banging </li>
+ * <li> Pin configuration locking for safety </li>
+ * <li> 3.3V tolerant I/Os </li>
+ * </ul>
+ * 
+ * @note GPIOA, GPIOB, GPIOC fully available on STM32F103C8T6
+ * @note GPIOD, GPIOE partially available (check pinout)
+ * @note GPIOF, GPIOG not available on LQFP48 package
+ * 
+ * @see Reference Manual RM0008 - Section 9. GPIOs
+ * @see Datasheet DS5319 - Section 5. Memory mapping
+ * 
+ * @}
+ */
 
 /**
  * @addtogroup 03_01_GPIO_PinModes
@@ -57,7 +106,7 @@ extern "C" {
  * @section GPIO_Pins_Config Pin Configuration Description
  * - Defines the GPIO Pin Configuration: Analog, Alternate Function, ...
  * - Defines exact functionality of GPIO
- * - `CNFx` Settings: ( )
+ * - `CNFx`:  
  * 
  * Input Mode: ( @ref GPIO_Pins_Mode "MODEx" == `0x00`)  
  * | CNFx  | Configuration | Description |
@@ -109,12 +158,13 @@ extern "C" {
  */
 
 /**
- * @defgroup 01_GPIO_RegisterMap GPIO Register
- * @ingroup  GPIO
- * @brief    GPIO Registers
- * @details GPIO_Pins_Summary
- * - This structure represents the complete register set for a single GPIO port.
- * - It is memory-mapped to the base address of each GPIO peripheral (GPIOA, GPIOB, etc.).
+ * @defgroup 01_GPIO_01_Registers_Structure Encapsulation of Registers
+ * @ingroup  GPIO_01_Registers
+ * @section	 GPIO_RegistersMap GPIO Registers
+ * @brief    GPIO Registers representation using structs
+ * @details
+ * - This structure represents the complete register set for a single GPIO port
+ * - It is memory-mapped to the base address of each GPIO peripheral (`GPIOA`, `GPIOB`, etc.)
  * @note The structure uses unions to provide both bit-level and register-level access
  * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
  * 
@@ -386,7 +436,7 @@ typedef struct _GPIO_TypeDef
 	} LCKR;
 } GPIO_TypeDef;
 
-/** @} */ // 01_GPIO_RegisterMap
+/** @} */ // 01_GPIO_01_Registers_Structure
 
 // C++ Header Guards
 #ifdef __cplusplus

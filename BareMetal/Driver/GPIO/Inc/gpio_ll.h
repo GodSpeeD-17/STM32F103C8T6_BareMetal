@@ -12,10 +12,8 @@
  *
  * The file is modular by design:
  * - Core LL functions are always compiled.
- * - Optional commit/IRQ layers can be enabled via compile-time flags.
+ * - Optional commit/IRQ layers can be enabled via compile-time flags
  * 
- * @defgroup GPIO_LL GPIO Low-Level Hardware Instruction Layer
- * @ingroup GPIO
  */
 
 #ifndef GPIO_LL_H_
@@ -26,20 +24,42 @@ extern "C" {
 #endif /* __cplusplus */
 
 /*---------------------------------------------- Includes ----------------------------------------------*/
-#include "gpio_types.h"
+/** 
+ * @brief For register mapping base types
+ * @include Test
+ */
+#include "stm32f1xx.h"
+
+// ######################################################################################################
+// GPIO Register APIs
+// ######################################################################################################
+
+/**
+ * @defgroup GPIO_01_Registers GPIO Low-Level Layer
+ * @ingroup GPIO
+ * 
+ * @{
+ */
+
+/**
+ * @defgroup GPIO_01_Registers_04_API GPIO Register Access APIs
+ * @ingroup GPIO_01_Registers
+ * 
+ * @{
+ */
+
 
 /*---------------------------------------------- GPIO Clock Control ----------------------------------------------*/
 /**
- * @section GPIO_LL_ClockAPI
- * @defgroup 01_GPIO_LL_Clock GPIO Clock APIs
- * @ingroup GPIO_LL
+ * @defgroup GPIO_01_Registers_04_API_01_Clock GPIO Clock APIs
+ * @ingroup GPIO_01_Registers_04_API
  * @brief Direct RCC register access for GPIO clocks
  * @{
  */
 
 /**
  * @brief Enable GPIO peripheral clock
- * @param[in] gpio Target GPIO port (`GPIOA` – `GPIOG`)
+ * @param[in] gpio Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  */
 __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const gpio)
 {
@@ -48,26 +68,26 @@ __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const gpio)
 
 /**
  * @brief Disable GPIO peripheral clock
- * @param[in] gpio Target GPIO port (`GPIOA` – `GPIOG`)
+ * @param[in] gpio Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  */
 __STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const gpio)
 {
 	RCC->APB2ENR.REG &= ~(0x01U << (RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(gpio)));
 }
 
-/** @} */ // 01_GPIO_LL_Clock
+/** @} */ // GPIO_01_Registers_04_API_01_Clock
 
 /*---------------------------------------------- GPIO Configuration ----------------------------------------------*/
 /**
- * @defgroup 02_GPIO_LL_CRx GPIO Configuration Register APIs
- * @ingroup GPIO_LL
+ * @defgroup GPIO_01_Registers_04_API_02_CRx GPIO Configuration Register APIs
+ * @ingroup GPIO_01_Registers_04_API
  * @brief Direct pin mode and configuration access (CRL/CRH)
  * @{
  */
 
 /**
  * @brief 				Reads @ref GPIO_Typdef_CRL "CRL"
- * @param[in] GPIOx		Target GPIO port
+ * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  * @returns				CRL
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -78,7 +98,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_ReadCRL(const GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief				Writes @ref GPIO_Typdef_CRL "CRL"
- * @param[in] GPIOx		Target GPIO port
+ * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -109,12 +129,12 @@ __STATIC_FORCEINLINE void _GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint32
 	GPIOx->CRH.REG = value;
 }
 
-/** @} */ // 02_GPIO_LL_CRx
+/** @} */ // GPIO_01_Registers_04_API_02_CRx
 
 /*---------------------------------------------- GPIO Output Operations ----------------------------------------------*/
 /**
- * @defgroup 03_GPIO_LL_Output GPIO Output APIs
- * @ingroup GPIO_LL
+ * @defgroup GPIO_01_Registers_04_API_03_Output GPIO Output APIs
+ * @ingroup GPIO_01_Registers_04_API
  * @brief Output write operations
  * @{
  */
@@ -149,12 +169,12 @@ __STATIC_FORCEINLINE void _GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32
 	GPIOx->BRR.REG = value;
 }
 
-/** @} */ // 03_GPIO_LL_Output
+/** @} */ // GPIO_01_Registers_04_API_03_Output
 
 /*---------------------------------------------- GPIO Input Operations ----------------------------------------------*/
 /**
- * @defgroup 04_GPIO_LL_Input GPIO Input APIs
- * @ingroup GPIO_LL
+ * @defgroup GPIO_01_Registers_04_API_04_Input GPIO Input APIs
+ * @ingroup GPIO_01_Registers_04_API
  * @brief Reads current input state from GPIO pins
  * @{
  */
@@ -169,12 +189,12 @@ __STATIC_FORCEINLINE uint32_t _GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
 	return (uint32_t)(GPIOx->IDR.REG);
 }
 
-/** @} */ // 04_GPIO_LL_Input
+/** @} */ // GPIO_01_Registers_04_API_04_Input
 
 /*---------------------------------------------- GPIO Lock Operations ----------------------------------------------*/
 /**
- * @defgroup 05_GPIO_LL_Lock GPIO Lock APIs
- * @ingroup GPIO_LL
+ * @defgroup GPIO_01_Registers_04_API_05_Lock GPIO Lock APIs
+ * @ingroup GPIO_01_Registers_04_API
  * @brief Locks the state of GPIO pins until next reset
  * @{
  */
@@ -188,7 +208,31 @@ __STATIC_FORCEINLINE uint32_t _GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const u
 	GPIOx->LCKR.REG = value;
 } 
 
-/** @} */ // 05_GPIO_LL_Lock
+/** @} */ // GPIO_01_Registers_04_API_05_Lock
+
+/** @} */ // GPIO_01_Registers_04_API
+
+/** @} */ // GPIO_01_Registers
+
+// ######################################################################################################
+// GPIO Low Level APIs
+// ######################################################################################################
+
+/**
+ * @brief GPIO Low Level APIs
+ * @defgroup GPIO_02_LL GPIO Low Level
+ * 
+ * @{
+ */
+
+
+
+ 
+/** @} */ // GPIO_02_LL
+
+
+
+
 
 #ifdef __cplusplus
 }

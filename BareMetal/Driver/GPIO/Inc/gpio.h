@@ -15,10 +15,7 @@
 #include "gpio_exti.h"
 /*********************************************** Helper APIs ***********************************************/
 
-#ifdef STM32F103C8T6__
-	#define GPIO_PORT_OB_LED						GPIO_PORT_C
-	#define GPIO_PIN_OB_LED							GPIO_PIN_13
-#endif /* STM32F103C8T6__ */
+
 
 
 /**
