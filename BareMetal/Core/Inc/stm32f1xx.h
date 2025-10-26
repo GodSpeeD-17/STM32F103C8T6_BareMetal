@@ -83,7 +83,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 // STM32F103C8T6
-#ifdef STM32F103C8T6__
+// #ifdef STM32F103C8T6__
 
 /*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
 #include "cmsis_gcc.h"
@@ -109,15 +109,15 @@ extern "C" {
 /*----------------------------------------------- STM32F103C8T6 -----------------------------------------------*/
 
 /*----------------------------------------------- Custom Declaration -----------------------------------------------*/
-#define BIT_MASK(X)								((uint32_t) (0x01 << (X)))
-#define CONSECUTIVE_BIT1_MASK()					((uint32_t) (0x01))
-#define CONSECUTIVE_BIT2_MASK()					((uint32_t) (0x03))
-#define CONSECUTIVE_BIT3_MASK()					((uint32_t) (0x07))
-#define CONSECUTIVE_BIT4_MASK()					((uint32_t) (0x0F))
-#define CONSECUTIVE_BIT5_MASK()					((uint32_t) (0x1F))
-#define CONSECUTIVE_BIT6_MASK()					((uint32_t) (0x3F))
-#define CONSECUTIVE_BIT7_MASK()					((uint32_t) (0x7F))
-#define CONSECUTIVE_BIT8_MASK()					((uint32_t) (0xFF))
+#define BIT_MASK(X)								((uint32_t) (0x01UL << (X)))
+#define BIT_1_MASK								((uint32_t) (0x01))
+#define BIT_2_MASK								((uint32_t) (0x03))
+#define BIT_3_MASK								((uint32_t) (0x07))
+#define BIT_4_MASK								((uint32_t) (0x0F))
+#define BIT_5_MASK								((uint32_t) (0x1F))
+#define BIT_6_MASK								((uint32_t) (0x3F))
+#define BIT_7_MASK								((uint32_t) (0x7F))
+#define BIT_8_MASK								((uint32_t) (0xFF))
 
 /**
  * @addtogroup 01_STM32F1xx_Utilities
@@ -169,7 +169,7 @@ extern "C" {
  *
  * @see @ref RCC_APB2ENR for example bit positioning of GPIO ports.
  * @see @ref GPIO_TypeDef for structure size reference.
- *
+ * @def BIT_POS
  * @par Example:
  * @code
  * // Example: Compute GPIO port index
@@ -181,7 +181,7 @@ extern "C" {
  * @endcode
  */
 #define BIT_POS(value, base, type) \
-	((unsigned long)((((uintptr_t)(value)) - ((uintptr_t)(base))) / ((uintptr_t)(sizeof((type))))))
+	((unsigned long)((((uintptr_t)(value)) - ((uintptr_t)(base))) / (uintptr_t)sizeof(type)))
 
 /**
  * @brief Driver Status
@@ -255,7 +255,9 @@ typedef enum
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
 #define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000UL))
 
-/*----------------------------------------------- GPIO Peripheral -----------------------------------------------*/
+// ######################################################################################################
+// GPIO
+// ######################################################################################################
 
 /**
  * @addtogroup  GPIO_01_Registers
@@ -272,8 +274,8 @@ typedef enum
 
 /**
  * @defgroup  GPIO_01_Registers_02_Offset GPIO Register Offset
- * @brief GPIO Register Offset from Base Memory Address
  * @ingroup GPIO_01_Registers
+ * @brief GPIO Offset from Base Memory Address
  * @{
  */
 /** @brief GPIO Port A Offset @def GPIOA_OFFSET */
@@ -294,23 +296,24 @@ typedef enum
 /** @} */ // GPIO_01_Registers_02_Offset
 
 /**
- * @defgroup  GPIO_03_Registers_03_Memory GPIO Register Memory Addess
+ * @defgroup  GPIO_03_Registers_03_Memory GPIO Ports Memory Addess
  * @ingroup GPIO_01_Registers
+ * @brief GPIO Ports Memory Address
  * @{
  */
-/** @brief GPIO Port A memory-mapped register structure @def GPIOA */
+/** @brief GPIO Port A  @def GPIOA */
 #define GPIOA									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOA_OFFSET))
-/** @brief GPIO Port B memory-mapped register structure @def GPIOB */
+/** @brief GPIO Port B  @def GPIOB */
 #define GPIOB									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOB_OFFSET))
-/** @brief GPIO Port C memory-mapped register structure @def GPIOC */
+/** @brief GPIO Port C  @def GPIOC */
 #define GPIOC									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOC_OFFSET))
-/** @brief GPIO Port D memory-mapped register structure @def GPIOD */
+/** @brief GPIO Port D  @def GPIOD */
 #define GPIOD									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOD_OFFSET))
-/** @brief GPIO Port E memory-mapped register structure @def GPIOE */
+/** @brief GPIO Port E  @def GPIOE */
 #define GPIOE									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOE_OFFSET))
-/** @brief GPIO Port F memory-mapped register structure @def GPIOF */
+/** @brief GPIO Port F  @def GPIOF */
 #define GPIOF									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOF_OFFSET))
-/** @brief GPIO Port G memory-mapped register structure @def GPIOG */
+/** @brief GPIO Port G  @def GPIOG */
 #define GPIOG									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOG_OFFSET))
 
 /** @} */ // GPIO_03_Registers_03_Memory
@@ -983,7 +986,7 @@ typedef enum
 
 /*----------------------------------------------- Helper Functions -----------------------------------------------*/
 
-#endif /* STM32F103C8T6__ */
+// #endif /* STM32F103C8T6__ */
 
 // C++ Safeguard
 #ifdef __cplusplus

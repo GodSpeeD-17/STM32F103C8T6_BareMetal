@@ -1,7 +1,7 @@
 # Directory Specific Preferences
-.vscode
+.vscode/
 # VS Code Tag Mapping
 .vscode-ctags
 # Doxygen documentation output
 Documentation/
-.doxygen
+.doxygen/
