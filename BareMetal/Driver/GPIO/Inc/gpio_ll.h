@@ -293,6 +293,14 @@ __STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const GPIOx)
 	RCC->APB2ENR.REG &= ~GPIO_CLK_MASK(GPIOx);
 }
 
+/**
+ * @brief Enables AFIO Clock
+ */
+__STATIC_FORCEINLINE void _GPIO_EnableAFIOClock(void)
+{
+	RCC->APB2ENR.REG |= RCC_APB2ENR_AFIOEN;
+}
+
 /** @} */ // GPIO_02_LL_01_Clock
 
 
@@ -374,19 +382,19 @@ typedef uint8_t _gpio_pin_t;
  * @note
  * - This implementation assumes a standard 16-pin port structure, as it masks the result with \c 0xFFFFUL
  * - Pins greater than 15 will result in a mask of \c 0x0000UL due to the final AND operation
- * @def GPIO_GET_PIN_MASK
+ * @def GPIO_LL_GET_PIN_MASK
  */
-#define GPIO_GET_PIN_MASK(pin)						((uint32_t)((0x01UL << (pin)) & 0xFFFFUL))
+#define GPIO_LL_GET_PIN_MASK(pin)						((uint32_t)((0x01UL << (pin)) & 0xFFFFUL))
 
 /**
  * @brief Extracts the Pin Number (0-15) from a mask with a single bit set
  * @param[in] pinMask A non-zero 32-bit mask with exactly one bit set (e.g., 0x0020UL)
  * @return uint32_t The position of the set bit, which is the Pin Number (0-15)
  * @note This macro uses the highly optimized GCC built-in function `__builtin_ctz`
- * * @def GPIO_EXTRACT_PIN_MASK
+ * * @def GPIO_LL_EXTRACT_PIN_MASK
  */
-#define GPIO_EXTRACT_PIN_MASK(pinMask)				\
-	((((uint32_t)(pinMask)) != 0x00UL)? ((_gpio_pin_t)__builtin_ctz((pinMask) & _GPIO_MAX_PIN)) : ((_gpio_pin_t) GPIO_GET_PIN_MASK(17)))
+#define GPIO_LL_EXTRACT_PIN_MASK(pinMask)				\
+	((((uint32_t)(pinMask)) != 0x00UL)? ((_gpio_pin_t)__builtin_ctz((pinMask) & _GPIO_MAX_PIN)) : ((_gpio_pin_t) GPIO_LL_GET_PIN_MASK(17)))
 
 /** @} */ // GPIO_02_LL_02_Pin
 
@@ -424,12 +432,12 @@ typedef uint8_t _gpio_mode_t;
  */
 /** @brief Input mode @def _GPIO_MODE_INPUT */
 #define _GPIO_MODE_INPUT							((_gpio_mode_t)0x00)
-/** @brief Output mode, max speed 10 MHz @def _GPIO_MODE_OUTPUT_10MHZ */
-#define _GPIO_MODE_OUTPUT_10MHZ						((_gpio_mode_t)0x01)
-/** @brief Output mode, max speed 2 MHz @def _GPIO_MODE_OUTPUT_2MHZ */
-#define _GPIO_MODE_OUTPUT_2MHZ						((_gpio_mode_t)0x02)
-/** @brief Output mode, max speed 50 MHz @def _GPIO_MODE_OUTPUT_50MHZ */
-#define _GPIO_MODE_OUTPUT_50MHZ						((_gpio_mode_t)0x03)
+/** @brief Output mode, max speed 10 MHz @def _GPIO_MODE_OUTPUT_10MHz */
+#define _GPIO_MODE_OUTPUT_10MHz						((_gpio_mode_t)0x01)
+/** @brief Output mode, max speed 2 MHz @def _GPIO_MODE_OUTPUT_2MHz */
+#define _GPIO_MODE_OUTPUT_2MHz						((_gpio_mode_t)0x02)
+/** @brief Output mode, max speed 50 MHz @def _GPIO_MODE_OUTPUT_50MHz */
+#define _GPIO_MODE_OUTPUT_50MHz						((_gpio_mode_t)0x03)
 /** @} */ // GPIO_LL_PinParams_Mode_Macros
 /**
  * @brief Creates a mask for the MODE field (bits 1:0 of the 4-bit block)
@@ -681,8 +689,8 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageResetParams(const _gpio_pin_t pin, u
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, const _gpio_pin_pull_state_t pud_state, uint32_t odrReg)
 {
-	if(pud_state == _GPIO_PULL_PULLDOWN) odrReg &= ~GPIO_GET_PIN_MASK(pin);
-	else if (pud_state == _GPIO_PULL_PULLUP) odrReg |= GPIO_GET_PIN_MASK(pin);
+	if(pud_state == _GPIO_PULL_PULLDOWN) odrReg &= ~GPIO_LL_GET_PIN_MASK(pin);
+	else if (pud_state == _GPIO_PULL_PULLUP) odrReg |= GPIO_LL_GET_PIN_MASK(pin);
 	return odrReg;
 }
 
@@ -719,7 +727,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 //  */
 // __STATIC_FORCEINLINE void _GPIO_SetPin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
 // {
-// 	__GPIO_WriteBSRR(GPIOx, GPIO_GET_PIN_MASK(pin));
+// 	__GPIO_WriteBSRR(GPIOx, GPIO_LL_GET_PIN_MASK(pin));
 // }
 
 // /**
@@ -730,7 +738,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 //  */
 // __STATIC_FORCEINLINE void _GPIO_ResetPin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
 // {
-// 	__GPIO_WriteBRR(GPIOx, GPIO_GET_PIN_MASK(pin));
+// 	__GPIO_WriteBRR(GPIOx, GPIO_LL_GET_PIN_MASK(pin));
 // }
 
 // /**
@@ -741,7 +749,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 //  */
 // __STATIC_FORCEINLINE void _GPIO_TogglePin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
 // {
-// 	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadIDR(GPIOx) ^ GPIO_GET_PIN_MASK(pin)));
+// 	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadIDR(GPIOx) ^ GPIO_LL_GET_PIN_MASK(pin)));
 // }
 
 // /**
@@ -754,7 +762,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 //  */
 // __STATIC_FORCEINLINE uint8_t _GPIO_ReadPin(const GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
 // {
-// 	return (uint8_t) ((__GPIO_ReadIDR(GPIOx) & GPIO_GET_PIN_MASK(pin)) ? 0x01 : 0x00);
+// 	return (uint8_t) ((__GPIO_ReadIDR(GPIOx) & GPIO_LL_GET_PIN_MASK(pin)) ? 0x01 : 0x00);
 // }
 
 // /** @} */ // GPIO_02_LL_02_Pin
