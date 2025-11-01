@@ -657,9 +657,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageConfig(const _gpio_pin_t pin, const 
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const _gpio_mode_t mode, const _gpio_config_t config, uint32_t crxReg)
 {
-	crxReg = _GPIO_PinStageMode(pin, mode, crxReg);
-	crxReg = _GPIO_PinStageConfig(pin, config, crxReg);
-	return crxReg;
+	return _GPIO_PinStageConfig(pin, config, _GPIO_PinStageMode(pin, mode, crxReg));
 }
 
 /**
@@ -674,8 +672,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const 
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_PinStageResetParams(const _gpio_pin_t pin, uint32_t crxReg)
 {
-    crxReg = _GPIO_PinStageParams(pin, _GPIO_MODE_INPUT, _GPIO_CNF_INPUT_FLOATING, crxReg);
-	return crxReg;
+    return _GPIO_PinStageParams(pin, _GPIO_MODE_INPUT, _GPIO_CNF_INPUT_FLOATING, crxReg);
 }
 
 /**
@@ -694,81 +691,9 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 	return odrReg;
 }
 
-
-
-
 /** @} */ // GPIO_02_LL_03_PinParams
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*---------------------------------------------- GPIO LL Pin ----------------------------------------------*/
-
-
-
-
-
-// /**
-//  * @brief Set single pin (atomic)
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0 - 15)
-//  * @details Uses BSRR for atomic set operation
-//  */
-// __STATIC_FORCEINLINE void _GPIO_SetPin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-// 	__GPIO_WriteBSRR(GPIOx, GPIO_LL_GET_PIN_MASK(pin));
-// }
-
-// /**
-//  * @brief Reset a single pin (atomic)
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0 - 15)
-//  * @details Uses BRR for atomic reset operation
-//  */
-// __STATIC_FORCEINLINE void _GPIO_ResetPin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-// 	__GPIO_WriteBRR(GPIOx, GPIO_LL_GET_PIN_MASK(pin));
-// }
-
-// /**
-//  * @brief Toggle pin state
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0 - 15)
-//  * @details Reads ODR via IDR, toggles, writes back to ODR
-//  */
-// __STATIC_FORCEINLINE void _GPIO_TogglePin(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-// 	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadIDR(GPIOx) ^ GPIO_LL_GET_PIN_MASK(pin)));
-// }
-
-// /**
-//  * @brief Read pin state
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0 - 15)
-//  * @returns State of pin:
-//  * @returns - `0x00`: Pin Reset
-//  * @returns - `0x01`: Pin Set
-//  */
-// __STATIC_FORCEINLINE uint8_t _GPIO_ReadPin(const GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-// 	return (uint8_t) ((__GPIO_ReadIDR(GPIOx) & GPIO_LL_GET_PIN_MASK(pin)) ? 0x01 : 0x00);
-// }
-
-// /** @} */ // GPIO_02_LL_02_Pin
-
-
-
 
 // /**
 //  * @brief Set GPIO Pin Mode and Configuration
@@ -797,18 +722,6 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 // 		reg = (reg & ~(0xFUL << shift)) | ((((uint32_t)config << 2) | mode) << shift);
 // 		__GPIO_WriteCRL(GPIOx, reg);
 // 	}
-// }
-
-// /**
-//  * @brief Reset GPIO Pin to default mode
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * 
-//  * @note Sets the Pin to Input Floating State
-//  */
-// __STATIC_FORCEINLINE void _GPIO_ResetPinParams(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-//     _GPIO_SetPinParams(GPIOx, pin, _GPIO_MODE_INPUT, _GPIO_CNF_INPUT_FLOATING);
 // }
 
 // /**
@@ -902,8 +815,6 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 // }
 
 // /** @} */ // GPIO_02_LL_03_PinParams
-
-
 
 // /**
 //  * @brief Lock GPIO pin configuration

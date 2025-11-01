@@ -296,37 +296,37 @@ __STATIC_FORCEINLINE const _gpio_mode_t GPIO_getLLPinMode(const gpio_pin_mode_t 
  * * @{
  */
 
-/** @brief GPIO Pin Configuration type @typedef gpio_pin_cnf_t */
-typedef uint8_t											gpio_pin_cnf_t;
+/** @brief GPIO Pin Configuration type @typedef gpio_pin_config_t */
+typedef uint8_t											gpio_pin_config_t;
 /**
  * @section GPIO_Driver_PinConfiguration_Macros GPIO Driver Pin Configuration Macros
  * @details GPIO Driver Pin Configuration Macros
  * @{
  */
 /** @brief Analog input mode @def GPIO_PIN_CNF_IN_ANALOG */
-#define GPIO_PIN_CNF_IN_ANALOG							((gpio_pin_cnf_t) 0x00)
+#define GPIO_PIN_CNF_IN_ANALOG							((gpio_pin_config_t) 0x00)
 /** @brief Floating input (no pull-up/down) @def GPIO_PIN_CNF_IN_FLOAT */
-#define GPIO_PIN_CNF_IN_FLOAT							((gpio_pin_cnf_t) 0x01)
+#define GPIO_PIN_CNF_IN_FLOAT							((gpio_pin_config_t) 0x01)
 /**
  * @brief Input with pull-down resistor
  * @details Requires the corresponding bit in ODR to be set to 0
  * @def GPIO_PIN_CNF_IN_PULL_DOWN
  */
-#define GPIO_PIN_CNF_IN_PULL_DOWN						((gpio_pin_cnf_t) 0x02)
+#define GPIO_PIN_CNF_IN_PULL_DOWN						((gpio_pin_config_t) 0x02)
 /**
  * @brief Input with pull-up resistor
  * @details Requires the corresponding bit in ODR to be set to 1
  * @def GPIO_PIN_CNF_IN_PULL_UP
  */
-#define GPIO_PIN_CNF_IN_PULL_UP							((gpio_pin_cnf_t) 0x12)
+#define GPIO_PIN_CNF_IN_PULL_UP							((gpio_pin_config_t) 0x12)
 /** @brief General purpose output push-pull @def GPIO_PIN_CNF_OUT_GP_PP */
-#define GPIO_PIN_CNF_OUT_GP_PP							((gpio_pin_cnf_t) 0x03)
+#define GPIO_PIN_CNF_OUT_GP_PP							((gpio_pin_config_t) 0x03)
 /** @brief General purpose output open-drain @def GPIO_PIN_CNF_OUT_GP_OD */
-#define GPIO_PIN_CNF_OUT_GP_OD							((gpio_pin_cnf_t) 0x04)
+#define GPIO_PIN_CNF_OUT_GP_OD							((gpio_pin_config_t) 0x04)
 /** @brief Alternate function output push-pull @def GPIO_PIN_CNF_OUT_AF_PP */
-#define GPIO_PIN_CNF_OUT_AF_PP							((gpio_pin_cnf_t) 0x05)
+#define GPIO_PIN_CNF_OUT_AF_PP							((gpio_pin_config_t) 0x05)
 /** @brief Alternate function output open-drain @def GPIO_PIN_CNF_OUT_AF_OD */
-#define GPIO_PIN_CNF_OUT_AF_OD							((gpio_pin_cnf_t) 0x06)
+#define GPIO_PIN_CNF_OUT_AF_OD							((gpio_pin_config_t) 0x06)
 
 /** @}  */ // GPIO_Driver_PinConfiguration_Macros
 
@@ -351,10 +351,10 @@ typedef uint8_t											gpio_pin_cnf_t;
 
 /**
  * @brief Maps driver-side GPIO configuration to LL GPIO configuration
- * @param[in][in] config GPIO pin configuration (gpio_pin_cnf_t)
+ * @param[in][in] config GPIO pin configuration (gpio_pin_config_t)
  * @return Corresponding LL configuration (_gpio_config_t)
  */
-__STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf_t config)
+__STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_config_t config)
 {
 	switch (config)
 	{
@@ -397,7 +397,7 @@ __STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf
 
 /**
  * @brief Checks if a GPIO configuration uses Alternate Function (AF) mode
- * @param[in][in] config GPIO pin configuration value of type @ref gpio_pin_cnf_t
+ * @param[in][in] config GPIO pin configuration value of type @ref gpio_pin_config_t
  * @returns true (non-zero) if configuration is AF type else 0
  * @note According to STM32F1 reference manual (RM0008, Table 20),
  *       Alternate Function configurations are:
@@ -423,7 +423,7 @@ __STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf
 /**
  * @brief Validates GPIO mode and configuration compatibility
  * @param[in][in] mode The GPIO pin mode (of type gpio_pin_mode_t)
- * @param[in][in] config  The GPIO pin configuration (of type gpio_pin_cnf_t)
+ * @param[in][in] config  The GPIO pin configuration (of type gpio_pin_config_t)
  * @returns non-zero (true) if combination is valid else 0
  * @note According to STM32F1 reference manual (RM0008, Table 20):
  * - When MODE = 0b00 (Input), CNF must be one of the `GPIO_PIN_CNF_IN_*` values.
@@ -449,7 +449,7 @@ __STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf
 
 /**
  * @brief Extracts GPIO Pull-Up or Pull-Down configuration from a driver pin configuration value.
- * @param[in][in] config GPIO configuration value of type @ref gpio_pin_cnf_t.
+ * @param[in][in] config GPIO configuration value of type @ref gpio_pin_config_t.
  *
  * @returns `_GPIO_PULL_PULLUP` if the configuration value has any bits set in
  *         the upper nibble (`0xF0`), otherwise `_GPIO_PULL_PULLDOWN`.
@@ -605,7 +605,7 @@ typedef struct
 	 *
 	 * @see @ref GPIO_03_Driver_01_Types_04_PinConfig "GPIO Pin Configuration"
 	 */
-	gpio_pin_cnf_t config : 2;
+	gpio_pin_config_t config : 2;
 } gpio_config_t;
 
 /** @} */ // GPIO_03_Driver_02_Config
@@ -691,7 +691,73 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 	GPIO_Toggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
-/*********************************************** Driver APIs ***********************************************/
+/*---------------------------------------------- Driver APIs ----------------------------------------------*/
+
+/**
+ * @brief  Configures the operating mode of one or more GPIO pins.
+ * @details
+ * Updates the MODE bits in the GPIO port configuration registers (CRL/CRH)
+ * for the selected pin(s). Supports configuring multiple pins simultaneously.
+ *
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
+ *
+ * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or mode).
+ *
+ * @note
+ * - Automatically determines whether CRL or CRH needs to be updated.
+ * - Existing configuration bits for unaffected pins remain unchanged.
+ * - Use with @ref GPIO_SetPinConfig for full electrical configuration.
+ */
+driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode);
+
+/**
+ * @brief  Configures the electrical setting (CNF bits) of one or more GPIO pins.
+ * @details
+ * Updates the CNF[1:0] configuration bits in CRL/CRH for the specified pins,
+ * setting input/output type and alternate-function behavior as defined
+ * by the driver configuration constants.
+ *
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
+ *
+ * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or configuration).
+ *
+ * @note
+ * - Automatically determines whether CRL or CRH registers are affected.
+ * - Use with @ref GPIO_SetPinMode to fully configure a pin.
+ * - Safe for multi-pin configuration; unaffected bits are preserved.
+ * - Does not configure Pull Up, need to be externally set.
+ */
+driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_config_t config);
+
+/**
+ * @brief  Configures GPIO pin mode and electrical parameters.
+ * @details
+ * Updates the MODE and CNF fields in the GPIO control registers (CRL/CRH),
+ * and sets the pull-up/pull-down state in ODR when applicable.
+ * Supports batch configuration of multiple pins using bitmask.
+ *
+ * @param[in] gpio    GPIO port identifier (see @ref gpio_port_t)
+ * @param[in] pin     Target pin(s) as bitmask (see @ref gpio_pin_t)
+ * @param[in] mode    Desired operating mode (see @ref gpio_pin_mode_t)
+ * @param[in] config  Electrical configuration (see @ref gpio_pin_config_t)
+ *
+ * @note
+ * - Automatically detects whether CRL or CRH should be updated per pin.
+ * - Pull-up/down configuration is only applied when valid for input modes.
+ * - Existing register bits for unaffected pins remain unchanged.
+ * - Does not perform validation; call-site must ensure compatible parameters.
+ *
+ * @retval None
+ *
+ */
+void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
+
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
@@ -700,7 +766,7 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t *const gpioConfig);
+driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfig);
 
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
