@@ -305,31 +305,6 @@ __STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const GPIOx)
  */
 
 /**
- * @brief Creates a 32-bit mask for a single GPIO Pin
- *
- * This macro generates a bitmask where only the specified pin's bit is set
- * It is typically used for register operations like setting, clearing, or checking
- * the state of a single pin in a 16-pin port (0-15).
- *
- * @param pin The GPIO pin number (0-15) for which the mask should be created.
- * @return A 32-bit unsigned integer (\c uint32_t) with the bit corresponding to
- * the \p pin parameter set to '1', and all other bits set to '0'.
- * The mask is constrained to the lower 16 bits (0xFFFFUL).
- *
- * @note 
- * - This implementation assumes a standard 16-pin port structure, as it masks the result with \c 0xFFFFUL
- * - Pins greater than 15 will result in a mask of \c 0x0000UL due to the final AND operation
- *
- * @code
- * // Example usage:
- * uint32_t pin_mask = GPIO_GET_PIN_MASK(5); // pin_mask will be 0x0020UL (0b100000)
- * @endcode
- * 
- * @def GPIO_GET_PIN_MASK
- */
-#define GPIO_GET_PIN_MASK(pin)						((uint32_t)((0x01UL << (pin)) & 0xFFFFUL))
-
-/**
  * @brief GPIO Pin Identifier Type
  * 
  * @details
@@ -389,6 +364,29 @@ typedef uint8_t _gpio_pin_t;
 #define _GPIO_PIN_14					((_gpio_pin_t)0x0E)
 /** @brief GPIO Pin 15 @def _GPIO_PIN_15 */
 #define _GPIO_PIN_15					((_gpio_pin_t)0x0F)
+/** @brief GPIO Max Pin used for Masking  @def _GPIO_MAX_PIN */
+#define _GPIO_MAX_PIN					_GPIO_PIN_15
+
+/**
+ * @brief Creates a 32-bit mask for a single GPIO Pin
+ * @param[in] pin The GPIO pin number (0-15) for which the mask should be created.
+ * @return A 32-bit unsigned integer pinMask
+ * @note
+ * - This implementation assumes a standard 16-pin port structure, as it masks the result with \c 0xFFFFUL
+ * - Pins greater than 15 will result in a mask of \c 0x0000UL due to the final AND operation
+ * @def GPIO_GET_PIN_MASK
+ */
+#define GPIO_GET_PIN_MASK(pin)						((uint32_t)((0x01UL << (pin)) & 0xFFFFUL))
+
+/**
+ * @brief Extracts the Pin Number (0-15) from a mask with a single bit set
+ * @param[in] pinMask A non-zero 32-bit mask with exactly one bit set (e.g., 0x0020UL)
+ * @return uint32_t The position of the set bit, which is the Pin Number (0-15)
+ * @note This macro uses the highly optimized GCC built-in function `__builtin_ctz`
+ * * @def GPIO_EXTRACT_PIN_MASK
+ */
+#define GPIO_EXTRACT_PIN_MASK(pinMask)				\
+	((((uint32_t)(pinMask)) != 0x00UL)? ((_gpio_pin_t)__builtin_ctz((pinMask) & _GPIO_MAX_PIN)) : ((_gpio_pin_t) GPIO_GET_PIN_MASK(17)))
 
 /** @} */ // GPIO_02_LL_02_Pin
 
@@ -419,6 +417,11 @@ typedef uint8_t _gpio_pin_t;
  */
 /** @brief GPIO Mode LL Data Type @typedef _gpio_mode_t */
 typedef uint8_t _gpio_mode_t;
+/**
+ * @section GPIO_LL_PinParams_Mode_Macros GPIO LL Pin Configuration Macros
+ * @details Use this for LL
+ * @{
+ */
 /** @brief Input mode @def _GPIO_MODE_INPUT */
 #define _GPIO_MODE_INPUT							((_gpio_mode_t)0x00)
 /** @brief Output mode, max speed 10 MHz @def _GPIO_MODE_OUTPUT_10MHZ */
@@ -427,25 +430,25 @@ typedef uint8_t _gpio_mode_t;
 #define _GPIO_MODE_OUTPUT_2MHZ						((_gpio_mode_t)0x02)
 /** @brief Output mode, max speed 50 MHz @def _GPIO_MODE_OUTPUT_50MHZ */
 #define _GPIO_MODE_OUTPUT_50MHZ						((_gpio_mode_t)0x03)
-
+/** @} */ // GPIO_LL_PinParams_Mode_Macros
 /**
  * @brief Creates a mask for the MODE field (bits 1:0 of the 4-bit block)
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
- * @param mode Mode Value
+ * @param mode @ref GPIO_LL_PinParams_Mode_Macros "Pin Mode Value"
  * @return The final 32-bit mask value
- * @def _GPIO_MODE_GET_MASK
+ * @def _GPIO_PIN_MODE_GET_MASK
  */
-#define _GPIO_MODE_GET_MASK(pin, mode) \
+#define _GPIO_PIN_MODE_GET_MASK(pin, mode) \
     ((uint32_t)(((uint32_t)(mode)) << (((pin) & _GPIO_PIN_7) << 2)))
 
 /**
  * @brief Creates a reset mask for the MODE field (bits 1:0 of the 4-bit block)
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
  * @return The final 32-bit mask value (with 2 bits set to '1')
- * @ref _GPIO_MODE_GET_MASK "GPIO Mode Mask"
- * @def _GPIO_MODE_RESET_MASK
+ * @ref _GPIO_PIN_MODE_GET_MASK "GPIO Pin Mode Mask"
+ * @def _GPIO_PIN_MODE_RESET_MASK
  */
-#define _GPIO_MODE_RESET_MASK(pin)						_GPIO_MODE_GET_MASK(pin, 0x03)
+#define _GPIO_PIN_MODE_RESET_MASK(pin)						_GPIO_PIN_MODE_GET_MASK(pin, 0x03)
 
 /** @} */ // GPIO_LL_PinParams_Mode
 
@@ -468,36 +471,78 @@ typedef uint8_t _gpio_mode_t;
  *       - Output mode: Push-pull/Open-drain configurations
  * @{
  */
-/** @brief GPIO Configuration LL Data Type @typedef _gpio_config_t */
+/** @brief GPIO Pin Configuration LL Data Type @typedef _gpio_config_t */
 typedef uint8_t _gpio_config_t;
-/** @brief Input: Analog mode | Output: Push-pull @def _GPIO_CNF_INPUT_ANALOG */
-#define _GPIO_CNF_INPUT_ANALOG    ((_gpio_config_t) 0x00)
-/** @brief Input: Floating input | Output: Open-drain @def _GPIO_CNF_INPUT_FLOATING */
-#define _GPIO_CNF_INPUT_FLOATING  ((_gpio_config_t) 0x01)
-/** @brief Input: Pull-up/pull-down | Output: Alternate function push-pull @def _GPIO_CNF_INPUT_PULL */
-#define _GPIO_CNF_INPUT_PULL      ((_gpio_config_t) 0x02)
-/** @brief Input: Reserved | Output: Alternate function open-drain @def _GPIO_CNF_AF_OD */
-#define _GPIO_CNF_AF_OD           ((_gpio_config_t) 0x03)
+/** @brief GPIO Pull-Up/Pull-Down State @typedef _gpio_pin_pull_state_t */
+typedef uint8_t _gpio_pin_pull_state_t;
+
 /**
- * @brief Creates a 2-bit mask for the CNF field of a single GPIO Pin
- * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO pin number" (0-15) for which the mask should be created.
- * @return A 32-bit unsigned integer (`uint32_t`) with the pin's 2-bit CNF
- * field set to '11' (0x0C), and all other bits set to '0'.
- *
- * @see @ref GPIO_LL_Config "GPIO LL Configuration Macros"
- *
- * @code
- * // Example: Mask for Pin 5's CNF field (Shift = 5 * 4 + 2 = 22)
- * uint32_t cnf_mask_pin5 = _GPIO_CNF_MASK(_GPIO_PIN_5);
- * // Result: 0x0000000CUL shifted left 20 places
- * // Example: Mask for Pin 12's CNF field (Shift = (12 & 7) * 4 + 2 = 16 + 2 = 18)
- * uint32_t cnf_mask_pin12 = _GPIO_CNF_MASK(_GPIO_PIN_12);
- * // Result: 0x000C0000UL
- * @endcode
- * @def _GPIO_CNF_MASK
+ * @brief Configuration setting when MODE = Input (0x00)
+ * @section GPIO_LL_PinParams_CNF_Input_Macros 
+ * @details Use this for LL Input Configuration 
+ * @{
  */
-#define _GPIO_CNF_MASK(pin) \
-    ((uint32_t)(0x03UL << ((((pin) & _GPIO_PIN_7) << 2) + 2)))
+/** @brief Input: Analog mode (CNF=0x00) @def _GPIO_CNF_INPUT_ANALOG */
+#define _GPIO_CNF_INPUT_ANALOG							((_gpio_config_t) 0x00)
+/** @brief Input: Floating input (CNF=0x01) @def _GPIO_CNF_INPUT_FLOATING */
+#define _GPIO_CNF_INPUT_FLOATING						((_gpio_config_t) 0x01)
+/** @brief Input: Pull-up/Pull-down (CNF=0x02) @def _GPIO_CNF_INPUT_PULL */
+#define _GPIO_CNF_INPUT_PULL							((_gpio_config_t) 0x02)
+/** @brief Input: Reserved (CNF=0x03) @def _GPIO_CNF_INPUT_RESERVED */
+#define _GPIO_CNF_INPUT_RESERVED						((_gpio_config_t) 0x03)
+
+/**
+ * @brief LL Constants for setting the Pull-Up/Pull-Down state in the ODR register.
+ * @section GPIO_LL_PinParams_CNF_Input_Macros_PullConfig 
+ * @details Use this for LL PULL Staging 
+ * @{
+ */
+/** @brief Sets the ODR bit to '0' for PULL-DOWN activation. @def _GPIO_PULL_PULLDOWN */
+#define _GPIO_PULL_PULLDOWN								((_gpio_pin_pull_state_t) 0x00)
+/** @brief Sets the ODR bit to '1' for PULL-UP activation. @def _GPIO_PULL_PULLUP */
+#define _GPIO_PULL_PULLUP								((_gpio_pin_pull_state_t) 0x01)
+
+/** @} */ // GPIO_LL_PinParams_CNF_Input_Macros_PullConfig
+
+/** @} */ // GPIO_LL_PinParams_CNF_Input_Macros
+
+/**
+ * @brief Configuration setting when MODE = Output/AF (0x01, 0x02, 0x03)
+ * @section GPIO_LL_PinParams_CNF_Output_Macros 
+ * @details Use this for LL Output Configuration 
+ * @{
+ */
+/** @brief Output: General Purpose Push-pull (CNF=0x00) @def _GPIO_CNF_OUTPUT_PP */
+#define _GPIO_CNF_OUTPUT_PP								((_gpio_config_t) 0x00)
+/** @brief Output: General Purpose Open-drain (CNF=0x01) @def _GPIO_CNF_OUTPUT_OD */
+#define _GPIO_CNF_OUTPUT_OD								((_gpio_config_t) 0x01)
+/** @brief Output: Alternate Function Push-pull (CNF=0x02) @def _GPIO_CNF_AF_PP */
+#define _GPIO_CNF_AF_PP									((_gpio_config_t) 0x02)
+/** @brief Output: Alternate Function Open-drain (CNF=0x03) @def _GPIO_CNF_AF_OD */
+#define _GPIO_CNF_AF_OD									((_gpio_config_t) 0x03)
+
+/** @} */ // GPIO_LL_PinParams_CNF_Output_Macros
+
+/** @} */ // GPIO_LL_PinParams_Config_Macros
+
+/**
+ * @brief Creates a mask for the CNF field (bits 3:2 of the 4-bit block).
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param cnf @ref GPIO_LL_PinParams_Config_Macros "Pin Configuration Value"
+ * @return The final 32-bit mask value
+ * @def _GPIO_PIN_CNF_GET_MASK
+ */
+#define _GPIO_PIN_CNF_GET_MASK(pin, cnf) \
+	((uint32_t)(((uint32_t)(cnf)) << ((((pin) & _GPIO_PIN_7) << 2) + 2)))
+/**
+ * @brief Creates a reset mask for the CNF field (bits 3:2 of the 4-bit block).
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number" (0-15).
+ * @return The final 32-bit mask value (with 2 bits set to '1').
+ * @ref _GPIO_PIN_CNF_GET_MASK "GPIO Pin Configuration Mask"
+ * @def _GPIO_PIN_CNF_RESET_MASK
+ */
+#define _GPIO_PIN_CNF_RESET_MASK(pin)							_GPIO_PIN_CNF_GET_MASK(pin, 0x03)	
+
 /** @} */ // GPIO_LL_PinParams_Config
 
 /** @} */ // GPIO_02_LL_03_PinParams
@@ -553,11 +598,59 @@ typedef uint8_t _gpio_lock_status_t;
  * @{
  */
 
-__STATIC_FORCEINLINE void _GPIO_StagePinMode(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin, const _gpio_mode_t mode, uint32_t* const reg)
+
+/**
+ * @brief Stage GPIO Pin Mode Configuration into input register
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param[in] mode Value of @ref GPIO_LL_PinParams_Mode_Macros "GPIO Pin Mode"
+ * @param[in] crxReg The current staged CRL/CRH (CRx) value
+ * @returns The updated staged register value with Pin Mode
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register should be updated instance of either CRL/CRH
+ * @note - Register Value to be provided as input
+ * @see @ref GPIO_Pins_Mode "GPIO Pin Mode Theory"
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinMode(const _gpio_pin_t pin, const _gpio_mode_t mode, uint32_t crxReg)
 {
-	*reg &= ~_GPIO_MODE_MASK(pin);
+	crxReg &= ~_GPIO_PIN_MODE_RESET_MASK(pin);
+	crxReg |= _GPIO_PIN_MODE_GET_MASK(pin, mode);
+	return crxReg;
 }
 
+/**
+ * @brief Stage GPIO Pin Configuration into the input register
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param[in] config Value of @ref GPIO_LL_PinParams_Config_Macros "GPIO Pin Configuration"
+ * @param[in] crxReg The current staged CRL/CRH (CRx) value
+ * @returns The updated staged register value with Pin Configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register should be updated instance of either CRL/CRH (CRx)
+ * @note - Register Value to be provided as input
+ * @see @ref @ref GPIO_LL_PinParams_Config "GPIO Pin Configuration Theory"
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinConfig(const _gpio_pin_t pin, const _gpio_config_t config, uint32_t crxReg)
+{
+	crxReg &= ~_GPIO_PIN_CNF_RESET_MASK(pin);
+	crxReg |= _GPIO_PIN_CNF_GET_MASK(pin, config);
+	return crxReg; 
+}
+
+
+/**
+ * @brief Stage GPIO Pin Pull-Up/Pull-Down state into the input ODR register value.
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param[in] pud_state Value of @ref GPIO_LL_PinParams_CNF_Input_Macros_PullConfig "Pull-Up or Pull-Down"
+ * @param[in] odrReg The current staged ODR value
+ * @returns The updated staged ODR register value with new PULL state
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinPullConfig(const _gpio_pin_t pin, const _gpio_pin_pull_state_t pud_state, uint32_t odrReg)
+{
+	if(pud_state == _GPIO_PULL_PULLDOWN) odrReg &= ~GPIO_GET_PIN_MASK(pin);
+	else if (pud_state == _GPIO_PULL_PULLUP) odrReg |= GPIO_GET_PIN_MASK(pin);
+	return odrReg;
+}
 
 /** @} */ // GPIO_02_LL_03_PinParams
 
