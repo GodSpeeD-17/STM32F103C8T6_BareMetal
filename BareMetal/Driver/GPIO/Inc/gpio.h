@@ -743,7 +743,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
  * Supports batch configuration of multiple pins using bitmask.
  *
  * @param[in] gpio    GPIO port identifier (see @ref gpio_port_t)
- * @param[in] pin     Target pin(s) as bitmask (see @ref gpio_pin_t)
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @param[in] mode    Desired operating mode (see @ref gpio_pin_mode_t)
  * @param[in] config  Electrical configuration (see @ref gpio_pin_config_t)
  *
@@ -771,7 +771,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfi
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
- * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: FailureGPIO_03_Driver_01_Types01_Types
  * @returns - DRIVER_SUCCESS: Success
@@ -813,6 +813,106 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_
 __STATIC_FORCEINLINE void OB_LED_Deinit(void)
 {
 	return GPIO_Deinit(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+}
+
+/**
+ * @brief Get GPIO Pin Configuration Register Value
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return uint8_t 4-bit configuration value (CNF[1:0] | MODE[1:0])
+ * @see @ref GPIO_Pins_Summary "Summary of Configuration"
+ * 
+ * @details
+ * Retrieves the complete 4-bit configuration value for a specified GPIO pin
+ * directly from the hardware registers. The returned value matches the exact
+ * bit pattern stored in the CRL/CRH registers.
+ * 
+ * - **Bit 3:2**: CNF configuration field
+ * - **Bit 1:0**: MODE configuration field  
+ * 
+ * @note The returned value can be directly compared with predefined constants
+ *       or used for bit manipulation operations.
+ * 
+ */
+__STATIC_FORCEINLINE uint8_t GPIO_GetPinParameters(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+	_gpio_pin_t pinLL = GPIO_getLLPin(pin); 
+	uint32_t reg = (pinLL & _GPIO_PIN_7) ? __GPIO_ReadCRH(GPIO_getLLPort(gpio)) : __GPIO_ReadCRL(GPIO_getLLPort(gpio));
+	reg &= (_GPIO_PIN_CNF_MASK(pinLL) | _GPIO_PIN_MODE_MASK(pinLL));
+	return ((uint8_t)(reg >> pinLL));
+}
+
+/**
+ * @brief Get GPIO Pin Mode Configuration
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return @ref gpio_pin_mode_t "GPIO Driver Pin Mode"
+ * 
+ * @details
+ * Extracts the MODE field from the pin's configuration register.
+ * Returns only the 2-bit mode value without the configuration bits.
+ */
+__STATIC_FORCEINLINE gpio_pin_mode_t _GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+    _gpio_mode_t modeLL = (GPIO_GetPinParameters(gpio, pin) & 0x03);
+	switch(modeLL)
+	{
+		case _GPIO_MODE_INPUT:
+			return GPIO_PIN_MODE_INPUT;
+		break;
+
+		case _GPIO_MODE_OUTPUT_10MHz:
+			return GPIO_PIN_MODE_OUTPUT_10MHz;
+		break;
+
+		case _GPIO_MODE_OUTPUT_2MHz:
+			return GPIO_PIN_MODE_OUTPUT_2MHz;
+		break;
+
+		case _GPIO_MODE_OUTPUT_50MHz:
+			return GPIO_PIN_MODE_OUTPUT_50MHz;
+		break;
+
+		default:
+		break;
+	}
+}
+
+/**
+ * @brief Get GPIO Pin Configuration Type
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return _gpio_config_t @ref GPIO_LL_Config "Pin Configuration"
+ * 
+ * @details
+ * Extracts the CNF field from the pin's configuration register.
+ * Returns only the 2-bit configuration value without the mode bits.
+ */
+__STATIC_FORCEINLINE _gpio_config_t _GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+    _gpio_config_t configLL = (GPIO_(GPIO_GetPinParameters(gpio, pin) >> 2) & 0x03);
+	// switch(configLL)
+	// {
+	// 	case _GPIO_CNF_INPUT_ANALOG:
+	// 		return GPIO_PIN_CNF_IN_ANALOG;
+	// 	break;
+
+	// 	case _GPIO_CNF_INPUT_FLOATING:
+	// 		return GPIO_PIN_CNF_IN_FLOAT;
+	// 	break;
+
+	// 	case _GPIO_CNF_INPUT_PULL:
+	// 		return GPIO_PIN_CNF_IN_PULL_DOWN;
+	// 	break;
+
+	// 	case _GPIO_CNF_OUTPUT_PP:
+	// 		return GPIO_PIN_CNF_OUT_GP_PP;
+	// 	break;
+
+	// 	case _GPIO_CNF_OUTPUT_OD:
+	// 		return GPIO_PIN_CNF_OUT_GP_OD;
+	// 	break;
+	// }
 }
 
 #endif /* GPIO_H_ */

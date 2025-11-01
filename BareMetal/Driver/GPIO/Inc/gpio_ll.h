@@ -448,7 +448,14 @@ typedef uint8_t _gpio_mode_t;
  */
 #define _GPIO_PIN_MODE_GET_MASK(pin, mode) \
     ((uint32_t)(((uint32_t)(mode)) << (((pin) & _GPIO_PIN_7) << 2)))
-
+/**
+ * @brief Masks the MODE field (bits 1:0 of the 4-bit block)
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @return The final 32-bit mask value
+ * @def _GPIO_PIN_MODE_MASK
+ */
+#define _GPIO_PIN_MODE_MASK(pin) \
+    ((uint32_t)(0x03UL << (((pin) & _GPIO_PIN_7) << 2)))
 /**
  * @brief Creates a reset mask for the MODE field (bits 1:0 of the 4-bit block)
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
@@ -542,6 +549,14 @@ typedef uint8_t _gpio_pin_pull_state_t;
  */
 #define _GPIO_PIN_CNF_GET_MASK(pin, cnf) \
 	((uint32_t)(((uint32_t)(cnf)) << ((((pin) & _GPIO_PIN_7) << 2) + 2)))
+/**
+ * @brief Masks the CNF field (bits 3:2 of the 4-bit block).
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @return The final 32-bit mask value
+ * @def _GPIO_PIN_CNF_MASK
+ */
+#define _GPIO_PIN_CNF_MASK(pin) \
+	((uint32_t)((0x03UL) << ((((pin) & _GPIO_PIN_7) << 2) + 2)))
 /**
  * @brief Creates a reset mask for the CNF field (bits 3:2 of the 4-bit block).
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number" (0-15).
@@ -695,124 +710,8 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 
 /*---------------------------------------------- GPIO LL Pin ----------------------------------------------*/
 
-// /**
-//  * @brief Set GPIO Pin Mode and Configuration
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @param[in] mode @ref GPIO_Pins_Mode "Mode Theory" | @ref GPIO_LL_Mode "GPIO LL Modes"
-//  * @param[in] config @ref GPIO_Pins_Config "Configuration Theory" | @ref GPIO_LL_Config "GPIO LL Configurations"
-//  * @see @ref GPIO_Pins_Summary "Summary of Configuration"
-//  */
-// __STATIC_FORCEINLINE void _GPIO_SetPinParams(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin, const _gpio_mode_t mode, const _gpio_config_t config)
-// {
-// 	uint32_t reg = 0x00UL;
-// 	uint8_t shift = ((pin & 0x07) << 2);  // (pin % 8) * 4
-	
-// 	// Pins 8-15: Use CRH
-// 	if (pin & 0x08) 
-// 	{
-// 		reg = __GPIO_ReadCRH(GPIOx);
-// 		reg = (reg & ~(0xFUL << shift)) | ((((uint32_t)config << 2) | mode) << shift);
-// 		__GPIO_WriteCRH(GPIOx, reg);
-// 	} 
-// 	// Pins 0-7: Use CRL
-// 	else 
-// 	{
-// 		reg = __GPIO_ReadCRL(GPIOx);
-// 		reg = (reg & ~(0xFUL << shift)) | ((((uint32_t)config << 2) | mode) << shift);
-// 		__GPIO_WriteCRL(GPIOx, reg);
-// 	}
-// }
 
-// /**
-//  * @brief Get GPIO Pin Configuration Register Value
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @return uint8_t 4-bit configuration value (CNF[1:0] | MODE[1:0])
-//  * @see @ref GPIO_Pins_Summary "Summary of Configuration"
-//  * 
-//  * @details
-//  * Retrieves the complete 4-bit configuration value for a specified GPIO pin
-//  * directly from the hardware registers. The returned value matches the exact
-//  * bit pattern stored in the CRL/CRH registers.
-//  * 
-//  * - **Bit 3:2**: CNF configuration field
-//  * - **Bit 1:0**: MODE configuration field  
-//  * 
-//  * @note The returned value can be directly compared with predefined constants
-//  *       or used for bit manipulation operations.
-//  * 
-//  */
-// __STATIC_FORCEINLINE uint8_t _GPIO_GetPinParams(const GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-// 	uint32_t reg = 0x00UL;
-// 	// Pins 8-15: Use CRH
-// 	if (pin & 0x08) reg = __GPIO_ReadCRH(GPIOx);
-// 	// Pins 0-7: Use CRL
-// 	else reg = __GPIO_ReadCRL(GPIOx);
-// 	reg >>= (pin & 0x07) << 2;
-// 	return (uint8_t)(reg & 0x0FUL);
-// }
 
-// /**
-//  * @brief Get GPIO Pin Mode Configuration
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @return _gpio_mode_t @ref GPIO_LL_Mode "Pin Mode"
-//  * 
-//  * @details
-//  * Extracts the MODE field from the pin's configuration register.
-//  * Returns only the 2-bit mode value without the configuration bits.
-//  */
-// __STATIC_FORCEINLINE _gpio_mode_t _GPIO_GetPinMode(const GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-//     return ((_gpio_mode_t) (_GPIO_GetPinParams(GPIOx, pin) & 0x03));
-// }
-
-// /**
-//  * @brief Get GPIO Pin Configuration Type
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @return _gpio_config_t @ref GPIO_LL_Config "Pin Configuration"
-//  * 
-//  * @details
-//  * Extracts the CNF field from the pin's configuration register.
-//  * Returns only the 2-bit configuration value without the mode bits.
-//  */
-// __STATIC_FORCEINLINE _gpio_config_t _GPIO_GetPinConfig(const GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin)
-// {
-//     return ((_gpio_config_t) ((_GPIO_GetPinParams(GPIOx, pin) >> 2) & 0x03));
-// }
-
-// /**
-//  * @brief Set GPIO Pin Mode Configuration
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @param[in] mode @ref GPIO_Pins_Mode "Mode Theory" | @ref GPIO_LL_Mode "GPIO LL Modes"
-//  * 
-//  * @details
-//  * Updates only the MODE field of the pin's configuration register
-//  * while preserving the existing CNF configuration bits.
-//  */
-// __STATIC_FORCEINLINE void _GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin, const _gpio_mode_t mode)
-// {
-//     _GPIO_SetPinParams(GPIOx, pin, (mode & 0x03), _GPIO_GetPinConfig(GPIOx, pin));
-// }
-
-// /**
-//  * @brief Set GPIO Pin Configuration Type
-//  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
-//  * @param[in] pin Pin Number (0-15)
-//  * @param[in] config @ref GPIO_Pins_Config "Configuration Theory" | @ref GPIO_LL_Config "GPIO LL Configurations"
-//  * 
-//  * @details
-//  * Updates only the CNF field of the pin's configuration register
-//  * while preserving the existing MODE bits.
-//  */
-// __STATIC_FORCEINLINE void _GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, const _gpio_pin_t pin, const _gpio_config_t config)
-// {
-//     _GPIO_SetPinParams(GPIOx, pin, _GPIO_GetPinMode(GPIOx, pin), (config & 0x03));
-// }
 
 // /** @} */ // GPIO_02_LL_03_PinParams
 
