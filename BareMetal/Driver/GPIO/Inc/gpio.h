@@ -131,41 +131,41 @@ typedef uint16_t 										gpio_pin_t;
  * @{
  */
 /** @brief No pins bitmask @def GPIO_PIN_NONE @note Use @ref GPIO_PIN_NONE "GPIO_PIN_NONE" for no pins */
-#define GPIO_PIN_NONE									((gpio_pin_t)0x0000)
+#define GPIO_PIN_NONE									((gpio_pin_t) 0x0000)
 /** @brief Pin 0 bitmask @def GPIO_PIN_0 */
-#define GPIO_PIN_0										((gpio_pin_t)0x0001)
+#define GPIO_PIN_0										((gpio_pin_t) 0x0001)
 /** @brief Pin 1 bitmask @def GPIO_PIN_1 */
-#define GPIO_PIN_1										((gpio_pin_t)0x0002)
+#define GPIO_PIN_1										((gpio_pin_t) 0x0002)
 /** @brief Pin 2 bitmask @def GPIO_PIN_2 */
-#define GPIO_PIN_2										((gpio_pin_t)0x0004)
+#define GPIO_PIN_2										((gpio_pin_t) 0x0004)
 /** @brief Pin 3 bitmask @def GPIO_PIN_3 */
-#define GPIO_PIN_3										((gpio_pin_t)0x0008)
+#define GPIO_PIN_3										((gpio_pin_t) 0x0008)
 /** @brief Pin 4 bitmask @def GPIO_PIN_4 */
-#define GPIO_PIN_4										((gpio_pin_t)0x0010)
+#define GPIO_PIN_4										((gpio_pin_t) 0x0010)
 /** @brief Pin 5 bitmask @def GPIO_PIN_5 */
-#define GPIO_PIN_5										((gpio_pin_t)0x0020)
+#define GPIO_PIN_5										((gpio_pin_t) 0x0020)
 /** @brief Pin 6 bitmask @def GPIO_PIN_6 */
-#define GPIO_PIN_6										((gpio_pin_t)0x0040)
+#define GPIO_PIN_6										((gpio_pin_t) 0x0040)
 /** @brief Pin 7 bitmask @def GPIO_PIN_7 */
-#define GPIO_PIN_7										((gpio_pin_t)0x0080)
+#define GPIO_PIN_7										((gpio_pin_t) 0x0080)
 /** @brief Pin 8 bitmask @def GPIO_PIN_8 */
-#define GPIO_PIN_8										((gpio_pin_t)0x0100)
+#define GPIO_PIN_8										((gpio_pin_t) 0x0100)
 /** @brief Pin 9 bitmask @def GPIO_PIN_9 */
-#define GPIO_PIN_9										((gpio_pin_t)0x0200)
+#define GPIO_PIN_9										((gpio_pin_t) 0x0200)
 /** @brief Pin 10 bitmask @def GPIO_PIN_10 */
-#define GPIO_PIN_10										((gpio_pin_t)0x0400)
+#define GPIO_PIN_10										((gpio_pin_t) 0x0400)
 /** @brief Pin 11 bitmask @def GPIO_PIN_11 */
-#define GPIO_PIN_11										((gpio_pin_t)0x0800)
+#define GPIO_PIN_11										((gpio_pin_t) 0x0800)
 /** @brief Pin 12 bitmask @def GPIO_PIN_12 */
-#define GPIO_PIN_12										((gpio_pin_t)0x1000)
+#define GPIO_PIN_12										((gpio_pin_t) 0x1000)
 /** @brief Pin 13 bitmask @def GPIO_PIN_13 */
-#define GPIO_PIN_13										((gpio_pin_t)0x2000)
+#define GPIO_PIN_13										((gpio_pin_t) 0x2000)
 /** @brief Pin 14 bitmask @def GPIO_PIN_14 */
-#define GPIO_PIN_14										((gpio_pin_t)0x4000)
+#define GPIO_PIN_14										((gpio_pin_t) 0x4000)
 /** @brief Pin 15 bitmask @def GPIO_PIN_15 */
 #define GPIO_PIN_15										((gpio_pin_t)0x8000)
 /** @brief All pins bitmask @def GPIO_PIN_ALL @note Use @ref GPIO_PIN_ALL "GPIO_PIN_ALL" for all pins */
-#define GPIO_PIN_ALL									((gpio_pin_t)0xFFFF)
+#define GPIO_PIN_ALL									((gpio_pin_t) 0xFFFF)
 
 /** @} */ // GPIO_Driver_Pin_Macros
 
@@ -227,14 +227,14 @@ typedef uint8_t											gpio_pin_mode_t;
  * @details GPIO Driver Pin Mode Macros 
  * @{
  */
-/** @brief Input mode @def GPIO_MODE_INPUT */
-#define GPIO_MODE_INPUT									((gpio_pin_mode_t) 0x00)
-/** @brief Output mode, max speed 10 MHz @def GPIO_MODE_OUTPUT_10MHz */
-#define GPIO_MODE_OUTPUT_10MHz							((gpio_pin_mode_t) 0x01)
-/** @brief Output mode, max speed 2 MHz @def GPIO_MODE_OUTPUT_2MHz */
-#define GPIO_MODE_OUTPUT_2MHz							((gpio_pin_mode_t) 0x02)
-/** @brief Output mode, max speed 50 MHz @def GPIO_MODE_OUTPUT_50MHz */
-#define GPIO_MODE_OUTPUT_50MHz							((gpio_pin_mode_t) 0x03)
+/** @brief Input mode @def GPIO_PIN_MODE_INPUT */
+#define GPIO_PIN_MODE_INPUT								((gpio_pin_mode_t) 0x00)
+/** @brief Output mode, max speed 10 MHz @def GPIO_PIN_MODE_OUTPUT_10MHz */
+#define GPIO_PIN_MODE_OUTPUT_10MHz						((gpio_pin_mode_t) 0x01)
+/** @brief Output mode, max speed 2 MHz @def GPIO_PIN_MODE_OUTPUT_2MHz */
+#define GPIO_PIN_MODE_OUTPUT_2MHz						((gpio_pin_mode_t) 0x02)
+/** @brief Output mode, max speed 50 MHz @def GPIO_PIN_MODE_OUTPUT_50MHz */
+#define GPIO_PIN_MODE_OUTPUT_50MHz						((gpio_pin_mode_t) 0x03)
 
 /** @} */ // GPIO_Driver_PinMode_Macros
 
@@ -245,10 +245,10 @@ typedef uint8_t											gpio_pin_mode_t;
  * @def GPIO_DRIVER_IS_PIN_MODE
  */
 #define GPIO_DRIVER_IS_PIN_MODE(mode) ( \
-    (mode) == GPIO_MODE_INPUT || \
-    (mode) == GPIO_MODE_OUTPUT_10MHz || \
-    (mode) == GPIO_MODE_OUTPUT_2MHz || \
-    (mode) == GPIO_MODE_OUTPUT_50MHz \
+    (mode) == GPIO_PIN_MODE_INPUT || \
+    (mode) == GPIO_PIN_MODE_OUTPUT_10MHz || \
+    (mode) == GPIO_PIN_MODE_OUTPUT_2MHz || \
+    (mode) == GPIO_PIN_MODE_OUTPUT_50MHz \
 )
 
 /**
@@ -261,19 +261,19 @@ __STATIC_FORCEINLINE const _gpio_mode_t GPIO_getLLPinMode(const gpio_pin_mode_t 
 {
 	switch(mode)
 	{
-		case GPIO_MODE_INPUT:
+		case GPIO_PIN_MODE_INPUT:
 			return _GPIO_MODE_INPUT;
 		break;
 
-		case GPIO_MODE_OUTPUT_10MHz:
+		case GPIO_PIN_MODE_OUTPUT_10MHz:
 			return _GPIO_MODE_OUTPUT_10MHz;
 		break;
 
-		case GPIO_MODE_OUTPUT_2MHz:
+		case GPIO_PIN_MODE_OUTPUT_2MHz:
 			return _GPIO_MODE_OUTPUT_2MHz;
 		break;
 
-		case GPIO_MODE_OUTPUT_50MHz:
+		case GPIO_PIN_MODE_OUTPUT_50MHz:
 			return _GPIO_MODE_OUTPUT_50MHz;
 		break;
 	}
@@ -416,7 +416,7 @@ __STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf
  * @see @ref GPIO_03_Driver_01_Types_03_PinModes "GPIO Driver Pin Modes" | @ref GPIO_03_Driver_01_Types_04_PinConfig "GPIO Driver Pin Configurations" 
  */
 #define GPIO_DRIVER_PIN_IS_PULL_CONFIG(mode, config)	\
-	(((mode) == GPIO_MODE_INPUT) && \
+	(((mode) == GPIO_PIN_MODE_INPUT) && \
 	 (((config) == GPIO_PIN_CNF_IN_PULL_DOWN) || \
 	 ((config) == GPIO_PIN_CNF_IN_PULL_UP)))
 
@@ -431,15 +431,15 @@ __STATIC_FORCEINLINE const _gpio_config_t GPIO_getLLPinConfig(const gpio_pin_cnf
  * @def GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE
  */
 #define GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(mode, config) ( \
-    (((mode) == GPIO_MODE_INPUT) && ( \
+    (((mode) == GPIO_PIN_MODE_INPUT) && ( \
         ((config) == GPIO_PIN_CNF_IN_ANALOG)     || \
         ((config) == GPIO_PIN_CNF_IN_FLOAT)      || \
         ((config) == GPIO_PIN_CNF_IN_PULL_DOWN)  || \
         ((config) == GPIO_PIN_CNF_IN_PULL_UP)       \
     )) || \
-    (((mode) == GPIO_MODE_OUTPUT_10MHz) || \
-     ((mode) == GPIO_MODE_OUTPUT_2MHz)  || \
-     ((mode) == GPIO_MODE_OUTPUT_50MHz)) && ( \
+    (((mode) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
+     ((mode) == GPIO_PIN_MODE_OUTPUT_2MHz)  || \
+     ((mode) == GPIO_PIN_MODE_OUTPUT_50MHz)) && ( \
         ((config) == GPIO_PIN_CNF_OUT_GP_PP)     || \
         ((config) == GPIO_PIN_CNF_OUT_GP_OD)     || \
         ((config) == GPIO_PIN_CNF_OUT_AF_PP)     || \
@@ -532,7 +532,7 @@ typedef uint8_t gpio_exti_port_t;
  * gpio_config_t led_config =
  * {
  *     .pin = GPIO_PIN_5,
- *     .mode = GPIO_MODE_OUTPUT_2MHz,
+ *     .mode = GPIO_PIN_MODE_OUTPUT_2MHz,
  *     .config = GPIO_PIN_CNF_OUT_GP_PP
  * };
  *
@@ -540,7 +540,7 @@ typedef uint8_t gpio_exti_port_t;
  * gpio_config_t button_config =
  * {
  *     .pin = GPIO_PIN_13,
- *     .mode = GPIO_MODE_INPUT,
+ *     .mode = GPIO_PIN_MODE_INPUT,
  *     .config = GPIO_PIN_CNF_IN_PULL_UP
  * };
  *
@@ -548,7 +548,7 @@ typedef uint8_t gpio_exti_port_t;
  * gpio_config_t adc_config =
  * {
  *     .pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2,
- *     .mode = GPIO_MODE_INPUT,
+ *     .mode = GPIO_PIN_MODE_INPUT,
  *     .config = GPIO_PIN_CNF_IN_ANALOG
  * };
  * @endcode
@@ -576,10 +576,10 @@ typedef struct
 	 * @brief Pin operating mode and speed
 	 *
 	 * @details
-	 * @ref GPIO_MODE_INPUT: Input mode
-	 * @ref GPIO_MODE_OUTPUT_10MHz: Output 10MHz
-	 * @ref GPIO_MODE_OUTPUT_2MHz: Output 2MHz
-	 * @ref GPIO_MODE_OUTPUT_50MHz: Output 50MHz
+	 * @ref GPIO_PIN_MODE_INPUT: Input mode
+	 * @ref GPIO_PIN_MODE_OUTPUT_10MHz: Output 10MHz
+	 * @ref GPIO_PIN_MODE_OUTPUT_2MHz: Output 2MHz
+	 * @ref GPIO_PIN_MODE_OUTPUT_50MHz: Output 50MHz
 	 *
 	 * @see @ref GPIO_03_Driver_01_Types_03_PinModes "GPIO Pin Modes"
 	 */
@@ -589,13 +589,13 @@ typedef struct
 	 * @brief Pin electrical configuration
 	 *
 	 * @details
-	 * @ref GPIO_MODE_INPUT "Input Modes:"
+	 * @ref GPIO_PIN_MODE_INPUT "Input Modes:"
 	 * @ref GPIO_PIN_CNF_IN_ANALOG: Analog input
 	 * @ref GPIO_PIN_CNF_IN_FLOAT: Floating input
 	 * @ref GPIO_PIN_CNF_IN_PULL_DOWN: Input with pull-down
 	 * @ref GPIO_PIN_CNF_IN_PULL_UP: Input with pull-up
 	 *
-	 * @ref GPIO_MODE_OUTPUT_10MHz "Output Modes:"
+	 * @ref GPIO_PIN_MODE_OUTPUT_10MHz "Output Modes:"
 	 * @ref GPIO_PIN_CNF_OUT_GP_PP: General purpose push-pull
 	 * @ref GPIO_PIN_CNF_OUT_GP_OD: General purpose open-drain
 	 * @ref GPIO_PIN_CNF_OUT_AF_PP: Alternate function push-pull
@@ -620,57 +620,50 @@ typedef struct
 
 
 
-
-
 /**
  * @brief Sets the GPIO
- * @param[in] gpioPort GPIO Port
- * @param[in] gpioPin GPIO Pin
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @note Atomicity
  */
-__STATIC_FORCEINLINE void GPIO_PinSet(const gpio_port_t gpioPort, const gpio_pin_t gpioPin)
+__STATIC_FORCEINLINE void GPIO_PinSet(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpioPort);
-	if (GPIOx != NULL) __GPIO_WriteBSRR(GPIOx, (uint32_t) gpioPin);
+	__GPIO_WriteBSRR(GPIO_getLLPort(gpio), (uint32_t) pin);
 }
 
 /**
  * @brief Resets the GPIO
- * @param[in] gpioPort GPIO Port
- * @param[in] gpioPin GPIO Pin
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @note Atomicity
  */
-__STATIC_FORCEINLINE void GPIO_PinReset(gpio_port_t gpioPort, gpio_pin_t gpioPin)
+__STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpioPort);
-	if (GPIOx != NULL)
-		GPIOx->BRR.REG |= gpioPin;
+	__GPIO_WriteBRR(GPIO_getLLPort(gpio), (uint32_t) pin);
 }
 
 /**
  * @brief Toggles the GPIO
- * @param[in] gpioPort GPIO Port
- * @param[in] gpioPin GPIO Pin
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  */
-__STATIC_FORCEINLINE void GPIO_Toggle(gpio_port_t gpioPort, gpio_pin_t gpioPin)
+__STATIC_FORCEINLINE void GPIO_Toggle(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpioPort);
-	if (GPIOx != NULL)
-		GPIOx->ODR.REG ^= gpioPin;
+	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadODR(GPIOx) ^ ((uint32_t) pin)));
 }
 
 /**
  * @brief Retrieves the GPIO Status
- * @param[in] gpioPort GPIO Port
- * @param[in] gpioPin GPIO Pin
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @returns 
  */
-__STATIC_FORCEINLINE uint8_t GPIO_Get(gpio_port_t gpioPort, gpio_pin_t gpioPin)
+__STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpioPort);
-	if (GPIOx != NULL)
-	{
-		return ((uint8_t)((GPIOx->IDR.REG & gpioPin) ? (0x01) : (0x00)));
-	}
+	uint32_t reg = __GPIO_ReadIDR(GPIO_getLLPort(gpio));
+	reg = (reg & ((uint32_t) pin)) >> GPIO_getLLPin(pin);
+	return ((uint8_t) reg);
 }
 
 /**
@@ -729,7 +722,7 @@ driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t *gpioConfig)
  * @returns - DRIVER_FAIL: FailureGPIO_03_Driver_01_Types01_Types
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t *const gpioConfig);
+driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);
 
 /**
  * @brief Configures the On-board LED

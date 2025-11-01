@@ -19,11 +19,11 @@
 driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpioConfig)
 {
 	// Validation
-	if(GPIO_DRIVER_IS_PORT(gpio) == 0x00) return DRIVER_FAIL;
-	else if (GPIO_DRIVER_IS_PIN(gpioConfig->pin) == 0x00) return DRIVER_FAIL;
-	else if (GPIO_DRIVER_IS_PIN_MODE(gpioConfig->mode) == 0x00) return DRIVER_FAIL;
-	else if (GPIO_DRIVER_IS_PIN_CONFIG(gpioConfig->config) == 0x00) return DRIVER_FAIL;
-	else if (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00) return DRIVER_FAIL;
+	 if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(gpioConfig->pin) == 0x00) ||
+       (GPIO_DRIVER_IS_PIN_MODE(gpioConfig->mode) == 0x00) || (GPIO_DRIVER_IS_PIN_CONFIG(gpioConfig->config) == 0x00) ||
+       (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00)) 
+		return DRIVER_FAIL;
+    
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
 	// Enable Clock for GPIO Port
@@ -75,27 +75,44 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpi
 	return DRIVER_SUCCESS;
 }
 
-// /**
-//  * @brief Configures GPIO Port based on GPIO Configuration Structure
-//  * @param gpio GPIO Port (Refer `gpio_port_t`)
-//  * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
-//  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
-//  */
-// driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_config_t *const gpioConfig)
+/**
+ * @brief Configures the LED connected to the specified GPIO Port and Pin
+ * @param gpio @ref gpio_port_t "GPIO Port"
+ * @param gpioConfig @ref gpio_config_t "GPIO Configuration Structure"
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig)
+{
+	// Update the GPIO Configuration Structure for LED
+	gpioConfig->mode = GPIO_PIN_MODE_OUTPUT_10MHz;
+	gpioConfig->config = GPIO_PIN_CNF_OUT_GP_PP;
+	// Call GPIO Config()
+	return GPIO_Init(gpio, gpioConfig);
+}
+
+/**
+ * @brief Configures GPIO Port based on GPIO Configuration Structure
+ * @param gpio GPIO Port (Refer `gpio_port_t`)
+ * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ */
+// driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin)
 // {
-// 	// Validate GPIO Port Support on Hardware
-// 	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpio);
-// 	if (GPIOx == NULL)
-// 	{
+// 	// Validation
+// 	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00))
 // 		return DRIVER_FAIL;
-// 	}
+// 	// Local Variables
+// 	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpio);
+
 // 	// Local Variables
 // 	uint32_t gpioX_CRH = GPIOx->CRH.REG;
 // 	uint32_t gpioX_CRL = GPIOx->CRL.REG;
 // 	uint32_t gpioX_ODR = GPIOx->ODR.REG;
-// 	gpio_pin_t pinMask = gpioConfig->pin;
+// 	gpio_pin_t pinMask = pin;
 // 	uint8_t regStatus = 0x00;
 // 	// Configure Each Pin
 // 	while (pinMask)
@@ -115,7 +132,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpi
 // 			regStatus |= GPIO_CRL_UPDATED;
 // 		}
 // 		// Pull-Up or Pull-Down Configuration
-// 		if ((gpioConfig->mode == GPIO_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config)))
+// 		if ((gpioConfig->mode == GPIO_PIN_MODE_INPUT) && (IS_PULL_CONFIG(gpioConfig->config)))
 // 		{
 // 			__GPIO_resetPullConfig__(currentPin, &gpioX_ODR);
 // 			regStatus |= GPIO_ODR_UPDATED;
@@ -133,28 +150,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpi
 // 	return DRIVER_SUCCESS;
 // }
 
-// /**
-//  * @brief Configures the LED connected to the specified GPIO Port and Pin
-//  * @param gpio GPIO Port (Refer `gpio_port_t`)
-//  * @param gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
-//  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
-//  */
-// driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t *gpioConfig)
-// {
-// 	// Validate GPIO Port Support on Hardware
-// 	GPIO_TypeDef *GPIOx = GPIO_getLLPort(gpio);
-// 	if (GPIOx == NULL)
-// 	{
-// 		return DRIVER_FAIL;
-// 	}
-// 	// Update the GPIO Configuration Structure for LED
-// 	gpioConfig->mode = GPIO_MODE_OUTPUT_10MHz;
-// 	gpioConfig->config = GPIO_PIN_CNF_OUT_GP_PP;
-// 	// Call GPIO Config()
-// 	return GPIO_Init(gpio, gpioConfig);
-// }
+
 
 // /**
 //  * @brief Configures the On-board LED
@@ -168,7 +164,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpi
 // 	gpio_config_t obLedConfig = 
 // 	{
 // 		.pin = GPIO_PIN_OB_LED,
-// 		.mode = GPIO_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
+// 		.mode = GPIO_PIN_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
 // 		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 // 	};
 // 	// Call GPIO Config()
@@ -187,7 +183,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t* const gpi
 // 	gpio_config_t obLedConfig = 
 // 	{
 // 		.pin = GPIO_PIN_OB_LED,
-// 		.mode = GPIO_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
+// 		.mode = GPIO_PIN_MODE_OUTPUT_2MHz,	 // Refer datasheet for this speed selection
 // 		.config = GPIO_PIN_CNF_OUT_GP_PP // General Purpose Push-Pull Configuration
 // 	};
 // 	// Call GPIO Config()

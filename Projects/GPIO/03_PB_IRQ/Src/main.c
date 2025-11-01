@@ -9,7 +9,7 @@ gpio_config_t combinedLEDConfig = {
 // Initialisation of Push Button
 gpio_config_t pushButtonConfig = {
 	.pin = PUSH_BUTTON_PIN,
-	.mode = GPIO_MODE_INPUT,
+	.mode = GPIO_PIN_MODE_INPUT,
 	.config = GPIO_PIN_CNF_IN_FLOAT
 };
 // Debounce Time Counter

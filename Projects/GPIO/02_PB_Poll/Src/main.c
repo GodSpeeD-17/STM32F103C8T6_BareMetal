@@ -14,7 +14,7 @@ int main(){
 	// Initialization of Push Button
 	gpio_config_t pbConfig = {
 		.pin = PUSH_BUTTON_PIN,
-		.mode = GPIO_MODE_INPUT,
+		.mode = GPIO_PIN_MODE_INPUT,
 		.config = GPIO_PIN_CNF_IN_FLOAT
 	};
 	GPIO_Init(PUSH_BUTTON_PORT, &pbConfig);

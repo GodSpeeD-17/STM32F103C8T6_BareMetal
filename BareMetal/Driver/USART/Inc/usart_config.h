@@ -54,15 +54,15 @@
 #define USART3_RTS_PIN					GPIO_PIN_14
 
 /*********************************************** USART Pin Generic Configuration ***********************************************/
-#define USART_TX_PIN_MODE				GPIO_MODE_OUTPUT_10MHz
+#define USART_TX_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHz
 #define USART_TX_PIN_CONFIG				GPIO_PIN_CNF_OUT_AF_PP
-#define USART_RX_PIN_MODE				GPIO_MODE_INPUT
+#define USART_RX_PIN_MODE				GPIO_PIN_MODE_INPUT
 #define USART_RX_PIN_CONFIG				GPIO_PIN_CNF_IN_PULL_UP
-#define USART_RTS_PIN_MODE				GPIO_MODE_INPUT
+#define USART_RTS_PIN_MODE				GPIO_PIN_MODE_INPUT
 #define USART_RTS_PIN_CONFIG			GPIO_PIN_CNF_IN_PULL_UP
-#define USART_CTS_PIN_MODE				GPIO_MODE_OUTPUT_10MHz
+#define USART_CTS_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHz
 #define USART_CTS_PIN_CONFIG			GPIO_PIN_CNF_OUT_AF_PP
-#define USART_CK_PIN_MODE				GPIO_MODE_OUTPUT_10MHz
+#define USART_CK_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHz
 #define USART_CK_PIN_CONFIG				GPIO_PIN_CNF_OUT_AF_PP
 
 /*********************************************** USART Data Configuration ***********************************************/
