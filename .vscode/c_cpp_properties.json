@@ -10,7 +10,7 @@
                 "CORTEX_M3__",
                 "STM32F103C8T6__"
             ],
-            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "compilerPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-arm"
