@@ -3,8 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/BareMetal/**",
-                "${workspaceFolder}/Projects/**"
+				"${workspaceFolder}/BareMetal/Core/**",
+				"${workspaceFolder}/BareMetal/Driver/**",
+				"${workspaceFolder}/Projects/**"
             ],
             "defines": [
                 "CORTEX_M3__",
@@ -13,7 +14,17 @@
             "compilerPath": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-arm"
+            "intelliSenseMode": "linux-gcc-arm",
+			"browse": {
+                "path": [
+                    "${workspaceFolder}/BareMetal/Core/Inc",
+                    "${workspaceFolder}/BareMetal/Driver/",
+                    "${workspaceFolder}/BareMetal/Driver/**/Inc",
+                    "${workspaceFolder}/Projects/**/**/Inc",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4

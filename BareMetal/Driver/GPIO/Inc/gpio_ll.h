@@ -598,7 +598,6 @@ typedef uint8_t _gpio_lock_status_t;
  * @{
  */
 
-
 /**
  * @brief Stage GPIO Pin Mode Configuration into input register
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
@@ -610,7 +609,7 @@ typedef uint8_t _gpio_lock_status_t;
  * @note - Register Value to be provided as input
  * @see @ref GPIO_Pins_Mode "GPIO Pin Mode Theory"
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinMode(const _gpio_pin_t pin, const _gpio_mode_t mode, uint32_t crxReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageMode(const _gpio_pin_t pin, const _gpio_mode_t mode, uint32_t crxReg)
 {
 	crxReg &= ~_GPIO_PIN_MODE_RESET_MASK(pin);
 	crxReg |= _GPIO_PIN_MODE_GET_MASK(pin, mode);
@@ -628,16 +627,51 @@ __STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinMode(const _gpio_pin_t pin, const
  * @note - Register Value to be provided as input
  * @see @ref @ref GPIO_LL_PinParams_Config "GPIO Pin Configuration Theory"
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinConfig(const _gpio_pin_t pin, const _gpio_config_t config, uint32_t crxReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageConfig(const _gpio_pin_t pin, const _gpio_config_t config, uint32_t crxReg)
 {
 	crxReg &= ~_GPIO_PIN_CNF_RESET_MASK(pin);
 	crxReg |= _GPIO_PIN_CNF_GET_MASK(pin, config);
 	return crxReg; 
 }
 
+/**
+ * @brief Stage GPIO Pin Mode and Configuration into the input register
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param[in] mode Value of @ref GPIO_LL_PinParams_Mode_Macros "GPIO Pin Mode"
+ * @param[in] config Value of @ref GPIO_LL_PinParams_Config_Macros "GPIO Pin Configuration"
+ * @param[in] crxReg The current staged CRL/CRH (CRx) value
+ * @returns The updated staged register value with Pin Mode and Configuration
+ * @note - This function simplifies User API configuration by wrapping _GPIO_PinStageMode and _GPIO_PinStageConfig.
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register should be updated instance of either CRL/CRH (CRx)
+ * @note - Register Value to be provided as input
+ * @see @ref _GPIO_PinStageMode "GPIO Pin Mode Staging API" | @ref _GPIO_PinStageConfig "GPIO Pin Configuration Staging API"
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const _gpio_mode_t mode, const _gpio_config_t config, uint32_t crxReg)
+{
+	crxReg = _GPIO_PinStageMode(pin, mode, crxReg);
+	crxReg = _GPIO_PinStageConfig(pin, config, crxReg);
+	return crxReg;
+}
 
 /**
- * @brief Stage GPIO Pin Pull-Up/Pull-Down state into the input ODR register value.
+ * @brief Stages the GPIO Pin to default mode
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @param[in] crxReg The current staged CRL/CRH (CRx) value
+ * @note Sets the Pin to Default (Input Floating) State
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register should be updated instance of either CRL/CRH (CRx)
+ * @note - Register Value to be provided as input
+ * @see @ref _GPIO_PinStageParams "GPIO Pin Parameters Staging API"
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageResetParams(const _gpio_pin_t pin, uint32_t crxReg)
+{
+    crxReg = _GPIO_PinStageParams(pin, _GPIO_MODE_INPUT, _GPIO_CNF_INPUT_FLOATING, crxReg);
+	return crxReg;
+}
+
+/**
+ * @brief Stage GPIO Pin Pull-Up/Pull-Down state into the input ODR register value
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
  * @param[in] pud_state Value of @ref GPIO_LL_PinParams_CNF_Input_Macros_PullConfig "Pull-Up or Pull-Down"
  * @param[in] odrReg The current staged ODR value
@@ -645,12 +679,15 @@ __STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinConfig(const _gpio_pin_t pin, con
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_StageSetPinPullConfig(const _gpio_pin_t pin, const _gpio_pin_pull_state_t pud_state, uint32_t odrReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, const _gpio_pin_pull_state_t pud_state, uint32_t odrReg)
 {
 	if(pud_state == _GPIO_PULL_PULLDOWN) odrReg &= ~GPIO_GET_PIN_MASK(pin);
 	else if (pud_state == _GPIO_PULL_PULLUP) odrReg |= GPIO_GET_PIN_MASK(pin);
 	return odrReg;
 }
+
+
+
 
 /** @} */ // GPIO_02_LL_03_PinParams
 
