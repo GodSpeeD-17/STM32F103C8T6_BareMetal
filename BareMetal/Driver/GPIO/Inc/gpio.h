@@ -504,19 +504,19 @@ typedef uint8_t												gpio_exti_trigger_t;
 /** @brief EXTI port source type @typedef gpio_exti_port_t */
 typedef uint8_t gpio_exti_port_t;
 /** @brief EXTI source: GPIO Port A (0000) @def GPIO_EXTI_PORT_A */
-#define GPIO_EXTI_PORT_A ((gpio_exti_port_t)0x00)
+#define GPIO_EXTI_PORT_A									((gpio_exti_port_t)0x00)
 /** @brief EXTI source: GPIO Port B (0001) @def GPIO_EXTI_PORT_B */
-#define GPIO_EXTI_PORT_B ((gpio_exti_port_t)0x01)
+#define GPIO_EXTI_PORT_B									((gpio_exti_port_t)0x01)
 /** @brief EXTI source: GPIO Port C (0010) @def GPIO_EXTI_PORT_C */
-#define GPIO_EXTI_PORT_C ((gpio_exti_port_t)0x02)
+#define GPIO_EXTI_PORT_C									((gpio_exti_port_t)0x02)
 /** @brief EXTI source: GPIO Port D (0011) @def GPIO_EXTI_PORT_D */
-#define GPIO_EXTI_PORT_D ((gpio_exti_port_t)0x03)
+#define GPIO_EXTI_PORT_D									((gpio_exti_port_t)0x03)
 /** @brief EXTI source: GPIO Port E (0100) @def GPIO_EXTI_PORT_E */
-#define GPIO_EXTI_PORT_E ((gpio_exti_port_t)0x04)
+#define GPIO_EXTI_PORT_E									((gpio_exti_port_t)0x04)
 /** @brief EXTI source: GPIO Port F (0101) @def GPIO_EXTI_PORT_F */
-#define GPIO_EXTI_PORT_F ((gpio_exti_port_t)0x05)
+#define GPIO_EXTI_PORT_F									((gpio_exti_port_t)0x05)
 /** @brief EXTI source: GPIO Port G (0110) @def GPIO_EXTI_PORT_G */
-#define GPIO_EXTI_PORT_G ((gpio_exti_port_t)0x06)
+#define GPIO_EXTI_PORT_G									((gpio_exti_port_t)0x06)
 
 /** @} */ // GPIO_03_Driver_01_Types_06_EXTIPorts
 
@@ -618,8 +618,6 @@ typedef struct
 	#define GPIO_PIN_OB_LED 									GPIO_PIN_13
 #endif /* STM32F103C8T6__ */
 
-
-
 /**
  * @brief Sets the GPIO
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
@@ -705,16 +703,6 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 driver_status_t GPIO_Init(const gpio_port_t gpio, const gpio_config_t *const gpioConfig);
 
 /**
- * @brief Configures the LED connected to the specified GPIO Port and Pin
- * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
- * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
- * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
- */
-driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t *gpioConfig);
-
-/**
  * @brief Configures GPIO Port based on GPIO Configuration Structure
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
@@ -726,18 +714,39 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);
 
 /**
  * @brief Configures the On-board LED
- * @return Status of Driver Operation
+ * @returns Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
 driver_status_t OB_LED_Init(void);
 
 /**
- * @brief Deconfigures the On-board LED
+ * @brief Configures the LED connected to the specified GPIO Port and Pin
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] gpioConfig @ref gpio_config_t "GPIO Configuration Structure"
+ * @return Status of Driver Operation
+ * @returns - DRIVER_FAIL: Failure
+ * @returns - DRIVER_SUCCESS: Success
+ * @note Assumes Pin is already filled
+ */
+__STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig)
+{
+	// Update the GPIO Configuration Structure for LED
+	gpioConfig->mode = GPIO_PIN_MODE_OUTPUT_10MHz;
+	gpioConfig->config = GPIO_PIN_CNF_OUT_GP_PP;
+	// Call GPIO Config()
+	return GPIO_Init(gpio, gpioConfig);
+}
+
+/**
+ * @brief Deinitialize the On-board LED
  * @return Status of Driver Operation
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-driver_status_t OB_LED_Deinit(void);
+__STATIC_FORCEINLINE void OB_LED_Deinit(void)
+{
+	return GPIO_Deinit(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+}
 
 #endif /* GPIO_H_ */
