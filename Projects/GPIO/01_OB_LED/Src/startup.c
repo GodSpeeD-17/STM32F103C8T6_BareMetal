@@ -1,6 +1,5 @@
 /*-------------------------------- Includes ---------------------------*/
 #include "startup.h"
-
 /*-------------------------------- Local Variables ------------------------*/
 // Timer Delay Configuration
 #ifndef SYSTICK_DELAY__
@@ -149,22 +148,16 @@ void Reset_Handler(void)
 	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
 	uint32_t *pSrc = (uint32_t *)&_sidata;
 	uint32_t *pDst = (uint32_t *)&_sdata;
-	while (pDst < &_edata)
-	{
-		*pDst++ = *pSrc++;
-	}
+	while (pDst < &_edata) *pDst++ = *pSrc++;
 	// Step 2: Initialise .bss to 0 in RAM
 	pDst = (uint32_t *)&_sbss;
-	while (pDst < &_ebss)
-	{
-		*pDst++ = 0;
-	}
+	while (pDst < &_ebss) *pDst++ = 0;
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 // Step 4: Configure SysTick & Timer
 #ifdef SYSTICK_DELAY__
 	// SysTick: Resolution 1us
-	SysTick_Config(((RCC_Get_AHBClock()) / FREQ_1MHz));
+	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1MHz));
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1kHz));
