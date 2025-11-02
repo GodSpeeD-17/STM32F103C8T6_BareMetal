@@ -88,7 +88,8 @@ static const GPIO_TypeDef* const _driverGpioPortMapping[] =
  * @return non-zero (true) if valid, 0 (false) otherwise
  * @def GPIO_DRIVER_IS_PORT
  */
-#define GPIO_DRIVER_IS_PORT(port) ( \
+#define GPIO_DRIVER_IS_PORT(port) \
+( \
 	((port) == GPIO_PORT_A) || \
 	((port) == GPIO_PORT_B) || \
 	((port) == GPIO_PORT_C) || \
@@ -402,20 +403,20 @@ __STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_getLLPinConfig(const gpio_pin
  * @def GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE
  */
 #define GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(mode, config) ( \
-    ((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_INPUT) && ( \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_ANALOG)     || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_FLOAT)      || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN)  || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_UP)       \
-    )) || \
-    ((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
-     (((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_2MHz)  || \
-     (((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_50MHz)) && ( \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_PP)     || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_OD)     || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP)     || \
-        (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)       \
-    ) \
+	((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_INPUT) && ( \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_ANALOG)     || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_FLOAT)      || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN)  || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_UP)       \
+	)) || \
+	((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
+	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_2MHz)  || \
+	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_50MHz)) && ( \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_PP)     || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_OD)     || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP)     || \
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)       \
+	) \
 )
 
 /**
@@ -432,14 +433,61 @@ __STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_getLLPinConfig(const gpio_pin
  *
  * @see _GPIO_PIN_CNF_INPUT_PULL_UP
  * @see _GPIO_PIN_CNF_INPUT_PULL_DOWN
+ * @def GPIO_LL_PIN_GET_PULL_CONFIG
  */
-#define GPIO_DRIVER_PIN_GET_PULL_CONFIG(config) \
-	(((gpio_pin_config_t)(config) & (gpio_pin_config_t)0xF0) ? _GPIO_PIN_CNF_INPUT_PULL_UP : _GPIO_PIN_CNF_INPUT_PULL_DOWN)
+#define GPIO_LL_PIN_GET_PULL_CONFIG(config) \
+	((((gpio_pin_config_t)(config)) & ((gpio_pin_config_t) 0xF0)) ? _GPIO_PIN_CNF_INPUT_PULL_UP : _GPIO_PIN_CNF_INPUT_PULL_DOWN)
 
+/**
+ * @brief GPIO pin parameter type
+ * @typedef gpio_pin_parameter_t
+ * @details 
+ * - Represents an encoded 8-bit value containing both mode and configuration information for a GPIO pin.  
+ * - Used internally for parameter passing and low-level driver encoding
+ * - Each field is defined as follows:
+ * <ul>
+ * <li>Bits [1:0] → GPIO mode bits (MODE[1:0])</li>
+ * <li>Bits [3:2] → GPIO configuration bits (CNF[1:0])</li>
+ * </ul>
+ * - Remaining bits may be reserved for additional flags or pin attributes
+ */
+typedef uint8_t gpio_pin_parameter_t;
 
-typedef uint8_t gpio_pin_parameter_t;	
-#define GPIO_DRIVER_PIN_EXTRACT_MODE(pinParameter) \
-	((gpio_pin_mode_t)((gpio_pin_parameter_t)(pinParameter) & (gpio_pin_parameter_t)0x03))
+/**
+ * @brief Extracts the GPIO pin mode from a combined @ref gpio_pin_parameter_t "pin parameter" value
+ * @param[in] pinParameter Encoded GPIO pin parameter of type @ref gpio_pin_parameter_t.
+ * @return GPIO pin mode value of type @ref _gpio_pin_mode_t.
+ * 
+ * @details
+ * The mode information is stored in bits [1:0] of the pin parameter.  
+ * This macro masks and returns only those bits, interpreting the result as a 
+ * @ref gpio_pin_mode_t value.
+ * 
+ * @note
+ * - This macro should be used when decoding composite GPIO configuration data 
+ * - Example: Initializing or validating pin configuration structures
+ * @def GPIO_LL_PIN_PARAMETER_EXTRACT_MODE
+ */
+#define GPIO_LL_PIN_PARAMETER_EXTRACT_MODE(pinParameter) \
+	((_gpio_pin_mode_t)(((gpio_pin_parameter_t)(pinParameter)) & ((gpio_pin_parameter_t) 0x03)))
+
+/**
+ * @brief Extracts the GPIO pin configuration from a combined @ref gpio_pin_parameter_t "pin parameter" value
+ * @param[in] pinParameter Encoded GPIO pin parameter of type @ref gpio_pin_parameter_t.
+ * @return GPIO pin mode value of type @ref _gpio_pin_config_t
+ * 
+ * @details
+ * The mode information is stored in bits [1:0] of the pin parameter.  
+ * This macro masks and returns only those bits, interpreting the result as a 
+ * @ref gpio_pin_mode_t value.
+ * 
+ * @note
+ * - This macro should be used when decoding composite GPIO configuration data 
+ * - Example: Initializing or validating pin configuration structures
+ * @def GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION
+ */
+#define GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION(pinParameter) \
+	((_gpio_pin_config_t)((((gpio_pin_parameter_t)(pinParameter)) >> 0x02) & ((gpio_pin_parameter_t) 0x03)))
 	
 /** @} */ // GPIO_03_Driver_01_Types_04_PinConfig
 
@@ -697,6 +745,29 @@ __STATIC_FORCEINLINE gpio_pin_parameter_t GPIO_GetPinParameters(const gpio_port_
 }
 
 /**
+ * @brief  Configures GPIO pin mode and electrical parameters.
+ * @details
+ * Updates the MODE and CNF fields in the GPIO control registers (CRL/CRH),
+ * and sets the pull-up/pull-down state in ODR when applicable.
+ * Supports batch configuration of multiple pins using bitmask.
+ *
+ * @param[in] gpio    GPIO port identifier (see @ref gpio_port_t)
+ * @param[in] pin	  @ref gpio_pin_t "GPIO Pin"
+ * @param[in] mode    Desired operating mode (see @ref gpio_pin_mode_t)
+ * @param[in] config  Electrical configuration (see @ref gpio_pin_config_t)
+ *
+ * @note
+ * - Automatically detects whether CRL or CRH should be updated per pin.
+ * - Pull-up/down configuration is only applied when valid for input modes.
+ * - Existing register bits for unaffected pins remain unchanged.
+ * - Does not perform validation; call-site must ensure compatible parameters.
+ *
+ * @retval None
+ *
+ */
+void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
+
+/**
  * @brief Get GPIO Pin Mode Configuration
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
@@ -729,6 +800,18 @@ gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin);
 driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode);
 
 /**
+ * @brief Get GPIO Pin Configuration Type
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return @ref gpio_pin_config_t "GPIO Driver Pin Configuration"
+ * 
+ * @details
+ * Extracts the CNF field from the pin's configuration register.
+ * Returns only the 2-bit configuration value without the mode bits.
+ */
+gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin);
+
+/**
  * @brief  Configures the electrical setting (CNF bits) of one or more GPIO pins.
  * @details
  * Updates the CNF[1:0] configuration bits in CRL/CRH for the specified pins,
@@ -749,29 +832,6 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
  * - Does not configure Pull Up, need to be externally set.
  */
 driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_config_t config);
-
-/**
- * @brief  Configures GPIO pin mode and electrical parameters.
- * @details
- * Updates the MODE and CNF fields in the GPIO control registers (CRL/CRH),
- * and sets the pull-up/pull-down state in ODR when applicable.
- * Supports batch configuration of multiple pins using bitmask.
- *
- * @param[in] gpio    GPIO port identifier (see @ref gpio_port_t)
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @param[in] mode    Desired operating mode (see @ref gpio_pin_mode_t)
- * @param[in] config  Electrical configuration (see @ref gpio_pin_config_t)
- *
- * @note
- * - Automatically detects whether CRL or CRH should be updated per pin.
- * - Pull-up/down configuration is only applied when valid for input modes.
- * - Existing register bits for unaffected pins remain unchanged.
- * - Does not perform validation; call-site must ensure compatible parameters.
- *
- * @retval None
- *
- */
-void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
 
 /**
  * @brief Configures GPIO Port based on GPIO Configuration Structure

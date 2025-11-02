@@ -9,187 +9,6 @@
 /*---------------------------------------------- Driver APIs ---------------------------------------------- */
 
 /**
- * @brief Get GPIO Pin Mode Configuration
- * @param[in] gpio @ref gpio_port_t "GPIO Port"
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @return @ref gpio_pin_mode_t "GPIO Driver Pin Mode"
- * 
- * @details
- * Extracts the MODE field from the pin's configuration register.
- * Returns only the 2-bit mode value without the configuration bits.
- */
-gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
-{
-	switch((_gpio_pin_mode_t) GPIO_GetPinParameters(gpio, pin) & 0x03)
-	{
-		case _GPIO_PIN_MODE_INPUT: return GPIO_PIN_MODE_INPUT; break;
-		case _GPIO_PIN_MODE_OUTPUT_10MHz: return GPIO_PIN_MODE_OUTPUT_10MHz; break;
-		case _GPIO_PIN_MODE_OUTPUT_2MHz: return GPIO_PIN_MODE_OUTPUT_2MHz; break;
-		case _GPIO_PIN_MODE_OUTPUT_50MHz: return GPIO_PIN_MODE_OUTPUT_50MHz; break;
-		default: break;
-	}
-}
-
-/**
- * @brief Get GPIO Pin Configuration Type
- * @param[in] gpio @ref gpio_port_t "GPIO Port"
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @return _gpio_pin_config_t @ref GPIO_LL_Config "Pin Configuration"
- * 
- * @details
- * Extracts the CNF field from the pin's configuration register.
- * Returns only the 2-bit configuration value without the mode bits.
- */
-gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin)
-{
-    uint8_t pinParams = GPIO_GetPinParameters(gpio, pin);
-	switch((_gpio_pin_mode_t)(pinParams & 0x03))
-	{
-		// Input Mode
-		case _GPIO_PIN_MODE_INPUT:
-			switch((_gpio_pin_config_t)(pinParams >> 0x02) & 0x03)
-			{
-				case _GPIO_PIN_CNF_INPUT_ANALOG: return GPIO_PIN_CNF_IN_ANALOG; break;
-				case _GPIO_PIN_CNF_INPUT_FLOATING: return GPIO_PIN_CNF_IN_FLOAT; break;
-				case _GPIO_PIN_CNF_INPUT_PULL:
-					if(__GPIO_ReadODR(GPIO_getLLPort(gpio)) & (uint32_t) pin) return GPIO_PIN_CNF_IN_PULL_UP;
-					else return GPIO_PIN_CNF_IN_PULL_DOWN;
-				break;
-			}
-		break;
-		// Output Mode
-		case _GPIO_PIN_MODE_OUTPUT_10MHz:
-		case _GPIO_PIN_MODE_OUTPUT_2MHz:
-		case _GPIO_PIN_MODE_OUTPUT_50MHz:
-			switch((_gpio_pin_config_t)(pinParams >> 0x02) & 0x03)
-			{
-				case _GPIO_PIN_CNF_OUTPUT_PP: return GPIO_PIN_CNF_OUT_GP_PP; break;
-				case _GPIO_PIN_CNF_OUTPUT_OD: return GPIO_PIN_CNF_OUT_GP_OD; break;
-				case _GPIO_PIN_CNF_AF_PP: return GPIO_PIN_CNF_OUT_AF_PP; break;
-				case _GPIO_PIN_CNF_AF_OD: return GPIO_PIN_CNF_OUT_AF_OD; break;
-				default: break;
-			}
-		break;
-		// Default Case	
-		default: break;
-	}
-}
-
-/**
- * @brief  Configures the operating mode of one or more GPIO pins.
- * @details
- * Updates the MODE bits in the GPIO port configuration registers (CRL/CRH)
- * for the selected pin(s). Supports configuring multiple pins simultaneously.
- *
- * @param[in] gpio @ref gpio_port_t "GPIO Port"
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
- *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or mode).
- *
- * @note
- * - Automatically determines whether CRL or CRH needs to be updated.
- * - Existing configuration bits for unaffected pins remain unchanged.
- * - Use with @ref GPIO_SetPinConfig for full electrical configuration.
- */
-driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode)
-{
-	// Validation
-	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
-		return DRIVER_FAIL;
-	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
-	uint32_t gpioX_CRH = 0x00UL;
-	uint32_t gpioX_CRL = 0x00UL;
-	uint8_t regStatus = 0x00;
-	// Read
-	if(GPIO_DRIVER_PIN_REQUIRES_CRH(pin)) gpioX_CRH = __GPIO_ReadCRH(GPIOx);
-	if(GPIO_DRIVER_PIN_REQUIRES_CRL(pin)) gpioX_CRL = __GPIO_ReadCRL(GPIOx);
-	// Update
-	while(pin)
-	{
-		// Extract only the 1st bit set from LSB
-		gpio_pin_t currentPin = (gpio_pin_t)(pin & -pin);
-		// Configure the Control Register High
-		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
-		{
-			gpioX_CRH = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRH);
-			regStatus |= GPIO_CRH_UPDATED;
-		}
-		else
-		{
-			gpioX_CRL = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRL);
-			regStatus |= GPIO_CRL_UPDATED;
-		}
-		// Update the parameters
-		pin &= ~currentPin;
-	}
-	// Write
-	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
-	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
-	return DRIVER_SUCCESS;
-}
-
-/**
- * @brief  Configures the electrical setting (CNF bits) of one or more GPIO pins.
- * @details
- * Updates the CNF[1:0] configuration bits in CRL/CRH for the specified pins,
- * setting input/output type and alternate-function behavior as defined
- * by the driver configuration constants.
- *
- * @param[in] gpio @ref gpio_port_t "GPIO Port"
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
- *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or configuration).
- *
- * @note
- * - Automatically determines whether CRL or CRH registers are affected.
- * - Use with @ref GPIO_SetPinMode to fully configure a pin.
- * - Safe for multi-pin configuration; unaffected bits are preserved.
- * - Does not configure Pull Up, need to be externally set.
- */
-driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_config_t config)
-{
-	// Validation
-	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
-		return DRIVER_FAIL;
-	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
-	uint32_t gpioX_CRH = 0x00UL;
-	uint32_t gpioX_CRL = 0x00UL;
-	uint8_t regStatus = 0x00;
-	// Read
-	if(GPIO_DRIVER_PIN_REQUIRES_CRH(pin)) gpioX_CRH = __GPIO_ReadCRH(GPIOx);
-	if(GPIO_DRIVER_PIN_REQUIRES_CRL(pin)) gpioX_CRL = __GPIO_ReadCRL(GPIOx);
-	// Update
-	while(pin)
-	{
-		// Extract only the 1st bit set from LSB
-		gpio_pin_t currentPin = (gpio_pin_t)(pin & -pin);
-		// Configure the Control Register High
-		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
-		{
-			gpioX_CRH = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRH);
-			regStatus |= GPIO_CRH_UPDATED;
-		}
-		else
-		{
-			gpioX_CRL = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRL);
-			regStatus |= GPIO_CRL_UPDATED;
-		}
-		// Update the parameters
-		pin &= ~currentPin;
-	}
-	// Write
-	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
-	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
-	return DRIVER_SUCCESS;
-}
-
-/**
  * @brief  Configures GPIO pin mode and electrical parameters.
  * @details
  * Updates the MODE and CNF fields in the GPIO control registers (CRL/CRH),
@@ -252,6 +71,187 @@ void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pi
 	if (regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
 	if (regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
 	if (regStatus & GPIO_ODR_UPDATED) __GPIO_WriteODR(GPIOx, gpioX_ODR);
+}
+
+/**
+ * @brief Get GPIO Pin Mode Configuration
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return @ref gpio_pin_mode_t "GPIO Driver Pin Mode"
+ * 
+ * @details
+ * Extracts the MODE field from the pin's configuration register.
+ * Returns only the 2-bit mode value without the configuration bits.
+ */
+gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+	switch(GPIO_LL_PIN_PARAMETER_EXTRACT_MODE(GPIO_GetPinParameters(gpio, pin)))
+	{
+		case _GPIO_PIN_MODE_INPUT: return GPIO_PIN_MODE_INPUT; break;
+		case _GPIO_PIN_MODE_OUTPUT_10MHz: return GPIO_PIN_MODE_OUTPUT_10MHz; break;
+		case _GPIO_PIN_MODE_OUTPUT_2MHz: return GPIO_PIN_MODE_OUTPUT_2MHz; break;
+		case _GPIO_PIN_MODE_OUTPUT_50MHz: return GPIO_PIN_MODE_OUTPUT_50MHz; break;
+		default: break;
+	}
+}
+
+/**
+ * @brief  Configures the operating mode of one or more GPIO pins.
+ * @details
+ * Updates the MODE bits in the GPIO port configuration registers (CRL/CRH)
+ * for the selected pin(s). Supports configuring multiple pins simultaneously.
+ *
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
+ *
+ * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or mode).
+ *
+ * @note
+ * - Automatically determines whether CRL or CRH needs to be updated.
+ * - Existing configuration bits for unaffected pins remain unchanged.
+ * - Use with @ref GPIO_SetPinConfig for full electrical configuration.
+ */
+driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode)
+{
+	// Validation
+	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
+		return DRIVER_FAIL;
+	// Local Variables
+	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	uint32_t gpioX_CRH = 0x00UL;
+	uint32_t gpioX_CRL = 0x00UL;
+	uint8_t regStatus = 0x00;
+	// Read
+	if(GPIO_DRIVER_PIN_REQUIRES_CRH(pin)) gpioX_CRH = __GPIO_ReadCRH(GPIOx);
+	if(GPIO_DRIVER_PIN_REQUIRES_CRL(pin)) gpioX_CRL = __GPIO_ReadCRL(GPIOx);
+	// Update
+	while(pin)
+	{
+		// Extract only the 1st bit set from LSB
+		gpio_pin_t currentPin = (gpio_pin_t)(pin & -pin);
+		// Configure the Control Register High
+		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
+		{
+			gpioX_CRH = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRH);
+			regStatus |= GPIO_CRH_UPDATED;
+		}
+		else
+		{
+			gpioX_CRL = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRL);
+			regStatus |= GPIO_CRL_UPDATED;
+		}
+		// Update the parameters
+		pin &= ~currentPin;
+	}
+	// Write
+	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
+	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
+	return DRIVER_SUCCESS;
+}
+
+/**
+ * @brief Get GPIO Pin Configuration Type
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return _gpio_pin_config_t @ref GPIO_LL_Config "Pin Configuration"
+ * 
+ * @details
+ * Extracts the CNF field from the pin's configuration register.
+ * Returns only the 2-bit configuration value without the mode bits.
+ */
+gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+    const gpio_pin_parameter_t pinParams = GPIO_GetPinParameters(gpio, pin);
+	switch(GPIO_LL_PIN_PARAMETER_EXTRACT_MODE(pinParams))
+	{
+		// Input Mode
+		case _GPIO_PIN_MODE_INPUT:
+			switch(GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION(pinParams))
+			{
+				case _GPIO_PIN_CNF_INPUT_ANALOG: return GPIO_PIN_CNF_IN_ANALOG; break;
+				case _GPIO_PIN_CNF_INPUT_FLOATING: return GPIO_PIN_CNF_IN_FLOAT; break;
+				case _GPIO_PIN_CNF_INPUT_PULL:
+					if(__GPIO_ReadODR(GPIO_getLLPort(gpio)) & (uint32_t) pin) return GPIO_PIN_CNF_IN_PULL_UP;
+					else return GPIO_PIN_CNF_IN_PULL_DOWN;
+				break;
+			}
+		break;
+		// Output Mode
+		case _GPIO_PIN_MODE_OUTPUT_10MHz:
+		case _GPIO_PIN_MODE_OUTPUT_2MHz:
+		case _GPIO_PIN_MODE_OUTPUT_50MHz:
+			switch(GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION(pinParams))
+			{
+				case _GPIO_PIN_CNF_OUTPUT_PP: return GPIO_PIN_CNF_OUT_GP_PP; break;
+				case _GPIO_PIN_CNF_OUTPUT_OD: return GPIO_PIN_CNF_OUT_GP_OD; break;
+				case _GPIO_PIN_CNF_AF_PP: return GPIO_PIN_CNF_OUT_AF_PP; break;
+				case _GPIO_PIN_CNF_AF_OD: return GPIO_PIN_CNF_OUT_AF_OD; break;
+				default: break;
+			}
+		break;
+		// Default Case	
+		default: break;
+	}
+}
+
+/**
+ * @brief  Configures the electrical setting (CNF bits) of one or more GPIO pins.
+ * @details
+ * Updates the CNF[1:0] configuration bits in CRL/CRH for the specified pins,
+ * setting input/output type and alternate-function behavior as defined
+ * by the driver configuration constants.
+ *
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
+ *
+ * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or configuration).
+ *
+ * @note
+ * - Automatically determines whether CRL or CRH registers are affected.
+ * - Use with @ref GPIO_SetPinMode to fully configure a pin.
+ * - Safe for multi-pin configuration; unaffected bits are preserved.
+ * - Does not configure Pull Up, need to be externally set.
+ */
+driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_config_t config)
+{
+	// Validation
+	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
+		return DRIVER_FAIL;
+	// Local Variables
+	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	uint32_t gpioX_CRH = 0x00UL;
+	uint32_t gpioX_CRL = 0x00UL;
+	uint8_t regStatus = 0x00;
+	// Read
+	if(GPIO_DRIVER_PIN_REQUIRES_CRH(pin)) gpioX_CRH = __GPIO_ReadCRH(GPIOx);
+	if(GPIO_DRIVER_PIN_REQUIRES_CRL(pin)) gpioX_CRL = __GPIO_ReadCRL(GPIOx);
+	// Update
+	while(pin)
+	{
+		// Extract only the 1st bit set from LSB
+		gpio_pin_t currentPin = (gpio_pin_t)(pin & -pin);
+		// Configure the Control Register High
+		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
+		{
+			gpioX_CRH = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRH);
+			regStatus |= GPIO_CRH_UPDATED;
+		}
+		else
+		{
+			gpioX_CRL = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRL);
+			regStatus |= GPIO_CRL_UPDATED;
+		}
+		// Update the parameters
+		pin &= ~currentPin;
+	}
+	// Write
+	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
+	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
+	return DRIVER_SUCCESS;
 }
 
 /**
