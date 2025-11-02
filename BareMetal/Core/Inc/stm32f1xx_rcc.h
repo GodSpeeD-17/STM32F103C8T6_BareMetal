@@ -15,7 +15,7 @@ typedef struct {
 	// Clock Control Register (CR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t HSION: 1;
@@ -36,7 +36,7 @@ typedef struct {
 	// Configuration Register (CFGR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t SW: 2;
@@ -57,7 +57,7 @@ typedef struct {
 	// Clock Interrupt Register (CIR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t LSIRDYF: 1;
@@ -86,7 +86,7 @@ typedef struct {
 	// APB2 Peripheral Reset Register (APB2RSTR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t AFIORST: 1;
@@ -115,7 +115,7 @@ typedef struct {
 	// APB1 Peripheral Reset Register (APB2RSTR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t TIM2RST: 1;
@@ -152,7 +152,7 @@ typedef struct {
 	// AHB Enable Register (AHBENR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t DMA1EN: 1;
@@ -172,7 +172,7 @@ typedef struct {
 	// APB2 Enable Register (APB2ENR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t AFIOEN: 1;
@@ -201,7 +201,7 @@ typedef struct {
 	// APB1 Enable Register (APB1ENR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t TIM2EN: 1;
@@ -238,7 +238,7 @@ typedef struct {
 	// Backup Domain Control Register (BDCR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t LSEON: 1;
@@ -255,7 +255,7 @@ typedef struct {
 	// Control/Status Register (CSR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t LSION: 1;

@@ -285,7 +285,7 @@ __STATIC_FORCEINLINE void RCC_HSE_ON(void)
 	// Turn ON HSE
 	RCC->CR.REG |= RCC_CR_HSEON;
 	// Blocking: Wait for Clock to be ready
-	while(!(RCC->CR.REG & RCC_CR_HSERDY));
+	while((RCC->CR.REG & RCC_CR_HSERDY_Msk) != RCC_CR_HSERDY);
 }
 
 /**
@@ -309,7 +309,7 @@ __STATIC_FORCEINLINE void RCC_PLL_ON(void)
 	// Turn ON PLL
 	RCC->CR.REG |= RCC_CR_PLLON;
 	// Blocking: Wait for Clock to be ready
-	while(!(RCC->CR.REG & RCC_CR_PLLRDY));
+	while((RCC->CR.REG & RCC_CR_PLLRDY_Msk) != RCC_CR_PLLRDY);
 }
 
 /**

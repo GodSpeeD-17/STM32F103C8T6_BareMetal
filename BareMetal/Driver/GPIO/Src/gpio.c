@@ -340,11 +340,11 @@ driver_status_t OB_LED_Init(void)
 	// On-board (OB) LED Configuration Structure
 	gpio_config_t obLedConfig = 
 	{
-		.pin = GPIO_PIN_OB_LED,
+		.pin = GPIO_OB_LED_PIN,
 		.mode = GPIO_PIN_MODE_OUTPUT_2MHz,	///<  Refer datasheet for this speed selection
 		.config = GPIO_PIN_CNF_OUT_GP_PP	///< General Purpose Push-Pull Configuration
 	};
 	// Call GPIO Config()
-	return GPIO_Init(GPIO_PORT_OB_LED, &obLedConfig);
+	return GPIO_Init(GPIO_OB_LED_PORT, &obLedConfig);
 }
 

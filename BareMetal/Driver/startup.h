@@ -10,6 +10,8 @@
 /*--------------------------------------------- Headers ----------------------------------*/
 // Dependency
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 // Required for `errno` in standard `malloc`
 #include <errno.h>
 // SysTick Configuration

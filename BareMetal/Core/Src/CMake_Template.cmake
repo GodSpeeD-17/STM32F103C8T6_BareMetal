@@ -26,10 +26,10 @@ verify_tool("Core Root"					${CORE_ROOT})
 verify_tool("Driver Root"				${DRIVER_ROOT})
 verify_tool("Linker Script"				${LINKER_FILE})
 verify_tool("Toolchain Path"			${TOOLCHAIN_PATH})
-verify_tool("ST-Flash"            ${ST_FLASH_PATH})
-verify_tool("ST-Util"             ${ST_UTIL_PATH})
-verify_tool("OpenOCD"             ${OPENOCD_PATH})
-verify_tool("GDB Multiarch"       ${GDB_PATH_MULTIARCH_PATH})
+verify_tool("ST-Flash"					${ST_FLASH_PATH})
+verify_tool("ST-Util"					${ST_UTIL_PATH})
+verify_tool("OpenOCD"					${OPENOCD_PATH})
+verify_tool("GDB Multiarch"				${GDB_PATH_MULTIARCH_PATH})
 
 # ---------------------- Binary Utilities ----------------------
 set(CMAKE_OBJCOPY				  ${TOOLCHAIN_PREFIX}-objcopy)
@@ -46,22 +46,22 @@ verify_tool("NM"        		  ${CMAKE_NM})
 verify_tool("Size Utility"        ${CMAKE_SIZE})
 
 # Modules registered
-if(NOT DRIVER_MODULES)
+if(NOT DEFINED DRIVER_MODULES)
 	message(FATAL_ERROR "DRIVER_MODULES not set! Please set this in your project's CMakeLists.txt before including this template")
 # Optimization Level
-elseif(NOT OPTIMIZATION_LEVEL)
-	message(WARNING "OPTIMIZATION_LEVEL not set! Assuming it to be O3")
-	set(OPTIMIZATION_LEVEL 3)
+elseif(NOT DEFINED OPTIMIZATION_LEVEL)
+	message(WARNING "OPTIMIZATION_LEVEL not set! Assuming it to be O1")
+	set(OPTIMIZATION_LEVEL 1)
 # Flash Address
-elseif(NOT FLASH_ADDRESS)
+elseif(NOT DEFINED FLASH_ADDRESS)
 	message(WARNING "FLASH_ADDRESS not set! Assuming 0x08000000")
 	set(FLASH_ADDRESS 0x08000000)
 # Driver Module Tree View
-elseif(NOT DRIVER_MODULE_TREE)
+elseif(NOT DEFINED DRIVER_MODULE_TREE)
 	message(WARNING "DRIVER_MODULE_TREE not set! Assuming SHOW_FILENAME_ONLY")
 	set(DRIVER_MODULE_TREE SHOW_FILENAME_ONLY)
 # UART Flashing Port
-elseif(NOT ST_UART_FLASH_PORT)
+elseif(NOT DEFINED ST_UART_FLASH_PORT)
 	message(WARNING "ST_UART_FLASH_PORT not set! Assuming /dev/ttyUSB0")
 	set(ST_UART_FLASH_PORT "/dev/ttyUSB0")
 endif()
@@ -104,9 +104,9 @@ set(DEFAULT_FLAGS
     -mcpu=${MCU_CPU}
     -mthumb
     -mfloat-abi=soft
+    -lc -lm -lstdc++ -lsupc++
     --specs=nano.specs    # Use reduced libc
     --specs=nosys.specs   # No system calls
-    -lc -lm
     -MMD -MP              # Dependency generation
     -save-temps           # Keep intermediate files
 )
@@ -114,7 +114,8 @@ set(DEFAULT_FLAGS
 # =============================================================================
 # Common Flags (C & C++)
 # =============================================================================
-set(COMMON_FLAGS ${DEFAULT_FLAGS}
+set(COMMON_FLAGS 
+	${DEFAULT_FLAGS}
     -O${OPTIMIZATION_LEVEL}
     -Wall                 # All standard warnings
     -Wextra               # Extra warnings
@@ -132,10 +133,11 @@ set(COMMON_FLAGS ${DEFAULT_FLAGS}
 # =============================================================================
 
 # C specific flags
-set(C_FLAGS ${COMMON_FLAGS}
-    -std=${C_STD}
-    -Wstrict-prototypes   # Warn about non-ANSI function prototypes
-    -Wmissing-prototypes  # Warn about missing function prototypes
+set(C_FLAGS 
+	${COMMON_FLAGS}
+	-std=${C_STD}
+	-Wstrict-prototypes   # Warn about non-ANSI function prototypes
+	-Wmissing-prototypes  # Warn about missing function prototypes
 )
 
 # C++ specific flags  
@@ -157,6 +159,19 @@ set(ASM_FLAGS
     -Wa,--warn            # Enable assembler warnings
 )
 
+# Linker Flags
+set(LINKER_FLAGS
+    -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft # MCU architecture options
+    -T${LINKER_FILE} -Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map     # Linker script and map file
+    -lc -lm -lstdc++ -lsupc++ --specs=nano.specs # Standard libraries (nano version for size)
+    -Wl,--gc-sections          # Remove unused sections
+    -Wl,--print-memory-usage   # Display memory usage
+    -Wl,--stats                # Linker statistics
+    -Wl,--cref                 # Cross-reference table
+    # Bare-metal environment
+    -static 
+	# -nostartfiles -nodefaultlibs -nostdlib
+)
 # =============================================================================
 # File & Path Configuration
 # =============================================================================
@@ -330,19 +345,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
 # Linker Configuration
 # =============================================================================
 target_link_options(${PROJECT_NAME}.elf PRIVATE
-    # MCU architecture options
-    -mcpu=${MCU_CPU} -mthumb -mfloat-abi=soft
-    # Linker script and map file
-    -T${LINKER_FILE} -Wl,-Map=${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.map
-    # Standard libraries (nano version for size)
-    -lc -lm --specs=nano.specs
-    # Optimization and analysis
-    -Wl,--gc-sections          # Remove unused sections
-    -Wl,--print-memory-usage   # Display memory usage
-    -Wl,--stats                # Linker statistics
-    -Wl,--cref                 # Cross-reference table
-    # Bare-metal environment
-    -static -nostartfiles -nodefaultlibs -nostdlib
+    ${LINKER_FLAGS}
 )
 
 # =============================================================================
@@ -389,7 +392,8 @@ add_custom_target(vscode_launch
   COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\""  >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
-  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // Reset_Handler" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // Main" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "//    \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Reset Handler" >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": [" 		>> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\"," 		>> ${VSCODE_DIR}/launch.json

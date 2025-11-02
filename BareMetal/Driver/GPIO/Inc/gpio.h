@@ -77,10 +77,8 @@ static const GPIO_TypeDef* const _driverGpioPortMapping[] =
 	[GPIO_PORT_D] = GPIOD,
 	[GPIO_PORT_E] = GPIOE,
 	[GPIO_PORT_F] = GPIOF,
-	[GPIO_PORT_G] = GPIOG,
-	NULL
+	[GPIO_PORT_G] = GPIOG
 };
-
 
 /**
  * @brief Checks if a GPIO port value is valid
@@ -375,10 +373,10 @@ __STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_getLLPinConfig(const gpio_pin
  * @def GPIO_DRIVER_PIN_IS_AF_CONFIG
  */
 #define GPIO_DRIVER_PIN_IS_AF_CONFIG(config)							\
-(																		\
-	(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP) ||		\
-	(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
-)
+	(																		\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP) ||		\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
+	)
 
 /** 
  * @brief Determines whether pull-up or pull-down mode is used 
@@ -638,8 +636,8 @@ typedef struct
 
 // Board Specific Configuration
 #ifdef STM32F103C8T6__
-	#define GPIO_PORT_OB_LED 									GPIO_PORT_C
-	#define GPIO_PIN_OB_LED 									GPIO_PIN_13
+	#define GPIO_OB_LED_PORT 									GPIO_PORT_C
+	#define GPIO_OB_LED_PIN 									GPIO_PIN_13
 #endif /* STM32F103C8T6__ */
 
 /**
@@ -694,7 +692,7 @@ __STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t p
  */
 __STATIC_FORCEINLINE void OB_LED_Set(void)
 {
-	GPIO_PinReset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinReset(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
 /**
@@ -703,7 +701,7 @@ __STATIC_FORCEINLINE void OB_LED_Set(void)
  */
 __STATIC_FORCEINLINE void OB_LED_Reset(void)
 {
-	GPIO_PinReset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinSet(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
 /**
@@ -712,7 +710,7 @@ __STATIC_FORCEINLINE void OB_LED_Reset(void)
  */
 __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 {
-	GPIO_PinToggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinToggle(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
 /*---------------------------------------------- Driver APIs ----------------------------------------------*/
@@ -887,7 +885,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_
  */
 __STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)
 {
-	return GPIO_Deinit(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	return GPIO_Deinit(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
 

@@ -85,6 +85,7 @@ extern "C" {
 /*----------------------------------------------- Core C -----------------------------------------------*/
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 /*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
@@ -186,7 +187,9 @@ extern "C" {
 	((unsigned long)((((uintptr_t)(value)) - ((uintptr_t)(base))) / (uintptr_t)sizeof(type)))
 
 /**
- * @brief Driver Status
+ * @brief Driver Operational Status
+ * @enum driver_status_t
+ * @note Driver Operational Status
  */
 typedef enum
 {
@@ -196,14 +199,15 @@ typedef enum
 
 /**
  * @brief Assert Driver Functionality Status
+ * @param[in] status Driver Status @ref driver_status_t
  */
 #define ASSERT_DRIVER_STATUS(status)    \
-	do                                  \
-	{                                   \
+	do									\
+	{									\
 		if ((status) != DRIVER_SUCCESS) \
-		{                               \
-			return (status);            \
-		}                               \
+		{								\
+			return ((status));			\
+		}								\
 	} while (0)
 
 /** @} */ // 01_STM32F1xx_Utilities
