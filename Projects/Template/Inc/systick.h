@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef __SYSTICK_H__
-#define __SYSTICK_H__
+#ifndef SYSTICK_H_
+#define SYSTICK_H_
 
 // Register Mapping
 #include "stm32f1xx.h"
@@ -12,23 +12,24 @@
 #endif
 
 // SysTick Wrap Value Macro
-#define SYSTICK_WRAP_VAL(X) 				((X) & 0x00FFFFFF)
+#define SYSTICK_WRAP_VAL(X) ((X) & 0x00FFFFFF)
 
 // Future Usage for SysTick
 #ifdef __SYSTICK_CONFIG__
 // SysTick Configuration Structure
-typedef struct {
+typedef struct
+{
 	// SysTick Clock Source
 	// - 0: External Reference Clock
 	// - 1: Core Clock (AHB Clock)
-	uint32_t CLK_SRC: 1;
+	uint32_t CLK_SRC : 1;
 	// SysTick Interrupt
 	// - 0: Counting Down to 0 does not pend the `SysTick_Handler`
 	// - 1: Counting Down to 0 pends the `SysTick_Handler`
-	uint32_t TICK_INT: 1;
+	uint32_t TICK_INT : 1;
 	// SysTick Reload Value Register
 	// - 24-bit value that is loaded into the counter register
-	uint32_t LOAD: 24;
+	uint32_t LOAD : 24;
 	// SysTick Current Value Register
 	uint32_t VAL;
 } systick_config_t;
@@ -37,7 +38,8 @@ typedef struct {
 /**
  * @brief Enables SysTick Counter
  */
-__STATIC_FORCEINLINE void SysTick_Enable(void){
+__STATIC_FORCEINLINE void SysTick_Enable(void)
+{
 	// Disable Interrupts
 	__disable_irq();
 	// Enable SysTick
@@ -49,7 +51,8 @@ __STATIC_FORCEINLINE void SysTick_Enable(void){
 /**
  * @brief Disables SysTick Counter
  */
-__STATIC_FORCEINLINE void SysTick_Disable(void){
+__STATIC_FORCEINLINE void SysTick_Disable(void)
+{
 	// Disable Interrupts
 	__disable_irq();
 	// Disable SysTick
@@ -102,4 +105,4 @@ void delay_ms(uint32_t delayTime);
  */
 void SysTick_Handler(void);
 
-#endif /* __SYSTICK_H__ */
+#endif /* SYSTICK_H_ */

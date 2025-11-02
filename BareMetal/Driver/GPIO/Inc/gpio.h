@@ -669,7 +669,7 @@ __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  */
-__STATIC_FORCEINLINE void GPIO_Toggle(const gpio_port_t gpio, const gpio_pin_t pin)
+__STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_t pin)
 {
 	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
 	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadODR(GPIOx) ^ ((uint32_t) pin)));
@@ -694,7 +694,7 @@ __STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t p
  */
 __STATIC_FORCEINLINE void OB_LED_Set(void)
 {
-	GPIO_Reset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinReset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /**
@@ -703,7 +703,7 @@ __STATIC_FORCEINLINE void OB_LED_Set(void)
  */
 __STATIC_FORCEINLINE void OB_LED_Reset(void)
 {
-	GPIO_Set(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinReset(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /**
@@ -712,7 +712,7 @@ __STATIC_FORCEINLINE void OB_LED_Reset(void)
  */
 __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 {
-	GPIO_Toggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
+	GPIO_PinToggle(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
 
 /*---------------------------------------------- Driver APIs ----------------------------------------------*/
@@ -889,9 +889,6 @@ __STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)
 {
 	return GPIO_Deinit(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }
-
-
-
 
 
 #endif /* GPIO_H_ */

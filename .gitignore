@@ -1,5 +1,8 @@
 # Directory Specific Preferences
-.vscode/
+.vscode
+.vscode/c_cpp_properties.json
+.vscode/settings.json
+.vscode/cpp_snippet.code-snippets
 # VS Code Tag Mapping
 .vscode-ctags
 # Doxygen documentation output

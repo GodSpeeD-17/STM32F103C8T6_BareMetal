@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef __SYSTICK_H__
-#define __SYSTICK_H__
+#ifndef SYSTICK_H_
+#define SYSTICK_H_
 
 // Register Mapping
 #include "stm32f1xx.h"
@@ -100,4 +100,4 @@ void delay_ms(uint32_t delayTime);
  */
 void SysTick_Handler(void);
 
-#endif /* __SYSTICK_H__ */
+#endif /* SYSTICK_H_ */

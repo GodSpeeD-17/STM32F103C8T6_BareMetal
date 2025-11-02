@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef MAIN_H_
+#define MAIN_H_
 
 /*-------------------------------------------------------------------------------*/
 // Headers
@@ -19,4 +19,4 @@
 #define PUSH_BUTTON_PIN                     (GPIO_PIN_1)
 /*-------------------------------------------------------------------------------*/
 
-#endif /* __MAIN_H__ */
+#endif /* MAIN_H_ */

@@ -44,7 +44,7 @@ void EXTI1_IRQHandler(void){
 		if(SysTick_Get_Ticks() - time_now > DEBOUNCE_TIME_MS){
 			time_now = SysTick_Get_Ticks();
 			// Toggle the Red LED
-			GPIO_Toggle(RED_LED_PORT, RED_LED_PIN);
+			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
 		}
 		// Clear the Pending Bit
 		GPIO_EXTI_Ack(pushButtonConfig.pin);

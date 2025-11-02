@@ -24,9 +24,9 @@ int main(){
 		// Check if Push Button is Pressed
 		if(GPIO_Get(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == 0x01){
 			// Turn ON Red LED
-			GPIO_Toggle(RED_LED_PORT, RED_LED_PIN);
+			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
 			// Turn OFF Yellow LED
-			GPIO_Toggle(YELLOW_LED_PORT, YELLOW_LED_PIN);
+			GPIO_PinToggle(YELLOW_LED_PORT, YELLOW_LED_PIN);
 		}
 		
 		// Loop Delay

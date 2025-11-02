@@ -17,24 +17,19 @@ endfunction()
 # =============================================================================
 # Project Path Validation
 # =============================================================================
-message(STATUS "==========================================")
-message(STATUS "Project Paths")
-message(STATUS "==========================================")
+message(STATUS "====================================================================================")
+message(STATUS "Project Paths Summary:")
+message(STATUS "====================================================================================")
 verify_tool("Project Directory"			${PROJ_DIR})
 verify_tool("Repository Root"			${REPO_ROOT})
 verify_tool("Core Root"					${CORE_ROOT})
 verify_tool("Driver Root"				${DRIVER_ROOT})
 verify_tool("Linker Script"				${LINKER_FILE})
-
-# Modules registered
-if(NOT DRIVER_MODULES)
-	message(FATAL_ERROR "DRIVER_MODULES not set! Please set this in your project's CMakeLists.txt before including this template")
-endif()
-
-message(STATUS "==========================================")
-message(STATUS "Toolchain Verification")
-message(STATUS "==========================================")
-verify_tool("Toolchain Path"	  ${TOOLCHAIN_PATH})
+verify_tool("Toolchain Path"			${TOOLCHAIN_PATH})
+verify_tool("ST-Flash"            ${ST_FLASH_PATH})
+verify_tool("ST-Util"             ${ST_UTIL_PATH})
+verify_tool("OpenOCD"             ${OPENOCD_PATH})
+verify_tool("GDB Multiarch"       ${GDB_PATH_MULTIARCH_PATH})
 
 # ---------------------- Binary Utilities ----------------------
 set(CMAKE_OBJCOPY				  ${TOOLCHAIN_PREFIX}-objcopy)
@@ -49,10 +44,27 @@ verify_tool("Objcopy"             ${CMAKE_OBJCOPY})
 verify_tool("Objdump"             ${CMAKE_OBJDUMP})
 verify_tool("NM"        		  ${CMAKE_NM})
 verify_tool("Size Utility"        ${CMAKE_SIZE})
-verify_tool("ST-Flash"            ${ST_FLASH_PATH})
-verify_tool("OpenOCD"             ${OPENOCD_PATH})
-verify_tool("GDB Multiarch"       ${GDB_PATH_MULTIARCH_PATH})
-verify_tool("ST-Util"             ${ST_UTIL_PATH})
+
+# Modules registered
+if(NOT DRIVER_MODULES)
+	message(FATAL_ERROR "DRIVER_MODULES not set! Please set this in your project's CMakeLists.txt before including this template")
+# Optimization Level
+elseif(NOT OPTIMIZATION_LEVEL)
+	message(WARNING "OPTIMIZATION_LEVEL not set! Assuming it to be O3")
+	set(OPTIMIZATION_LEVEL 3)
+# Flash Address
+elseif(NOT FLASH_ADDRESS)
+	message(WARNING "FLASH_ADDRESS not set! Assuming 0x08000000")
+	set(FLASH_ADDRESS 0x08000000)
+# Driver Module Tree View
+elseif(NOT DRIVER_MODULE_TREE)
+	message(WARNING "DRIVER_MODULE_TREE not set! Assuming SHOW_FILENAME_ONLY")
+	set(DRIVER_MODULE_TREE SHOW_FILENAME_ONLY)
+# UART Flashing Port
+elseif(NOT ST_UART_FLASH_PORT)
+	message(WARNING "ST_UART_FLASH_PORT not set! Assuming /dev/ttyUSB0")
+	set(ST_UART_FLASH_PORT "/dev/ttyUSB0")
+endif()
 
 # =============================================================================
 # Flashing & Debugging Tools Configuration
@@ -84,12 +96,6 @@ set(MCU_CPU cortex-m3)
 # =============================================================================
 set(C_STD gnu11)
 set(CXX_STD c++17)
-
-# =============================================================================
-# Optimization & Debugging
-# =============================================================================
-set(OPTIMIZATION_LEVEL 0)  # 0: Debug, 1: Balanced, 2: Performance, 3: Size
-set(DEBUG_LEVEL 2)         # 0: None, 1: Minimal, 2: Standard, 3: Maximum
 
 # =============================================================================
 # Base Compiler Flags
@@ -155,12 +161,6 @@ set(ASM_FLAGS
 # File & Path Configuration
 # =============================================================================
 
-# Verify linker script exists
-if(NOT EXISTS ${LINKER_FILE})
-    message(FATAL_ERROR "Default linker script not found: ${LINKER_FILE}")
-    message(STATUS "  → Replace LINKER_FILE variable for custom linker script")
-endif()
-
 # ---------------------- IDE & Development Tools ----------------------
 set(VSCODE_DIR ${PROJ_DIR}/.vscode)  # VSCode configuration directory
 if(NOT EXISTS ${VSCODE_DIR})
@@ -218,9 +218,9 @@ function(add_driver_module)
         endif()
 	endforeach()
 	# Information
-	message(STATUS "==========================================")
+	message(STATUS "====================================================================================")
 	message(STATUS "Library")
-	message(STATUS "==========================================")
+	message(STATUS "====================================================================================")
 	# Iterate over each module name
     foreach(module_name IN LISTS module_names)
         # Construct module path
@@ -275,7 +275,7 @@ function(add_driver_module)
             message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
         endif()
     endforeach()
-	message(STATUS "==========================================")
+	message(STATUS "====================================================================================")
 endfunction()
 
 # =============================================================================

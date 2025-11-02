@@ -1,6 +1,6 @@
 // Header Guards
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef MAIN_H_
+#define MAIN_H_
 
 /*-------------------------------------------------------------------------------*/
 // Headers
@@ -11,11 +11,11 @@
 
 /*-------------------------------------------------------------------------------*/
 // MACROS
-#define LOOP_DELAY_MS						(1000)
-#define RED_LED_PORT						(GPIO_PORT_A)
-#define RED_LED_PIN							(GPIO_PIN_2)
-#define YELLOW_LED_PORT						(GPIO_PORT_A)
-#define YELLOW_LED_PIN						(GPIO_PIN_3)
+#define LOOP_DELAY_MS						(1000UL)
+#define RED_LED_PORT						GPIO_PORT_A
+#define RED_LED_PIN							GPIO_PIN_2
+#define YELLOW_LED_PORT						GPIO_PORT_A
+#define YELLOW_LED_PIN						GPIO_PIN_3
 /*-------------------------------------------------------------------------------*/
 
-#endif /* __MAIN_H__ */
+#endif /* MAIN_H_ */
