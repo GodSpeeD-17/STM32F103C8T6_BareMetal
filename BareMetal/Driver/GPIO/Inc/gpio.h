@@ -885,7 +885,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_
  * @returns - DRIVER_FAIL: Failure
  * @returns - DRIVER_SUCCESS: Success
  */
-__STATIC_FORCEINLINE void OB_LED_Deinit(void)
+__STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)
 {
 	return GPIO_Deinit(GPIO_PORT_OB_LED, GPIO_PIN_OB_LED);
 }

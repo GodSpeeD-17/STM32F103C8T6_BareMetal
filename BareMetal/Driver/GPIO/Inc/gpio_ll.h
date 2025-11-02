@@ -35,16 +35,14 @@ extern "C" {
 // ######################################################################################################
 
 /**
- * @defgroup GPIO_01_Registers GPIO Registers
- * @ingroup GPIO
- * @brief GPIO Registers
+ * @addtogroup GPIO_01_Registers
  * @{
  */
 
 /**
  * @defgroup GPIO_01_Registers_04_API GPIO Register Access APIs
  * @ingroup GPIO_01_Registers
- * @brief APIs to access @ref 01_GPIO_01_Registers_Structure "GPIO Registers"
+ * @brief APIs to access @ref GPIO_01_Registers_01_Structure "GPIO Registers"
  * @{
  */
 
@@ -80,7 +78,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief				Reads @ref GPIO_TypeDef_CRH "CRH"
- * @param[in] GPIOx		Target GPIO port 
+ * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port" 
  * @returns				CRH
  * @ref GPIO_Pins_Summary "GPIO Pin Summary" 
  */
@@ -91,7 +89,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadCRH(const GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief				Writes @ref GPIO_TypeDef_CRH "CRH"
- * @param[in] GPIOx		Target GPIO port
+ * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -112,8 +110,8 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_ODR "ODR"
- * @param[in] GPIOx Target GPIO port
- * @param[in] value 32-bit port output value
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_TypeDef_ODR "ODR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
@@ -121,19 +119,9 @@ __STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint3
 }
 
 /**
- * @brief Reads @ref GPIO_TypeDef_ODR "ODR"
- * @param[in] GPIOx Target GPIO port
- * @returns 32-bit port output value
- */
-__STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(const GPIO_TypeDef* const GPIOx)
-{
-	return (uint32_t)(GPIOx->ODR.REG);
-}
-
-/**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_BSRR "BSRR"
- * @param[in] GPIOx Target GPIO port
- * @param[in] value 32-bit port output value
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BSRR "BSRR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
@@ -142,8 +130,8 @@ __STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_BRR "BRR"
- * @param[in] GPIOx Target GPIO port
- * @param[in] value 32-bit port output value
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BRR "BRR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
@@ -161,13 +149,23 @@ __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint3
  */
 
 /**
- * @brief Reads an entire pattern from IDR
- * @param[in] GPIOx Target GPIO port
- * @returns Status of GPIO Input
+ * @brief Reads @ref GPIO_TypeDef_IDR "IDR"
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @returns Value read from @ref GPIO_TypeDef_IDR "IDR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t)(GPIOx->IDR.REG);
+}
+
+/**
+ * @brief Reads @ref GPIO_TypeDef_ODR "ODR"
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @returns Value read from @ref GPIO_TypeDef_ODR "ODR"
+ */
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(const GPIO_TypeDef* const GPIOx)
+{
+	return (uint32_t)(GPIOx->ODR.REG);
 }
 
 /** @} */ // GPIO_01_Registers_04_API_03_Input
@@ -182,8 +180,8 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_LCKR "LCKR"
- * @param[in] GPIOx Target GPIO port
- * @param[in] value 32-bit port output value 
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_TypeDef_LCKR "LCKR" value 
  */
 __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
@@ -192,7 +190,8 @@ __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint
 
 /**
  * @brief Reads an entire pattern from @ref GPIO_TypeDef_LCKR "LCKR"
- * @param[in] GPIOx Target GPIO port
+ * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @returns Value read from @ref GPIO_TypeDef_LCKR "LCKR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 {

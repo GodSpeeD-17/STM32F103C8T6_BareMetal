@@ -260,10 +260,11 @@ typedef enum
 // ######################################################################################################
 
 /**
- * @addtogroup  GPIO_01_Registers
+ * @defgroup	GPIO_01_Registers_02_Memory GPIO Ports Memory Address
+ * @ingroup		GPIO_01_Registers
  * @brief       STM32F1xx GPIO Memory Address Mapping
  * @details 
- * - GPIO peripheral instances based on @ref 01_GPIO_01_Registers_Structure "GPIO Registers"
+ * - GPIO peripheral instances based on @ref GPIO_01_Registers_01_Structure "GPIO Registers"
  * - All GPIO ports are clocked from @ref APB2_BASE_ADDR "APB2 Bus"
  * - Each GPIO port occupies 0x400 bytes of address space
  * - Supports GPIO Port A through G on STM32F103C8T6
@@ -273,10 +274,21 @@ typedef enum
  */
 
 /**
- * @defgroup  GPIO_01_Registers_02_Offset GPIO Register Offset
- * @ingroup GPIO_01_Registers
- * @brief GPIO Offset from Base Memory Address
+ * @section  GPIO_Registers_Memory_Base GPIO Register Base Memory Address
+ * @ingroup GPIO_01_Registers_02_Memory
+ * @brief GPIO Base Memory Address
+ * @details @see @ref APB2_BASE_ADDR "APB2 Base Memory Address"
  * @{
+ */
+#define GPIO_BASE_ADDRESS						APB2_BASE_ADDR
+
+/** @} */ // GPIO_Registers_Memory_Base
+
+/**
+ * @{
+ * @section  GPIO_Registers_Memory_Offset GPIO Register Offset from GPIO Base Memory Address
+ * @ingroup GPIO_01_Registers_02_Memory
+ * @brief GPIO Offset from @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address"
  */
 /** @brief GPIO Port A Offset @def GPIOA_OFFSET */
 #define GPIOA_OFFSET                            0x00000800UL
@@ -293,32 +305,33 @@ typedef enum
 /** @brief GPIO Port G Offset @def GPIOG_OFFSET */
 #define GPIOG_OFFSET                            0x00002000UL
 
-/** @} */ // GPIO_01_Registers_02_Offset
+/** @} */ // GPIO_Registers_Memory_Offset
 
 /**
- * @defgroup  GPIO_03_Registers_03_Memory GPIO Ports Memory Addess
- * @ingroup GPIO_01_Registers
- * @brief GPIO Ports Memory Address
  * @{
+ * @section GPIO_Registers_Memory_Ports GPIO Ports Memory Address
+ * @ingroup GPIO_01_Registers_02_Memory
+ * @brief GPIO Ports Memory Address
+ * @see @ref GPIO_01_Registers_01_Structure "GPIO Registers Encapsulation" | @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address" | @ref GPIO_Registers_Memory_Offset "GPIO Register Offset from GPIO Base Memory Address"  
  */
 /** @brief GPIO Port A  @def GPIOA */
-#define GPIOA									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOA_OFFSET))
+#define GPIOA									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOA_OFFSET))
 /** @brief GPIO Port B  @def GPIOB */
-#define GPIOB									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOB_OFFSET))
+#define GPIOB									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOB_OFFSET))
 /** @brief GPIO Port C  @def GPIOC */
-#define GPIOC									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOC_OFFSET))
+#define GPIOC									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOC_OFFSET))
 /** @brief GPIO Port D  @def GPIOD */
-#define GPIOD									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOD_OFFSET))
+#define GPIOD									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOD_OFFSET))
 /** @brief GPIO Port E  @def GPIOE */
-#define GPIOE									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOE_OFFSET))
+#define GPIOE									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOE_OFFSET))
 /** @brief GPIO Port F  @def GPIOF */
-#define GPIOF									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOF_OFFSET))
+#define GPIOF									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOF_OFFSET))
 /** @brief GPIO Port G  @def GPIOG */
-#define GPIOG									((GPIO_TypeDef *) (APB2_BASE_ADDR + GPIOG_OFFSET))
+#define GPIOG									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOG_OFFSET))
 
-/** @} */ // GPIO_03_Registers_03_Memory
+/** @} */ // GPIO_Registers_Memory_Ports
 
-/** @} */ // GPIO_01_Registers
+/** @} */ // GPIO_01_Registers_02_Memory
 
 #define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
 #define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00UL))

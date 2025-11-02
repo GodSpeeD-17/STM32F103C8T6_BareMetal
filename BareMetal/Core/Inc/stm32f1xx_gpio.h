@@ -4,16 +4,16 @@
  * @version v1.2
  * @date    21-10-2025
  *
- * @defgroup GPIO General Purpose Input/Ouptut (GPIO)
+ * @defgroup GPIO General Purpose Input/Output (GPIO)
  *
  * @brief STM32F1xx General-Purpose Input/Output (GPIO)
  *
  * @details
  * This module provides complete access to GPIO peripherals including:
- * - Register mapping (stm32f1xx_gpio.h)
- * - Memory Address (stm32f1xx.h)
- * - Low Level GPIO APIs (gpio_ll.h)
- * - Driver APIs (gpio.h)
+ * - @ref stm32f1xx_gpio.h "Register mapping"
+ * - @ref stm32f1xx.h "Memory Address"
+ * - @ref gpio_ll.h "GPIO Low Level (LL) APIs"
+ * - @ref gpio.h "GPIO Driver APIs"
  *
  * @note    All GPIO operations require enabled RCC clock for the corresponding GPIO port
  * @warning Direct register access should only be used when performance is critical
@@ -31,7 +31,7 @@ extern "C"
 #include <stdint.h>
 
 	/**
-	 * @brief Structure encapsuation of GPIO Registers
+	 * @brief Structure encapsulation of GPIO Registers
 	 * @defgroup  GPIO_01_Registers GPIO Registers
 	 * @ingroup GPIO
 	 *
@@ -159,10 +159,10 @@ extern "C"
 	 */
 
 	/**
-	 * @defgroup 01_GPIO_01_Registers_Structure Encapsulation of Registers
+	 * @defgroup GPIO_01_Registers_01_Structure GPIO Registers Encapsulation
 	 * @ingroup  GPIO_01_Registers
-	 * @section	 GPIO_RegistersMap GPIO Registers
-	 * @brief    GPIO Registers representation using structs
+	 * @section	 GPIO_Registers_Mapping GPIO Registers Layout in Datasheet
+	 * @brief    GPIO Registers representation using structure
 	 * @details
 	 * - This structure represents the complete register set for a single GPIO port
 	 * - It is memory-mapped to the base address of each GPIO peripheral (`GPIOA`, `GPIOB`, etc.)
@@ -459,7 +459,7 @@ extern "C"
 		} LCKR;
 	} GPIO_TypeDef;
 
-/** @} */ // 01_GPIO_01_Registers_Structure
+/** @} */ // GPIO_01_Registers_01_Structure
 
 // C++ Header Guards
 #ifdef __cplusplus
