@@ -21,7 +21,7 @@ typedef struct
 	// - Writing 0xAAAA: Regular intervals to feed the watchdog
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -38,7 +38,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -54,7 +54,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -66,7 +66,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -86,7 +86,7 @@ typedef struct {
 	union 
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t T: 7;
@@ -97,7 +97,7 @@ typedef struct {
 	// Configuration Register (CFGR)
 	union
 	{
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct 
 		{
 			volatile uint32_t W: 7;
@@ -109,7 +109,7 @@ typedef struct {
 	// Status Register (SR)
 	union
 	{
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			// Early wakeup interrupt flag

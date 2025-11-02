@@ -15,7 +15,7 @@ typedef struct {
     // Flash Access Control Register (ACR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t LATENCY: 3;
@@ -28,7 +28,7 @@ typedef struct {
     // FPEC Key Register (KEYR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;
@@ -37,7 +37,7 @@ typedef struct {
     // Flash OPTKEY Register 
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;
@@ -46,7 +46,7 @@ typedef struct {
     // 
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;
@@ -55,7 +55,7 @@ typedef struct {
     // 
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;
@@ -66,7 +66,7 @@ typedef struct {
     // 
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;
@@ -75,7 +75,7 @@ typedef struct {
     // 
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             uint32_t demo: 1;

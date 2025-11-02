@@ -185,7 +185,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_CRL
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t MODE0 : 2;
@@ -219,7 +219,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_CRH
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t MODE8 : 2;
@@ -253,7 +253,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_IDR
 	{
-		volatile const uint32_t REG;
+		volatile const volatile uint32_t REG;
 		struct
 		{
 			volatile const uint32_t IDR0 : 1;
@@ -289,7 +289,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_ODR
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t ODR0 : 1;
@@ -326,7 +326,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_BSRR
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t BS0 : 1;
@@ -377,7 +377,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_BRR
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t BR0 : 1;
@@ -434,7 +434,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_LCKR
 	{
-		volatile uint32_t REG;
+		volatile volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t LCK0 : 1;

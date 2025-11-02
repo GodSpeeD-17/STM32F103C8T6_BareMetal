@@ -15,7 +15,7 @@ typedef struct {
     // Event Control Register (EVCR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t PIN: 4;
@@ -28,7 +28,7 @@ typedef struct {
     // AF Remap and Debug I/O Configuration Register (MAPR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t SPI1_REMAP: 1;
@@ -55,7 +55,7 @@ typedef struct {
     // External Interrupt Configuration Register 1 (EXTICR1)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t EXTI0: 4;
@@ -68,7 +68,7 @@ typedef struct {
     // External Interrupt Configuration Register 2 (EXTICR2)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t EXTI4: 4;
@@ -82,7 +82,7 @@ typedef struct {
     // External Interrupt Configuration Register 3 (EXTICR3)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t EXTI8: 4;
@@ -95,7 +95,7 @@ typedef struct {
     // External Interrupt Configuration Register 3 (EXTICR4)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t EXTI12: 4;

@@ -15,7 +15,7 @@ typedef struct {
 	// Control and Status Register (CTRL)
 	union{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t EN: 1;
@@ -36,7 +36,7 @@ typedef struct {
 	// Calibration Value Register (CAL)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t TENMS: 24;

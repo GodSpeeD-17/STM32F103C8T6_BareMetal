@@ -16,7 +16,7 @@ typedef struct
     // Interrupt Mask Register (IMR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t MR0: 1;  
@@ -45,7 +45,7 @@ typedef struct
     // Event Mask Register (EMR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t MR0: 1;  
@@ -74,7 +74,7 @@ typedef struct
     // Rising Trigger Selection Register (RTSR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t TR0: 1;  
@@ -103,7 +103,7 @@ typedef struct
     // Falling Trigger Selection Register (FTSR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t TR0: 1;  
@@ -132,7 +132,7 @@ typedef struct
     // Software Interrupt Event Register (SWIER)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t SWIER0: 1;  
@@ -161,7 +161,7 @@ typedef struct
     // Pending Register (PR)
     union {
         // Full 32-bit Register Access
-        uint32_t REG;
+        volatile uint32_t REG;
         // Bit Access
         struct {
             volatile uint32_t PR0: 1;  

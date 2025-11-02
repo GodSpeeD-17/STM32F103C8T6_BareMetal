@@ -18,7 +18,7 @@ extern "C" {
 // 	union
 // 	{
 // 		// Full 32-bit Register Access
-// 		uint32_t REG;
+// 		volatile uint32_t REG;
 // 		struct
 // 		{
 // 			// Revision ID: Implementation defined revision number
@@ -46,7 +46,7 @@ extern "C" {
 // 	union
 // 	{
 // 		// Full 32-bit Register Access
-// 		uint32_t REG;
+// 		volatile uint32_t REG;
 // 		// Bit Field Access
 // 		struct
 // 		{

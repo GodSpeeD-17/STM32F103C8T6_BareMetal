@@ -15,7 +15,7 @@ typedef struct {
 	// DMA Channel Configuration Register (DMA_CCR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t EN: 1;
@@ -37,7 +37,7 @@ typedef struct {
 	// DMA Channel  Number of Data Register (DMA_CNDTR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			// Number of data to transfer
@@ -64,7 +64,7 @@ typedef struct {
 	// DMA Channel  Peripheral Address Register (DMA_CPAR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			// Peripheral Address
@@ -105,7 +105,7 @@ typedef struct {
 	// DMA Channel  Memory Address Register (DMA_CMAR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			// Memory Address
@@ -152,7 +152,7 @@ typedef struct {
 	// DMA Interrupt Status Register (DMA_ISR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			// Channel 1
@@ -197,7 +197,7 @@ typedef struct {
 	// DMA Interrupt Flag Clear Register (DMA_IFCR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			// Channel 1

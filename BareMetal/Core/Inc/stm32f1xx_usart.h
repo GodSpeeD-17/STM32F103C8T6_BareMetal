@@ -15,7 +15,7 @@ typedef struct {
     // Status Register (SR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t PE: 1;
@@ -35,7 +35,7 @@ typedef struct {
     // Data Register (DR)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t DR: 9;
@@ -46,7 +46,7 @@ typedef struct {
     // Baud Rate Register (BRR)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t DIV_FRACTION: 4;
@@ -58,7 +58,7 @@ typedef struct {
     // Control Register 1 (CR1)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t SBK: 1;
@@ -82,7 +82,7 @@ typedef struct {
     // Control Register 2 (CR2)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t ADD: 4;
@@ -103,7 +103,7 @@ typedef struct {
     // Control Register 3 (CR3)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t EIE: 1;
@@ -124,7 +124,7 @@ typedef struct {
     // Guard Time and Prescaler Register (GTPR)
     union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t PSC: 8;

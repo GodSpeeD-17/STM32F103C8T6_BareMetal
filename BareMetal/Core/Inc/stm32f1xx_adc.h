@@ -16,7 +16,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -32,7 +32,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -58,7 +58,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -86,7 +86,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -106,7 +106,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -128,7 +128,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -141,7 +141,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -154,7 +154,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -167,7 +167,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -180,7 +180,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -193,7 +193,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -206,7 +206,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -223,7 +223,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -241,7 +241,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -259,7 +259,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -276,7 +276,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -289,7 +289,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -302,7 +302,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -315,7 +315,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{
@@ -328,7 +328,7 @@ typedef struct
 	union
 	{
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct
 		{

@@ -14,7 +14,7 @@ extern "C" {
 typedef struct {
 	// Control Register 1 (CR1)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			// Peripheral enable
 			volatile uint32_t PE: 1;
@@ -48,7 +48,7 @@ typedef struct {
 	} CR1;
 	// Control Register 2 (CR2)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			// Peripheral clock frequency
 			volatile uint32_t FREQ: 6;
@@ -68,7 +68,7 @@ typedef struct {
 	} CR2;
 	// Own Address Register 1 (OAR1)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			volatile uint32_t ADD0: 1;
 			volatile uint32_t ADD1_7: 7;
@@ -80,7 +80,7 @@ typedef struct {
 	} OAR1;
 	// Own Address Register 2 (OAR2)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			volatile uint32_t ENDUAL: 1;
 			volatile uint32_t ADD2_1_7: 7;
@@ -89,7 +89,7 @@ typedef struct {
 	} OAR2;
 	// Data Register (DR)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			volatile uint32_t DR: 8;
 			volatile uint32_t RESERVED: 24;
@@ -97,7 +97,7 @@ typedef struct {
 	} DR;
 	// Status Register 1 (SR1)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			// Start bit (Master mode)
 			volatile uint32_t SB: 1;
@@ -132,7 +132,7 @@ typedef struct {
 	} SR1;
 	// Status Register 2 (SR2)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			volatile uint32_t MSL: 1;
 			volatile uint32_t BUSY: 1;
@@ -149,7 +149,7 @@ typedef struct {
 	} SR2;
 	// Clock Control Register (CCR)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			volatile uint32_t CCR: 12;
 			volatile uint32_t RESERVED_1: 2;
@@ -162,7 +162,7 @@ typedef struct {
 	} CCR;
 	// TRISE Register (TRISE)
 	union {
-		uint32_t REG;
+		volatile uint32_t REG;
 		struct {
 			// Maximum rise time in Fm/Sm mode (Master mode)
 			volatile uint32_t TRISE: 6;

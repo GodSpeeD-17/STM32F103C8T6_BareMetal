@@ -15,7 +15,7 @@ typedef struct {
 	// Control Register 1 (CR1)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t CEN : 1;
@@ -32,7 +32,7 @@ typedef struct {
 	// Control Register 2 (CR2)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t reserved_1 : 3;
@@ -45,7 +45,7 @@ typedef struct {
 	// Slave Mode Control Register (SMCR)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t SMS : 3;
@@ -62,7 +62,7 @@ typedef struct {
 	// TIMx DMA/Interrupt Enable Register (DIER)
 	union {
 		// Full 32-bit Register Access
-		uint32_t REG;
+		volatile uint32_t REG;
 		// Bit Access
 		struct {
 			volatile uint32_t UIE : 1;
@@ -86,7 +86,7 @@ typedef struct {
 	// TIMx Status Register (SR)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		struct {
 			volatile uint32_t UIF: 1;
@@ -107,7 +107,7 @@ typedef struct {
 	// TIMx Event Generation Register (EGR)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		struct {
 			volatile uint32_t UG: 1;
@@ -123,7 +123,7 @@ typedef struct {
 	// TIMx Capture/Compare Mode Register 1 (CCMR1)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		union {
 			struct{
@@ -153,7 +153,7 @@ typedef struct {
 	// TIMx Capture/Compare Mode Register 2 (CCMR2)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		union {
 			struct{
@@ -183,7 +183,7 @@ typedef struct {
 	// TIMx Capture/Compare Enable Register (CCER)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		struct {
 			volatile uint32_t CC1E: 1;
@@ -233,7 +233,7 @@ typedef struct {
 	// TIMx DMA Control Register (DCR)
 	union {
 		// FULL 32-BIT REGISTER ACCESS
-		uint32_t REG;
+		volatile uint32_t REG;
 		// BIT ACCESS
 		struct {
 			volatile uint32_t DBA: 5;
