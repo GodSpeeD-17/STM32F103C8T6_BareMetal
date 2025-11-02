@@ -121,6 +121,16 @@ __STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint3
 }
 
 /**
+ * @brief Reads @ref GPIO_TypeDef_ODR "ODR"
+ * @param[in] GPIOx Target GPIO port
+ * @returns 32-bit port output value
+ */
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(const GPIO_TypeDef* const GPIOx)
+{
+	return (uint32_t)(GPIOx->ODR.REG);
+}
+
+/**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_BSRR "BSRR"
  * @param[in] GPIOx Target GPIO port
  * @param[in] value 32-bit port output value
@@ -423,21 +433,21 @@ typedef uint8_t _gpio_pin_t;
  * 
  * @{
  */
-/** @brief GPIO Mode LL Data Type @typedef _gpio_mode_t */
-typedef uint8_t _gpio_mode_t;
+/** @brief GPIO Mode LL Data Type @typedef _gpio_pin_mode_t */
+typedef uint8_t _gpio_pin_mode_t;
 /**
  * @section GPIO_LL_PinParams_Mode_Macros GPIO LL Pin Configuration Macros
  * @details Use this for LL
  * @{
  */
-/** @brief Input mode @def _GPIO_MODE_INPUT */
-#define _GPIO_MODE_INPUT							((_gpio_mode_t)0x00)
-/** @brief Output mode, max speed 10 MHz @def _GPIO_MODE_OUTPUT_10MHz */
-#define _GPIO_MODE_OUTPUT_10MHz						((_gpio_mode_t)0x01)
-/** @brief Output mode, max speed 2 MHz @def _GPIO_MODE_OUTPUT_2MHz */
-#define _GPIO_MODE_OUTPUT_2MHz						((_gpio_mode_t)0x02)
-/** @brief Output mode, max speed 50 MHz @def _GPIO_MODE_OUTPUT_50MHz */
-#define _GPIO_MODE_OUTPUT_50MHz						((_gpio_mode_t)0x03)
+/** @brief Input mode @def _GPIO_PIN_MODE_INPUT */
+#define _GPIO_PIN_MODE_INPUT						((_gpio_pin_mode_t)0x00)
+/** @brief Output mode, max speed 10 MHz @def _GPIO_PIN_MODE_OUTPUT_10MHz */
+#define _GPIO_PIN_MODE_OUTPUT_10MHz					((_gpio_pin_mode_t)0x01)
+/** @brief Output mode, max speed 2 MHz @def _GPIO_PIN_MODE_OUTPUT_2MHz */
+#define _GPIO_PIN_MODE_OUTPUT_2MHz					((_gpio_pin_mode_t)0x02)
+/** @brief Output mode, max speed 50 MHz @def _GPIO_PIN_MODE_OUTPUT_50MHz */
+#define _GPIO_PIN_MODE_OUTPUT_50MHz					((_gpio_pin_mode_t)0x03)
 /** @} */ // GPIO_LL_PinParams_Mode_Macros
 /**
  * @brief Creates a mask for the MODE field (bits 1:0 of the 4-bit block)
@@ -486,8 +496,8 @@ typedef uint8_t _gpio_mode_t;
  *       - Output mode: Push-pull/Open-drain configurations
  * @{
  */
-/** @brief GPIO Pin Configuration LL Data Type @typedef _gpio_config_t */
-typedef uint8_t _gpio_config_t;
+/** @brief GPIO Pin Configuration LL Data Type @typedef _gpio_pin_config_t */
+typedef uint8_t _gpio_pin_config_t;
 /** @brief GPIO Pull-Up/Pull-Down State @typedef _gpio_pin_pull_state_t */
 typedef uint8_t _gpio_pin_pull_state_t;
 
@@ -497,14 +507,14 @@ typedef uint8_t _gpio_pin_pull_state_t;
  * @details Use this for LL Input Configuration 
  * @{
  */
-/** @brief Input: Analog mode (CNF=0x00) @def _GPIO_CNF_INPUT_ANALOG */
-#define _GPIO_CNF_INPUT_ANALOG							((_gpio_config_t) 0x00)
-/** @brief Input: Floating input (CNF=0x01) @def _GPIO_CNF_INPUT_FLOATING */
-#define _GPIO_CNF_INPUT_FLOATING						((_gpio_config_t) 0x01)
-/** @brief Input: Pull-up/Pull-down (CNF=0x02) @def _GPIO_CNF_INPUT_PULL */
-#define _GPIO_CNF_INPUT_PULL							((_gpio_config_t) 0x02)
-/** @brief Input: Reserved (CNF=0x03) @def _GPIO_CNF_INPUT_RESERVED */
-#define _GPIO_CNF_INPUT_RESERVED						((_gpio_config_t) 0x03)
+/** @brief Input: Analog mode (CNF=0x00) @def _GPIO_PIN_CNF_INPUT_ANALOG */
+#define _GPIO_PIN_CNF_INPUT_ANALOG						((_gpio_pin_config_t) 0x00)
+/** @brief Input: Floating input (CNF=0x01) @def _GPIO_PIN_CNF_INPUT_FLOATING */
+#define _GPIO_PIN_CNF_INPUT_FLOATING					((_gpio_pin_config_t) 0x01)
+/** @brief Input: Pull-up/Pull-down (CNF=0x02) @def _GPIO_PIN_CNF_INPUT_PULL */
+#define _GPIO_PIN_CNF_INPUT_PULL						((_gpio_pin_config_t) 0x02)
+/** @brief Input: Reserved (CNF=0x03) @def _GPIO_PIN_CNF_INPUT_RESERVED */
+#define _GPIO_PIN_CNF_INPUT_RESERVED					((_gpio_pin_config_t) 0x03)
 
 /**
  * @brief LL Constants for setting the Pull-Up/Pull-Down state in the ODR register.
@@ -512,10 +522,10 @@ typedef uint8_t _gpio_pin_pull_state_t;
  * @details Use this for LL PULL Staging 
  * @{
  */
-/** @brief Sets the ODR bit to '0' for PULL-DOWN activation. @def _GPIO_PULL_PULLDOWN */
-#define _GPIO_PULL_PULLDOWN								((_gpio_pin_pull_state_t) 0x00)
-/** @brief Sets the ODR bit to '1' for PULL-UP activation. @def _GPIO_PULL_PULLUP */
-#define _GPIO_PULL_PULLUP								((_gpio_pin_pull_state_t) 0x01)
+/** @brief Sets the ODR bit to '0' for PULL-DOWN activation. @def _GPIO_PIN_CNF_INPUT_PULL_DOWN */
+#define _GPIO_PIN_CNF_INPUT_PULL_DOWN					((_gpio_pin_pull_state_t) 0x00)
+/** @brief Sets the ODR bit to '1' for PULL-UP activation. @def _GPIO_PIN_CNF_INPUT_PULL_UP */
+#define _GPIO_PIN_CNF_INPUT_PULL_UP						((_gpio_pin_pull_state_t) 0x01)
 
 /** @} */ // GPIO_LL_PinParams_CNF_Input_Macros_PullConfig
 
@@ -527,14 +537,14 @@ typedef uint8_t _gpio_pin_pull_state_t;
  * @details Use this for LL Output Configuration 
  * @{
  */
-/** @brief Output: General Purpose Push-pull (CNF=0x00) @def _GPIO_CNF_OUTPUT_PP */
-#define _GPIO_CNF_OUTPUT_PP								((_gpio_config_t) 0x00)
-/** @brief Output: General Purpose Open-drain (CNF=0x01) @def _GPIO_CNF_OUTPUT_OD */
-#define _GPIO_CNF_OUTPUT_OD								((_gpio_config_t) 0x01)
-/** @brief Output: Alternate Function Push-pull (CNF=0x02) @def _GPIO_CNF_AF_PP */
-#define _GPIO_CNF_AF_PP									((_gpio_config_t) 0x02)
-/** @brief Output: Alternate Function Open-drain (CNF=0x03) @def _GPIO_CNF_AF_OD */
-#define _GPIO_CNF_AF_OD									((_gpio_config_t) 0x03)
+/** @brief Output: General Purpose Push-pull (CNF=0x00) @def _GPIO_PIN_CNF_OUTPUT_PP */
+#define _GPIO_PIN_CNF_OUTPUT_PP							((_gpio_pin_config_t) 0x00)
+/** @brief Output: General Purpose Open-drain (CNF=0x01) @def _GPIO_PIN_CNF_OUTPUT_OD */
+#define _GPIO_PIN_CNF_OUTPUT_OD							((_gpio_pin_config_t) 0x01)
+/** @brief Output: Alternate Function Push-pull (CNF=0x02) @def _GPIO_PIN_CNF_AF_PP */
+#define _GPIO_PIN_CNF_AF_PP								((_gpio_pin_config_t) 0x02)
+/** @brief Output: Alternate Function Open-drain (CNF=0x03) @def _GPIO_PIN_CNF_AF_OD */
+#define _GPIO_PIN_CNF_AF_OD								((_gpio_pin_config_t) 0x03)
 
 /** @} */ // GPIO_LL_PinParams_CNF_Output_Macros
 
@@ -567,6 +577,15 @@ typedef uint8_t _gpio_pin_pull_state_t;
 #define _GPIO_PIN_CNF_RESET_MASK(pin)							_GPIO_PIN_CNF_GET_MASK(pin, 0x03)	
 
 /** @} */ // GPIO_LL_PinParams_Config
+
+/**
+ * @brief Masks the CNF & MODE field (bits 3:0 of the 4-bit block)
+ * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
+ * @return The final 32-bit mask value
+ * @def _GPIO_PIN_CNF_MODE_MASK
+ */
+#define _GPIO_PIN_CNF_MODE_MASK(pin) \
+	((uint32_t)(0x0FUL) << (((pin) & _GPIO_PIN_7) << 2))
 
 /** @} */ // GPIO_02_LL_03_PinParams
 
@@ -632,7 +651,7 @@ typedef uint8_t _gpio_lock_status_t;
  * @note - Register Value to be provided as input
  * @see @ref GPIO_Pins_Mode "GPIO Pin Mode Theory"
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_PinStageMode(const _gpio_pin_t pin, const _gpio_mode_t mode, uint32_t crxReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageMode(const _gpio_pin_t pin, const _gpio_pin_mode_t mode, uint32_t crxReg)
 {
 	crxReg &= ~_GPIO_PIN_MODE_RESET_MASK(pin);
 	crxReg |= _GPIO_PIN_MODE_GET_MASK(pin, mode);
@@ -650,7 +669,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageMode(const _gpio_pin_t pin, const _g
  * @note - Register Value to be provided as input
  * @see @ref @ref GPIO_LL_PinParams_Config "GPIO Pin Configuration Theory"
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_PinStageConfig(const _gpio_pin_t pin, const _gpio_config_t config, uint32_t crxReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageConfig(const _gpio_pin_t pin, const _gpio_pin_config_t config, uint32_t crxReg)
 {
 	crxReg &= ~_GPIO_PIN_CNF_RESET_MASK(pin);
 	crxReg |= _GPIO_PIN_CNF_GET_MASK(pin, config);
@@ -670,7 +689,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageConfig(const _gpio_pin_t pin, const 
  * @note - Register Value to be provided as input
  * @see @ref _GPIO_PinStageMode "GPIO Pin Mode Staging API" | @ref _GPIO_PinStageConfig "GPIO Pin Configuration Staging API"
  */
-__STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const _gpio_mode_t mode, const _gpio_config_t config, uint32_t crxReg)
+__STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const _gpio_pin_mode_t mode, const _gpio_pin_config_t config, uint32_t crxReg)
 {
 	return _GPIO_PinStageConfig(pin, config, _GPIO_PinStageMode(pin, mode, crxReg));
 }
@@ -687,7 +706,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageParams(const _gpio_pin_t pin, const 
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_PinStageResetParams(const _gpio_pin_t pin, uint32_t crxReg)
 {
-    return _GPIO_PinStageParams(pin, _GPIO_MODE_INPUT, _GPIO_CNF_INPUT_FLOATING, crxReg);
+    return _GPIO_PinStageParams(pin, _GPIO_PIN_MODE_INPUT, _GPIO_PIN_CNF_INPUT_FLOATING, crxReg);
 }
 
 /**
@@ -701,8 +720,8 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStageResetParams(const _gpio_pin_t pin, u
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, const _gpio_pin_pull_state_t pud_state, uint32_t odrReg)
 {
-	if(pud_state == _GPIO_PULL_PULLDOWN) odrReg &= ~GPIO_LL_GET_PIN_MASK(pin);
-	else if (pud_state == _GPIO_PULL_PULLUP) odrReg |= GPIO_LL_GET_PIN_MASK(pin);
+	if(pud_state == _GPIO_PIN_CNF_INPUT_PULL_DOWN) odrReg &= ~GPIO_LL_GET_PIN_MASK(pin);
+	else if (pud_state == _GPIO_PIN_CNF_INPUT_PULL_UP) odrReg |= GPIO_LL_GET_PIN_MASK(pin);
 	return odrReg;
 }
 

@@ -9,6 +9,73 @@
 /*---------------------------------------------- Driver APIs ---------------------------------------------- */
 
 /**
+ * @brief Get GPIO Pin Mode Configuration
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return @ref gpio_pin_mode_t "GPIO Driver Pin Mode"
+ * 
+ * @details
+ * Extracts the MODE field from the pin's configuration register.
+ * Returns only the 2-bit mode value without the configuration bits.
+ */
+gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+	switch((_gpio_pin_mode_t) GPIO_GetPinParameters(gpio, pin) & 0x03)
+	{
+		case _GPIO_PIN_MODE_INPUT: return GPIO_PIN_MODE_INPUT; break;
+		case _GPIO_PIN_MODE_OUTPUT_10MHz: return GPIO_PIN_MODE_OUTPUT_10MHz; break;
+		case _GPIO_PIN_MODE_OUTPUT_2MHz: return GPIO_PIN_MODE_OUTPUT_2MHz; break;
+		case _GPIO_PIN_MODE_OUTPUT_50MHz: return GPIO_PIN_MODE_OUTPUT_50MHz; break;
+		default: break;
+	}
+}
+
+/**
+ * @brief Get GPIO Pin Configuration Type
+ * @param[in] gpio @ref gpio_port_t "GPIO Port"
+ * @param[in] pin @ref gpio_pin_t "GPIO Pin"
+ * @return _gpio_pin_config_t @ref GPIO_LL_Config "Pin Configuration"
+ * 
+ * @details
+ * Extracts the CNF field from the pin's configuration register.
+ * Returns only the 2-bit configuration value without the mode bits.
+ */
+gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin)
+{
+    uint8_t pinParams = GPIO_GetPinParameters(gpio, pin);
+	switch((_gpio_pin_mode_t)(pinParams & 0x03))
+	{
+		// Input Mode
+		case _GPIO_PIN_MODE_INPUT:
+			switch((_gpio_pin_config_t)(pinParams >> 0x02) & 0x03)
+			{
+				case _GPIO_PIN_CNF_INPUT_ANALOG: return GPIO_PIN_CNF_IN_ANALOG; break;
+				case _GPIO_PIN_CNF_INPUT_FLOATING: return GPIO_PIN_CNF_IN_FLOAT; break;
+				case _GPIO_PIN_CNF_INPUT_PULL:
+					if(__GPIO_ReadODR(GPIO_getLLPort(gpio)) & (uint32_t) pin) return GPIO_PIN_CNF_IN_PULL_UP;
+					else return GPIO_PIN_CNF_IN_PULL_DOWN;
+				break;
+			}
+		break;
+		// Output Mode
+		case _GPIO_PIN_MODE_OUTPUT_10MHz:
+		case _GPIO_PIN_MODE_OUTPUT_2MHz:
+		case _GPIO_PIN_MODE_OUTPUT_50MHz:
+			switch((_gpio_pin_config_t)(pinParams >> 0x02) & 0x03)
+			{
+				case _GPIO_PIN_CNF_OUTPUT_PP: return GPIO_PIN_CNF_OUT_GP_PP; break;
+				case _GPIO_PIN_CNF_OUTPUT_OD: return GPIO_PIN_CNF_OUT_GP_OD; break;
+				case _GPIO_PIN_CNF_AF_PP: return GPIO_PIN_CNF_OUT_AF_PP; break;
+				case _GPIO_PIN_CNF_AF_OD: return GPIO_PIN_CNF_OUT_AF_OD; break;
+				default: break;
+			}
+		break;
+		// Default Case	
+		default: break;
+	}
+}
+
+/**
  * @brief  Configures the operating mode of one or more GPIO pins.
  * @details
  * Updates the MODE bits in the GPIO port configuration registers (CRL/CRH)
@@ -29,7 +96,7 @@
 driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode)
 {
 	// Validation
-	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_IS_PIN_MODE(mode) == 0x00))
+	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
 		return DRIVER_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
@@ -87,7 +154,7 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_config_t config)
 {
 	// Validation
-	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_IS_PIN_CONFIG(config) == 0x00))
+	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
 		return DRIVER_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
@@ -199,7 +266,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 {
 	// Validation
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(gpioConfig->pin) == 0x00) ||
-       (GPIO_DRIVER_IS_PIN_MODE(gpioConfig->mode) == 0x00) || (GPIO_DRIVER_IS_PIN_CONFIG(gpioConfig->config) == 0x00) ||
+       (GPIO_DRIVER_PIN_IS_MODE(gpioConfig->mode) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(gpioConfig->config) == 0x00) ||
        (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00)) 
 		return DRIVER_FAIL;
 	// Enable Clock for GPIO Port
