@@ -172,7 +172,7 @@ extern "C"
  * @{
  */
 
-typedef struct __GPIO_TypeDef
+typedef volatile struct __GPIO_TypeDef
 {
 	/**
 	 * @section GPIO_TypeDef_CRL GPIO Port Configuration Register Low (CRL)
@@ -185,7 +185,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_CRL
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t MODE0 : 2;
@@ -219,7 +219,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_CRH
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t MODE8 : 2;
@@ -289,7 +289,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_ODR
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t ODR0 : 1;
@@ -326,7 +326,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_BSRR
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t BS0 : 1;
@@ -377,7 +377,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_BRR
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t BR0 : 1;
@@ -434,7 +434,7 @@ typedef struct __GPIO_TypeDef
 	 */
 	union GPIO_LCKR
 	{
-		volatile volatile uint32_t REG;
+		volatile uint32_t REG;
 		struct
 		{
 			volatile uint32_t LCK0 : 1;

@@ -19,7 +19,8 @@ extern "C" {
 /**
  * @brief System Control Block (SCB) - CPU Core Registers
  */
-typedef struct {
+typedef volatile struct __SCB_TypeDef
+{
 	// CPUID Base Register
 	uint32_t CPUID;
 	// Interrupt Control State Register  

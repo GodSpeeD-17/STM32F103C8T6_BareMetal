@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // SysTick Structure
-typedef struct {
+typedef volatile struct __SysTick_TypeDef 
+{
 	// Control and Status Register (CTRL)
 	union{
 		// Full 32-bit Register Access

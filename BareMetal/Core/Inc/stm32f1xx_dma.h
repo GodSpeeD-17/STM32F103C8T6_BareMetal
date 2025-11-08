@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // DMA Channel Register Structure Configuration
-typedef struct {
+typedef volatile struct __DMA_Channel_TypeDef
+{
 	// DMA Channel Configuration Register (DMA_CCR)
 	union {
 		// Full 32-bit Register Access
@@ -148,7 +149,8 @@ typedef struct {
 } DMA_Channel_TypeDef;
 
 // DMA Register Structure
-typedef struct {
+typedef volatile struct __DMA_TypeDef 
+{
 	// DMA Interrupt Status Register (DMA_ISR)
 	union {
 		// Full 32-bit Register Access

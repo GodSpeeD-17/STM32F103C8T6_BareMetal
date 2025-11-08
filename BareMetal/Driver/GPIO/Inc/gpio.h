@@ -52,19 +52,19 @@ typedef uint8_t											gpio_port_t;
  */
 
 /** @brief GPIO Port A @def GPIO_PORT_A */
-#define GPIO_PORT_A										((gpio_port_t) 0x01)
+#define GPIO_PORT_A										((gpio_port_t) 0x00)
 /** @brief GPIO Port B @def GPIO_PORT_B */
-#define GPIO_PORT_B										((gpio_port_t) 0x02)
+#define GPIO_PORT_B										((gpio_port_t) 0x01)
 /** @brief GPIO Port C @def GPIO_PORT_C */
-#define GPIO_PORT_C										((gpio_port_t) 0x03)
+#define GPIO_PORT_C										((gpio_port_t) 0x02)
 /** @brief GPIO Port D @def GPIO_PORT_D */
-#define GPIO_PORT_D										((gpio_port_t) 0x04)
+#define GPIO_PORT_D										((gpio_port_t) 0x03)
 /** @brief GPIO Port E @def GPIO_PORT_E */
-#define GPIO_PORT_E										((gpio_port_t) 0x05)
+#define GPIO_PORT_E										((gpio_port_t) 0x04)
 /** @brief GPIO Port F @def GPIO_PORT_F */
-#define GPIO_PORT_F										((gpio_port_t) 0x06)
+#define GPIO_PORT_F										((gpio_port_t) 0x05)
 /** @brief GPIO Port G @def GPIO_PORT_G */
-#define GPIO_PORT_G										((gpio_port_t) 0x07)
+#define GPIO_PORT_G										((gpio_port_t) 0x06)
 
 /** @} */ // GPIO_Driver_Port_Macros
 
@@ -167,6 +167,12 @@ typedef uint16_t 										gpio_pin_t;
 #define GPIO_PIN_ALL									((gpio_pin_t) 0xFFFF)
 
 /** @} */ // GPIO_Driver_Pin_Macros
+
+// Board Specific Configuration
+#ifdef STM32F103C8T6__
+	#define GPIO_OB_LED_PORT 									GPIO_PORT_C
+	#define GPIO_OB_LED_PIN 									GPIO_PIN_13
+#endif /* STM32F103C8T6__ */
 
 /**
  * @brief Checks if a GPIO pin mask is valid
@@ -632,13 +638,14 @@ typedef struct
 
 /** @} */ // GPIO_03_Driver_02_Config
 
-/** @} */ // GPIO_03_Driver
+#define GPIO_OB_LED_CONFIG() \
+{											\
+	.pin = GPIO_OB_LED_PIN,					\
+	.mode = GPIO_PIN_MODE_OUTPUT_2MHz,		\
+	.config = GPIO_PIN_CNF_OUT_GP_PP		\
+}
 
-// Board Specific Configuration
-#ifdef STM32F103C8T6__
-	#define GPIO_OB_LED_PORT 									GPIO_PORT_C
-	#define GPIO_OB_LED_PIN 									GPIO_PIN_13
-#endif /* STM32F103C8T6__ */
+/** @} */ // GPIO_03_Driver
 
 /**
  * @brief Sets the GPIO

@@ -10,7 +10,7 @@ extern "C" {
 // Includes
 #include <stdint.h>
 
-typedef struct
+typedef volatile struct __ADC_TypeDef
 {
 	// Status Register (SR)
 	union

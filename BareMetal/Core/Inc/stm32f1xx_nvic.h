@@ -52,7 +52,8 @@ extern "C" {
  * @note Array sizes are designed for maximum STM32F1xx interrupt count
  * @see Reference Manual RM0008 - Table 63 for STM32F1xx interrupt mapping
  */
-typedef struct {
+typedef volatile struct __NVIC_TypeDef 
+{
 	/**
 	 * @brief Interrupt Set-Enable Registers (ISER)
 	 * @details Enable interrupts by setting corresponding bits

@@ -11,7 +11,7 @@ extern "C" {
 #include <stdint.h>
 
 // Independent WatchDog
-typedef struct 
+typedef volatile struct __IWDG_TypeDef 
 {
 	// Key Register
 	// - Write only, if read will yeild 0x0000
@@ -81,7 +81,8 @@ typedef struct
 
 
 // Window WatchDog
-typedef struct {
+typedef volatile struct __WWDG_TypeDef 
+{
 	// Control Register (CR)
 	union 
 	{

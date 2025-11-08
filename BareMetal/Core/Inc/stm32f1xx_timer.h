@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // General Purpose Timers (TIM2 to TIM5)
-typedef struct {
+typedef volatile struct __TIM_TypeDef 
+{
 	// Control Register 1 (CR1)
 	union {
 		// Full 32-bit Register Access

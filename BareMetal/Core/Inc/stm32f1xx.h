@@ -184,7 +184,7 @@ extern "C" {
  * @endcode
  */
 #define BIT_POS(value, base, type) \
-	((unsigned long)((((uintptr_t)(value)) - ((uintptr_t)(base))) / (uintptr_t)sizeof(type)))
+	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)sizeof(type)))
 
 /**
  * @brief Driver Operational Status

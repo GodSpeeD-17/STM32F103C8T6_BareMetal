@@ -392,8 +392,8 @@ add_custom_target(vscode_launch
   COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\""  >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
-  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // Main" >> ${VSCODE_DIR}/launch.json
-  COMMAND ${CMAKE_COMMAND} -E echo "//    \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // Reset Handler" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // main.c" >> ${VSCODE_DIR}/launch.json
+  COMMAND ${CMAKE_COMMAND} -E echo "    //   \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // startup.c" >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": [" 		>> ${VSCODE_DIR}/launch.json
   COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\"," 		>> ${VSCODE_DIR}/launch.json

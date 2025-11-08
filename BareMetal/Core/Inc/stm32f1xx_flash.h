@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // Flash Structure
-typedef struct {
+typedef volatile struct __FLASH_TypeDef 
+{
     // Flash Access Control Register (ACR)
     union {
         // Full 32-bit Register Access

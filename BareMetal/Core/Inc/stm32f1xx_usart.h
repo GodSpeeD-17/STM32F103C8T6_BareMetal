@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // USART Structure
-typedef struct {
+typedef volatile struct __USART_TypeDef
+{
     // Status Register (SR)
 	union {
 		// Full 32-bit Register Access

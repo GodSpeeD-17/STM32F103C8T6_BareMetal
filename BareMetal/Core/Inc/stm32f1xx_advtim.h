@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // Advanced Timers (TIM1, TIM8)
-typedef struct {
+typedef volatile struct Adv_TIM_TypeDef 
+{
 	// Control Register 1 (CR1)
 	union {
 		// Full 32-bit Register Access

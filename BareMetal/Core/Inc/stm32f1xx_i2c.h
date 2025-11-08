@@ -11,7 +11,8 @@ extern "C" {
 #include <stdint.h>
 
 // I2C Main Structure
-typedef struct {
+typedef volatile struct __I2C_TypeDef 
+{
 	// Control Register 1 (CR1)
 	union {
 		volatile uint32_t REG;
