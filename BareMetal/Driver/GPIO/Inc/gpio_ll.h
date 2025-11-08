@@ -40,16 +40,16 @@ extern "C" {
  * @{
  */
 
-/*---------------------------------------------- GPIO Configuration ----------------------------------------------*/
+/*---------------------------------------------- GPIO CRx ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_03_API_01_CRx GPIO Configuration Register APIs
+ * @defgroup GPIO_01_Registers_03_API_01_CRx GPIO Configuration Register
  * @ingroup GPIO_01_Registers_03_API
- * @brief Direct pin mode and configuration access (CRL/CRH)
+ * @brief APIs for GPIO Configuration Register
  * @{
  */
 
 /**
- * @brief 				Reads @ref GPIO_TypeDef_CRL "CRL"
+ * @brief 				Reads @ref GPIO_CRL "GPIOx->CRL"
  * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @returns				CRL
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
@@ -60,7 +60,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadCRL(GPIO_TypeDef* const GPIOx)
 }
 
 /**
- * @brief				Writes @ref GPIO_TypeDef_CRL "CRL"
+ * @brief				Writes @ref GPIO_CRL "GPIOx->CRL"
  * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
@@ -71,7 +71,40 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint3
 }
 
 /**
- * @brief				Reads @ref GPIO_TypeDef_CRH "CRH"
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_CRL "GPIOx->CRL"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_SetCRL(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRL.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_CRL "GPIOx->CRL"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearCRL(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRL.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_CRL "GPIOx->CRL"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleCRL(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRL.REG ^= value;
+}
+
+/**
+ * @brief				Reads @ref GPIO_CRH "GPIOx->CRH"
  * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port" 
  * @returns				CRH
  * @ref GPIO_Pins_Summary "GPIO Pin Summary" 
@@ -82,7 +115,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadCRH(GPIO_TypeDef* const GPIOx)
 }
 
 /**
- * @brief				Writes @ref GPIO_TypeDef_CRH "CRH"
+ * @brief				Writes @ref GPIO_CRH "GPIOx->CRH"
  * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
@@ -92,60 +125,54 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint3
 	GPIOx->CRH.REG = value;
 }
 
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_CRH "GPIOx->CRH"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_SetCRH(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRH.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_CRH "GPIOx->CRH"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearCRH(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRH.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_CRH "GPIOx->CRH"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ * @ref GPIO_Pins_Summary "GPIO Pin Summary"
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleCRH(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->CRH.REG ^= value;
+}
+
 /** @} */ // GPIO_01_Registers_03_API_01_CRx
 
-/*---------------------------------------------- GPIO Output Operations ----------------------------------------------*/
+/*---------------------------------------------- GPIO IDR ----------------------------------------------*/
+
 /**
- * @defgroup GPIO_01_Registers_03_API_02_Output GPIO Output APIs
+ * @defgroup GPIO_01_Registers_03_API_02_IDR GPIO Input Data Register
  * @ingroup GPIO_01_Registers_03_API
- * @brief Output write operations
+ * @brief APIs for GPIO Input Data Register
  * @{
  */
 
 /**
- * @brief Writes an entire pattern to @ref GPIO_TypeDef_ODR "ODR"
+ * @brief Reads @ref GPIO_IDR "GPIOx->IDR"
  * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @param[in] value Updated 32-bit @ref GPIO_TypeDef_ODR "ODR" value
- */
-__STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
-{
-	GPIOx->ODR.REG = value;
-}
-
-/**
- * @brief Writes an entire pattern to @ref GPIO_TypeDef_BSRR "BSRR"
- * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BSRR "BSRR" value
- */
-__STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
-{
-	GPIOx->BSRR.REG = value;
-}
-
-/**
- * @brief Writes an entire pattern to @ref GPIO_TypeDef_BRR "BRR"
- * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BRR "BRR" value
- */
-__STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
-{
-	GPIOx->BRR.REG = value;
-}
-
-/** @} */ // GPIO_01_Registers_03_API_02_Output
-
-/*---------------------------------------------- GPIO Input Operations ----------------------------------------------*/
-/**
- * @defgroup GPIO_01_Registers_03_API_03_Input GPIO Input APIs
- * @ingroup GPIO_01_Registers_03_API
- * @brief Reads current input state from GPIO pins
- * @{
- */
-
-/**
- * @brief Reads @ref GPIO_TypeDef_IDR "IDR"
- * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @returns Value read from @ref GPIO_TypeDef_IDR "IDR"
+ * @returns Value read from @ref GPIO_IDR "GPIOx->IDR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
 {
@@ -153,29 +180,242 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
 }
 
 /**
- * @brief Reads @ref GPIO_TypeDef_ODR "ODR"
+ * @brief				Writes @ref GPIO_IDR "GPIOx->IDR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Updated Value to be written
+ */
+// __STATIC_FORCEINLINE void __GPIO_WriteIDR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+// {
+// 	GPIOx->IDR.REG = value;
+// }
+
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_IDR "GPIOx->IDR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ */
+// __STATIC_FORCEINLINE void __GPIO_SetIDR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+// {
+// 	GPIOx->IDR.REG |= value;
+// }
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_IDR "GPIOx->IDR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ */
+// __STATIC_FORCEINLINE void __GPIO_ClearIDR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+// {
+// 	GPIOx->IDR.REG &= ~value;
+// }
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_IDR "GPIOx->IDR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ */
+// __STATIC_FORCEINLINE void __GPIO_ToggleIDR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+// {
+// 	GPIOx->IDR.REG ^= value;
+// }
+
+/** @} */ // GPIO_01_Registers_03_API_02_IDR
+
+/*---------------------------------------------- GPIO ODR ----------------------------------------------*/
+
+/**
+ * @defgroup GPIO_01_Registers_03_API_03_ODR GPIO Output Data Register
+ * @ingroup GPIO_01_Registers_03_API
+ * @brief APIs for GPIO Output Data Register
+ * @{
+ */
+
+/**
+ * @brief Reads from @ref GPIO_ODR "GPIOx->ODR"
  * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @returns Value read from @ref GPIO_TypeDef_ODR "ODR"
+ * @returns Value read from @ref GPIO_ODR "GPIOx->ODR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t)(GPIOx->ODR.REG);
 }
 
-/** @} */ // GPIO_01_Registers_03_API_03_Input
-
-/*---------------------------------------------- GPIO Lock Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_03_API_04_Lock GPIO Lock APIs
+ * @brief Writes an entire pattern to @ref GPIO_ODR "GPIOx->ODR"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_ODR "GPIOx->ODR" value
+ */
+__STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->ODR.REG = value;
+}
+
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_ODR "GPIOx->ODR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_SetODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->ODR.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_ODR "GPIOx->ODR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->ODR.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_ODR "GPIOx->ODR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->ODR.REG ^= value;
+}
+
+/** @} */ // GPIO_01_Registers_03_API_03_ODR
+
+/*---------------------------------------------- GPIO BSRR ----------------------------------------------*/
+
+/**
+ * @defgroup GPIO_01_Registers_03_API_04_BSRR GPIO Bit Set/Reset Register
  * @ingroup GPIO_01_Registers_03_API
- * @brief Locks the state of GPIO pins until next reset
+ * @brief APIs for GPIO Bit Set/Reset Register
  * @{
  */
 
 /**
- * @brief Writes an entire pattern to @ref GPIO_TypeDef_LCKR "LCKR"
+ * @brief 				Reads @ref GPIO_BSRR "GPIOx->BSRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @returns				GPIOx->BSRR register value
+ */
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadBSRR(GPIO_TypeDef* const GPIOx)
+{
+	return (uint32_t) GPIOx->BSRR.REG;
+}
+
+/**
+ * @brief Writes an entire pattern to @ref GPIO_BSRR "BSRR"
  * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @param[in] value Updated 32-bit @ref GPIO_TypeDef_LCKR "LCKR" value 
+ * @param[in] value Updated 32-bit @ref GPIO_BSRR "BSRR" value
+ */
+__STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BSRR.REG = value;
+}
+
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_BSRR "GPIOx->BSRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_SetBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BSRR.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_BSRR "GPIOx->BSRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BSRR.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_BSRR "GPIOx->BSRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BSRR.REG ^= value;
+}
+
+/** @} */ // GPIO_01_Registers_03_API_04_BSRR
+
+/*---------------------------------------------- GPIO BRR ----------------------------------------------*/
+
+/**
+ * @defgroup GPIO_01_Registers_03_API_05_BRR GPIO Reset Register
+ * @ingroup GPIO_01_Registers_03_API
+ * @brief APIs for GPIO Reset Register
+ * @{
+ */
+
+/**
+ * @brief 				Reads @ref GPIO_BRR "GPIOx->BRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @returns				GPIOx->BRR register value
+ */
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadBRR(GPIO_TypeDef* const GPIOx)
+{
+	return (uint32_t) GPIOx->BRR.REG;
+}
+
+/**
+ * @brief Writes an entire pattern to @ref GPIO_BRR "BRR"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_BRR "BRR" value
+ */
+__STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BRR.REG = value;
+} 
+
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_BRR "GPIOx->BRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_SetBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BRR.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_BRR "GPIOx->BRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BRR.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_BRR "GPIOx->BRR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->BRR.REG ^= value;
+}
+
+/** @} */ // GPIO_01_Registers_03_API_05_BRR
+
+/*---------------------------------------------- GPIO Lock Operations ----------------------------------------------*/
+/**
+ * @defgroup GPIO_01_Registers_03_API_06_LCKR GPIO Lock Configuration Register
+ * @ingroup GPIO_01_Registers_03_API
+ * @brief APIs for GPIO Lock Configuration Register
+ * @{
+ */
+
+/**
+ * @brief Writes an entire pattern to @ref GPIO_LCKR "LCKR"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value Updated 32-bit @ref GPIO_LCKR "LCKR" value 
  */
 __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
 {
@@ -183,16 +423,46 @@ __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint
 } 
 
 /**
- * @brief Reads an entire pattern from @ref GPIO_TypeDef_LCKR "LCKR"
+ * @brief Reads an entire pattern from @ref GPIO_LCKR "LCKR"
  * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
- * @returns Value read from @ref GPIO_TypeDef_LCKR "LCKR"
+ * @returns Value read from @ref GPIO_LCKR "LCKR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 {
 	return (GPIOx->LCKR.REG);
 } 
 
-/** @} */ // GPIO_01_Registers_03_API_04_Lock
+/**
+ * @brief				Performs a bitwise OR Operation on @ref GPIO_LCKR "GPIOx->LCKR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to OR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_SetLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->LCKR.REG |= value;
+}
+
+/**
+ * @brief				Performs a bitwise AND, ~ Operation on @ref GPIO_LCKR "GPIOx->LCKR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to AND with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ClearLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->LCKR.REG &= ~value;
+}
+
+/**
+ * @brief				Performs a bitwise EXOR Operation on @ref GPIO_LCKR "GPIOx->LCKR"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
+ * @param[in] value		Value to EXOR with current register value
+ */
+__STATIC_FORCEINLINE void __GPIO_ToggleLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
+{
+	GPIOx->LCKR.REG ^= value;
+}
+
+/** @} */ // GPIO_01_Registers_03_API_06_LCKR
 
 /** @} */ // GPIO_01_Registers_03_API
 
