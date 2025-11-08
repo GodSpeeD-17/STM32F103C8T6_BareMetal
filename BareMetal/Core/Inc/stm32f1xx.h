@@ -176,7 +176,7 @@ extern "C" {
  *
  * @see @ref GPIO_PERIPHERAL_SIZE for GPIO memory spacing.
  * @see @ref RCC_APB2ENR for clock enable bit positions.
- * @def BIT_POS
+ * @def BIT_POS()
  * @par Example:
  * @code
  * // Example: Compute GPIO port index
@@ -270,9 +270,7 @@ typedef enum
 // ######################################################################################################
 
 /**
- * @defgroup	GPIO_01_Registers_02_Memory GPIO Ports Memory Address
- * @ingroup		GPIO_01_Registers
- * @brief       STM32F1xx GPIO Memory Address Mapping
+ * @addtogroup	GPIO_01_Registers_02_Memory
  * @details 
  * - GPIO peripheral instances based on @ref GPIO_01_Registers_01_Structure "GPIO Registers"
  * - All GPIO ports are clocked from @ref APB2_BASE_ADDR "APB2 Bus"
@@ -313,7 +311,7 @@ typedef enum
  *
  * @see Reference Manual RM0008, Section 3.2 "Memory Map"
  * @see @ref GPIO_01_Registers_02_Memory "GPIO Ports Memory Address"
- * @see @ref BIT_POS "Peripheral Index Computation"
+ * @see @ref BIT_POS() "Peripheral Index Computation"
  */
 #define GPIO_PERIPHERAL_SIZE					0x400UL
 

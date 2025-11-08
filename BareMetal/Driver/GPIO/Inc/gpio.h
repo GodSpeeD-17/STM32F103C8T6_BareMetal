@@ -14,10 +14,7 @@
 #include "gpio_ll.h"
 
 /**
- * @brief GPIO Driver Layer
- * @defgroup GPIO_03_Driver GPIO Driver
- * @ingroup GPIO
- *
+ * @addtogroup GPIO_03_Driver
  * @{
  */
 

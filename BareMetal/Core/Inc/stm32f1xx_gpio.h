@@ -28,15 +28,51 @@ extern "C"
 {
 #endif
 
+/** @include stdint.h */
 #include <stdint.h>
 
 /**
- * @brief Structure encapsulation of GPIO Registers
- * @defgroup  GPIO_01_Registers GPIO Registers
+ * @brief Structure encapsulation of GPIO Registers 
+ * @defgroup GPIO_01_Registers GPIO Registers
  * @ingroup GPIO
- *
  * @{
- *
+ */
+
+/**
+ * @defgroup GPIO_01_Registers_01_Structure GPIO Registers Encapsulation
+ * @ingroup  GPIO_01_Registers
+ * @brief    GPIO Registers representation using structure
+ */
+
+/**
+ * @defgroup	GPIO_01_Registers_02_Memory GPIO Ports Memory Address
+ * @ingroup		GPIO_01_Registers
+ * @brief       STM32F1xx GPIO Memory Address Mapping
+ */
+
+/**
+ * @brief APIs to access @ref GPIO_01_Registers_01_Structure "GPIO Registers"
+ * @defgroup GPIO_01_Registers_03_API GPIO Register Access APIs
+ * @ingroup GPIO_01_Registers
+ */ 
+
+/** @} */ // GPIO_01_Registers
+
+/**
+ * @brief GPIO Low Level APIs
+ * @defgroup GPIO_02_LL GPIO Low Level APIs
+ * @ingroup GPIO
+ */
+
+/**
+ * @brief GPIO Driver Layer
+ * @defgroup GPIO_03_Driver GPIO Driver APIs
+ * @ingroup GPIO
+ */ 
+
+/**
+ * @addtogroup  GPIO_01_Registers
+ * @{
  * @details
  * - STM32F103C8T6 GPIO peripherals provide 16 digital I/O pins per port (GPIOA-GPIOG)
  * - Each GPIO port has 7 registers that control configuration, data, and locking functions
@@ -159,19 +195,15 @@ extern "C"
  */
 
 /**
- * @defgroup GPIO_01_Registers_01_Structure GPIO Registers Encapsulation
- * @ingroup  GPIO_01_Registers
- * @section	 GPIO_Registers_Mapping GPIO Registers Layout in Datasheet
- * @brief    GPIO Registers representation using structure
+ * @addtogroup GPIO_01_Registers_01_Structure
+ * @{
  * @details
  * - This structure represents the complete register set for a single GPIO port
  * - It is memory-mapped to the base address of each GPIO peripheral (`GPIOA`, `GPIOB`, etc.)
  * @note The structure uses unions to provide both bit-level and register-level access
  * @see Reference Manual RM0008 - Section 9.2 GPIO registers (Page 171)
- *
- * @{
+ * @typedef GPIO_TypeDef
  */
-
 typedef volatile struct __GPIO_TypeDef
 {
 	/**

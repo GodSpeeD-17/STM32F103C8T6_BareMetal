@@ -9,7 +9,7 @@
  * @note - Shifted to use combination of `typedef` & macros
  */
 
-/*********************************************** Header Guards ***********************************************/
+/*---------------------------------------------- Header Guards ----------------------------------------------*/
 #ifndef RCC_H_
 #define RCC_H_
 
@@ -18,13 +18,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*********************************************** Header File ***********************************************/
+/*---------------------------------------------- Header File ----------------------------------------------*/
 #include "rcc_config.h"
 
-/*********************************************** System Frequency Tracker ***********************************************/
+/*---------------------------------------------- System Frequency Tracker ----------------------------------------------*/
 extern rcc_clk_freq_t __systemFrequency__;
 
-/*********************************************** Driver APIs ***********************************************/
+/*---------------------------------------------- Driver APIs ----------------------------------------------*/
 /**
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure `rcc_flash_config_t` 
@@ -57,7 +57,7 @@ driver_status_t RCC_BusConfig(const rcc_bus_prescaler_config_t busPrescalerConfi
 
 /**
  * @brief RCC Component Configuration - ADC, USB
- * @param componentPrescalerConfig Compoennt Prescaler Configuration Structure  
+ * @param componentPrescalerConfig Component Prescaler Configuration Structure  
  * @param reg Pointer to `RCC->CFGR.REG`
  * @return Status of operation
  * @return - `DRIVER_FAIL`: Failure
@@ -110,7 +110,7 @@ void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_prescaler_config_t*
  */
 void RCC_72MHz_LoadDefaultConfig(rcc_config_t* rccConfig);
 
-/*********************************************** Helper APIs ***********************************************/
+/*---------------------------------------------- Helper APIs ----------------------------------------------*/
 /**
  * @brief Shortcut Function to set Clock Frequency to 72MHz
  */

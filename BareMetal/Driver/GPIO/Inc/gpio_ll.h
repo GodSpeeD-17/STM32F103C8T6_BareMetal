@@ -35,21 +35,14 @@ extern "C" {
 // ######################################################################################################
 
 /**
- * @addtogroup GPIO_01_Registers
- * @{
- */
-
-/**
- * @defgroup GPIO_01_Registers_04_API GPIO Register Access APIs
- * @ingroup GPIO_01_Registers
- * @brief APIs to access @ref GPIO_01_Registers_01_Structure "GPIO Registers"
+ * @addtogroup GPIO_01_Registers_03_API
  * @{
  */
 
 /*---------------------------------------------- GPIO Configuration ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_04_API_01_CRx GPIO Configuration Register APIs
- * @ingroup GPIO_01_Registers_04_API
+ * @defgroup GPIO_01_Registers_03_API_01_CRx GPIO Configuration Register APIs
+ * @ingroup GPIO_01_Registers_03_API
  * @brief Direct pin mode and configuration access (CRL/CRH)
  * @{
  */
@@ -98,12 +91,12 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint3
 	GPIOx->CRH.REG = value;
 }
 
-/** @} */ // GPIO_01_Registers_04_API_01_CRx
+/** @} */ // GPIO_01_Registers_03_API_01_CRx
 
 /*---------------------------------------------- GPIO Output Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_04_API_02_Output GPIO Output APIs
- * @ingroup GPIO_01_Registers_04_API
+ * @defgroup GPIO_01_Registers_03_API_02_Output GPIO Output APIs
+ * @ingroup GPIO_01_Registers_03_API
  * @brief Output write operations
  * @{
  */
@@ -138,12 +131,12 @@ __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint3
 	GPIOx->BRR.REG = value;
 }
 
-/** @} */ // GPIO_01_Registers_04_API_02_Output
+/** @} */ // GPIO_01_Registers_03_API_02_Output
 
 /*---------------------------------------------- GPIO Input Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_04_API_03_Input GPIO Input APIs
- * @ingroup GPIO_01_Registers_04_API
+ * @defgroup GPIO_01_Registers_03_API_03_Input GPIO Input APIs
+ * @ingroup GPIO_01_Registers_03_API
  * @brief Reads current input state from GPIO pins
  * @{
  */
@@ -153,7 +146,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint3
  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  * @returns Value read from @ref GPIO_TypeDef_IDR "IDR"
  */
-__STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t)(GPIOx->IDR.REG);
 }
@@ -163,17 +156,17 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(const GPIO_TypeDef* const GPIOx)
  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  * @returns Value read from @ref GPIO_TypeDef_ODR "ODR"
  */
-__STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t)(GPIOx->ODR.REG);
 }
 
-/** @} */ // GPIO_01_Registers_04_API_03_Input
+/** @} */ // GPIO_01_Registers_03_API_03_Input
 
 /*---------------------------------------------- GPIO Lock Operations ----------------------------------------------*/
 /**
- * @defgroup GPIO_01_Registers_04_API_04_Lock GPIO Lock APIs
- * @ingroup GPIO_01_Registers_04_API
+ * @defgroup GPIO_01_Registers_03_API_04_Lock GPIO Lock APIs
+ * @ingroup GPIO_01_Registers_03_API
  * @brief Locks the state of GPIO pins until next reset
  * @{
  */
@@ -198,21 +191,16 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 	return (GPIOx->LCKR.REG);
 } 
 
-/** @} */ // GPIO_01_Registers_04_API_04_Lock
+/** @} */ // GPIO_01_Registers_03_API_04_Lock
 
-/** @} */ // GPIO_01_Registers_04_API
-
-/** @} */ // GPIO_01_Registers
+/** @} */ // GPIO_01_Registers_03_API
 
 // ######################################################################################################
 // GPIO Low Level APIs: LL
 // ######################################################################################################
 
 /**
- * @brief GPIO Low Level APIs
- * @defgroup GPIO_02_LL GPIO Low Level APIs
- * @ingroup GPIO
- * 
+ * @addtogroup GPIO_02_LL
  * @{
  */
 
@@ -226,29 +214,25 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Compute the RCC clock-enable bit position for a GPIO port
- *
+ * @section 
  * @details
- * Determines the **relative bit position** of a GPIO port within `RCC->APB2ENR`
- * by calculating its offset from @ref GPIOA using @ref BIT_POS.
+ * Determines the <b>relative bit position</b> of a GPIO port within `RCC->APB2ENR`
+ * by calculating its offset from @ref GPIOA using @ref BIT_POS() "BIT_POS()()"
  *
  * The result provides a **zero-based index** for clock-enable bit positioning.
  * This is purely compile-time arithmetic — no hardware access occurs.
  *
  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  *
- * @return Zero-based index of the GPIO port relative to GPIOA
- *
- * @see @ref BIT_POS
- * @see @ref _GPIO_EnableClock()
- * @see @ref _GPIO_DisableClock()
- *
+ * @return Zero-based index of the GPIO port relative to @ref GPIOA
+ * @see @ref BIT_POS() "BIT_POS()()" | @ref _GPIO_EnableClock() | @ref _GPIO_DisableClock()
  * @par Example:
+ * @example
  * @code
  * uint32_t pos = GPIO_CLK_POS(GPIOC);  // GPIOC → index 2
  * RCC->APB2ENR |= (1U << (RCC_APB2ENR_IOPAEN_Pos + pos));
  * @endcode
- * 
- * @def GPIO_CLK_POS
+ * @def GPIO_CLK_POS()
  */
 #define GPIO_CLK_POS(GPIOx) 						BIT_POS((GPIOx), GPIOA, GPIO_PERIPHERAL_SIZE)
 
@@ -266,7 +250,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  *
  * @return Bitmask for the GPIO port’s clock-enable bit
  *
- * @see @ref GPIO_CLK_POS
+ * @see @ref GPIO_CLK_POS()
  * @see @ref _GPIO_EnableClock
  * @see @ref _GPIO_DisableClock
  *
@@ -311,7 +295,6 @@ __STATIC_FORCEINLINE void _GPIO_EnableAFIOClock(void)
 }
 
 /** @} */ // GPIO_02_LL_01_Clock
-
 
 /**
  * @brief GPIO Low Level Pin APIs
@@ -731,11 +714,6 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 /** @} */ // GPIO_02_LL_03_PinParams
 
 /*---------------------------------------------- GPIO LL Pin ----------------------------------------------*/
-
-
-
-
-// /** @} */ // GPIO_02_LL_03_PinParams
 
 // /**
 //  * @brief Lock GPIO pin configuration

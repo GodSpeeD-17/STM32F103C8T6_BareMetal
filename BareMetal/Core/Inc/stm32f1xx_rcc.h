@@ -1,3 +1,19 @@
+/**
+ * @file stm32f1xx_rcc.h
+ * @author Shrey Shah
+ * @version v1.0
+ * @date 08-11-2025
+ * @defgroup Reset & Clock Control (RCC)
+ * @details
+ * This module provides complete access to RCC peripheral including:
+ * - @ref stm32f1xx_rcc.h "Register mapping"
+ * - @ref stm32f1xx.h "Memory Address"
+ * - @ref rcc_ll.h "RCC Low Level (LL) APIs"
+ * - @ref rcc.h "RCC Driver APIs"
+ *
+ * @note    All peripheral clock operations require proper RCC configuration
+ * @warning Direct register access should only be used when performance is critical
+ */
 // Header Guards
 #ifndef STM32F1XX_RCC_H_
 #define STM32F1XX_RCC_H_
@@ -10,7 +26,71 @@ extern "C" {
 // Includes
 #include <stdint.h>
 
-// RCC Main Structure
+/**
+ * @brief Structure encapsulation of RCC Registers
+ * @defgroup  RCC_01_Registers RCC Registers
+ * @ingroup RCC
+ *
+ * @{
+ *
+ * @details
+ * - STM32F103C8T6 RCC peripheral controls system clocks, resets, and clock gating
+ * - Manages multiple clock sources and distribution to all peripherals
+ *
+ * - RCC Register Map:
+ *
+ * | Offset | Register | Name | Description |
+ * |--------|----------|------|-------------|
+ * | 0x00   | RCC_CR     | Clock Control Register | Controls internal/external clock sources |
+ * | 0x04   | RCC_CFGR   | Clock Configuration Register | Configures clock dividers and PLL |
+ * | 0x08   | RCC_CIR    | Clock Interrupt Register | Manages clock-related interrupts |
+ * | 0x0C   | RCC_APB2RSTR | APB2 Peripheral Reset Register | Resets APB2 peripherals |
+ * | 0x10   | RCC_APB1RSTR | APB1 Peripheral Reset Register | Resets APB1 peripherals |
+ * | 0x14   | RCC_AHBENR  | AHB Peripheral Clock Enable Register | Enables AHB peripherals |
+ * | 0x18   | RCC_APB2ENR | APB2 Peripheral Clock Enable Register | Enables APB2 peripherals |
+ * | 0x1C   | RCC_APB1ENR | APB1 Peripheral Clock Enable Register | Enables APB1 peripherals |
+ * | 0x20   | RCC_BDCR    | Backup Domain Control Register | Controls RTC and backup domain |
+ * | 0x24   | RCC_CSR     | Control/Status Register | Controls LSI and reset status |
+ *
+ * - Key Features:
+ * <ul>
+ * <li> Multiple clock sources:
+ * 	<ul>
+ *   <li> HSI: 8 MHz internal RC oscillator </li>
+ *   <li> HSE: 4-16 MHz external crystal/oscillator </li>
+ *   <li> PLL: Clock multiplier for system clock </li>
+ *   <li> LSI: 40 kHz internal RC for IWDG </li>
+ *   <li> LSE: 32.768 kHz external crystal for RTC </li>
+ * 	</ul>
+ * </li>
+ * <li> Flexible clock distribution with prescalers </li>
+ * <li> Individual peripheral clock gating for power management </li>
+ * <li> Clock security system (CSS) for HSE failure detection </li>
+ * <li> Backup domain with independent power supply </li>
+ * </ul>
+ *
+ * @note System clock configuration must follow proper sequence
+ * @warning Changing clock settings during operation may cause system instability
+ *
+ * @see Reference Manual RM0008 - Section 7. Reset and Clock Control (RCC)
+ * @see Datasheet DS5319 - Section 5. Memory mapping
+ *
+ * @}
+ */
+
+/**
+ * @defgroup RCC_01_Registers_01_Structure RCC Registers Encapsulation
+ * @ingroup  RCC_01_Registers
+ * @section	 RCC_Registers_Mapping RCC Registers Layout in Datasheet
+ * @brief    RCC Registers representation using structure
+ * @details
+ * - This structure represents the complete register set for RCC peripheral
+ * - It is memory-mapped to the RCC base address
+ * @note The structure uses unions to provide both bit-level and register-level access
+ * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113)
+ *
+ * @{
+ */
 typedef volatile struct __RCC_TypeDef 
 {
 	// Clock Control Register (CR)
