@@ -100,7 +100,7 @@ extern "C" {
  * @brief 	 RCC Low Level APIs
  */
 
- /**
+/**
  * @defgroup RCC_03_Driver RCC Driver APIs
  * @ingroup  RCC
  * @brief 	 RCC Driver APIs
@@ -116,7 +116,7 @@ extern "C" {
  * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113) 
  * @typedef RCC_TypeDef
  */
-typedef volatile struct __RCC_TypeDef 
+typedef volatile struct __RCC_TypeDef
 {
 	/**
 	 * @brief Clock Control Register

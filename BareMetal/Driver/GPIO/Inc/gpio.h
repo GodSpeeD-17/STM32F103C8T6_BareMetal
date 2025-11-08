@@ -375,7 +375,7 @@ __STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_getLLPinConfig(const gpio_pin
  *       - @ref GPIO_PIN_CNF_OUT_AF_OD  → AF Open-Drain
  * @def GPIO_DRIVER_PIN_IS_AF_CONFIG
  */
-#define GPIO_DRIVER_PIN_IS_AF_CONFIG(config)							\
+#define GPIO_DRIVER_PIN_IS_AF_CONFIG(config)								\
 	(																		\
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP) ||		\
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
@@ -673,8 +673,7 @@ __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t
  */
 __STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
-	__GPIO_WriteODR(GPIOx, (uint32_t)(__GPIO_ReadODR(GPIOx) ^ ((uint32_t) pin)));
+	__GPIO_ToggleODR(GPIO_getLLPort(gpio), (uint32_t) pin);
 }
 
 /**

@@ -2,17 +2,18 @@
  * @file rcc.c
  * @author Shrey Shah
  * @brief Reset & Clock Control Configuration
- * @version 1.1
- * @date 28-09-2025
+ * @version 1.2
+ * @date 08-11-2025
  * @note Logs till v1.1:
  * @note - Aborted usage of `enums` as it consumes a lot of space
  * @note - Shifted to use combination of `typedef` & macros
  */
 
-/*********************************************** Header Guards ***********************************************/
+/*---------------------------------------------- Header Guards ***********************************************/
 #include "rcc.h"
 
-/*********************************************** System Frequency Tracker ***********************************************/
+#ifdef _OLD_
+/*---------------------------------------------- System Frequency Tracker ***********************************************/
 /**
  * @brief System frequency Summary
  */
@@ -24,7 +25,7 @@ rcc_clk_freq_t __systemFrequency__ =
 	.APB2 = HSI_FREQ
 };
 
-/*********************************************** Driver APIs ***********************************************/
+/*---------------------------------------------- Driver APIs ***********************************************/
 /**
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure `rcc_flash_config_t`
@@ -239,3 +240,5 @@ void RCC_72MHz_LoadDefaultConfig(rcc_config_t *rccConfig)
 	// Default Component Prescaler Configuration
 	RCC_72MHz_ComponentPrescalerDefaultConfig(&rccConfig->component_prescaler);
 }
+
+#endif
