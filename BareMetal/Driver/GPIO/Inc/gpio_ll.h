@@ -19,6 +19,7 @@
 #ifndef GPIO_LL_H_
 #define GPIO_LL_H_
 
+// C++ Functionality
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -30,9 +31,9 @@ extern "C" {
  */
 #include "stm32f1xx.h"
 
-// ######################################################################################################
+// ======================================================================================================
 // GPIO Register APIs
-// ######################################################################################################
+// ======================================================================================================
 
 /**
  * @addtogroup GPIO_01_Registers_03_API
@@ -49,7 +50,7 @@ extern "C" {
 
 /**
  * @brief 				Reads @ref GPIO_TypeDef_CRL "CRL"
- * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @returns				CRL
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -60,7 +61,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadCRL(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief				Writes @ref GPIO_TypeDef_CRL "CRL"
- * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -71,7 +72,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief				Reads @ref GPIO_TypeDef_CRH "CRH"
- * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port" 
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port" 
  * @returns				CRH
  * @ref GPIO_Pins_Summary "GPIO Pin Summary" 
  */
@@ -82,7 +83,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadCRH(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief				Writes @ref GPIO_TypeDef_CRH "CRH"
- * @param[in] GPIOx		Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx		Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value		Updated Value to be written
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
@@ -103,7 +104,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_ODR "ODR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value Updated 32-bit @ref GPIO_TypeDef_ODR "ODR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -113,7 +114,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_BSRR "BSRR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BSRR "BSRR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -123,7 +124,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const uint
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_BRR "BRR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value Updated 32-bit @ref GPIO_TypeDef_BRR "BRR" value
  */
 __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -143,7 +144,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const uint3
 
 /**
  * @brief Reads @ref GPIO_TypeDef_IDR "IDR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @returns Value read from @ref GPIO_TypeDef_IDR "IDR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
@@ -153,7 +154,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Reads @ref GPIO_TypeDef_ODR "ODR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @returns Value read from @ref GPIO_TypeDef_ODR "ODR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
@@ -173,7 +174,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Writes an entire pattern to @ref GPIO_TypeDef_LCKR "LCKR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @param[in] value Updated 32-bit @ref GPIO_TypeDef_LCKR "LCKR" value 
  */
 __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint32_t value)
@@ -183,7 +184,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const uint
 
 /**
  * @brief Reads an entire pattern from @ref GPIO_TypeDef_LCKR "LCKR"
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  * @returns Value read from @ref GPIO_TypeDef_LCKR "LCKR"
  */
 __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
@@ -195,9 +196,9 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 
 /** @} */ // GPIO_01_Registers_03_API
 
-// ######################################################################################################
-// GPIO Low Level APIs: LL
-// ######################################################################################################
+// ======================================================================================================
+// GPIO Low Level APIs
+// ======================================================================================================
 
 /**
  * @addtogroup GPIO_02_LL
@@ -214,7 +215,6 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Compute the RCC clock-enable bit position for a GPIO port
- * @section 
  * @details
  * Determines the <b>relative bit position</b> of a GPIO port within `RCC->APB2ENR`
  * by calculating its offset from @ref GPIOA using @ref BIT_POS() "BIT_POS()()"
@@ -222,7 +222,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * The result provides a **zero-based index** for clock-enable bit positioning.
  * This is purely compile-time arithmetic — no hardware access occurs.
  *
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  *
  * @return Zero-based index of the GPIO port relative to @ref GPIOA
  * @see @ref BIT_POS() "BIT_POS()()" | @ref _GPIO_EnableClock() | @ref _GPIO_DisableClock()
@@ -246,7 +246,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * This macro provides a ready-to-use mask for enabling or disabling
  * the clock for a specific GPIO port.
  *
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  *
  * @return Bitmask for the GPIO port’s clock-enable bit
  *
@@ -270,7 +270,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Enable GPIO Peripheral Clock
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  */
 __STATIC_FORCEINLINE void _GPIO_EnableClock(GPIO_TypeDef* const GPIOx)
 {
@@ -279,7 +279,7 @@ __STATIC_FORCEINLINE void _GPIO_EnableClock(GPIO_TypeDef* const GPIOx)
 
 /**
  * @brief Disable GPIO Peripheral Clock
- * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
+ * @param[in] GPIOx Target @ref GPIO_01_Registers_02_Memory "GPIO Port"
  */
 __STATIC_FORCEINLINE void _GPIO_DisableClock(GPIO_TypeDef* const GPIOx)
 {
@@ -300,22 +300,23 @@ __STATIC_FORCEINLINE void _GPIO_EnableAFIOClock(void)
  * @brief GPIO Low Level Pin APIs
  * @defgroup GPIO_02_LL_02_Pin GPIO LL Pin APIs
  * @ingroup GPIO_02_LL
- * 
  * @{
  */
 
 /**
  * @brief GPIO Pin Identifier Type
- * 
+ * @section GPIO_LL_Pin_Values GPIO LL Pins
+ * @{
  * @details
  * Type-safe abstraction for GPIO pin identifiers. Using a typedef allows for
  * easy portability across different microcontroller architectures and future
  * enhancements without modifying function prototypes.
- * 
- * - **Current implementation**: `uint8_t` (0-255 range, supports up to 256 pins)
- * - **Future flexibility**: Can change to `uint16_t` for larger pin counts
- * - **Type safety**: Prevents accidental mixing with other integer types
- * - **Documentation clarity**: Self-documenting pin parameters
+ * <ul>
+ * <li> <b>Current implementation</b>: `uint8_t` (0-255 range, supports up to 256 pins) </li>
+ * <li> <b>Future flexibility</b>: Can change to `uint16_t` for larger pin counts </li>
+ * <li> <b>Type safety</b>: Prevents accidental mixing with other integer types </li>
+ * <li> <b>Documentation clarity</b>: Self-documenting pin parameters </li>
+ * </ul>
  * 
  * @note Changing the underlying type requires updating only this typedef and
  *       the pin constant definitions - all function signatures remain unchanged.
@@ -366,6 +367,8 @@ typedef uint8_t _gpio_pin_t;
 #define _GPIO_PIN_15					((_gpio_pin_t)0x0F)
 /** @brief GPIO Max Pin used for Masking  @def _GPIO_MAX_PIN */
 #define _GPIO_MAX_PIN					_GPIO_PIN_15
+
+/** @} */ // GPIO_LL_Pin_Values
 
 /**
  * @brief Creates a 32-bit mask for a single GPIO Pin
@@ -773,6 +776,7 @@ __STATIC_FORCEINLINE uint32_t _GPIO_PinStagePullConfig(const _gpio_pin_t pin, co
 
 // /** @} */ // GPIO_02_LL
 
+// C++ Functionality
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

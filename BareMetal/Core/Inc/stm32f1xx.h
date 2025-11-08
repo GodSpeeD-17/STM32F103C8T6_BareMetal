@@ -222,38 +222,36 @@ typedef enum
 /**
  * @defgroup 02_STM32F1xx_BaseAddress Memory Base Addresses
  * @ingroup  STM32F1xx
+ * @{
  * @brief    Base addresses for different memory buses in STM32F1xx
- *
  * @details 
  * STM32F1xx Base Memory Addresses Offsets
  * @see Reference Manual RM0008 - Section 3.2 Memory Map
- * 
- * @{
  */
 
-/** @brief System Timer Base (Cortex-M3 Core Peripheral) */
+/** @brief System Timer Base (Cortex-M3 Core Peripheral) @def SysTick_BASE_ADDR */
 #define SysTick_BASE_ADDR                       0xE000E010UL
-/** @brief Nested Vectored Interrupt Controller Base */
+/** @brief Nested Vectored Interrupt Controller Base @def NVIC_BASE_ADDR */
 #define NVIC_BASE_ADDR                          0xE000E100UL
-/** @brief System Control Block Base */
+/** @brief System Control Block Base @def SCB_BASE_ADDR */
 #define SCB_BASE_ADDR                           0xE000ED00UL
-/** @brief Core Debug Registers Base */
+/** @brief Core Debug Registers Base @def CoreDebug_BASE_ADDR */
 #define CoreDebug_BASE_ADDR                     0xE000EDF0UL
-/** @brief APB1 Peripheral Base (Low-speed peripherals) @def APB1_BASE_ADDR */
+/** @brief APB1 Peripheral Base (Low-speed peripherals) @def APB1_BASE_ADDR @def APB1_BASE_ADDR */
 #define APB1_BASE_ADDR                          0x40000000UL
-/** @brief APB2 Peripheral Base (High-speed peripherals) @def APB2_BASE_ADDR */
+/** @brief APB2 Peripheral Base (High-speed peripherals) @def APB2_BASE_ADDR @def APB2_BASE_ADDR */
 #define APB2_BASE_ADDR                          0x40010000UL
-/** @brief AHB Peripheral Base (Memory, DMA, CRC) @def AHB_BASE_ADDR */
+/** @brief AHB Peripheral Base (Memory, DMA, CRC) @def AHB_BASE_ADDR @def AHB_BASE_ADDR */
 #define AHB_BASE_ADDR                           0x40018000UL
-/** @brief Flash Memory Interface Base */
+/** @brief Flash Memory Interface Base @def FLASH_BASE_ADDR */
 #define FLASH_BASE_ADDR                         0x40022000UL
-/** @brief DMA1 Controller Base */
+/** @brief DMA1 Controller Base @def DMA1_BASE_ADDR */
 #define DMA1_BASE_ADDR                          (AHB_BASE_ADDR + 0x00008000UL)
-/** @brief DMA2 Controller Base */
+/** @brief DMA2 Controller Base @def DMA2_BASE_ADDR */
 #define DMA2_BASE_ADDR                          (DMA1_BASE_ADDR + 0x00000400UL)
-/** @brief Window Watchdog Base */
+/** @brief Window Watchdog Base @def WWDG_BASE_ADDR */
 #define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000UL)
-/** @brief Independent Watchdog Base */
+/** @brief Independent Watchdog Base @def IWDG_BASE_ADDR */
 #define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000UL)
 
 /** @} */  // 02_STM32F1xx_BaseAddress
@@ -263,7 +261,25 @@ typedef enum
 #define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
 #define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
 #define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
-#define RCC 									((RCC_TypeDef *) (AHB_BASE_ADDR + 0x00009000UL))
+
+/**
+ * @addtogroup RCC_01_Registers_02_Memory
+ * @{
+ */
+
+/** \section RCC_Registers_Memory_Base RCC Peripheral Base Address */
+/** @brief RCC Peripheral Base Address @def RCC_BASE_ADDRESS  */
+#define RCC_BASE_ADDRESS						AHB_BASE_ADDR
+
+/** \section RCC_Registers_Memory_Offset RCC Peripheral Offset from Base */
+/** @brief RCC Peripheral Offset from Base Address @def RCC_BASE_OFFSET  */
+#define RCC_BASE_OFFSET							0x00009000UL
+
+/** \section RCC_Registers_Memory_Address RCC Peripheral Memory Address */
+/** @brief RCC Memory Address @def RCC  */
+#define RCC 									((RCC_TypeDef* const) (RCC_BASE_ADDRESS + RCC_BASE_OFFSET))
+
+/** @} */ // RCC_01_Registers_02_Memory
 
 // ######################################################################################################
 // GPIO
@@ -282,18 +298,24 @@ typedef enum
  */
 
 /**
- * @section  GPIO_Registers_Memory_Base GPIO Register Base Memory Address
- * @ingroup GPIO_01_Registers_02_Memory
+ * \section  GPIO_Registers_Memory_Base GPIO Register Base Memory Address
+ * \brief GPIO Peripheral: Base Memory Address
+ */
+
+/**
  * @brief GPIO Base Memory Address
  * @details @see @ref APB2_BASE_ADDR "APB2 Base Memory Address"
- * @{
+ * @def GPIO_BASE_ADDRESS
  */
 #define GPIO_BASE_ADDRESS						APB2_BASE_ADDR
 
 /**
- * @section  GPIO_Registers_Memory_Size GPIO Peripheral Memory Size
- * @ingroup  GPIO_01_Registers_02_Memory
- * @brief    GPIO Peripheral Address Space Size
+ * \section  GPIO_Registers_Memory_Size GPIO Register Memory Size
+ * \brief GPIO Peripheral: Memory Size
+ */
+
+/**
+ * @brief    GPIO Peripheral Memory Size
  * @def		 GPIO_PERIPHERAL_SIZE 
  * @details  
  * Each GPIO port (GPIOA–GPIOG) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
@@ -315,13 +337,9 @@ typedef enum
  */
 #define GPIO_PERIPHERAL_SIZE					0x400UL
 
-/** @} */ // GPIO_Registers_Memory_Base
-
 /**
- * @{
- * @section  GPIO_Registers_Memory_Offset GPIO Register Offset from GPIO Base Memory Address
- * @ingroup GPIO_01_Registers_02_Memory
- * @brief GPIO Offset from @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address"
+ * \section  GPIO_Registers_Memory_Offset GPIO Register Offset from Base
+ * \brief GPIO Peripheral: Offset from Base
  */
 
  /**
@@ -330,7 +348,7 @@ typedef enum
  * @param[in] n  Zero-based port index (0 = GPIOA, 1 = GPIOB, ..., 6 = GPIOG)
  * @return Offset from GPIO base address
  * @note This macro ensures uniform, safe computation of port addresses
- * @def GPIO_OFFSET
+ * @def GPIO_OFFSET()
  */
 #define GPIO_OFFSET(n)	\
 	((uint32_t)(GPIOA_OFFSET) + ((uint32_t)(n) * (uint32_t)GPIO_PERIPHERAL_SIZE))
@@ -349,15 +367,12 @@ typedef enum
 /** @brief GPIO Port G Offset @def GPIOG_OFFSET */
 #define GPIOG_OFFSET							GPIO_OFFSET(6)
 
-/** @} */ // GPIO_Registers_Memory_Offset
-
 /**
- * @{
- * @section GPIO_Registers_Memory_Ports GPIO Ports Memory Address
- * @ingroup GPIO_01_Registers_02_Memory
- * @brief GPIO Ports Memory Address
+ * \section GPIO_Registers_Memory_Ports GPIO Ports Memory Address
+ * \brief GPIO Ports Memory Address
  * @see @ref GPIO_01_Registers_01_Structure "GPIO Registers Encapsulation" | @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address" | @ref GPIO_Registers_Memory_Offset "GPIO Register Offset from GPIO Base Memory Address"  
  */
+
 /** @brief GPIO Port A  @def GPIOA */
 #define GPIOA									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOA_OFFSET))
 /** @brief GPIO Port B  @def GPIOB */
@@ -372,8 +387,6 @@ typedef enum
 #define GPIOF									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOF_OFFSET))
 /** @brief GPIO Port G  @def GPIOG */
 #define GPIOG									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOG_OFFSET))
-
-/** @} */ // GPIO_Registers_Memory_Ports
 
 /** @} */ // GPIO_01_Registers_02_Memory
 

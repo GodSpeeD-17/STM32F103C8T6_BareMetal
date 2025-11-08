@@ -3,7 +3,7 @@
  * @author Shrey Shah
  * @version v1.0
  * @date 08-11-2025
- * @defgroup Reset & Clock Control (RCC)
+ * @defgroup RCC Reset & Clock Control (RCC)
  * @details
  * This module provides complete access to RCC peripheral including:
  * - @ref stm32f1xx_rcc.h "Register mapping"
@@ -23,16 +23,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-// Includes
+/** @include stdint */
 #include <stdint.h>
 
 /**
  * @brief Structure encapsulation of RCC Registers
  * @defgroup  RCC_01_Registers RCC Registers
- * @ingroup RCC
- *
- * @{
- *
+ * @ingroup   RCC
  * @details
  * - STM32F103C8T6 RCC peripheral controls system clocks, resets, and clock gating
  * - Manages multiple clock sources and distribution to all peripherals
@@ -74,27 +71,62 @@ extern "C" {
  *
  * @see Reference Manual RM0008 - Section 7. Reset and Clock Control (RCC)
  * @see Datasheet DS5319 - Section 5. Memory mapping
- *
- * @}
+ * @{ 
  */
 
 /**
  * @defgroup RCC_01_Registers_01_Structure RCC Registers Encapsulation
  * @ingroup  RCC_01_Registers
- * @section	 RCC_Registers_Mapping RCC Registers Layout in Datasheet
  * @brief    RCC Registers representation using structure
+ */
+
+ /**
+ * @defgroup RCC_01_Registers_02_Memory RCC Memory Address
+ * @ingroup  RCC_01_Registers 
+ * @brief    STM32F1xx RCC Memory Address Mapping
+ */
+
+/**
+ * @defgroup RCC_01_Registers_03_API RCC Register Access APIs
+ * @ingroup  RCC_01_Registers 
+ * @brief    APIs to access @ref RCC_01_Registers_01_Structure "RCC Registers"
+ */
+
+/** @} */ // RCC_01_Registers
+
+/**
+ * @defgroup RCC_02_LL RCC Low Level APIs
+ * @ingroup  RCC
+ * @brief 	 RCC Low Level APIs
+ */
+
+ /**
+ * @defgroup RCC_03_Driver RCC Driver APIs
+ * @ingroup  RCC
+ * @brief 	 RCC Driver APIs
+ */
+
+/**
+ * @addtogroup RCC_01_Registers_01_Structure
+ * @{
  * @details
  * - This structure represents the complete register set for RCC peripheral
  * - It is memory-mapped to the RCC base address
  * @note The structure uses unions to provide both bit-level and register-level access
- * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113)
- *
- * @{
+ * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113) 
+ * @typedef RCC_TypeDef
  */
 typedef volatile struct __RCC_TypeDef 
 {
-	// Clock Control Register (CR)
-	union {
+	/**
+	 * @brief Clock Control Register
+	 * @details
+	 * Controls the internal and external clock sources including HSI, HSE, and PLL.
+	 * Manages oscillator enable/disable, ready status, calibration, and clock security system.
+	 * This register must be configured before any clock switching operations.
+	 */
+	union RCC_CR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -114,8 +146,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 6;
 		} BIT;
 	} CR;
-	// Configuration Register (CFGR)
-	union {
+	/**
+	 * @brief Clock Configuration Register  
+	 * @details
+	 * Configures the system clock source, prescalers for AHB, APB1, APB2 buses,
+	 * PLL multiplication factor, and clock output selection. This register determines
+	 * the final system clock frequency and peripheral clock speeds.
+	 */
+	union RCC_CFGR 
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -135,8 +174,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_2: 5;
 		} BIT;
 	} CFGR;
-	// Clock Interrupt Register (CIR)
-	union {
+	/**
+	 * @brief Clock Interrupt Register
+	 * @details
+	 * Manages interrupt flags and enable bits for various clock events including
+	 * oscillator ready flags, PLL lock, and clock security system interrupts.
+	 * Provides clear bits to reset interrupt flags.
+	 */
+	union RCC_CIR 
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -164,8 +210,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_4: 8;
 		} BIT;
 	} CIR;
-	// APB2 Peripheral Reset Register (APB2RSTR)
-	union {
+	/**
+	 * @brief APB2 Peripheral Reset Register
+	 * @details
+	 * Controls the reset functionality for peripherals connected to APB2 bus.
+	 * Writing 1 to any bit asserts reset for the corresponding peripheral,
+	 * writing 0 releases reset. Includes GPIO ports, ADC, TIM1, SPI1, USART1.
+	 */
+	union RCC_APB2RSTR 
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -193,8 +246,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 10;
 		} BIT;
 	} APB2RSTR;
-	// APB1 Peripheral Reset Register (APB2RSTR)
-	union {
+	/**
+	 * @brief APB1 Peripheral Reset Register
+	 * @details
+	 * Controls the reset functionality for peripherals connected to APB1 bus.
+	 * Writing 1 to any bit asserts reset for the corresponding peripheral,
+	 * writing 0 releases reset. Includes timers, watchdogs, SPI, USART, I2C, USB, CAN.
+	 */
+	union RCC_APB1RSTR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -230,8 +290,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_6: 2;
 		} BIT;
 	} APB1RSTR;
-	// AHB Enable Register (AHBENR)
-	union {
+	/**
+	 * @brief AHB Peripheral Clock Enable Register
+	 * @details
+	 * Controls clock gating for peripherals connected to AHB bus.
+	 * Enables or disables clocks to DMA, SRAM, FLASH, CRC, FSMC, and SDIO peripherals.
+	 * Disabling unused peripheral clocks reduces power consumption.
+	 */
+	union RCC_AHBENR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -250,8 +317,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_5: 21;
 		} BIT;
 	} AHBENR;
-	// APB2 Enable Register (APB2ENR)
-	union {
+	/**
+	 * @brief APB2 Peripheral Clock Enable Register
+	 * @details
+	 * Controls clock gating for peripherals connected to APB2 bus.
+	 * Enables or disables clocks to AFIO, GPIO ports, ADC, advanced timers,
+	 * SPI1, and USART1. Essential for GPIO and communication peripheral operation.
+	 */
+	union RCC_APB2ENR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -279,8 +353,16 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 10;
 		} BIT;
 	} APB2ENR;
-	// APB1 Enable Register (APB1ENR)
-	union {
+	/**
+	 * @brief APB1 Peripheral Clock Enable Register
+	 * @details
+	 * Controls clock gating for peripherals connected to APB1 bus.
+	 * Enables or disables clocks to general-purpose timers, watchdogs,
+	 * SPI2/3, USART2-5, I2C, USB, CAN, backup interface, power, and DAC.
+	 * Critical for timer and communication peripheral operation.
+	 */
+	union RCC_APB1ENR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -316,8 +398,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_6: 2;
 		} BIT;
 	} APB1ENR;
-	// Backup Domain Control Register (BDCR)
-	union {
+	/**
+	 * @brief Backup Domain Control Register
+	 * @details
+	 * Controls the backup domain including LSE oscillator and RTC configuration.
+	 * Manages RTC clock source selection, RTC enable, and backup domain reset.
+	 * This register is not reset by system reset, only by backup domain reset.
+	 */
+	union RCC_BDCR
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -333,8 +422,15 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 15;
 		} BIT;
 	} BDCR;
-	// Control/Status Register (CSR)
-	union {
+	/**
+	 * @brief Control/Status Register
+	 * @details
+	 * Controls the LSI oscillator and provides reset status flags.
+	 * Indicates the source of the last reset (power-on, pin, watchdog, etc.)
+	 * and allows clearing of reset flags. LSI is used for independent watchdog.
+	 */
+	union RCC_CSR 
+	{
 		// Full 32-bit Register Access
 		volatile uint32_t REG;
 		// Bit Access
@@ -353,6 +449,8 @@ typedef volatile struct __RCC_TypeDef
 		} BIT;
 	} CSR;
 } RCC_TypeDef;
+
+/** @} */ // RCC_01_Registers_01_Structure
 
 // C++ Safeguards
 #ifdef __cplusplus

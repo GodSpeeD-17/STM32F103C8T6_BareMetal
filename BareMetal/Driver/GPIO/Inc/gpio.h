@@ -36,7 +36,7 @@
  * - Not all ports may be available on all STM32F1xx variants
  * - STM32F103C8T6 has ports A, B, and C fully available
  *
- * @see STM32F103C8T6 Datasheet - Section 4 Memory mapping | @ref GPIO_03_Registers_03_Memory "GPIO Ports"
+ * @see STM32F103C8T6 Datasheet - Section 4 Memory mapping | @ref GPIO_01_Registers_02_Memory "GPIO Ports"
  * @{
  */
 

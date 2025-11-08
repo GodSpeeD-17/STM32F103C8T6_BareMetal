@@ -51,9 +51,9 @@ extern "C"
  */
 
 /**
- * @brief APIs to access @ref GPIO_01_Registers_01_Structure "GPIO Registers"
  * @defgroup GPIO_01_Registers_03_API GPIO Register Access APIs
  * @ingroup GPIO_01_Registers
+ * @brief APIs to access @ref GPIO_01_Registers_01_Structure "GPIO Registers"
  */ 
 
 /** @} */ // GPIO_01_Registers
