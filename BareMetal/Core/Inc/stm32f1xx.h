@@ -136,55 +136,59 @@ extern "C" {
 #define BIT_SET(POS)							((uint32_t) (0x01UL << (POS)))
 
 /**
- * @brief   Compute peripheral index based on base addresses
+ * @brief   Compute peripheral index based on base addresses and peripheral size
  * @addtogroup 01_STM32F1xx_Utilities
  *
  * @details
- * This macro computes the relative index (or bit position) of a peripheral 
- * instance based on its memory-mapped base address, reference base address, 
- * and register block type.
+ * This macro computes the **zero-based peripheral index** (or bit position)
+ * of a given peripheral instance by comparing its memory-mapped address
+ * with that of a reference instance of the same peripheral family.
  *
- * It is primarily used to determine clock-enable bit positions or array indices
- * for peripherals of the same type (e.g., GPIOA–GPIOG, USART1–USART3).
+ * The computation uses the **known peripheral memory spacing** (in bytes)
+ * rather than the structure size (`sizeof()`), ensuring accurate results even
+ * when peripheral register blocks do not occupy their entire memory region.
+ *
+ * It is primarily used to determine **clock-enable bit positions** or
+ * **array indices** for peripherals of the same type (e.g., GPIOA–GPIOG,
+ * USART1–USART3, TIM2–TIM5, etc.).
  *
  * @note
- * - The computation uses pointer arithmetic on `uintptr_t` to ensure 
- *   portability across 32-bit and 64-bit targets
- * - The result assumes all peripheral instances of the given `type` 
- *   are equally spaced in memory
- * - No hardware access is performed by this macro; it performs 
- *   pure compile-time address arithmetic when operands are constants
+ * - Performs **pure compile-time address arithmetic** when constant operands are used.
+ * - No hardware register access is performed.
+ * - Peripheral instances must have equal address spacing in the memory map.
  *
  * @param[in] value   The address (or pointer) of the target peripheral instance  
- *                    (e.g., `GPIOC`, `USART2`, `TIM4`).
- * @param[in] base    The address (or pointer) of the first peripheral instance  
- *                    of the same type (e.g., `GPIOA`, `USART1`, `TIM2`).
- * @param[in] type    The peripheral structure type (e.g., `GPIO_TypeDef`, 
- *                    `USART_TypeDef`).
+ *                    (e.g., @ref GPIOC, @ref USART2, @ref TIM4)
+ * @param[in] base    The address (or pointer) of the reference peripheral instance  
+ *                    (e.g., @ref GPIOA, @ref USART1, @ref TIM2)
+ * @param[in] size    The memory spacing (in bytes) between consecutive instances  
+ *                    of the same peripheral type  
+ *                    (e.g., @ref GPIO_PERIPHERAL_SIZE "GPIO_PERIPHERAL_SIZE")
  *
- * @return The peripheral index (zero-based)
+ * @return The **zero-based index** of the target peripheral relative to the base.
  *
- * @pre The base and value must both point to valid peripherals of the same type.
+ * @pre Both `base` and `value` must belong to peripherals of the same family
+ *      and share the same address spacing.
  *
- * @warning The result is undefined if `base` and `value` do not belong to 
- *          peripherals of the same structure layout or are not memory-aligned
- *          as expected.
+ * @warning
+ * - The result is undefined if `base` and `value` are not aligned to `size`.
+ * - Passing an incorrect `size` value may result in invalid peripheral indices.
  *
- * @see @ref RCC_APB2ENR for example bit positioning of GPIO ports.
- * @see @ref GPIO_TypeDef for structure size reference.
+ * @see @ref GPIO_PERIPHERAL_SIZE for GPIO memory spacing.
+ * @see @ref RCC_APB2ENR for clock enable bit positions.
  * @def BIT_POS
  * @par Example:
  * @code
  * // Example: Compute GPIO port index
- * uint32_t index = BIT_POS(GPIOC, GPIOA, GPIO_TypeDef);
+ * uint32_t index = BIT_POS(GPIOC, GPIOA, GPIO_PERIPHERAL_SIZE);
  * // index = 2 → GPIOC is the third port after GPIOA
  *
  * // Enable corresponding GPIO clock (bit = index + 2)
  * RCC->APB2ENR |= (1U << (index + 2));
  * @endcode
  */
-#define BIT_POS(value, base, type) \
-	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)sizeof(type)))
+#define BIT_POS(value, base, size) \
+	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)(size)))
 
 /**
  * @brief Driver Operational Status
@@ -288,6 +292,31 @@ typedef enum
  */
 #define GPIO_BASE_ADDRESS						APB2_BASE_ADDR
 
+/**
+ * @section  GPIO_Registers_Memory_Size GPIO Peripheral Memory Size
+ * @ingroup  GPIO_01_Registers_02_Memory
+ * @brief    GPIO Peripheral Address Space Size
+ * @def		 GPIO_PERIPHERAL_SIZE 
+ * @details  
+ * Each GPIO port (GPIOA–GPIOG) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
+ * address block in the <b>APB2 peripheral memory space</b>
+ *
+ * Although the @ref GPIO_TypeDef "GPIO register structure" uses only 0x1C bytes
+ * (the sum of all defined registers), the hardware reserves a full 0x400-byte
+ * region per GPIO instance. This spacing ensures aligned, uniform addressing
+ * for all ports and simplifies peripheral bus decoding logic.
+ *
+ * @note 
+ * - Use this constant when computing peripheral index offsets or bit positions.
+ * - Do **not** use `sizeof(GPIO_TypeDef)` for address-based calculations, as it
+ *   does not reflect the physical memory spacing.
+ *
+ * @see Reference Manual RM0008, Section 3.2 "Memory Map"
+ * @see @ref GPIO_01_Registers_02_Memory "GPIO Ports Memory Address"
+ * @see @ref BIT_POS "Peripheral Index Computation"
+ */
+#define GPIO_PERIPHERAL_SIZE					0x400UL
+
 /** @} */ // GPIO_Registers_Memory_Base
 
 /**
@@ -296,20 +325,31 @@ typedef enum
  * @ingroup GPIO_01_Registers_02_Memory
  * @brief GPIO Offset from @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address"
  */
+
+ /**
+ * @brief Compute GPIO port offset based on index
+ * @ingroup GPIO_01_Registers_02_Memory
+ * @param[in] n  Zero-based port index (0 = GPIOA, 1 = GPIOB, ..., 6 = GPIOG)
+ * @return Offset from GPIO base address
+ * @note This macro ensures uniform, safe computation of port addresses
+ * @def GPIO_OFFSET
+ */
+#define GPIO_OFFSET(n)	\
+	((uint32_t)(GPIOA_OFFSET) + ((uint32_t)(n) * (uint32_t)GPIO_PERIPHERAL_SIZE))
 /** @brief GPIO Port A Offset @def GPIOA_OFFSET */
-#define GPIOA_OFFSET                            0x00000800UL
+#define GPIOA_OFFSET							0x00000800UL
 /** @brief GPIO Port B Offset @def GPIOB_OFFSET */
-#define GPIOB_OFFSET                            0x00000C00UL
+#define GPIOB_OFFSET							GPIO_OFFSET(1)
 /** @brief GPIO Port C Offset @def GPIOC_OFFSET */
-#define GPIOC_OFFSET                            0x00001000UL
+#define GPIOC_OFFSET							GPIO_OFFSET(2)
 /** @brief GPIO Port D Offset @def GPIOD_OFFSET */
-#define GPIOD_OFFSET                            0x00001400UL
+#define GPIOD_OFFSET							GPIO_OFFSET(3)
 /** @brief GPIO Port E Offset @def GPIOE_OFFSET */
-#define GPIOE_OFFSET                            0x00001800UL
+#define GPIOE_OFFSET							GPIO_OFFSET(4)
 /** @brief GPIO Port F Offset @def GPIOF_OFFSET */
-#define GPIOF_OFFSET                            0x00001C00UL
+#define GPIOF_OFFSET							GPIO_OFFSET(5)
 /** @brief GPIO Port G Offset @def GPIOG_OFFSET */
-#define GPIOG_OFFSET                            0x00002000UL
+#define GPIOG_OFFSET							GPIO_OFFSET(6)
 
 /** @} */ // GPIO_Registers_Memory_Offset
 

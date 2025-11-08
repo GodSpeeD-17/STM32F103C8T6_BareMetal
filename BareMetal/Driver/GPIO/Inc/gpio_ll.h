@@ -60,7 +60,7 @@ extern "C" {
  * @returns				CRL
  * @ref GPIO_Pins_Summary "GPIO Pin Summary"
  */
-__STATIC_FORCEINLINE uint32_t __GPIO_ReadCRL(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadCRL(GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t) GPIOx->CRL.REG;
 }
@@ -82,7 +82,7 @@ __STATIC_FORCEINLINE void __GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const uint3
  * @returns				CRH
  * @ref GPIO_Pins_Summary "GPIO Pin Summary" 
  */
-__STATIC_FORCEINLINE uint32_t __GPIO_ReadCRH(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE uint32_t __GPIO_ReadCRH(GPIO_TypeDef* const GPIOx)
 {
 	return (uint32_t) GPIOx->CRH.REG;
 }
@@ -250,7 +250,7 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * 
  * @def GPIO_CLK_POS
  */
-#define GPIO_CLK_POS(GPIOx) 						BIT_POS((GPIOx), GPIOA, GPIO_TypeDef)
+#define GPIO_CLK_POS(GPIOx) 						BIT_POS((GPIOx), GPIOA, GPIO_PERIPHERAL_SIZE)
 
 /**
  * @brief Compute the RCC clock-enable bitmask for a GPIO port
@@ -267,8 +267,8 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * @return Bitmask for the GPIO port’s clock-enable bit
  *
  * @see @ref GPIO_CLK_POS
- * @see @ref _GPIO_EnableClock()
- * @see @ref _GPIO_DisableClock()
+ * @see @ref _GPIO_EnableClock
+ * @see @ref _GPIO_DisableClock
  *
  * @par Example:
  * @code
@@ -282,13 +282,13 @@ __STATIC_FORCEINLINE uint32_t __GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * @def GPIO_CLK_MASK
  */
 #define GPIO_CLK_MASK(GPIOx) \
-	((uint32_t) (0x01UL << (RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(GPIOx))))
+	((uint32_t) (0x01UL << ((RCC_APB2ENR_IOPAEN_Pos + GPIO_CLK_POS(GPIOx)) & ((uint32_t) 0x1F))))
 
 /**
  * @brief Enable GPIO Peripheral Clock
  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  */
-__STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE void _GPIO_EnableClock(GPIO_TypeDef* const GPIOx)
 {
 	RCC->APB2ENR.REG |= GPIO_CLK_MASK(GPIOx);
 }
@@ -297,7 +297,7 @@ __STATIC_FORCEINLINE void _GPIO_EnableClock(const GPIO_TypeDef* const GPIOx)
  * @brief Disable GPIO Peripheral Clock
  * @param[in] GPIOx Target @ref GPIO_03_Registers_03_Memory "GPIO Port"
  */
-__STATIC_FORCEINLINE void _GPIO_DisableClock(const GPIO_TypeDef* const GPIOx)
+__STATIC_FORCEINLINE void _GPIO_DisableClock(GPIO_TypeDef* const GPIOx)
 {
 	RCC->APB2ENR.REG &= ~GPIO_CLK_MASK(GPIOx);
 }
@@ -402,8 +402,12 @@ typedef uint8_t _gpio_pin_t;
  * @note This macro uses the highly optimized GCC built-in function `__builtin_ctz`
  * * @def GPIO_LL_EXTRACT_PIN_MASK
  */
-#define GPIO_LL_EXTRACT_PIN_MASK(pinMask)				\
-	((((uint32_t)(pinMask)) != 0x00UL)? ((_gpio_pin_t)__builtin_ctz((pinMask) & _GPIO_MAX_PIN)) : ((_gpio_pin_t) GPIO_LL_GET_PIN_MASK(17)))
+#define GPIO_LL_EXTRACT_PIN_MASK(pinMask)		\
+	(											\
+		((pinMask) != GPIO_PIN_NONE) ?			\
+		((_gpio_pin_t)(__builtin_ctz((uint32_t)((pinMask) & _GPIO_MAX_PIN)))) : \
+		((_gpio_pin_t) 16)\
+	)
 
 /** @} */ // GPIO_02_LL_02_Pin
 

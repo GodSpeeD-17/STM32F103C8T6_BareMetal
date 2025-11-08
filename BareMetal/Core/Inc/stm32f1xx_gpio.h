@@ -253,7 +253,7 @@ typedef volatile struct __GPIO_TypeDef
 	 */
 	union GPIO_IDR
 	{
-		volatile const volatile uint32_t REG;
+		const volatile uint32_t REG;
 		struct
 		{
 			volatile const uint32_t IDR0 : 1;

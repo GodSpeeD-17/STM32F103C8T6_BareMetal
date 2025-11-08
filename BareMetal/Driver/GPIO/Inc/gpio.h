@@ -69,7 +69,7 @@ typedef uint8_t											gpio_port_t;
 /** @} */ // GPIO_Driver_Port_Macros
 
 /** @brief Driver GPIO Port Mapping Lookup Table */
-static const GPIO_TypeDef* const _driverGpioPortMapping[] =
+static GPIO_TypeDef* const _driverGpioPortMapping[] =
 {
 	[GPIO_PORT_A] = GPIOA,
 	[GPIO_PORT_B] = GPIOB,
@@ -206,7 +206,7 @@ typedef uint16_t 										gpio_pin_t;
  */
 __STATIC_FORCEINLINE _gpio_pin_t GPIO_getLLPin(const gpio_pin_t pin)
 {
-	return GPIO_LL_EXTRACT_PIN_MASK(pin);
+	return (((pin != GPIO_PIN_NONE) && (pin & GPIO_PIN_ALL) && ((pin & (pin - 1)) == GPIO_PIN_NONE)) ? ((_gpio_pin_t) (__builtin_ctz(pin))) : ((_gpio_pin_t) 0x10));
 } 
 
 /** @} */ // GPIO_03_Driver_01_Types_02_Pins
