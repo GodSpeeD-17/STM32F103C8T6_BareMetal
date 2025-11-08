@@ -58,19 +58,19 @@ __STATIC_FORCEINLINE void __RCC_WriteCR(RCC_TypeDef* const RCCx, const uint32_t 
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_CR "RCC->CR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CR "RCC->CR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->CR.REG &= value;
+	RCCx->CR.REG &= ~value;
 }
 
 /**
@@ -78,7 +78,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndCR(RCC_TypeDef* const RCCx, const uint
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CR.REG ^= value;
 }
@@ -117,19 +117,19 @@ __STATIC_FORCEINLINE void __RCC_WriteCFGR(RCC_TypeDef* const RCCx, const uint32_
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CFGR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_CFGR "RCC->CFGR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CFGR "RCC->CFGR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->CFGR.REG &= value;
+	RCCx->CFGR.REG &= ~value;
 }
 
 /**
@@ -137,7 +137,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndCFGR(RCC_TypeDef* const RCCx, const ui
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CFGR.REG ^= value;
 }
@@ -176,19 +176,19 @@ __STATIC_FORCEINLINE void __RCC_WriteCIR(RCC_TypeDef* const RCCx, const uint32_t
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrCIR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetCIR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CIR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_CIR "RCC->CIR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CIR "RCC->CIR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndCIR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearCIR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->CIR.REG &= value;
+	RCCx->CIR.REG &= ~value;
 }
 
 /**
@@ -196,7 +196,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndCIR(RCC_TypeDef* const RCCx, const uin
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorCIR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleCIR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CIR.REG ^= value;
 }
@@ -235,19 +235,19 @@ __STATIC_FORCEINLINE void __RCC_WriteAPB2RSTR(RCC_TypeDef* const RCCx, const uin
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB2RSTR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_APB2RSTR "RCC->APB2RSTR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB2RSTR "RCC->APB2RSTR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->APB2RSTR.REG &= value;
+	RCCx->APB2RSTR.REG &= ~value;
 }
 
 /**
@@ -255,7 +255,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndAPB2RSTR(RCC_TypeDef* const RCCx, cons
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB2RSTR.REG ^= value;
 }
@@ -294,19 +294,19 @@ __STATIC_FORCEINLINE void __RCC_WriteAPB1RSTR(RCC_TypeDef* const RCCx, const uin
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB1RSTR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_APB1RSTR "RCC->APB1RSTR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB1RSTR "RCC->APB1RSTR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->APB1RSTR.REG &= value;
+	RCCx->APB1RSTR.REG &= ~value;
 }
 
 /**
@@ -314,7 +314,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndAPB1RSTR(RCC_TypeDef* const RCCx, cons
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB1RSTR.REG ^= value;
 }
@@ -353,19 +353,19 @@ __STATIC_FORCEINLINE void __RCC_WriteAHBENR(RCC_TypeDef* const RCCx, const uint3
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->AHBENR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_AHBENR "RCC->AHBENR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_AHBENR "RCC->AHBENR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->AHBENR.REG &= value;
+	RCCx->AHBENR.REG &= ~value;
 }
 
 /**
@@ -373,7 +373,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndAHBENR(RCC_TypeDef* const RCCx, const 
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->AHBENR.REG ^= value;
 }
@@ -412,19 +412,19 @@ __STATIC_FORCEINLINE void __RCC_WriteAPB2ENR(RCC_TypeDef* const RCCx, const uint
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB2ENR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_APB2ENR "RCC->APB2ENR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB2ENR "RCC->APB2ENR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->APB2ENR.REG &= value;
+	RCCx->APB2ENR.REG &= ~value;
 }
 
 /**
@@ -432,7 +432,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndAPB2ENR(RCC_TypeDef* const RCCx, const
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB2ENR.REG ^= value;
 }
@@ -471,19 +471,19 @@ __STATIC_FORCEINLINE void __RCC_WriteAPB1ENR(RCC_TypeDef* const RCCx, const uint
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB1ENR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_APB1ENR "RCC->APB1ENR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB1ENR "RCC->APB1ENR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->APB1ENR.REG &= value;
+	RCCx->APB1ENR.REG &= ~value;
 }
 
 /**
@@ -491,7 +491,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndAPB1ENR(RCC_TypeDef* const RCCx, const
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->APB1ENR.REG ^= value;
 }
@@ -530,19 +530,19 @@ __STATIC_FORCEINLINE void __RCC_WriteBDCR(RCC_TypeDef* const RCCx, const uint32_
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->BDCR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_BDCR "RCC->BDCR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_BDCR "RCC->BDCR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->BDCR.REG &= value;
+	RCCx->BDCR.REG &= ~value;
 }
 
 /**
@@ -550,7 +550,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndBDCR(RCC_TypeDef* const RCCx, const ui
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->BDCR.REG ^= value;
 }
@@ -589,19 +589,19 @@ __STATIC_FORCEINLINE void __RCC_WriteCSR(RCC_TypeDef* const RCCx, const uint32_t
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to OR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseOrCSR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_SetCSR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CSR.REG |= value;
 }
 
 /**
- * @brief				Performs a bitwise AND Operation on @ref RCC_CSR "RCC->CSR"
+ * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CSR "RCC->CSR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to AND with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseAndCSR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ClearCSR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
-	RCCx->CSR.REG &= value;
+	RCCx->CSR.REG &= ~value;
 }
 
 /**
@@ -609,7 +609,7 @@ __STATIC_FORCEINLINE void __RCC_BitwiseAndCSR(RCC_TypeDef* const RCCx, const uin
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
  * @param[in] value		Value to EXOR with current register value
  */
-__STATIC_FORCEINLINE void __RCC_BitwiseXorCSR(RCC_TypeDef* const RCCx, const uint32_t value)
+__STATIC_FORCEINLINE void __RCC_ToggleCSR(RCC_TypeDef* const RCCx, const uint32_t value)
 {
 	RCCx->CSR.REG ^= value;
 }
