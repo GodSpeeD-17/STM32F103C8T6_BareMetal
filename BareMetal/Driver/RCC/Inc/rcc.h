@@ -84,7 +84,7 @@ typedef struct
 	 * - Use @ref RCC_FLASH_LATENCY_1 for 24 MHz < SYSCLK ≤ 48 MHz
 	 * - Use @ref RCC_FLASH_LATENCY_2 for 48 MHz < SYSCLK ≤ 72 MHz
 	 */
-	rcc_flash_latency_t latency;
+	rcc_flash_latency_t latency: 2;
 	
 	/** 
 	 * @brief Flash prefetch buffer control
@@ -92,8 +92,39 @@ typedef struct
 	 * - Use @ref RCC_FLASH_PREFETCH_DISABLE to disable prefetch
 	 * - Use @ref RCC_FLASH_PREFETCH_ENABLE to enable prefetch (recommended)
 	 */
-	rcc_flash_prefetch_t prefetch;
+	rcc_flash_prefetch_t prefetch: 1;
 } rcc_flash_config_t;
+
+/**
+ * @brief Convert driver flash latency to low-level hardware value
+ * @param[in] latency Driver flash latency value (@ref RCC_FLASH_LATENCY_0, RCC_FLASH_LATENCY_1, RCC_FLASH_LATENCY_2)
+ * @returns Low-level flash latency value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_flash_latency_t RCC_D2L_FlashLatency(const rcc_flash_latency_t latency)
+{
+	switch(latency)
+	{
+		case RCC_FLASH_LATENCY_0: return _RCC_FLASH_LATENCY_0; break;
+		case RCC_FLASH_LATENCY_1: return _RCC_FLASH_LATENCY_1; break;
+		case RCC_FLASH_LATENCY_2: return _RCC_FLASH_LATENCY_2; break;
+		default: return _RCC_FLASH_LATENCY_0; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Convert driver flash prefetch to low-level hardware value
+ * @param[in] prefetch Driver flash prefetch value (@ref RCC_FLASH_PREFETCH_DISABLE, RCC_FLASH_PREFETCH_ENABLE)
+ * @returns Low-level flash prefetch value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_flash_prefetch_t RCC_D2L_FlashPrefetch(const rcc_flash_prefetch_t prefetch)
+{
+	switch(prefetch)
+	{
+		case RCC_FLASH_PREFETCH_DISABLE: return _RCC_FLASH_PREFETCH_DISABLE; break;
+		case RCC_FLASH_PREFETCH_ENABLE: return _RCC_FLASH_PREFETCH_ENABLE; break;
+		default: return _RCC_FLASH_PREFETCH_DISABLE; break; // Safe fallback
+	}
+}
 
 /** @} */ // RCC_03_Driver_01_FlashConfig
 
@@ -163,7 +194,7 @@ typedef uint8_t rcc_apb2_prescaler_t;
 
 /**
  * @brief Bus Prescaler Configuration Structure
- * @typedef rcc_bus_prescaler_config_t
+ * @typedef rcc_bus_config_t
  */
 typedef struct 
 {
@@ -193,7 +224,7 @@ typedef struct
 	 * - APB2 clock = AHB clock / APB2 prescaler
 	 */
 	rcc_apb2_prescaler_t APB2: 3;
-} rcc_bus_prescaler_config_t;
+} rcc_bus_config_t;
 
 /**
  * @brief Convert driver AHB prescaler to low-level hardware value
@@ -449,7 +480,7 @@ typedef uint8_t rcc_component_prescaler_t;
 
 /**
  * @brief Component Prescaler Configuration Structure
- * @typedef rcc_component_prescaler_config_t
+ * @typedef rcc_component_config_t
  */
 typedef struct 
 {
@@ -472,7 +503,31 @@ typedef struct
 	 * - USB clock = PLL clock / USB prescaler
 	 */
 	rcc_component_prescaler_t USB: 1;
-} rcc_component_prescaler_config_t;
+} rcc_component_config_t;
+
+/**
+ * @brief RCC Prescaler Configuration Structure
+ * @typedef rcc_prescaler_config_t
+ */
+typedef struct
+{
+	/**
+	 * @brief Bus Prescaler Configuration
+	 * @details
+	 * - Configuration for AHB, APB1, and APB2 bus prescalers
+	 * - Refer @ref rcc_bus_prescaler_config_t for details
+	 */
+	rcc_bus_config_t bus;
+
+	/**
+	 * @brief Components Prescaler Configuration
+	 * @details
+	 * - Peripheral component prescalers (ADC, USB)
+	 * - Refer @ref rcc_component_config_t for details
+	 */
+	rcc_component_config_t component;
+} rcc_prescaler_config_t;
+
 
 /**
  * @brief Convert driver ADC prescaler to low-level hardware value
@@ -595,12 +650,14 @@ __STATIC_FORCEINLINE _rcc_sys_clk_t RCC_D2L_SystemClockSource(const rcc_system_c
 typedef struct
 {
 	/**
-	 * @brief Bus Prescaler Configuration
+	 * @brief Prescaler Configuration
 	 * @details
-	 * - Configuration for AHB, APB1, and APB2 bus prescalers
-	 * - Refer @ref rcc_bus_prescaler_config_t for details
+	 * - Combined configuration for all clock prescalers
+	 * - Includes bus prescalers (AHB, APB1, APB2) and component prescalers (ADC, USB)
+	 * - Controls clock distribution throughout the system
+	 * - Refer @ref rcc_prescaler_config_t for detailed structure
 	 */
-	rcc_bus_prescaler_config_t bus_prescaler;
+	rcc_prescaler_config_t prescaler;
 	
 	/**
 	 * @brief System Clock Configuration
@@ -617,14 +674,6 @@ typedef struct
 	 * - Refer @ref rcc_flash_config_t for details
 	 */
 	rcc_flash_config_t flash;
-	
-	/**
-	 * @brief Components Prescaler Configuration
-	 * @details
-	 * - Peripheral component prescalers (ADC, USB)
-	 * - Refer @ref rcc_component_prescaler_config_t for details
-	 */
-	rcc_component_prescaler_config_t component_prescaler;
 } rcc_config_t;
 
 /** @} */ // RCC_03_Driver_06_MainConfig
@@ -637,7 +686,6 @@ typedef struct
  * @details
  * - Ultra-efficient frequency tracking using AHB base + prescalers
  * - Uses LUT-based right-shifting instead of division for maximum performance
- * - 75% smaller than storing all frequencies (8B vs 32B)
  * - Perfect balance of memory efficiency and calculation speed
  *
  * @see Reference Manual RM0008 - Section 7. Clock Configuration
@@ -648,42 +696,57 @@ typedef struct
  * @brief RCC Clock Frequency Structure
  * @typedef rcc_clk_freq_t
  */
-typedef struct
+typedef struct 
 {
-	/**
-	 * @brief AHB Base Clock Frequency
-	 * @details
-	 * - Base reference frequency in Hz
-	 * - All other frequencies derived from this + prescalers
-	 * - Stored once to avoid repeated calculations
-	 */
+	/** @brief Core system clock frequency in Hz (before AHB prescaler) */
 	_rcc_freq_t Core;
 	
-	/**
-	 * @brief Clock Prescalers Configuration
-	 * @details
-	 * - Compact storage of all active prescalers
-	 * - Used with LUT to convert to right-shift values
-	 */
+	/** @brief System Clock Configuration */
+	struct 
+	{
+		/** @brief System clock source - HSI/HSE/PLL */
+		rcc_system_clock_t source : 2;
+		/** @brief Reserved for future expansion */
+		uint8_t _reserved : 1;
+		
+		/** @brief PLL Configuration */
+		struct 
+		{
+			/** @brief PLL multiplication factor - x2 to x16 */
+			rcc_pll_mul_t multiplier : 4;
+			/** @brief PLL source - HSI/HSE */
+			rcc_pll_src_t source : 1;
+			/** @brief PLL source prescaler */
+			rcc_pll_src_prescaler_t source_prescaler : 1;
+		} pll;
+	} system;
+	
+	/** @brief Clock Prescalers Configuration */
 	struct
 	{
-		/** @brief AHB prescaler setting */
-		rcc_ahb_prescaler_t AHB      : 4; 
-		/** @brief APB1 prescaler setting */
-		rcc_apb1_prescaler_t APB1    : 3; 
-		/** @brief APB2 prescaler setting */
-		rcc_apb2_prescaler_t APB2    : 3; 
-		/** @brief ADC prescaler setting */
-		rcc_component_prescaler_t ADC : 2;
-		/** @brief USB prescaler setting */
-		rcc_component_prescaler_t USB : 1;
-	} prescalers;
+		/** @brief Bus Prescalers */
+		struct
+		{
+			/** @brief AHB prescaler as shift count - /1,/2,/4,...,/512 */
+			rcc_ahb_prescaler_t AHB : 4;
+			/** @brief APB1 prescaler as shift count - /1,/2,/4,/8,/16 */
+			rcc_apb1_prescaler_t APB1 : 3;
+			/** @brief APB2 prescaler as shift count - /1,/2,/4,/8,/16 */
+			rcc_apb2_prescaler_t APB2 : 3;
+		} bus;
+		
+		/** @brief Component Prescalers */
+		struct
+		{
+			/** @brief ADC prescaler - /2,/4,/6,/8 */
+			rcc_component_prescaler_t ADC : 2;
+			/** @brief USB prescaler - /1.5,/1 */
+			rcc_component_prescaler_t USB : 1;
+		} component;
+	} prescaler;
 } rcc_clk_freq_t;
 
-
-
-
-
+/** @} */ // RCC_03_Driver_07_ClockFrequency
 
 
 
@@ -725,7 +788,7 @@ driver_status_t RCC_PLLConfig(const rcc_pll_config_t pllConfig, uint32_t* reg);
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success 
  */
-driver_status_t RCC_BusConfig(const rcc_bus_prescaler_config_t busPrescalerConfig, uint32_t* reg);
+driver_status_t RCC_BusConfig(const rcc_bus_config_t busPrescalerConfig, uint32_t* reg);
 
 /**
  * @brief RCC Component Configuration - ADC, USB
@@ -735,7 +798,7 @@ driver_status_t RCC_BusConfig(const rcc_bus_prescaler_config_t busPrescalerConfi
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success 
  */
-driver_status_t RCC_ComponentConfig(const rcc_component_prescaler_config_t componentPrescalerConfig, uint32_t* reg);
+driver_status_t RCC_ComponentConfig(const rcc_component_config_t componentPrescalerConfig, uint32_t* reg);
 
 /**
  * @brief RCC Clock Configuration
@@ -768,13 +831,13 @@ void RCC_72MHz_SystemDefaultConfig(rcc_sys_clk_config_t* sysClkConfig);
  * @brief Sets Bus Prescaler for 72MHz
  * @param busPrescalerConfig Pointer to Bus Prescaler Configuration Structure
  */
-void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_prescaler_config_t* busPrescalerConfig);
+void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_config_t* busPrescalerConfig);
 
 /**
  * @brief Sets Component Prescaler for 72MHz
  * @param componentPrescalerConfig Pointer to Component Prescaler Configuration Structure
  */
-void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_prescaler_config_t* componentPrescalerConfig);
+void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_config_t* componentPrescalerConfig);
 
 /**
  * @brief Sets RCC Configuration 72MHz

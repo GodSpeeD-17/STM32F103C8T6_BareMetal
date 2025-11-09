@@ -647,10 +647,84 @@ __STATIC_FORCEINLINE void __RCC_ToggleCSR(RCC_TypeDef* const RCCx, const uint32_
  * @{
  */
 
+/*---------------------------------------------- RCC Flash ----------------------------------------------*/
+/** @brief Low-level flash latency type definition @typedef _rcc_flash_latency_t */
+typedef uint8_t 								_rcc_flash_latency_t;
+
+/** @brief Zero wait state @def _RCC_FLASH_LATENCY_0 */
+#define _RCC_FLASH_LATENCY_0					((_rcc_flash_latency_t) 0x00)
+/** @brief One wait state @def _RCC_FLASH_LATENCY_1 */
+#define _RCC_FLASH_LATENCY_1					((_rcc_flash_latency_t) 0x01)
+/** @brief Two wait states @def _RCC_FLASH_LATENCY_2 */
+#define _RCC_FLASH_LATENCY_2					((_rcc_flash_latency_t) 0x02)
+
+/** @brief Low-level flash prefetch type definition @typedef _rcc_flash_prefetch_t */
+typedef uint8_t _rcc_flash_prefetch_t;
+
+/** @brief Prefetch disabled @def _RCC_FLASH_PREFETCH_DISABLE */
+#define _RCC_FLASH_PREFETCH_DISABLE				((_rcc_flash_prefetch_t) 0x00)
+/** @brief Prefetch enabled @def _RCC_FLASH_PREFETCH_ENABLE */
+#define _RCC_FLASH_PREFETCH_ENABLE				((_rcc_flash_prefetch_t) 0x01)
+
+/**
+ * @brief Stage Flash Latency configuration into FLASH_ACR register value
+ * @param[in] latency Flash latency configuration (@ref RCC_FLASH_LATENCY_0, RCC_FLASH_LATENCY_1, RCC_FLASH_LATENCY_2)
+ * @param[in] acrReg Current FLASH_ACR register value
+ * @returns The updated staged FLASH_ACR register value with new latency configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageFlashLatency(const _rcc_flash_latency_t latency, uint32_t acrReg)
+{
+	// Clear latency bits (bits 0-2 for LATENCY[2:0])
+	acrReg &= ~FLASH_ACR_LATENCY;
+	// Stage latency configuration
+	acrReg |= ((uint32_t)RCC_D2L_FlashLatency(latency) << FLASH_ACR_LATENCY_Pos);
+	return acrReg;
+}
+
+/**
+ * @brief Stage Flash Prefetch Buffer configuration into FLASH_ACR register value
+ * @param[in] prefetch Flash prefetch configuration (@ref RCC_FLASH_PREFETCH_DISABLE, RCC_FLASH_PREFETCH_ENABLE)
+ * @param[in] acrReg Current FLASH_ACR register value
+ * @returns The updated staged FLASH_ACR register value with new prefetch configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageFlashPrefetch(const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
+{
+	// Clear prefetch buffer enable bit
+	acrReg &= ~FLASH_ACR_PRFTBE;
+	// Stage prefetch configuration
+	if(RCC_D2L_FlashPrefetch(prefetch) == _RCC_FLASH_PREFETCH_ENABLE) acrReg |= FLASH_ACR_PRFTBE;
+	return acrReg;
+}
+
+/**
+ * @brief Stage complete Flash ACR configuration into register value
+ * @param[in] latency Flash latency configuration (@ref RCC_FLASH_LATENCY_0, RCC_FLASH_LATENCY_1, RCC_FLASH_LATENCY_2) 
+ * @param[in] prefetch Flash prefetch configuration (@ref RCC_FLASH_PREFETCH_DISABLE, RCC_FLASH_PREFETCH_ENABLE)
+ * @param[in] acrReg Current FLASH_ACR register value
+ * @returns The updated staged FLASH_ACR register value with new flash configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ * @note - This combines both latency and prefetch configurations
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageFlashACR(const _rcc_flash_latency_t latency, const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
+{
+	// Stage latency configuration
+	acrReg = _RCC_StageFlashLatency(latency, acrReg);
+	// Stage prefetch configuration
+	acrReg = _RCC_StageFlashPrefetch(prefetch, acrReg);
+	return acrReg;
+}
+
+/** @} */ // RCC_02_LL_01_FlashConfig
+
 /*---------------------------------------------- RCC Frequency ----------------------------------------------*/
 /**
  * @brief		RCC Low Level Frequency Type and Definitions
- * @defgroup 	RCC_02_LL_01_Freq RCC Low Level Frequency
+ * @defgroup 	RCC_02_LL_02_Freq RCC Low Level Frequency
  * @ingroup 	RCC_02_LL
  * @details
  * - These constants define standard frequency values used in RCC configuration
@@ -701,12 +775,12 @@ typedef uint32_t _rcc_freq_t;
 /** @brief Maximum PLL output frequency @def _RCC_PLL_MAX_FREQ */
 #define _RCC_PLL_MAX_FREQ 								((_rcc_freq_t) 72000000)
 
-/** @} */ // RCC_02_LL_01_Freq
+/** @} */ // RCC_02_LL_02_Freq
 
 /*---------------------------------------------- RCC Clock Source ----------------------------------------------*/
 /**
  * @brief		RCC Low Level Clock Source Definitions
- * @defgroup	RCC_02_LL_02_ClockSource RCC Low Level Clock Source
+ * @defgroup	RCC_02_LL_03_ClockSource RCC Low Level Clock Source
  * @ingroup		RCC_02_LL
  * @details
  * - These constants define the available system clock sources for RCC configuration
@@ -726,13 +800,13 @@ typedef uint8_t 										_rcc_sys_clk_t;
 /** @brief PLL (Phase Locked Loop) output @def _RCC_SYS_CLK_PLL */
 #define _RCC_SYS_CLK_PLL 								((_rcc_sys_clk_t) 0x02)
 
-/** @} */ // RCC_02_LL_02_ClockSource
+/** @} */ // RCC_02_LL_03_ClockSource
 
 /*---------------------------------------------- RCC Prescaler ----------------------------------------------*/
 
 /**
  * @brief		RCC Low Level Prescaler Definitions
- * @defgroup 	RCC_02_LL_03_Prescaler RCC Low Level Prescalers
+ * @defgroup 	RCC_02_LL_04_Prescaler RCC Low Level Prescalers
  * @ingroup 	RCC_02_LL
  * @details
  * - These constants define the AHB (Advanced High-performance Bus) prescaler values
@@ -748,8 +822,8 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 
 /**
  * @brief		RCC Low Level AHB Prescaler Definitions
- * @defgroup 	RCC_02_LL_03_Prescaler_01_AHB RCC Low Level AHB Prescaler
- * @ingroup 	RCC_02_LL_03_Prescaler
+ * @defgroup 	RCC_02_LL_04_Prescaler_01_AHB RCC Low Level AHB Prescaler
+ * @ingroup 	RCC_02_LL_04_Prescaler
  * @details
  * - These constants define the AHB (Advanced High-performance Bus) prescaler values
  * - Used to divide the system clock frequency for AHB peripherals
@@ -778,12 +852,12 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 /** @brief AHB division by 512 @def _RCC_AHB_DIV_512 */
 #define _RCC_AHB_DIV_512 						((_rcc_bus_prescaler_t) 0x0F)
 
-/** @} */ // RCC_02_LL_03_Prescaler_01_AHB
+/** @} */ // RCC_02_LL_04_Prescaler_01_AHB
 
 /**
  * @brief		RCC Low Level APB1 Prescaler Definitions
- * @defgroup 	RCC_02_LL_03_Prescaler_02_APB1 RCC Low Level APB1 Prescaler
- * @ingroup 	RCC_02_LL_03_Prescaler
+ * @defgroup 	RCC_02_LL_04_Prescaler_02_APB1 RCC Low Level APB1 Prescaler
+ * @ingroup 	RCC_02_LL_04_Prescaler
  * @details
  * - These constants define the APB1 (Advanced Peripheral Bus 1) prescaler values
  * - Used to divide the AHB clock frequency for low-speed peripherals
@@ -803,12 +877,12 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 #define _RCC_APB1_DIV_8 							((_rcc_bus_prescaler_t) 0x06)
 /** @brief APB1 division by 16 @def _RCC_APB1_DIV_16 */
 #define _RCC_APB1_DIV_16 							((_rcc_bus_prescaler_t) 0x07)
-/** @} */ // RCC_02_LL_03_Prescaler_02_APB1
+/** @} */ // RCC_02_LL_04_Prescaler_02_APB1
 
 /**
  * @brief		RCC Low Level APB2 Prescaler Definitions
- * @defgroup 	RCC_02_LL_03_Prescaler_03_APB2 RCC Low Level APB2 Prescaler
- * @ingroup 	RCC_02_LL_03_Prescaler
+ * @defgroup 	RCC_02_LL_04_Prescaler_03_APB2 RCC Low Level APB2 Prescaler
+ * @ingroup 	RCC_02_LL_04_Prescaler
  * @details
  * - These constants define the APB2 (Advanced Peripheral Bus 2) prescaler values
  * - Used to divide the AHB clock frequency for high-speed peripherals
@@ -828,14 +902,14 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 #define _RCC_APB2_DIV_8 							((_rcc_bus_prescaler_t) 0x06)
 /** @brief APB2 division by 16 @def _RCC_APB2_DIV_16 */
 #define _RCC_APB2_DIV_16 							((_rcc_bus_prescaler_t) 0x07)
-/** @} */ // RCC_02_LL_03_Prescaler_03_APB2
+/** @} */ // RCC_02_LL_04_Prescaler_03_APB2
 
-/** @} */ // RCC_02_LL_03_Prescaler
+/** @} */ // RCC_02_LL_04_Prescaler
 
 /*---------------------------------------------- RCC PLL ----------------------------------------------*/
 /**
  * @brief		RCC Low Level PLL Configuration Definitions
- * @defgroup 	RCC_02_LL_04_PLL RCC Low Level PLL Configuration
+ * @defgroup 	RCC_02_LL_05_PLL RCC Low Level PLL Configuration
  * @ingroup 	RCC_02_LL
  * @details
  * - These constants define the PLL (Phase Locked Loop) configuration parameters
@@ -855,8 +929,8 @@ typedef uint8_t 								_rcc_pll_mul_t;
 
 /**
  * @brief		RCC Low Level PLL Source Definitions
- * @defgroup 	RCC_02_LL_04_PLL_01_Source RCC Low Level PLL Source
- * @ingroup 	RCC_02_LL_04_PLL
+ * @defgroup 	RCC_02_LL_05_PLL_01_Source RCC Low Level PLL Source
+ * @ingroup 	RCC_02_LL_05_PLL
  * @details
  * - These constants define the available clock sources for PLL input
  * - PLL can use either HSI or HSE as its input source
@@ -871,12 +945,12 @@ typedef uint8_t 								_rcc_pll_mul_t;
 /** @brief PLL source HSE (High Speed External) @def _RCC_PLL_SRC_HSE */
 #define _RCC_PLL_SRC_HSE 						((_rcc_pll_src_t) 0x01)
 
-/** @} */ // RCC_02_LL_04_PLL_01_Source
+/** @} */ // RCC_02_LL_05_PLL_01_Source
 
 /**
  * @brief		RCC Low Level PLL Source Prescaler Definitions
- * @defgroup 	RCC_02_LL_04_PLL_02_SourcePrescaler RCC Low Level PLL Source Prescaler
- * @ingroup 	RCC_02_LL_04_PLL
+ * @defgroup 	RCC_02_LL_05_PLL_02_SourcePrescaler RCC Low Level PLL Source Prescaler
+ * @ingroup 	RCC_02_LL_05_PLL
  * @details
  * - These constants define the prescaler for PLL input source
  * - HSE can be divided by 1 or 2 before PLL input
@@ -893,12 +967,12 @@ typedef uint8_t 								_rcc_pll_mul_t;
 /** @brief HSE division by 2 for PLL input @def _RCC_PLL_SRC_HSE_DIV_2 */
 #define _RCC_PLL_SRC_HSE_DIV_2 					((_rcc_pll_src_prescaler_t) 0x01)
 
-/** @} */ // RCC_02_LL_04_PLL_02_SourcePrescaler
+/** @} */ // RCC_02_LL_05_PLL_02_SourcePrescaler
 
 /**
  * @brief		RCC Low Level PLL Multiplication Factor Definitions
- * @defgroup 	RCC_02_LL_04_PLL_03_Multiplication RCC Low Level PLL Multiplication
- * @ingroup 	RCC_02_LL_04_PLL
+ * @defgroup 	RCC_02_LL_05_PLL_03_Multiplication RCC Low Level PLL Multiplication
+ * @ingroup 	RCC_02_LL_05_PLL
  * @details
  * - These constants define the PLL multiplication factors
  * - PLL output frequency = (PLL input frequency) × (PLL multiplication factor)
@@ -940,15 +1014,15 @@ typedef uint8_t 								_rcc_pll_mul_t;
 /** @brief PLL multiplication by 16 @def _RCC_PLL_MUL_16 */
 #define _RCC_PLL_MUL_16 						((_rcc_pll_mul_t) 0x0E)
 
-/** @} */ // RCC_02_LL_04_PLL_03_Multiplication
+/** @} */ // RCC_02_LL_05_PLL_03_Multiplication
 
-/** @} */ // RCC_02_LL_04_PLL
+/** @} */ // RCC_02_LL_05_PLL
 
 /*---------------------------------------------- RCC Component Prescaler ----------------------------------------------*/
 
 /**
  * @brief		RCC Low Level Component Prescaler Definitions
- * @defgroup 	RCC_02_LL_05_ComponentPrescaler RCC Low Level Component Prescaler
+ * @defgroup 	RCC_02_LL_06_ComponentPrescaler RCC Low Level Component Prescaler
  * @ingroup 	RCC_02_LL
  * @details
  * - These constants define the prescaler values for specific peripherals
@@ -964,8 +1038,8 @@ typedef uint8_t 								_rcc_component_prescaler_t;
 
 /**
  * @brief		RCC Low Level ADC Prescaler Definitions
- * @defgroup 	RCC_02_LL_05_ComponentPrescaler_01_ADC RCC Low Level ADC Prescaler
- * @ingroup 	RCC_02_LL_05_ComponentPrescaler
+ * @defgroup 	RCC_02_LL_06_ComponentPrescaler_01_ADC RCC Low Level ADC Prescaler
+ * @ingroup 	RCC_02_LL_06_ComponentPrescaler
  * @details
  * - These constants define the ADC (Analog-to-Digital Converter) prescaler values
  * - Used to divide the APB2 clock frequency for ADC peripheral
@@ -985,12 +1059,12 @@ typedef uint8_t 								_rcc_component_prescaler_t;
 /** @brief ADC division by 8 @def _RCC_ADC_DIV_8 */
 #define _RCC_ADC_DIV_8 							((_rcc_component_prescaler_t) 0x03)
 
-/** @} */ // RCC_02_LL_05_ComponentPrescaler_01_ADC
+/** @} */ // RCC_02_LL_06_ComponentPrescaler_01_ADC
 
 /**
  * @brief		RCC Low Level USB Prescaler Definitions
- * @defgroup 	RCC_02_LL_05_ComponentPrescaler_02_USB RCC Low Level USB Prescaler
- * @ingroup 	RCC_02_LL_05_ComponentPrescaler
+ * @defgroup 	RCC_02_LL_06_ComponentPrescaler_02_USB RCC Low Level USB Prescaler
+ * @ingroup 	RCC_02_LL_06_ComponentPrescaler
  * @details
  * - These constants define the USB (Universal Serial Bus) prescaler values
  * - Used to generate the 48 MHz clock required for USB peripheral
@@ -1006,9 +1080,9 @@ typedef uint8_t 								_rcc_component_prescaler_t;
 /** @brief USB division by 1 (no prescaling) @def _RCC_USB_DIV_1 */
 #define _RCC_USB_DIV_1 							((_rcc_component_prescaler_t) 0x01)
 
-/** @} */ // RCC_02_LL_05_ComponentPrescaler_02_USB
+/** @} */ // RCC_02_LL_06_ComponentPrescaler_02_USB
 
-/** @} */ // RCC_02_LL_05_ComponentPrescaler
+/** @} */ // RCC_02_LL_06_ComponentPrescaler
 
 /** @} */ // RCC_02_LL
 

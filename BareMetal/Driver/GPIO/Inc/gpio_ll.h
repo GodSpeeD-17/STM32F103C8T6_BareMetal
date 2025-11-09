@@ -283,7 +283,6 @@ __STATIC_FORCEINLINE void __GPIO_ToggleODR(GPIO_TypeDef* const GPIOx, const uint
 /** @} */ // GPIO_01_Registers_03_API_03_ODR
 
 /*---------------------------------------------- GPIO BSRR ----------------------------------------------*/
-
 /**
  * @defgroup GPIO_01_Registers_03_API_04_BSRR GPIO Bit Set/Reset Register
  * @ingroup GPIO_01_Registers_03_API
