@@ -9,11 +9,69 @@
  * @note - Shifted to use combination of `typedef` & macros
  */
 
-/*---------------------------------------------- Header Guards ***********************************************/
+/*---------------------------------------------- Header Guards ----------------------------------------------*/
 #include "rcc.h"
 
+volatile rcc_clk_freq_t _systemConfig = 
+{
+	.Core = _RCC_HSI_FREQ,
+	.system =
+	{
+		.source = RCC_SYS_CLK_PLL,
+		.pll =
+		{
+			.multiplier = RCC_PLL_MUL_9,
+			.source = RCC_PLL_SRC_HSE,
+			.source_prescaler = RCC_PLL_SRC_HSE_DIV_1,
+		}
+	},
+	.prescaler =
+	{
+		.bus =
+		{
+			.AHB = RCC_AHB_DIV_1,
+			.APB1 = RCC_APB1_DIV_2,
+			.APB2 = RCC_APB2_DIV_1,
+		},
+		.component = 
+		{
+			.ADC = RCC_ADC_DIV_6,
+			.USB = RCC_USB_DIV_1_5,
+		}
+	}
+};
+
+/**
+ * @brief RCC Flash Configuration
+ * @param flash Flash Configuration Structure @ref rcc_flash_config_t
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_FlashConfig(const rcc_flash_config_t* const flash)
+{
+	uint32_t reg = 0x00;
+	// TODO: Replace this with __* API
+	reg = FLASH->ACR.REG;
+	reg = _RCC_StageFlashConfig(flash->latency, flash->prefetch, reg);
+	// TODO: Replace this with __* API
+	FLASH->ACR.REG = reg;
+}
+
+
+driver_status_t RCC_Config(rcc_config_t* const rcc)
+{
+	uint32_t reg = 0x00;
+	// Flash Settings
+	RCC_FlashConfig(&rcc->flash);
+
+	// RCC Configuration Register Read
+	reg = __RCC_ReadCFGR(RCC); 
+	
+}
+
 #ifdef _OLD_
-/*---------------------------------------------- System Frequency Tracker ***********************************************/
+/*---------------------------------------------- System Frequency Tracker ----------------------------------------------*/
 /**
  * @brief System frequency Summary
  */
@@ -25,7 +83,7 @@ rcc_clk_freq_t __systemFrequency__ =
 	.APB2 = HSI_FREQ
 };
 
-/*---------------------------------------------- Driver APIs ***********************************************/
+/*---------------------------------------------- Driver APIs ----------------------------------------------*/
 /**
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure `rcc_flash_config_t`

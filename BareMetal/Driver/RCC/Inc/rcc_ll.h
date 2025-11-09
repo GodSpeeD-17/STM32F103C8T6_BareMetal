@@ -679,7 +679,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageFlashLatency(const _rcc_flash_latency_t 
 	// Clear latency bits (bits 0-2 for LATENCY[2:0])
 	acrReg &= ~FLASH_ACR_LATENCY;
 	// Stage latency configuration
-	acrReg |= ((uint32_t)RCC_D2L_FlashLatency(latency) << FLASH_ACR_LATENCY_Pos);
+	acrReg |= (uint32_t)(latency << FLASH_ACR_LATENCY_Pos);
 	return acrReg;
 }
 
@@ -696,7 +696,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageFlashPrefetch(const _rcc_flash_prefetch_
 	// Clear prefetch buffer enable bit
 	acrReg &= ~FLASH_ACR_PRFTBE;
 	// Stage prefetch configuration
-	if(RCC_D2L_FlashPrefetch(prefetch) == _RCC_FLASH_PREFETCH_ENABLE) acrReg |= FLASH_ACR_PRFTBE;
+	if(prefetch == _RCC_FLASH_PREFETCH_ENABLE) acrReg |= FLASH_ACR_PRFTBE;
 	return acrReg;
 }
 
@@ -710,7 +710,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageFlashPrefetch(const _rcc_flash_prefetch_
  * @note - Register Value to be provided as input
  * @note - This combines both latency and prefetch configurations
  */
-__STATIC_FORCEINLINE uint32_t _RCC_StageFlashACR(const _rcc_flash_latency_t latency, const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
+__STATIC_FORCEINLINE uint32_t _RCC_StageFlashConfig(const _rcc_flash_latency_t latency, const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
 {
 	// Stage latency configuration
 	acrReg = _RCC_StageFlashLatency(latency, acrReg);
