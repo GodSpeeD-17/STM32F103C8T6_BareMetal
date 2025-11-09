@@ -200,7 +200,7 @@ typedef struct
  * @param[in] prescaler Driver AHB prescaler value (@ref RCC_AHB_DIV_1 "RCC_AHB_DIV_*")
  * @returns Low-level AHB prescaler value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_AHBPrescaler(const rcc_ahb_prescaler_t prescaler)
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_AHBPrescaler(const rcc_ahb_prescaler_t prescaler)
 {
     switch(prescaler)
 	{
@@ -222,7 +222,7 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_AHBPrescaler(const rcc_
  * @param[in] prescaler Driver APB1 prescaler value (@ref RCC_APB1_DIV_1 "RCC_APB1_DIV_*")
  * @returns Low-level APB1 prescaler value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_APB1Prescaler(const rcc_apb1_prescaler_t prescaler)
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB1Prescaler(const rcc_apb1_prescaler_t prescaler)
 {
     switch(prescaler)
 	{
@@ -240,7 +240,7 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_APB1Prescaler(const rcc
  * @param[in] prescaler Driver APB2 prescaler value (@ref RCC_APB2_DIV_1 "RCC_APB2_DIV_*")
  * @returns Low-level APB2 prescaler value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_APB2Prescaler(const rcc_apb2_prescaler_t prescaler)
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_apb2_prescaler_t prescaler)
 {
     switch(prescaler)
 	{
@@ -259,7 +259,7 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_APB2Prescaler(const rcc
 /*---------------------------------------------- RCC PLL ----------------------------------------------*/
 /**
  * @brief    Driver PLL Configuration Types and Structure
- * @defgroup RCC_03_Driver_04_PLLConfig Driver PLL Configuration
+ * @defgroup RCC_03_Driver_03_PLLConfig Driver PLL Configuration
  * @ingroup  RCC_03_Driver
  * @details
  * - Type definitions and structure for PLL (Phase Locked Loop) configuration
@@ -271,16 +271,14 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_DriverToLL_APB2Prescaler(const rcc
  */
 
 /** @brief PLL source type definition @typedef rcc_pll_src_t */
-typedef uint8_t rcc_pll_src_t;
-
+typedef uint8_t									rcc_pll_src_t;
 /** @brief PLL source HSI (High Speed Internal) @def RCC_PLL_SRC_HSI */
 #define RCC_PLL_SRC_HSI 						((rcc_pll_src_t) 0x00)
 /** @brief PLL source HSE (High Speed External) @def RCC_PLL_SRC_HSE */
 #define RCC_PLL_SRC_HSE 						((rcc_pll_src_t) 0x01)
 
 /** @brief PLL multiplication factor type definition @typedef rcc_pll_mul_t */
-typedef uint8_t rcc_pll_mul_t;
-
+typedef uint8_t									rcc_pll_mul_t;
 /** @brief PLL multiplication by 2 @def RCC_PLL_MUL_2 */
 #define RCC_PLL_MUL_2 							((rcc_pll_mul_t) 0x00)
 /** @brief PLL multiplication by 3 @def RCC_PLL_MUL_3 */
@@ -314,7 +312,8 @@ typedef uint8_t rcc_pll_mul_t;
 
 /** @brief PLL source prescaler type definition @typedef rcc_pll_src_prescaler_t */
 typedef uint8_t rcc_pll_src_prescaler_t;
-
+/** @brief HSI division by 2 for PLL input @def RCC_PLL_SRC_HSI_DIV_2 */
+#define RCC_PLL_SRC_HSI_DIV_2 					((rcc_pll_src_prescaler_t) 0x00)
 /** @brief HSE division by 1 for PLL input @def RCC_PLL_SRC_HSE_DIV_1 */
 #define RCC_PLL_SRC_HSE_DIV_1 					((rcc_pll_src_prescaler_t) 0x00)
 /** @brief HSE division by 2 for PLL input @def RCC_PLL_SRC_HSE_DIV_2 */
@@ -334,7 +333,7 @@ typedef struct {
 	 * - Do not use value 0x0F (reserved, not multiplication by 16)
 	 * - Use @ref RCC_PLL_MUL_16 for multiplication by 16
 	 */
-	rcc_pll_mul_t mul_fact: 4;
+	rcc_pll_mul_t multiplication_factor: 4;
 	
 	/**
 	 * @brief PLL Source Configuration
@@ -343,7 +342,7 @@ typedef struct {
 	 * - For STM32F1xx, HSI is always divided by 2 before PLL input
 	 * - HSE can be used directly or divided by 2
 	 */
-	rcc_pll_src_t src: 1;
+	rcc_pll_src_t source: 1;
 	
 	/**
 	 * @brief PLL Source Prescaler Configuration
@@ -353,7 +352,7 @@ typedef struct {
 	 * - HSE can be configured with division by 1 or 2
 	 * - Only applicable when source is HSE (@ref RCC_PLL_SRC_HSE)
 	 */
-	rcc_pll_src_prescaler_t src_prescaler: 1;
+	rcc_pll_src_prescaler_t source_prescaler: 1;
 } rcc_pll_config_t;
 
 /**
@@ -361,7 +360,7 @@ typedef struct {
  * @param[in] src Driver PLL source value (@ref RCC_PLL_SRC_HSI "RCC_PLL_SRC_*")
  * @returns Low-level PLL source value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_pll_src_t RCC_DriverToLL_PLLSource(const rcc_pll_src_t src)
+__STATIC_FORCEINLINE _rcc_pll_src_t RCC_D2L_PLLSource(const rcc_pll_src_t src)
 {
     switch(src)
 	{
@@ -376,7 +375,7 @@ __STATIC_FORCEINLINE _rcc_pll_src_t RCC_DriverToLL_PLLSource(const rcc_pll_src_t
  * @param[in] mul Driver PLL multiplication value (@ref RCC_PLL_MUL_2 "RCC_PLL_MUL_*")
  * @returns Low-level PLL multiplication value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_pll_mul_t __RCC_DriverToLL_PLLMultiplication(const rcc_pll_mul_t mul)
+__STATIC_FORCEINLINE _rcc_pll_mul_t RCC_D2L_PLLMultiplication(const rcc_pll_mul_t mul)
 {
     switch(mul)
 	{
@@ -404,7 +403,7 @@ __STATIC_FORCEINLINE _rcc_pll_mul_t __RCC_DriverToLL_PLLMultiplication(const rcc
  * @param[in] prescaler Driver PLL source prescaler value (@ref RCC_PLL_SRC_HSE_DIV_1 "RCC_PLL_SRC_*_DIV_*")
  * @returns Low-level PLL source prescaler value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_pll_src_prescaler_t __RCC_DriverToLL_PLLSourcePrescaler(const rcc_pll_src_prescaler_t prescaler)
+__STATIC_FORCEINLINE _rcc_pll_src_prescaler_t RCC_D2L_PLLSourcePrescaler(const rcc_pll_src_prescaler_t prescaler)
 {
     switch(prescaler)
 	{
@@ -414,7 +413,279 @@ __STATIC_FORCEINLINE _rcc_pll_src_prescaler_t __RCC_DriverToLL_PLLSourcePrescale
     }
 }
 
-/** @} */ // RCC_03_Driver_04_PLLConfig
+/** @} */ // RCC_03_Driver_03_PLLConfig
+
+/*---------------------------------------------- RCC Component ----------------------------------------------*/
+
+/**
+ * @brief    Driver Component Prescaler Configuration Types and Structure
+ * @defgroup RCC_03_Driver_04_ComponentPrescalerConfig Driver Component Prescaler Configuration
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Type definitions and structure for peripheral component prescaler configuration
+ * - ADC and USB have specific frequency requirements and clock sources
+ * - STM32F103C8T6 specific constraints and requirements
+ *
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @{
+ */
+
+/** @brief Component prescaler type definition @typedef rcc_component_prescaler_t */
+typedef uint8_t rcc_component_prescaler_t;
+
+/** @brief ADC division by 2 @def RCC_ADC_DIV_2 */
+#define RCC_ADC_DIV_2 							((rcc_component_prescaler_t) 0x00)
+/** @brief ADC division by 4 @def RCC_ADC_DIV_4 */
+#define RCC_ADC_DIV_4 							((rcc_component_prescaler_t) 0x01)
+/** @brief ADC division by 6 @def RCC_ADC_DIV_6 */
+#define RCC_ADC_DIV_6 							((rcc_component_prescaler_t) 0x02)
+/** @brief ADC division by 8 @def RCC_ADC_DIV_8 */
+#define RCC_ADC_DIV_8 							((rcc_component_prescaler_t) 0x03)
+
+/** @brief USB division by 1.5 @def RCC_USB_DIV_1_5 */
+#define RCC_USB_DIV_1_5 						((rcc_component_prescaler_t) 0x00)
+/** @brief USB division by 1 (no prescaling) @def RCC_USB_DIV_1 */
+#define RCC_USB_DIV_1 							((rcc_component_prescaler_t) 0x01)
+
+/**
+ * @brief Component Prescaler Configuration Structure
+ * @typedef rcc_component_prescaler_config_t
+ */
+typedef struct 
+{
+	/**
+	 * @brief ADC Prescaler Configuration
+	 * @details
+	 * - ADC Prescaler Values Refer @ref RCC_ADC_DIV_2 "RCC_ADC_DIV_*"
+	 * - Max Frequency: 14MHz
+	 * - Clock Source: APB2
+	 * - ADC clock = APB2 clock / ADC prescaler
+	 */
+	rcc_component_prescaler_t ADC: 2;
+	
+	/**
+	 * @brief USB Prescaler Configuration
+	 * @details
+	 * - USB Prescaler Values Refer @ref RCC_USB_DIV_1_5 "RCC_USB_DIV_*"
+	 * - Max Frequency: 48MHz (must be exactly 48MHz for USB operation)
+	 * - Clock Source: PLL
+	 * - USB clock = PLL clock / USB prescaler
+	 */
+	rcc_component_prescaler_t USB: 1;
+} rcc_component_prescaler_config_t;
+
+/**
+ * @brief Convert driver ADC prescaler to low-level hardware value
+ * @param[in] prescaler Driver ADC prescaler value (@ref RCC_ADC_DIV_2 "RCC_ADC_DIV_*")
+ * @returns Low-level ADC prescaler value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_component_prescaler_t RCC_D2L_ADCPrescaler(const rcc_component_prescaler_t prescaler)
+{
+    switch(prescaler)
+	{
+        case RCC_ADC_DIV_2: return _RCC_ADC_DIV_2; break;
+        case RCC_ADC_DIV_4: return _RCC_ADC_DIV_4; break;
+        case RCC_ADC_DIV_6: return _RCC_ADC_DIV_6; break;
+        case RCC_ADC_DIV_8: return _RCC_ADC_DIV_8; break;
+        default: return _RCC_ADC_DIV_2; break; // Safe fallback
+    }
+}
+
+/**
+ * @brief Convert driver USB prescaler to low-level hardware value
+ * @param[in] prescaler Driver USB prescaler value (@ref RCC_USB_DIV_1_5 "RCC_USB_DIV_*")
+ * @returns Low-level USB prescaler value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_component_prescaler_t RCC_D2L_USBPrescaler(const rcc_component_prescaler_t prescaler)
+{
+    switch(prescaler)
+	{
+        case RCC_USB_DIV_1_5: return _RCC_USB_DIV_1_5; break;
+        case RCC_USB_DIV_1:   return _RCC_USB_DIV_1; break;
+        default: return _RCC_USB_DIV_1_5; break; // Safe fallback
+    }
+}
+
+/** @} */ // RCC_03_Driver_04_ComponentPrescalerConfig
+
+/*---------------------------------------------- RCC System Clock ----------------------------------------------*/
+/**
+ * @brief    Driver System Clock Configuration Types and Structure
+ * @defgroup RCC_03_Driver_05_SystemClockConfig Driver System Clock Configuration
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Type definitions and structure for system clock source configuration
+ * - Defines the main system clock source and PLL configuration
+ * - System clock feeds into AHB prescaler for bus distribution
+ *
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @{
+ */
+
+/** @brief System clock source type definition @typedef rcc_system_clock_t */
+typedef uint8_t 								rcc_system_clock_t;
+/** @brief System clock source HSI (High Speed Internal) @def RCC_SYS_CLK_HSI */
+#define RCC_SYS_CLK_HSI 						((rcc_system_clock_t) 0x00)
+/** @brief System clock source HSE (High Speed External) @def RCC_SYS_CLK_HSE */
+#define RCC_SYS_CLK_HSE 						((rcc_system_clock_t) 0x01)
+/** @brief System clock source PLL (Phase Locked Loop) @def RCC_SYS_CLK_PLL */
+#define RCC_SYS_CLK_PLL 						((rcc_system_clock_t) 0x02)
+
+/**
+ * @brief System Clock Configuration Structure
+ * @typedef rcc_sys_clk_config_t
+ */
+typedef struct
+{
+	/**
+	 * @brief System Clock Source
+	 * @details
+	 * - System Clock Source Values Refer @ref RCC_SYS_CLK_HSI "RCC_SYS_CLK_*"
+	 * - This defines the AHB input clock before AHB Prescaler
+	 * - Determines the source for the main system clock
+	 */
+	rcc_system_clock_t clk_src;
+	
+	/**
+	 * @brief Phase Lock Loop (PLL) Configuration Structure
+	 * @details
+	 * - Refer @ref rcc_pll_config_t for PLL configuration options
+	 * - This parameter defines the PLL Configuration to be set
+	 * - Only used when system clock source is @ref RCC_SYS_CLK_PLL
+	 */
+	rcc_pll_config_t pll;
+} rcc_sys_clk_config_t;
+
+/**
+ * @brief Convert driver system clock source to low-level hardware value
+ * @param[in] src Driver system clock source value (@ref RCC_SYS_CLK_HSI "RCC_SYS_CLK_*")
+ * @returns Low-level system clock source value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_sys_clk_t RCC_D2L_SystemClockSource(const rcc_system_clock_t src)
+{
+    switch(src)
+	{
+        case RCC_SYS_CLK_HSI: return _RCC_SYS_CLK_HSI; break;
+        case RCC_SYS_CLK_HSE: return _RCC_SYS_CLK_HSE; break;
+        case RCC_SYS_CLK_PLL: return _RCC_SYS_CLK_PLL; break;
+        default: return _RCC_SYS_CLK_HSI; break; // Safe fallback
+    }
+}
+
+/** @} */ // RCC_03_Driver_05_SystemClockConfig
+
+/*---------------------------------------------- RCC Main Configuration ----------------------------------------------*/
+/**
+ * @brief    Driver RCC Main Configuration Structure
+ * @defgroup RCC_03_Driver_06_MainConfig Driver RCC Main Configuration
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Main configuration structure that combines all RCC subsystems
+ * - Used as the primary parameter for complete clock tree configuration
+ * - Contains all necessary components for system clock setup
+ *
+ * @see Reference Manual RM0008 - Section 7. Clock Configuration
+ * @{
+ */
+
+/**
+ * @brief RCC Configuration Structure
+ * @typedef rcc_config_t
+ */
+typedef struct
+{
+	/**
+	 * @brief Bus Prescaler Configuration
+	 * @details
+	 * - Configuration for AHB, APB1, and APB2 bus prescalers
+	 * - Refer @ref rcc_bus_prescaler_config_t for details
+	 */
+	rcc_bus_prescaler_config_t bus_prescaler;
+	
+	/**
+	 * @brief System Clock Configuration
+	 * @details
+	 * - Main system clock source and PLL configuration
+	 * - Refer @ref rcc_sys_clk_config_t for details
+	 */
+	rcc_sys_clk_config_t system;
+	
+	/**
+	 * @brief Flash Configuration
+	 * @details
+	 * - Flash memory wait states and prefetch buffer configuration
+	 * - Refer @ref rcc_flash_config_t for details
+	 */
+	rcc_flash_config_t flash;
+	
+	/**
+	 * @brief Components Prescaler Configuration
+	 * @details
+	 * - Peripheral component prescalers (ADC, USB)
+	 * - Refer @ref rcc_component_prescaler_config_t for details
+	 */
+	rcc_component_prescaler_config_t component_prescaler;
+} rcc_config_t;
+
+/** @} */ // RCC_03_Driver_06_MainConfig
+
+/*---------------------------------------------- RCC Clock Frequency Tracking ----------------------------------------------*/
+/**
+ * @brief    Driver RCC Clock Frequency Tracking Structure
+ * @defgroup RCC_03_Driver_07_ClockFrequency Driver RCC Clock Frequency Tracking
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Ultra-efficient frequency tracking using AHB base + prescalers
+ * - Uses LUT-based right-shifting instead of division for maximum performance
+ * - 75% smaller than storing all frequencies (8B vs 32B)
+ * - Perfect balance of memory efficiency and calculation speed
+ *
+ * @see Reference Manual RM0008 - Section 7. Clock Configuration
+ * @{
+ */
+
+/**
+ * @brief RCC Clock Frequency Structure
+ * @typedef rcc_clk_freq_t
+ */
+typedef struct
+{
+	/**
+	 * @brief AHB Base Clock Frequency
+	 * @details
+	 * - Base reference frequency in Hz
+	 * - All other frequencies derived from this + prescalers
+	 * - Stored once to avoid repeated calculations
+	 */
+	_rcc_freq_t Core;
+	
+	/**
+	 * @brief Clock Prescalers Configuration
+	 * @details
+	 * - Compact storage of all active prescalers
+	 * - Used with LUT to convert to right-shift values
+	 */
+	struct
+	{
+		/** @brief AHB prescaler setting */
+		rcc_ahb_prescaler_t AHB      : 4; 
+		/** @brief APB1 prescaler setting */
+		rcc_apb1_prescaler_t APB1    : 3; 
+		/** @brief APB2 prescaler setting */
+		rcc_apb2_prescaler_t APB2    : 3; 
+		/** @brief ADC prescaler setting */
+		rcc_component_prescaler_t ADC : 2;
+		/** @brief USB prescaler setting */
+		rcc_component_prescaler_t USB : 1;
+	} prescalers;
+} rcc_clk_freq_t;
+
+
+
+
+
+
+
 
 /** @} */ // RCC_03_Driver
 
@@ -528,7 +799,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
  * @brief Retrieves RCC Core Clock Frequency in Hz
  * @note This is the clock which is being fed to AHB Prescaler 
  */
-__STATIC_FORCEINLINE freq_t RCC_CoreClockFreq_Get(void)
+__STATIC_FORCEINLINE _rcc_freq_t RCC_CoreClockFreq_Get(void)
 {
 	return (__systemFrequency__.Core); 
 }
@@ -537,7 +808,7 @@ __STATIC_FORCEINLINE freq_t RCC_CoreClockFreq_Get(void)
  * @brief Retrieves RCC AHB Clock Frequency in Hz
  * @note This is the clock which is being fed to APB1/APB2 Prescaler 
  */
-__STATIC_FORCEINLINE freq_t RCC_AHBClockFreq_Get(void)
+__STATIC_FORCEINLINE _rcc_freq_t RCC_AHBClockFreq_Get(void)
 {
 	return (__systemFrequency__.AHB);
 }
@@ -546,7 +817,7 @@ __STATIC_FORCEINLINE freq_t RCC_AHBClockFreq_Get(void)
  * @brief Retrieves RCC APB1 Clock Frequency in Hz
  * @note This is the clock which is being fed to APB1 Peripherals 
  */
-__STATIC_FORCEINLINE freq_t RCC_APB1ClockFreq_Get(void)
+__STATIC_FORCEINLINE _rcc_freq_t RCC_APB1ClockFreq_Get(void)
 {
 	return (__systemFrequency__.APB1);
 }
@@ -555,7 +826,7 @@ __STATIC_FORCEINLINE freq_t RCC_APB1ClockFreq_Get(void)
  * @brief Retrieves RCC APB2 Clock Frequency in Hz
  * @note This is the clock which is being fed to APB2 Peripherals 
  */
-__STATIC_FORCEINLINE freq_t RCC_APB2ClockFreq_Get(void)
+__STATIC_FORCEINLINE _rcc_freq_t RCC_APB2ClockFreq_Get(void)
 {
 	return (__systemFrequency__.APB2);
 }
