@@ -800,6 +800,21 @@ typedef uint8_t 										_rcc_sys_clk_t;
 /** @brief PLL (Phase Locked Loop) output @def _RCC_SYS_CLK_PLL */
 #define _RCC_SYS_CLK_PLL 								((_rcc_sys_clk_t) 0x02)
 
+/**
+ * @brief Stage System Clock Source configuration into RCC_CFGR register value
+ * @param[in] sysClk System clock source configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new system clock source configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageSystemClockSource(const _rcc_sys_clk_t sysClk, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_SW;
+	cfgrReg |= (uint32_t)(sysClk << RCC_CFGR_SW_Pos);
+	return cfgrReg;
+}
+
 /** @} */ // RCC_02_LL_03_ClockSource
 
 /*---------------------------------------------- RCC Prescaler ----------------------------------------------*/
@@ -986,8 +1001,8 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageBusPrescaler(const _rcc_bus_prescaler_t 
 
 /** @brief PLL source type definition @typedef _rcc_pll_src_t */
 typedef uint8_t 								_rcc_pll_src_t;
-/** @brief PLL source prescaler type definition @typedef _rcc_pll_src_prescaler_t */
-typedef uint8_t 								_rcc_pll_src_prescaler_t;
+/** @brief PLL source prescaler type definition @typedef _rcc_pll_src_psc_t */
+typedef uint8_t 								_rcc_pll_src_psc_t;
 /** @brief PLL multiplication factor type definition @typedef _rcc_pll_mul_t */
 typedef uint8_t 								_rcc_pll_mul_t;
 
@@ -1025,11 +1040,11 @@ typedef uint8_t 								_rcc_pll_mul_t;
  */
 
 /** @brief HSI division by 2 for PLL input @def _RCC_PLL_SRC_HSI_DIV_2 */
-#define _RCC_PLL_SRC_HSI_DIV_2 					((_rcc_pll_src_prescaler_t) 0x00)
+#define _RCC_PLL_SRC_HSI_DIV_2 					((_rcc_pll_src_psc_t) 0x00)
 /** @brief HSE division by 1 for PLL input @def _RCC_PLL_SRC_HSE_DIV_1 */
-#define _RCC_PLL_SRC_HSE_DIV_1 					((_rcc_pll_src_prescaler_t) 0x00)
+#define _RCC_PLL_SRC_HSE_DIV_1 					((_rcc_pll_src_psc_t) 0x00)
 /** @brief HSE division by 2 for PLL input @def _RCC_PLL_SRC_HSE_DIV_2 */
-#define _RCC_PLL_SRC_HSE_DIV_2 					((_rcc_pll_src_prescaler_t) 0x01)
+#define _RCC_PLL_SRC_HSE_DIV_2 					((_rcc_pll_src_psc_t) 0x01)
 
 /** @} */ // RCC_02_LL_05_PLL_02_SourcePrescaler
 
@@ -1079,6 +1094,70 @@ typedef uint8_t 								_rcc_pll_mul_t;
 #define _RCC_PLL_MUL_16 						((_rcc_pll_mul_t) 0x0E)
 
 /** @} */ // RCC_02_LL_05_PLL_03_Multiplication
+
+/**
+ * @brief Stage PLL Source configuration into RCC_CFGR register value
+ * @param[in] pllSrc PLL source configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new PLL source configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StagePLLSource(const _rcc_pll_src_t pllSrc, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_PLLSRC;
+	cfgrReg |= (uint32_t)(pllSrc << RCC_CFGR_PLLSRC_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage PLL HSE Source Prescaler configuration into RCC_CFGR register value
+ * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new PLL HSE source prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ * @note - Only applicable when PLL source is HSE
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StagePLLSourceHSEPrescaler(const _rcc_pll_src_psc_t pllSrcPrescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_PLLXTPRE;
+	cfgrReg |= (uint32_t)(pllSrcPrescaler << RCC_CFGR_PLLXTPRE_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage PLL Multiplier configuration into RCC_CFGR register value
+ * @param[in] pllMultiplier PLL multiplier configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new PLL multiplier configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StagePLLMultiplier(const _rcc_pll_mul_t pllMultiplier, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_PLLMULL;
+	cfgrReg |= (uint32_t)(pllMultiplier << RCC_CFGR_PLLMULL_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage complete PLL Parameters configuration into RCC_CFGR register value
+ * @param[in] pllSrc PLL source configuration
+ * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
+ * @param[in] pllMultiplier PLL multiplier configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new PLL parameters configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ * @note - This combines PLL source, HSE prescaler, and multiplier configurations
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StagePLLParameters(const _rcc_pll_src_t pllSrc, const _rcc_pll_src_psc_t pllSrcPrescaler, const _rcc_pll_mul_t pllMultiplier, uint32_t cfgrReg)
+{
+	cfgrReg &= ~(RCC_CFGR_PLLMULL | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLSRC);
+	cfgrReg |= (uint32_t)((pllMultiplier << RCC_CFGR_PLLMULL_Pos) | (pllSrcPrescaler << RCC_CFGR_PLLXTPRE_Pos) | (pllSrc << RCC_CFGR_PLLSRC_Pos));
+	return cfgrReg;
+}
 
 /** @} */ // RCC_02_LL_05_PLL
 
@@ -1145,6 +1224,36 @@ typedef uint8_t 								_rcc_component_prescaler_t;
 #define _RCC_USB_DIV_1 							((_rcc_component_prescaler_t) 0x01)
 
 /** @} */ // RCC_02_LL_06_ComponentPrescaler_02_USB
+
+/**
+ * @brief Stage ADC Prescaler configuration into RCC_CFGR register value
+ * @param[in] adcPrescaler ADC prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new ADC prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageADCPrescaler(const _rcc_component_prescaler_t adcPrescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_ADCPRE;
+	cfgrReg |= (uint32_t)(adcPrescaler << RCC_CFGR_ADCPRE_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage USB Prescaler configuration into RCC_CFGR register value
+ * @param[in] usbPrescaler USB prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new USB prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageUSBPrescaler(const _rcc_component_prescaler_t usbPrescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_USBPRE;
+	cfgrReg |= (uint32_t)(usbPrescaler << RCC_CFGR_USBPRE_Pos);
+	return cfgrReg;
+}
 
 /** @} */ // RCC_02_LL_06_ComponentPrescaler
 

@@ -435,7 +435,7 @@ __STATIC_FORCEINLINE _rcc_pll_mul_t RCC_D2L_PLLMultiplication(const rcc_pll_mul_
  * @param[in] prescaler Driver PLL source prescaler value (@ref RCC_PLL_SRC_HSE_DIV_1 "RCC_PLL_SRC_*_DIV_*")
  * @returns Low-level PLL source prescaler value for hardware registers
  */
-__STATIC_FORCEINLINE _rcc_pll_src_prescaler_t RCC_D2L_PLLSourcePrescaler(const rcc_pll_src_prescaler_t prescaler)
+__STATIC_FORCEINLINE _rcc_pll_src_psc_t RCC_D2L_PLLSourcePrescaler(const rcc_pll_src_prescaler_t prescaler)
 {
     switch(prescaler)
 	{
