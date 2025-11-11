@@ -56,6 +56,7 @@ driver_status_t RCC_FlashConfig(const rcc_flash_config_t* const flash)
 	reg = _RCC_StageFlashConfig(flash->latency, flash->prefetch, reg);
 	// TODO: Replace this with __* API
 	FLASH->ACR.REG = reg;
+	return DRIVER_SUCCESS;
 }
 
 

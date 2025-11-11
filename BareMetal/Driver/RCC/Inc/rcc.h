@@ -284,6 +284,7 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_apb2_p
     }
 }
 
+
 /** @} */ // RCC_03_Driver_02_BusPrescalerConfig
 
 

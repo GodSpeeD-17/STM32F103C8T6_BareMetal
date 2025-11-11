@@ -902,7 +902,71 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 #define _RCC_APB2_DIV_8 							((_rcc_bus_prescaler_t) 0x06)
 /** @brief APB2 division by 16 @def _RCC_APB2_DIV_16 */
 #define _RCC_APB2_DIV_16 							((_rcc_bus_prescaler_t) 0x07)
+
 /** @} */ // RCC_02_LL_04_Prescaler_03_APB2
+
+/**
+ * @brief Stage AHB Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
+ * @param[in] ahbPrescaler AHB prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new AHB prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageAHBPrescaler(const _rcc_bus_prescaler_t ahbPrescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_HPRE;
+	cfgrReg |= (uint32_t)(ahbPrescaler << RCC_CFGR_HPRE_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage APB1 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
+ * @param[in] apb1Prescaler APB1 prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new APB1 prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageAPB1Prescaler(const _rcc_bus_prescaler_t apb1Prescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_PPRE1;
+	cfgrReg |= (uint32_t)(apb1Prescaler << RCC_CFGR_PPRE1_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage APB2 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
+ * @param[in] apb2Prescaler APB2 prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new APB2 prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageAPB2Prescaler(const _rcc_bus_prescaler_t apb2Prescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~RCC_CFGR_PPRE2;
+	cfgrReg |= (uint32_t)(apb2Prescaler << RCC_CFGR_PPRE2_Pos);
+	return cfgrReg;
+}
+
+/**
+ * @brief Stage complete Bus Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
+ * @param[in] ahbPrescaler AHB prescaler configuration
+ * @param[in] apb1Prescaler APB1 prescaler configuration
+ * @param[in] apb2Prescaler APB2 prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new bus prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ * @note - This combines AHB, APB1, and APB2 prescaler configurations
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageBusPrescaler(const _rcc_bus_prescaler_t ahbPrescaler, const _rcc_bus_prescaler_t apb1Prescaler, const _rcc_bus_prescaler_t apb2Prescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~(RCC_CFGR_PPRE2 | RCC_CFGR_PPRE1 | RCC_CFGR_HPRE);
+	cfgrReg |= (uint32_t)((apb2Prescaler << RCC_CFGR_PPRE2_Pos) | (apb1Prescaler << RCC_CFGR_PPRE1_Pos) | (ahbPrescaler << RCC_CFGR_HPRE_Pos));
+	return cfgrReg;
+}
 
 /** @} */ // RCC_02_LL_04_Prescaler
 
