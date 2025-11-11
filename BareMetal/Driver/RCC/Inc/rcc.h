@@ -293,6 +293,13 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_apb2_p
     }
 }
 
+/**
+ * @brief Configure RCC Bus Prescalers
+ * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
 driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler);
 
 /** @} */ // RCC_03_Driver_02_BusPrescalerConfig
@@ -353,7 +360,7 @@ typedef uint8_t									rcc_pll_mul_t;
 #define RCC_PLL_MUL_16 							((rcc_pll_mul_t) 0x0E)
 
 /** @brief PLL source prescaler type definition @typedef rcc_pll_src_prescaler_t */
-typedef uint8_t rcc_pll_src_prescaler_t;
+typedef uint8_t									rcc_pll_src_prescaler_t;
 /** @brief HSI division by 2 for PLL input @def RCC_PLL_SRC_HSI_DIV_2 */
 #define RCC_PLL_SRC_HSI_DIV_2 					((rcc_pll_src_prescaler_t) 0x00)
 /** @brief HSE division by 1 for PLL input @def RCC_PLL_SRC_HSE_DIV_1 */
@@ -455,9 +462,6 @@ __STATIC_FORCEINLINE _rcc_pll_src_psc_t RCC_D2L_PLLSourcePrescaler(const rcc_pll
     }
 }
 
-
-driver_status_t RCC_ConfigPLL(rcc_pll_config_t* const pllConfig);
-
 /** @} */ // RCC_03_Driver_03_PLLConfig
 
 /*---------------------------------------------- RCC Component ----------------------------------------------*/
@@ -476,8 +480,7 @@ driver_status_t RCC_ConfigPLL(rcc_pll_config_t* const pllConfig);
  */
 
 /** @brief Component prescaler type definition @typedef rcc_component_prescaler_t */
-typedef uint8_t rcc_component_prescaler_t;
-
+typedef uint8_t									rcc_component_prescaler_t;
 /** @brief ADC division by 2 @def RCC_ADC_DIV_2 */
 #define RCC_ADC_DIV_2 							((rcc_component_prescaler_t) 0x00)
 /** @brief ADC division by 4 @def RCC_ADC_DIV_4 */
@@ -542,7 +545,6 @@ typedef struct
 	rcc_component_config_t component;
 } rcc_prescaler_config_t;
 
-
 /**
  * @brief Convert driver ADC prescaler to low-level hardware value
  * @param[in] prescaler Driver ADC prescaler value (@ref RCC_ADC_DIV_2 "RCC_ADC_DIV_*")
@@ -574,6 +576,15 @@ __STATIC_FORCEINLINE _rcc_component_prescaler_t RCC_D2L_USBPrescaler(const rcc_c
         default: return _RCC_USB_DIV_1_5; break; // Safe fallback
     }
 }
+
+/**
+ * @brief Configure RCC Component Prescalers
+ * @param[in] rccComponentPrescaler Pointer to Component Prescaler Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccComponentPrescaler);
 
 /** @} */ // RCC_03_Driver_04_ComponentPrescalerConfig
 

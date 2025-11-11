@@ -59,7 +59,13 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 	return DRIVER_SUCCESS;
 }
 
-
+/**
+ * @brief Configure RCC Bus Prescalers
+ * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
 driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler)
 {
 	uint32_t reg = __RCC_ReadCFGR(RCC);
@@ -72,6 +78,13 @@ driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler)
 	__RCC_WriteCFGR(RCC, reg);
 }
 
+/**
+ * @brief Configure RCC Component Prescalers
+ * @param[in] rccComponentPrescaler Pointer to Component Prescaler Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
 driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccComponentPrescaler)
 {
 	uint32_t reg = __RCC_ReadCFGR(RCC);
@@ -99,7 +112,11 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 		reg
 	);
 	// Component Prescaler
-
+	reg = _RCC_StageComponentPrescaler(
+		RCC_D2L_ADCPrescaler(rcc->prescaler.component.ADC),
+		RCC_D2L_USBPrescaler(rcc->prescaler.component.USB),
+		reg
+	);
 	// RCC Configuration Register Write
 	__RCC_WriteCFGR(RCC, reg); 
 	
