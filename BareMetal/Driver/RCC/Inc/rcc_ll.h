@@ -801,10 +801,10 @@ typedef uint8_t 										_rcc_sys_clk_t;
 #define _RCC_SYS_CLK_PLL 								((_rcc_sys_clk_t) 0x02)
 
 /**
- * @brief Stage System Clock Source configuration into RCC_CFGR register value
+ * @brief Stage System Clock Source configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] sysClk System clock source configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new system clock source configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new system clock source configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -828,7 +828,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageSystemClockSource(const _rcc_sys_clk_t s
  * - Used to divide the system clock frequency for AHB peripherals
  * - AHB bus connects to core, memory, and DMA
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -844,7 +844,7 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
  * - Used to divide the system clock frequency for AHB peripherals
  * - AHB bus connects to core, memory, and DMA
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -879,7 +879,7 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
  * - APB1 bus connects to timers 2-7, USART2-5, I2C1-2, SPI2-3, etc.
  * - Maximum APB1 frequency is 36 MHz
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 /** @brief APB1 division by 1 (no prescaling) @def _RCC_APB1_DIV_1 */
@@ -904,7 +904,7 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
  * - APB2 bus connects to GPIO ports, ADC, TIM1, TIM8, USART1, SPI1, etc.
  * - Maximum APB2 frequency is 72 MHz
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 /** @brief APB2 division by 1 (no prescaling) @def _RCC_APB2_DIV_1 */
@@ -923,8 +923,8 @@ typedef uint8_t 								_rcc_bus_prescaler_t;
 /**
  * @brief Stage AHB Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] ahbPrescaler AHB prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new AHB prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new AHB prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -938,8 +938,8 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageAHBPrescaler(const _rcc_bus_prescaler_t 
 /**
  * @brief Stage APB1 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] apb1Prescaler APB1 prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new APB1 prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new APB1 prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -953,8 +953,8 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageAPB1Prescaler(const _rcc_bus_prescaler_t
 /**
  * @brief Stage APB2 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] apb2Prescaler APB2 prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new APB2 prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new APB2 prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -970,8 +970,8 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageAPB2Prescaler(const _rcc_bus_prescaler_t
  * @param[in] ahbPrescaler AHB prescaler configuration
  * @param[in] apb1Prescaler APB1 prescaler configuration
  * @param[in] apb2Prescaler APB2 prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new bus prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new bus prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  * @note - This combines AHB, APB1, and APB2 prescaler configurations
@@ -995,7 +995,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageBusPrescaler(const _rcc_bus_prescaler_t 
  * - Used to configure PLL source, prescaler, and multiplication factor
  * - PLL generates high-frequency system clock from lower frequency sources
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1015,7 +1015,7 @@ typedef uint8_t 								_rcc_pll_mul_t;
  * - PLL can use either HSI or HSE as its input source
  * - Source selection affects PLL output frequency and stability
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1035,7 +1035,7 @@ typedef uint8_t 								_rcc_pll_mul_t;
  * - HSE can be divided by 1 or 2 before PLL input
  * - HSI is always divided by 2 for PLL input
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1058,7 +1058,7 @@ typedef uint8_t 								_rcc_pll_mul_t;
  * - Valid multiplication factors range from 2 to 16
  * - PLL output must be between 16 MHz and 72 MHz
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1096,10 +1096,10 @@ typedef uint8_t 								_rcc_pll_mul_t;
 /** @} */ // RCC_02_LL_05_PLL_03_Multiplication
 
 /**
- * @brief Stage PLL Source configuration into RCC_CFGR register value
+ * @brief Stage PLL Source configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] pllSrc PLL source configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new PLL source configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL source configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -1111,10 +1111,10 @@ __STATIC_FORCEINLINE uint32_t _RCC_StagePLLSource(const _rcc_pll_src_t pllSrc, u
 }
 
 /**
- * @brief Stage PLL HSE Source Prescaler configuration into RCC_CFGR register value
+ * @brief Stage PLL HSE Source Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new PLL HSE source prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL HSE source prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  * @note - Only applicable when PLL source is HSE
@@ -1127,10 +1127,10 @@ __STATIC_FORCEINLINE uint32_t _RCC_StagePLLSourceHSEPrescaler(const _rcc_pll_src
 }
 
 /**
- * @brief Stage PLL Multiplier configuration into RCC_CFGR register value
+ * @brief Stage PLL Multiplier configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] pllMultiplier PLL multiplier configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new PLL multiplier configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL multiplier configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -1142,12 +1142,12 @@ __STATIC_FORCEINLINE uint32_t _RCC_StagePLLMultiplier(const _rcc_pll_mul_t pllMu
 }
 
 /**
- * @brief Stage complete PLL Parameters configuration into RCC_CFGR register value
+ * @brief Stage complete PLL Parameters configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] pllSrc PLL source configuration
  * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
  * @param[in] pllMultiplier PLL multiplier configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new PLL parameters configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL parameters configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  * @note - This combines PLL source, HSE prescaler, and multiplier configurations
@@ -1172,7 +1172,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StagePLLParameters(const _rcc_pll_src_t pllSr
  * - Used to divide the APB2 clock for ADC and USB peripherals
  * - Each peripheral has specific prescaler requirements and limitations
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1189,7 +1189,7 @@ typedef uint8_t 								_rcc_component_prescaler_t;
  * - ADC clock must not exceed 14 MHz for accurate conversions
  * - APB2 clock is divided to generate ADC clock
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1214,7 +1214,7 @@ typedef uint8_t 								_rcc_component_prescaler_t;
  * - USB requires precise 48 MHz clock for proper operation
  * - PLL output is divided to generate USB clock
  * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
  * @{
  */
 
@@ -1226,10 +1226,10 @@ typedef uint8_t 								_rcc_component_prescaler_t;
 /** @} */ // RCC_02_LL_06_ComponentPrescaler_02_USB
 
 /**
- * @brief Stage ADC Prescaler configuration into RCC_CFGR register value
+ * @brief Stage ADC Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] adcPrescaler ADC prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new ADC prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new ADC prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
@@ -1241,10 +1241,10 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageADCPrescaler(const _rcc_component_presca
 }
 
 /**
- * @brief Stage USB Prescaler configuration into RCC_CFGR register value
+ * @brief Stage USB Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
  * @param[in] usbPrescaler USB prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new USB prescaler configuration
+ * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
+ * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new USB prescaler configuration
  * @note - Preferred usage is during batch update for configuration
  * @note - Register Value to be provided as input
  */
