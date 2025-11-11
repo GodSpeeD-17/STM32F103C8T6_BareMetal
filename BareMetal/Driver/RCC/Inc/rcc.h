@@ -126,6 +126,15 @@ __STATIC_FORCEINLINE _rcc_flash_prefetch_t RCC_D2L_FlashPrefetch(const rcc_flash
 	}
 }
 
+/**
+ * @brief RCC Flash Configuration
+ * @param flash Flash Configuration Structure @ref rcc_flash_config_t
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash);
+
 /** @} */ // RCC_03_Driver_01_FlashConfig
 
 /*---------------------------------------------- RCC Bus Prescaler ----------------------------------------------*/
@@ -284,6 +293,7 @@ __STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_apb2_p
     }
 }
 
+driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler);
 
 /** @} */ // RCC_03_Driver_02_BusPrescalerConfig
 
@@ -444,6 +454,9 @@ __STATIC_FORCEINLINE _rcc_pll_src_psc_t RCC_D2L_PLLSourcePrescaler(const rcc_pll
         default: return _RCC_PLL_SRC_HSE_DIV_1; // Safe fallback
     }
 }
+
+
+driver_status_t RCC_ConfigPLL(rcc_pll_config_t* const pllConfig);
 
 /** @} */ // RCC_03_Driver_03_PLLConfig
 
@@ -769,7 +782,7 @@ extern rcc_clk_freq_t __systemFrequency__;
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success
  */
-driver_status_t RCC_FlashConfig(const rcc_flash_config_t flash, uint32_t* reg);
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t flash, uint32_t* reg);
 
 /**
  * @brief RCC PLL Configuration

@@ -48,9 +48,9 @@ volatile rcc_clk_freq_t _systemConfig =
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success
  */
-driver_status_t RCC_FlashConfig(const rcc_flash_config_t* const flash)
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 {
-	uint32_t reg = 0x00;
+	uint32_t reg = 0x00UL;
 	// TODO: Replace this with __* API
 	reg = FLASH->ACR.REG;
 	reg = _RCC_StageFlashConfig(flash->latency, flash->prefetch, reg);
@@ -60,14 +60,48 @@ driver_status_t RCC_FlashConfig(const rcc_flash_config_t* const flash)
 }
 
 
+driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler)
+{
+	uint32_t reg = __RCC_ReadCFGR(RCC);
+	reg = _RCC_StageBusPrescaler(
+		RCC_D2L_AHBPrescaler(rccBusPrescaler->AHB),
+		RCC_D2L_APB1Prescaler(rccBusPrescaler->APB1),
+		RCC_D2L_APB2Prescaler(rccBusPrescaler->APB2),
+		reg
+	);
+	__RCC_WriteCFGR(RCC, reg);
+}
+
+driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccComponentPrescaler)
+{
+	uint32_t reg = __RCC_ReadCFGR(RCC);
+	reg = _RCC_StageComponentPrescaler(
+		RCC_D2L_ADCPrescaler(rccComponentPrescaler->ADC),
+		RCC_D2L_USBPrescaler(rccComponentPrescaler->USB),
+		reg
+	);
+	__RCC_WriteCFGR(RCC, reg);
+}
+
 driver_status_t RCC_Config(rcc_config_t* const rcc)
 {
-	uint32_t reg = 0x00;
+	uint32_t reg = 0x00UL;
 	// Flash Settings
-	RCC_FlashConfig(&rcc->flash);
+	RCC_ConfigFlash(&rcc->flash);
 
 	// RCC Configuration Register Read
-	reg = __RCC_ReadCFGR(RCC); 
+	reg = __RCC_ReadCFGR(RCC);
+	// Bus Prescaler
+	reg = _RCC_StageBusPrescaler(
+		RCC_D2L_AHBPrescaler(rcc->prescaler.bus.AHB),
+		RCC_D2L_APB1Prescaler(rcc->prescaler.bus.APB1),
+		RCC_D2L_APB2Prescaler(rcc->prescaler.bus.APB2),
+		reg
+	);
+	// Component Prescaler
+
+	// RCC Configuration Register Write
+	__RCC_WriteCFGR(RCC, reg); 
 	
 }
 
@@ -93,7 +127,7 @@ rcc_clk_freq_t __systemFrequency__ =
  * @return - `DRIVER_FAIL`: Failure
  * @return - `DRIVER_SUCCESS`: Success
  */
-driver_status_t RCC_FlashConfig(const rcc_flash_config_t flash, uint32_t *reg)
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t flash, uint32_t *reg)
 {
 	// Clear
 	*reg &= ~(uint32_t)(FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY);
@@ -176,7 +210,7 @@ driver_status_t RCC_Config(const rcc_config_t *rccConfig)
 	driver_status_t status = DRIVER_FAIL;
 	// Flash Access Control Register Read
 	uint32_t reg = FLASH->ACR.REG;
-	status = RCC_FlashConfig(rccConfig->flash, &reg);
+	status = RCC_ConfigFlash(rccConfig->flash, &reg);
 	ASSERT_DRIVER_STATUS(status);
 	// Flash Access Control Register Write
 	FLASH->ACR.REG = reg;

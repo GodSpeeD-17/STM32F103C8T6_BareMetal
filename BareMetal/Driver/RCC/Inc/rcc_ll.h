@@ -1255,6 +1255,23 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageUSBPrescaler(const _rcc_component_presca
 	return cfgrReg;
 }
 
+/**
+ * @brief Stage complete Component Prescaler configuration into RCC_CFGR register value
+ * @param[in] adcPrescaler ADC prescaler configuration
+ * @param[in] usbPrescaler USB prescaler configuration
+ * @param[in] cfgrReg Current RCC_CFGR register value
+ * @returns The updated staged RCC_CFGR register value with new component prescaler configuration
+ * @note - Preferred usage is during batch update for configuration
+ * @note - Register Value to be provided as input
+ * @note - This combines both ADC and USB prescaler configurations
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_StageComponentPrescaler(const _rcc_component_prescaler_t adcPrescaler, const _rcc_component_prescaler_t usbPrescaler, uint32_t cfgrReg)
+{
+	cfgrReg &= ~(RCC_CFGR_USBPRE | RCC_CFGR_ADCPRE);
+	cfgrReg |= (uint32_t)((usbPrescaler << RCC_CFGR_USBPRE_Pos) | (adcPrescaler << RCC_CFGR_ADCPRE_Pos));
+	return cfgrReg;
+}
+
 /** @} */ // RCC_02_LL_06_ComponentPrescaler
 
 /** @} */ // RCC_02_LL
