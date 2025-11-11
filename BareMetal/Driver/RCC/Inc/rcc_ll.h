@@ -712,9 +712,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageFlashPrefetch(const _rcc_flash_prefetch_
  */
 __STATIC_FORCEINLINE uint32_t _RCC_StageFlashConfig(const _rcc_flash_latency_t latency, const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
 {
-	// Stage latency configuration
 	acrReg = _RCC_StageFlashLatency(latency, acrReg);
-	// Stage prefetch configuration
 	acrReg = _RCC_StageFlashPrefetch(prefetch, acrReg);
 	return acrReg;
 }
@@ -978,8 +976,9 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageAPB2Prescaler(const _rcc_bus_prescaler_t
  */
 __STATIC_FORCEINLINE uint32_t _RCC_StageBusPrescaler(const _rcc_bus_prescaler_t ahbPrescaler, const _rcc_bus_prescaler_t apb1Prescaler, const _rcc_bus_prescaler_t apb2Prescaler, uint32_t cfgrReg)
 {
-	cfgrReg &= ~(RCC_CFGR_PPRE2 | RCC_CFGR_PPRE1 | RCC_CFGR_HPRE);
-	cfgrReg |= (uint32_t)((apb2Prescaler << RCC_CFGR_PPRE2_Pos) | (apb1Prescaler << RCC_CFGR_PPRE1_Pos) | (ahbPrescaler << RCC_CFGR_HPRE_Pos));
+	cfgrReg = _RCC_StageAHBPrescaler(ahbPrescaler, cfgrReg);
+	cfgrReg = _RCC_StageAPB1Prescaler(apb1Prescaler, cfgrReg);
+	cfgrReg = _RCC_StageAPB2Prescaler(apb2Prescaler, cfgrReg);
 	return cfgrReg;
 }
 
@@ -1154,8 +1153,9 @@ __STATIC_FORCEINLINE uint32_t _RCC_StagePLLMultiplier(const _rcc_pll_mul_t pllMu
  */
 __STATIC_FORCEINLINE uint32_t _RCC_StagePLLParameters(const _rcc_pll_src_t pllSrc, const _rcc_pll_src_psc_t pllSrcPrescaler, const _rcc_pll_mul_t pllMultiplier, uint32_t cfgrReg)
 {
-	cfgrReg &= ~(RCC_CFGR_PLLMULL | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLSRC);
-	cfgrReg |= (uint32_t)((pllMultiplier << RCC_CFGR_PLLMULL_Pos) | (pllSrcPrescaler << RCC_CFGR_PLLXTPRE_Pos) | (pllSrc << RCC_CFGR_PLLSRC_Pos));
+	cfgrReg = _RCC_StagePLLSource(pllSrc, cfgrReg);
+	cfgrReg = _RCC_StagePLLSourceHSEPrescaler(pllSrcPrescaler, cfgrReg);
+	cfgrReg = _RCC_StagePLLMultiplier(pllMultiplier, cfgrReg);
 	return cfgrReg;
 }
 
@@ -1267,8 +1267,8 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageUSBPrescaler(const _rcc_component_presca
  */
 __STATIC_FORCEINLINE uint32_t _RCC_StageComponentPrescaler(const _rcc_component_prescaler_t adcPrescaler, const _rcc_component_prescaler_t usbPrescaler, uint32_t cfgrReg)
 {
-	cfgrReg &= ~(RCC_CFGR_USBPRE | RCC_CFGR_ADCPRE);
-	cfgrReg |= (uint32_t)((usbPrescaler << RCC_CFGR_USBPRE_Pos) | (adcPrescaler << RCC_CFGR_ADCPRE_Pos));
+	cfgrReg = _RCC_StageADCPrescaler(adcPrescaler, cfgrReg);
+	cfgrReg = _RCC_StageUSBPrescaler(usbPrescaler, cfgrReg);
 	return cfgrReg;
 }
 
