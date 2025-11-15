@@ -693,6 +693,16 @@ __STATIC_FORCEINLINE void RCC_ControlHSI(const driver_status_t state)
 }
 
 /**
+ * @brief Checks the readiness status of the HSI clock source.
+ * @return DRIVER_STATE_READY if HSI is stable, otherwise DRIVER_STATE_BUSY
+ * @note Relies on the RCC_CR_HSIRDY flag.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_HSIReady(void)
+{
+	return (__RCC_GetCR(RCC) & RCC_CR_HSIRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+}
+
+/**
  * @brief Controls the state of the External High Speed Clock (HSE)
  * @param[in] state 
  * Desired state:
@@ -707,6 +717,16 @@ __STATIC_FORCEINLINE void RCC_ControlHSE(const driver_status_t state)
 }
 
 /**
+ * @brief Checks the readiness status of the HSE clock source.
+ * @return DRIVER_STATE_READY if HSE is stable, otherwise DRIVER_STATE_BUSY.
+ * @note Relies on the RCC_CR_HSERDY flag.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_HSEReady(void)
+{
+	return (__RCC_GetCR(RCC) & RCC_CR_HSERDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+}
+
+/**
  * @brief Controls the state of the Phase Lock Loop (PLL)
  * @param[in] state 
  * Desired state:
@@ -718,6 +738,16 @@ __STATIC_FORCEINLINE void RCC_ControlPLL(const driver_status_t state)
 {
 	if (state) __RCC_SetCR(RCC, RCC_CR_PLLON);
 	else __RCC_ClearCR(RCC, RCC_CR_PLLON);
+}
+
+/**
+ * @brief Checks the readiness status of the PLL clock source.
+ * @return DRIVER_STATE_READY if PLL is locked, otherwise DRIVER_STATE_BUSY.
+ * @note Relies on the RCC_CR_PLLRDY flag.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_PLLReady(void)
+{
+	return (__RCC_GetCR(RCC) & RCC_CR_PLLRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
 }
 
 /**

@@ -200,47 +200,24 @@ extern "C" {
  */
 typedef uint8_t								driver_status_t;
 
-/**
- * @def DRIVER_SUCCESS
- * @brief Operation completed successfully.
- */
+/** @def DRIVER_SUCCESS @brief Operation completed successfully */
 #define DRIVER_SUCCESS						((driver_status_t) 0x00)
-
-/**
- * @def DRIVER_FAIL
- * @brief Operation failed due to a non-specific error.
- */
+/** @def DRIVER_FAIL @brief Operation failed due to a non-specific error */
 #define DRIVER_FAIL							((driver_status_t) 0x01)
-
-/**
- * @def DRIVER_ERR_TIMEOUT
- * @brief Operation timed out waiting for hardware or condition.
- */
+/** @def DRIVER_ERR_TIMEOUT @brief Operation timed out waiting for hardware or condition */
 #define DRIVER_ERR_TIMEOUT					((driver_status_t) 0x02)
-
-/**
- * @def DRIVER_ERR_INVALID_ARG
- * @brief An input parameter was invalid or out of range.
- */
+/** @def DRIVER_ERR_INVALID_ARG @brief An input parameter was invalid or out of range */
 #define DRIVER_ERR_INVALID_ARG				((driver_status_t) 0x03)
-
-/**
- * @def DRIVER_ERR_STATE
- * @brief Operation requested in an invalid driver or peripheral state.
- */
+/** @def DRIVER_ERR_STATE @brief Operation requested in an invalid driver or peripheral state */
 #define DRIVER_ERR_STATE					((driver_status_t) 0x04)
-
-/**
- * @def DRIVER_STATE_OFF
- * @brief Target state: Disabled or turned OFF.
- */
+/** @def DRIVER_STATE_OFF @brief Target state: Disabled or turned OFF */
 #define DRIVER_STATE_OFF					((driver_status_t) 0x05)
-
-/**
- * @def DRIVER_STATE_ON
- * @brief Target state: Enabled or turned ON.
- */
+/** @def DRIVER_STATE_ON @brief Target state: Enabled or turned ON */
 #define DRIVER_STATE_ON						((driver_status_t) 0x06)
+/** @def DRIVER_STATE_READY @brief Peripheral or driver is configured and ready for an operation */
+#define DRIVER_STATE_READY					((driver_status_t) 0x07)
+/** @def DRIVER_STATE_BUSY @brief Peripheral or driver is currently executing an operation (e.g., DMA transfer) */
+#define DRIVER_STATE_BUSY					((driver_status_t) 0x08)
 
 /**
  * @brief Assert Driver Functionality Status
