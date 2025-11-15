@@ -96,6 +96,7 @@ driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccCo
 	__RCC_WriteCFGR(RCC, reg);
 }
 
+
 driver_status_t RCC_Config(rcc_config_t* const rcc)
 {
 	uint32_t reg = 0x00UL;
@@ -117,9 +118,36 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 		RCC_D2L_USBPrescaler(rcc->prescaler.component.USB),
 		reg
 	);
+	// Check for System Clock Source
+	if(rcc->system.clk_src != RCC_SYS_CLK_HSI)
+	{
+		// PLL Configuration
+		if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
+		{
+			reg = _RCC_StagePLLParameters(
+				rcc->system.pll.source,
+				rcc->system.pll.source_prescaler,
+				rcc->system.pll.multiplication_factor,
+				reg
+			);			
+		}
+		// HSE ON
+		if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || (rcc->system.pll.source == RCC_PLL_SRC_HSE)) RCC_ControlHSE(0x01);
+	}
 	// RCC Configuration Register Write
-	__RCC_WriteCFGR(RCC, reg); 
-	
+	__RCC_WriteCFGR(RCC, reg);
+	// Set System Clock Source
+	if(rcc->system.clk_src != RCC_SYS_CLK_HSI)
+	{
+		// Wait till HSE ready
+		while(RCC_GetSysClkSrc() != RCC_SYS_CLK_HSE) __ASM volatile("nop"); // Prevent compiler optimization
+		if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
+		{
+			RCC_SwitchPLLON();
+			// Wait till PLL ready
+			while(RCC_GetSysClkSrc() != RCC_SYS_CLK_PLL) __ASM volatile("nop"); // Prevent compiler optimization
+		}
+	}
 }
 
 #ifdef _OLD_
@@ -197,7 +225,7 @@ driver_status_t RCC_BusConfig(const rcc_bus_prescaler_config_t busPrescalerConfi
 
 /**
  * @brief RCC Component Configuration - ADC, USB
- * @param componentPrescalerConfig Compoennt Prescaler Configuration Structure
+ * @param componentPrescalerConfig Component Prescaler Configuration Structure
  * @param reg Pointer to `RCC->CFGR.REG`
  * @return Status of operation
  * @return - `DRIVER_FAIL`: Failure

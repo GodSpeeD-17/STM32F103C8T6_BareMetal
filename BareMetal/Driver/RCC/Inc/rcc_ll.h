@@ -66,9 +66,9 @@ __STATIC_FORCEINLINE void __RCC_SetCR(RCC_TypeDef* const RCCx, const uint32_t va
 }
 
 /**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CR "RCC->CR"
+ * @brief				Performs a bitwise AND + ~ Operation on @ref RCC_CR "RCC->CR"
  * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
+ * @param[in] value		Value to AND + ~ with current register value
  */
 __STATIC_FORCEINLINE void __RCC_ClearCR(RCC_TypeDef* const RCCx, const uint32_t value)
 {

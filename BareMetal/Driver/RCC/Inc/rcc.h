@@ -462,6 +462,16 @@ __STATIC_FORCEINLINE _rcc_pll_src_psc_t RCC_D2L_PLLSourcePrescaler(const rcc_pll
     }
 }
 
+/**
+ * @brief Configure RCC PLL
+ * @param[in] rccPllConfig Pointer to PLL Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_ConfigPLL(const rcc_pll_config_t* const rccPllConfig);
+
+
 /** @} */ // RCC_03_Driver_03_PLLConfig
 
 /*---------------------------------------------- RCC Component ----------------------------------------------*/
@@ -643,13 +653,92 @@ typedef struct
  */
 __STATIC_FORCEINLINE _rcc_sys_clk_t RCC_D2L_SystemClockSource(const rcc_system_clock_t src)
 {
-    switch(src)
+	switch(src)
 	{
-        case RCC_SYS_CLK_HSI: return _RCC_SYS_CLK_HSI; break;
-        case RCC_SYS_CLK_HSE: return _RCC_SYS_CLK_HSE; break;
-        case RCC_SYS_CLK_PLL: return _RCC_SYS_CLK_PLL; break;
-        default: return _RCC_SYS_CLK_HSI; break; // Safe fallback
-    }
+		case RCC_SYS_CLK_HSI: return _RCC_SYS_CLK_HSI; break;
+		case RCC_SYS_CLK_HSE: return _RCC_SYS_CLK_HSE; break;
+		case RCC_SYS_CLK_PLL: return _RCC_SYS_CLK_PLL; break;
+		default: return _RCC_SYS_CLK_HSI; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Convert low-level system clock source to driver hardware value
+ * @param[in] src Low-level system clock source value (@ref _rcc_sys_clk_t "_RCC_SYS_CLK_*")
+ * @returns Driver system clock source value for driver layer
+ */
+__STATIC_FORCEINLINE rcc_system_clock_t RCC_L2D_SystemClockSource(const _rcc_sys_clk_t src)
+{
+	switch(src)
+	{
+		case _RCC_SYS_CLK_HSI: return RCC_SYS_CLK_HSI; break;
+		case _RCC_SYS_CLK_HSE: return RCC_SYS_CLK_HSE; break;
+		case _RCC_SYS_CLK_PLL: return RCC_SYS_CLK_PLL; break;
+		default: return RCC_SYS_CLK_HSI; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Controls the state of the Internal High Speed Clock (HSI)
+ * @param[in] state 
+ * Desired state:
+ *	- DRIVER_STATE_OFF: Turn OFF HSI
+ *	- DRIVER_STATE_ON: Turn ON HSI
+ * @note Operates on the HSI ON/OFF bit @ref RCC_CR_HSION
+ */
+__STATIC_FORCEINLINE void RCC_ControlHSI(const driver_status_t state)
+{
+	if (state) __RCC_SetCR(RCC, RCC_CR_HSION);
+	else __RCC_ClearCR(RCC, RCC_CR_HSION);
+}
+
+/**
+ * @brief Controls the state of the External High Speed Clock (HSE)
+ * @param[in] state 
+ * Desired state:
+ *	- DRIVER_STATE_OFF: Turn OFF HSE
+ *	- DRIVER_STATE_ON: Turn ON HSE
+ * @note Operates on the HSE ON/OFF bit @ref RCC_CR_HSEON
+ */
+__STATIC_FORCEINLINE void RCC_ControlHSE(const driver_status_t state)
+{
+	if (state) __RCC_SetCR(RCC, RCC_CR_HSEON);
+	else __RCC_ClearCR(RCC, RCC_CR_HSEON);
+}
+
+/**
+ * @brief Controls the state of the Phase Lock Loop (PLL)
+ * @param[in] state 
+ * Desired state:
+ *	- DRIVER_STATE_OFF: Turn OFF PLL
+ *	- DRIVER_STATE_ON: Turn ON PLL
+ * @note Operates on the PLL ON/OFF bit @ref RCC_CR_PLLON
+ */
+__STATIC_FORCEINLINE void RCC_ControlPLL(const driver_status_t state)
+{
+	if (state) __RCC_SetCR(RCC, RCC_CR_PLLON);
+	else __RCC_ClearCR(RCC, RCC_CR_PLLON);
+}
+
+/**
+ * @brief Set System Clock Source
+ * @param[in] sysClkSrc System Clock Source (@ref rcc_system_clock_t "RCC_SYS_CLK_*")
+ */
+__STATIC_FORCEINLINE void RCC_SetSysClkSrc(const rcc_system_clock_t sysClkSrc)
+{
+	uint32_t reg = __RCC_ReadCFGR(RCC);
+	reg &= ~RCC_CFGR_SW_Msk;
+	reg |= (uint32_t)(RCC_D2L_SystemClockSource(sysClkSrc) << RCC_CFGR_SW_Pos);
+	__RCC_WriteCFGR(RCC, reg);
+}
+
+/**
+ * @brief Retrieve System Clock Source
+ * @returns @ref rcc_system_clock_t "System Clock Source"
+ */
+__STATIC_FORCEINLINE rcc_system_clock_t RCC_GetSysClkSrc(void)
+{
+	return RCC_L2D_SystemClockSource((_rcc_sys_clk_t)(__RCC_GetCFGR(RCC) >> RCC_CFGR_SWS_Pos));
 }
 
 /** @} */ // RCC_03_Driver_05_SystemClockConfig
