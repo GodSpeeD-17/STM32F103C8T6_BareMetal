@@ -1034,11 +1034,66 @@ typedef struct
  */
 driver_status_t RCC_Config(rcc_config_t* const rcc);
 
+/**
+ * @brief Sets default flash configuration for 72MHz
+ * @param flashConfig Pointer to @ref rcc_flash_config_t "Flash Configuration Structure"
+ */
+void RCC_72MHz_FlashDefaultConfig(rcc_flash_config_t* const flashConfig);
+
+/**
+ * @brief PLL Default Configuration for 72MHz
+ * @param pllConfig Pointer to @ref rcc_pll_config_t "PLL Configuration Structure"
+ */
+void RCC_72MHz_PLLDefaultConfig(rcc_pll_config_t* const pllConfig);
+
+/**
+ * @brief Sets System Configuration for 72MHz Clock
+ * @param sysClkConfig Pointer to @ref rcc_sys_clk_config_t "System Clock Configuration Structure"
+ */
+void RCC_72MHz_SystemDefaultConfig(rcc_sys_clk_config_t* const sysClkConfig);
+
+/**
+ * @brief Sets Bus Prescaler for 72MHz
+ * @param busPrescalerConfig Pointer to @ref rcc_bus_config_t "Bus Prescaler Configuration Structure"
+ */
+void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_config_t* const busPrescalerConfig);
+
+/**
+ * @brief Sets Component Prescaler for 72MHz
+ * @param componentPrescalerConfig Pointer to @ref rcc_component_config_t "Component Prescaler Configuration Structure"
+ */
+void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_config_t* const componentPrescalerConfig);
+
+/**
+ * @brief Sets Prescalers for 72MHz
+ * @param prescalerConfig Pointer to @ref rcc_prescaler_config_t "Component Prescaler Configuration Structure"
+ */
+void RCC_72MHz_PrescalerDefaultConfig(rcc_prescaler_config_t* const prescalerConfig);
+
+/**
+ * @brief Sets RCC Configuration 72MHz
+ * @param rccConfig Pointer to @ref rcc_config_t "RCC Configuration Structure"
+ */
+void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const rccConfig);
+
+/*---------------------------------------------- Helper APIs ----------------------------------------------*/
+/**
+ * @brief Shortcut Function to set Clock Frequency to 72MHz
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
+{
+	rcc_config_t rcc72MHzConfig = {0};
+	RCC_72MHz_LoadDefaultConfig(&rcc72MHzConfig);
+	driver_status_t status = RCC_Config(&rcc72MHzConfig);
+	ASSERT_DRIVER_STATUS(status);
+	return status;
+}
+
 /** @} */ // RCC_03_Driver_06_MainConfig
 
 /** @} */ // RCC_03_Driver
 
-#ifdef _OLD_
+#ifdef _OLD_RCC__
 /*---------------------------------------------- Header File ----------------------------------------------*/
 #include "rcc_config.h"
 
@@ -1095,54 +1150,7 @@ driver_status_t RCC_ComponentConfig(const rcc_component_config_t componentPresca
  */
 driver_status_t RCC_Config(const rcc_config_t* rccConfig);
 
-/**
- * @brief Sets default flash configuration for 72MHz
- * @param flashConfig Pointer to Flash Configuration Structure 
- */
-void RCC_72MHz_FlashDefaultConfig(rcc_flash_config_t* flashConfig);
 
-/**
- * @brief PLL Default Configuration for 72MHz
- * @param pllConfig Pointer to PLL Configuration Structure
- */
-void RCC_72MHz_PLLDefaultConfig(rcc_pll_config_t* pllConfig);
-
-/**
- * @brief Sets System Configuration for 72MHz Clock
- * @param sysClkConfig Pointer to System Clock
- */
-void RCC_72MHz_SystemDefaultConfig(rcc_sys_clk_config_t* sysClkConfig);
-
-/**
- * @brief Sets Bus Prescaler for 72MHz
- * @param busPrescalerConfig Pointer to Bus Prescaler Configuration Structure
- */
-void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_config_t* busPrescalerConfig);
-
-/**
- * @brief Sets Component Prescaler for 72MHz
- * @param componentPrescalerConfig Pointer to Component Prescaler Configuration Structure
- */
-void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_config_t* componentPrescalerConfig);
-
-/**
- * @brief Sets RCC Configuration 72MHz
- * @param rccConfig RCC Configuration Structure 
- */
-void RCC_72MHz_LoadDefaultConfig(rcc_config_t* rccConfig);
-
-/*---------------------------------------------- Helper APIs ----------------------------------------------*/
-/**
- * @brief Shortcut Function to set Clock Frequency to 72MHz
- */
-__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
-{
-	static rcc_config_t rcc72MHzConfig = {0};
-	RCC_72MHz_LoadDefaultConfig(&rcc72MHzConfig);
-	driver_status_t status = RCC_Config(&rcc72MHzConfig);
-	ASSERT_DRIVER_STATUS(status);
-	return status;
-}
 
 /**
  * @brief Retrieves RCC Core Clock Frequency in Hz
@@ -1180,7 +1188,7 @@ __STATIC_FORCEINLINE _rcc_freq_t RCC_APB2ClockFreq_Get(void)
 	return (__systemFrequency__.APB2);
 }
 
-#endif /* _OLD_ */
+#endif /* _OLD_RCC__ */
 
 // C++ Safeguard
 #ifdef __cplusplus

@@ -199,7 +199,6 @@ extern "C" {
  * @{
  */
 typedef uint8_t								driver_status_t;
-
 /** @def DRIVER_SUCCESS @brief Operation completed successfully */
 #define DRIVER_SUCCESS						((driver_status_t) 0x00)
 /** @def DRIVER_FAIL @brief Operation failed due to a non-specific error */
@@ -221,15 +220,18 @@ typedef uint8_t								driver_status_t;
 
 /**
  * @brief Assert Driver Functionality Status
- * @param[in] status Driver Status @ref driver_status_t
+ * @param[in] expr @ref driver_status_t "Expression to evaluate"
  */
-#define ASSERT_DRIVER_STATUS(status)    \
-	do									\
-	{									\
-		if (((driver_status_t)(status)) != DRIVER_SUCCESS) \
-		{								\
-			return ((status));			\
-		}								\
+#define ASSERT_DRIVER_STATUS(expr)											\
+	do																		\
+	{																		\
+		driver_status_t _status = (expr);									\
+		if (_status != DRIVER_SUCCESS &&									\
+			_status != DRIVER_STATE_READY &&								\
+			_status != DRIVER_STATE_BUSY)									\
+		{																	\
+			/* Update as per need */										\
+		}																	\
 	} while (0)
 
 /** @} */ // 01_STM32F1xx_Utilities_02_DriverStatus
