@@ -129,10 +129,10 @@
 //  * @return Prescaler in form of bits to be right shifted for PLL External Clock Source Prescaler 
 //  * @note Takes care of only: `RCC_PLL_SRC_HSE`
 //  */
-// __STATIC_FORCEINLINE rcc_pll_src_prescaler_t RCC_PLLExtClkSrcPscRightShift_Get(void)
+// __STATIC_FORCEINLINE rcc_pll_src_psc_t RCC_PLLExtClkSrcPscRightShift_Get(void)
 // {
 // 	// Return the External Clock Src Prescaler
-// 	return ((rcc_pll_src_prescaler_t) ((RCC->CFGR.REG & RCC_CFGR_PLLXTPRE) >> RCC_CFGR_PLLXTPRE_Pos));
+// 	return ((rcc_pll_src_psc_t) ((RCC->CFGR.REG & RCC_CFGR_PLLXTPRE) >> RCC_CFGR_PLLXTPRE_Pos));
 // }
 
 // /**
@@ -140,12 +140,12 @@
 //  * @returns Prescaler in form of bits to be right shifted for PLL Clock
 //  * @note Takes care of both the cases: `RCC_PLL_SRC_HSI`, `RCC_PLL_SRC_HSE`
 //  */
-// __STATIC_FORCEINLINE rcc_pll_src_prescaler_t RCC_PLLClkSrcPscRightShift_Get(void)
+// __STATIC_FORCEINLINE rcc_pll_src_psc_t RCC_PLLClkSrcPscRightShift_Get(void)
 // {
 // 	// Get PLL Clock Source
 // 	rcc_pll_src_t rccPLLSrc = RCC_PLLClkSrc_Get();
 // 	// Final Prescaler Value
-// 	rcc_pll_src_prescaler_t rccPLLSrcPrescaler = RCC_PLL_SRC_PRE_NOT_USED;
+// 	rcc_pll_src_psc_t rccPLLSrcPrescaler = RCC_PLL_SRC_PRE_NOT_USED;
 // 	// PLL Clock Source
 // 	switch(rccPLLSrc){
 // 		// HSI

@@ -12,6 +12,75 @@
 /*---------------------------------------------- Header Guards ----------------------------------------------*/
 #include "rcc.h"
 
+/*---------------------------------------------- RCC Clock Frequency Tracking ----------------------------------------------*/
+/**
+ * @brief    Driver RCC Clock Frequency Tracking Structure
+ * @defgroup RCC_03_Driver_07_ClockFrequency Driver RCC Clock Frequency Tracking
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Ultra-efficient frequency tracking using AHB base + prescalers
+ * - Uses LUT-based right-shifting instead of division for maximum performance
+ * - Perfect balance of memory efficiency and calculation speed
+ *
+ * @see Reference Manual RM0008 - Section 7. Clock Configuration
+ * @{
+ */
+
+/**
+ * @brief RCC Clock Frequency Structure
+ * @typedef rcc_clk_freq_t
+ */
+typedef struct 
+{
+	/** @brief Core system clock frequency in Hz (before AHB prescaler) */
+	_rcc_freq_t Core;
+	
+	/** @brief System Clock Configuration */
+	struct 
+	{
+		/** @brief System clock source - HSI/HSE/PLL */
+		rcc_system_clock_t source : 2;
+		/** @brief Reserved for future expansion */
+		uint8_t _reserved : 1;
+		
+		/** @brief PLL Configuration */
+		struct 
+		{
+			/** @brief PLL multiplication factor - x2 to x16 */
+			rcc_pll_mul_t multiplier : 4;
+			/** @brief PLL source - HSI/HSE */
+			rcc_pll_src_t source : 1;
+			/** @brief PLL source prescaler */
+			rcc_pll_src_psc_t source_prescaler : 1;
+		} pll;
+	} system;
+	
+	/** @brief Clock Prescalers Configuration */
+	struct
+	{
+		/** @brief Bus Prescalers */
+		struct
+		{
+			/** @brief AHB prescaler as shift count - /1,/2,/4,...,/512 */
+			rcc_ahb_prescaler_t AHB : 4;
+			/** @brief APB1 prescaler as shift count - /1,/2,/4,/8,/16 */
+			rcc_apb1_prescaler_t APB1 : 3;
+			/** @brief APB2 prescaler as shift count - /1,/2,/4,/8,/16 */
+			rcc_apb2_prescaler_t APB2 : 3;
+		} bus;
+		
+		/** @brief Component Prescalers */
+		struct
+		{
+			/** @brief ADC prescaler - /2,/4,/6,/8 */
+			rcc_component_prescaler_t ADC : 2;
+			/** @brief USB prescaler - /1.5,/1 */
+			rcc_component_prescaler_t USB : 1;
+		} component;
+	} prescaler;
+} rcc_clk_freq_t;
+
+// Default System Configuration
 volatile rcc_clk_freq_t _systemConfig = 
 {
 	.Core = _RCC_HSI_FREQ,
@@ -40,6 +109,82 @@ volatile rcc_clk_freq_t _systemConfig =
 		}
 	}
 };
+
+/** @} */ // RCC_03_Driver_07_ClockFrequency
+
+/**
+ * @brief Get current core clock frequency from hardware configuration
+ * @returns Current core clock frequency in Hz
+ * @note Calculates core frequency based on current system clock source and PLL configuration
+ * @note Core clock is the system clock before AHB prescaler
+ * @note For PLL configurations, calculates frequency based on source and multiplication factor
+ */
+_rcc_freq_t RCC_GetCoreClockFreq(void)
+{
+	_rcc_freq_t coreFreq = _RCC_HSI_FREQ;
+	switch(RCC_GetSysClkSrc())
+	{
+		case RCC_SYS_CLK_HSE:
+			coreFreq = _RCC_HSE_FREQ;
+		break;
+
+		case RCC_SYS_CLK_PLL:
+			switch(RCC_GetPLLSource())
+			{
+				case RCC_PLL_SRC_HSI:
+					coreFreq = _RCC_HSI_FREQ >> 1; // HSI divided by 2
+				break;
+
+				case RCC_PLL_SRC_HSE:
+					coreFreq = _RCC_HSE_FREQ;
+					if(RCC_GetPLLSourcePrescaler() == RCC_PLL_SRC_HSE_DIV_2) coreFreq >>= 1; // HSE divided by 2
+				break;
+			}
+		break;
+	}
+	return coreFreq;
+}
+
+/**
+ * @brief Retrieves the currently configured prescaler value for a specified bus
+ * @param[in] rccBus The target bus to query (e.g., RCC_AHB_BUS). Refer to @ref rcc_bus_t.
+ * @return The high-level prescaler setting. Refer to @ref rcc_bus_prescaler_t.
+ * @note This is an inline helper function for performance.
+ */
+rcc_bus_prescaler_t RCC_GetPrescaler(const rcc_bus_t rccBus)
+{
+	uint32_t reg = __RCC_ReadCFGR(RCC);
+	switch(rccBus)
+	{
+		case RCC_AHB_BUS:
+			return (rcc_bus_prescaler_t)RCC_L2D_AHBPrescaler((_rcc_bus_prescaler_t)((reg & RCC_CFGR_HPRE) >> RCC_CFGR_HPRE_Pos));
+		break;
+			
+		case RCC_APB1_BUS:
+			return (rcc_bus_prescaler_t)RCC_L2D_APB1Prescaler((_rcc_bus_prescaler_t)((reg & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos));
+		break;
+
+		case RCC_APB2_BUS:
+			return (rcc_bus_prescaler_t)RCC_L2D_APB2Prescaler((_rcc_bus_prescaler_t)((reg & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos));
+		break;
+	}
+}
+
+/**
+ * @brief Get current bus clock frequency
+ * @param[in] bus Target bus identifier (@ref rcc_bus_t)
+ * @returns Current bus clock frequency in Hz
+ * @note Calculates bus frequency based on core clock and bus prescaler
+ * @note For AHB bus: returns frequency after AHB prescaler
+ * @note For APB1/APB2 buses: returns frequency after respective APB prescalers
+ * @note Uses right-shift operation for efficient division by prescaler value
+ */
+_rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
+{
+	_rcc_freq_t ahbFreqHz = RCC_GetCoreClockFreq();
+	ahbFreqHz >>= RCC_GetPrescaler(bus);
+	return ahbFreqHz;
+}
 
 /**
  * @brief RCC Flash Configuration
@@ -96,14 +241,40 @@ driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccCo
 	__RCC_WriteCFGR(RCC, reg);
 }
 
-
+/**
+ * @brief Configures the system clock and bus prescalers.
+ *
+ * Initializes the RCC to the configuration specified in @p rcc,
+ * setting up Flash latency, enabling required clock sources (HSI/HSE/PLL),
+ * and switching the system clock source in a single atomic CFGR update.
+ *
+ * All prerequisite clocks are verified to be ready before the switch,
+ * ensuring a stable and deterministic clock tree setup.
+ *
+ * @param[in] rcc Pointer to @ref rcc_config_t "RCC Configuration Structure"
+ *
+ * @retval DRIVER_SUCCESS          Configuration successful.
+ * @retval DRIVER_ERR_INVALID_ARG  Null configuration pointer.
+ * @retval DRIVER_ERR_TIMEOUT      Clock source failed to stabilize (if timeout supported).
+ *
+ * @note Must be called once during system startup before any peripheral initialization.
+ * @note Blocks until selected clock source (HSE/PLL) is stable.
+ */
 driver_status_t RCC_Config(rcc_config_t* const rcc)
 {
+	// Early validation
+	if(rcc == NULL) return DRIVER_ERR_INVALID_ARG;
+
 	uint32_t reg = 0x00UL;
-	// Flash Settings
+	// Configure Flash Settings First (critical for timing)
 	RCC_ConfigFlash(&rcc->flash);
 
-	// RCC Configuration Register Read
+	// Pipeline HSE Configuration (if needed)
+	if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || (rcc->system.clk_src == RCC_SYS_CLK_PLL && rcc->system.pll.source == RCC_PLL_SRC_HSE))
+	{
+		RCC_ControlHSE(DRIVER_STATE_ON);
+	}
+
 	reg = __RCC_ReadCFGR(RCC);
 	// Bus Prescaler
 	reg = _RCC_StageBusPrescaler(
@@ -118,36 +289,39 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 		RCC_D2L_USBPrescaler(rcc->prescaler.component.USB),
 		reg
 	);
-	// Check for System Clock Source
+	// PLL Configuration
+	if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
+	{
+		reg = _RCC_StagePLLParameters(
+			rcc->system.pll.source,
+			rcc->system.pll.source_prescaler,
+			rcc->system.pll.multiplication_factor,
+			reg
+		);			
+	}
+	// System Clock Source
+	reg = _RCC_StageSystemClockSource(rcc->system.clk_src, reg);
+
+	// Pre-requisite compatibility
 	if(rcc->system.clk_src != RCC_SYS_CLK_HSI)
 	{
-		// PLL Configuration
+		// HSE ready?
+		while(RCC_HSEReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
+		// PLL?
 		if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
 		{
-			reg = _RCC_StagePLLParameters(
-				rcc->system.pll.source,
-				rcc->system.pll.source_prescaler,
-				rcc->system.pll.multiplication_factor,
-				reg
-			);			
+			// Switch PLL ON
+			RCC_ControlPLL(DRIVER_STATE_ON);
+			// PLL ready?
+			while(RCC_PLLReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
 		}
-		// HSE ON
-		if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || (rcc->system.pll.source == RCC_PLL_SRC_HSE)) RCC_ControlHSE(0x01);
 	}
+	
 	// RCC Configuration Register Write
 	__RCC_WriteCFGR(RCC, reg);
-	// Set System Clock Source
-	if(rcc->system.clk_src != RCC_SYS_CLK_HSI)
-	{
-		// Wait till HSE ready
-		while(RCC_GetSysClkSrc() != RCC_SYS_CLK_HSE) __ASM volatile("nop"); // Prevent compiler optimization
-		if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
-		{
-			RCC_SwitchPLLON();
-			// Wait till PLL ready
-			while(RCC_GetSysClkSrc() != RCC_SYS_CLK_PLL) __ASM volatile("nop"); // Prevent compiler optimization
-		}
-	}
+	// Validate System Clock Source
+	while(RCC_GetSysClkSrc() != rcc->system.clk_src) __ASM volatile("nop"); // Prevent compiler optimization
+	return DRIVER_SUCCESS;
 }
 
 #ifdef _OLD_
