@@ -53,7 +53,6 @@ extern "C" {
 /**
  * @brief Flash latency type definition @typedef rcc_flash_latency_t */
 typedef uint8_t rcc_flash_latency_t;
-
 /** @brief Zero wait state (SYSCLK ≤ 24 MHz) @def RCC_FLASH_LATENCY_0 */
 #define RCC_FLASH_LATENCY_0						((rcc_flash_latency_t) 0x00)
 /** @brief One wait state (24 MHz < SYSCLK ≤ 48 MHz) @def RCC_FLASH_LATENCY_1 */
