@@ -27,7 +27,7 @@ extern "C" {
 #include <stdint.h>
 
 /**
- * @brief Structure encapsulation of RCC Registers
+ * @brief RCC Peripheral Hardware Register Mapping
  * @defgroup  RCC_01_Registers RCC Registers
  * @ingroup   RCC
  * @details
@@ -80,7 +80,7 @@ extern "C" {
  * @brief    RCC Registers representation using structure
  */
 
- /**
+/**
  * @defgroup RCC_01_Registers_02_Memory RCC Memory Address
  * @ingroup  RCC_01_Registers 
  * @brief    STM32F1xx RCC Memory Address Mapping

@@ -49,11 +49,11 @@
 // I2C Configuration Structure
 typedef struct {
 	// I2C Instance: `I2C1`, `I2C2`
-	I2C_TypeDef* I2Cx;
+	I2C_TypeDef* I2Cx; // Not required
 	// Serial Clock GPIO Configuration
-	gpio_config_t SCL;
+	gpio_config_t SCL; // Not required
 	// Serial Data GPIO Configuration
-	gpio_config_t SDA;
+	gpio_config_t SDA; // Not required
 	// SCL Clock Frequency (in MHz)
 	// |--- `I2Cx_SCL_FREQ_4MHz`
 	// |--- `I2Cx_SCL_FREQ_8MHz`

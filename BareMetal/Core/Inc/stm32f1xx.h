@@ -428,8 +428,86 @@ typedef uint8_t								driver_status_t;
 #define USART2 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004400UL))
 #define USART3 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004800UL))
 #define EXTI 									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + 0x00000400UL))
-#define I2C1 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005400UL))
-#define I2C2 									((I2C_TypeDef *) (APB1_BASE_ADDR + 0x00005800UL))
+
+// ######################################################################################################
+// I2C
+// ######################################################################################################
+
+/**
+ * @addtogroup	I2C_01_Registers_02_Memory
+ * @details 
+ * - I2C peripheral instances based on @ref I2C_01_Registers_01_Structure "I2C Registers"
+ * - All I2C peripherals are clocked from @ref APB1_BASE_ADDR "APB1 Bus"
+ * - Each I2C peripheral occupies 0x400 bytes of address space
+ * - Supports I2C1 and I2C2 on STM32F103C8T6
+ * @see Reference Manual RM0008 - Section 24.6 I2C Registers
+ * @see Datasheet - Section 4 Memory Mapping
+ * @{
+ */
+
+/**
+ * \section  I2C_Registers_Memory_Base I2C Register Base Memory Address
+ * \brief I2C Peripheral: Base Memory Address
+ */
+
+/**
+ * @brief I2C Base Memory Address
+ * @details @see @ref APB1_BASE_ADDR "APB1 Base Memory Address"
+ * @def I2C_BASE_ADDRESS
+ */
+#define I2C_BASE_ADDRESS						APB1_BASE_ADDR
+
+/**
+ * \section  I2C_Registers_Memory_Size I2C Register Memory Size
+ * \brief I2C Peripheral: Memory Size
+ */
+
+/**
+ * @brief    I2C Peripheral Memory Size
+ * @def		 I2C_PERIPHERAL_SIZE 
+ * @details  
+ * Each I2C peripheral (I2C1–I2C2) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
+ * address block in the <b>APB1 peripheral memory space</b>
+ *
+ * Although the @ref I2C_TypeDef "I2C register structure" uses only 0x24 bytes
+ * (the sum of all defined registers), the hardware reserves a full 0x400-byte
+ * region per I2C instance. This spacing ensures aligned, uniform addressing
+ * for all I2C peripherals and simplifies peripheral bus decoding logic.
+ *
+ * @note 
+ * - Use this constant when computing peripheral index offsets or bit positions.
+ * - Do **not** use `sizeof(I2C_TypeDef)` for address-based calculations, as it
+ *   does not reflect the physical memory spacing.
+ *
+ * @see Reference Manual RM0008, Section 3.2 "Memory Map"
+ * @see @ref I2C_01_Registers_02_Memory "I2C Peripheral Memory Address"
+ * @see @ref BIT_POS() "Peripheral Index Computation"
+ */
+#define I2C_PERIPHERAL_SIZE						0x400UL
+
+/**
+ * \section  I2C_Registers_Memory_Offset I2C Register Offset from Base
+ * \brief I2C Peripheral: Offset from Base
+ */
+
+/** @brief I2C1 Peripheral Offset @def I2C1_OFFSET */ 
+#define I2C1_OFFSET								0x00005400UL
+/** @brief I2C2 Peripheral Offset @def I2C2_OFFSET */
+#define I2C2_OFFSET								0x00005800UL
+
+/**
+ * \section I2C_Registers_Memory_Peripherals I2C Peripheral Memory Address
+ * \brief I2C Peripheral Memory Address
+ * @see @ref I2C_01_Registers_01_Structure "I2C Registers Encapsulation" | @ref I2C_Registers_Memory_Base "I2C Base Memory Address" | @ref I2C_Registers_Memory_Offset "I2C Register Offset from I2C Base Memory Address"  
+ */
+
+/** @brief I2C1 Peripheral  @def I2C1 */ 
+#define I2C1 									((I2C_TypeDef *) (I2C_BASE_ADDRESS + I2C1_OFFSET))
+/** @brief I2C2 Peripheral  @def I2C2 */ 
+#define I2C2 									((I2C_TypeDef *) (I2C_BASE_ADDRESS + I2C2_OFFSET))
+
+/** @} */ // I2C_01_Registers_02_Memory
+
 #define IWDG									((IWDG_TypeDef *) IWDG_BASE_ADDR)
 #define WWDG									((WWDG_TypeDef *) WWDG_BASE_ADDR)
 #define DMA1 									((DMA_TypeDef *) DMA1_BASE_ADDR)

@@ -1,22 +1,137 @@
+/**
+ * @file stm32f1xx_i2c.h
+ * @author Shrey Shah
+ * @defgroup I2C Inter-Integrated Circuit (I2C)
+ * @brief This file contains all the I2C peripheral register definitions for STM32F1
+ * @version v1.0
+ * @date 16-11-2025
+ */
+
 // Header Guards
 #ifndef STM32F1XX_I2C_H_
 #define STM32F1XX_I2C_H_
+
+// Includes
+#include <stdint.h>
 
 // C++ Safeguards
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-// Includes
-#include <stdint.h>
+/**
+ * @brief I2C Peripheral Hardware Register Mapping
+ * @defgroup  I2C_01_Registers I2C Registers
+ * @ingroup   I2C
+ * @details
+ * - STM32F103C8T6 I2C peripheral provides I2C bus interface functionality
+ * - Supports standard-mode (Sm) up to 100 kHz and fast-mode (Fm) up to 400 kHz
+ * - Implements multi-master and slave communication with 7-bit/10-bit addressing
+ *
+ * - I2C Register Map:
+ *
+ * | Offset | Register | Name | Description |
+ * |--------|----------|------|-------------|
+ * | 0x00   | I2C_CR1    | Control Register 1 | Controls peripheral enable, addressing modes, and protocol features |
+ * | 0x04   | I2C_CR2    | Control Register 2 | Configures clock frequency, interrupts, and DMA |
+ * | 0x08   | I2C_OAR1   | Own Address Register 1 | Sets primary device address for slave mode |
+ * | 0x0C   | I2C_OAR2   | Own Address Register 2 | Sets secondary address for dual addressing mode |
+ * | 0x10   | I2C_DR     | Data Register | Holds data for transmission/reception |
+ * | 0x14   | I2C_SR1    | Status Register 1 | Monitors communication status and events |
+ * | 0x18   | I2C_SR2    | Status Register 2 | Provides additional status information |
+ * | 0x1C   | I2C_CCR    | Clock Control Register | Configures I2C timing and speed modes |
+ * | 0x20   | I2C_TRISE  | TRISE Register | Sets maximum rise time for timing compliance |
+ *
+ * - Key Features:
+ * <ul>
+ * <li> Communication Modes:
+ * 	<ul>
+ *   <li> Master transmitter/receiver mode </li>
+ *   <li> Slave transmitter/receiver mode </li>
+ *   <li> Multi-master capability with arbitration </li>
+ * 	</ul>
+ * </li>
+ * <li> Addressing Capabilities:
+ * 	<ul>
+ *   <li> 7-bit addressing with 112 addresses </li>
+ *   <li> 10-bit addressing for extended address range </li>
+ *   <li> Dual addressing mode for multiple slave addresses </li>
+ *   <li> General call address recognition </li>
+ * 	</ul>
+ * </li>
+ * <li> Advanced Features:
+ * 	<ul>
+ *   <li> Clock stretching support for slow slaves </li>
+ *   <li> SMBus protocol compatibility </li>
+ *   <li> Packet Error Checking (PEC) for data integrity </li>
+ *   <li> DMA support for efficient data transfer </li>
+ *   <li> Error detection (BERR, ARLO, AF, OVR) </li>
+ * 	</ul>
+ * </li>
+ * <li> Performance:
+ * 	<ul>
+ *   <li> Standard mode: up to 100 kbit/s </li>
+ *   <li> Fast mode: up to 400 kbit/s </li>
+ *   <li> Fast mode plus: up to 1 Mbit/s (device dependent) </li>
+ * 	</ul>
+ * </li>
+ * </ul>
+ *
+ * @note I2C initialization must follow proper sequence: disable PE → configure → enable PE
+ * @warning Changing I2C configuration while bus is active may cause communication errors
+ * @warning Clock frequency (CR2.FREQ) must match actual APB1 clock frequency for correct timing
+ *
+ * @see Reference Manual RM0008 - Section 24. Inter-Integrated Circuit (I2C) interface
+ * @see Datasheet DS5319 - Section 5. Memory mapping
+ * @{ 
+ */
 
-// I2C Main Structure
+/**
+ * @defgroup I2C_01_Registers_01_Structure I2C Registers Encapsulation
+ * @ingroup  I2C_01_Registers
+ * @brief    I2C Registers representation using structure
+ */
+
+/**
+ * @defgroup I2C_01_Registers_02_Memory I2C Memory Address
+ * @ingroup  I2C_01_Registers 
+ * @brief    STM32F1xx I2C Memory Address Mapping
+ */
+
+/**
+ * @defgroup I2C_01_Registers_03_API I2C Register Access APIs
+ * @ingroup  I2C_01_Registers 
+ * @brief    APIs to access @ref I2C_01_Registers_01_Structure "I2C Registers"
+ */
+
+/** @} */ // I2C_01_Registers
+
+
+// =============================================================================
+// I2C Register Definitions
+// =============================================================================
+
+/**
+ * @addtogroup I2C_01_Registers_01_Structure
+ * @{
+ * @brief I2C Peripheral Register Structure
+ * @typedef I2C_TypeDef
+ */
 typedef volatile struct __I2C_TypeDef 
 {
-	// Control Register 1 (CR1)
-	union {
+	/**
+	 * @brief Control Register 1 (CR1)
+	 * @details
+	 * - Main control register for I2C configuration and operation
+	 * - Controls peripheral enable, SMBus mode, and protocol features
+	 * - Manages start/stop generation and clock stretching
+	 * @union I2C_CR1
+	 */
+	union I2C_CR1
+	{
 		volatile uint32_t REG;
-		struct {
+		struct 
+		{
 			// Peripheral enable
 			volatile uint32_t PE: 1;
 			// SMBus mode
@@ -47,10 +162,19 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_3: 16;
 		} BIT;
 	} CR1;
-	// Control Register 2 (CR2)
-	union {
+	/**
+	 * @brief Control Register 2 (CR2)
+	 * @details
+	 * - Clock control and interrupt configuration register
+	 * - Sets peripheral clock frequency for timing generation
+	 * - Controls interrupt enable flags and DMA configuration
+	 * @union I2C_CR2
+	 */
+	union I2C_CR2 
+	{
 		volatile uint32_t REG;
-		struct {
+		struct
+		{
 			// Peripheral clock frequency
 			volatile uint32_t FREQ: 6;
 			volatile uint32_t RESERVED_1: 2;
@@ -67,10 +191,19 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_2: 19;
 		} BIT;
 	} CR2;
-	// Own Address Register 1 (OAR1)
-	union {
+	/**
+	 * @brief Own Address Register 1 (OAR1)
+	 * @details
+	 * - Primary device address configuration register
+	 * - Configures 7-bit or 10-bit addressing mode
+	 * - Contains device own address for slave mode operation
+	 * @union I2C_OAR1
+	 */
+	union I2C_OAR1 
+	{
 		volatile uint32_t REG;
-		struct {
+		struct 
+		{
 			volatile uint32_t ADD0: 1;
 			volatile uint32_t ADD1_7: 7;
 			volatile uint32_t ADD8_9: 2;
@@ -79,27 +212,54 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_2: 16;
 		} BIT;
 	} OAR1;
-	// Own Address Register 2 (OAR2)
-	union {
+	/**
+	 * @brief Own Address Register 2 (OAR2)
+	 * @details
+	 * - Secondary device address configuration register
+	 * - Enables dual addressing mode for multiple device addresses
+	 * - Contains second I2C address when dual mode is enabled
+	 * @union I2C_OAR2
+	 */
+	union I2C_OAR2
+	{
 		volatile uint32_t REG;
-		struct {
+		struct 
+		{
 			volatile uint32_t ENDUAL: 1;
 			volatile uint32_t ADD2_1_7: 7;
 			volatile uint32_t RESERVED: 24;
 		} BIT;
 	} OAR2;
-	// Data Register (DR)
-	union {
+	/**
+	 * @brief Data Register (DR)
+	 * @details
+	 * - Data transfer register for I2C communication
+	 * - Used for both transmit and receive data operations
+	 * - Contains 8-bit data value for I2C frame transmission
+	 * @union I2C_DR
+	 */
+	union I2C_DR
+	{
 		volatile uint32_t REG;
-		struct {
+		struct
+		{
 			volatile uint32_t DR: 8;
 			volatile uint32_t RESERVED: 24;
 		} BIT;
 	} DR;
-	// Status Register 1 (SR1)
-	union {
+	/**
+	 * @brief Status Register 1 (SR1)
+	 * @details
+	 * - Primary status register for I2C operation flags
+	 * - Contains event flags for start condition, address match, and data transfer
+	 * - Includes error flags for bus errors and arbitration loss
+	 * @union I2C_SR1
+	 */
+	union I2C_SR1
+	{
 		volatile uint32_t REG;
-		struct {
+		struct
+		{
 			// Start bit (Master mode)
 			volatile uint32_t SB: 1;
 			// Address sent (master mode)/matched (slave mode)
@@ -131,10 +291,19 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_3: 16;
 		} BIT;
 	} SR1;
-	// Status Register 2 (SR2)
-	union {
+	/**
+	 * @brief Status Register 2 (SR2)
+	 * @details
+	 * - Secondary status register with additional status information
+	 * - Contains master/slave mode indicator and bus busy flag
+	 * - Includes transmitter/receiver direction and PEC value
+	 * @union I2C_SR2
+	 */
+	union I2C_SR2
+	{
 		volatile uint32_t REG;
-		struct {
+		struct
+		{
 			volatile uint32_t MSL: 1;
 			volatile uint32_t BUSY: 1;
 			// Transmitter/receiver
@@ -148,8 +317,16 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_2: 16;
 		} BIT;
 	} SR2;
-	// Clock Control Register (CCR)
-	union {
+	/**
+	 * @brief Clock Control Register (CCR)
+	 * @details
+	 * - I2C clock configuration and timing control register
+	 * - Sets I2C communication speed in standard and fast modes
+	 * - Controls duty cycle for fast mode operation
+	 * @union I2C_CCR
+	 */
+	union I2C_CCR
+	{
 		volatile uint32_t REG;
 		struct {
 			volatile uint32_t CCR: 12;
@@ -161,16 +338,27 @@ typedef volatile struct __I2C_TypeDef
 			volatile uint32_t RESERVED_2: 16;
 		} BIT;
 	} CCR;
-	// TRISE Register (TRISE)
-	union {
+		/**
+	 * @brief TRISE Register (TRISE)
+	 * @details
+	 * - Maximum rise time configuration register
+	 * - Sets maximum SCL rise time for I2C timing compliance
+	 * - Used in both standard and fast mode master operation
+	 * @union I2C_TRISE
+	 */
+	union I2C_TRISE
+	{
 		volatile uint32_t REG;
-		struct {
+		struct
+		{
 			// Maximum rise time in Fm/Sm mode (Master mode)
 			volatile uint32_t TRISE: 6;
 			volatile uint32_t RESERVED: 26;
 		} BIT;
 	} TRISE;
 } I2C_TypeDef;
+
+/** @} */ // I2C_01_Registers_01_Structure
 
 // C++ Safeguards
 #ifdef __cplusplus

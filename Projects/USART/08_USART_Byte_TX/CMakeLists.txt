@@ -50,7 +50,7 @@ get_filename_component(PROJECT_NAME ${CMAKE_SOURCE_DIR} NAME)
 project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES C CXX ASM)
 set(LINKER_FILE ${CORE_ROOT}/Src/stm32f103c8t6.ld)  # Default linker script
 set(FLASH_ADDRESS 0x08000000)
-set(OPTIMIZATION_LEVEL s) # 0, 1, 2, 3, s
+set(OPTIMIZATION_LEVEL 1) # 0, 1, 2, 3, s
 
 # =============================================================================
 # Include Main CMake Template

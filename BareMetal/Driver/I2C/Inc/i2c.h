@@ -1,3 +1,18 @@
+/**
+ * @file i2c.h
+ * @author Shrey Shah
+ * @brief 
+ * @version v1.0
+ * @date 16-11-2025
+ */
+
+#include "i2c_ll.h"
+
+typedef uint8_t					i2c_t;
+#define I2C_1					((i2c_t) (0x00))
+#define I2C_2					((i2c_t) (0x01))
+
+#ifdef __OLD_I2C__ 
 // Header Guards
 #ifndef __I2C_H__
 #define __I2C_H__
@@ -167,3 +182,5 @@ uint8_t I2C_Read_Reg_Byte(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t regis
 void I2C_Read_Reg_Block(I2C_TypeDef* I2Cx, uint8_t slaveAddress, uint8_t registerAddress, uint8_t* data, uint8_t len);
 
 #endif /* __I2C_H__ */
+
+#endif /* __OLD_I2C__ */
