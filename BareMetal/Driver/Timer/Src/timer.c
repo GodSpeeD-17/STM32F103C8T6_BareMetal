@@ -62,10 +62,9 @@ static const uint8_t TIMx_IRQn[3] =
 uint16_t TIM_Calc_Prescaler(uint32_t freq_Hz, uint16_t arr_value)
 {
 	// Final Value
-	uint32_t prescaler_value = RCC_APB1ClockFreq_Get();
+	uint32_t prescaler_value = RCC_GetBusPrescaler(RCC_APB1_BUS);
 	// Calculate the Timer Frequency
-	if (RCC_Get_APB1_Prescaler() != RCC_CFGR_PPRE1_DIV1)
-		prescaler_value = (RCC_APB1ClockFreq_Get() << 1);
+	if (RCC_GetBusPrescaler(RCC_APB1_BUS) != RCC_APB1_DIV_1) prescaler_value = (RCC_GetBusPrescaler(RCC_APB1_BUS) << 1);
 	// Update the value based upon the desired frequency
 	prescaler_value /= freq_Hz;
 	// Update the value based upon the ARR Value
@@ -402,9 +401,9 @@ uint32_t TIM_Get_Frequency(TIM_TypeDef *TIMx)
 	if (TIMx != TIM1 && TIMx != TIM8)
 	{
 		// APB1 Clock Frequency
-		timer_freq_Hz = RCC_APB1ClockFreq_Get();
+		timer_freq_Hz = RCC_GetBusPrescaler(RCC_APB1_BUS);
 		// APB1 Clock Prescaler
-		prescaler = RCC_Get_APB1_Prescaler();
+		prescaler = RCC_GetBusPrescaler(RCC_APB1_BUS);
 		// Actual Timer Frequency
 		if (prescaler != 0x01)
 		{

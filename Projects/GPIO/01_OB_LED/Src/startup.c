@@ -4,7 +4,7 @@
 // Timer Delay Configuration
 #ifndef SYSTICK_DELAY__
 // Timer Configuration Structure
-static timer_config_t TIM_Configuration = {
+timer_config_t _TIM_Configuration = {
 #ifdef __OLD_TIMER_METHOD__
 	// Timer
 	.TIM = DELAY_TIMER,
@@ -21,7 +21,6 @@ static timer_config_t TIM_Configuration = {
 
 /*-------------------------------- Heap Pointer ---------------------------*/
 static uint8_t *heap_ptr = &_sheap;
-
 
 /*-------------------------------- Dynamic Memory Management ---------------------*/
 /**
@@ -67,25 +66,29 @@ void *_sbrk(intptr_t increment)
 void Reset_Handler(void)
 {
 	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
-	uint32_t *pSrc = (uint32_t *)&_sidata;
-	uint32_t *pDst = (uint32_t *)&_sdata;
+	volatile uint32_t *pSrc = (uint32_t *)&_sidata;
+	volatile uint32_t *pDst = (uint32_t *)&_sdata;
+	// Memory barrier to prevent reordering
+	__asm__ volatile ("" ::: "memory");	
 	while (pDst < &_edata) *pDst++ = *pSrc++;
 	// Step 2: Initialise .bss to 0 in RAM
 	pDst = (uint32_t *)&_sbss;
 	while (pDst < &_ebss) *pDst++ = 0;
+	// Memory barrier to prevent reordering
+	__asm__ volatile ("" ::: "memory");		
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
 // Step 4: Configure SysTick & Timer
 #ifdef SYSTICK_DELAY__
 	// SysTick: Resolution 1us
-	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1MHz));
+	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / FREQ_1MHz));
 #else
 	// SysTick: Resolution 1ms
-	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1kHz));
+	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / _RCC_FREQ_1kHz));
 	// TIM Configuration for 1us resolution
-	TIM_1MHz_Load_Default(&TIM_Configuration);
+	TIM_1MHz_Load_Default(&_TIM_Configuration);
 	// Configure TIM with the parameters
-	TIM_Config(&TIM_Configuration);
+	TIM_Config(&_TIM_Configuration);
 	// Configure TIM Interrupt for Overflow
 	TIM_IRQ_Enable(DELAY_TIMER, TIMx_IRQ_OVF_UVF);
 #endif /* SYSTICK_DELAY__ */

@@ -78,10 +78,10 @@ void Reset_Handler(void)
 // Step 4: Configure SysTick & Timer
 #ifdef SYSTICK_DELAY__
 	// SysTick: Resolution 1us
-	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1MHz));
+	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / FREQ_1MHz));
 #else
 	// SysTick: Resolution 1ms
-	SysTick_Config(((RCC_AHBClockFreq_Get()) / FREQ_1kHz));
+	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / _RCC_FREQ_1kHz));
 	// TIM Configuration for 1us resolution
 	TIM_1MHz_Load_Default(&TIM_Configuration);
 	// Configure TIM with the parameters

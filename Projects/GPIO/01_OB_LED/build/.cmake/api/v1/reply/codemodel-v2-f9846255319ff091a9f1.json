@@ -1,0 +1,276 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.28"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "01_OB_LED",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "01_OB_LED.elf::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-01_OB_LED.elf-7357fa3cf84053f98aeb.json",
+					"name" : "01_OB_LED.elf",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "clean_all::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-clean_all-e88502b36f2701d1b798.json",
+					"name" : "clean_all",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "clean_project::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-clean_project-62ab16fbcc93102ad983.json",
+					"name" : "clean_project",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "debug::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-debug-77f403efdb317f2e5bc2.json",
+					"name" : "debug",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "debug_config::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-debug_config-f66f75922bf98e96597b.json",
+					"name" : "debug_config",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "debug_flash::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-debug_flash-85b14e238d08620b5bd2.json",
+					"name" : "debug_flash",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "erase_flash::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-erase_flash-80bb4b23d7beac1e74ab.json",
+					"name" : "erase_flash",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "erase_flash_uart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-erase_flash_uart-7728ff5413c88cea8ee1.json",
+					"name" : "erase_flash_uart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "erase_mcu::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-erase_mcu-286db254a8af2969d8be.json",
+					"name" : "erase_mcu",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "flash::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-flash-d5d46fd19624b72a1114.json",
+					"name" : "flash",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "flash_mcu::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-flash_mcu-68630f6eb157eaca1bb0.json",
+					"name" : "flash_mcu",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "flash_uart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-flash_uart-b70b9242f90b1aa6ebb9.json",
+					"name" : "flash_uart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "info::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-info-c0b2962f5b80309d3939.json",
+					"name" : "info",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "info_uart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-info_uart-10308f63c62a66f62c65.json",
+					"name" : "info_uart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "replace_cmake::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-replace_cmake-2ea1563241a35c17de06.json",
+					"name" : "replace_cmake",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "replace_main_h::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-replace_main_h-dbc03ce95d209c0eea95.json",
+					"name" : "replace_main_h",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "replace_startup_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-replace_startup_c-cfe6548aa1c2d241f01d.json",
+					"name" : "replace_startup_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "replace_systick_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-replace_systick_c-b777dbec7cb522e1c7c7.json",
+					"name" : "replace_systick_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "replace_systick_h::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-replace_systick_h-df8e12a143f738b2a9fe.json",
+					"name" : "replace_systick_h",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "stlink_info::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stlink_info-5852118ade6404ff4830.json",
+					"name" : "stlink_info",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vscode_c_cpp_properties::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vscode_c_cpp_properties-8c9fad6488ebdaa8033c.json",
+					"name" : "vscode_c_cpp_properties",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vscode_files::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vscode_files-1c68e2762e0869878b96.json",
+					"name" : "vscode_files",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vscode_launch::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vscode_launch-07a79653e099486967a1.json",
+					"name" : "vscode_launch",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vscode_settings::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vscode_settings-9132048c35b005756349.json",
+					"name" : "vscode_settings",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vscode_tasks::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vscode_tasks-1406faa1614b2e5eccad.json",
+					"name" : "vscode_tasks",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+		"source" : "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 8
+	}
+}

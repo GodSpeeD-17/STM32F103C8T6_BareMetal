@@ -1,0 +1,44 @@
+[
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/Src/main.c.obj -c /home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/main.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/main.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/Src/main.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/Src/startup.c.obj -c /home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/startup.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/startup.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/Src/startup.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/Src/systick.c.obj -c /home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/systick.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Src/systick.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/Src/systick.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj -c /home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Src/rcc.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj -c /home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj -c /home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Src/gpio_exti.c.obj"
+},
+{
+  "directory": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build",
+  "command": "/opt/arm-gnu-toolchain-14.3/bin/arm-none-eabi-gcc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Core/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/RCC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/GPIO/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/NVIC/Inc -I/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Inc -I/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/Inc -g -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -lc -lm -lstdc++ -lsupc++ --specs=nano.specs --specs=nosys.specs -MMD -MP -save-temps -Os -Wall -Wextra -Wpedantic -fstack-usage -fdata-sections -ffunction-sections -DSTM32F103C8T6__ -DCORTEX_M3__ -g -gdwarf-2 -std=gnu11 -Wstrict-prototypes -Wmissing-prototypes -o CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj -c /home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c",
+  "file": "/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c",
+  "output": "/home/shrey_shah/STM32F103C8T6/Projects/GPIO/01_OB_LED/build/CMakeFiles/01_OB_LED.elf.dir/home/shrey_shah/STM32F103C8T6/BareMetal/Driver/Timer/Src/timer.c.obj"
+}
+]

@@ -202,8 +202,8 @@ __STATIC_FORCEINLINE rcc_system_clock_t RCC_L2D_SystemClockSource(const _rcc_sys
  */
 __STATIC_FORCEINLINE void RCC_ControlHSI(const driver_status_t state)
 {
-	if (state) __RCC_SetCR(RCC, RCC_CR_HSION);
-	else __RCC_ClearCR(RCC, RCC_CR_HSION);
+	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_HSION);
+	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_HSION);
 }
 
 /**
@@ -213,7 +213,7 @@ __STATIC_FORCEINLINE void RCC_ControlHSI(const driver_status_t state)
  */
 __STATIC_FORCEINLINE driver_status_t RCC_HSIReady(void)
 {
-	return (__RCC_GetCR(RCC) & RCC_CR_HSIRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_HSIRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
 }
 
 /**
@@ -226,8 +226,8 @@ __STATIC_FORCEINLINE driver_status_t RCC_HSIReady(void)
  */
 __STATIC_FORCEINLINE void RCC_ControlHSE(const driver_status_t state)
 {
-	if (state) __RCC_SetCR(RCC, RCC_CR_HSEON);
-	else __RCC_ClearCR(RCC, RCC_CR_HSEON);
+	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_HSEON);
+	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_HSEON);
 }
 
 /**
@@ -237,7 +237,7 @@ __STATIC_FORCEINLINE void RCC_ControlHSE(const driver_status_t state)
  */
 __STATIC_FORCEINLINE driver_status_t RCC_HSEReady(void)
 {
-	return (__RCC_GetCR(RCC) & RCC_CR_HSERDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_HSERDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
 }
 
 /**
@@ -250,8 +250,8 @@ __STATIC_FORCEINLINE driver_status_t RCC_HSEReady(void)
  */
 __STATIC_FORCEINLINE void RCC_ControlPLL(const driver_status_t state)
 {
-	if (state) __RCC_SetCR(RCC, RCC_CR_PLLON);
-	else __RCC_ClearCR(RCC, RCC_CR_PLLON);
+	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_PLLON);
+	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_PLLON);
 }
 
 /**
@@ -261,7 +261,7 @@ __STATIC_FORCEINLINE void RCC_ControlPLL(const driver_status_t state)
  */
 __STATIC_FORCEINLINE driver_status_t RCC_PLLReady(void)
 {
-	return (__RCC_GetCR(RCC) & RCC_CR_PLLRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_PLLRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
 }
 
 /**
@@ -282,267 +282,15 @@ __STATIC_FORCEINLINE void RCC_SetSysClkSrc(const rcc_system_clock_t sysClkSrc)
  */
 __STATIC_FORCEINLINE rcc_system_clock_t RCC_GetSysClkSrc(void)
 {
-	return RCC_L2D_SystemClockSource((_rcc_sys_clk_t)(__RCC_GetCFGR(RCC) >> RCC_CFGR_SWS_Pos));
+	return RCC_L2D_SystemClockSource((_rcc_sys_clk_t)(__RCC_ReadCFGR(RCC) >> RCC_CFGR_SWS_Pos));
 }
 
 /** @} */ // RCC_03_Driver_02_SystemClockConfig
 
-/*---------------------------------------------- RCC Bus Prescaler ----------------------------------------------*/
-/**
- * @brief    Driver Bus Prescaler Configuration Structure  
- * @defgroup RCC_03_Driver_03_BusPrescalerConfig Driver Bus Prescaler Configuration
- * @ingroup  RCC_03_Driver
- * @details
- * - Configuration structure for AHB, APB1, and APB2 bus prescalers
- * - Each bus has specific maximum frequency limits
- * - Used during system clock configuration
- *
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
- * @{
- */
-
-/** @brief Prescaler type definition @typedef rcc_bus_prescaler_t */
-typedef uint8_t									rcc_bus_prescaler_t;
-/** @brief AHB bus prescaler type definition @typedef rcc_ahb_prescaler_t */
-typedef rcc_bus_prescaler_t						rcc_ahb_prescaler_t;
-/** @brief AHB division by 1 (no prescaling) @def RCC_AHB_DIV_1 */
-#define RCC_AHB_DIV_1 							((rcc_ahb_prescaler_t) 0x00)
-/** @brief AHB division by 2 @def RCC_AHB_DIV_2 */
-#define RCC_AHB_DIV_2 							((rcc_ahb_prescaler_t) 0x01)
-/** @brief AHB division by 4 @def RCC_AHB_DIV_4 */
-#define RCC_AHB_DIV_4 							((rcc_ahb_prescaler_t) 0x02)
-/** @brief AHB division by 8 @def RCC_AHB_DIV_8 */
-#define RCC_AHB_DIV_8 							((rcc_ahb_prescaler_t) 0x03)
-/** @brief AHB division by 16 @def RCC_AHB_DIV_16 */
-#define RCC_AHB_DIV_16 							((rcc_ahb_prescaler_t) 0x04)
-/** @brief AHB division by 64 @def RCC_AHB_DIV_64 */
-#define RCC_AHB_DIV_64 							((rcc_ahb_prescaler_t) 0x06)
-/** @brief AHB division by 128 @def RCC_AHB_DIV_128 */
-#define RCC_AHB_DIV_128 						((rcc_ahb_prescaler_t) 0x07)
-/** @brief AHB division by 256 @def RCC_AHB_DIV_256 */
-#define RCC_AHB_DIV_256 						((rcc_ahb_prescaler_t) 0x08)
-/** @brief AHB division by 512 @def RCC_AHB_DIV_512 */
-#define RCC_AHB_DIV_512 						((rcc_ahb_prescaler_t) 0x09)
-
-/** @brief APB1 bus prescaler type definition @typedef rcc_apb1_prescaler_t */
-typedef rcc_bus_prescaler_t						rcc_apb1_prescaler_t;
-/** @brief APB1 division by 1 (no prescaling) @def RCC_APB1_DIV_1 */
-#define RCC_APB1_DIV_1 							((rcc_apb1_prescaler_t) 0x00)
-/** @brief APB1 division by 2 @def RCC_APB1_DIV_2 */
-#define RCC_APB1_DIV_2 							((rcc_apb1_prescaler_t) 0x01)
-/** @brief APB1 division by 4 @def RCC_APB1_DIV_4 */
-#define RCC_APB1_DIV_4 							((rcc_apb1_prescaler_t) 0x02)
-/** @brief APB1 division by 8 @def RCC_APB1_DIV_8 */
-#define RCC_APB1_DIV_8 							((rcc_apb1_prescaler_t) 0x03)
-/** @brief APB1 division by 16 @def RCC_APB1_DIV_16 */
-#define RCC_APB1_DIV_16 						((rcc_apb1_prescaler_t) 0x04)
-
-/** @brief APB2 bus prescaler type definition @typedef rcc_apb2_prescaler_t */
-typedef rcc_bus_prescaler_t						rcc_apb2_prescaler_t;
-/** @brief APB2 division by 1 (no prescaling) @def RCC_APB2_DIV_1 */
-#define RCC_APB2_DIV_1 							((rcc_apb2_prescaler_t) 0x00)
-/** @brief APB2 division by 2 @def RCC_APB2_DIV_2 */
-#define RCC_APB2_DIV_2 							((rcc_apb2_prescaler_t) 0x01)
-/** @brief APB2 division by 4 @def RCC_APB2_DIV_4 */
-#define RCC_APB2_DIV_4 							((rcc_apb2_prescaler_t) 0x02)
-/** @brief APB2 division by 8 @def RCC_APB2_DIV_8 */
-#define RCC_APB2_DIV_8 							((rcc_apb2_prescaler_t) 0x03)
-/** @brief APB2 division by 16 @def RCC_APB2_DIV_16 */
-#define RCC_APB2_DIV_16 						((rcc_apb2_prescaler_t) 0x04)
-
-/** @brief RCC Bus @typedef rcc_bus_t */
-typedef uint8_t									rcc_bus_t;
-/** @brief AHB Bus @def RCC_AHB_BUS */
-#define RCC_AHB_BUS								((rcc_bus_t) 0x00)
-/** @brief APB1 Bus @def RCC_APB1_BUS */
-#define RCC_APB1_BUS							((rcc_bus_t) 0x01)
-/** @brief APB2 Bus @def RCC_APB2_BUS */
-#define RCC_APB2_BUS							((rcc_bus_t) 0x02)
-
-/**
- * @brief Bus Prescaler Configuration Structure
- * @typedef rcc_bus_config_t
- */
-typedef struct 
-{
-	/**
-	 * @brief AHB Bus Prescaler
-	 * @details
-	 * - AHB Prescaler Values Refer @ref RCC_AHB_DIV_1 "RCC_AHB_DIV_*"
-	 * - Max frequency = 72MHz
-	 * - AHB clock = SYSCLK / AHB prescaler
-	 */
-	rcc_ahb_prescaler_t AHB: 4;
-	
-	/**
-	 * @brief APB1 Bus Prescaler
-	 * @details  
-	 * - APB1 Prescaler Values Refer @ref RCC_APB1_DIV_1 "RCC_APB1_DIV_*"
-	 * - Max frequency = 36MHz
-	 * - APB1 clock = AHB clock / APB1 prescaler
-	 */
-	rcc_apb1_prescaler_t APB1: 3;
-	
-	/**
-	 * @brief APB2 Bus Prescaler
-	 * @details
-	 * - APB2 Prescaler Values Refer @ref RCC_APB2_DIV_1 "RCC_APB2_DIV_*"
-	 * - Max frequency = 72MHz  
-	 * - APB2 clock = AHB clock / APB2 prescaler
-	 */
-	rcc_apb2_prescaler_t APB2: 3;
-} rcc_bus_config_t;
-
-/**
- * @brief Convert driver AHB prescaler to low-level hardware value
- * @param[in] prescaler Driver AHB prescaler value (@ref RCC_AHB_DIV_1 "RCC_AHB_DIV_*")
- * @returns Low-level AHB prescaler value for hardware registers
- */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_AHBPrescaler(const rcc_ahb_prescaler_t prescaler)
-{
-    switch(prescaler)
-	{
-        case RCC_AHB_DIV_1:   return _RCC_AHB_DIV_1; break;
-        case RCC_AHB_DIV_2:   return _RCC_AHB_DIV_2; break;
-        case RCC_AHB_DIV_4:   return _RCC_AHB_DIV_4; break;
-        case RCC_AHB_DIV_8:   return _RCC_AHB_DIV_8; break;
-        case RCC_AHB_DIV_16:  return _RCC_AHB_DIV_16; break;
-        case RCC_AHB_DIV_64:  return _RCC_AHB_DIV_64; break;
-        case RCC_AHB_DIV_128: return _RCC_AHB_DIV_128; break;
-        case RCC_AHB_DIV_256: return _RCC_AHB_DIV_256; break;
-        case RCC_AHB_DIV_512: return _RCC_AHB_DIV_512; break;
-        default: return _RCC_AHB_DIV_1; break; // Safe fallback
-    }
-}
-
-/**
- * @brief Convert driver APB1 prescaler to low-level hardware value
- * @param[in] prescaler Driver APB1 prescaler value (@ref RCC_APB1_DIV_1 "RCC_APB1_DIV_*")
- * @returns Low-level APB1 prescaler value for hardware registers
- */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB1Prescaler(const rcc_apb1_prescaler_t prescaler)
-{
-    switch(prescaler)
-	{
-        case RCC_APB1_DIV_1:  return _RCC_APB1_DIV_1; break;
-        case RCC_APB1_DIV_2:  return _RCC_APB1_DIV_2; break;
-        case RCC_APB1_DIV_4:  return _RCC_APB1_DIV_4; break;
-        case RCC_APB1_DIV_8:  return _RCC_APB1_DIV_8; break;
-        case RCC_APB1_DIV_16: return _RCC_APB1_DIV_16; break;
-        default: return _RCC_APB1_DIV_1; break; // Safe fallback
-    }
-}
-
-/**
- * @brief Convert driver APB2 prescaler to low-level hardware value
- * @param[in] prescaler Driver APB2 prescaler value (@ref RCC_APB2_DIV_1 "RCC_APB2_DIV_*")
- * @returns Low-level APB2 prescaler value for hardware registers
- */
-__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_apb2_prescaler_t prescaler)
-{
-    switch(prescaler)
-	{
-        case RCC_APB2_DIV_1:  return _RCC_APB2_DIV_1; break;
-        case RCC_APB2_DIV_2:  return _RCC_APB2_DIV_2; break;
-        case RCC_APB2_DIV_4:  return _RCC_APB2_DIV_4; break;
-        case RCC_APB2_DIV_8:  return _RCC_APB2_DIV_8; break;
-        case RCC_APB2_DIV_16: return _RCC_APB2_DIV_16; break;
-        default: return _RCC_APB2_DIV_1; break; // Safe fallback
-    }
-}
-
-/**
- * @brief Convert low-level AHB prescaler to driver hardware value
- * @param[in] prescaler Low-level AHB prescaler value (@ref _RCC_AHB_DIV_1 "_RCC_AHB_DIV_*")
- * @returns Driver AHB prescaler value for driver layer
- */
-__STATIC_FORCEINLINE rcc_ahb_prescaler_t RCC_L2D_AHBPrescaler(const _rcc_bus_prescaler_t prescaler)
-{
-	switch(prescaler)
-	{
-		case _RCC_AHB_DIV_1:   return RCC_AHB_DIV_1; break;
-		case _RCC_AHB_DIV_2:   return RCC_AHB_DIV_2; break;
-		case _RCC_AHB_DIV_4:   return RCC_AHB_DIV_4; break;
-		case _RCC_AHB_DIV_8:   return RCC_AHB_DIV_8; break;
-		case _RCC_AHB_DIV_16:  return RCC_AHB_DIV_16; break;
-		case _RCC_AHB_DIV_64:  return RCC_AHB_DIV_64; break;
-		case _RCC_AHB_DIV_128: return RCC_AHB_DIV_128; break;
-		case _RCC_AHB_DIV_256: return RCC_AHB_DIV_256; break;
-		case _RCC_AHB_DIV_512: return RCC_AHB_DIV_512; break;
-		default: return RCC_AHB_DIV_1; break; // Safe fallback
-	}
-}
-
-/**
- * @brief Convert low-level APB1 prescaler to driver hardware value
- * @param[in] prescaler Low-level APB1 prescaler value (@ref _RCC_APB1_DIV_1 "_RCC_APB1_DIV_*")
- * @returns Driver APB1 prescaler value for driver layer
- */
-__STATIC_FORCEINLINE rcc_apb1_prescaler_t RCC_L2D_APB1Prescaler(const _rcc_bus_prescaler_t prescaler)
-{
-	switch(prescaler)
-	{
-		case _RCC_APB1_DIV_1:  return RCC_APB1_DIV_1; break;
-		case _RCC_APB1_DIV_2:  return RCC_APB1_DIV_2; break;
-		case _RCC_APB1_DIV_4:  return RCC_APB1_DIV_4; break;
-		case _RCC_APB1_DIV_8:  return RCC_APB1_DIV_8; break;
-		case _RCC_APB1_DIV_16: return RCC_APB1_DIV_16; break;
-		default: return RCC_APB1_DIV_1; break; // Safe fallback
-	}
-}
-
-/**
- * @brief Convert low-level APB2 prescaler to driver hardware value
- * @param[in] prescaler Low-level APB2 prescaler value (@ref _RCC_APB2_DIV_1 "_RCC_APB2_DIV_*")
- * @returns Driver APB2 prescaler value for driver layer
- */
-__STATIC_FORCEINLINE rcc_apb2_prescaler_t RCC_L2D_APB2Prescaler(const _rcc_bus_prescaler_t prescaler)
-{
-	switch(prescaler)
-	{
-		case _RCC_APB2_DIV_1:  return RCC_APB2_DIV_1; break;
-		case _RCC_APB2_DIV_2:  return RCC_APB2_DIV_2; break;
-		case _RCC_APB2_DIV_4:  return RCC_APB2_DIV_4; break;
-		case _RCC_APB2_DIV_8:  return RCC_APB2_DIV_8; break;
-		case _RCC_APB2_DIV_16: return RCC_APB2_DIV_16; break;
-		default: return RCC_APB2_DIV_1; break; // Safe fallback
-	}
-}
-
-/**
- * @brief Configure RCC Bus Prescalers
- * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
- * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
- */
-driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler);
-
-/**
- * @brief Retrieves the currently configured prescaler value for a specified bus
- * @param[in] rccBus The target bus to query (e.g., RCC_AHB_BUS). Refer to @ref rcc_bus_t.
- * @return The high-level prescaler setting. Refer to @ref rcc_bus_prescaler_t.
- * @note This is an inline helper function for performance.
- */
-rcc_bus_prescaler_t RCC_GetPrescaler(const rcc_bus_t rccBus);
-
-/**
- * @brief Get current bus clock frequency
- * @param[in] bus Target bus identifier (@ref rcc_bus_t)
- * @returns Current bus clock frequency in Hz
- * @note Calculates bus frequency based on core clock and bus prescaler
- * @note For AHB bus: returns frequency after AHB prescaler
- * @note For APB1/APB2 buses: returns frequency after respective APB prescalers
- * @note Uses right-shift operation for efficient division by prescaler value
- */
-_rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
-
-/** @} */ // RCC_03_Driver_03_BusPrescalerConfig
-
 /*---------------------------------------------- RCC PLL ----------------------------------------------*/
 /**
  * @brief    Driver PLL Configuration Types and Structure
- * @defgroup RCC_03_Driver_04_PLLConfig Driver PLL Configuration
+ * @defgroup RCC_03_Driver_02_PLLConfig Driver PLL Configuration
  * @ingroup  RCC_03_Driver
  * @details
  * - Type definitions and structure for PLL (Phase Locked Loop) configuration
@@ -786,7 +534,7 @@ __STATIC_FORCEINLINE rcc_pll_src_psc_t RCC_L2D_PLLSourcePrescaler(const _rcc_pll
  */
 __STATIC_FORCEINLINE rcc_pll_src_t RCC_GetPLLSource(void)
 {
-	return RCC_L2D_PLLSource((_rcc_pll_src_t)((__RCC_GetCFGR(RCC) & RCC_CFGR_PLLSRC_Msk) >> RCC_CFGR_PLLSRC_Pos));
+	return RCC_L2D_PLLSource((_rcc_pll_src_t)((__RCC_ReadCFGR(RCC) & RCC_CFGR_PLLSRC_Msk) >> RCC_CFGR_PLLSRC_Pos));
 }
 
 /**
@@ -797,7 +545,7 @@ __STATIC_FORCEINLINE rcc_pll_src_t RCC_GetPLLSource(void)
  */
 __STATIC_FORCEINLINE rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void)
 {
-	return RCC_L2D_PLLSourcePrescaler((_rcc_pll_src_psc_t)((__RCC_GetCFGR(RCC) & RCC_CFGR_PLLXTPRE_Msk) >> RCC_CFGR_PLLXTPRE_Pos));
+	return RCC_L2D_PLLSourcePrescaler((_rcc_pll_src_psc_t)((__RCC_ReadCFGR(RCC) & RCC_CFGR_PLLXTPRE_Msk) >> RCC_CFGR_PLLXTPRE_Pos));
 }
 
 /**
@@ -809,7 +557,251 @@ __STATIC_FORCEINLINE rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void)
  */
 _rcc_freq_t RCC_GetCoreClockFreq(void);
 
-/** @} */ // RCC_03_Driver_04_PLLConfig
+/** @} */ // RCC_03_Driver_02_PLLConfig
+
+/*---------------------------------------------- RCC Bus Prescaler ----------------------------------------------*/
+/**
+ * @brief    Driver Bus Prescaler Configuration Structure  
+ * @defgroup RCC_03_Driver_03_BusPrescalerConfig Driver Bus Prescaler Configuration
+ * @ingroup  RCC_03_Driver
+ * @details
+ * - Configuration structure for AHB, APB1, and APB2 bus prescaler
+ * - Each bus has specific maximum frequency limits
+ * - Used during system clock configuration
+ *
+ * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (RCC_CFGR)
+ * @{
+ */
+
+/** @brief RCC Bus @typedef rcc_bus_t */
+typedef uint8_t									rcc_bus_t;
+/** @brief AHB Bus @def RCC_AHB_BUS */
+#define RCC_AHB_BUS								((rcc_bus_t) 0x00)
+/** @brief APB1 Bus @def RCC_APB1_BUS */
+#define RCC_APB1_BUS							((rcc_bus_t) 0x01)
+/** @brief APB2 Bus @def RCC_APB2_BUS */
+#define RCC_APB2_BUS							((rcc_bus_t) 0x02)
+
+/** @brief Prescaler type definition @typedef rcc_bus_prescaler_t */
+typedef uint8_t									rcc_bus_prescaler_t;
+/** @brief AHB division by 1 (no prescaling) @def RCC_AHB_DIV_1 */
+#define RCC_AHB_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+/** @brief AHB division by 2 @def RCC_AHB_DIV_2 */
+#define RCC_AHB_DIV_2 							((rcc_bus_prescaler_t) 0x01)
+/** @brief AHB division by 4 @def RCC_AHB_DIV_4 */
+#define RCC_AHB_DIV_4 							((rcc_bus_prescaler_t) 0x02)
+/** @brief AHB division by 8 @def RCC_AHB_DIV_8 */
+#define RCC_AHB_DIV_8 							((rcc_bus_prescaler_t) 0x03)
+/** @brief AHB division by 16 @def RCC_AHB_DIV_16 */
+#define RCC_AHB_DIV_16 							((rcc_bus_prescaler_t) 0x04)
+/** @brief AHB division by 64 @def RCC_AHB_DIV_64 */
+#define RCC_AHB_DIV_64 							((rcc_bus_prescaler_t) 0x06)
+/** @brief AHB division by 128 @def RCC_AHB_DIV_128 */
+#define RCC_AHB_DIV_128 						((rcc_bus_prescaler_t) 0x07)
+/** @brief AHB division by 256 @def RCC_AHB_DIV_256 */
+#define RCC_AHB_DIV_256 						((rcc_bus_prescaler_t) 0x08)
+/** @brief AHB division by 512 @def RCC_AHB_DIV_512 */
+#define RCC_AHB_DIV_512 						((rcc_bus_prescaler_t) 0x09)
+/** @brief APB1 division by 1 (no prescaling) @def RCC_APB1_DIV_1 */
+#define RCC_APB1_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+/** @brief APB1 division by 2 @def RCC_APB1_DIV_2 */
+#define RCC_APB1_DIV_2 							((rcc_bus_prescaler_t) 0x01)
+/** @brief APB1 division by 4 @def RCC_APB1_DIV_4 */
+#define RCC_APB1_DIV_4 							((rcc_bus_prescaler_t) 0x02)
+/** @brief APB1 division by 8 @def RCC_APB1_DIV_8 */
+#define RCC_APB1_DIV_8 							((rcc_bus_prescaler_t) 0x03)
+/** @brief APB1 division by 16 @def RCC_APB1_DIV_16 */
+#define RCC_APB1_DIV_16 						((rcc_bus_prescaler_t) 0x04)
+/** @brief APB2 division by 1 (no prescaling) @def RCC_APB2_DIV_1 */
+#define RCC_APB2_DIV_1 							((rcc_bus_prescaler_t) 0x00)
+/** @brief APB2 division by 2 @def RCC_APB2_DIV_2 */
+#define RCC_APB2_DIV_2 							((rcc_bus_prescaler_t) 0x01)
+/** @brief APB2 division by 4 @def RCC_APB2_DIV_4 */
+#define RCC_APB2_DIV_4 							((rcc_bus_prescaler_t) 0x02)
+/** @brief APB2 division by 8 @def RCC_APB2_DIV_8 */
+#define RCC_APB2_DIV_8 							((rcc_bus_prescaler_t) 0x03)
+/** @brief APB2 division by 16 @def RCC_APB2_DIV_16 */
+#define RCC_APB2_DIV_16 						((rcc_bus_prescaler_t) 0x04)
+
+/**
+ * @brief Bus Prescaler Configuration Structure
+ * @typedef rcc_bus_config_t
+ */
+typedef struct 
+{
+	/**
+	 * @brief AHB Bus Prescaler
+	 * @details
+	 * - AHB Prescaler Values Refer @ref RCC_AHB_DIV_1 "RCC_AHB_DIV_*"
+	 * - Max frequency = 72MHz
+	 * - AHB clock = SYSCLK / AHB prescaler
+	 */
+	rcc_bus_prescaler_t AHB: 4;
+	
+	/**
+	 * @brief APB1 Bus Prescaler
+	 * @details  
+	 * - APB1 Prescaler Values Refer @ref RCC_APB1_DIV_1 "RCC_APB1_DIV_*"
+	 * - Max frequency = 36MHz
+	 * - APB1 clock = AHB clock / APB1 prescaler
+	 */
+	rcc_bus_prescaler_t APB1: 3;
+	
+	/**
+	 * @brief APB2 Bus Prescaler
+	 * @details
+	 * - APB2 Prescaler Values Refer @ref RCC_APB2_DIV_1 "RCC_APB2_DIV_*"
+	 * - Max frequency = 72MHz  
+	 * - APB2 clock = AHB clock / APB2 prescaler
+	 */
+	rcc_bus_prescaler_t APB2: 3;
+} rcc_bus_config_t;
+
+/**
+ * @brief Convert driver AHB prescaler to low-level hardware value
+ * @param[in] prescaler Driver AHB prescaler value (@ref RCC_AHB_DIV_1 "RCC_AHB_DIV_*")
+ * @returns Low-level AHB prescaler value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_AHBPrescaler(const rcc_bus_prescaler_t prescaler)
+{
+    switch(prescaler)
+	{
+        case RCC_AHB_DIV_1:   return _RCC_AHB_DIV_1; break;
+        case RCC_AHB_DIV_2:   return _RCC_AHB_DIV_2; break;
+        case RCC_AHB_DIV_4:   return _RCC_AHB_DIV_4; break;
+        case RCC_AHB_DIV_8:   return _RCC_AHB_DIV_8; break;
+        case RCC_AHB_DIV_16:  return _RCC_AHB_DIV_16; break;
+        case RCC_AHB_DIV_64:  return _RCC_AHB_DIV_64; break;
+        case RCC_AHB_DIV_128: return _RCC_AHB_DIV_128; break;
+        case RCC_AHB_DIV_256: return _RCC_AHB_DIV_256; break;
+        case RCC_AHB_DIV_512: return _RCC_AHB_DIV_512; break;
+        default: return _RCC_AHB_DIV_1; break; // Safe fallback
+    }
+}
+
+/**
+ * @brief Convert driver APB1 prescaler to low-level hardware value
+ * @param[in] prescaler Driver APB1 prescaler value (@ref RCC_APB1_DIV_1 "RCC_APB1_DIV_*")
+ * @returns Low-level APB1 prescaler value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB1Prescaler(const rcc_bus_prescaler_t prescaler)
+{
+    switch(prescaler)
+	{
+        case RCC_APB1_DIV_1:  return _RCC_APB1_DIV_1; break;
+        case RCC_APB1_DIV_2:  return _RCC_APB1_DIV_2; break;
+        case RCC_APB1_DIV_4:  return _RCC_APB1_DIV_4; break;
+        case RCC_APB1_DIV_8:  return _RCC_APB1_DIV_8; break;
+        case RCC_APB1_DIV_16: return _RCC_APB1_DIV_16; break;
+        default: return _RCC_APB1_DIV_1; break; // Safe fallback
+    }
+}
+
+/**
+ * @brief Convert driver APB2 prescaler to low-level hardware value
+ * @param[in] prescaler Driver APB2 prescaler value (@ref RCC_APB2_DIV_1 "RCC_APB2_DIV_*")
+ * @returns Low-level APB2 prescaler value for hardware registers
+ */
+__STATIC_FORCEINLINE _rcc_bus_prescaler_t RCC_D2L_APB2Prescaler(const rcc_bus_prescaler_t prescaler)
+{
+    switch(prescaler)
+	{
+        case RCC_APB2_DIV_1:  return _RCC_APB2_DIV_1; break;
+        case RCC_APB2_DIV_2:  return _RCC_APB2_DIV_2; break;
+        case RCC_APB2_DIV_4:  return _RCC_APB2_DIV_4; break;
+        case RCC_APB2_DIV_8:  return _RCC_APB2_DIV_8; break;
+        case RCC_APB2_DIV_16: return _RCC_APB2_DIV_16; break;
+        default: return _RCC_APB2_DIV_1; break; // Safe fallback
+    }
+}
+
+/**
+ * @brief Convert low-level AHB prescaler to driver hardware value
+ * @param[in] prescaler Low-level AHB prescaler value (@ref _RCC_AHB_DIV_1 "_RCC_AHB_DIV_*")
+ * @returns Driver AHB prescaler value for driver layer
+ */
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_L2D_AHBPrescaler(const _rcc_bus_prescaler_t prescaler)
+{
+	switch(prescaler)
+	{
+		case _RCC_AHB_DIV_1:   return RCC_AHB_DIV_1; break;
+		case _RCC_AHB_DIV_2:   return RCC_AHB_DIV_2; break;
+		case _RCC_AHB_DIV_4:   return RCC_AHB_DIV_4; break;
+		case _RCC_AHB_DIV_8:   return RCC_AHB_DIV_8; break;
+		case _RCC_AHB_DIV_16:  return RCC_AHB_DIV_16; break;
+		case _RCC_AHB_DIV_64:  return RCC_AHB_DIV_64; break;
+		case _RCC_AHB_DIV_128: return RCC_AHB_DIV_128; break;
+		case _RCC_AHB_DIV_256: return RCC_AHB_DIV_256; break;
+		case _RCC_AHB_DIV_512: return RCC_AHB_DIV_512; break;
+		default: return RCC_AHB_DIV_1; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Convert low-level APB1 prescaler to driver hardware value
+ * @param[in] prescaler Low-level APB1 prescaler value (@ref _RCC_APB1_DIV_1 "_RCC_APB1_DIV_*")
+ * @returns Driver APB1 prescaler value for driver layer
+ */
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_L2D_APB1Prescaler(const _rcc_bus_prescaler_t prescaler)
+{
+	switch(prescaler)
+	{
+		case _RCC_APB1_DIV_1:  return RCC_APB1_DIV_1; break;
+		case _RCC_APB1_DIV_2:  return RCC_APB1_DIV_2; break;
+		case _RCC_APB1_DIV_4:  return RCC_APB1_DIV_4; break;
+		case _RCC_APB1_DIV_8:  return RCC_APB1_DIV_8; break;
+		case _RCC_APB1_DIV_16: return RCC_APB1_DIV_16; break;
+		default: return RCC_APB1_DIV_1; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Convert low-level APB2 prescaler to driver hardware value
+ * @param[in] prescaler Low-level APB2 prescaler value (@ref _RCC_APB2_DIV_1 "_RCC_APB2_DIV_*")
+ * @returns Driver APB2 prescaler value for driver layer
+ */
+__STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_L2D_APB2Prescaler(const _rcc_bus_prescaler_t prescaler)
+{
+	switch(prescaler)
+	{
+		case _RCC_APB2_DIV_1:  return RCC_APB2_DIV_1; break;
+		case _RCC_APB2_DIV_2:  return RCC_APB2_DIV_2; break;
+		case _RCC_APB2_DIV_4:  return RCC_APB2_DIV_4; break;
+		case _RCC_APB2_DIV_8:  return RCC_APB2_DIV_8; break;
+		case _RCC_APB2_DIV_16: return RCC_APB2_DIV_16; break;
+		default: return RCC_APB2_DIV_1; break; // Safe fallback
+	}
+}
+
+/**
+ * @brief Configure RCC Bus Prescaler
+ * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
+ * @return Status of operation
+ * @return - `DRIVER_FAIL`: Failure
+ * @return - `DRIVER_SUCCESS`: Success
+ */
+driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler);
+
+/**
+ * @brief Retrieves the currently configured prescaler value for a specified bus
+ * @param[in] rccBus The target bus to query (e.g., RCC_AHB_BUS). Refer to @ref rcc_bus_t.
+ * @return The high-level prescaler setting. Refer to @ref rcc_bus_prescaler_t.
+ * @note This is an inline helper function for performance.
+ */
+rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t rccBus);
+
+/**
+ * @brief Get current bus clock frequency
+ * @param[in] bus Target bus identifier (@ref rcc_bus_t)
+ * @returns Current bus clock frequency in Hz
+ * @note Calculates bus frequency based on core clock and bus prescaler
+ * @note For AHB bus: returns frequency after AHB prescaler
+ * @note For APB1/APB2 buses: returns frequency after respective APB prescaler
+ * @note Uses right-shift operation for efficient division by prescaler value
+ */
+_rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
+
+/** @} */ // RCC_03_Driver_03_BusPrescalerConfig
 
 /*---------------------------------------------- RCC Component ----------------------------------------------*/
 /**
@@ -877,7 +869,7 @@ typedef struct
 	/**
 	 * @brief Bus Prescaler Configuration
 	 * @details
-	 * - Configuration for AHB, APB1, and APB2 bus prescalers
+	 * - Configuration for AHB, APB1, and APB2 bus prescaler
 	 * - Refer @ref rcc_bus_prescaler_config_t for details
 	 */
 	rcc_bus_config_t bus;
@@ -885,7 +877,7 @@ typedef struct
 	/**
 	 * @brief Components Prescaler Configuration
 	 * @details
-	 * - Peripheral component prescalers (ADC, USB)
+	 * - Peripheral component prescaler (ADC, USB)
 	 * - Refer @ref rcc_component_config_t for details
 	 */
 	rcc_component_config_t component;
@@ -904,7 +896,7 @@ __STATIC_FORCEINLINE _rcc_component_prescaler_t RCC_D2L_ADCPrescaler(const rcc_c
         case RCC_ADC_DIV_4: return _RCC_ADC_DIV_4; break;
         case RCC_ADC_DIV_6: return _RCC_ADC_DIV_6; break;
         case RCC_ADC_DIV_8: return _RCC_ADC_DIV_8; break;
-        default: return _RCC_ADC_DIV_2; break; // Safe fallback
+        default: return _RCC_ADC_DIV_6; break; // Safe fallback
     }
 }
 
@@ -956,7 +948,7 @@ __STATIC_FORCEINLINE rcc_component_prescaler_t RCC_L2D_USBPrescaler(const _rcc_c
 }
 
 /**
- * @brief Configure RCC Component Prescalers
+ * @brief Configure RCC Component prescaler
  * @param[in] rccComponentPrescaler Pointer to Component Prescaler Configuration Structure
  * @return Status of operation
  * @return - `DRIVER_FAIL`: Failure
@@ -989,12 +981,12 @@ typedef struct
 	/**
 	 * @brief Prescaler Configuration
 	 * @details
-	 * - Combined configuration for all clock prescalers
-	 * - Includes bus prescalers (AHB, APB1, APB2) and component prescalers (ADC, USB)
+	 * - Combined configuration for all clock prescaler
+	 * - Includes bus prescaler (AHB, APB1, APB2) and component prescaler (ADC, USB)
 	 * - Controls clock distribution throughout the system
 	 * - Refer @ref rcc_prescaler_config_t for detailed structure
 	 */
-	rcc_prescaler_config_t prescaler;
+	volatile rcc_prescaler_config_t prescaler;
 	
 	/**
 	 * @brief System Clock Configuration
@@ -1002,7 +994,7 @@ typedef struct
 	 * - Main system clock source and PLL configuration
 	 * - Refer @ref rcc_sys_clk_config_t for details
 	 */
-	rcc_sys_clk_config_t system;
+	volatile rcc_sys_clk_config_t system;
 	
 	/**
 	 * @brief Flash Configuration
@@ -1010,11 +1002,11 @@ typedef struct
 	 * - Flash memory wait states and prefetch buffer configuration
 	 * - Refer @ref rcc_flash_config_t for details
 	 */
-	rcc_flash_config_t flash;
+	volatile rcc_flash_config_t flash;
 } rcc_config_t;
 
 /**
- * @brief Configures the system clock and bus prescalers.
+ * @brief Configures the system clock and bus prescaler.
  *
  * Initializes the RCC to the configuration specified in @p rcc,
  * setting up Flash latency, enabling required clock sources (HSI/HSE/PLL),
@@ -1038,7 +1030,7 @@ driver_status_t RCC_Config(rcc_config_t* const rcc);
  * @brief Sets default flash configuration for 72MHz
  * @param flashConfig Pointer to @ref rcc_flash_config_t "Flash Configuration Structure"
  */
-void RCC_72MHz_FlashDefaultConfig(rcc_flash_config_t* const flashConfig);
+extern void RCC_72MHz_FlashDefaultConfig(rcc_flash_config_t* const flashConfig);
 
 /**
  * @brief PLL Default Configuration for 72MHz
@@ -1065,7 +1057,7 @@ void RCC_72MHz_BusPrescalerDefaultConfig(rcc_bus_config_t* const busPrescalerCon
 void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_config_t* const componentPrescalerConfig);
 
 /**
- * @brief Sets Prescalers for 72MHz
+ * @brief Sets prescaler for 72MHz
  * @param prescalerConfig Pointer to @ref rcc_prescaler_config_t "Component Prescaler Configuration Structure"
  */
 void RCC_72MHz_PrescalerDefaultConfig(rcc_prescaler_config_t* const prescalerConfig);

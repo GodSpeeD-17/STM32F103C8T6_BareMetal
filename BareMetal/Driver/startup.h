@@ -42,21 +42,21 @@
 
 /*----------------------------------- Linker Script --------------------------------------------*/
 // Start address of initialized data in Flash
-extern uint32_t _sidata;
+extern volatile uint32_t _sidata;
 // Start of .data in RAM
-extern uint32_t _sdata;
+extern volatile uint32_t _sdata;
 // End of .data in RAM
-extern uint32_t _edata;
+extern volatile uint32_t _edata;
 // Start of .bss
-extern uint32_t _sbss;
+extern volatile uint32_t _sbss;
 // End of .bss
-extern uint32_t _ebss;
+extern volatile uint32_t _ebss;
 // Top of stack from linker
-extern uint32_t _estack;
+extern volatile uint32_t _estack;
 // Start of heap
-extern uint8_t _sheap;
+extern volatile uint8_t _sheap;
 // End of heap
-extern uint8_t _eheap;
+extern volatile uint8_t _eheap;
 
 /*-------------------------------- Function Prototypes -----------------------------*/
 /**
@@ -65,7 +65,7 @@ extern uint8_t _eheap;
 __attribute__((weak, naked)) void Default_Handler(void)
 {
 	// Infinite Loop
-	while(1);
+	while(1) __ASM volatile("nop"); // Prevent Compiler Optimization
 }
 
 /**

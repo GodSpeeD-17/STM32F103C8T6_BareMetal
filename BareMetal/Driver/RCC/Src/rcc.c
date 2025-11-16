@@ -63,11 +63,11 @@ typedef struct
 		struct
 		{
 			/** @brief AHB prescaler as shift count - /1,/2,/4,...,/512 */
-			rcc_ahb_prescaler_t AHB : 4;
+			rcc_bus_prescaler_t AHB : 4;
 			/** @brief APB1 prescaler as shift count - /1,/2,/4,/8,/16 */
-			rcc_apb1_prescaler_t APB1 : 3;
+			rcc_bus_prescaler_t APB1 : 3;
 			/** @brief APB2 prescaler as shift count - /1,/2,/4,/8,/16 */
-			rcc_apb2_prescaler_t APB2 : 3;
+			rcc_bus_prescaler_t APB2 : 3;
 		} bus;
 		
 		/** @brief Component Prescalers */
@@ -154,7 +154,7 @@ _rcc_freq_t RCC_GetCoreClockFreq(void)
  * @return The high-level prescaler setting. Refer to @ref rcc_bus_prescaler_t.
  * @note This is an inline helper function for performance.
  */
-rcc_bus_prescaler_t RCC_GetPrescaler(const rcc_bus_t rccBus)
+rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t rccBus)
 {
 	uint32_t reg = __RCC_ReadCFGR(RCC);
 	switch(rccBus)
@@ -184,9 +184,9 @@ rcc_bus_prescaler_t RCC_GetPrescaler(const rcc_bus_t rccBus)
  */
 _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 {
-	_rcc_freq_t ahbFreqHz = RCC_GetCoreClockFreq();
-	ahbFreqHz >>= RCC_GetPrescaler(bus);
-	return ahbFreqHz;
+	_rcc_freq_t busFreqHz = RCC_GetCoreClockFreq();
+	busFreqHz >>= RCC_GetBusPrescaler(bus);
+	return busFreqHz;
 }
 
 /**
@@ -272,58 +272,60 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 	// Configure Flash Settings First (critical for timing)
 	RCC_ConfigFlash(&rcc->flash);
 
-	// Pipeline HSE Configuration (if needed)
-	if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || (rcc->system.clk_src == RCC_SYS_CLK_PLL && rcc->system.pll.source == RCC_PLL_SRC_HSE))
-	{
-		RCC_ControlHSE(DRIVER_STATE_ON);
-	}
-
 	reg = __RCC_ReadCFGR(RCC);
 	// Bus Prescaler
-	reg = _RCC_StageBusPrescaler(
-		RCC_D2L_AHBPrescaler(rcc->prescaler.bus.AHB),
-		RCC_D2L_APB1Prescaler(rcc->prescaler.bus.APB1),
-		RCC_D2L_APB2Prescaler(rcc->prescaler.bus.APB2),
-		reg
-	);
+	_rcc_bus_prescaler_t ahb  = RCC_D2L_AHBPrescaler(rcc->prescaler.bus.AHB);
+	_rcc_bus_prescaler_t apb1 = RCC_D2L_APB1Prescaler(rcc->prescaler.bus.APB1);
+	_rcc_bus_prescaler_t apb2 = RCC_D2L_APB2Prescaler(rcc->prescaler.bus.APB2);
+	reg = _RCC_StageBusPrescaler(ahb, apb1, apb2, reg);
 	// Component Prescaler
-	reg = _RCC_StageComponentPrescaler(
-		RCC_D2L_ADCPrescaler(rcc->prescaler.component.ADC),
-		RCC_D2L_USBPrescaler(rcc->prescaler.component.USB),
-		reg
-	);
+	_rcc_component_prescaler_t adcPrescaler = RCC_D2L_ADCPrescaler(rcc->prescaler.component.ADC);
+	_rcc_component_prescaler_t usbPrescaler = RCC_D2L_USBPrescaler(rcc->prescaler.component.USB);
+	reg = _RCC_StageComponentPrescaler(adcPrescaler, usbPrescaler, reg);
 	// PLL Configuration
 	if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
 	{
-		reg = _RCC_StagePLLParameters(
-			rcc->system.pll.source,
-			rcc->system.pll.source_prescaler,
-			rcc->system.pll.multiplication_factor,
-			reg
-		);			
-	}
-	// System Clock Source
-	reg = _RCC_StageSystemClockSource(rcc->system.clk_src, reg);
-
-	// Pre-requisite compatibility
-	if(rcc->system.clk_src != RCC_SYS_CLK_HSI)
-	{
-		// HSE ready?
-		while(RCC_HSEReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
-		// PLL?
-		if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
-		{
-			// Switch PLL ON
-			RCC_ControlPLL(DRIVER_STATE_ON);
-			// PLL ready?
-			while(RCC_PLLReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
-		}
+		_rcc_pll_src_t pllSrc = RCC_D2L_PLLSource(rcc->system.pll.source);
+		_rcc_pll_src_psc_t pllSrcPsc = RCC_D2L_PLLSourcePrescaler(rcc->system.pll.source_prescaler);
+		_rcc_pll_mul_t pllMulFac = RCC_D2L_PLLMultiplication(rcc->system.pll.multiplication_factor);
+		reg = _RCC_StagePLLParameters(pllSrc, pllSrcPsc, pllMulFac, reg);
 	}
 	
 	// RCC Configuration Register Write
 	__RCC_WriteCFGR(RCC, reg);
-	// Validate System Clock Source
+
+	// Ensuring reliability of clock source switch
+	if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || ((rcc->system.clk_src == RCC_SYS_CLK_PLL) && (rcc->system.pll.source == RCC_PLL_SRC_HSE)))
+	{
+		// HSE ready?
+		RCC_ControlHSE(DRIVER_STATE_ON);
+		while(RCC_HSEReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
+	}
+
+	// PLL?
+	if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
+	{
+		// Switch PLL ON
+		RCC_ControlPLL(DRIVER_STATE_ON);
+		// PLL ready?
+		while(RCC_PLLReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
+	}
+
+	// System Clock Source
+	reg = __RCC_ReadCFGR(RCC);
+	_rcc_sys_clk_t sysClk = RCC_D2L_SystemClockSource(rcc->system.clk_src);
+	reg = _RCC_StageSystemClockSource(sysClk, reg);
+	__RCC_WriteCFGR(RCC, reg);
 	while(RCC_GetSysClkSrc() != rcc->system.clk_src) __ASM volatile("nop"); // Prevent compiler optimization
+
+	// HSI Required?
+	if((rcc->system.clk_src != RCC_SYS_CLK_HSI) || (rcc->system.clk_src == RCC_SYS_CLK_PLL && rcc->system.pll.source != RCC_PLL_SRC_HSI))
+	{
+		RCC_ControlHSI(DRIVER_STATE_OFF);
+		while(RCC_HSIReady() != DRIVER_STATE_BUSY) __ASM volatile("nop"); // Prevent compiler optimization
+	}
+
+	// Return Success
 	return DRIVER_SUCCESS;
 }
 
@@ -392,7 +394,7 @@ void RCC_72MHz_ComponentPrescalerDefaultConfig(rcc_component_config_t* const com
 }
 
 /**
- * @brief Sets Prescalers for 72MHz
+ * @brief Set Prescaler for 72MHz
  * @param prescalerConfig Pointer to @ref rcc_prescaler_config_t "Component Prescaler Configuration Structure"
  */
 void RCC_72MHz_PrescalerDefaultConfig(rcc_prescaler_config_t* const prescalerConfig)
