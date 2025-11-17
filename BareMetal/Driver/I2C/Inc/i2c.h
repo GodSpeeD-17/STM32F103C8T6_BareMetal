@@ -17,7 +17,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @addtogroup I2C_03_Driver
+ * @defgroup I2C_03_Driver I2C Driver
+ * @ingroup I2C
  * @{
  */
 
@@ -149,9 +150,6 @@ typedef uint8_t									i2c_protocol_ack_t;
  *
  * @see Reference Manual RM0008 - Section 24.4.6 Clock stretching
  * @{
- */
-
-/**
  * \section I2C_Driver_ProtocolStretch_Definitions I2C Driver Clock Stretching Definitions
  * \brief I2C Clock Stretching Configuration
  */
@@ -333,6 +331,50 @@ typedef struct
 } smbus_protocol_t;
 
 /** @} */ // I2C_03_Driver_07_SMBusProtocol
+
+/*---------------------------------- Address Configuration ----------------------------------*/
+
+/** @brief I2C addressing mode type definition @typedef i2c_address_mode_t */
+typedef uint8_t									i2c_address_mode_t;
+/** @brief 7-bit addressing mode (0x08-0x77) @def I2C_ADDRESS_MODE_7BIT */
+#define I2C_ADDRESS_MODE_7BIT					((i2c_address_mode_t)(0x00))
+/** @brief 10-bit addressing mode (0x000-0x3FF) @def I2C_ADDRESS_MODE_10BIT */
+#define I2C_ADDRESS_MODE_10BIT					((i2c_address_mode_t)(0x01))
+
+/** @brief I2C dual addressing mode type definition @typedef i2c_dual_address_t */
+typedef uint8_t									i2c_dual_address_t;
+/** @brief Single address recognition mode @def I2C_DUAL_ADDRESS_DISABLE */
+#define I2C_DUAL_ADDRESS_DISABLE				((i2c_dual_address_t)(0x00))
+/** @brief Dual address recognition mode @def I2C_DUAL_ADDRESS_ENABLE */
+#define I2C_DUAL_ADDRESS_ENABLE					((i2c_dual_address_t)(0x01))
+
+/** @brief I2C general call recognition type definition @typedef i2c_general_call_t */
+typedef uint8_t									i2c_general_call_t;
+/** @brief Ignore general call address (0x00) @def I2C_GENERAL_CALL_DISABLE */
+#define I2C_GENERAL_CALL_DISABLE				((i2c_general_call_t)(0x00))
+/** @brief Respond to general call address (0x00) @def I2C_GENERAL_CALL_ENABLE */
+#define I2C_GENERAL_CALL_ENABLE					((i2c_general_call_t)(0x01))
+
+/** @brief I2C Address @typedef i2c_address_t */
+typedef uint16_t 								i2c_address_t;
+
+/**
+ * @brief I2C Address Configuration (valid for Slave mode)
+ * @typedef i2c_address_config_t
+ */
+typedef struct
+{
+	/** @brief Primary own address */
+	i2c_address_t addr1;
+	/** @brief Secondary address (if dual address enabled) */
+	i2c_address_t addr2;
+	/** @brief 7-bit or 10-bit addressing mode */
+	i2c_address_mode_t addr_mode : 1;
+	/** @brief Enable secondary address recognition */
+	i2c_dual_address_t dual_addr	: 1;
+	/** @brief Enable general call recognition */
+	i2c_general_call_t gen_call	: 1;
+} i2c_slave_address_config_t;
 
 
 /** @} */ // I2C_03_Driver

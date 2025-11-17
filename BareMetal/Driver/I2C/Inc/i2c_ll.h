@@ -1,7 +1,7 @@
 /**
  * @file i2c_ll.h
  * @author Shrey Shah
- * @brief 
+ * @brief I2C Low Level Driver Header File
  * @version v1.0
  * @date 16-11-2025
  */
@@ -581,7 +581,8 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
 // ======================================================================================================
 
 /**
- * @addtogroup I2C_02_LL
+ * @defgroup I2C_02_LL I2C Low Level APIs
+ * @ingroup I2C
  * @{
  */
 
