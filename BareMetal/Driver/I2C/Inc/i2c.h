@@ -11,6 +11,7 @@
 
 // Includes
 #include "i2c_ll.h"
+#include "rcc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +44,10 @@ typedef uint8_t									i2c_t;
 #define I2C_1									((i2c_t) (0x00))
 /** @brief I2C2 peripheral instance @def I2C_2 */
 #define I2C_2									((i2c_t) (0x01))
+
+
+// TODO: Peripheral Instance Mapping Function
+
 
 /** @} */ // I2C_03_Driver_01_PeripheralInstances
 

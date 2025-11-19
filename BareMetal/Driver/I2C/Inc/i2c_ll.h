@@ -586,7 +586,51 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
  * @{
  */
 
- 
+/**
+ * @defgroup I2C_02_LL_01_Clock I2C Clock Control APIs
+ * @ingroup I2C_02_LL
+ * @brief I2C Clock Control Functions
+ * @{
+ */
+
+// TODO: Need to create mask functions (Refer gpio_ll.h for reference) 
+
+__STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
+{
+	if(I2Cx == I2C1) __RCC_SetAPB1ENR(RCC, RCC_APB1ENR_I2C1EN);
+	else if(I2Cx == I2C2) __RCC_SetAPB1ENR(RCC, RCC_APB1ENR_I2C2EN);
+}
+
+__STATIC_FORCEINLINE _I2C_DisableClock(I2C_TypeDef* const I2Cx)
+{
+	if(I2Cx == I2C1) __RCC_ClearAPB1ENR(RCC, RCC_APB1ENR_I2C1EN);
+	else if(I2Cx == I2C2) __RCC_ClearAPB1ENR(RCC, RCC_APB1ENR_I2C2EN);
+}
+
+/** @} */ // I2C_02_LL_01_Clock
+
+/**
+ * @defgroup I2C_02_LL_02_Peripheral I2C Peripheral Control APIs
+ * @ingroup I2C_02_LL
+ * @brief I2C Peripheral Control Functions
+ * @{
+ */
+
+// TODO: Need to create mask functions (Refer gpio_ll.h for reference)  
+
+__STATIC_FORCEINLINE _I2C_Enable(I2C_TypeDef* const I2Cx)
+{
+	if(I2Cx == I2C1) __I2C_SetCR1(I2C1, I2C_CR1_PE);
+	else if(I2Cx == I2C2) __I2C_SetCR1(I2C2, I2C_CR1_PE);
+}
+
+__STATIC_FORCEINLINE _I2C_Disable(I2C_TypeDef* const I2Cx)
+{
+	if(I2Cx == I2C1) __I2C_ClearCR1(I2C1, I2C_CR1_PE);
+	else if(I2Cx == I2C2) __I2C_ClearCR1(I2C2, I2C_CR1_PE);
+}
+
+/** @} */ // I2C_02_LL_02_Peripheral
 
 /** @} */ // I2C_02_LL
 
