@@ -47,10 +47,18 @@ typedef uint8_t									i2c_t;
 /** @} */ // I2C_03_Driver_01_PeripheralInstances
 
 /*---------------------------------------------- I2C Protocol Configuration ----------------------------------------------*/ 
+
+/**
+ * @defgroup I2C_03_Driver_02_Protocol I2C Protocol Configuration Structure
+ * @ingroup I2C_03_Driver
+ * @brief I2C Protocol Configuration
+ * @{
+ */
+
 /**
  * @brief    I2C Protocol Speed Mode Configuration
- * @defgroup I2C_03_Driver_02_ProtocolSpeedMode I2C Protocol Speed Mode
- * @ingroup  I2C_03_Driver
+ * @defgroup I2C_03_Driver_02_Protocol_01_SpeedMode I2C Protocol Speed Mode
+ * @ingroup  I2C_03_Driver_02_Protocol
  * @details
  * - Defines I2C communication speed modes (Standard Mode and Fast Mode)
  * - Standard Mode: Up to 100 kHz operation
@@ -58,7 +66,7 @@ typedef uint8_t									i2c_t;
  * - Selection depends on application requirements and pull-up resistor characteristics
  *
  * @see I2C Timing Specifications in Reference Manual RM0008 - Section 24.4
- * @see @ref I2C_03_Driver_03_ProtocolSpeedFMDuty for Fast Mode duty cycle options
+ * @see @ref I2C_03_Driver_02_Protocol_02_SpeedFMDuty for Fast Mode duty cycle options
  * @{
  */
 
@@ -74,13 +82,13 @@ typedef uint8_t									i2c_protocol_speed_mode_t;
 /** @brief Fast Mode (up to 400 kHz) @def I2C_PROTOCOL_SPEED_MODE_FM */
 #define I2C_PROTOCOL_SPEED_MODE_FM				((i2c_protocol_speed_mode_t) (0x01))
 
-/** @} */ // I2C_03_Driver_02_ProtocolSpeedMode
+/** @} */ // I2C_03_Driver_02_Protocol_01_SpeedMode
 
 /*---------------------------------------------- I2C Fast Mode Duty Cycle ----------------------------------------------*/ 
 /**
  * @brief    I2C Fast Mode Duty Cycle Configuration
- * @defgroup I2C_03_Driver_03_ProtocolSpeedFMDuty I2C Fast Mode Duty Cycle
- * @ingroup  I2C_03_Driver
+ * @defgroup I2C_03_Driver_02_Protocol_02_SpeedFMDuty I2C Fast Mode Duty Cycle
+ * @ingroup  I2C_03_Driver_02_Protocol
  * @details
  * - Defines duty cycle options for I2C Fast Mode operation
  * - Controls the Thigh/Tlow ratio for SCL signal in Fast Mode
@@ -91,7 +99,7 @@ typedef uint8_t									i2c_protocol_speed_mode_t;
  * - 16:9 duty cycle: Thigh = 16/9 × Tlow (64% duty)
  *
  * @see Reference Manual RM0008 - Section 24.4.5 I2C clock generation
- * @see @ref I2C_03_Driver_02_ProtocolSpeedMode for speed mode selection
+ * @see @ref I2C_03_Driver_02_Protocol_01_SpeedMode for speed mode selection
  * @{
  */
 
@@ -106,13 +114,13 @@ typedef uint8_t									i2c_protocol_speed_fm_duty_t;
 /** @brief 16:9 duty cycle (Thigh = 16/9 × Tlow) @def I2C_PROTOCOL_SPEED_FM_DUTY_16_9 */
 #define I2C_PROTOCOL_SPEED_FM_DUTY_16_9			((i2c_protocol_speed_fm_duty_t) (0x01))
 
-/** @} */ // I2C_03_Driver_03_ProtocolSpeedFMDuty
+/** @} */ // I2C_03_Driver_02_Protocol_02_SpeedFMDuty
 
 /*---------------------------------------------- I2C Acknowledgment Configuration ----------------------------------------------*/ 
 /**
  * @brief    I2C Acknowledgment Configuration
- * @defgroup I2C_03_Driver_04_ProtocolAck I2C Acknowledgment Control
- * @ingroup  I2C_03_Driver
+ * @defgroup I2C_03_Driver_02_Protocol_03_Ack I2C Acknowledgment Control
+ * @ingroup  I2C_03_Driver_02_Protocol
  * @details
  * - Controls I2C acknowledgment generation for slave devices
  * - When enabled, slave generates ACK after each byte reception
@@ -135,13 +143,13 @@ typedef uint8_t									i2c_protocol_ack_t;
 /** @brief Acknowledgment enabled @def I2C_PROTOCOL_ACK_ENABLE */
 #define I2C_PROTOCOL_ACK_ENABLE					((i2c_protocol_ack_t) (0x01))
 
-/** @} */ // I2C_03_Driver_04_ProtocolAck
+/** @} */ // I2C_03_Driver_02_Protocol_03_Ack
 
 /*---------------------------------------------- I2C Clock Stretching Configuration ----------------------------------------------*/ 
 /**
  * @brief    I2C Clock Stretching Configuration
- * @defgroup I2C_03_Driver_05_ProtocolStretch I2C Clock Stretching Control
- * @ingroup  I2C_03_Driver
+ * @defgroup I2C_03_Driver_02_Protocol_04_Stretch I2C Clock Stretching Control
+ * @ingroup  I2C_03_Driver_02_Protocol
  * @details
  * - Controls I2C clock stretching capability for slave devices
  * - When enabled, slave can hold SCL low to delay communication
@@ -161,13 +169,13 @@ typedef uint8_t									i2c_protocol_stretch_t;
 /** @brief Clock stretching enabled @def I2C_PROTOCOL_STRETCH_ENABLE */
 #define I2C_PROTOCOL_STRETCH_ENABLE				((i2c_protocol_stretch_t) (0x01))
 
-/** @} */ // I2C_03_Driver_05_ProtocolStretch
+/** @} */ // I2C_03_Driver_02_Protocol_04_Stretch
 
 /*---------------------------------------------- I2C Protocol Structure ----------------------------------------------*/ 
 /**
  * @brief    I2C Protocol Configuration Structure
- * @defgroup I2C_03_Driver_06_ProtocolStructure I2C Protocol Structure
- * @ingroup  I2C_03_Driver
+ * @defgroup I2C_03_Driver_02_Protocol_05_Structure I2C Protocol Structure
+ * @ingroup  I2C_03_Driver_02_Protocol
  * @details
  * - Combined protocol configuration structure for I2C communication
  * - Uses bit fields for efficient storage and access
@@ -208,8 +216,8 @@ typedef uint8_t									i2c_protocol_stretch_t;
  * - Clock stretching should be enabled unless master requires deterministic timing
  * - Duty cycle selection depends on pull-up resistor characteristics
  * 
- * @see @ref I2C_03_Driver_02_ProtocolSpeedMode for speed mode details
- * @see @ref I2C_03_Driver_03_ProtocolSpeedFMDuty for duty cycle details
+ * @see @ref I2C_03_Driver_02_Protocol_01_SpeedMode for speed mode details
+ * @see @ref I2C_03_Driver_02_Protocol_02_SpeedFMDuty for duty cycle details
  * </details>
  */
 typedef struct
@@ -299,12 +307,14 @@ typedef struct
 	i2c_protocol_stretch_t stretch: 1;
 } i2c_protocol_t;
 
-/** @} */ // I2C_03_Driver_06_ProtocolStructure
+/** @} */ // I2C_03_Driver_02_Protocol_05_Structure
+
+/** @} */ // I2C_03_Driver_02_Protocol
 
 /*---------------------------------------------- SMBus Protocol Structure ----------------------------------------------*/ 
 /**
  * @brief    SMBus Protocol Configuration Structure
- * @defgroup I2C_03_Driver_07_SMBusProtocol SMBus Protocol Structure
+ * @defgroup I2C_03_Driver_03_SMBusProtocol SMBus Protocol Structure
  * @ingroup  I2C_03_Driver
  * @details
  * - SMBus (System Management Bus) protocol configuration
@@ -330,9 +340,50 @@ typedef struct
 	/* Reserved for SMBus protocol implementation */
 } smbus_protocol_t;
 
-/** @} */ // I2C_03_Driver_07_SMBusProtocol
+/** @} */ // I2C_03_Driver_03_SMBusProtocol
 
 /*---------------------------------- Address Configuration ----------------------------------*/
+
+/**
+ * @brief    I2C Address Configuration Structure 
+ * @defgroup I2C_03_Driver_04_Address I2C Address Configuration Structure
+ * @ingroup  I2C_03_Driver
+ * @details
+ * - Complete address configuration for I2C slave mode operation
+ * - Supports 7-bit and 10-bit addressing modes with dual address capability
+ * - Configures primary and secondary addresses with general call recognition
+ * 
+ * **Usage Example (7-bit addressing):**
+ * @code
+ * i2c_slave_address_config_t addr_config = {
+ *     .addr1     = 0x68,                          // Primary address 0x68
+ *     .addr2     = 0x00,                          // Secondary address (unused)
+ *     .addr_mode = I2C_ADDRESS_MODE_7BIT,         // 7-bit addressing
+ *     .dual_addr = I2C_DUAL_ADDRESS_DISABLE,      // Single address mode
+ *     .gen_call  = I2C_GENERAL_CALL_ENABLE        // Respond to broadcast
+ * };
+ * @endcode
+ * 
+ * **Usage Example (10-bit dual addressing):**
+ * @code
+ * i2c_slave_address_config_t addr_config = {
+ *     .addr1     = 0x123,                         // Primary address 0x123
+ *     .addr2     = 0x456,                         // Secondary address 0x456  
+ *     .addr_mode = I2C_ADDRESS_MODE_10BIT,        // 10-bit addressing
+ *     .dual_addr = I2C_DUAL_ADDRESS_ENABLE,       // Dual address mode
+ *     .gen_call  = I2C_GENERAL_CALL_DISABLE       // Ignore broadcast
+ * };
+ * @endcode
+ * 
+ * @note This configuration is only valid when I2C peripheral operates in slave mode
+ * @see Reference Manual RM0008 - Section 24.6.3/24.6.4 Own Address Registers
+ * @{
+ */
+
+/**
+ * \section I2C_Driver_Address_Definitions I2C Driver Address Configuration Definitions
+ * \brief I2C Address Mode and Control Definitions
+ */
 
 /** @brief I2C addressing mode type definition @typedef i2c_address_mode_t */
 typedef uint8_t									i2c_address_mode_t;
@@ -355,27 +406,142 @@ typedef uint8_t									i2c_general_call_t;
 /** @brief Respond to general call address (0x00) @def I2C_GENERAL_CALL_ENABLE */
 #define I2C_GENERAL_CALL_ENABLE					((i2c_general_call_t)(0x01))
 
-/** @brief I2C Address @typedef i2c_address_t */
+/** @brief I2C Address value type definition @typedef i2c_address_t */
 typedef uint16_t 								i2c_address_t;
 
 /**
- * @brief I2C Address Configuration (valid for Slave mode)
- * @typedef i2c_address_config_t
+ * \section I2C_Driver_Address_Structure I2C Driver Address Configuration Structure
+ * \brief I2C Slave Address Configuration Structure
+ */
+
+/**
+ * @brief I2C Address Configuration Structure (valid for Slave mode)
+ * @typedef i2c_slave_address_config_t
+ * @details
+ * <details>
+ * <summary><b>Click to expand I2C Address Configuration Details</b></summary>
+ * 
+ * Complete address configuration structure for I2C slave mode operation.
+ * Configures all addressing-related parameters including primary and secondary
+ * addresses, addressing mode, and special address recognition features.
+ * 
+ * **Bit Field Allocation:**
+ * - `addr1` (11 bits): Primary 7-bit or 10-bit address
+ * - `addr2` (11 bits): Secondary address for dual mode  
+ * - `addr_mode` (1 bit): 7-bit or 10-bit addressing selection
+ * - `dual_addr` (1 bit): Dual address recognition enable
+ * - `gen_call` (1 bit): General call recognition enable
+ * 
+ * **Address Range Validation:**
+ * - **7-bit mode**: addr1 must be in range 0x08-0x77 (0x00-0x07 and 0x78-0x7F reserved)
+ * - **10-bit mode**: addr1 must be in range 0x000-0x3FF
+ * 
+ * **Configuration Rules:**
+ * - When dual addressing is disabled, `addr2` is ignored
+ * - General call address (0x00) is always recognized when enabled
+ * - 10-bit addressing requires both master and slave support
+ * 
+ * @warning Address values outside valid ranges may cause undefined behavior
+ * @see @ref I2C_ADDRESS_MODE_7BIT for 7-bit address range details  
+ * @see @ref I2C_ADDRESS_MODE_10BIT for 10-bit address range details
+ * </details>
  */
 typedef struct
 {
-	/** @brief Primary own address */
-	i2c_address_t addr1;
-	/** @brief Secondary address (if dual address enabled) */
-	i2c_address_t addr2;
-	/** @brief 7-bit or 10-bit addressing mode */
-	i2c_address_mode_t addr_mode : 1;
+	/** @brief Primary own address (7-bit: 0x08-0x77, 10-bit: 0x000-0x3FF) */
+	i2c_address_t addr1				: 10;
+	/** @brief Secondary address (only used when dual address enabled) */
+	i2c_address_t addr2				: 10;
+	/** @brief 7-bit or 10-bit addressing mode selection */
+	i2c_address_mode_t addr_mode	: 1;
 	/** @brief Enable secondary address recognition */
 	i2c_dual_address_t dual_addr	: 1;
-	/** @brief Enable general call recognition */
-	i2c_general_call_t gen_call	: 1;
+	/** @brief Enable general call address (0x00) recognition */
+	i2c_general_call_t gen_call		: 1;
 } i2c_slave_address_config_t;
 
+/** @} */ // I2C_03_Driver_04_Address
+
+/*---------------------------------- Mode Configuration ----------------------------------*/
+
+/**
+ * @brief    I2C Complete Configuration Structure
+ * @defgroup I2C_03_Driver_05_Config I2C Configuration Structure
+ * @ingroup  I2C_03_Driver
+ * @details
+ * - Defines I2C peripheral operational modes (Master and Slave)
+ * - Master mode: Peripheral initiates communication and controls clock
+ * - Slave mode: Peripheral responds to master requests and follows clock
+ * - Mode selection affects available features and configuration requirements
+ *
+ * **Master Mode Characteristics:**
+ * - Generates START and STOP conditions
+ * - Controls SCL clock frequency
+ * - Initiates data transfers to slave devices
+ * - Supports multiple slave devices on same bus
+ *
+ * **Slave Mode Characteristics:**
+ * - Responds to own address recognition
+ * - Follows master-generated clock
+ * - Can stretch clock if processing time required
+ * - Supports dual addressing and general call
+ * 
+ * - Complete I2C peripheral configuration structure
+ * - Combines operational mode, protocol timing, and slave addressing
+ * - Used for initializing and configuring I2C peripheral instances
+ * 
+ * @code
+ * i2c_config_t master_config = {
+ *     .mode     = I2C_MODE_MASTER,
+ *     .protocol = {
+ *         .speed   = I2C_PROTOCOL_SPEED_MODE_FM,
+ *         .duty    = I2C_PROTOCOL_SPEED_FM_DUTY_2_1,
+ *         .ack     = I2C_PROTOCOL_ACK_ENABLE,
+ *         .stretch = I2C_PROTOCOL_STRETCH_ENABLE
+ *     },
+ *     .slave    = {
+ *         .addr1    = 0x00,  // Not used in master mode
+ *         .addr_mode = I2C_ADDRESS_MODE_7BIT
+ *     }
+ * };
+ * @endcode 
+ *
+ * @see Reference Manual RM0008 - Section 24.4 I2C functional description
+ * @{
+ */
+
+/**
+ * \section I2C_Driver_Mode_Definitions I2C Driver Operational Mode Definitions
+ * \brief I2C Operational Mode Type and Constants
+ */
+
+/** @brief I2C operational mode type definition @typedef i2c_mode_t */
+typedef uint8_t										i2c_mode_t;
+/** @brief I2C Master mode (controller role) @def I2C_MODE_MASTER */
+#define I2C_MODE_MASTER								((i2c_mode_t)(0x00))
+/** @brief I2C Slave mode (responder role) @def I2C_MODE_SLAVE */
+#define I2C_MODE_SLAVE								((i2c_mode_t)(0x01))
+
+/**
+ * \section I2C_Driver_Config_Structure I2C Driver Configuration Structure
+ * \brief Complete I2C Configuration Structure
+ */
+
+/**
+ * @brief I2C Complete Configuration Structure
+ * @typedef i2c_config_t
+ */
+typedef struct
+{
+	/** @brief I2C operational mode (Master/Slave) */
+	i2c_mode_t mode;
+	/** @brief I2C protocol timing configuration */
+	i2c_protocol_t protocol;
+	/** @brief Slave address configuration (meaningful only in slave mode) */
+	i2c_slave_address_config_t slave;
+} i2c_config_t;
+
+/** @} */ // I2C_03_Driver_05_Config
 
 /** @} */ // I2C_03_Driver
 
