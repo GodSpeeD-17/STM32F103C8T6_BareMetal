@@ -32,7 +32,7 @@
 void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config)
 {
 	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
 	uint32_t gpioX_CRL = 0x00UL;
 	uint32_t gpioX_ODR = 0x00UL;
@@ -119,7 +119,7 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
 		return DRIVER_FAIL;
 	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
 	uint32_t gpioX_CRL = 0x00UL;
 	uint8_t regStatus = 0x00;
@@ -173,7 +173,7 @@ gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin
 				case _GPIO_PIN_CNF_INPUT_ANALOG: return GPIO_PIN_CNF_IN_ANALOG; break;
 				case _GPIO_PIN_CNF_INPUT_FLOATING: return GPIO_PIN_CNF_IN_FLOAT; break;
 				case _GPIO_PIN_CNF_INPUT_PULL:
-					if(__GPIO_ReadODR(GPIO_getLLPort(gpio)) & (uint32_t) pin) return GPIO_PIN_CNF_IN_PULL_UP;
+					if(__GPIO_ReadODR(GPIO_D2L_GetPort(gpio)) & (uint32_t) pin) return GPIO_PIN_CNF_IN_PULL_UP;
 					else return GPIO_PIN_CNF_IN_PULL_DOWN;
 				break;
 			}
@@ -222,7 +222,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
 		return DRIVER_FAIL;
 	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
 	uint32_t gpioX_CRL = 0x00UL;
 	uint8_t regStatus = 0x00;
@@ -270,7 +270,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
        (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00)) 
 		return DRIVER_FAIL;
 	// Enable Clock for GPIO Port
-	_GPIO_EnableClock(GPIO_getLLPort(gpio));
+	_GPIO_EnableClock(GPIO_D2L_GetPort(gpio));
 	// Enable AFIO Clock
 	if (GPIO_DRIVER_PIN_IS_AF_CONFIG(gpioConfig->config)) _GPIO_EnableAFIOClock();
 	// Set Pin Parameters
@@ -292,7 +292,7 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 	// Validation
 	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00)) return DRIVER_FAIL;
 	// Local Variables
-	GPIO_TypeDef* const GPIOx = GPIO_getLLPort(gpio);
+	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	// Local Variables
 	uint32_t gpioX_CRH = 0x00UL;
 	uint32_t gpioX_CRL = 0x00UL;

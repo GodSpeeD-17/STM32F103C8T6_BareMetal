@@ -7,8 +7,8 @@
  */
 
 // Header Guards
-#ifndef I2C_LL_H_
-#define I2C_LL_H_
+#ifndef I2C_LL
+#define I2C_LL
 
 /** 
  * @brief For register mapping base types
@@ -593,18 +593,74 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
  * @{
  */
 
-// TODO: Need to create mask functions (Refer gpio_ll.h for reference) 
+/**
+ * @brief Compute I2C peripheral clock bit position in RCC registers
+ * @param[in] I2Cx I2C peripheral instance (I2C1, I2C2)
+ * @returns Zero-based bit position relative to I2C1 clock enable bit
+ * @details
+ * Computes the relative position of I2C peripheral clock enable bit
+ * in RCC_APB1ENR register using peripheral memory mapping.
+ * 
+ * **Bit Position Calculation:**
+ * - I2C1: Position 0 (RCC_APB1ENR bit 21)
+ * - I2C2: Position 1 (RCC_APB1ENR bit 22)
+ * 
+ * @note Result must be added to RCC_APB1ENR_I2C1EN_Pos for actual register bit position
+ * @see @ref BIT_POS() for underlying computation algorithm
+ * @def I2C_CLK_POS()
+ */
+#define I2C_CLK_POS(I2Cx)							BIT_POS((I2Cx), I2C1, I2C_PERIPHERAL_SIZE)
 
+/**
+ * @brief Generate I2C peripheral clock enable/disable bit mask
+ * @param[in] I2Cx I2C peripheral instance (I2C1, I2C2)
+ * @returns Bit mask for RCC_APB1ENR register to control I2C clock
+ * @details
+ * Computes the complete bit mask for enabling/disabling I2C peripheral clock
+ * in RCC_APB1ENR register. The mask positions the bit at the correct offset
+ * based on the peripheral instance.
+ * 
+ * **Register Bit Mapping:**
+ * - I2C1: RCC_APB1ENR bit 21 (0x00200000)
+ * - I2C2: RCC_APB1ENR bit 22 (0x00400000)
+ * 
+ * **Usage:**
+ * @code
+ * // Enable clock
+ * RCC->APB1ENR.REG |= I2C_CLK_MASK(I2C1);
+ * 
+ * // Disable clock  
+ * RCC->APB1ENR.REG &= ~I2C_CLK_MASK(I2C2);
+ * 
+ * // Check clock status
+ * if(RCC->APB1ENR.REG & I2C_CLK_MASK(I2C1)) {
+ *     // I2C1 clock is enabled
+ * }
+ * @endcode
+ * 
+ * @note This macro generates compile-time constant when used with constant I2C instances
+ * @warning Do not use with invalid I2C peripheral pointers
+ * @def I2C_CLK_MASK()
+ */
+#define I2C_CLK_MASK(I2Cx) \
+	((uint32_t) (0x01UL << ((RCC_APB1ENR_I2C1EN_Pos + I2C_CLK_POS(I2Cx)) & ((uint32_t) 0x1F))))
+
+/**
+ * @brief Enable I2C Peripheral Clock
+ * @param[in] I2Cx Target @ref I2C_Registers_Memory_Peripherals "I2C Peripheral"
+ */	
 __STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
 {
-	if(I2Cx == I2C1) __RCC_SetAPB1ENR(RCC, RCC_APB1ENR_I2C1EN);
-	else if(I2Cx == I2C2) __RCC_SetAPB1ENR(RCC, RCC_APB1ENR_I2C2EN);
+	__RCC_SetAPB1ENR(RCC, I2C_CLK_MASK(I2Cx));
 }
 
+/**
+ * @brief Disable I2C Peripheral Clock
+ * @param[in] I2Cx Target @ref I2C_Registers_Memory_Peripherals "I2C Peripheral"
+ */	
 __STATIC_FORCEINLINE _I2C_DisableClock(I2C_TypeDef* const I2Cx)
 {
-	if(I2Cx == I2C1) __RCC_ClearAPB1ENR(RCC, RCC_APB1ENR_I2C1EN);
-	else if(I2Cx == I2C2) __RCC_ClearAPB1ENR(RCC, RCC_APB1ENR_I2C2EN);
+	__RCC_ClearAPB1ENR(RCC, I2C_CLK_MASK(I2Cx));
 }
 
 /** @} */ // I2C_02_LL_01_Clock
@@ -616,22 +672,26 @@ __STATIC_FORCEINLINE _I2C_DisableClock(I2C_TypeDef* const I2Cx)
  * @{
  */
 
-// TODO: Need to create mask functions (Refer gpio_ll.h for reference)  
-
+/**
+ * @brief Enable I2C Peripheral
+ * @param[in] I2Cx Target @ref I2C_01_Registers_02_Memory "I2C Peripheral"
+ */
 __STATIC_FORCEINLINE _I2C_Enable(I2C_TypeDef* const I2Cx)
 {
-	if(I2Cx == I2C1) __I2C_SetCR1(I2C1, I2C_CR1_PE);
-	else if(I2Cx == I2C2) __I2C_SetCR1(I2C2, I2C_CR1_PE);
+	__I2C_SetCR1(I2Cx, I2C_CR1_PE);
 }
 
+/**
+ * @brief Disable I2C Peripheral
+ * @param[in] I2Cx Target @ref I2C_01_Registers_02_Memory "I2C Peripheral"
+ */
 __STATIC_FORCEINLINE _I2C_Disable(I2C_TypeDef* const I2Cx)
 {
-	if(I2Cx == I2C1) __I2C_ClearCR1(I2C1, I2C_CR1_PE);
-	else if(I2Cx == I2C2) __I2C_ClearCR1(I2C2, I2C_CR1_PE);
+	__I2C_ClearCR1(I2Cx, I2C_CR1_PE);
 }
 
 /** @} */ // I2C_02_LL_02_Peripheral
 
 /** @} */ // I2C_02_LL
 
-#endif /* I2C_LL_H_ */
+#endif /* I2C_LL */

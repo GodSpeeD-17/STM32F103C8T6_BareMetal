@@ -446,18 +446,6 @@ typedef uint8_t								driver_status_t;
  */
 
 /**
- * \section  I2C_Registers_Memory_Base I2C Register Base Memory Address
- * \brief I2C Peripheral: Base Memory Address
- */
-
-/**
- * @brief I2C Base Memory Address
- * @details @see @ref APB1_BASE_ADDR "APB1 Base Memory Address"
- * @def I2C_BASE_ADDRESS
- */
-#define I2C_BASE_ADDRESS						APB1_BASE_ADDR
-
-/**
  * \section  I2C_Registers_Memory_Size I2C Register Memory Size
  * \brief I2C Peripheral: Memory Size
  */
@@ -486,6 +474,11 @@ typedef uint8_t								driver_status_t;
 #define I2C_PERIPHERAL_SIZE						0x400UL
 
 /**
+ * \section  I2C_Registers_Memory_Base I2C Register Base Memory Address
+ * \brief I2C Peripheral: Base Memory Address
+ */
+
+/**
  * \section  I2C_Registers_Memory_Offset I2C Register Offset from Base
  * \brief I2C Peripheral: Offset from Base
  */
@@ -496,15 +489,24 @@ typedef uint8_t								driver_status_t;
 #define I2C2_OFFSET								0x00005800UL
 
 /**
+ * @brief I2C Base Memory Address
+ * @details @see @ref APB1_BASE_ADDR "APB1 Base Memory Address"
+ * @def I2C_BASE_ADDRESS
+ */
+#define I2C_BASE_ADDRESS						APB1_BASE_ADDR
+#define I2C1_BASE_ADDRESS						(I2C_BASE_ADDRESS + I2C1_OFFSET)
+#define I2C2_BASE_ADDRESS						(I2C_BASE_ADDRESS + I2C2_OFFSET)
+
+/**
  * \section I2C_Registers_Memory_Peripherals I2C Peripheral Memory Address
  * \brief I2C Peripheral Memory Address
  * @see @ref I2C_01_Registers_01_Structure "I2C Registers Encapsulation" | @ref I2C_Registers_Memory_Base "I2C Base Memory Address" | @ref I2C_Registers_Memory_Offset "I2C Register Offset from I2C Base Memory Address"  
  */
 
 /** @brief I2C1 Peripheral  @def I2C1 */ 
-#define I2C1 									((I2C_TypeDef *) (I2C_BASE_ADDRESS + I2C1_OFFSET))
+#define I2C1 									((I2C_TypeDef *) (I2C1_BASE_ADDRESS))
 /** @brief I2C2 Peripheral  @def I2C2 */ 
-#define I2C2 									((I2C_TypeDef *) (I2C_BASE_ADDRESS + I2C2_OFFSET))
+#define I2C2 									((I2C_TypeDef *) (I2C2_BASE_ADDRESS))
 
 /** @} */ // I2C_01_Registers_02_Memory
 

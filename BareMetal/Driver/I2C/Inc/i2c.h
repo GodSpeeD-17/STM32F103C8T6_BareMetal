@@ -45,9 +45,20 @@ typedef uint8_t									i2c_t;
 /** @brief I2C2 peripheral instance @def I2C_2 */
 #define I2C_2									((i2c_t) (0x01))
 
-
-// TODO: Peripheral Instance Mapping Function
-
+/**
+ * @brief Convert driver I2C instance to low-level peripheral pointer
+ * @param[in] i2cx Driver I2C instance (@ref I2C_1, @ref I2C_2)
+ * @returns Corresponding I2C_TypeDef peripheral pointer
+ */
+__STATIC_FORCEINLINE I2C_TypeDef* I2C_D2L_GetInstance(const i2c_t i2cx)
+{
+	static I2C_TypeDef* const _driverI2CMapping[] = 
+	{
+		[I2C_1] = I2C1, 
+		[I2C_2] = I2C2
+	};
+	return _driverI2CMapping[i2cx];
+}
 
 /** @} */ // I2C_03_Driver_01_PeripheralInstances
 

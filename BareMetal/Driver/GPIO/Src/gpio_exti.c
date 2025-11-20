@@ -129,7 +129,7 @@
 //  */
 // driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 // 	// Check hardware compatibility
-// 	GPIO_TypeDef* GPIOx = GPIO_getLLPort(gpio);
+// 	GPIO_TypeDef* GPIOx = GPIO_D2L_GetPort(gpio);
 // 	if(GPIOx == NULL){
 // 		return DRIVER_FAIL;
 // 	}
@@ -187,7 +187,7 @@
 //  */
 // driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 // 	// Check hardware compatibility
-// 	GPIO_TypeDef* GPIOx = GPIO_getLLPort(gpio);
+// 	GPIO_TypeDef* GPIOx = GPIO_D2L_GetPort(gpio);
 // 	if(GPIOx == NULL){
 // 		return DRIVER_FAIL;
 // 	}

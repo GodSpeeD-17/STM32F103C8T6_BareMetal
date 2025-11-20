@@ -65,18 +65,6 @@ typedef uint8_t											gpio_port_t;
 
 /** @} */ // GPIO_Driver_Port_Macros
 
-/** @brief Driver GPIO Port Mapping Lookup Table */
-static GPIO_TypeDef* const _driverGpioPortMapping[] =
-{
-	[GPIO_PORT_A] = GPIOA,
-	[GPIO_PORT_B] = GPIOB,
-	[GPIO_PORT_C] = GPIOC,
-	[GPIO_PORT_D] = GPIOD,
-	[GPIO_PORT_E] = GPIOE,
-	[GPIO_PORT_F] = GPIOF,
-	[GPIO_PORT_G] = GPIOG
-};
-
 /**
  * @brief Checks if a GPIO port value is valid
  * @param[in] port The GPIO port value to check
@@ -100,9 +88,20 @@ static GPIO_TypeDef* const _driverGpioPortMapping[] =
  * @return GPIO Port Data Type used by LL
  * @note Pointer to GPIO Memory Address
  */
-__STATIC_FORCEINLINE GPIO_TypeDef* const GPIO_getLLPort(const gpio_port_t gpio)
+__STATIC_FORCEINLINE GPIO_TypeDef* const GPIO_D2L_GetPort(const gpio_port_t gpio)
 {
-	return _driverGpioPortMapping[gpio];
+	/** @brief Driver GPIO Port Mapping Lookup Table */
+	static GPIO_TypeDef* const _driverGPIOPortMapping[] =
+	{
+		[GPIO_PORT_A] = GPIOA,
+		[GPIO_PORT_B] = GPIOB,
+		[GPIO_PORT_C] = GPIOC,
+		[GPIO_PORT_D] = GPIOD,
+		[GPIO_PORT_E] = GPIOE,
+		[GPIO_PORT_F] = GPIOF,
+		[GPIO_PORT_G] = GPIOG
+	};
+	return _driverGPIOPortMapping[gpio];
 }
 
 /** @} */ // GPIO_03_Driver_01_Types_01_Ports
@@ -652,7 +651,7 @@ typedef struct
  */
 __STATIC_FORCEINLINE void GPIO_PinSet(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_WriteBSRR(GPIO_getLLPort(gpio), (uint32_t) pin);
+	__GPIO_WriteBSRR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
 }
 
 /**
@@ -663,7 +662,7 @@ __STATIC_FORCEINLINE void GPIO_PinSet(const gpio_port_t gpio, const gpio_pin_t p
  */
 __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_WriteBRR(GPIO_getLLPort(gpio), (uint32_t) pin);
+	__GPIO_WriteBRR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
 }
 
 /**
@@ -673,7 +672,7 @@ __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t
  */
 __STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_ToggleODR(GPIO_getLLPort(gpio), (uint32_t) pin);
+	__GPIO_ToggleODR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
 }
 
 /**
@@ -684,7 +683,7 @@ __STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_
  */
 __STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	uint32_t reg = __GPIO_ReadIDR(GPIO_getLLPort(gpio));
+	uint32_t reg = __GPIO_ReadIDR(GPIO_D2L_GetPort(gpio));
 	reg = (reg & ((uint32_t) pin)) >> GPIO_getLLPin(pin);
 	return ((uint8_t) reg);
 }
@@ -740,7 +739,7 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 __STATIC_FORCEINLINE gpio_pin_parameter_t GPIO_GetPinParameters(const gpio_port_t gpio, const gpio_pin_t pin)
 {
 	_gpio_pin_t pinLL = GPIO_getLLPin(pin); 
-	uint32_t reg = (pinLL & _GPIO_PIN_7) ? __GPIO_ReadCRH(GPIO_getLLPort(gpio)) : __GPIO_ReadCRL(GPIO_getLLPort(gpio));
+	uint32_t reg = (pinLL & _GPIO_PIN_7) ? __GPIO_ReadCRH(GPIO_D2L_GetPort(gpio)) : __GPIO_ReadCRL(GPIO_D2L_GetPort(gpio));
 	reg &= _GPIO_PIN_CNF_MODE_MASK(pinLL);
 	return ((gpio_pin_parameter_t)(reg >> pinLL));
 }
