@@ -18,8 +18,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup I2C_03_Driver I2C Driver
+ * @defgroup I2C_03_Driver I2C Driver APIs
  * @ingroup I2C
+ * @brief I2C Driver APIs
  * @{
  */
 
@@ -47,7 +48,7 @@ typedef uint8_t									i2c_t;
 
 /**
  * @brief Convert driver I2C instance to low-level peripheral pointer
- * @param[in] i2cx Driver I2C instance (@ref I2C_1, @ref I2C_2)
+ * @param[in] i2cx Driver I2C instance ( @ref I2C_1, @ref I2C_2)
  * @returns Corresponding I2C_TypeDef peripheral pointer
  */
 __STATIC_FORCEINLINE I2C_TypeDef* I2C_D2L_GetInstance(const i2c_t i2cx)
@@ -219,7 +220,8 @@ typedef uint8_t									i2c_protocol_stretch_t;
  * 
  * **Usage Example:**
  * @code
- * i2c_protocol_t protocol_config = {
+ * i2c_protocol_t protocol_config = 
+ * {
  *     .speed = I2C_PROTOCOL_SPEED_MODE_FM,      // 400kHz Fast Mode
  *     .duty = I2C_PROTOCOL_SPEED_FM_DUTY_2_1,   // 2:1 duty cycle
  *     .ack = I2C_PROTOCOL_ACK_ENABLE,           // Enable acknowledgment
@@ -325,6 +327,7 @@ typedef struct
 
 /** @} */ // I2C_03_Driver_02_Protocol_05_Structure
 
+
 /** @} */ // I2C_03_Driver_02_Protocol
 
 /*---------------------------------------------- SMBus Protocol Structure ----------------------------------------------*/ 
@@ -371,7 +374,8 @@ typedef struct
  * 
  * **Usage Example (7-bit addressing):**
  * @code
- * i2c_slave_address_config_t addr_config = {
+ * i2c_slave_address_config_t addr_config = 
+ * {
  *     .addr1     = 0x68,                          // Primary address 0x68
  *     .addr2     = 0x00,                          // Secondary address (unused)
  *     .addr_mode = I2C_ADDRESS_MODE_7BIT,         // 7-bit addressing
@@ -382,7 +386,8 @@ typedef struct
  * 
  * **Usage Example (10-bit dual addressing):**
  * @code
- * i2c_slave_address_config_t addr_config = {
+ * i2c_slave_address_config_t addr_config = 
+ * {
  *     .addr1     = 0x123,                         // Primary address 0x123
  *     .addr2     = 0x456,                         // Secondary address 0x456  
  *     .addr_mode = I2C_ADDRESS_MODE_10BIT,        // 10-bit addressing

@@ -106,8 +106,8 @@
 //  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
 //  * @note - Failing to do so may cause driver to misbehave
 //  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
+//  * @returns - DRIVER_STATUS_FAIL: Failure
+//  * @returns - DRIVER_STATUS_SUCCESS: Success
 //  */
 // driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 
@@ -119,8 +119,8 @@
 //  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
 //  * @note - Failing to do so may cause driver to misbehave
 //  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
+//  * @returns - DRIVER_STATUS_FAIL: Failure
+//  * @returns - DRIVER_STATUS_SUCCESS: Success
 //  */
 // driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
 

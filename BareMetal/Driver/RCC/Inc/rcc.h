@@ -129,8 +129,8 @@ __STATIC_FORCEINLINE _rcc_flash_prefetch_t RCC_D2L_FlashPrefetch(const rcc_flash
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure @ref rcc_flash_config_t
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash);
 
@@ -195,72 +195,72 @@ __STATIC_FORCEINLINE rcc_system_clock_t RCC_L2D_SystemClockSource(const _rcc_sys
  * @brief Controls the state of the Internal High Speed Clock (HSI)
  * @param[in] state 
  * Desired state:
- *	- DRIVER_STATE_OFF: Turn OFF HSI
- *	- DRIVER_STATE_ON: Turn ON HSI
+ *	- DRIVER_STATUS_OFF: Turn OFF HSI
+ *	- DRIVER_STATUS_ON: Turn ON HSI
  * @note Operates on the HSI ON/OFF bit @ref RCC_CR_HSION
  */
 __STATIC_FORCEINLINE void RCC_ControlHSI(const driver_status_t state)
 {
-	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_HSION);
-	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_HSION);
+	if (state == DRIVER_STATUS_ON) __RCC_SetCR(RCC, RCC_CR_HSION);
+	else if(state == DRIVER_STATUS_OFF) __RCC_ClearCR(RCC, RCC_CR_HSION);
 }
 
 /**
  * @brief Checks the readiness status of the HSI clock source.
- * @return DRIVER_STATE_READY if HSI is stable, otherwise DRIVER_STATE_BUSY
+ * @return DRIVER_STATUS_READY if HSI is stable, otherwise DRIVER_STATUS_BUSY
  * @note Relies on the RCC_CR_HSIRDY flag.
  */
 __STATIC_FORCEINLINE driver_status_t RCC_HSIReady(void)
 {
-	return (__RCC_ReadCR(RCC) & RCC_CR_HSIRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_HSIRDY) ? DRIVER_STATUS_READY : DRIVER_STATUS_BUSY;
 }
 
 /**
  * @brief Controls the state of the External High Speed Clock (HSE)
  * @param[in] state 
  * Desired state:
- *	- DRIVER_STATE_OFF: Turn OFF HSE
- *	- DRIVER_STATE_ON: Turn ON HSE
+ *	- DRIVER_STATUS_OFF: Turn OFF HSE
+ *	- DRIVER_STATUS_ON: Turn ON HSE
  * @note Operates on the HSE ON/OFF bit @ref RCC_CR_HSEON
  */
 __STATIC_FORCEINLINE void RCC_ControlHSE(const driver_status_t state)
 {
-	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_HSEON);
-	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_HSEON);
+	if (state == DRIVER_STATUS_ON) __RCC_SetCR(RCC, RCC_CR_HSEON);
+	else if(state == DRIVER_STATUS_OFF) __RCC_ClearCR(RCC, RCC_CR_HSEON);
 }
 
 /**
  * @brief Checks the readiness status of the HSE clock source.
- * @return DRIVER_STATE_READY if HSE is stable, otherwise DRIVER_STATE_BUSY.
+ * @return DRIVER_STATUS_READY if HSE is stable, otherwise DRIVER_STATUS_BUSY.
  * @note Relies on the RCC_CR_HSERDY flag.
  */
 __STATIC_FORCEINLINE driver_status_t RCC_HSEReady(void)
 {
-	return (__RCC_ReadCR(RCC) & RCC_CR_HSERDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_HSERDY) ? DRIVER_STATUS_READY : DRIVER_STATUS_BUSY;
 }
 
 /**
  * @brief Controls the state of the Phase Lock Loop (PLL)
  * @param[in] state 
  * Desired state:
- *	- DRIVER_STATE_OFF: Turn OFF PLL
- *	- DRIVER_STATE_ON: Turn ON PLL
+ *	- DRIVER_STATUS_OFF: Turn OFF PLL
+ *	- DRIVER_STATUS_ON: Turn ON PLL
  * @note Operates on the PLL ON/OFF bit @ref RCC_CR_PLLON
  */
 __STATIC_FORCEINLINE void RCC_ControlPLL(const driver_status_t state)
 {
-	if (state == DRIVER_STATE_ON) __RCC_SetCR(RCC, RCC_CR_PLLON);
-	else if(state == DRIVER_STATE_OFF) __RCC_ClearCR(RCC, RCC_CR_PLLON);
+	if (state == DRIVER_STATUS_ON) __RCC_SetCR(RCC, RCC_CR_PLLON);
+	else if(state == DRIVER_STATUS_OFF) __RCC_ClearCR(RCC, RCC_CR_PLLON);
 }
 
 /**
  * @brief Checks the readiness status of the PLL clock source.
- * @return DRIVER_STATE_READY if PLL is locked, otherwise DRIVER_STATE_BUSY.
+ * @return DRIVER_STATUS_READY if PLL is locked, otherwise DRIVER_STATUS_BUSY.
  * @note Relies on the RCC_CR_PLLRDY flag.
  */
 __STATIC_FORCEINLINE driver_status_t RCC_PLLReady(void)
 {
-	return (__RCC_ReadCR(RCC) & RCC_CR_PLLRDY) ? DRIVER_STATE_READY : DRIVER_STATE_BUSY;
+	return (__RCC_ReadCR(RCC) & RCC_CR_PLLRDY) ? DRIVER_STATUS_READY : DRIVER_STATUS_BUSY;
 }
 
 /**
@@ -776,8 +776,8 @@ __STATIC_FORCEINLINE rcc_bus_prescaler_t RCC_L2D_APB2Prescaler(const _rcc_bus_pr
  * @brief Configure RCC Bus Prescaler
  * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler);
 
@@ -950,8 +950,8 @@ __STATIC_FORCEINLINE rcc_component_prescaler_t RCC_L2D_USBPrescaler(const _rcc_c
  * @brief Configure RCC Component prescaler
  * @param[in] rccComponentPrescaler Pointer to Component Prescaler Configuration Structure
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccComponentPrescaler);
 
@@ -1016,9 +1016,9 @@ typedef struct
  *
  * @param[in] rcc Pointer to @ref rcc_config_t "RCC Configuration Structure"
  *
- * @retval DRIVER_SUCCESS          Configuration successful.
- * @retval DRIVER_ERR_INVALID_ARG  Null configuration pointer.
- * @retval DRIVER_ERR_TIMEOUT      Clock source failed to stabilize (if timeout supported).
+ * @retval DRIVER_STATUS_SUCCESS          Configuration successful.
+ * @retval DRIVER_STATUS_ERR_INVALID_ARG  Null configuration pointer.
+ * @retval DRIVER_STATUS_ERR_TIMEOUT      Clock source failed to stabilize (if timeout supported).
  *
  * @note Must be called once during system startup before any peripheral initialization.
  * @note Blocks until selected clock source (HSE/PLL) is stable.
@@ -1097,8 +1097,8 @@ extern rcc_clk_freq_t __systemFrequency__;
  * @param flash Flash Configuration Structure `rcc_flash_config_t` 
  * @param reg Pointer to `FLASH->ACR.REG`
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigFlash(const rcc_flash_config_t flash, uint32_t* reg);
 
@@ -1107,8 +1107,8 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t flash, uint32_t* reg);
  * @param pllConfig  PLL Configuration Structure
  * @param reg Pointer to `RCC->CFGR.REG`
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_PLLConfig(const rcc_pll_config_t pllConfig, uint32_t* reg);
 
@@ -1117,8 +1117,8 @@ driver_status_t RCC_PLLConfig(const rcc_pll_config_t pllConfig, uint32_t* reg);
  * @param busConfig Bus Configuration Structure 
  * @param reg Pointer to `RCC->CFGR.REG`
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success 
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success 
  */
 driver_status_t RCC_BusConfig(const rcc_bus_config_t busPrescalerConfig, uint32_t* reg);
 
@@ -1127,8 +1127,8 @@ driver_status_t RCC_BusConfig(const rcc_bus_config_t busPrescalerConfig, uint32_
  * @param componentPrescalerConfig Component Prescaler Configuration Structure  
  * @param reg Pointer to `RCC->CFGR.REG`
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success 
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success 
  */
 driver_status_t RCC_ComponentConfig(const rcc_component_config_t componentPrescalerConfig, uint32_t* reg);
 
@@ -1136,8 +1136,8 @@ driver_status_t RCC_ComponentConfig(const rcc_component_config_t componentPresca
  * @brief RCC Clock Configuration
  * @param rccConfig RCC Clock Configuration Structure 
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_Config(const rcc_config_t* rccConfig);
 

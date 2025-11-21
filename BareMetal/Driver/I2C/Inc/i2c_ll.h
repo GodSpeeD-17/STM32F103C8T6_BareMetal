@@ -583,6 +583,7 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
 /**
  * @defgroup I2C_02_LL I2C Low Level APIs
  * @ingroup I2C
+ * @brief I2C Low Level APIs
  * @{
  */
 
@@ -691,6 +692,192 @@ __STATIC_FORCEINLINE _I2C_Disable(I2C_TypeDef* const I2Cx)
 }
 
 /** @} */ // I2C_02_LL_02_Peripheral
+
+/*---------------------------------------------- I2C Protocol Configuration ----------------------------------------------*/ 
+
+/**
+ * @defgroup I2C_02_LL_03_Protocol I2C Protocol Configuration Structure
+ * @ingroup I2C_02_LL
+ * @brief I2C Protocol Configuration
+ * @{
+ */
+
+/**
+ * @defgroup I2C_02_LL_03_Protocol_01_SpeedMode I2C Speed Mode Definitions
+ * @ingroup I2C_02_LL
+ * @brief I2C Speed Mode Definitions
+ * @{
+ */
+
+/** @brief I2C protocol speed mode type definition @typedef i2c_protocol_speed_mode_t */
+typedef uint8_t									_i2c_protocol_speed_mode_t;
+/** @brief Standard Mode (up to 100 kHz) @def I2C_PROTOCOL_SPEED_MODE_SM */
+#define _I2C_PROTOCOL_SPEED_MODE_SM				((_i2c_protocol_speed_mode_t) (0x00))
+/** @brief Fast Mode (up to 400 kHz) @def I2C_PROTOCOL_SPEED_MODE_FM */
+#define _I2C_PROTOCOL_SPEED_MODE_FM				((_i2c_protocol_speed_mode_t) (0x01)) 
+
+/**
+ * @brief Stage I2C Speed Mode into CCR Register Value
+ * @param[in] i2cMode Target @ref _i2c_protocol_speed_mode_t "I2C Speed Mode"
+ * @param[in] ccrReg Current CCR Register Value
+ * @returns Updated CCR Register Value with staged Speed Mode
+ */
+__STATIC_FORCEINLINE uint32_t _I2C_StageProtocolSpeedMode(const _i2c_protocol_speed_mode_t i2cMode, uint32_t ccrReg)
+{
+	switch(i2cMode)
+	{
+		case _I2C_PROTOCOL_SPEED_MODE_SM:
+			ccrReg &= ~I2C_CCR_FS;
+		break;
+		case _I2C_PROTOCOL_SPEED_MODE_FM:
+			ccrReg |= I2C_CCR_FS;
+		break;
+	}
+	return ccrReg;
+}
+
+/** @} */ // I2C_02_LL_03_Protocol_01_SpeedMode
+
+/**
+ * @brief    I2C Fast Mode Duty Cycle Configuration
+ * @defgroup I2C_02_LL_03_Protocol_02_SpeedFMDuty I2C Fast Mode Duty Cycle
+ * @ingroup  I2C_02_LL_02_Protocol
+ * @details
+ * - Defines duty cycle options for I2C Fast Mode operation
+ * - Controls the Thigh/Tlow ratio for SCL signal in Fast Mode
+ * - Available only when Fast Mode is selected
+ *
+ * **Duty Cycle Options:**
+ * - 2:1 duty cycle: Thigh = 2 × Tlow (33% duty)
+ * - 16:9 duty cycle: Thigh = 16/9 × Tlow (64% duty)
+ *
+ * @see Reference Manual RM0008 - Section 24.4.5 I2C clock generation
+ * @see @ref I2C_02_LL_02_Protocol_01_SpeedMode for speed mode selection
+ * @{
+ */
+
+/**
+ * \section I2C_Driver_ProtocolSpeedFMDuty_Definitions I2C Driver Fast Mode Duty Cycle Definitions
+ * \brief I2C Fast Mode Duty Cycle Configuration
+ */
+/** @brief I2C Fast Mode duty cycle type definition @typedef _i2c_protocol_speed_fm_duty_t */
+typedef uint8_t									_i2c_protocol_speed_fm_duty_t;
+/** @brief 2:1 duty cycle (Thigh = 2 × Tlow) @def I2C_PROTOCOL_SPEED_FM_DUTY_2_1 */
+#define _I2C_PROTOCOL_SPEED_FM_DUTY_2_1			((_i2c_protocol_speed_fm_duty_t) (0x00))
+/** @brief 16:9 duty cycle (Thigh = 16/9 × Tlow) @def I2C_PROTOCOL_SPEED_FM_DUTY_16_9 */
+#define _I2C_PROTOCOL_SPEED_FM_DUTY_16_9		((_i2c_protocol_speed_fm_duty_t) (0x01))
+
+/**
+ * @brief Stage I2C Speed Fm Duty into CCR Register Value
+ * @param[in] i2cFmDuty Target @ref _i2c_protocol_speed_fm_duty_t "I2C Speed Fm Duty"
+ * @param[in] ccrReg Current CCR Register Value
+ * @returns Updated CCR Register Value with staged Speed Mode
+ */
+__STATIC_FORCEINLINE uint32_t _I2C_StageProtocolSpeedFmDuty(const _i2c_protocol_speed_fm_duty_t i2cFmDuty, uint32_t ccrReg)
+{
+	switch(i2cFmDuty)
+	{
+		case _I2C_PROTOCOL_SPEED_FM_DUTY_2_1:
+			ccrReg &= ~I2C_CCR_DUTY;
+		break;
+		case _I2C_PROTOCOL_SPEED_FM_DUTY_16_9:
+			ccrReg |= I2C_CCR_DUTY;
+		break;
+	}
+	return ccrReg;
+}
+
+/** @} */ // I2C_02_LL_03_Protocol_02_SpeedFMDuty
+
+/**
+ * @brief    I2C Acknowledgment Configuration
+ * @defgroup I2C_02_LL_03_Protocol_03_Ack I2C Acknowledgment Control
+ * @ingroup  I2C_02_LL_03_Protocol
+ * @details
+ * - Controls I2C acknowledgment generation for slave devices
+ * - When enabled, slave generates ACK after each byte reception
+ * - When disabled, slave does not generate ACK (used in some advanced scenarios)
+ * - Typically kept enabled for normal operation
+ *
+ * @see Reference Manual RM0008 - Section 24.6.1 Control register 1 (I2C_CR1)
+ * @{
+ */
+
+/** @brief I2C acknowledgment control type definition @typedef i2c_protocol_ack_t */
+typedef uint8_t									_i2c_protocol_ack_t;
+/** @brief Acknowledgment disabled @def I2C_PROTOCOL_ACK_DISABLE */
+#define _I2C_PROTOCOL_ACK_DISABLE				((_i2c_protocol_ack_t) (0x00))
+/** @brief Acknowledgment enabled @def I2C_PROTOCOL_ACK_ENABLE */
+#define _I2C_PROTOCOL_ACK_ENABLE				((_i2c_protocol_ack_t) (0x01)) 
+
+/**
+ * @brief Stage I2C ACK into CR1 Register Value
+ * @param[in] i2cAck Target @ref _i2c_protocol_ack_t "I2C ACK State"
+ * @param[in] cr1Reg Current CR1 Register Value
+ * @returns Updated CR1 Register Value with staged Speed Mode
+ */
+__STATIC_FORCEINLINE uint32_t _I2C_StageProtocolAck(const _i2c_protocol_ack_t i2cAck, uint32_t cr1Reg)
+{
+	switch(i2cAck)
+	{
+		case _I2C_PROTOCOL_ACK_DISABLE:
+			cr1Reg &= ~I2C_CR1_ACK;
+		break;
+		case _I2C_PROTOCOL_ACK_ENABLE:
+			cr1Reg |= I2C_CR1_ACK;
+		break;
+	}
+	return cr1Reg;
+}
+
+/** @} */ // I2C_02_LL_03_Protocol_03_Ack
+
+/**
+ * @brief    I2C Clock Stretching Configuration
+ * @defgroup I2C_02_LL_03_Protocol_04_Stretch I2C Clock Stretching Control
+ * @ingroup  I2C_02_LL_03_Protocol
+ * @details
+ * - Controls I2C clock stretching capability for slave devices
+ * - When enabled, slave can hold SCL low to delay communication
+ * - When disabled, slave cannot stretch clock (useful for some masters)
+ * - Typically enabled to allow slaves time to process data
+ *
+ * @see Reference Manual RM0008 - Section 24.4.6 Clock stretching
+ * @{
+ * \section I2C_Driver_ProtocolStretch_Definitions I2C Driver Clock Stretching Definitions
+ * \brief I2C Clock Stretching Configuration
+ */
+
+/** @brief I2C clock stretching control type definition @typedef i2c_protocol_stretch_t */
+typedef uint8_t									_i2c_protocol_stretch_t;
+/** @brief Clock stretching disabled @def I2C_PROTOCOL_STRETCH_DISABLE */
+#define _I2C_PROTOCOL_STRETCH_DISABLE			((_i2c_protocol_stretch_t) (0x00))
+/** @brief Clock stretching enabled @def I2C_PROTOCOL_STRETCH_ENABLE */
+#define _I2C_PROTOCOL_STRETCH_ENABLE			((_i2c_protocol_stretch_t) (0x01))
+
+/**
+ * @brief Stage I2C Stretching into CR1 Register Value
+ * @param[in] i2cStretch Target @ref _i2c_protocol_ack_t "I2C Stretch Mode"
+ * @param[in] cr1Reg Current CR1 Register Value
+ * @returns Updated CR1 Register Value with staged Speed Mode
+ */
+__STATIC_FORCEINLINE uint32_t _I2C_StageProtocolStretch(const _i2c_protocol_stretch_t i2cStretch, uint32_t cr1Reg)
+{
+	switch(i2cStretch)
+	{
+		case _I2C_PROTOCOL_STRETCH_DISABLE:
+			cr1Reg &= ~I2C_CR1_NOSTRETCH;
+		break;
+		case _I2C_PROTOCOL_STRETCH_ENABLE:
+			cr1Reg |= I2C_CR1_NOSTRETCH;
+		break;
+	}
+	return cr1Reg;
+}
+
+/** @} */ // I2C_02_LL_03_Protocol_04_Stretch
+
+/** @} */ // I2C_02_LL_03_Protocol
 
 /** @} */ // I2C_02_LL
 

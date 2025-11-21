@@ -31,15 +31,15 @@
  * @param buffer Pointer to the data buffer (must be of size `size`).
  * @param size The size of the buffer. Must be a power of 2 (e.g., 2, 4, 8, ...).
  * @returns Driver Operation Status:
- * @returns - `DRIVER_SUCCESS`: Initialization Successful
- * @returns - `DRIVER_FAIL`: `size` is not a power of 2
+ * @returns - `DRIVER_STATUS_SUCCESS`: Initialization Successful
+ * @returns - `DRIVER_STATUS_FAIL`: `size` is not a power of 2
  */
 driver_status_t RingBuffer_Init(ring_buffer_t* rb, ring_buffer_data_t* const buffer, const ring_buffer_size_t size)
 {
 	// Size should be power of 2
 	if(_isPowerOf2(size) != 0x01)
 	{
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	}
 
 	// Init Ring Buffer
@@ -48,7 +48,7 @@ driver_status_t RingBuffer_Init(ring_buffer_t* rb, ring_buffer_data_t* const buf
 	rb->readIdx = 0;
 	rb->writeIdx = 0;
 
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -95,8 +95,8 @@ __STATIC_FORCEINLINE ring_buffer_size_t RingBuffer_Count(const ring_buffer_t* co
  * @param rb Pointer to the `ring_buffer_t` structure
  * @param data The `ring_buffer_data_t` data element to write
  * @returns Driver Operation Status:
- * @returns - `DRIVER_SUCCESS`: Data written into Ring Buffer
- * @returns - `DRIVER_FAIL`: Ring Buffer Full
+ * @returns - `DRIVER_STATUS_SUCCESS`: Data written into Ring Buffer
+ * @returns - `DRIVER_STATUS_FAIL`: Ring Buffer Full
  * @details Appends data at the current write index and increments the index using
  * the fast bitwise AND wrapping. The operation fails if the buffer is full.
  */
@@ -105,14 +105,14 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_Write(ring_buffer_t* const rb, c
 	// Ring Buffer Full?
 	if(RingBuffer_isFull(rb) == RINGBUFFER_FULL)
 	{
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	}
 	// Append the data
 	rb->buffer[rb->writeIdx] = data;
 	// Increment the write index
 	rb->writeIdx = (rb->writeIdx + 1) & (rb->size - 1);
 
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -120,8 +120,8 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_Write(ring_buffer_t* const rb, c
  * @param rb Pointer to the `ring_buffer_t` structure
  * @param data Pointer to store the read `ring_buffer_data_t` data element
  * @returns Driver Operation Status:
- * @returns - `DRIVER_SUCCESS`: Data was read successfully from Ring Buffer
- * @returns - `DRIVER_FAIL`: Ring Buffer Empty
+ * @returns - `DRIVER_STATUS_SUCCESS`: Data was read successfully from Ring Buffer
+ * @returns - `DRIVER_STATUS_FAIL`: Ring Buffer Empty
  * @details Reads data from the current read index and increments the index using
  * the fast bitwise AND wrapping. The operation fails if the buffer is empty.
  */
@@ -130,14 +130,14 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_Read(ring_buffer_t* const rb, ri
 	// Ring Buffer Empty?
 	if(RingBuffer_isEmpty(rb) == RINGBUFFER_EMPTY)
 	{
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	}
 	// Read the data
 	*data = rb->buffer[rb->readIdx];
 	// Increment the read index
 	rb->readIdx = (rb->readIdx + 1) & (rb->size - 1);
 
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 
@@ -147,8 +147,8 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_Read(ring_buffer_t* const rb, ri
  * @param data Pointer to store the peeked 8-bit data element.
  * @param offset Positive offset from the read index (0 is the next element to be read).
  * @returns Driver Operation Status:
- * @returns - `DRIVER_SUCCESS`: Data peeked successfully
- * @returns - `DRIVER_FAIL`: Ring Buffer Empty or the `offset` is out of bounds
+ * @returns - `DRIVER_STATUS_SUCCESS`: Data peeked successfully
+ * @returns - `DRIVER_STATUS_FAIL`: Ring Buffer Empty or the `offset` is out of bounds
  * @details Retrieves data from an element at a positive offset from the current read index
  * without modifying the read index or the buffer state.
  */
@@ -157,13 +157,13 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_PeekRead(const ring_buffer_t* co
 	// Data Available?
 	if (offset >= RingBuffer_Count(rb))
 	{
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	}
 	// Calculate the peek index with fast wrapping: (readIdx + offset) & (size - 1)
 	const ring_buffer_size_t peekIdx = (rb->readIdx + offset) & (rb->size - 1);
 	// Read the data
 	*data = rb->buffer[peekIdx];
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -175,8 +175,8 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_PeekRead(const ring_buffer_t* co
  * @param data Pointer to store the peeked 8-bit data element.
  * @param offset Positive offset backwards from the write index (1 is the last written element).
  * @return driver_status_t:
- * - **DRIVER_SUCCESS** if the data was peeked successfully.
- * - **DRIVER_FAIL** if the buffer is empty or the offset is out of bounds (> count).
+ * - **DRIVER_STATUS_SUCCESS** if the data was peeked successfully.
+ * - **DRIVER_STATUS_FAIL** if the buffer is empty or the offset is out of bounds (> count).
  */
 __STATIC_FORCEINLINE driver_status_t RingBuffer_PeekWrite(const ring_buffer_t* const rb, ring_buffer_data_t* const data, const ring_buffer_size_t offset)
 {
@@ -186,14 +186,14 @@ __STATIC_FORCEINLINE driver_status_t RingBuffer_PeekWrite(const ring_buffer_t* c
 	if (offset == 0 || offset > count)
 	{
 		// Out of bounds (0 offset or offset greater than available data)
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	}
 	// Calculate the peek index backwards with fast wrapping: (writeIdx - offset) & (size - 1)
 	const ring_buffer_size_t peekIdx = (rb->writeIdx - offset) & (rb->size - 1);
 	// Read the data
 	*data = rb->buffer[peekIdx];
 
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**

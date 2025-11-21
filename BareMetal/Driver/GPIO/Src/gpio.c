@@ -49,19 +49,19 @@ void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pi
 		// Configure the Control Register High
 		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
 		{
-			gpioX_CRH = _GPIO_PinStageParams(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), GPIO_getLLPinConfig(config), gpioX_CRH);
+			gpioX_CRH = _GPIO_PinStageParams(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinMode(mode), GPIO_D2L_GetPinConfig(config), gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		// Configure the Control Register Low
 		else
 		{
-			gpioX_CRL = _GPIO_PinStageParams(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), GPIO_getLLPinConfig(config), gpioX_CRL);
+			gpioX_CRL = _GPIO_PinStageParams(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinMode(mode), GPIO_D2L_GetPinConfig(config), gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Pull-Up or Pull-Down Configuration
 		if (GPIO_DRIVER_PIN_IS_PULL_CONFIG(mode, config))
 		{
-			gpioX_ODR = _GPIO_PinStagePullConfig(GPIO_getLLPin(currentPin), config, gpioX_ODR);
+			gpioX_ODR = _GPIO_PinStagePullConfig(GPIO_D2L_GetPin(currentPin), config, gpioX_ODR);
 			regStatus |= GPIO_ODR_UPDATED;
 		}
 		// Update the status
@@ -105,8 +105,8 @@ gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
  *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or mode).
+ * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or mode).
  *
  * @note
  * - Automatically determines whether CRL or CRH needs to be updated.
@@ -117,7 +117,7 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 {
 	// Validation
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
@@ -134,12 +134,12 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 		// Configure the Control Register High
 		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
 		{
-			gpioX_CRH = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRH);
+			gpioX_CRH = _GPIO_PinStageMode(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinMode(mode), gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			gpioX_CRL = _GPIO_PinStageMode(GPIO_getLLPin(currentPin), GPIO_getLLPinMode(mode), gpioX_CRL);
+			gpioX_CRL = _GPIO_PinStageMode(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinMode(mode), gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Update the parameters
@@ -148,7 +148,7 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 	// Write
 	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
 	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -207,8 +207,8 @@ gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
  *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or configuration).
+ * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or configuration).
  *
  * @note
  * - Automatically determines whether CRL or CRH registers are affected.
@@ -220,7 +220,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
 {
 	// Validation
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
@@ -237,12 +237,12 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
 		// Configure the Control Register High
 		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
 		{
-			gpioX_CRH = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRH);
+			gpioX_CRH = _GPIO_PinStageConfig(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinConfig(config), gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			gpioX_CRL = _GPIO_PinStageConfig(GPIO_getLLPin(currentPin), GPIO_getLLPinConfig(config), gpioX_CRL);
+			gpioX_CRL = _GPIO_PinStageConfig(GPIO_D2L_GetPin(currentPin), GPIO_D2L_GetPinConfig(config), gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Update the parameters
@@ -251,7 +251,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
 	// Write
 	if(regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
 	if(regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -259,8 +259,8 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig)
 {
@@ -268,7 +268,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(gpioConfig->pin) == 0x00) ||
        (GPIO_DRIVER_PIN_IS_MODE(gpioConfig->mode) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(gpioConfig->config) == 0x00) ||
        (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00)) 
-		return DRIVER_FAIL;
+		return DRIVER_STATUS_FAIL;
 	// Enable Clock for GPIO Port
 	_GPIO_EnableClock(GPIO_D2L_GetPort(gpio));
 	// Enable AFIO Clock
@@ -276,7 +276,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 	// Set Pin Parameters
 	GPIO_SetPinParameters(gpio, gpioConfig->pin, gpioConfig->mode, gpioConfig->config);
 	// Return Success
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -284,13 +284,13 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 {
 	// Validation
-	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00)) return DRIVER_FAIL;
+	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00)) return DRIVER_STATUS_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	// Local Variables
@@ -309,13 +309,13 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 		// Configure the Control Register High
 		if (GPIO_DRIVER_PIN_REQUIRES_CRH(currentPin))
 		{
-			gpioX_CRH = _GPIO_PinStageResetParams(GPIO_getLLPin(currentPin), gpioX_CRH);
+			gpioX_CRH = _GPIO_PinStageResetParams(GPIO_D2L_GetPin(currentPin), gpioX_CRH);
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		// Configure the Control Register Low
 		else
 		{
-			gpioX_CRL = _GPIO_PinStageResetParams(GPIO_getLLPin(currentPin), gpioX_CRL);
+			gpioX_CRL = _GPIO_PinStageResetParams(GPIO_D2L_GetPin(currentPin), gpioX_CRL);
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 		// Update the status
@@ -326,14 +326,14 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 	if (regStatus & GPIO_CRH_UPDATED) __GPIO_WriteCRH(GPIOx, gpioX_CRH);
 	if (regStatus & GPIO_CRL_UPDATED) __GPIO_WriteCRL(GPIOx, gpioX_CRL);
 	__GPIO_WriteBRR(GPIOx, gpioX_BRR);
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
  * @brief Configures the On-board LED
  * @returns Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t OB_LED_Init(void)
 {

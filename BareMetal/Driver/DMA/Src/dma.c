@@ -7,8 +7,8 @@
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @param dmaConfig Pointer to DMA Channel Configuration Structure
  * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
+ * @returns - `DRIVER_STATUS_FAIL`: Failure
+ * @returns - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_channel_config_t* const dmaConfig)
 {	
@@ -23,15 +23,15 @@ driver_status_t DMA_ConfigChannel(const dma_channel_t dmaChannel, const dma_chan
 	// Update the CCR Register_DMA_configChannelMode
 	_DMA_setChannelConfiguration(dmaChannel, reg);
 	// Return Success
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
  * @brief Configures the DMA Channel for memory to memory transfer mode
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
+ * @returns - `DRIVER_STATUS_FAIL`: Failure
+ * @returns - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t DMA_ConfigChannelForMem2Mem(const dma_channel_t dmaChannel)
 {
@@ -44,8 +44,8 @@ driver_status_t DMA_ConfigChannelForMem2Mem(const dma_channel_t dmaChannel)
  * @brief Configures the DMA Channel for peripheral to memory transfer mode (RX)
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
+ * @returns - `DRIVER_STATUS_FAIL`: Failure
+ * @returns - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t DMA_ConfigChannelForPer2Mem(const dma_channel_t dmaChannel)
 {
@@ -58,8 +58,8 @@ driver_status_t DMA_ConfigChannelForPer2Mem(const dma_channel_t dmaChannel)
  * @brief Configures the DMA Channel for memory to peripheral transfer mode (TX)
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
+ * @returns - `DRIVER_STATUS_FAIL`: Failure
+ * @returns - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel)
 {
@@ -74,8 +74,8 @@ driver_status_t DMA_ConfigChannelForMem2Per(const dma_channel_t dmaChannel)
  * @param dmaChannel DMA Channel. Refer `DMA_x_Channel_Y`
  * @param dmaTransfer DMA Transfer
  * @return Status of Driver Operation
- * @returns - `DRIVER_FAIL`: Failure
- * @returns - `DRIVER_SUCCESS`: Success
+ * @returns - `DRIVER_STATUS_FAIL`: Failure
+ * @returns - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer)
 {
@@ -86,7 +86,7 @@ driver_status_t DMA_Transfer(const dma_channel_t dmaChannel, const dma_transfer_
 	// Enable DMA Channel
 	_DMA_enableChannel(dmaChannel);
 	// Return Success
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 #ifdef ____OLD_DMA_METHOD__

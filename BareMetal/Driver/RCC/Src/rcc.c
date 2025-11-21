@@ -193,8 +193,8 @@ _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
  * @brief RCC Flash Configuration
  * @param flash Flash Configuration Structure @ref rcc_flash_config_t
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 {
@@ -204,15 +204,15 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 	reg = _RCC_StageFlashConfig(flash->latency, flash->prefetch, reg);
 	// TODO: Replace this with __* API
 	FLASH->ACR.REG = reg;
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
  * @brief Configure RCC Bus Prescalers
  * @param[in] rccBusPrescaler Pointer to Bus Prescaler Configuration Structure
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler)
 {
@@ -230,8 +230,8 @@ driver_status_t RCC_ConfigBusPrescaler(rcc_bus_config_t* const rccBusPrescaler)
  * @brief Configure RCC Component Prescalers
  * @param[in] rccComponentPrescaler Pointer to Component Prescaler Configuration Structure
  * @return Status of operation
- * @return - `DRIVER_FAIL`: Failure
- * @return - `DRIVER_SUCCESS`: Success
+ * @return - `DRIVER_STATUS_FAIL`: Failure
+ * @return - `DRIVER_STATUS_SUCCESS`: Success
  */
 driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccComponentPrescaler)
 {
@@ -256,9 +256,9 @@ driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccCo
  *
  * @param[in] rcc Pointer to @ref rcc_config_t "RCC Configuration Structure"
  *
- * @retval DRIVER_SUCCESS          Configuration successful.
- * @retval DRIVER_ERR_INVALID_ARG  Null configuration pointer.
- * @retval DRIVER_ERR_TIMEOUT      Clock source failed to stabilize (if timeout supported).
+ * @retval DRIVER_STATUS_SUCCESS          Configuration successful.
+ * @retval DRIVER_STATUS_ERR_INVALID_ARG  Null configuration pointer.
+ * @retval DRIVER_STATUS_ERR_TIMEOUT      Clock source failed to stabilize (if timeout supported).
  *
  * @note Must be called once during system startup before any peripheral initialization.
  * @note Blocks until selected clock source (HSE/PLL) is stable.
@@ -266,7 +266,7 @@ driver_status_t RCC_ConfigComponentPrescaler(rcc_component_config_t* const rccCo
 driver_status_t RCC_Config(rcc_config_t* const rcc)
 {
 	// Early validation
-	if(rcc == NULL) return DRIVER_ERR_INVALID_ARG;
+	if(rcc == NULL) return DRIVER_STATUS_ERR_INVALID_ARG;
 
 	uint32_t reg = 0x00UL;
 	// Configure Flash Settings First (critical for timing)
@@ -298,17 +298,17 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 	if((rcc->system.clk_src == RCC_SYS_CLK_HSE) || ((rcc->system.clk_src == RCC_SYS_CLK_PLL) && (rcc->system.pll.source == RCC_PLL_SRC_HSE)))
 	{
 		// HSE ready?
-		RCC_ControlHSE(DRIVER_STATE_ON);
-		while(RCC_HSEReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
+		RCC_ControlHSE(DRIVER_STATUS_ON);
+		while(RCC_HSEReady() != DRIVER_STATUS_READY) __ASM volatile("nop"); // Prevent compiler optimization
 	}
 
 	// PLL?
 	if(rcc->system.clk_src == RCC_SYS_CLK_PLL)
 	{
 		// Switch PLL ON
-		RCC_ControlPLL(DRIVER_STATE_ON);
+		RCC_ControlPLL(DRIVER_STATUS_ON);
 		// PLL ready?
-		while(RCC_PLLReady() != DRIVER_STATE_READY) __ASM volatile("nop"); // Prevent compiler optimization
+		while(RCC_PLLReady() != DRIVER_STATUS_READY) __ASM volatile("nop"); // Prevent compiler optimization
 	}
 
 	// System Clock Source
@@ -321,12 +321,12 @@ driver_status_t RCC_Config(rcc_config_t* const rcc)
 	// HSI Required?
 	if((rcc->system.clk_src != RCC_SYS_CLK_HSI) || (rcc->system.clk_src == RCC_SYS_CLK_PLL && rcc->system.pll.source != RCC_PLL_SRC_HSI))
 	{
-		RCC_ControlHSI(DRIVER_STATE_OFF);
-		while(RCC_HSIReady() != DRIVER_STATE_BUSY) __ASM volatile("nop"); // Prevent compiler optimization
+		RCC_ControlHSI(DRIVER_STATUS_OFF);
+		while(RCC_HSIReady() != DRIVER_STATUS_BUSY) __ASM volatile("nop"); // Prevent compiler optimization
 	}
 
 	// Return Success
-	return DRIVER_SUCCESS;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**

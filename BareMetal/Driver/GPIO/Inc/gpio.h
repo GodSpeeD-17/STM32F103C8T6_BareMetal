@@ -200,7 +200,7 @@ typedef uint16_t 										gpio_pin_t;
  * @param[in] pin @ref GPIO_Driver_Pin_Macros "GPIO Pin Mask" to check 
  * @return GPIO Pin Data Type used by LL 
  */
-__STATIC_FORCEINLINE _gpio_pin_t GPIO_getLLPin(const gpio_pin_t pin)
+__STATIC_FORCEINLINE _gpio_pin_t GPIO_D2L_GetPin(const gpio_pin_t pin)
 {
 	return (((pin != GPIO_PIN_NONE) && (pin & GPIO_PIN_ALL) && ((pin & (pin - 1)) == GPIO_PIN_NONE)) ? ((_gpio_pin_t) (__builtin_ctz(pin))) : ((_gpio_pin_t) 0x10));
 } 
@@ -258,7 +258,7 @@ typedef uint8_t											gpio_pin_mode_t;
  * @return GPIO mode
  * @note Make sure to validate the mode using @ref GPIO_DRIVER_IS_MODE before calling
  */
-__STATIC_FORCEINLINE const _gpio_pin_mode_t GPIO_getLLPinMode(const gpio_pin_mode_t mode)
+__STATIC_FORCEINLINE const _gpio_pin_mode_t GPIO_D2L_GetPinMode(const gpio_pin_mode_t mode)
 {
 	switch(mode)
 	{
@@ -345,7 +345,7 @@ typedef uint8_t											gpio_pin_config_t;
  * @param[in] config GPIO pin configuration (gpio_pin_config_t)
  * @return Corresponding LL configuration (_gpio_pin_config_t)
  */
-__STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_getLLPinConfig(const gpio_pin_config_t config)
+__STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_D2L_GetPinConfig(const gpio_pin_config_t config)
 {
 	switch (config)
 	{
@@ -684,7 +684,7 @@ __STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_
 __STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t pin)
 {
 	uint32_t reg = __GPIO_ReadIDR(GPIO_D2L_GetPort(gpio));
-	reg = (reg & ((uint32_t) pin)) >> GPIO_getLLPin(pin);
+	reg = (reg & ((uint32_t) pin)) >> GPIO_D2L_GetPin(pin);
 	return ((uint8_t) reg);
 }
 
@@ -738,7 +738,7 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
  */
 __STATIC_FORCEINLINE gpio_pin_parameter_t GPIO_GetPinParameters(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	_gpio_pin_t pinLL = GPIO_getLLPin(pin); 
+	_gpio_pin_t pinLL = GPIO_D2L_GetPin(pin); 
 	uint32_t reg = (pinLL & _GPIO_PIN_7) ? __GPIO_ReadCRH(GPIO_D2L_GetPort(gpio)) : __GPIO_ReadCRL(GPIO_D2L_GetPort(gpio));
 	reg &= _GPIO_PIN_CNF_MODE_MASK(pinLL);
 	return ((gpio_pin_parameter_t)(reg >> pinLL));
@@ -789,8 +789,8 @@ gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin);
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
  *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or mode).
+ * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or mode).
  *
  * @note
  * - Automatically determines whether CRL or CRH needs to be updated.
@@ -822,8 +822,8 @@ gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
  *
- * @retval `DRIVER_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_FAIL`:     Invalid parameter (port, pin, or configuration).
+ * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
+ * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or configuration).
  *
  * @note
  * - Automatically determines whether CRL or CRH registers are affected.
@@ -838,8 +838,8 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfig);
 
@@ -848,16 +848,16 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfi
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: FailureGPIO_03_Driver_01_Types01_Types
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: FailureGPIO_03_Driver_01_Types01_Types
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);
 
 /**
  * @brief Configures the On-board LED
  * @returns Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t OB_LED_Init(void);
 
@@ -866,8 +866,8 @@ driver_status_t OB_LED_Init(void);
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] gpioConfig @ref gpio_config_t "GPIO Configuration Structure"
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  * @note Assumes Pin is already filled
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig)
@@ -882,13 +882,12 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_
 /**
  * @brief Deinitialize the On-board LED
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 __STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)
 {
 	return GPIO_Deinit(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
-
 
 #endif /* GPIO_H_ */

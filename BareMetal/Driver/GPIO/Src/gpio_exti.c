@@ -124,14 +124,14 @@
 //  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
 //  * @note - Failing to do so may cause driver to misbehave
 //  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
+//  * @returns - DRIVER_STATUS_FAIL: Failure
+//  * @returns - DRIVER_STATUS_SUCCESS: Success
 //  */
 // driver_status_t GPIO_EXTI_Init(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 // 	// Check hardware compatibility
 // 	GPIO_TypeDef* GPIOx = GPIO_D2L_GetPort(gpio);
 // 	if(GPIOx == NULL){
-// 		return DRIVER_FAIL;
+// 		return DRIVER_STATUS_FAIL;
 // 	}
 // 	// TODO: Validate the pin as input pin
 // 	// Enable AFIO Clock
@@ -171,7 +171,7 @@
 // 	// Enable the EXTI Interrupt
 // 	GPIO_EXTI_Enable(pin);
 // 	// Return Success
-// 	return DRIVER_SUCCESS;
+// 	return DRIVER_STATUS_SUCCESS;
 // }
 
 // /**
@@ -182,14 +182,14 @@
 //  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
 //  * @note - Failing to do so may cause driver to misbehave
 //  * @return Status of Driver Operation
-//  * @returns - DRIVER_FAIL: Failure
-//  * @returns - DRIVER_SUCCESS: Success
+//  * @returns - DRIVER_STATUS_FAIL: Failure
+//  * @returns - DRIVER_STATUS_SUCCESS: Success
 //  */
 // driver_status_t GPIO_EXTI_Deinit(const gpio_port_t gpio, const gpio_pin_t pin, const gpio_exti_trigger_t trigger){
 // 	// Check hardware compatibility
 // 	GPIO_TypeDef* GPIOx = GPIO_D2L_GetPort(gpio);
 // 	if(GPIOx == NULL){
-// 		return DRIVER_FAIL;
+// 		return DRIVER_STATUS_FAIL;
 // 	}
 // 	// TODO: Validate the pin as input pin
 // 	// Enable AFIO Clock
@@ -229,5 +229,5 @@
 // 	// Disable the EXTI Interrupt
 // 	GPIO_EXTI_Disable(pin);
 // 	// Return Success
-// 	return DRIVER_SUCCESS;
+// 	return DRIVER_STATUS_SUCCESS;
 // }

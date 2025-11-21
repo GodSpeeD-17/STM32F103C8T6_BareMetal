@@ -409,8 +409,8 @@ __STATIC_FORCEINLINE void USART_Default_Config(usart_config_t* usartConfig){
  * @param hardware Refer `usart_hardware_enable_t`
  * @param usartGpioConfig Refer `usart_gpio_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig);
 
@@ -419,8 +419,8 @@ driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @param baudRate Refer `usart_baud_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success 
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success 
  */
 driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudRate);
 
@@ -430,8 +430,8 @@ driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudR
  * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
  * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success 
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success 
  */
 driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig);
 
@@ -440,8 +440,8 @@ driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_e
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @param usartConfig Pointer to USART Configuration Structure
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig);
 
@@ -450,8 +450,8 @@ driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartCon
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
 
@@ -460,8 +460,8 @@ driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_FAIL: Failure
- * @returns - DRIVER_SUCCESS: Success
+ * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq);
 
