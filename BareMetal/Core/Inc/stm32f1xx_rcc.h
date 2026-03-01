@@ -28,6 +28,9 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 #include <stdint.h>
 
+// ------------------------------------------------------------------------------------------
+// Theory of Operation
+// ------------------------------------------------------------------------------------------
 /**
  * @brief RCC Peripheral Hardware Register Mapping
  * @defgroup  RCC_01_Registers RCC Registers
@@ -76,6 +79,10 @@ extern "C" {
  * @{ 
  */
 
+// ------------------------------------------------------------------------------------------
+// Doxygen Groups
+// ------------------------------------------------------------------------------------------ 
+
 /**
  * @defgroup RCC_01_Registers_01_Structure RCC Registers Encapsulation
  * @ingroup  RCC_01_Registers
@@ -108,6 +115,619 @@ extern "C" {
  * @brief 	 RCC Driver APIs
  */
 
+// ------------------------------------------------------------------------------------------
+// RCC_CR (Clock Control Register)
+// ------------------------------------------------------------------------------------------ 
+
+/**
+ * @brief Clock Control Register (RCC_CR)
+ * @defgroup RCC_CR RCC Clock Control Register
+ * @ingroup  RCC_01_Registers
+ * @{
+ */
+
+// ------ HSION (Internal High-Speed Clock Enable) ------ // 
+/** @brief Internal High-Speed Clock Enable Position @def RCC_CR_HSION_Pos */
+#define RCC_CR_HSION_Pos							((uint8_t) 0U)
+/** @brief Internal High-Speed Clock Enable Mask @def RCC_CR_HSION_Msk */
+#define RCC_CR_HSION_Msk							((uint32_t)(0x01UL << RCC_CR_HSION_Pos))
+/** @brief Internal High-Speed Clock Enable @def RCC_CR_HSION */
+#define RCC_CR_HSION								RCC_CR_HSION_Msk
+
+// ------ HSIRDY (Internal High-Speed Clock Ready) ------ // 
+/** @brief Internal High-Speed Clock Ready Flag Position @def RCC_CR_HSIRDY_Pos */
+#define RCC_CR_HSIRDY_Pos							((uint8_t) 1U)
+/** @brief Internal High-Speed Clock Ready Flag Mask @def RCC_CR_HSIRDY_Msk */
+#define RCC_CR_HSIRDY_Msk							((uint32_t)(0x01UL << RCC_CR_HSIRDY_Pos))
+/** @brief Internal High-Speed Clock Ready Flag @def RCC_CR_HSIRDY */
+#define RCC_CR_HSIRDY								RCC_CR_HSIRDY_Msk
+
+// ------ HSITRIM (Internal High-Speed Clock Trimming) ------ // 
+/** @brief Internal High-Speed Clock Trimming Position (5 bits) @def RCC_CR_HSITRIM_Pos */
+#define RCC_CR_HSITRIM_Pos							((uint8_t) 3U)
+/** @brief Internal High-Speed Clock Trimming Mask (5 bits) @def RCC_CR_HSITRIM_Msk */
+#define RCC_CR_HSITRIM_Msk							((uint32_t)(0x1FUL << RCC_CR_HSITRIM_Pos))
+/** @brief Internal High-Speed Clock Trimming @def RCC_CR_HSITRIM */
+#define RCC_CR_HSITRIM								RCC_CR_HSITRIM_Msk
+
+// ------ HSICAL (Internal High-Speed Clock Calibration) ------ // 
+/** @brief Internal High-Speed Clock Calibration Position (8 bits) @def RCC_CR_HSICAL_Pos */
+#define RCC_CR_HSICAL_Pos							((uint8_t) 8U)
+/** @brief Internal High-Speed Clock Calibration Mask (8 bits) @def RCC_CR_HSICAL_Msk */
+#define RCC_CR_HSICAL_Msk							((uint32_t)(0xFFUL << RCC_CR_HSICAL_Pos))
+/** @brief Internal High-Speed Clock Calibration @def RCC_CR_HSICAL */
+#define RCC_CR_HSICAL								RCC_CR_HSICAL_Msk
+
+// ------ HSEON (External High-Speed Clock Enable) ------ // 
+/** @brief External High-Speed Clock Enable Position @def RCC_CR_HSEON_Pos */
+#define RCC_CR_HSEON_Pos							((uint8_t) 16U)
+/** @brief External High-Speed Clock Enable Mask @def RCC_CR_HSEON_Msk */
+#define RCC_CR_HSEON_Msk							((uint32_t)(0x01UL << RCC_CR_HSEON_Pos))
+/** @brief External High-Speed Clock Enable @def RCC_CR_HSEON */
+#define RCC_CR_HSEON								RCC_CR_HSEON_Msk
+
+// ------ HSERDY (External High-Speed Clock Ready) ------ // 
+/** @brief External High-Speed Clock Ready Flag Position @def RCC_CR_HSERDY_Pos */
+#define RCC_CR_HSERDY_Pos							((uint8_t) 17U)
+/** @brief External High-Speed Clock Ready Flag Mask @def RCC_CR_HSERDY_Msk */
+#define RCC_CR_HSERDY_Msk							((uint32_t)(0x01UL << RCC_CR_HSERDY_Pos))
+/** @brief External High-Speed Clock Ready Flag @def RCC_CR_HSERDY */
+#define RCC_CR_HSERDY								RCC_CR_HSERDY_Msk
+
+// ------ HSEBYP (External High-Speed Clock Bypass) ------ // 
+/** @brief External High-Speed Clock Bypass Position @def RCC_CR_HSEBYP_Pos */
+#define RCC_CR_HSEBYP_Pos							((uint8_t) 18U)
+/** @brief External High-Speed Clock Bypass Mask @def RCC_CR_HSEBYP_Msk */
+#define RCC_CR_HSEBYP_Msk							((uint32_t)(0x01UL << RCC_CR_HSEBYP_Pos))
+/** @brief External High-Speed Clock Bypass @def RCC_CR_HSEBYP */
+#define RCC_CR_HSEBYP								RCC_CR_HSEBYP_Msk
+
+// ------ CSSON (Clock Security System Enable) ------ // 
+/** @brief Clock Security System Enable Position @def RCC_CR_CSSON_Pos */
+#define RCC_CR_CSSON_Pos							((uint8_t) 19U)
+/** @brief Clock Security System Enable Mask @def RCC_CR_CSSON_Msk */
+#define RCC_CR_CSSON_Msk							((uint32_t)(0x01UL << RCC_CR_CSSON_Pos))
+/** @brief Clock Security System Enable @def RCC_CR_CSSON */
+#define RCC_CR_CSSON								RCC_CR_CSSON_Msk
+
+// ------ PLLON (PLL Enable) ------ // 
+/** @brief PLL Enable Position @def RCC_CR_PLLON_Pos */
+#define RCC_CR_PLLON_Pos							((uint8_t) 24U)
+/** @brief PLL Enable Mask @def RCC_CR_PLLON_Msk */
+#define RCC_CR_PLLON_Msk							((uint32_t)(0x01UL << RCC_CR_PLLON_Pos))
+/** @brief PLL Enable @def RCC_CR_PLLON */
+#define RCC_CR_PLLON								RCC_CR_PLLON_Msk
+
+// ------ PLLRDY (PLL Ready) ------ // 
+/** @brief PLL Ready Flag Position @def RCC_CR_PLLRDY_Pos */
+#define RCC_CR_PLLRDY_Pos							((uint8_t) 25U)
+/** @brief PLL Ready Flag Mask @def RCC_CR_PLLRDY_Msk */
+#define RCC_CR_PLLRDY_Msk							((uint32_t)(0x01UL << RCC_CR_PLLRDY_Pos))
+/** @brief PLL Ready Flag @def RCC_CR_PLLRDY */
+#define RCC_CR_PLLRDY								RCC_CR_PLLRDY_Msk
+
+/** @} */ // RCC_CR
+
+// ------------------------------------------------------------------------------------------
+// RCC_CFGR (Clock Configuration Register)
+// ------------------------------------------------------------------------------------------ 
+
+/**
+ * @brief Clock Configuration Register (RCC_CFGR)
+ * @defgroup RCC_CFGR RCC Clock Configuration Register
+ * @ingroup  RCC_01_Registers
+ * @{
+ */
+
+// ------ SW (System Clock Switch) ------ //
+/** @brief System Clock Switch Position (2 bits) @def RCC_CFGR_SW_Pos */
+#define RCC_CFGR_SW_Pos							((uint8_t) 0U)
+/** @brief System Clock Switch Mask (2 bits) @def RCC_CFGR_SW_Msk */
+#define RCC_CFGR_SW_Msk							((uint32_t)(0x03UL << RCC_CFGR_SW_Pos))
+/** @brief System Clock Switch @def RCC_CFGR_SW */
+#define RCC_CFGR_SW								RCC_CFGR_SW_Msk
+/** @brief HSI selected as system clock @def RCC_CFGR_SW_HSI */
+#define RCC_CFGR_SW_HSI							((uint32_t)(0x00UL << RCC_CFGR_SW_Pos))
+/** @brief HSE selected as system clock @def RCC_CFGR_SW_HSE */
+#define RCC_CFGR_SW_HSE							((uint32_t)(0x01UL << RCC_CFGR_SW_Pos))
+/** @brief PLL selected as system clock @def RCC_CFGR_SW_PLL */
+#define RCC_CFGR_SW_PLL							((uint32_t)(0x02UL << RCC_CFGR_SW_Pos))
+
+// ------ SWS (System Clock Switch Status) ------ //
+/** @brief System Clock Switch Status Position (2 bits) @def RCC_CFGR_SWS_Pos */
+#define RCC_CFGR_SWS_Pos						((uint8_t) 2U)
+/** @brief System Clock Switch Status Mask (2 bits) @def RCC_CFGR_SWS_Msk */
+#define RCC_CFGR_SWS_Msk						((uint32_t)(0x03UL << RCC_CFGR_SWS_Pos))
+/** @brief System Clock Switch Status @def RCC_CFGR_SWS */
+#define RCC_CFGR_SWS							RCC_CFGR_SWS_Msk
+/** @brief HSI selected as system clock @def RCC_CFGR_SWS_HSI */
+#define RCC_CFGR_SWS_HSI						((uint32_t)(0x00UL << RCC_CFGR_SWS_Pos))
+/** @brief HSE selected as system clock @def RCC_CFGR_SWS_HSE */
+#define RCC_CFGR_SWS_HSE						((uint32_t)(0x01UL << RCC_CFGR_SWS_Pos))
+/** @brief PLL selected as system clock @def RCC_CFGR_SWS_PLL */
+#define RCC_CFGR_SWS_PLL						((uint32_t)(0x02UL << RCC_CFGR_SWS_Pos))
+
+// ------ HPRE (AHB Prescaler) ------ //
+/** @brief AHB Prescaler Position (4 bits) @def RCC_CFGR_HPRE_Pos */
+#define RCC_CFGR_HPRE_Pos						((uint8_t) 4U)
+/** @brief AHB Prescaler Mask (4 bits) @def RCC_CFGR_HPRE_Msk */
+#define RCC_CFGR_HPRE_Msk						((uint32_t)(0x0FUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB Prescaler @def RCC_CFGR_HPRE */
+#define RCC_CFGR_HPRE							RCC_CFGR_HPRE_Msk
+/** @brief AHB prescaler = 1 (no division) @def RCC_CFGR_HPRE_DIV1 */
+#define RCC_CFGR_HPRE_DIV1						((uint32_t)(0x00UL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 2 @def RCC_CFGR_HPRE_DIV2 */
+#define RCC_CFGR_HPRE_DIV2						((uint32_t)(0x08UL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 4 @def RCC_CFGR_HPRE_DIV4 */
+#define RCC_CFGR_HPRE_DIV4						((uint32_t)(0x09UL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 8 @def RCC_CFGR_HPRE_DIV8 */
+#define RCC_CFGR_HPRE_DIV8						((uint32_t)(0x0AUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 16 @def RCC_CFGR_HPRE_DIV16 */
+#define RCC_CFGR_HPRE_DIV16						((uint32_t)(0x0BUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 64 @def RCC_CFGR_HPRE_DIV64 */
+#define RCC_CFGR_HPRE_DIV64						((uint32_t)(0x0CUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 128 @def RCC_CFGR_HPRE_DIV128 */
+#define RCC_CFGR_HPRE_DIV128					((uint32_t)(0x0DUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 256 @def RCC_CFGR_HPRE_DIV256 */
+#define RCC_CFGR_HPRE_DIV256					((uint32_t)(0x0EUL << RCC_CFGR_HPRE_Pos))
+/** @brief AHB prescaler = 512 @def RCC_CFGR_HPRE_DIV512 */
+#define RCC_CFGR_HPRE_DIV512					((uint32_t)(0x0FUL << RCC_CFGR_HPRE_Pos))
+
+// ------ PPRE1 (APB Low-Speed Prescaler - APB1) ------ //
+/** @brief APB1 Prescaler Position (3 bits) @def RCC_CFGR_PPRE1_Pos */
+#define RCC_CFGR_PPRE1_Pos						((uint8_t) 8U)
+/** @brief APB1 Prescaler Mask (3 bits) @def RCC_CFGR_PPRE1_Msk */
+#define RCC_CFGR_PPRE1_Msk						((uint32_t)(0x07UL << RCC_CFGR_PPRE1_Pos))
+/** @brief APB1 Prescaler @def RCC_CFGR_PPRE1 */
+#define RCC_CFGR_PPRE1							RCC_CFGR_PPRE1_Msk
+/** @brief APB1 prescaler = 1 (no division) @def RCC_CFGR_PPRE1_DIV1 */
+#define RCC_CFGR_PPRE1_DIV1						((uint32_t)(0x00UL << RCC_CFGR_PPRE1_Pos))
+/** @brief APB1 prescaler = 2 @def RCC_CFGR_PPRE1_DIV2 */
+#define RCC_CFGR_PPRE1_DIV2						((uint32_t)(0x04UL << RCC_CFGR_PPRE1_Pos))
+/** @brief APB1 prescaler = 4 @def RCC_CFGR_PPRE1_DIV4 */
+#define RCC_CFGR_PPRE1_DIV4						((uint32_t)(0x05UL << RCC_CFGR_PPRE1_Pos))
+/** @brief APB1 prescaler = 8 @def RCC_CFGR_PPRE1_DIV8 */
+#define RCC_CFGR_PPRE1_DIV8						((uint32_t)(0x06UL << RCC_CFGR_PPRE1_Pos))
+/** @brief APB1 prescaler = 16 @def RCC_CFGR_PPRE1_DIV16 */
+#define RCC_CFGR_PPRE1_DIV16					((uint32_t)(0x07UL << RCC_CFGR_PPRE1_Pos))
+
+// ------ PPRE2 (APB High-Speed Prescaler - APB2) ------ //
+/** @brief APB2 Prescaler Position (3 bits) @def RCC_CFGR_PPRE2_Pos */
+#define RCC_CFGR_PPRE2_Pos						((uint8_t) 11U)
+/** @brief APB2 Prescaler Mask (3 bits) @def RCC_CFGR_PPRE2_Msk */
+#define RCC_CFGR_PPRE2_Msk						((uint32_t)(0x07UL << RCC_CFGR_PPRE2_Pos))
+/** @brief APB2 Prescaler @def RCC_CFGR_PPRE2 */
+#define RCC_CFGR_PPRE2							RCC_CFGR_PPRE2_Msk
+/** @brief APB2 prescaler = 1 (no division) @def RCC_CFGR_PPRE2_DIV1 */
+#define RCC_CFGR_PPRE2_DIV1						((uint32_t)(0x00UL << RCC_CFGR_PPRE2_Pos))
+/** @brief APB2 prescaler = 2 @def RCC_CFGR_PPRE2_DIV2 */
+#define RCC_CFGR_PPRE2_DIV2						((uint32_t)(0x04UL << RCC_CFGR_PPRE2_Pos))
+/** @brief APB2 prescaler = 4 @def RCC_CFGR_PPRE2_DIV4 */
+#define RCC_CFGR_PPRE2_DIV4						((uint32_t)(0x05UL << RCC_CFGR_PPRE2_Pos))
+/** @brief APB2 prescaler = 8 @def RCC_CFGR_PPRE2_DIV8 */
+#define RCC_CFGR_PPRE2_DIV8						((uint32_t)(0x06UL << RCC_CFGR_PPRE2_Pos))
+/** @brief APB2 prescaler = 16 @def RCC_CFGR_PPRE2_DIV16 */
+#define RCC_CFGR_PPRE2_DIV16					((uint32_t)(0x07UL << RCC_CFGR_PPRE2_Pos))
+
+// ------ ADCPRE (ADC Prescaler) ------ //
+/** @brief ADC Prescaler Position (2 bits) @def RCC_CFGR_ADCPRE_Pos */
+#define RCC_CFGR_ADCPRE_Pos						((uint8_t) 14U)
+/** @brief ADC Prescaler Mask (2 bits) @def RCC_CFGR_ADCPRE_Msk */
+#define RCC_CFGR_ADCPRE_Msk						((uint32_t)(0x03UL << RCC_CFGR_ADCPRE_Pos))
+/** @brief ADC Prescaler @def RCC_CFGR_ADCPRE */
+#define RCC_CFGR_ADCPRE							RCC_CFGR_ADCPRE_Msk
+/** @brief ADC prescaler = 2 (PCLK2/2) @def RCC_CFGR_ADCPRE_DIV2 */
+#define RCC_CFGR_ADCPRE_DIV2					((uint32_t)(0x00UL << RCC_CFGR_ADCPRE_Pos))
+/** @brief ADC prescaler = 4 (PCLK2/4) @def RCC_CFGR_ADCPRE_DIV4 */
+#define RCC_CFGR_ADCPRE_DIV4					((uint32_t)(0x01UL << RCC_CFGR_ADCPRE_Pos))
+/** @brief ADC prescaler = 6 (PCLK2/6) @def RCC_CFGR_ADCPRE_DIV6 */
+#define RCC_CFGR_ADCPRE_DIV6					((uint32_t)(0x02UL << RCC_CFGR_ADCPRE_Pos))
+/** @brief ADC prescaler = 8 (PCLK2/8) @def RCC_CFGR_ADCPRE_DIV8 */
+#define RCC_CFGR_ADCPRE_DIV8					((uint32_t)(0x03UL << RCC_CFGR_ADCPRE_Pos))
+
+// ------ PLLSRC (PLL Entry Clock Source) ------ //
+/** @brief PLL Entry Clock Source Position @def RCC_CFGR_PLLSRC_Pos */
+#define RCC_CFGR_PLLSRC_Pos						((uint8_t) 16U)
+/** @brief PLL Entry Clock Source Mask @def RCC_CFGR_PLLSRC_Msk */
+#define RCC_CFGR_PLLSRC_Msk						((uint32_t)(0x01UL << RCC_CFGR_PLLSRC_Pos))
+/** @brief PLL Entry Clock Source @def RCC_CFGR_PLLSRC */
+#define RCC_CFGR_PLLSRC							RCC_CFGR_PLLSRC_Msk
+/** @brief HSI/2 selected as PLL input clock @def RCC_CFGR_PLLSRC_HSI_DIV2 */
+#define RCC_CFGR_PLLSRC_HSI_DIV2				((uint32_t)(0x00UL << RCC_CFGR_PLLSRC_Pos))
+/** @brief HSE selected as PLL input clock @def RCC_CFGR_PLLSRC_HSE */
+#define RCC_CFGR_PLLSRC_HSE						((uint32_t)(0x01UL << RCC_CFGR_PLLSRC_Pos))
+
+// ------ PLLXTPRE (HSE Divider for PLL Entry) ------ //
+/** @brief HSE Divider for PLL Entry Position @def RCC_CFGR_PLLXTPRE_Pos */
+#define RCC_CFGR_PLLXTPRE_Pos					((uint8_t) 17U)
+/** @brief HSE Divider for PLL Entry Mask @def RCC_CFGR_PLLXTPRE_Msk */
+#define RCC_CFGR_PLLXTPRE_Msk					((uint32_t)(0x01UL << RCC_CFGR_PLLXTPRE_Pos))
+/** @brief HSE Divider for PLL Entry @def RCC_CFGR_PLLXTPRE */
+#define RCC_CFGR_PLLXTPRE						RCC_CFGR_PLLXTPRE_Msk
+#define RCC_CFGR_PLLXTPRE_HSE						((uint32_t)(0x00UL << RCC_CFGR_PLLXTPRE_Pos))
+/** @brief HSE divided by 2 before PLL @def RCC_CFGR_PLLXTPRE_HSE_DIV2 */
+#define RCC_CFGR_PLLXTPRE_HSE_DIV2					((uint32_t)(0x01UL << RCC_CFGR_PLLXTPRE_Pos))
+
+// ------ PLLMUL (PLL Multiplication Factor) ------ //
+/** @brief PLL Multiplication Factor Position (4 bits) @def RCC_CFGR_PLLMUL_Pos */
+#define RCC_CFGR_PLLMUL_Pos						((uint8_t) 18U)
+/** @brief PLL Multiplication Factor Mask (4 bits) @def RCC_CFGR_PLLMUL_Msk */
+#define RCC_CFGR_PLLMUL_Msk						((uint32_t)(0x0FUL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL Multiplication Factor @def RCC_CFGR_PLLMUL */
+#define RCC_CFGR_PLLMUL							RCC_CFGR_PLLMUL_Msk
+
+// ------ PLLMUL Values (PLL Multiplication Factor Selection) ------ //
+/** @brief PLL input clock x 2 @def RCC_CFGR_PLLMUL_2 */
+#define RCC_CFGR_PLLMUL_2						((uint32_t)(0x00UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 3 @def RCC_CFGR_PLLMUL_3 */
+#define RCC_CFGR_PLLMUL_3						((uint32_t)(0x01UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 4 @def RCC_CFGR_PLLMUL_4 */
+#define RCC_CFGR_PLLMUL_4						((uint32_t)(0x02UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 5 @def RCC_CFGR_PLLMUL_5 */
+#define RCC_CFGR_PLLMUL_5						((uint32_t)(0x03UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 6 @def RCC_CFGR_PLLMUL_6 */
+#define RCC_CFGR_PLLMUL_6						((uint32_t)(0x04UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 7 @def RCC_CFGR_PLLMUL_7 */
+#define RCC_CFGR_PLLMUL_7						((uint32_t)(0x05UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 8 @def RCC_CFGR_PLLMUL_8 */
+#define RCC_CFGR_PLLMUL_8						((uint32_t)(0x06UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 9 @def RCC_CFGR_PLLMUL_9 */
+#define RCC_CFGR_PLLMUL_9						((uint32_t)(0x07UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 10 @def RCC_CFGR_PLLMUL_10 */
+#define RCC_CFGR_PLLMUL_10						((uint32_t)(0x08UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 11 @def RCC_CFGR_PLLMUL_11 */
+#define RCC_CFGR_PLLMUL_11						((uint32_t)(0x9UL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 12 @def RCC_CFGR_PLLMUL_12 */
+#define RCC_CFGR_PLLMUL_12						((uint32_t)(0xAUL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 13 @def RCC_CFGR_PLLMUL_13 */
+#define RCC_CFGR_PLLMUL_13						((uint32_t)(0xBUL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 14 @def RCC_CFGR_PLLMUL_14 */
+#define RCC_CFGR_PLLMUL_14						((uint32_t)(0xCUL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 15 @def RCC_CFGR_PLLMUL_15 */
+#define RCC_CFGR_PLLMUL_15						((uint32_t)(0xDUL << RCC_CFGR_PLLMUL_Pos))
+/** @brief PLL input clock x 16 @def RCC_CFGR_PLLMUL_16 */
+#define RCC_CFGR_PLLMUL_16						((uint32_t)(0xEUL << RCC_CFGR_PLLMUL_Pos))
+
+// ------ USBPRE (USB Prescaler) ------ //
+/** @brief USB Prescaler Position @def RCC_CFGR_USBPRE_Pos */
+#define RCC_CFGR_USBPRE_Pos						((uint8_t) 22U)
+/** @brief USB Prescaler Mask @def RCC_CFGR_USBPRE_Msk */
+#define RCC_CFGR_USBPRE_Msk						((uint32_t)(0x01UL << RCC_CFGR_USBPRE_Pos))
+/** @brief USB Prescaler @def RCC_CFGR_USBPRE */
+#define RCC_CFGR_USBPRE							RCC_CFGR_USBPRE_Msk
+/** @brief PLL clock divided by 1.5 (48 MHz for USB) @def RCC_CFGR_USBPRE_DIV1_5 */
+#define RCC_CFGR_USBPRE_DIV1_5					((uint32_t)(0x00UL << RCC_CFGR_USBPRE_Pos))
+/** @brief PLL clock directly used as USB clock (must be 48 MHz) @def RCC_CFGR_USBPRE_DIRECT */
+#define RCC_CFGR_USBPRE_DIRECT					((uint32_t)(0x01UL << RCC_CFGR_USBPRE_Pos))
+
+// ------ MCO (Microcontroller Clock Output) ------ //
+/** @brief Microcontroller Clock Output Position (3 bits) @def RCC_CFGR_MCO_Pos */
+#define RCC_CFGR_MCO_Pos						((uint8_t) 24U)
+/** @brief Microcontroller Clock Output Mask (3 bits) @def RCC_CFGR_MCO_Msk */
+#define RCC_CFGR_MCO_Msk						((uint32_t)(0x07UL << RCC_CFGR_MCO_Pos))
+/** @brief Microcontroller Clock Output @def RCC_CFGR_MCO */
+#define RCC_CFGR_MCO							RCC_CFGR_MCO_Msk
+/** @brief No clock output on MCO @def RCC_CFGR_MCO_NOCLOCK */
+#define RCC_CFGR_MCO_NOCLOCK					((uint32_t)(0x00UL << RCC_CFGR_MCO_Pos))
+/** @brief System clock output on MCO @def RCC_CFGR_MCO_SYSCLK */
+#define RCC_CFGR_MCO_SYSCLK						((uint32_t)(0x01UL << RCC_CFGR_MCO_Pos))
+/** @brief HSI clock output on MCO @def RCC_CFGR_MCO_HSI */
+#define RCC_CFGR_MCO_HSI						((uint32_t)(0x02UL << RCC_CFGR_MCO_Pos))
+/** @brief HSE clock output on MCO @def RCC_CFGR_MCO_HSE */
+#define RCC_CFGR_MCO_HSE						((uint32_t)(0x03UL << RCC_CFGR_MCO_Pos))
+/** @brief PLL clock divided by 2 output on MCO @def RCC_CFGR_MCO_PLL_DIV2 */
+#define RCC_CFGR_MCO_PLL_DIV2					((uint32_t)(0x04UL << RCC_CFGR_MCO_Pos))
+/** @brief PLL clock output on MCO @def RCC_CFGR_MCO_PLL */
+#define RCC_CFGR_MCO_PLL						((uint32_t)(0x05UL << RCC_CFGR_MCO_Pos))
+
+/** @} */ // RCC_CFGR 
+
+// ------------------------------------------------------------------------------------------
+// RCC_CIR (Clock Interrupt Register)
+// ------------------------------------------------------------------------------------------ 
+
+/**
+ * @brief Clock Interrupt Register (RCC_CIR)
+ * @defgroup RCC_CIR RCC Clock Interrupt Register
+ * @ingroup  RCC_01_Registers
+ * @{
+ */
+
+// ------ LSIRDYF (LSI Ready Interrupt Flag) ------ // 
+/** @brief LSI Ready Interrupt Flag Position @def RCC_CIR_LSIRDYF_Pos */
+#define RCC_CIR_LSIRDYF_Pos							((uint8_t) 0U)
+/** @brief LSI Ready Interrupt Flag Mask @def RCC_CIR_LSIRDYF_Msk */
+#define RCC_CIR_LSIRDYF_Msk							((uint32_t)(0x01UL << RCC_CIR_LSIRDYF_Pos))
+/** @brief LSI Ready Interrupt Flag @def RCC_CIR_LSIRDYF */
+#define RCC_CIR_LSIRDYF								RCC_CIR_LSIRDYF_Msk
+
+// ------ LSERDYF (LSE Ready Interrupt Flag) ------ // 
+/** @brief LSE Ready Interrupt Flag Position @def RCC_CIR_LSERDYF_Pos */
+#define RCC_CIR_LSERDYF_Pos							((uint8_t) 1U)
+/** @brief LSE Ready Interrupt Flag Mask @def RCC_CIR_LSERDYF_Msk */
+#define RCC_CIR_LSERDYF_Msk							((uint32_t)(0x01UL << RCC_CIR_LSERDYF_Pos))
+/** @brief LSE Ready Interrupt Flag @def RCC_CIR_LSERDYF */
+#define RCC_CIR_LSERDYF								RCC_CIR_LSERDYF_Msk
+
+// ------ HSIRDYF (HSI Ready Interrupt Flag) ------ // 
+/** @brief HSI Ready Interrupt Flag Position @def RCC_CIR_HSIRDYF_Pos */
+#define RCC_CIR_HSIRDYF_Pos							((uint8_t) 2U)
+/** @brief HSI Ready Interrupt Flag Mask @def RCC_CIR_HSIRDYF_Msk */
+#define RCC_CIR_HSIRDYF_Msk							((uint32_t)(0x01UL << RCC_CIR_HSIRDYF_Pos))
+/** @brief HSI Ready Interrupt Flag @def RCC_CIR_HSIRDYF */
+#define RCC_CIR_HSIRDYF								RCC_CIR_HSIRDYF_Msk
+
+// ------ HSERDYF (HSE Ready Interrupt Flag) ------ // 
+/** @brief HSE Ready Interrupt Flag Position @def RCC_CIR_HSERDYF_Pos */
+#define RCC_CIR_HSERDYF_Pos							((uint8_t) 3U)
+/** @brief HSE Ready Interrupt Flag Mask @def RCC_CIR_HSERDYF_Msk */
+#define RCC_CIR_HSERDYF_Msk							((uint32_t)(0x01UL << RCC_CIR_HSERDYF_Pos))
+/** @brief HSE Ready Interrupt Flag @def RCC_CIR_HSERDYF */
+#define RCC_CIR_HSERDYF								RCC_CIR_HSERDYF_Msk
+
+// ------ PLLRDYF (PLL Ready Interrupt Flag) ------ // 
+/** @brief PLL Ready Interrupt Flag Position @def RCC_CIR_PLLRDYF_Pos */
+#define RCC_CIR_PLLRDYF_Pos							((uint8_t) 4U)
+/** @brief PLL Ready Interrupt Flag Mask @def RCC_CIR_PLLRDYF_Msk */
+#define RCC_CIR_PLLRDYF_Msk							((uint32_t)(0x01UL << RCC_CIR_PLLRDYF_Pos))
+/** @brief PLL Ready Interrupt Flag @def RCC_CIR_PLLRDYF */
+#define RCC_CIR_PLLRDYF								RCC_CIR_PLLRDYF_Msk
+
+// ------ CSFF (Clock Security System Interrupt Flag) ------ // 
+/** @brief Clock Security System Interrupt Flag Position @def RCC_CIR_CSFF_Pos */
+#define RCC_CIR_CSFF_Pos							((uint8_t) 7U)
+/** @brief Clock Security System Interrupt Flag Mask @def RCC_CIR_CSFF_Msk */
+#define RCC_CIR_CSFF_Msk							((uint32_t)(0x01UL << RCC_CIR_CSFF_Pos))
+/** @brief Clock Security System Interrupt Flag @def RCC_CIR_CSFF */
+#define RCC_CIR_CSFF								RCC_CIR_CSFF_Msk
+
+// ------ LSIRDYIE (LSI Ready Interrupt Enable) ------ // 
+/** @brief LSI Ready Interrupt Enable Position @def RCC_CIR_LSIRDYIE_Pos */
+#define RCC_CIR_LSIRDYIE_Pos						((uint8_t) 8U)
+/** @brief LSI Ready Interrupt Enable Mask @def RCC_CIR_LSIRDYIE_Msk */
+#define RCC_CIR_LSIRDYIE_Msk						((uint32_t)(0x01UL << RCC_CIR_LSIRDYIE_Pos))
+/** @brief LSI Ready Interrupt Enable @def RCC_CIR_LSIRDYIE */
+#define RCC_CIR_LSIRDYIE							RCC_CIR_LSIRDYIE_Msk
+
+// ------ LSERDYIE (LSE Ready Interrupt Enable) ------ // 
+/** @brief LSE Ready Interrupt Enable Position @def RCC_CIR_LSERDYIE_Pos */
+#define RCC_CIR_LSERDYIE_Pos						((uint8_t) 9U)
+/** @brief LSE Ready Interrupt Enable Mask @def RCC_CIR_LSERDYIE_Msk */
+#define RCC_CIR_LSERDYIE_Msk						((uint32_t)(0x01UL << RCC_CIR_LSERDYIE_Pos))
+/** @brief LSE Ready Interrupt Enable @def RCC_CIR_LSERDYIE */
+#define RCC_CIR_LSERDYIE							RCC_CIR_LSERDYIE_Msk
+
+// ------ HSIRDYIE (HSI Ready Interrupt Enable) ------ // 
+/** @brief HSI Ready Interrupt Enable Position @def RCC_CIR_HSIRDYIE_Pos */
+#define RCC_CIR_HSIRDYIE_Pos						((uint8_t) 10U)
+/** @brief HSI Ready Interrupt Enable Mask @def RCC_CIR_HSIRDYIE_Msk */
+#define RCC_CIR_HSIRDYIE_Msk						((uint32_t)(0x01UL << RCC_CIR_HSIRDYIE_Pos))
+/** @brief HSI Ready Interrupt Enable @def RCC_CIR_HSIRDYIE */
+#define RCC_CIR_HSIRDYIE							RCC_CIR_HSIRDYIE_Msk
+
+// ------ HSERDYIE (HSE Ready Interrupt Enable) ------ // 
+/** @brief HSE Ready Interrupt Enable Position @def RCC_CIR_HSERDYIE_Pos */
+#define RCC_CIR_HSERDYIE_Pos						((uint8_t) 11U)
+/** @brief HSE Ready Interrupt Enable Mask @def RCC_CIR_HSERDYIE_Msk */
+#define RCC_CIR_HSERDYIE_Msk						((uint32_t)(0x01UL << RCC_CIR_HSERDYIE_Pos))
+/** @brief HSE Ready Interrupt Enable @def RCC_CIR_HSERDYIE */
+#define RCC_CIR_HSERDYIE							RCC_CIR_HSERDYIE_Msk
+
+// ------ PLLRDYIE (PLL Ready Interrupt Enable) ------ // 
+/** @brief PLL Ready Interrupt Enable Position @def RCC_CIR_PLLRDYIE_Pos */
+#define RCC_CIR_PLLRDYIE_Pos						((uint8_t) 12U)
+/** @brief PLL Ready Interrupt Enable Mask @def RCC_CIR_PLLRDYIE_Msk */
+#define RCC_CIR_PLLRDYIE_Msk						((uint32_t)(0x01UL << RCC_CIR_PLLRDYIE_Pos))
+/** @brief PLL Ready Interrupt Enable @def RCC_CIR_PLLRDYIE */
+#define RCC_CIR_PLLRDYIE							RCC_CIR_PLLRDYIE_Msk
+
+// ------ LSIRDYC (LSI Ready Interrupt Clear) ------ // 
+/** @brief LSI Ready Interrupt Clear Position @def RCC_CIR_LSIRDYC_Pos */
+#define RCC_CIR_LSIRDYC_Pos							((uint8_t) 16U)
+/** @brief LSI Ready Interrupt Clear Mask @def RCC_CIR_LSIRDYC_Msk */
+#define RCC_CIR_LSIRDYC_Msk							((uint32_t)(0x01UL << RCC_CIR_LSIRDYC_Pos))
+/** @brief LSI Ready Interrupt Clear @def RCC_CIR_LSIRDYC */
+#define RCC_CIR_LSIRDYC								RCC_CIR_LSIRDYC_Msk
+
+// ------ LSERDYC (LSE Ready Interrupt Clear) ------ // 
+/** @brief LSE Ready Interrupt Clear Position @def RCC_CIR_LSERDYC_Pos */
+#define RCC_CIR_LSERDYC_Pos							((uint8_t) 17U)
+/** @brief LSE Ready Interrupt Clear Mask @def RCC_CIR_LSERDYC_Msk */
+#define RCC_CIR_LSERDYC_Msk							((uint32_t)(0x01UL << RCC_CIR_LSERDYC_Pos))
+/** @brief LSE Ready Interrupt Clear @def RCC_CIR_LSERDYC */
+#define RCC_CIR_LSERDYC								RCC_CIR_LSERDYC_Msk
+
+// ------ HSIRDYC (HSI Ready Interrupt Clear) ------ // 
+/** @brief HSI Ready Interrupt Clear Position @def RCC_CIR_HSIRDYC_Pos */
+#define RCC_CIR_HSIRDYC_Pos							((uint8_t) 18U)
+/** @brief HSI Ready Interrupt Clear Mask @def RCC_CIR_HSIRDYC_Msk */
+#define RCC_CIR_HSIRDYC_Msk							((uint32_t)(0x01UL << RCC_CIR_HSIRDYC_Pos))
+/** @brief HSI Ready Interrupt Clear @def RCC_CIR_HSIRDYC */
+#define RCC_CIR_HSIRDYC								RCC_CIR_HSIRDYC_Msk
+
+// ------ HSERDYC (HSE Ready Interrupt Clear) ------ // 
+/** @brief HSE Ready Interrupt Clear Position @def RCC_CIR_HSERDYC_Pos */
+#define RCC_CIR_HSERDYC_Pos							((uint8_t) 19U)
+/** @brief HSE Ready Interrupt Clear Mask @def RCC_CIR_HSERDYC_Msk */
+#define RCC_CIR_HSERDYC_Msk							((uint32_t)(0x01UL << RCC_CIR_HSERDYC_Pos))
+/** @brief HSE Ready Interrupt Clear @def RCC_CIR_HSERDYC */
+#define RCC_CIR_HSERDYC								RCC_CIR_HSERDYC_Msk
+
+// ------ PLLRDYC (PLL Ready Interrupt Clear) ------ // 
+/** @brief PLL Ready Interrupt Clear Position @def RCC_CIR_PLLRDYC_Pos */
+#define RCC_CIR_PLLRDYC_Pos							((uint8_t) 20U)
+/** @brief PLL Ready Interrupt Clear Mask @def RCC_CIR_PLLRDYC_Msk */
+#define RCC_CIR_PLLRDYC_Msk							((uint32_t)(0x01UL << RCC_CIR_PLLRDYC_Pos))
+/** @brief PLL Ready Interrupt Clear @def RCC_CIR_PLLRDYC */
+#define RCC_CIR_PLLRDYC								RCC_CIR_PLLRDYC_Msk
+
+// ------ CSSC (Clock Security System Interrupt Clear) ------ // 
+/** @brief Clock Security System Interrupt Clear Position @def RCC_CIR_CSSC_Pos */
+#define RCC_CIR_CSSC_Pos							((uint8_t) 23U)
+/** @brief Clock Security System Interrupt Clear Mask @def RCC_CIR_CSSC_Msk */
+#define RCC_CIR_CSSC_Msk							((uint32_t)(0x01UL << RCC_CIR_CSSC_Pos))
+/** @brief Clock Security System Interrupt Clear @def RCC_CIR_CSSC */
+#define RCC_CIR_CSSC								RCC_CIR_CSSC_Msk
+
+/** @} */ // RCC_CIR
+
+/**
+ * @brief APB2 Peripheral Reset Register (RCC_APB2RSTR)
+ * @defgroup RCC_APB2RSTR RCC APB2 Peripheral Reset Register
+ * @ingroup	RCC_01_Registers
+ * @{
+ */
+
+// ------ AFIORST (Alternate Function I/O Reset) ------ //
+/** @brief Alternate Function I/O Reset Position @def RCC_APB2RSTR_AFIORST_Pos */
+#define RCC_APB2RSTR_AFIORST_Pos					((uint8_t) 0U)
+/** @brief Alternate Function I/O Reset Mask @def RCC_APB2RSTR_AFIORST_Msk */
+#define RCC_APB2RSTR_AFIORST_Msk					((uint32_t)(0x01UL << RCC_APB2RSTR_AFIORST_Pos))
+/** @brief Alternate Function I/O Reset @def RCC_APB2RSTR_AFIORST */
+#define RCC_APB2RSTR_AFIORST						RCC_APB2RSTR_AFIORST_Msk
+
+// ------ IOPARST (I/O Port A Reset) ------ //
+/** @brief I/O Port A Reset Position @def RCC_APB2RSTR_IOPARST_Pos */
+#define RCC_APB2RSTR_IOPARST_Pos						((uint8_t) 2U)
+/** @brief I/O Port A Reset Mask @def RCC_APB2RSTR_IOPARST_Msk */
+#define RCC_APB2RSTR_IOPARST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPARST_Pos))
+/** @brief I/O Port A Reset @def RCC_APB2RSTR_IOPARST */
+#define RCC_APB2RSTR_IOPARST							RCC_APB2RSTR_IOPARST_Msk
+
+// ------ IOPBRST (I/O Port B Reset) ------ //
+/** @brief I/O Port B Reset Position @def RCC_APB2RSTR_IOPBRST_Pos */
+#define RCC_APB2RSTR_IOPBRST_Pos						((uint8_t) 3U)
+/** @brief I/O Port B Reset Mask @def RCC_APB2RSTR_IOPBRST_Msk */
+#define RCC_APB2RSTR_IOPBRST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPBRST_Pos))
+/** @brief I/O Port B Reset @def RCC_APB2RSTR_IOPBRST */
+#define RCC_APB2RSTR_IOPBRST							RCC_APB2RSTR_IOPBRST_Msk
+
+// ------ IOPCRST (I/O Port C Reset) ------ //
+/** @brief I/O Port C Reset Position @def RCC_APB2RSTR_IOPCRST_Pos */
+#define RCC_APB2RSTR_IOPCRST_Pos						((uint8_t) 4U)
+/** @brief I/O Port C Reset Mask @def RCC_APB2RSTR_IOPCRST_Msk */
+#define RCC_APB2RSTR_IOPCRST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPCRST_Pos))
+/** @brief I/O Port C Reset @def RCC_APB2RSTR_IOPCRST */
+#define RCC_APB2RSTR_IOPCRST							RCC_APB2RSTR_IOPCRST_Msk
+
+// ------ IOPDRST (I/O Port D Reset) ------ //
+/** @brief I/O Port D Reset Position @def RCC_APB2RSTR_IOPDRST_Pos */
+#define RCC_APB2RSTR_IOPDRST_Pos						((uint8_t) 5U)
+/** @brief I/O Port D Reset Mask @def RCC_APB2RSTR_IOPDRST_Msk */
+#define RCC_APB2RSTR_IOPDRST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPDRST_Pos))
+/** @brief I/O Port D Reset @def RCC_APB2RSTR_IOPDRST */
+#define RCC_APB2RSTR_IOPDRST							RCC_APB2RSTR_IOPDRST_Msk
+
+// ------ IOPERST (I/O Port E Reset) ------ //
+/** @brief I/O Port E Reset Position @def RCC_APB2RSTR_IOPERST_Pos */
+#define RCC_APB2RSTR_IOPERST_Pos						((uint8_t) 6U)
+/** @brief I/O Port E Reset Mask @def RCC_APB2RSTR_IOPERST_Msk */
+#define RCC_APB2RSTR_IOPERST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPERST_Pos))
+/** @brief I/O Port E Reset @def RCC_APB2RSTR_IOPERST */
+#define RCC_APB2RSTR_IOPERST							RCC_APB2RSTR_IOPERST_Msk
+
+// ------ IOPFRST (I/O Port F Reset) ------ //
+/** @brief I/O Port F Reset Position @def RCC_APB2RSTR_IOPFRST_Pos */
+#define RCC_APB2RSTR_IOPFRST_Pos						((uint8_t) 7U)
+/** @brief I/O Port F Reset Mask @def RCC_APB2RSTR_IOPFRST_Msk */
+#define RCC_APB2RSTR_IOPFRST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPFRST_Pos))
+/** @brief I/O Port F Reset @def RCC_APB2RSTR_IOPFRST */
+#define RCC_APB2RSTR_IOPFRST							RCC_APB2RSTR_IOPFRST_Msk
+
+// ------ IOPGRST (I/O Port G Reset) ------ //
+/** @brief I/O Port G Reset Position @def RCC_APB2RSTR_IOPGRST_Pos */
+#define RCC_APB2RSTR_IOPGRST_Pos						((uint8_t) 8U)
+/** @brief I/O Port G Reset Mask @def RCC_APB2RSTR_IOPGRST_Msk */
+#define RCC_APB2RSTR_IOPGRST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_IOPGRST_Pos))
+/** @brief I/O Port G Reset @def RCC_APB2RSTR_IOPGRST */
+#define RCC_APB2RSTR_IOPGRST							RCC_APB2RSTR_IOPGRST_Msk
+
+// ------ ADC1RST (ADC 1 Reset) ------ //
+/** @brief ADC 1 Reset Position @def RCC_APB2RSTR_ADC1RST_Pos */
+#define RCC_APB2RSTR_ADC1RST_Pos						((uint8_t) 9U)
+/** @brief ADC 1 Reset Mask @def RCC_APB2RSTR_ADC1RST_Msk */
+#define RCC_APB2RSTR_ADC1RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_ADC1RST_Pos))
+/** @brief ADC 1 Reset @def RCC_APB2RSTR_ADC1RST */
+#define RCC_APB2RSTR_ADC1RST							RCC_APB2RSTR_ADC1RST_Msk
+
+// ------ ADC2RST (ADC 2 Reset) ------ //
+/** @brief ADC 2 Reset Position @def RCC_APB2RSTR_ADC2RST_Pos */
+#define RCC_APB2RSTR_ADC2RST_Pos						((uint8_t) 10U)
+/** @brief ADC 2 Reset Mask @def RCC_APB2RSTR_ADC2RST_Msk */
+#define RCC_APB2RSTR_ADC2RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_ADC2RST_Pos))
+/** @brief ADC 2 Reset @def RCC_APB2RSTR_ADC2RST */
+#define RCC_APB2RSTR_ADC2RST							RCC_APB2RSTR_ADC2RST_Msk
+
+// ------ TIM1RST (TIM1 Timer Reset) ------ //
+/** @brief TIM1 Timer Reset Position @def RCC_APB2RSTR_TIM1RST_Pos */
+#define RCC_APB2RSTR_TIM1RST_Pos						((uint8_t) 11U)
+/** @brief TIM1 Timer Reset Mask @def RCC_APB2RSTR_TIM1RST_Msk */
+#define RCC_APB2RSTR_TIM1RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_TIM1RST_Pos))
+/** @brief TIM1 Timer Reset @def RCC_APB2RSTR_TIM1RST */
+#define RCC_APB2RSTR_TIM1RST							RCC_APB2RSTR_TIM1RST_Msk
+
+// ------ SPI1RST (SPI1 Reset) ------ //
+/** @brief SPI1 Reset Position @def RCC_APB2RSTR_SPI1RST_Pos */
+#define RCC_APB2RSTR_SPI1RST_Pos						((uint8_t) 12U)
+/** @brief SPI1 Reset Mask @def RCC_APB2RSTR_SPI1RST_Msk */
+#define RCC_APB2RSTR_SPI1RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_SPI1RST_Pos))
+/** @brief SPI1 Reset @def RCC_APB2RSTR_SPI1RST */
+#define RCC_APB2RSTR_SPI1RST							RCC_APB2RSTR_SPI1RST_Msk
+
+// ------ TIM8RST (TIM8 Timer Reset) ------ //
+/** @brief TIM8 Timer Reset Position @def RCC_APB2RSTR_TIM8RST_Pos */
+#define RCC_APB2RSTR_TIM8RST_Pos						((uint8_t) 13U)
+/** @brief TIM8 Timer Reset Mask @def RCC_APB2RSTR_TIM8RST_Msk */
+#define RCC_APB2RSTR_TIM8RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_TIM8RST_Pos))
+/** @brief TIM8 Timer Reset @def RCC_APB2RSTR_TIM8RST */
+#define RCC_APB2RSTR_TIM8RST							RCC_APB2RSTR_TIM8RST_Msk
+
+// ------ USART1RST (USART1 Reset) ------ //
+/** @brief USART1 Reset Position @def RCC_APB2RSTR_USART1RST_Pos */
+#define RCC_APB2RSTR_USART1RST_Pos						((uint8_t) 14U)
+/** @brief USART1 Reset Mask @def RCC_APB2RSTR_USART1RST_Msk */
+#define RCC_APB2RSTR_USART1RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_USART1RST_Pos))
+/** @brief USART1 Reset @def RCC_APB2RSTR_USART1RST */
+#define RCC_APB2RSTR_USART1RST							RCC_APB2RSTR_USART1RST_Msk
+
+// ------ ADC3RST (ADC 3 Reset) ------ //
+/** @brief ADC 3 Reset Position @def RCC_APB2RSTR_ADC3RST_Pos */
+#define RCC_APB2RSTR_ADC3RST_Pos						((uint8_t) 15U)
+/** @brief ADC 3 Reset Mask @def RCC_APB2RSTR_ADC3RST_Msk */
+#define RCC_APB2RSTR_ADC3RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_ADC3RST_Pos))
+/** @brief ADC 3 Reset @def RCC_APB2RSTR_ADC3RST */
+#define RCC_APB2RSTR_ADC3RST							RCC_APB2RSTR_ADC3RST_Msk
+
+// ------ TIM9RST (TIM9 Timer Reset) ------ // 
+/** @brief TIM9 Timer Reset Position @def RCC_APB2RSTR_TIM9RST_Pos */
+#define RCC_APB2RSTR_TIM9RST_Pos						((uint8_t) 19U)
+/** @brief TIM9 Timer Reset Mask @def RCC_APB2RSTR_TIM9RST_Msk */
+#define RCC_APB2RSTR_TIM9RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_TIM9RST_Pos))
+/** @brief TIM9 Timer Reset @def RCC_APB2RSTR_TIM9RST */
+#define RCC_APB2RSTR_TIM9RST							RCC_APB2RSTR_TIM9RST_Msk
+
+// ------ TIM10RST (TIM10 Timer Reset) ------ // 
+/** @brief TIM10 Timer Reset Position @def RCC_APB2RSTR_TIM10RST_Pos */
+#define RCC_APB2RSTR_TIM10RST_Pos						((uint8_t) 20U)
+/** @brief TIM10 Timer Reset Mask @def RCC_APB2RSTR_TIM10RST_Msk */
+#define RCC_APB2RSTR_TIM10RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_TIM10RST_Pos))
+/** @brief TIM10 Timer Reset @def RCC_APB2RSTR_TIM10RST */
+#define RCC_APB2RSTR_TIM10RST							RCC_APB2RSTR_TIM10RST_Msk
+
+// ------ TIM11RST (TIM11 Timer Reset) ------ // 
+/** @brief TIM11 Timer Reset Position @def RCC_APB2RSTR_TIM11RST_Pos */
+#define RCC_APB2RSTR_TIM11RST_Pos						((uint8_t) 21U)
+/** @brief TIM11 Timer Reset Mask @def RCC_APB2RSTR_TIM11RST_Msk */
+#define RCC_APB2RSTR_TIM11RST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_TIM11RST_Pos))
+/** @brief TIM11 Timer Reset @def RCC_APB2RSTR_TIM11RST */
+#define RCC_APB2RSTR_TIM11RST							RCC_APB2RSTR_TIM11RST_Msk
+
+/** @} */ // RCC_APB2RSTR
+
+// ------------------------------------------------------------------------------------------
+// RCC Structure
+// ------------------------------------------------------------------------------------------ 
+
 /**
  * @addtogroup RCC_01_Registers_01_Structure
  * @{
@@ -118,7 +738,7 @@ extern "C" {
  * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113) 
  * @typedef RCC_TypeDef
  */
-typedef volatile struct __RCC_TypeDef
+typedef volatile struct _RCC_TypeDef
 {
 	/**
 	 * @brief Clock Control Register
