@@ -10,67 +10,8 @@
  * @brief   STM32F1xx - Peripheral Register Mapping
  *
  * @details 
- * This file provides centralized memory mapping for all peripherals for STM32F1xx Seriess
- *
- * @code
- * 
- * // STM32F1xx Series Peripheral Address Mapping
- * #include "stm32f1xx.h"
- *
- * // Set PA13
- * GPIOA->ODR.REG |= GPIO_PIN_13;
- * // Reset GPIOA clock
- * RCC->APB2ENR.REG &= ~RCC_APB2ENR_IOPAEN;
- * // Send character via USART1
- * USART1->DR = 'A';
- * 
- * @endcode
+ * This file provides centralized memory mapping for all peripherals for STM32F1xx Series
  *  
- */
-
-/**
- * @brief Basic Utilities for Helper
- * @defgroup 01_STM32F1xx_Utilities Utilities
- * @ingroup STM32F1xx
- * 
- * @{
- * 
- * @details
- *******************************************************************************************************************
- *	Basic Notes:-
- *	YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
- *	`uint32_t` inside every BIT struct because of padding alignment
- *	`volatile` used for ensuring no further optimization by compiler
- *	`: x` indicates only x bit(s) to be used from that 32-bit
- ****************************************************************************************************************
- *						  🔧 Bit Manipulation Built-ins (GCC)
- * -------------------------------------------------------------------------------------
- * | Built-in Function		| Description										   |
- * |--------------------------|--------------------------------------------------------|
- * | __builtin_clz(x)		 | Counts leading zeros from MSB (Undefined if x == 0)   |
- * | __builtin_ctz(x)		 | Counts trailing zeros from LSB (Undefined if x == 0)  |
- * | __builtin_popcount(x)	| Counts number of bits set to 1 (Hamming weight)	   |
- * | __builtin_parity(x)	  | Returns 1 if number of 1-bits is odd, else 0		  |
- * | __builtin_ffsl(x)		| Index (1-based) of first bit set (LSB side)		   |
- * | __builtin_bswap16(x)	 | Swaps byte order (Endian swap) for 16-bit integer	 |
- * | __builtin_bswap32(x)	 | Swaps byte order for 32-bit integer				   |
- * | __builtin_bswap64(x)	 | Swaps byte order for 64-bit integer				   |
- * -------------------------------------------------------------------------------------
- * 
- * @note
- * - All __builtin_* functions are evaluated at compile-time if argument is constant.
- * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
- * - These generate single assembly instructions (CLZ, RBIT, etc.) on ARM Cortex-M.
- * - Use with uint32_t or cast explicitly to avoid type promotion issues.
- *
- * @example
- * Example Usage:
- *   uint32_t val = 0x0000000F;
- *   uint8_t zeros = __builtin_clz(val);	  // → 28
- *   uint8_t set   = __builtin_popcount(val); // → 4
- *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
- * 
- * @}
  */
  
 // Header Guards
@@ -83,10 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /*----------------------------------------------- Core C -----------------------------------------------*/
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "stm32f1xx_data_types.h"
 
 /*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
 #include "cmsis_gcc.h"
@@ -96,7 +34,8 @@ extern "C" {
 #include "stm32f1xx_nvic.h"
 #include "stm32f1xx_systick.h"
 #include "stm32f1xx_watchdog.h"
-/*----------------------------------------------- ARM Cortex-M3 -----------------------------------------------*/
+
+#include "stm32f1xx_utils.h"
 
 /*----------------------------------------------- STM32F103C8T6 -----------------------------------------------*/
 #include "stm32f1xx_adc.h"
@@ -109,175 +48,12 @@ extern "C" {
 #include "stm32f1xx_timer.h"
 #include "stm32f1xx_rcc.h"
 #include "stm32f1xx_usart.h"
-/*----------------------------------------------- STM32F103C8T6 -----------------------------------------------*/
 
 /*----------------------------------------------- Custom Declaration -----------------------------------------------*/
-#define BIT_MASK(X)								((uint32_t) (0x01UL << (X)))
-#define BIT_1_MASK								((uint32_t) (0x01))
-#define BIT_2_MASK								((uint32_t) (0x03))
-#define BIT_3_MASK								((uint32_t) (0x07))
-#define BIT_4_MASK								((uint32_t) (0x0F))
-#define BIT_5_MASK								((uint32_t) (0x1F))
-#define BIT_6_MASK								((uint32_t) (0x3F))
-#define BIT_7_MASK								((uint32_t) (0x7F))
-#define BIT_8_MASK								((uint32_t) (0xFF))
 
-/**
- * @defgroup 01_STM32F1xx_Utilities_01_Bit Bit Manipulation Utilities
- * @ingroup 01_STM32F1xx_Utilities
- * @{
- */
 
-/** 
- * @brief Sets bit at `POS`
- * @param[in] POS Bit position
- * @note Assumed 32-bits
- */
-#define BIT_SET(POS)							((uint32_t) (0x01UL << (POS)))
 
-/**
- * @brief   Compute peripheral index based on base addresses and peripheral size
- * @addtogroup 01_STM32F1xx_Utilities_01_Bit
- *
- * @details
- * This macro computes the **zero-based peripheral index** (or bit position)
- * of a given peripheral instance by comparing its memory-mapped address
- * with that of a reference instance of the same peripheral family.
- *
- * The computation uses the **known peripheral memory spacing** (in bytes)
- * rather than the structure size (`sizeof()`), ensuring accurate results even
- * when peripheral register blocks do not occupy their entire memory region.
- *
- * It is primarily used to determine **clock-enable bit positions** or
- * **array indices** for peripherals of the same type (e.g., GPIOA–GPIOG,
- * USART1–USART3, TIM2–TIM5, etc.).
- *
- * @note
- * - Performs **pure compile-time address arithmetic** when constant operands are used.
- * - No hardware register access is performed.
- * - Peripheral instances must have equal address spacing in the memory map.
- *
- * @param[in] value   The address (or pointer) of the target peripheral instance  
- *					(e.g., @ref GPIOC, @ref USART2, @ref TIM4)
- * @param[in] base	The address (or pointer) of the reference peripheral instance  
- *					(e.g., @ref GPIOA, @ref USART1, @ref TIM2)
- * @param[in] size	The memory spacing (in bytes) between consecutive instances  
- *					of the same peripheral type  
- *					(e.g., @ref GPIO_PERIPHERAL_SIZE "GPIO_PERIPHERAL_SIZE")
- *
- * @return The **zero-based index** of the target peripheral relative to the base.
- *
- * @pre Both `base` and `value` must belong to peripherals of the same family
- *	  and share the same address spacing.
- *
- * @warning
- * - The result is undefined if `base` and `value` are not aligned to `size`.
- * - Passing an incorrect `size` value may result in invalid peripheral indices.
- *
- * @see @ref GPIO_PERIPHERAL_SIZE for GPIO memory spacing.
- * @see @ref RCC_APB2ENR for clock enable bit positions.
- * @def BIT_POS()
- * @par Example:
- * @code
- * // Example: Compute GPIO port index
- * uint32_t index = BIT_POS(GPIOC, GPIOA, GPIO_PERIPHERAL_SIZE);
- * // index = 2 → GPIOC is the third port after GPIOA
- *
- * // Enable corresponding GPIO clock (bit = index + 2)
- * RCC->APB2ENR |= (1U << (index + 2));
- * @endcode
- */
-#define BIT_POS(value, base, size) \
-	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)(size)))
 
-/** @} */ // 01_STM32F1xx_Utilities_01_Bit
-
-/**
- * @brief Driver Operational Status Type
- * @defgroup 01_STM32F1xx_Utilities_02_DriverStatus Driver Status Definitions
- * @ingroup 01_STM32F1xx_Utilities
- * @{
- */
-
-/**
- * @enum driver_status_code_t
- * @brief Driver status codes in ascending order.
- *
- * @note
- * Link individual codes using @ref DRIVER_STATUS_xxx.
- */
-typedef enum
-{
-	/** @brief Operation requested in an invalid driver or peripheral state. */
-	DRIVER_STATUS_ERR_STATE			=	-4,
-
-	/** @brief An input parameter was invalid or out of range. */
-	DRIVER_STATUS_ERR_INVALID_ARG	=	-3,
-
-	/** @brief Operation timed out waiting for hardware or condition. */
-	DRIVER_STATUS_ERR_TIMEOUT		=	-2,
-
-	/** @brief Operation failed due to a non-specific error. */
-	DRIVER_STATUS_FAIL				=	-1,
-
-	/** @brief Generic error (baseline error code). */
-	DRIVER_STATUS_ERROR				=	 0,
-
-	/** @brief Operation completed successfully. */
-	DRIVER_STATUS_SUCCESS			=	 1,
-
-	/** @brief Target state: Disabled or turned OFF. */
-	DRIVER_STATUS_OFF				=	 2,
-
-	/** @brief Target state: Enabled or turned ON. */
-	DRIVER_STATUS_ON				=	 3,
-
-	/** @brief Peripheral or driver is configured and ready for an operation. */
-	DRIVER_STATUS_READY				=	 4,
-
-	/** @brief Peripheral or driver is currently executing an operation. */
-	DRIVER_STATUS_BUSY				=	 5
-
-} driver_status_code_t;
-
-/**
- * @brief Assert Driver Functionality Status
- * @param[in] expr @ref driver_status_t "Expression to evaluate"
- */
-#define ASSERT_DRIVER_STATUS(expr)										\
-do																		\
-{																		\
-	driver_status_t _status = (expr);									\
-	if																	\
-	(																	\
-		(_status != DRIVER_STATUS_SUCCESS)								\
-						&&												\
-		(_status != DRIVER_STATUS_READY)								\
-						&&												\
-		(_status != DRIVER_STATUS_BUSY)									\
-	)																	\
-	{																	\
-		/* Update as per need */										\
-	}																	\
-} while (0)
-
-/**
- * @brief Return if Driver Functionality Status is not Success
- * @param[in] expr @ref driver_status_t "Expression to evaluate"
- * @returns Returns the evaluated status
- * @retval - Input Expression if not @ref `DRIVER_STATUS_SUCCESS`
- */
-#define DRIVER_RETURN_IF_NOT_SUCCESS(expr)								\
-do																		\
-{																		\
-	driver_status_t _st = (driver_status_t)(expr);						\
-	if (_st != DRIVER_STATUS_SUCCESS)									\
-	{																	\
-		return _st;														\
-	}																	\
-} while (0)
-
-/** @} */ // 01_STM32F1xx_Utilities_02_DriverStatus
 
 /** @} */ // 01_STM32F1xx_Utilities
 

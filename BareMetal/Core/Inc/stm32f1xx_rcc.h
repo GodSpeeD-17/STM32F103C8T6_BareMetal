@@ -38,16 +38,16 @@ extern "C" {
  *
  * | Offset | Register | Name | Description |
  * |--------|----------|------|-------------|
- * | 0x00   | RCC_CR     | Clock Control Register | Controls internal/external clock sources |
- * | 0x04   | RCC_CFGR   | Clock Configuration Register | Configures clock dividers and PLL |
- * | 0x08   | RCC_CIR    | Clock Interrupt Register | Manages clock-related interrupts |
- * | 0x0C   | RCC_APB2RSTR | APB2 Peripheral Reset Register | Resets APB2 peripherals |
- * | 0x10   | RCC_APB1RSTR | APB1 Peripheral Reset Register | Resets APB1 peripherals |
- * | 0x14   | RCC_AHBENR  | AHB Peripheral Clock Enable Register | Enables AHB peripherals |
- * | 0x18   | RCC_APB2ENR | APB2 Peripheral Clock Enable Register | Enables APB2 peripherals |
- * | 0x1C   | RCC_APB1ENR | APB1 Peripheral Clock Enable Register | Enables APB1 peripherals |
- * | 0x20   | RCC_BDCR    | Backup Domain Control Register | Controls RTC and backup domain |
- * | 0x24   | RCC_CSR     | Control/Status Register | Controls LSI and reset status |
+ * | `0x00`   | @ref `RCC_CR`     | Clock Control Register | Controls internal/external clock sources |
+ * | `0x04`   | @ref `RCC_CFGR`   | Clock Configuration Register | Configures clock dividers and PLL |
+ * | `0x08`   | @ref `RCC_CIR`    | Clock Interrupt Register | Manages clock-related interrupts |
+ * | `0x0C`   | @ref `RCC_APB2RSTR` | APB2 Peripheral Reset Register | Resets APB2 peripherals |
+ * | `0x10`   | @ref `RCC_APB1RSTR` | APB1 Peripheral Reset Register | Resets APB1 peripherals |
+ * | `0x14`   | @ref `RCC_AHBENR`  | AHB Peripheral Clock Enable Register | Enables AHB peripherals |
+ * | `0x18`   | @ref `RCC_APB2ENR` | APB2 Peripheral Clock Enable Register | Enables APB2 peripherals |
+ * | `0x1C`   | @ref `RCC_APB1ENR` | APB1 Peripheral Clock Enable Register | Enables APB1 peripherals |
+ * | `0x20`   | @ref `RCC_BDCR`    | Backup Domain Control Register | Controls RTC and backup domain |
+ * | `0x24`   | @ref `RCC_CSR`     | Control/Status Register | Controls LSI and reset status |
  *
  * - Key Features:
  * <ul>
@@ -146,6 +146,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 6;
 		} BIT;
 	} CR;
+	
 	/**
 	 * @brief Clock Configuration Register  
 	 * @details
@@ -174,6 +175,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_2: 5;
 		} BIT;
 	} CFGR;
+
 	/**
 	 * @brief Clock Interrupt Register
 	 * @details
@@ -210,6 +212,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_4: 8;
 		} BIT;
 	} CIR;
+
 	/**
 	 * @brief APB2 Peripheral Reset Register
 	 * @details
@@ -246,6 +249,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 10;
 		} BIT;
 	} APB2RSTR;
+
 	/**
 	 * @brief APB1 Peripheral Reset Register
 	 * @details
@@ -290,6 +294,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_6: 2;
 		} BIT;
 	} APB1RSTR;
+
 	/**
 	 * @brief AHB Peripheral Clock Enable Register
 	 * @details
@@ -317,6 +322,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_5: 21;
 		} BIT;
 	} AHBENR;
+
 	/**
 	 * @brief APB2 Peripheral Clock Enable Register
 	 * @details
@@ -398,6 +404,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_6: 2;
 		} BIT;
 	} APB1ENR;
+
 	/**
 	 * @brief Backup Domain Control Register
 	 * @details
@@ -422,6 +429,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 15;
 		} BIT;
 	} BDCR;
+
 	/**
 	 * @brief Control/Status Register
 	 * @details

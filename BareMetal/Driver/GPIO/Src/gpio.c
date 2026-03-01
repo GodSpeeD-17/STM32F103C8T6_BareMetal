@@ -106,7 +106,7 @@ gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin)
  * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
  *
  * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or mode).
+ * @retval `DRIVER_STATUS_ERROR_FAIL`:     Invalid parameter (port, pin, or mode).
  *
  * @note
  * - Automatically determines whether CRL or CRH needs to be updated.
@@ -117,7 +117,7 @@ driver_status_t GPIO_SetPinMode(const gpio_port_t gpio, gpio_pin_t pin, const gp
 {
 	// Validation
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_MODE(mode) == 0x00))
-		return DRIVER_STATUS_FAIL;
+		return DRIVER_STATUS_ERROR_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
@@ -208,7 +208,7 @@ gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin
  * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
  *
  * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or configuration).
+ * @retval `DRIVER_STATUS_ERROR_FAIL`:     Invalid parameter (port, pin, or configuration).
  *
  * @note
  * - Automatically determines whether CRL or CRH registers are affected.
@@ -220,7 +220,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
 {
 	// Validation
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(config) == 0x00))
-		return DRIVER_STATUS_FAIL;
+		return DRIVER_STATUS_ERROR_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	uint32_t gpioX_CRH = 0x00UL;
@@ -259,7 +259,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfig)
@@ -268,7 +268,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
 	if ((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(gpioConfig->pin) == 0x00) ||
        (GPIO_DRIVER_PIN_IS_MODE(gpioConfig->mode) == 0x00) || (GPIO_DRIVER_PIN_IS_CONFIG(gpioConfig->config) == 0x00) ||
        (GPIO_DRIVER_PIN_IS_MODE_CONFIG_COMPATIBLE(gpioConfig->mode, gpioConfig->config) == 0x00)) 
-		return DRIVER_STATUS_FAIL;
+		return DRIVER_STATUS_ERROR_FAIL;
 	// Enable Clock for GPIO Port
 	_GPIO_EnableClock(GPIO_D2L_GetPort(gpio));
 	// Enable AFIO Clock
@@ -284,13 +284,13 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t* const gpioConfi
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 {
 	// Validation
-	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00)) return DRIVER_STATUS_FAIL;
+	if((GPIO_DRIVER_IS_PORT(gpio) == 0x00) || (GPIO_DRIVER_IS_PIN(pin) == 0x00)) return DRIVER_STATUS_ERROR_FAIL;
 	// Local Variables
 	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
 	// Local Variables
@@ -332,7 +332,7 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, gpio_pin_t pin)
 /**
  * @brief Configures the On-board LED
  * @returns Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t OB_LED_Init(void)
