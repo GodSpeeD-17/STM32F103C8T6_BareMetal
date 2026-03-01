@@ -57,6 +57,22 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // APB1 Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
+/** @brief General-purpose Timer 2 Base Memory Address @def TIM2_BASE_ADDRESS */
+#define TIM2_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM2_OFFSET))
+/** @brief General-purpose Timer 3 Base Memory Address @def TIM3_BASE_ADDRESS */
+#define TIM3_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM3_OFFSET))
+/** @brief General-purpose Timer 4 Base Memory Address @def TIM4_BASE_ADDRESS */
+#define TIM4_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM4_OFFSET))
+/** @brief General-purpose Timer 5 Base Memory Address @def TIM5_BASE_ADDRESS */
+#define TIM5_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM5_OFFSET))
+/** @brief Basic Timer 6 Base Memory Address @def TIM6_BASE_ADDRESS */
+#define TIM6_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM6_OFFSET))
+/** @brief Basic Timer 7 Base Memory Address @def TIM7_BASE_ADDRESS */
+#define TIM7_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + TIM7_OFFSET))
+/** @brief USART2 Base Memory Address @def USART2_BASE_ADDRESS */
+#define USART2_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + USART2_OFFSET))
+/** @brief USART3 Base Memory Address @def USART3_BASE_ADDRESS */
+#define USART3_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + USART3_OFFSET))
 /** @brief I2C1 Base Memory Address @def I2C1_BASE_ADDRESS */
 #define I2C1_BASE_ADDRESS						((uint32_t) (APB1_BASE_ADDR + I2C1_OFFSET))
 /** @brief I2C2 Base Memory Address @def I2C2_BASE_ADDRESS */
@@ -69,7 +85,6 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // APB2 Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
-
 /** @brief AFIO Base Memory Address @def AFIO_BASE_ADDRESS */
 #define AFIO_BASE_ADDRESS						((uint32_t) (APB2_BASE_ADDR + AFIO_OFFSET))
 /** @brief EXTI Base Memory Address @def EXTI_BASE_ADDRESS */

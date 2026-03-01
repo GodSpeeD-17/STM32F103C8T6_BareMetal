@@ -33,11 +33,8 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 #include "cmsis_gcc.h"
 #include "stm32f1xx_defines.h"
-#include "stm32f1xx_flash.h"
 #include "stm32f1xx_scb.h"
-#include "stm32f1xx_nvic.h"
 #include "stm32f1xx_systick.h"
-#include "stm32f1xx_watchdog.h"
 
 // ------------------------------------------------------------------------------------------
 // STM32F103C8T6
@@ -54,62 +51,156 @@ extern "C" {
 #include "stm32f1xx_timer.h"
 #include "stm32f1xx_rcc.h"
 #include "stm32f1xx_usart.h"
+#include "stm32f1xx_watchdog.h"
+#include "stm32f1xx_flash.h"
+#include "stm32f1xx_nvic.h"
 
 // ==========================================================================================
 // Address Mapping
 // ==========================================================================================
 
 // ------------------------------------------------------------------------------------------
-// RCC
+// Cortex-M3 Core Peripherals
 // ------------------------------------------------------------------------------------------
-
-/**
- * @addtogroup RCC_01_Registers_02_Memory
- * @{
- */
-
 /** @brief System Control Block  (Cortex-M3 Core Peripheral) @def SCB */
-#define SCB										((SCB_TypeDef*) (SCB_BASE_ADDR))
+#define SCB										((SCB_TypeDef*) SCB_BASE_ADDR)
 /** @brief Nested Vectored Interrupt Controller  (Cortex-M3 Core Peripheral) @def NVIC */
-#define NVIC									((NVIC_TypeDef*) (NVIC_BASE_ADDR))
+#define NVIC									((NVIC_TypeDef*) NVIC_BASE_ADDR)
 /** @brief System Timer  (Cortex-M3 Core Peripheral) @def SysTick */
-#define SysTick									((SysTick_TypeDef*) (SysTick_BASE_ADDR))
-/** @brief Flash Memory Interface  @def FLASH */
-#define FLASH									((FLASH_TypeDef*) (FLASH_BASE_ADDR))
+#define SysTick									((SysTick_TypeDef*) SysTick_BASE_ADDR)
+
+// ------------------------------------------------------------------------------------------
+// AHB Peripherals
+// ------------------------------------------------------------------------------------------
+/** @brief DMA1 Controller @def DMA1 */
+#define DMA1									((DMA_TypeDef*) DMA1_BASE_ADDR)
+/**
+ * @brief DMA1 Channel 1 @def DMA1_Channel1
+ * @details Channel 1 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x08 (channel 1 register offset)
+ * @note  - Connected peripherals: ADC1, TIM2_CH3, TIM4_CH1
+ */
+#define DMA1_Channel1 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[0]))
+/**
+ * @brief DMA1 Channel 2 @def DMA1_Channel2
+ * @details Channel 2 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x1C (channel 2 register offset)
+ * @note  - Connected peripherals: SPI1_RX, TIM1_CH1, TIM2_UP, TIM3_CH3
+ */
+#define DMA1_Channel2 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[1]))
+/**
+ * @brief DMA1 Channel 3 @def DMA1_Channel3
+ * @details Channel 3 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x30 (channel 3 register offset)
+ * @note  - Connected peripherals: SPI1_TX, TIM1_CH2, TIM3_CH4, TIM3_UP
+ */
+#define DMA1_Channel3 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[2]))
+/**
+ * @brief DMA1 Channel 4 @def DMA1_Channel4
+ * @details Channel 4 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x44 (channel 4 register offset)
+ * @note  - Connected peripherals: SPI2_RX, USART1_TX, I2C2_TX, TIM1_CH4, TIM2_CH1, TIM4_CH3
+ */
+#define DMA1_Channel4 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[3]))
+/**
+ * @brief DMA1 Channel 5 @def DMA1_Channel5
+ * @details Channel 5 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x58 (channel 5 register offset)
+ * @note  - Connected peripherals: SPI2_TX, USART1_RX, I2C2_RX, TIM1_CH1, TIM2_CH2, TIM4_CH4
+ */
+#define DMA1_Channel5 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[4]))
+/**
+ * @brief DMA1 Channel 6 @def DMA1_Channel6
+ * @details Channel 6 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x6C (channel 6 register offset)
+ * @note  - Connected peripherals: USART2_RX, I2C1_TX, TIM1_CH3, TIM3_CH1, TIM3_TRIG
+ */
+#define DMA1_Channel6 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[5]))
+/**
+ * @brief DMA1 Channel 7 @def DMA1_Channel7
+ * @details Channel 7 of DMA1 controller
+ * @note  - Address: DMA1 base + 0x80 (channel 7 register offset)
+ * @note  - Connected peripherals: USART2_TX, I2C1_RX, TIM2_CH2, TIM2_CH4, TIM4_UP
+ */
+#define DMA1_Channel7 							((DMA_Channel_TypeDef*) (&DMA1->CHANNEL[6]))
+/** @brief DMA2 Controller @def DMA2 */
+#define DMA2									((DMA_TypeDef*) DMA2_BASE_ADDR)
+/**
+ * @brief DMA2 Channel 1 @def DMA2_Channel1
+ * @details Channel 1 of DMA2 controller
+ * @note  - Available only on high-density STM32F103 devices
+ * @note  - Address: DMA2 base + 0x08 (channel 1 register offset)
+ * @note  - Connected peripherals: ADC3, TIM1_CH1, TIM8_CH3, TIM8_UP
+ */
+#define DMA2_Channel1 							((DMA_Channel_TypeDef*)(&DMA2->CHANNEL[0]))
+/**
+ * @brief DMA2 Channel 2 @def DMA2_Channel2
+ * @details Channel 2 of DMA2 controller
+ * @note  - Available only on high-density STM32F103 devices
+ * @note  - Address: DMA2 base + 0x1C (channel 2 register offset)
+ * @note  - Connected peripherals: TIM1_CH2, TIM8_CH4, SPI1_RX, USART3_TX
+ */
+#define DMA2_Channel2 							((DMA_Channel_TypeDef*)(&DMA2->CHANNEL[1]))
+/**
+ * @brief DMA2 Channel 3 @def DMA2_Channel3
+ * @details Channel 3 of DMA2 controller
+ * @note  - Available only on high-density STM32F103 devices
+ * @note  - Address: DMA2 base + 0x30 (channel 3 register offset)
+ * @note  - Connected peripherals: TIM1_CH3, TIM8_CH1, SPI1_TX, USART3_RX
+ */
+#define DMA2_Channel3 							((DMA_Channel_TypeDef*)(&DMA2->CHANNEL[2]))
+/**
+ * @brief DMA2 Channel 4 @def DMA2_Channel4
+ * @details Channel 4 of DMA2 controller
+ * @note  - Available only on high-density STM32F103 devices
+ * @note  - Address: DMA2 base + 0x44 (channel 4 register offset)
+ * @note  - Connected peripherals: TIM1_CH4, TIM8_CH2, I2C2_TX, USART1_TX
+ */
+#define DMA2_Channel4 							((DMA_Channel_TypeDef*)(&DMA2->CHANNEL[3]))
+/**
+ * @brief DMA2 Channel 5 @def DMA2_Channel5
+ * @details Channel 5 of DMA2 controller
+ * @note  - Available only on high-density STM32F103 devices
+ * @note  - Address: DMA2 base + 0x58 (channel 5 register offset)
+ * @note  - Connected peripherals: TIM1_UP, TIM8_CH3, I2C2_RX, USART1_RX
+ */
+#define DMA2_Channel5 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[4]))
 /** @brief RCC Memory Address @def RCC  */
 #define RCC 									((RCC_TypeDef*) RCC_BASE_ADDRESS)
-
-/** @} */ // RCC_01_Registers_02_Memory
+/** @brief Flash Memory Interface  @def FLASH */
+#define FLASH									((FLASH_TypeDef*) FLASH_BASE_ADDR)
 
 // ------------------------------------------------------------------------------------------
 // APB1 Peripherals
 // ------------------------------------------------------------------------------------------
-
 /** @brief General-purpose Timer 2  @def TIM2 */
-#define TIM2									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM2_OFFSET))
+#define TIM2									((TIM_TypeDef*) TIM2_BASE_ADDRESS)
 /** @brief General-purpose Timer 3  @def TIM3 */
-#define TIM3									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM3_OFFSET))
+#define TIM3									((TIM_TypeDef*) TIM3_BASE_ADDRESS)
 /** @brief General-purpose Timer 4  @def TIM4 */
-#define TIM4									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM4_OFFSET))
+#define TIM4									((TIM_TypeDef*) TIM4_BASE_ADDRESS)
 /** @brief General-purpose Timer 5  @def TIM5 */
-#define TIM5									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM5_OFFSET))
+#define TIM5									((TIM_TypeDef*) TIM5_BASE_ADDRESS)
 /** @brief Basic Timer 6  @def TIM6 */
-#define TIM6									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM6_OFFSET))
+#define TIM6									((TIM_TypeDef*) TIM6_BASE_ADDRESS)
 /** @brief Basic Timer 7  @def TIM7 */
-#define TIM7									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM7_OFFSET))
+#define TIM7									((TIM_TypeDef*) TIM7_BASE_ADDRESS)
+/** @brief Window Watchdog @def WWDG */
+#define WWDG									((WWDG_TypeDef*) WWDG_BASE_ADDR)
+/** @brief Independent Watchdog @def IWDG */
+#define IWDG									((IWDG_TypeDef*) IWDG_BASE_ADDR)
 /** @brief USART2 Peripheral @def USART2 */
-#define USART2									((USART_TypeDef *) (APB1_BASE_ADDR + USART2_OFFSET))
+#define USART2									((USART_TypeDef*) USART2_BASE_ADDRESS)
 /** @brief USART3 Peripheral @def USART3 */
-#define USART3									((USART_TypeDef *) (APB1_BASE_ADDR + USART3_OFFSET))
+#define USART3									((USART_TypeDef*) USART3_BASE_ADDRESS)
 /** @brief I2C1 Peripheral  @def I2C1 */ 
-#define I2C1 									((I2C_TypeDef *) I2C1_BASE_ADDRESS)
+#define I2C1 									((I2C_TypeDef*) I2C1_BASE_ADDRESS)
 /** @brief I2C2 Peripheral  @def I2C2 */ 
-#define I2C2 									((I2C_TypeDef *) I2C2_BASE_ADDRESS)
+#define I2C2 									((I2C_TypeDef*) I2C2_BASE_ADDRESS)
 
 // ------------------------------------------------------------------------------------------
 // APB2 Peripherals
 // ------------------------------------------------------------------------------------------
-
 /** @brief Alternate Function I/O @def AFIO */
 #define AFIO									((AFIO_TypeDef*) AFIO_BASE_ADDRESS)
 /** @brief External Interrupt/Event Controller @def EXTI */
@@ -140,52 +231,6 @@ extern "C" {
 #define USART1									((USART_TypeDef*) USART1_BASE_ADDRESS)
 /** @brief ADC3  @def ADC3 */
 #define ADC3									((ADC_TypeDef*) ADC3_BASE_ADDRESS)
-
-// ==============================================================================================
-// I2C
-// ==============================================================================================
-
-/**
- * @addtogroup	I2C_01_Registers_02_Memory
- * @details 
- * - I2C peripheral instances based on @ref I2C_01_Registers_01_Structure "I2C Registers"
- * - All I2C peripherals are clocked from @ref APB1_BASE_ADDR "APB1 Bus"
- * - Each I2C peripheral occupies 0x400 bytes of address space
- * - Supports I2C1 and I2C2 on STM32F103C8T6
- * @see Reference Manual RM0008 - Section 24.6 I2C Registers
- * @see Datasheet - Section 4 Memory Mapping
- * @{
- */
-
-/**
- * @section  I2C_Registers_Memory_Size I2C Register Memory Size
- * @brief I2C Peripheral: Memory Size
- */
-
-
-
-/** @} */ // I2C_01_Registers_02_Memory
-
-#define IWDG									((IWDG_TypeDef *) IWDG_BASE_ADDR)
-#define WWDG									((WWDG_TypeDef *) WWDG_BASE_ADDR)
-#define DMA1 									((DMA_TypeDef *) DMA1_BASE_ADDR)
-#define DMA1_Channel1 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[0]))
-#define DMA1_Channel2 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[1]))
-#define DMA1_Channel3 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[2]))
-#define DMA1_Channel4 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[3]))
-#define DMA1_Channel5 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[4]))
-#define DMA1_Channel6 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[5]))
-#define DMA1_Channel7 							((DMA_Channel_TypeDef *) (&DMA1->CHANNEL[6]))
-#define DMA2 									((DMA_TypeDef *) DMA2_BASE_ADDR)
-#define DMA2_Channel1 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[0]))
-#define DMA2_Channel2 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[1]))
-#define DMA2_Channel3 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[2]))
-#define DMA2_Channel4 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[3]))
-#define DMA2_Channel5 							((DMA_Channel_TypeDef *)(&DMA2->CHANNEL[4]))
-
-/*----------------------------------------------- Address Mapping -----------------------------------------------*/
-
-
 
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed
@@ -220,7 +265,6 @@ extern "C" {
 #define I2C2_SCL_PIN 							(GPIOx_PIN_10)
 #define I2C2_SDA_GPIO 							(GPIOB)
 #define I2C2_SDA_PIN 							(GPIOx_PIN_11)
-/*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 
 /*----------------------------------------------- SysTick MACROS -----------------------------------------------*/
 // SysTick Clock Selection
@@ -232,7 +276,6 @@ extern "C" {
 #define SYSTICK_DELAY_2_US (SYSTICK_DELAY_1_US << 1)
 #define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / _RCC_FREQ_1kHz)
 #define SYSTICK_DELAYS_2_MS (SYSTICK_DELAY_1_MS << 1)
-/*----------------------------------------------- SysTick MACROS -----------------------------------------------*/
 
 /*----------------------------------------------- Timer MACROS -----------------------------------------------*/
 // - Prescaler
@@ -471,8 +514,6 @@ typedef enum
 #define TIMx_DMA_CC3DE (0x08)
 #define TIMx_DMA_CC4DE (0x10)
 
-/*----------------------------------------------- Timer MACROS -----------------------------------------------*/
-
 /*----------------------------------------------- PWM MACROS -----------------------------------------------*/
 // PWM Min Duty Cycle: 1%
 #define PWM_MIN_DUTY_CYCLE (1)
@@ -669,7 +710,6 @@ typedef enum
 
 /*----------------------------------------------- PWM MACROS -----------------------------------------------*/
 
-/*----------------------------------------------- ADC MACROS -----------------------------------------------*/
 // ADC Max Value
 #define MAX_ADC_VALUE ((uint16_t)0x0FFF)
 
@@ -711,8 +751,6 @@ typedef enum
 #define ADC_SAMPLE_CHANNEL(ADC_SAMPLEx) ((uint8_t)(((ADC_SAMPLEx) & 0xF0) >> 4))
 // ADC Sample Time Decoding
 #define ADC_SAMPLE_TIME(ADC_SAMPLEx) ((uint8_t)((ADC_SAMPLEx) & 0x0F))
-
-/*----------------------------------------------- ADC MACROS -----------------------------------------------*/
 
 /*----------------------------------------------- USART MACROS -----------------------------------------------*/
 // TX
@@ -760,7 +798,6 @@ typedef enum
 
 // Local Delay
 #define USARTx_STRING_TX_DELAY ((uint16_t)3000)
-/*----------------------------------------------- USART MACROS -----------------------------------------------*/
 
 /*----------------------------------------------- DMA MACROS -----------------------------------------------*/
 // DMA Direction
@@ -807,14 +844,6 @@ typedef enum
 #define DMA_TIM2_CH2 (DMA1_Channel7)
 #define DMA_TIM2_CH4 (DMA1_Channel7)
 #define DMA_TIM4_UP (DMA1_Channel7)
-
-/*----------------------------------------------- DMA MACROS -----------------------------------------------*/
-
-
-
-/*----------------------------------------------- Helper Functions -----------------------------------------------*/
-
-// #endif /* STM32F103C8T6__ */
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus
