@@ -18,12 +18,14 @@
 #ifndef STM32F1XX_RCC_H_
 #define STM32F1XX_RCC_H_
 
-// C++ Safeguards
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/** @include stdint */
+// ------------------------------------------------------------------------------------------
+// Includes
+// ------------------------------------------------------------------------------------------
 #include <stdint.h>
 
 /**
@@ -146,7 +148,7 @@ typedef volatile struct __RCC_TypeDef
 			volatile uint32_t reserved_3: 6;
 		} BIT;
 	} CR;
-	
+
 	/**
 	 * @brief Clock Configuration Register  
 	 * @details
@@ -460,7 +462,7 @@ typedef volatile struct __RCC_TypeDef
 
 /** @} */ // RCC_01_Registers_01_Structure
 
-// C++ Safeguards
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

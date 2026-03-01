@@ -8,6 +8,11 @@
 #ifndef STM32F1XX_DATA_TYPES_H_
 #define STM32F1XX_DATA_TYPES_H_
 
+// --- C++ Safeguards ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 // ------------------------------------------------------------------------------------------
 // Includes
 // ------------------------------------------------------------------------------------------
@@ -81,5 +86,10 @@ do												\
 } while (0)
 
 /** @} */ // 01_STM32F1xx_Utilities_02_DriverStatus
+
+// --- C++ Safeguards ---
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* STM32F1XX_DATA_TYPES_H_ */

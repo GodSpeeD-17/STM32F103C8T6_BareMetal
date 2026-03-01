@@ -7,14 +7,14 @@
 #ifndef RCC_LL_H_
 #define RCC_LL_H_
 
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/** 
- * @brief For register mapping base types
- * @include @file stm32f1xx.h 
- */
+// ------------------------------------------------------------------------------------------
+// Includes
+// ------------------------------------------------------------------------------------------
 #include "stm32f1xx.h"
 
 // ======================================================================================================
@@ -1276,6 +1276,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_StageComponentPrescaler(const _rcc_component_
 
 /** @} */ // RCC_02_LL
 
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
