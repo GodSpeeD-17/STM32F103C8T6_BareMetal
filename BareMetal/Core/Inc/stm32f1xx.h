@@ -1,8 +1,8 @@
 /**
- * @file    stm32f1xx.h
+ * @file	stm32f1xx.h
  * @author  Shrey Shah
  * @version v1.2
- * @date    21-10-2025
+ * @date	21-10-2025
  *
  * 
  * @defgroup STM32F1xx STM32F1 Memory Address Mapping
@@ -43,18 +43,18 @@
  *	`volatile` used for ensuring no further optimization by compiler
  *	`: x` indicates only x bit(s) to be used from that 32-bit
  ****************************************************************************************************************
- *                          🔧 Bit Manipulation Built-ins (GCC)
+ *						  🔧 Bit Manipulation Built-ins (GCC)
  * -------------------------------------------------------------------------------------
- * | Built-in Function        | Description                                           |
+ * | Built-in Function		| Description										   |
  * |--------------------------|--------------------------------------------------------|
- * | __builtin_clz(x)         | Counts leading zeros from MSB (Undefined if x == 0)   |
- * | __builtin_ctz(x)         | Counts trailing zeros from LSB (Undefined if x == 0)  |
- * | __builtin_popcount(x)    | Counts number of bits set to 1 (Hamming weight)       |
- * | __builtin_parity(x)      | Returns 1 if number of 1-bits is odd, else 0          |
- * | __builtin_ffsl(x)        | Index (1-based) of first bit set (LSB side)           |
- * | __builtin_bswap16(x)     | Swaps byte order (Endian swap) for 16-bit integer     |
- * | __builtin_bswap32(x)     | Swaps byte order for 32-bit integer                   |
- * | __builtin_bswap64(x)     | Swaps byte order for 64-bit integer                   |
+ * | __builtin_clz(x)		 | Counts leading zeros from MSB (Undefined if x == 0)   |
+ * | __builtin_ctz(x)		 | Counts trailing zeros from LSB (Undefined if x == 0)  |
+ * | __builtin_popcount(x)	| Counts number of bits set to 1 (Hamming weight)	   |
+ * | __builtin_parity(x)	  | Returns 1 if number of 1-bits is odd, else 0		  |
+ * | __builtin_ffsl(x)		| Index (1-based) of first bit set (LSB side)		   |
+ * | __builtin_bswap16(x)	 | Swaps byte order (Endian swap) for 16-bit integer	 |
+ * | __builtin_bswap32(x)	 | Swaps byte order for 32-bit integer				   |
+ * | __builtin_bswap64(x)	 | Swaps byte order for 64-bit integer				   |
  * -------------------------------------------------------------------------------------
  * 
  * @note
@@ -66,7 +66,7 @@
  * @example
  * Example Usage:
  *   uint32_t val = 0x0000000F;
- *   uint8_t zeros = __builtin_clz(val);      // → 28
+ *   uint8_t zeros = __builtin_clz(val);	  // → 28
  *   uint8_t set   = __builtin_popcount(val); // → 4
  *   uint8_t rev   = __builtin_bswap32(val);  // → 0xF0000000
  * 
@@ -158,17 +158,17 @@ extern "C" {
  * - Peripheral instances must have equal address spacing in the memory map.
  *
  * @param[in] value   The address (or pointer) of the target peripheral instance  
- *                    (e.g., @ref GPIOC, @ref USART2, @ref TIM4)
- * @param[in] base    The address (or pointer) of the reference peripheral instance  
- *                    (e.g., @ref GPIOA, @ref USART1, @ref TIM2)
- * @param[in] size    The memory spacing (in bytes) between consecutive instances  
- *                    of the same peripheral type  
- *                    (e.g., @ref GPIO_PERIPHERAL_SIZE "GPIO_PERIPHERAL_SIZE")
+ *					(e.g., @ref GPIOC, @ref USART2, @ref TIM4)
+ * @param[in] base	The address (or pointer) of the reference peripheral instance  
+ *					(e.g., @ref GPIOA, @ref USART1, @ref TIM2)
+ * @param[in] size	The memory spacing (in bytes) between consecutive instances  
+ *					of the same peripheral type  
+ *					(e.g., @ref GPIO_PERIPHERAL_SIZE "GPIO_PERIPHERAL_SIZE")
  *
  * @return The **zero-based index** of the target peripheral relative to the base.
  *
  * @pre Both `base` and `value` must belong to peripherals of the same family
- *      and share the same address spacing.
+ *	  and share the same address spacing.
  *
  * @warning
  * - The result is undefined if `base` and `value` are not aligned to `size`.
@@ -198,46 +198,88 @@ extern "C" {
  * @ingroup 01_STM32F1xx_Utilities
  * @{
  */
-typedef uint8_t								driver_status_t;
-/** @def DRIVER_STATUS_SUCCESS @brief Operation completed successfully */
-#define DRIVER_STATUS_SUCCESS				((driver_status_t) 0x00)
-/** @def DRIVER_STATUS_FAIL @brief Operation failed due to a non-specific error */
-#define DRIVER_STATUS_FAIL					((driver_status_t) 0x01)
-/** @def DRIVER_STATUS_ERR_TIMEOUT @brief Operation timed out waiting for hardware or condition */
-#define DRIVER_STATUS_ERR_TIMEOUT			((driver_status_t) 0x02)
-/** @def DRIVER_STATUS_ERR_INVALID_ARG @brief An input parameter was invalid or out of range */
-#define DRIVER_STATUS_ERR_INVALID_ARG		((driver_status_t) 0x03)
-/** @def DRIVER_STATUS_ERR_STATE @brief Operation requested in an invalid driver or peripheral state */
-#define DRIVER_STATUS_ERR_STATE				((driver_status_t) 0x04)
-/** @def DRIVER_STATUS_OFF @brief Target state: Disabled or turned OFF */
-#define DRIVER_STATUS_OFF					((driver_status_t) 0x05)
-/** @def DRIVER_STATUS_ON @brief Target state: Enabled or turned ON */
-#define DRIVER_STATUS_ON					((driver_status_t) 0x06)
-/** @def DRIVER_STATUS_READY @brief Peripheral or driver is configured and ready for an operation */
-#define DRIVER_STATUS_READY					((driver_status_t) 0x07)
-/** @def DRIVER_STATUS_BUSY @brief Peripheral or driver is currently executing an operation (e.g., DMA transfer) */
-#define DRIVER_STATUS_BUSY					((driver_status_t) 0x08)
+
+/**
+ * @enum driver_status_code_t
+ * @brief Driver status codes in ascending order.
+ *
+ * @note
+ * Link individual codes using @ref DRIVER_STATUS_xxx.
+ */
+typedef enum
+{
+	/** @brief Operation requested in an invalid driver or peripheral state. */
+	DRIVER_STATUS_ERR_STATE			=	-4,
+
+	/** @brief An input parameter was invalid or out of range. */
+	DRIVER_STATUS_ERR_INVALID_ARG	=	-3,
+
+	/** @brief Operation timed out waiting for hardware or condition. */
+	DRIVER_STATUS_ERR_TIMEOUT		=	-2,
+
+	/** @brief Operation failed due to a non-specific error. */
+	DRIVER_STATUS_FAIL				=	-1,
+
+	/** @brief Generic error (baseline error code). */
+	DRIVER_STATUS_ERROR				=	 0,
+
+	/** @brief Operation completed successfully. */
+	DRIVER_STATUS_SUCCESS			=	 1,
+
+	/** @brief Target state: Disabled or turned OFF. */
+	DRIVER_STATUS_OFF				=	 2,
+
+	/** @brief Target state: Enabled or turned ON. */
+	DRIVER_STATUS_ON				=	 3,
+
+	/** @brief Peripheral or driver is configured and ready for an operation. */
+	DRIVER_STATUS_READY				=	 4,
+
+	/** @brief Peripheral or driver is currently executing an operation. */
+	DRIVER_STATUS_BUSY				=	 5
+
+} driver_status_code_t;
 
 /**
  * @brief Assert Driver Functionality Status
  * @param[in] expr @ref driver_status_t "Expression to evaluate"
  */
-#define ASSERT_DRIVER_STATUS(expr)											\
-	do																		\
-	{																		\
-		driver_status_t _status = (expr);									\
-		if (_status != DRIVER_STATUS_SUCCESS &&								\
-			_status != DRIVER_STATUS_READY &&								\
-			_status != DRIVER_STATUS_BUSY)									\
-		{																	\
-			/* Update as per need */										\
-		}																	\
-	} while (0)
+#define ASSERT_DRIVER_STATUS(expr)										\
+do																		\
+{																		\
+	driver_status_t _status = (expr);									\
+	if																	\
+	(																	\
+		(_status != DRIVER_STATUS_SUCCESS)								\
+						&&												\
+		(_status != DRIVER_STATUS_READY)								\
+						&&												\
+		(_status != DRIVER_STATUS_BUSY)									\
+	)																	\
+	{																	\
+		/* Update as per need */										\
+	}																	\
+} while (0)
+
+/**
+ * @brief Return if Driver Functionality Status is not Success
+ * @param[in] expr @ref driver_status_t "Expression to evaluate"
+ * @returns Returns the evaluated status
+ * @retval - Input Expression if not @ref `DRIVER_STATUS_SUCCESS`
+ */
+#define DRIVER_RETURN_IF_NOT_SUCCESS(expr)								\
+do																		\
+{																		\
+	driver_status_t _st = (driver_status_t)(expr);						\
+	if (_st != DRIVER_STATUS_SUCCESS)									\
+	{																	\
+		return _st;														\
+	}																	\
+} while (0)
 
 /** @} */ // 01_STM32F1xx_Utilities_02_DriverStatus
 
 /** @} */ // 01_STM32F1xx_Utilities
-/*----------------------------------------------- Custom Declaration -----------------------------------------------*/
 
 /*----------------------------------------------- Memory Bus Base Addresses -----------------------------------------------*/
 
@@ -245,67 +287,70 @@ typedef uint8_t								driver_status_t;
  * @defgroup 02_STM32F1xx_BaseAddress Memory Base Addresses
  * @ingroup  STM32F1xx
  * @{
- * @brief    Base addresses for different memory buses in STM32F1xx
+ * @brief	Base addresses for different memory buses in STM32F1xx
  * @details 
  * STM32F1xx Base Memory Addresses Offsets
  * @see Reference Manual RM0008 - Section 3.2 Memory Map
  */
 
 /** @brief System Timer Base (Cortex-M3 Core Peripheral) @def SysTick_BASE_ADDR */
-#define SysTick_BASE_ADDR                       0xE000E010UL
+#define SysTick_BASE_ADDR						((uint32_t) 0xE000E010UL)
 /** @brief Nested Vectored Interrupt Controller Base @def NVIC_BASE_ADDR */
-#define NVIC_BASE_ADDR                          0xE000E100UL
+#define NVIC_BASE_ADDR							((uint32_t) 0xE000E100UL)
 /** @brief System Control Block Base @def SCB_BASE_ADDR */
-#define SCB_BASE_ADDR                           0xE000ED00UL
+#define SCB_BASE_ADDR							((uint32_t) 0xE000ED00UL)
 /** @brief Core Debug Registers Base @def CoreDebug_BASE_ADDR */
-#define CoreDebug_BASE_ADDR                     0xE000EDF0UL
+#define CoreDebug_BASE_ADDR						((uint32_t) 0xE000EDF0UL)
 /** @brief APB1 Peripheral Base (Low-speed peripherals) @def APB1_BASE_ADDR @def APB1_BASE_ADDR */
-#define APB1_BASE_ADDR                          0x40000000UL
+#define APB1_BASE_ADDR							((uint32_t) 0x40000000UL)
 /** @brief APB2 Peripheral Base (High-speed peripherals) @def APB2_BASE_ADDR @def APB2_BASE_ADDR */
-#define APB2_BASE_ADDR                          0x40010000UL
+#define APB2_BASE_ADDR							((uint32_t) 0x40010000UL)
 /** @brief AHB Peripheral Base (Memory, DMA, CRC) @def AHB_BASE_ADDR @def AHB_BASE_ADDR */
-#define AHB_BASE_ADDR                           0x40018000UL
+#define AHB_BASE_ADDR							((uint32_t) 0x40018000UL)
 /** @brief Flash Memory Interface Base @def FLASH_BASE_ADDR */
-#define FLASH_BASE_ADDR                         0x40022000UL
+#define FLASH_BASE_ADDR							((uint32_t) 0x40022000UL)
 /** @brief DMA1 Controller Base @def DMA1_BASE_ADDR */
-#define DMA1_BASE_ADDR                          (AHB_BASE_ADDR + 0x00008000UL)
+#define DMA1_BASE_ADDR							((uint32_t) (AHB_BASE_ADDR + ((uint32_t) 0x00008000UL)))
 /** @brief DMA2 Controller Base @def DMA2_BASE_ADDR */
-#define DMA2_BASE_ADDR                          (DMA1_BASE_ADDR + 0x00000400UL)
+#define DMA2_BASE_ADDR							((uint32_t) (DMA1_BASE_ADDR + ((uint32_t) 0x00000400UL)))
 /** @brief Window Watchdog Base @def WWDG_BASE_ADDR */
-#define WWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00002000UL)
+#define WWDG_BASE_ADDR							((uint32_t) (APB1_BASE_ADDR + ((uint32_t) 0x00002000UL)))
 /** @brief Independent Watchdog Base @def IWDG_BASE_ADDR */
-#define IWDG_BASE_ADDR                          (APB1_BASE_ADDR + 0x00003000UL)
+#define IWDG_BASE_ADDR							((uint32_t) (APB1_BASE_ADDR + ((uint32_t) 0x00003000UL)))
+
+/** @brief System Control Block register map pointer (Cortex-M3 Core Peripheral) @def SCB */
+#define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
+/** @brief Nested Vectored Interrupt Controller register map pointer (Cortex-M3 Core Peripheral) @def NVIC */
+#define NVIC									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
+/** @brief System Timer register map pointer (Cortex-M3 Core Peripheral) @def SysTick */
+#define SysTick									((SysTick_TypeDef *) (SysTick_BASE_ADDR))
+/** @brief Flash Memory Interface register map pointer @def FLASH */
+#define FLASH									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
 
 /** @} */  // 02_STM32F1xx_BaseAddress
-
-
-#define SCB										((SCB_TypeDef *) (SCB_BASE_ADDR))
-#define NVIC 									((NVIC_TypeDef *) (NVIC_BASE_ADDR))
-#define SysTick 								((SysTick_TypeDef *) (SysTick_BASE_ADDR))
-#define FLASH 									((FLASH_TypeDef *) (FLASH_BASE_ADDR))
 
 /**
  * @addtogroup RCC_01_Registers_02_Memory
  * @{
  */
 
-/** \section RCC_Registers_Memory_Base RCC Peripheral Base Address */
+/** @section RCC_Registers_Memory_Base RCC Peripheral Base Address */
 /** @brief RCC Peripheral Base Address @def RCC_BASE_ADDRESS  */
 #define RCC_BASE_ADDRESS						AHB_BASE_ADDR
 
-/** \section RCC_Registers_Memory_Offset RCC Peripheral Offset from Base */
+/** @section RCC_Registers_Memory_Offset RCC Peripheral Offset from Base */
 /** @brief RCC Peripheral Offset from Base Address @def RCC_BASE_OFFSET  */
-#define RCC_BASE_OFFSET							0x00009000UL
+#define RCC_BASE_OFFSET							((uint32_t) 0x00009000UL)
 
-/** \section RCC_Registers_Memory_Address RCC Peripheral Memory Address */
+/** @section RCC_Registers_Memory_Address RCC Peripheral Memory Address */
 /** @brief RCC Memory Address @def RCC  */
 #define RCC 									((RCC_TypeDef* const) (RCC_BASE_ADDRESS + RCC_BASE_OFFSET))
 
 /** @} */ // RCC_01_Registers_02_Memory
 
-// ######################################################################################################
+// ==============================================================================================
 // GPIO
-// ######################################################################################################
+// ==============================================================================================
 
 /**
  * @addtogroup	GPIO_01_Registers_02_Memory
@@ -320,8 +365,8 @@ typedef uint8_t								driver_status_t;
  */
 
 /**
- * \section  GPIO_Registers_Memory_Base GPIO Register Base Memory Address
- * \brief GPIO Peripheral: Base Memory Address
+ * @section  GPIO_Registers_Memory_Base GPIO Register Base Memory Address
+ * @brief GPIO Peripheral: Base Memory Address
  */
 
 /**
@@ -332,12 +377,12 @@ typedef uint8_t								driver_status_t;
 #define GPIO_BASE_ADDRESS						APB2_BASE_ADDR
 
 /**
- * \section  GPIO_Registers_Memory_Size GPIO Register Memory Size
- * \brief GPIO Peripheral: Memory Size
+ * @section  GPIO_Registers_Memory_Size GPIO Register Memory Size
+ * @brief GPIO Peripheral: Memory Size
  */
 
 /**
- * @brief    GPIO Peripheral Memory Size
+ * @brief	GPIO Peripheral Memory Size
  * @def		 GPIO_PERIPHERAL_SIZE 
  * @details  
  * Each GPIO port (GPIOA–GPIOG) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
@@ -357,11 +402,11 @@ typedef uint8_t								driver_status_t;
  * @see @ref GPIO_01_Registers_02_Memory "GPIO Ports Memory Address"
  * @see @ref BIT_POS() "Peripheral Index Computation"
  */
-#define GPIO_PERIPHERAL_SIZE					0x400UL
+#define GPIO_PERIPHERAL_SIZE					((uint32_t) 0x400UL)
 
 /**
- * \section  GPIO_Registers_Memory_Offset GPIO Register Offset from Base
- * \brief GPIO Peripheral: Offset from Base
+ * @section  GPIO_Registers_Memory_Offset GPIO Register Offset from Base
+ * @brief GPIO Peripheral: Offset from Base
  */
 
  /**
@@ -373,9 +418,9 @@ typedef uint8_t								driver_status_t;
  * @def GPIO_OFFSET()
  */
 #define GPIO_OFFSET(n)	\
-	((uint32_t)(GPIOA_OFFSET) + ((uint32_t)(n) * (uint32_t)GPIO_PERIPHERAL_SIZE))
+	((uint32_t) ((uint32_t)(GPIOA_OFFSET)) + (((uint32_t) (n)) * ((uint32_t) GPIO_PERIPHERAL_SIZE)))
 /** @brief GPIO Port A Offset @def GPIOA_OFFSET */
-#define GPIOA_OFFSET							0x00000800UL
+#define GPIOA_OFFSET							((uint32_t) 0x00000800UL)
 /** @brief GPIO Port B Offset @def GPIOB_OFFSET */
 #define GPIOB_OFFSET							GPIO_OFFSET(1)
 /** @brief GPIO Port C Offset @def GPIOC_OFFSET */
@@ -390,48 +435,137 @@ typedef uint8_t								driver_status_t;
 #define GPIOG_OFFSET							GPIO_OFFSET(6)
 
 /**
- * \section GPIO_Registers_Memory_Ports GPIO Ports Memory Address
- * \brief GPIO Ports Memory Address
+ * @section GPIO_Registers_Memory_Ports GPIO Ports Memory Address
+ * @brief GPIO Ports Memory Address
  * @see @ref GPIO_01_Registers_01_Structure "GPIO Registers Encapsulation" | @ref GPIO_Registers_Memory_Base "GPIO Base Memory Address" | @ref GPIO_Registers_Memory_Offset "GPIO Register Offset from GPIO Base Memory Address"  
  */
 
 /** @brief GPIO Port A  @def GPIOA */
-#define GPIOA									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOA_OFFSET))
+#define GPIOA									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOA_OFFSET))
 /** @brief GPIO Port B  @def GPIOB */
-#define GPIOB									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOB_OFFSET))
+#define GPIOB									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOB_OFFSET))
 /** @brief GPIO Port C  @def GPIOC */
-#define GPIOC									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOC_OFFSET))
+#define GPIOC									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOC_OFFSET))
 /** @brief GPIO Port D  @def GPIOD */
-#define GPIOD									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOD_OFFSET))
+#define GPIOD									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOD_OFFSET))
 /** @brief GPIO Port E  @def GPIOE */
-#define GPIOE									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOE_OFFSET))
+#define GPIOE									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOE_OFFSET))
 /** @brief GPIO Port F  @def GPIOF */
-#define GPIOF									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOF_OFFSET))
+#define GPIOF									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOF_OFFSET))
 /** @brief GPIO Port G  @def GPIOG */
-#define GPIOG									((GPIO_TypeDef * const) (GPIO_BASE_ADDRESS + GPIOG_OFFSET))
+#define GPIOG									((GPIO_TypeDef* const) (GPIO_BASE_ADDRESS + GPIOG_OFFSET))
 
 /** @} */ // GPIO_01_Registers_02_Memory
 
-#define AFIO 									((AFIO_TypeDef *) (APB2_BASE_ADDR))
-#define TIM1 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00002C00UL))
-#define TIM2 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000000UL))
-#define TIM3 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000400UL))
-#define TIM4 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000800UL))
-#define TIM5 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00000C00UL))
-#define TIM6 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001000UL))
-#define TIM7 									((TIM_TypeDef *) (APB1_BASE_ADDR + 0x00001400UL))
-#define TIM8 									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + 0x00003400UL))
-#define ADC1 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002400UL))
-#define ADC2 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00002800UL))
-#define ADC3 									((ADC_TypeDef *) (APB2_BASE_ADDR + 0x00003C00UL))
-#define USART1 									((USART_TypeDef *) (APB2_BASE_ADDR + 0x00003800UL))
-#define USART2 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004400UL))
-#define USART3 									((USART_TypeDef *) (APB1_BASE_ADDR + 0x00004800UL))
-#define EXTI 									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + 0x00000400UL))
+/**
+ * @defgroup 01_STM32F1xx_Utilities_03_PeripheralOffsets Peripheral Offset Definitions
+ * @ingroup 01_STM32F1xx_Utilities
+ * @{
+ */
 
-// ######################################################################################################
+/* ----------------------------- APB2 OFFSETS ----------------------------- */
+
+/** @brief AFIO offset from @ref APB2_BASE_ADDR @def AFIO_OFFSET */
+#define AFIO_OFFSET								((uint32_t) (0x00000000UL))
+
+/** @brief TIM1 offset from @ref APB2_BASE_ADDR @def TIM1_OFFSET */
+#define TIM1_OFFSET								((uint32_t) (0x00002C00UL))
+
+/** @brief TIM8 offset from @ref APB2_BASE_ADDR @def TIM8_OFFSET */
+#define TIM8_OFFSET								((uint32_t) (0x00003400UL))
+
+/** @brief ADC1 offset from @ref APB2_BASE_ADDR @def ADC1_OFFSET */
+#define ADC1_OFFSET								((uint32_t) (0x00002400UL))
+
+/** @brief ADC2 offset from @ref APB2_BASE_ADDR @def ADC2_OFFSET */
+#define ADC2_OFFSET								((uint32_t) (0x00002800UL))
+
+/** @brief ADC3 offset from @ref APB2_BASE_ADDR @def ADC3_OFFSET */
+#define ADC3_OFFSET								((uint32_t) (0x00003C00UL))
+
+/** @brief USART1 offset from @ref APB2_BASE_ADDR @def USART1_OFFSET */
+#define USART1_OFFSET							((uint32_t) (0x00003800UL))
+
+/** @brief EXTI offset from @ref APB2_BASE_ADDR @def EXTI_OFFSET */
+#define EXTI_OFFSET								((uint32_t) (0x00000400UL))
+
+/* ----------------------------- APB1 OFFSETS ----------------------------- */
+
+/** @brief TIM2 offset from @ref APB1_BASE_ADDR @def TIM2_OFFSET */
+#define TIM2_OFFSET								((uint32_t) (0x00000000UL))
+
+/** @brief TIM3 offset from @ref APB1_BASE_ADDR @def TIM3_OFFSET */
+#define TIM3_OFFSET								((uint32_t) (0x00000400UL))
+
+/** @brief TIM4 offset from @ref APB1_BASE_ADDR @def TIM4_OFFSET */
+#define TIM4_OFFSET								((uint32_t) (0x00000800UL))
+
+/** @brief TIM5 offset from @ref APB1_BASE_ADDR @def TIM5_OFFSET */
+#define TIM5_OFFSET								((uint32_t) (0x00000C00UL))
+
+/** @brief TIM6 offset from @ref APB1_BASE_ADDR @def TIM6_OFFSET */
+#define TIM6_OFFSET								((uint32_t) (0x00001000UL))
+
+/** @brief TIM7 offset from @ref APB1_BASE_ADDR @def TIM7_OFFSET */
+#define TIM7_OFFSET								((uint32_t) (0x00001400UL))
+
+/** @brief USART2 offset from @ref APB1_BASE_ADDR @def USART2_OFFSET */
+#define USART2_OFFSET							((uint32_t) (0x00004400UL))
+
+/** @brief USART3 offset from @ref APB1_BASE_ADDR @def USART3_OFFSET */
+#define USART3_OFFSET							((uint32_t) (0x00004800UL))
+
+/** @} */ // 01_STM32F1xx_Utilities_03_PeripheralOffsets
+
+/**
+ * @defgroup 01_STM32F1xx_Utilities_04_PeripheralPointers Peripheral Pointer Definitions
+ * @ingroup 01_STM32F1xx_Utilities
+ * @{
+ */
+
+/* ----------------------------- APB2 PERIPHERALS ----------------------------- */
+
+/** @brief Alternate Function I/O register map pointer @def AFIO */
+#define AFIO									((AFIO_TypeDef *) (APB2_BASE_ADDR + AFIO_OFFSET))
+/** @brief Advanced-control Timer 1 register map pointer @def TIM1 */
+#define TIM1									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + TIM1_OFFSET))
+/** @brief Advanced-control Timer 8 register map pointer @def TIM8 */
+#define TIM8									((Adv_TIM_TypeDef *) (APB2_BASE_ADDR + TIM8_OFFSET))
+/** @brief ADC1 register map pointer @def ADC1 */
+#define ADC1									((ADC_TypeDef *) (APB2_BASE_ADDR + ADC1_OFFSET))
+/** @brief ADC2 register map pointer @def ADC2 */
+#define ADC2									((ADC_TypeDef *) (APB2_BASE_ADDR + ADC2_OFFSET))
+/** @brief ADC3 register map pointer @def ADC3 */
+#define ADC3									((ADC_TypeDef *) (APB2_BASE_ADDR + ADC3_OFFSET))
+/** @brief USART1 register map pointer @def USART1 */
+#define USART1									((USART_TypeDef *) (APB2_BASE_ADDR + USART1_OFFSET))
+/** @brief External Interrupt/Event Controller register map pointer @def EXTI */
+#define EXTI									((EXTI_REG_STRUCT *) (APB2_BASE_ADDR + EXTI_OFFSET))
+
+/* ----------------------------- APB1 PERIPHERALS ----------------------------- */
+
+/** @brief General-purpose Timer 2 register map pointer @def TIM2 */
+#define TIM2									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM2_OFFSET))
+/** @brief General-purpose Timer 3 register map pointer @def TIM3 */
+#define TIM3									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM3_OFFSET))
+/** @brief General-purpose Timer 4 register map pointer @def TIM4 */
+#define TIM4									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM4_OFFSET))
+/** @brief General-purpose Timer 5 register map pointer @def TIM5 */
+#define TIM5									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM5_OFFSET))
+/** @brief Basic Timer 6 register map pointer @def TIM6 */
+#define TIM6									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM6_OFFSET))
+/** @brief Basic Timer 7 register map pointer @def TIM7 */
+#define TIM7									((TIM_TypeDef *) (APB1_BASE_ADDR + TIM7_OFFSET))
+/** @brief USART2 register map pointer @def USART2 */
+#define USART2									((USART_TypeDef *) (APB1_BASE_ADDR + USART2_OFFSET))
+/** @brief USART3 register map pointer @def USART3 */
+#define USART3									((USART_TypeDef *) (APB1_BASE_ADDR + USART3_OFFSET))
+
+/** @} */ // 01_STM32F1xx_Utilities_04_PeripheralPointers
+
+// ==============================================================================================
 // I2C
-// ######################################################################################################
+// ==============================================================================================
 
 /**
  * @addtogroup	I2C_01_Registers_02_Memory
@@ -446,12 +580,12 @@ typedef uint8_t								driver_status_t;
  */
 
 /**
- * \section  I2C_Registers_Memory_Size I2C Register Memory Size
- * \brief I2C Peripheral: Memory Size
+ * @section  I2C_Registers_Memory_Size I2C Register Memory Size
+ * @brief I2C Peripheral: Memory Size
  */
 
 /**
- * @brief    I2C Peripheral Memory Size
+ * @brief	I2C Peripheral Memory Size
  * @def		 I2C_PERIPHERAL_SIZE 
  * @details  
  * Each I2C peripheral (I2C1–I2C2) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
@@ -471,22 +605,22 @@ typedef uint8_t								driver_status_t;
  * @see @ref I2C_01_Registers_02_Memory "I2C Peripheral Memory Address"
  * @see @ref BIT_POS() "Peripheral Index Computation"
  */
-#define I2C_PERIPHERAL_SIZE						0x400UL
+#define I2C_PERIPHERAL_SIZE						((uint32_t) 0x400UL)
 
 /**
- * \section  I2C_Registers_Memory_Base I2C Register Base Memory Address
- * \brief I2C Peripheral: Base Memory Address
+ * @section  I2C_Registers_Memory_Base I2C Register Base Memory Address
+ * @brief I2C Peripheral: Base Memory Address
  */
 
 /**
- * \section  I2C_Registers_Memory_Offset I2C Register Offset from Base
- * \brief I2C Peripheral: Offset from Base
+ * @section  I2C_Registers_Memory_Offset I2C Register Offset from Base
+ * @brief I2C Peripheral: Offset from Base
  */
 
 /** @brief I2C1 Peripheral Offset @def I2C1_OFFSET */ 
-#define I2C1_OFFSET								0x00005400UL
+#define I2C1_OFFSET								((uint32_t) 0x00005400UL)
 /** @brief I2C2 Peripheral Offset @def I2C2_OFFSET */
-#define I2C2_OFFSET								0x00005800UL
+#define I2C2_OFFSET								((uint32_t) 0x00005800UL)
 
 /**
  * @brief I2C Base Memory Address
@@ -494,12 +628,14 @@ typedef uint8_t								driver_status_t;
  * @def I2C_BASE_ADDRESS
  */
 #define I2C_BASE_ADDRESS						APB1_BASE_ADDR
-#define I2C1_BASE_ADDRESS						(I2C_BASE_ADDRESS + I2C1_OFFSET)
-#define I2C2_BASE_ADDRESS						(I2C_BASE_ADDRESS + I2C2_OFFSET)
+/** @brief I2C1 Base Memory Address @def I2C1_BASE_ADDRESS */
+#define I2C1_BASE_ADDRESS						((uint32_t) (I2C_BASE_ADDRESS + I2C1_OFFSET))
+/** @brief I2C2 Base Memory Address @def I2C2_BASE_ADDRESS */
+#define I2C2_BASE_ADDRESS						((uint32_t) (I2C_BASE_ADDRESS + I2C2_OFFSET))
 
 /**
- * \section I2C_Registers_Memory_Peripherals I2C Peripheral Memory Address
- * \brief I2C Peripheral Memory Address
+ * @section I2C_Registers_Memory_Peripherals I2C Peripheral Memory Address
+ * @brief I2C Peripheral Memory Address
  * @see @ref I2C_01_Registers_01_Structure "I2C Registers Encapsulation" | @ref I2C_Registers_Memory_Base "I2C Base Memory Address" | @ref I2C_Registers_Memory_Offset "I2C Register Offset from I2C Base Memory Address"  
  */
 
@@ -533,8 +669,8 @@ typedef uint8_t								driver_status_t;
 
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed
-#define I2Cx_SPEED_STD (FREQ_100kHz)
-#define I2Cx_SPEED_FAST (FREQ_100kHz << 2)
+#define I2Cx_SPEED_STD							(FREQ_100kHz)
+#define I2Cx_SPEED_FAST							(FREQ_100kHz << 2)
 // I2C SCL Clock Frequency
 #define I2Cx_SCL_FREQ_4MHz						(0x04)
 #define I2Cx_SCL_FREQ_8MHz						(0x08)
