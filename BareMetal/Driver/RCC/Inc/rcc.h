@@ -21,7 +21,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*---------------------------------------------- Includes ----------------------------------------------*/
+// ==================================================================================================== //
+//                                               Includes                                               //
+// ==================================================================================================== //
+
 #include "rcc_ll.h"
 
 /**
@@ -29,7 +32,10 @@ extern "C" {
  * @{
  */
 
-/*---------------------------------------------- RCC Frequency Definitions ----------------------------------------------*/
+// ==================================================================================================== //
+//                                      RCC Frequency Definitions                                       //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Frequency Types and Limits
  * @defgroup RCC_03_Driver_01_Frequency RCC Driver Frequency Types and Macros
@@ -47,6 +53,8 @@ typedef uint32_t									rcc_freq_t;
 #define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
 /** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
 #define RCC_HSE_FREQ							((rcc_freq_t) 8000000UL)
+/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
+#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
 /** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
 #define RCC_SYSCLK_MAX_FREQ						((rcc_freq_t) 72000000UL)
 /** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
@@ -59,10 +67,17 @@ typedef uint32_t									rcc_freq_t;
 #define RCC_ADCCLK_MAX_FREQ						((rcc_freq_t) 14000000UL)
 /** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
 #define RCC_USBCLK_TARGET_FREQ					((rcc_freq_t) 48000000UL)
+/** @brief Maximum SYSCLK allowed with Flash latency 0 @def RCC_FLASH_LATENCY_0_MAX_FREQ */
+#define RCC_FLASH_LATENCY_0_MAX_FREQ				((rcc_freq_t) 24000000UL)
+/** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
+#define RCC_FLASH_LATENCY_1_MAX_FREQ				((rcc_freq_t) 48000000UL)
 
 /** @} */ // RCC_03_Driver_01_Frequency
 
-/*---------------------------------------------- RCC Flash Configuration ----------------------------------------------*/
+// ==================================================================================================== //
+//                                       RCC Flash Configuration                                        //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Flash Configuration Types
  * @defgroup RCC_03_Driver_02_Flash RCC Driver Flash Configuration
@@ -106,7 +121,10 @@ typedef struct _rcc_flash_config_t
 
 /** @} */ // RCC_03_Driver_02_Flash
 
-/*---------------------------------------------- RCC System Clock ----------------------------------------------*/
+// ==================================================================================================== //
+//                                           RCC System Clock                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC System Clock and PLL Types
  * @defgroup RCC_03_Driver_03_SystemClock RCC Driver System Clock Configuration
@@ -215,7 +233,10 @@ typedef struct _rcc_sys_clk_config_t
 
 /** @} */ // RCC_03_Driver_03_SystemClock
 
-/*---------------------------------------------- RCC Prescalers ----------------------------------------------*/
+// ==================================================================================================== //
+//                                            RCC Prescalers                                            //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Bus and Component Prescaler Types
  * @defgroup RCC_03_Driver_04_Prescalers RCC Driver Prescaler Configuration
@@ -232,48 +253,48 @@ typedef uint8_t									rcc_bus_t;
 /** @brief APB2 bus selector @def RCC_APB2_BUS */
 #define RCC_APB2_BUS							((rcc_bus_t) 2U)
 
-/** @brief Bus prescaler divider type @typedef rcc_bus_prescaler_t */
-typedef uint16_t								rcc_bus_prescaler_t;
-/** @brief Divider 1 @def RCC_AHB_DIV_1 */
-#define RCC_AHB_DIV_1							((rcc_bus_prescaler_t) 1U)
-/** @brief Divider 2 @def RCC_AHB_DIV_2 */
-#define RCC_AHB_DIV_2							((rcc_bus_prescaler_t) 2U)
-/** @brief Divider 4 @def RCC_AHB_DIV_4 */
-#define RCC_AHB_DIV_4							((rcc_bus_prescaler_t) 4U)
-/** @brief Divider 8 @def RCC_AHB_DIV_8 */
-#define RCC_AHB_DIV_8							((rcc_bus_prescaler_t) 8U)
-/** @brief Divider 16 @def RCC_AHB_DIV_16 */
-#define RCC_AHB_DIV_16							((rcc_bus_prescaler_t) 16U)
-/** @brief Divider 64 @def RCC_AHB_DIV_64 */
-#define RCC_AHB_DIV_64							((rcc_bus_prescaler_t) 64U)
-/** @brief Divider 128 @def RCC_AHB_DIV_128 */
-#define RCC_AHB_DIV_128							((rcc_bus_prescaler_t) 128U)
-/** @brief Divider 256 @def RCC_AHB_DIV_256 */
-#define RCC_AHB_DIV_256							((rcc_bus_prescaler_t) 256U)
-/** @brief Divider 512 @def RCC_AHB_DIV_512 */
-#define RCC_AHB_DIV_512							((rcc_bus_prescaler_t) 512U)
+/** @brief Bus prescaler divider selector type @typedef rcc_bus_prescaler_t */
+typedef uint8_t									 rcc_bus_prescaler_t;
+/** @brief Divider 1 selection @def RCC_AHB_DIV_1 */
+#define RCC_AHB_DIV_1							((rcc_bus_prescaler_t) 0U)
+/** @brief Divider 2 selection @def RCC_AHB_DIV_2 */
+#define RCC_AHB_DIV_2							((rcc_bus_prescaler_t) 1U)
+/** @brief Divider 4 selection @def RCC_AHB_DIV_4 */
+#define RCC_AHB_DIV_4							((rcc_bus_prescaler_t) 2U)
+/** @brief Divider 8 selection @def RCC_AHB_DIV_8 */
+#define RCC_AHB_DIV_8							((rcc_bus_prescaler_t) 3U)
+/** @brief Divider 16 selection @def RCC_AHB_DIV_16 */
+#define RCC_AHB_DIV_16							((rcc_bus_prescaler_t) 4U)
+/** @brief Divider 64 selection @def RCC_AHB_DIV_64 */
+#define RCC_AHB_DIV_64							((rcc_bus_prescaler_t) 5U)
+/** @brief Divider 128 selection @def RCC_AHB_DIV_128 */
+#define RCC_AHB_DIV_128							((rcc_bus_prescaler_t) 6U)
+/** @brief Divider 256 selection @def RCC_AHB_DIV_256 */
+#define RCC_AHB_DIV_256							((rcc_bus_prescaler_t) 7U)
+/** @brief Divider 512 selection @def RCC_AHB_DIV_512 */
+#define RCC_AHB_DIV_512							((rcc_bus_prescaler_t) 8U)
 
-/** @brief Divider 1 @def RCC_APB1_DIV_1 */
-#define RCC_APB1_DIV_1							((rcc_bus_prescaler_t) 1U)
-/** @brief Divider 2 @def RCC_APB1_DIV_2 */
-#define RCC_APB1_DIV_2							((rcc_bus_prescaler_t) 2U)
-/** @brief Divider 4 @def RCC_APB1_DIV_4 */
-#define RCC_APB1_DIV_4							((rcc_bus_prescaler_t) 4U)
-/** @brief Divider 8 @def RCC_APB1_DIV_8 */
-#define RCC_APB1_DIV_8							((rcc_bus_prescaler_t) 8U)
-/** @brief Divider 16 @def RCC_APB1_DIV_16 */
-#define RCC_APB1_DIV_16							((rcc_bus_prescaler_t) 16U)
+/** @brief Divider 1 selection @def RCC_APB1_DIV_1 */
+#define RCC_APB1_DIV_1							((rcc_bus_prescaler_t) 0U)
+/** @brief Divider 2 selection @def RCC_APB1_DIV_2 */
+#define RCC_APB1_DIV_2							((rcc_bus_prescaler_t) 1U)
+/** @brief Divider 4 selection @def RCC_APB1_DIV_4 */
+#define RCC_APB1_DIV_4							((rcc_bus_prescaler_t) 2U)
+/** @brief Divider 8 selection @def RCC_APB1_DIV_8 */
+#define RCC_APB1_DIV_8							((rcc_bus_prescaler_t) 3U)
+/** @brief Divider 16 selection @def RCC_APB1_DIV_16 */
+#define RCC_APB1_DIV_16							((rcc_bus_prescaler_t) 4U)
 
-/** @brief Divider 1 @def RCC_APB2_DIV_1 */
-#define RCC_APB2_DIV_1							((rcc_bus_prescaler_t) 1U)
-/** @brief Divider 2 @def RCC_APB2_DIV_2 */
-#define RCC_APB2_DIV_2							((rcc_bus_prescaler_t) 2U)
-/** @brief Divider 4 @def RCC_APB2_DIV_4 */
-#define RCC_APB2_DIV_4							((rcc_bus_prescaler_t) 4U)
-/** @brief Divider 8 @def RCC_APB2_DIV_8 */
-#define RCC_APB2_DIV_8							((rcc_bus_prescaler_t) 8U)
-/** @brief Divider 16 @def RCC_APB2_DIV_16 */
-#define RCC_APB2_DIV_16							((rcc_bus_prescaler_t) 16U)
+/** @brief Divider 1 selection @def RCC_APB2_DIV_1 */
+#define RCC_APB2_DIV_1							((rcc_bus_prescaler_t) 0U)
+/** @brief Divider 2 selection @def RCC_APB2_DIV_2 */
+#define RCC_APB2_DIV_2							((rcc_bus_prescaler_t) 1U)
+/** @brief Divider 4 selection @def RCC_APB2_DIV_4 */
+#define RCC_APB2_DIV_4							((rcc_bus_prescaler_t) 2U)
+/** @brief Divider 8 selection @def RCC_APB2_DIV_8 */
+#define RCC_APB2_DIV_8							((rcc_bus_prescaler_t) 3U)
+/** @brief Divider 16 selection @def RCC_APB2_DIV_16 */
+#define RCC_APB2_DIV_16							((rcc_bus_prescaler_t) 4U)
 
 /**
  * @brief	Bus prescaler configuration descriptor
@@ -300,14 +321,14 @@ typedef struct _rcc_bus_config_t
 
 /** @brief Component prescaler selector type @typedef rcc_component_prescaler_t */
 typedef uint8_t									rcc_component_prescaler_t;
-/** @brief ADC divider 2 @def RCC_ADC_DIV_2 */
-#define RCC_ADC_DIV_2							((rcc_component_prescaler_t) 2U)
-/** @brief ADC divider 4 @def RCC_ADC_DIV_4 */
-#define RCC_ADC_DIV_4							((rcc_component_prescaler_t) 4U)
-/** @brief ADC divider 6 @def RCC_ADC_DIV_6 */
-#define RCC_ADC_DIV_6							((rcc_component_prescaler_t) 6U)
-/** @brief ADC divider 8 @def RCC_ADC_DIV_8 */
-#define RCC_ADC_DIV_8							((rcc_component_prescaler_t) 8U)
+/** @brief ADC divider 2 selection @def RCC_ADC_DIV_2 */
+#define RCC_ADC_DIV_2							((rcc_component_prescaler_t) 0U)
+/** @brief ADC divider 4 selection @def RCC_ADC_DIV_4 */
+#define RCC_ADC_DIV_4							((rcc_component_prescaler_t) 1U)
+/** @brief ADC divider 6 selection @def RCC_ADC_DIV_6 */
+#define RCC_ADC_DIV_6							((rcc_component_prescaler_t) 2U)
+/** @brief ADC divider 8 selection @def RCC_ADC_DIV_8 */
+#define RCC_ADC_DIV_8							((rcc_component_prescaler_t) 3U)
 /** @brief USB clock equals PLL divided by 1.5 @def RCC_USB_DIV_1_5 */
 #define RCC_USB_DIV_1_5							((rcc_component_prescaler_t) 0x00U)
 /** @brief USB clock equals PLL directly @def RCC_USB_DIV_1 */
@@ -333,7 +354,10 @@ typedef struct _rcc_component_config_t
 
 /** @} */ // RCC_03_Driver_04_Prescalers
 
-/*---------------------------------------------- RCC Aggregate Configuration ----------------------------------------------*/
+// ==================================================================================================== //
+//                                     RCC Aggregate Configuration                                      //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Aggregate Configuration Types
  * @defgroup RCC_03_Driver_05_Config RCC Driver Aggregate Configuration
@@ -384,7 +408,10 @@ typedef struct _rcc_config_t
 
 /** @} */ // RCC_03_Driver_05_Config
 
-/*---------------------------------------------- RCC Clock Gate and Reset APIs ----------------------------------------------*/
+// ==================================================================================================== //
+//                                    RCC Clock Gate and Reset APIs                                     //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Clock Gate and Reset APIs
  * @defgroup RCC_03_Driver_06_ClockReset RCC Driver Clock Enable and Reset APIs
@@ -487,7 +514,11 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMas
 {
 	return RCC_LL_APB1_ResetPulse(resetMask);
 }
-/*---------------------------------------------- RCC Driver APIs ----------------------------------------------*/
+
+// ==================================================================================================== //
+//                                           RCC Driver APIs                                            //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Driver Functional APIs
  * @defgroup RCC_03_Driver_07_API RCC Driver Functional APIs
@@ -497,43 +528,43 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMas
 
 /**
  * @brief	Validates a complete RCC configuration descriptor
- * @param[in] cfg	Pointer to @ref rcc_config_t
+ * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
  * @returns - @ref driver_status_t Validation result
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Configuration is valid and internally consistent.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p cfg was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contains an invalid source, divider, multiplier, or limit violation.
  */
-driver_status_t RCC_ValidateConfig(const rcc_config_t* cfg);
+driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies Flash latency and prefetch configuration
- * @param[in] flash	Pointer to @ref rcc_flash_config_t
+ * @param[in] pFlashConfig	Pointer to @ref rcc_flash_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash latency and prefetch configuration were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p flash was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pFlashConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Flash configuration fields were invalid.
  */
-driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* flash);
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const pFlashConfig);
 
 /**
  * @brief	Applies AHB, APB1, and APB2 prescaler configuration
- * @param[in] busCfg	Pointer to @ref rcc_bus_config_t
+ * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested bus prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p busCfg was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid.
  */
-driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* busCfg);
+driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig);
 
 /**
  * @brief	Applies ADC and USB prescaler configuration
- * @param[in] componentCfg	Pointer to @ref rcc_component_config_t
+ * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested component prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p componentCfg was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid.
  */
-driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* componentCfg);
+driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig);
 
 /**
  * @brief	Switches SYSCLK to HSI and validates the transition with a timeout
@@ -565,33 +596,33 @@ driver_status_t RCC_SwitchClockSourceToPLL(void);
 
 /**
  * @brief	Applies a complete clock-tree configuration through the RCC driver orchestrator
- * @param[in] clockTree	Pointer to @ref rcc_clock_tree_config_t
+ * @param[in] pClockTreeConfig	Pointer to @ref rcc_clock_tree_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-tree sequencing completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p clockTree was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockTreeConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid clock-tree values.
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
  * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
  */
-driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* clockTree);
+driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockTreeConfig);
 
 /**
  * @brief	Applies a complete RCC configuration descriptor
- * @param[in] cfg	Pointer to @ref rcc_config_t
+ * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash and clock-tree configuration completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p cfg was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid fields or violated frequency limits.
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
  * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
  */
-driver_status_t RCC_Config(const rcc_config_t* cfg);
+driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Loads the default 72 MHz Blue Pill clock-tree preset
- * @param[out] cfg	Pointer to @ref rcc_config_t
+ * @param[out] pRCCConfig	Pointer to @ref rcc_config_t
  */
-void RCC_72MHz_LoadDefaultConfig(rcc_config_t* cfg);
+void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies the default 72 MHz Blue Pill RCC configuration
@@ -660,7 +691,11 @@ rcc_freq_t RCC_GetADCFreq(void);
 rcc_freq_t RCC_GetUSBFreq(void);
 
 /** @} */ // RCC_03_Driver_07_API
-/*---------------------------------------------- RCC Legacy Compatibility Wrappers ----------------------------------------------*/
+
+// ==================================================================================================== //
+//                                  RCC Legacy Compatibility Wrappers                                   //
+// ==================================================================================================== //
+
 /**
  * @brief	Legacy inline compatibility wrappers
  * @defgroup RCC_03_Driver_08_Legacy RCC Driver Legacy Compatibility Wrappers

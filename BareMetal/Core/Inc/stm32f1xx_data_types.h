@@ -115,7 +115,7 @@ typedef enum _driver_status_t
  * @returns Returns the evaluated status
  * @retval - Input Expression if not @ref `DRIVER_STATUS_SUCCESS`
  */
-#define DRIVER_RETURN_IF_NOT_SUCCESS(expr)		\
+#define ASSERT_DRIVER_STATUS(expr)				\
 do												\
 {												\
 	driver_status_t _st = (expr);				\

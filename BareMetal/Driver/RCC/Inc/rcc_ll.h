@@ -25,7 +25,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*---------------------------------------------- Includes ----------------------------------------------*/
+// ==================================================================================================== //
+//                                               Includes                                               //
+// ==================================================================================================== //
+
 #include "stm32f1xx.h"
 
 /**
@@ -33,7 +36,10 @@ extern "C" {
  * @{
  */
 
-/*---------------------------------------------- Generic RCC LL Register Macros ----------------------------------------------*/
+// ==================================================================================================== //
+//                                    Generic RCC LL Register Macros                                    //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Generic Register Access Macros
  * @defgroup RCC_02_LL_01_RegOps RCC LL Register Operation Macros
@@ -131,7 +137,10 @@ extern "C" {
 
 /** @} */ // RCC_02_LL_01_RegOps
 
-/*---------------------------------------------- RCC LL Data Types ----------------------------------------------*/
+// ==================================================================================================== //
+//                                          RCC LL Data Types                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC LL Field Data Types and Encoded Values
  * @defgroup RCC_02_LL_02_Types RCC LL Field Types and Macros
@@ -143,7 +152,10 @@ extern "C" {
  * @{
  */
 
-/*---------------------------------------------- LL System Clock Source ----------------------------------------------*/
+// ==================================================================================================== //
+//                                        LL System Clock Source                                        //
+// ==================================================================================================== //
+
 /**
  * @brief	LL system clock source request field type
  * @typedef	rcc_ll_sysclk_src_t
@@ -156,7 +168,10 @@ typedef uint32_t											rcc_ll_sysclk_src_t;
 /** @brief PLL selected as requested system clock source @def RCC_LL_SYSCLK_SRC_PLL */
 #define RCC_LL_SYSCLK_SRC_PLL								(RCC_CFGR_SW_PLL)
 
-/*---------------------------------------------- LL System Clock Status ----------------------------------------------*/
+// ==================================================================================================== //
+//                                        LL System Clock Status                                        //
+// ==================================================================================================== //
+
 /**
  * @brief	LL system clock status field type
  * @typedef	rcc_ll_sysclk_status_t
@@ -169,7 +184,10 @@ typedef uint32_t											rcc_ll_sysclk_status_t;
 /** @brief PLL is currently driving SYSCLK @def RCC_LL_SYSCLK_STATUS_PLL */
 #define RCC_LL_SYSCLK_STATUS_PLL							(RCC_CFGR_SWS_PLL)
 
-/*---------------------------------------------- LL PLL Source ----------------------------------------------*/
+// ==================================================================================================== //
+//                                            LL PLL Source                                             //
+// ==================================================================================================== //
+
 /**
  * @brief	LL PLL source field type
  * @typedef	rcc_ll_pll_src_t
@@ -180,7 +198,10 @@ typedef uint32_t											rcc_ll_pll_src_t;
 /** @brief HSE selected as PLL input @def RCC_LL_PLL_SRC_HSE */
 #define RCC_LL_PLL_SRC_HSE									(RCC_CFGR_PLLSRC_HSE)
 
-/*---------------------------------------------- LL PLL HSE Divider ----------------------------------------------*/
+// ==================================================================================================== //
+//                                          LL PLL HSE Divider                                          //
+// ==================================================================================================== //
+
 /**
  * @brief	LL PLL HSE divider field type
  * @typedef	rcc_ll_pll_hse_div_t
@@ -191,7 +212,10 @@ typedef uint32_t											rcc_ll_pll_hse_div_t;
 /** @brief HSE divided by 2 before PLL input @def RCC_LL_PLL_HSE_DIV_2 */
 #define RCC_LL_PLL_HSE_DIV_2								(RCC_CFGR_PLLXTPRE_HSE_DIV2)
 
-/*---------------------------------------------- LL PLL Multiplier ----------------------------------------------*/
+// ==================================================================================================== //
+//                                          LL PLL Multiplier                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	LL PLL multiplication field type
  * @typedef	rcc_ll_pll_mul_t
@@ -228,7 +252,10 @@ typedef uint32_t									rcc_ll_pll_mul_t;
 /** @brief PLL input clock multiplied by 16 @def RCC_LL_PLL_MUL_16 */
 #define RCC_LL_PLL_MUL_16							(RCC_CFGR_PLLMUL_16)
 
-/*---------------------------------------------- LL AHB Prescaler ----------------------------------------------*/
+// ==================================================================================================== //
+//                                           LL AHB Prescaler                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	LL AHB prescaler field type
  * @typedef	rcc_ll_ahb_prescaler_t
@@ -253,7 +280,10 @@ typedef uint32_t									rcc_ll_ahb_prescaler_t;
 /** @brief AHB clock divided by 512 @def RCC_LL_AHB_DIV_512 */
 #define RCC_LL_AHB_DIV_512							(RCC_CFGR_HPRE_DIV512)
 
-/*---------------------------------------------- LL APB Prescaler ----------------------------------------------*/
+// ==================================================================================================== //
+//                                           LL APB Prescaler                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	LL APB prescaler field type
  * @typedef	rcc_ll_apb_prescaler_t
@@ -270,7 +300,10 @@ typedef uint32_t									rcc_ll_apb_prescaler_t;
 /** @brief APB clock divided by 16 @def RCC_LL_APB_DIV_16 */
 #define RCC_LL_APB_DIV_16							(RCC_CFGR_PPRE1_DIV16)
 
-/*---------------------------------------------- LL ADC Prescaler ----------------------------------------------*/
+// ==================================================================================================== //
+//                                           LL ADC Prescaler                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	LL ADC prescaler field type
  * @typedef	rcc_ll_adc_prescaler_t
@@ -285,7 +318,10 @@ typedef uint32_t									rcc_ll_adc_prescaler_t;
 /** @brief ADC clock derived from PCLK2 divided by 8 @def RCC_LL_ADC_DIV_8 */
 #define RCC_LL_ADC_DIV_8							(RCC_CFGR_ADCPRE_DIV8)
 
-/*---------------------------------------------- LL USB Prescaler ----------------------------------------------*/
+// ==================================================================================================== //
+//                                           LL USB Prescaler                                           //
+// ==================================================================================================== //
+
 /**
  * @brief	LL USB prescaler field type
  * @typedef	rcc_ll_usb_prescaler_t
@@ -299,7 +335,10 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 
 /** @} */ // RCC_02_LL_02_Types
 
-/*---------------------------------------------- RCC LL Compatibility Macros ----------------------------------------------*/
+// ==================================================================================================== //
+//                                     RCC LL Compatibility Macros                                      //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC Legacy Compatibility Macros
  * @defgroup RCC_02_LL_03_RegAccess RCC LL Compatibility Helpers
@@ -353,7 +392,10 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 
 /** @} */ // RCC_02_LL_03_RegAccess
 
-/*---------------------------------------------- RCC LL Functional APIs ----------------------------------------------*/
+// ==================================================================================================== //
+//                                        RCC LL Functional APIs                                        //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC LL Functional APIs
  * @defgroup RCC_02_LL_04_API RCC LL Functional APIs
@@ -361,7 +403,10 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
  * @{
  */
 
-/*---------------------------------------------- RCC LL Clock Source Control ----------------------------------------------*/
+// ==================================================================================================== //
+//                                     RCC LL Clock Source Control                                      //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC LL Clock Source Control APIs
  * @defgroup RCC_02_LL_04_API_01_SourceControl RCC LL Clock Source Control
@@ -489,7 +534,10 @@ __STATIC_FORCEINLINE driver_status_t RCC_LL_PLL_GetReadyStatus(void)
 }
 /** @} */ // RCC_02_LL_04_API_01_SourceControl
 
-/*---------------------------------------------- RCC LL Clock Tree Fields ----------------------------------------------*/
+// ==================================================================================================== //
+//                                       RCC LL Clock Tree Fields                                       //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC LL Clock Tree Field APIs
  * @defgroup RCC_02_LL_04_API_02_ClockTree RCC LL Clock Tree Field Access
@@ -670,7 +718,10 @@ driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler)
 
 /** @} */ // RCC_02_LL_04_API_02_ClockTree
 
-/*---------------------------------------------- RCC LL Clock Gate and Reset ----------------------------------------------*/
+// ==================================================================================================== //
+//                                     RCC LL Clock Gate and Reset                                      //
+// ==================================================================================================== //
+
 /**
  * @brief	RCC LL Clock Gate and Reset APIs
  * @defgroup RCC_02_LL_04_API_03_ClockGateReset RCC LL Clock Gate and Reset Control

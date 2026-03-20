@@ -297,27 +297,27 @@ driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_
 	// Configure TX Pin
 	if(hardware & USART_TX_ENABLE){
 		status = GPIO_Init(usartGpioConfig->TX.GPIO, &usartGpioConfig->TX.setup); 
-		DRIVER_RETURN_IF_NOT_SUCCESS(status);
+		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure RX Pin
 	if(hardware & USART_RX_ENABLE){
 		status = GPIO_Init(usartGpioConfig->RX.GPIO, &usartGpioConfig->RX.setup);
-		DRIVER_RETURN_IF_NOT_SUCCESS(status);
+		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure RTS Pin
 	if(hardware & USART_RTS_ENABLE){
 		status = GPIO_Init(usartGpioConfig->RTS.GPIO, &usartGpioConfig->RTS.setup);
-		DRIVER_RETURN_IF_NOT_SUCCESS(status);
+		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure CTS Pin
 	if(hardware & USART_CTS_ENABLE){
 		status = GPIO_Init(usartGpioConfig->CTS.GPIO, &usartGpioConfig->CTS.setup);
-		DRIVER_RETURN_IF_NOT_SUCCESS(status);
+		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure CK Pin
 	if(hardware & USART_CK_ENABLE){
 		status = GPIO_Init(usartGpioConfig->CK.GPIO, &usartGpioConfig->CK.setup);
-		DRIVER_RETURN_IF_NOT_SUCCESS(status);
+		ASSERT_DRIVER_STATUS(status);
 	}
 	// Status
 	return status;
@@ -451,13 +451,13 @@ driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartCon
 	usart_gpio_t* usartGpioConfig = USART_GPIO_Config_Get(usart);
 	// Configure USART GPIO
 	status = USART_GPIO_Config(usartConfig->hardware, usartGpioConfig);
-	DRIVER_RETURN_IF_NOT_SUCCESS(status);
+	ASSERT_DRIVER_STATUS(status);
 	// Set USART Baud Rate
 	status = USART_BaudRate_Set(usart, usartConfig->baud_rate);
-	DRIVER_RETURN_IF_NOT_SUCCESS(status);
+	ASSERT_DRIVER_STATUS(status);
 	// Set USART Communication Configuration
 	status = USART_DataConfig_Set(usart, usartConfig->hardware, usartConfig->config);
-	DRIVER_RETURN_IF_NOT_SUCCESS(status);
+	ASSERT_DRIVER_STATUS(status);
 	// Return status
 	return status;
 }

@@ -6,10 +6,20 @@
  * @date	20-03-2026
  */
 
-/*---------------------------------------------- Includes ----------------------------------------------*/
+
+
+// ==================================================================================================== //
+//                                               Includes                                               //
+// ==================================================================================================== //
+
 #include "rcc_ll.h"
 
-/*---------------------------------------------- RCC LL Private Validation Helpers ----------------------------------------------*/
+
+
+// ==================================================================================================== //
+//                                  RCC LL Private Validation Helpers                                   //
+// ==================================================================================================== //
+
 static bool _RCC_LL_IsSystemClockSource(const rcc_ll_sysclk_src_t source)
 {
 	if ((source == RCC_LL_SYSCLK_SRC_HSI) || (source == RCC_LL_SYSCLK_SRC_HSE) || (source == RCC_LL_SYSCLK_SRC_PLL))
@@ -147,7 +157,12 @@ static driver_status_t _RCC_LL_ValidateMask(const uint32_t mask)
 		return DRIVER_STATUS_SUCCESS;
 	}
 }
-/*---------------------------------------------- RCC LL Clock Tree Field Access ----------------------------------------------*/
+
+
+// ==================================================================================================== //
+//                                    RCC LL Clock Tree Field Access                                    //
+// ==================================================================================================== //
+
 driver_status_t RCC_LL_SetSystemClockSource(const rcc_ll_sysclk_src_t source)
 {
 	if (_RCC_LL_IsSystemClockSource(source) == false)
@@ -334,91 +349,96 @@ driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+
 	*pPrescaler = (RCC->CFGR.REG & RCC_CFGR_USBPRE);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/*---------------------------------------------- RCC LL Clock Gate and Reset ----------------------------------------------*/
+
+// ==================================================================================================== //
+//                                      RCC LL Clock Gate and Reset                                      //
+// ==================================================================================================== //
+
 driver_status_t RCC_LL_AHB_EnableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_SET(RCC, AHBENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_AHB_DisableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_CLEAR(RCC, AHBENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB2_EnableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_SET(RCC, APB2ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB2_DisableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_CLEAR(RCC, APB2ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB1_EnableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_SET(RCC, APB1ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB1_DisableClock(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_CLEAR(RCC, APB1ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB2_ForceReset(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_SET(RCC, APB2RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB2_ReleaseReset(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_CLEAR(RCC, APB2RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB1_ForceReset(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_SET(RCC, APB1RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB1_ReleaseReset(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_LL_ValidateMask(mask));
+	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
 	RCC_LL_CLEAR(RCC, APB1RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB2_ResetPulse(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_APB2_ForceReset(mask));
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_APB2_ReleaseReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_APB2_ForceReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_APB2_ReleaseReset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_LL_APB1_ResetPulse(const uint32_t mask)
 {
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_APB1_ForceReset(mask));
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_APB1_ReleaseReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_APB1_ForceReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_APB1_ReleaseReset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
