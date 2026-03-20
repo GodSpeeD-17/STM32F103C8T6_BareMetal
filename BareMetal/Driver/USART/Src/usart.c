@@ -24,7 +24,7 @@ void USART_Config(usart_config_t* USART_CONFIGx){
 	if(USART_CONFIGx->USARTx == USART1)
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_Get_APB2Clock()/(USART_CONFIGx->baud_rate));
 	else
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusPrescaler(RCC_APB1_BUS)/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusFreq(RCC_APB1_BUS)/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
 	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
 	// Configure Rest of the Parameters
@@ -336,7 +336,7 @@ driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudR
 	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	if((usart < USART_MIN) || (usart > USART_MAX))
 		return status;
-	uint32_t clockFreq = (usart == USART_1)? RCC_Get_APB2Clock() : RCC_GetBusPrescaler(RCC_APB1_BUS);
+	uint32_t clockFreq = (usart == USART_1)? RCC_Get_APB2Clock() : RCC_GetBusFreq(RCC_APB1_BUS);
 	// Update Baud Rate Register Value
 	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(__usartDriverBaudRateMapping__[baudRate]));
 	// Return status
