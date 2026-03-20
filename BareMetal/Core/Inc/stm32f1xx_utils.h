@@ -244,7 +244,7 @@ driver_status_t	RegOps_Read(volatile uint32_t *reg, uint32_t *out_value);
  * @param[in]	value	Value to write.
  *
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:				Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
 driver_status_t	RegOps_Write(volatile uint32_t *reg, uint32_t value);
@@ -256,7 +256,7 @@ driver_status_t	RegOps_Write(volatile uint32_t *reg, uint32_t value);
  * @param[in]	mask	Bit mask to set.
  *
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:				Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
 driver_status_t	RegOps_Set(volatile uint32_t *reg, uint32_t mask);
@@ -268,7 +268,7 @@ driver_status_t	RegOps_Set(volatile uint32_t *reg, uint32_t mask);
  * @param[in]	mask	Bit mask to clear.
  *
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:				Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
 driver_status_t	RegOps_Clear(volatile uint32_t *reg, uint32_t mask);
@@ -280,7 +280,7 @@ driver_status_t	RegOps_Clear(volatile uint32_t *reg, uint32_t mask);
  * @param[in]	mask	Bit mask to toggle.
  *
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:				Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
 driver_status_t	RegOps_Toggle(volatile uint32_t *reg, uint32_t mask);
@@ -297,7 +297,7 @@ driver_status_t	RegOps_Toggle(volatile uint32_t *reg, uint32_t mask);
  * @param[in]	value	Field value (already shifted to position).
  *
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:				Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  *
  * @warning

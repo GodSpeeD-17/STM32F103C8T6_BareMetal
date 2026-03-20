@@ -750,22 +750,23 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_CR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
-			volatile uint32_t HSION: 1;
-			volatile uint32_t HSIRDY: 1;
-			volatile uint32_t reserved_1: 1;
-			volatile uint32_t HSITRIM: 5;
-			volatile uint32_t HSICAL: 8;
-			volatile uint32_t HSEON: 1;
-			volatile uint32_t HSERDY: 1;
-			volatile uint32_t HSEBYP: 1;
-			volatile uint32_t CSSON: 1;
-			volatile uint32_t reserved_2: 4;
-			volatile uint32_t PLLON: 1;
-			volatile uint32_t PLLRDY: 1;
-			volatile uint32_t reserved_3: 6;
+		struct
+		{
+			_IO HSION: 1;
+			_I HSIRDY: 1;
+			_I reserved_1: 1;
+			_IO HSITRIM: 5;
+			_I HSICAL: 8;
+			_IO HSEON: 1;
+			_I HSERDY: 1;
+			_IO HSEBYP: 1;
+			_IO CSSON: 1;
+			_I reserved_2: 4;
+			_IO PLLON: 1;
+			_I PLLRDY: 1;
+			_I reserved_3: 6;
 		} BIT;
 	} CR;
 
@@ -779,9 +780,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_CFGR 
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t SW: 2;
 			volatile uint32_t SWS: 2;
 			volatile uint32_t HPRE: 4;
@@ -808,9 +810,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_CIR 
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t LSIRDYF: 1;
 			volatile uint32_t LSERDYF: 1;
 			volatile uint32_t HSIRDYF: 1;
@@ -845,9 +848,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_APB2RSTR 
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t AFIORST: 1;
 			volatile uint32_t reserved_1: 1;
 			volatile uint32_t IOPARST: 1;
@@ -882,9 +886,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_APB1RSTR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t TIM2RST: 1;
 			volatile uint32_t TIM3RST: 1;
 			volatile uint32_t TIM4RST: 1;
@@ -927,9 +932,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_AHBENR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t DMA1EN: 1;
 			volatile uint32_t DMA2EN: 1;
 			volatile uint32_t SRAMEN: 1;
@@ -955,9 +961,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_APB2ENR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t AFIOEN: 1;
 			volatile uint32_t reserved_1: 1;
 			volatile uint32_t IOPAEN: 1;
@@ -992,9 +999,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_APB1ENR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t TIM2EN: 1;
 			volatile uint32_t TIM3EN: 1;
 			volatile uint32_t TIM4EN: 1;
@@ -1037,9 +1045,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_BDCR
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t LSEON: 1;
 			volatile uint32_t LSERDY: 1;
 			volatile uint32_t LSEBYP: 1;
@@ -1062,9 +1071,10 @@ typedef volatile struct _RCC_TypeDef
 	union RCC_CSR 
 	{
 		// Full 32-bit Register Access
-		volatile uint32_t REG;
+		_IO REG;
 		// Bit Access
-		struct {
+		struct
+		{
 			volatile uint32_t LSION: 1;
 			volatile uint32_t LSIRDY: 1;
 			volatile uint32_t reserved_1: 22;

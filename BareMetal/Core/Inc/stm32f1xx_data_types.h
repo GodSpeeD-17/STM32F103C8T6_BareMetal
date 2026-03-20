@@ -22,6 +22,46 @@ extern "C" {
 #include <string.h>
 
 // ------------------------------------------------------------------------------------------
+// Register Modification Type
+// ------------------------------------------------------------------------------------------
+
+/**
+ * @brief Read/Write access type
+ * 
+ * @details
+ * - Used for registers that support both read and write operations
+ * - Qualifies the register as volatile to prevent compiler optimizations
+ * - Ensures each access is performed as specified in code
+ * 
+ * @note This is the most commonly used type for peripheral registers
+ */
+typedef volatile uint32_t						_IO;
+
+/**
+ * @brief Read-only access type
+ * 
+ * @details
+ * - Used for registers that are read-only (status registers, flags)
+ * - Qualifies as volatile to ensure fresh read on each access
+ * - Writing to these registers may have undefined behavior
+ * 
+ * @note Hardware may update these registers asynchronously
+ */
+typedef volatile const uint32_t					_I;
+
+/**
+ * @brief Write-only access type
+ * 
+ * @details
+ * - Used for registers that are write-only (data output, control)
+ * - Qualifies as volatile to ensure write is not optimized away
+ * - Reading from these registers may return garbage values
+ * 
+ * @note Common for FIFO buffers and output-only control registers
+ */
+typedef volatile uint32_t						_O;
+
+// ------------------------------------------------------------------------------------------
 // Driver Operation Status Type
 // ------------------------------------------------------------------------------------------
 
