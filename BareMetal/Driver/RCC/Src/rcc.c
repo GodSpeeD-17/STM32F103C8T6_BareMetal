@@ -1,679 +1,1178 @@
 /**
- * @file rcc.c
- * @author Shrey Shah
- * @brief RCC Driver Source File
- * @version v2.1
- * @date 20-03-2026
+ * @file	rcc.c
+ * @author	Shrey Shah
+ * @brief	RCC Driver Source File
+ * @version	v2.2
+ * @date	20-03-2026
  */
 
 /*---------------------------------------------- Includes ----------------------------------------------*/
 #include "rcc.h"
 
 /*---------------------------------------------- Macros ----------------------------------------------*/
-#define RCC_READY_TIMEOUT						((uint32_t) 0x000FFFFFUL)
+#define RCC_READY_TIMEOUT					((uint32_t) 1000UL)
 #define RCC_DRIVER_INVALID_FIELD			((uint32_t) 0xFFFFFFFFUL)
 
-/*---------------------------------------------- Local Functions ----------------------------------------------*/
-static driver_status_t RCC_PrivateWaitFlag(volatile uint32_t* reg, const uint32_t mask, const bool set)
+/*---------------------------------------------- Local Helpers ----------------------------------------------*/
+static driver_status_t _RCC_WaitReadyStatus(driver_status_t (*readyGetter)(void), const driver_status_t targetStatus)
 {
 	uint32_t timeout = RCC_READY_TIMEOUT;
-	while (timeout--)
+
+	while (timeout > 0x00UL)
 	{
-		const bool state = ((*reg) & mask) != 0x00UL;
-		if (state == set) return DRIVER_STATUS_SUCCESS;
+		if (readyGetter() == targetStatus)
+		{
+			return DRIVER_STATUS_SUCCESS;
+		}
+
+		timeout--;
 	}
+
 	return DRIVER_STATUS_ERROR_TIMEOUT;
 }
 
-static driver_status_t RCC_PrivateWaitSystemClockSource(const rcc_system_clock_t source)
+static driver_status_t _RCC_WaitSystemClockSource(const rcc_system_clock_t source)
 {
-	uint32_t timeout = RCC_READY_TIMEOUT;
-	while (timeout--)
+	rcc_ll_sysclk_status_t	status = RCC_LL_SYSCLK_STATUS_HSI;
+	uint32_t				timeout = RCC_READY_TIMEOUT;
+
+	while (timeout > 0x00UL)
 	{
-		if (RCC_GetSysClkSrc() == source) return DRIVER_STATUS_SUCCESS;
+		if (RCC_LL_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
+		{
+			return DRIVER_STATUS_ERROR;
+		}
+
+		if (((source == RCC_SYS_CLK_HSI) && (status == RCC_LL_SYSCLK_STATUS_HSI)) ||
+			((source == RCC_SYS_CLK_HSE) && (status == RCC_LL_SYSCLK_STATUS_HSE)) ||
+			((source == RCC_SYS_CLK_PLL) && (status == RCC_LL_SYSCLK_STATUS_PLL)))
+		{
+			return DRIVER_STATUS_SUCCESS;
+		}
+
+		timeout--;
 	}
+
 	return DRIVER_STATUS_ERROR_TIMEOUT;
 }
 
-static uint32_t RCC_PrivateEncodeSystemClock(const rcc_system_clock_t source)
+static uint32_t _RCC_MapSystemClockSource(const rcc_system_clock_t source)
 {
 	switch (source)
 	{
-		case RCC_SYS_CLK_HSI: return RCC_CFGR_SW_HSI;
-		case RCC_SYS_CLK_HSE: return RCC_CFGR_SW_HSE;
-		case RCC_SYS_CLK_PLL: return RCC_CFGR_SW_PLL;
-		default: return RCC_DRIVER_INVALID_FIELD;
+		case RCC_SYS_CLK_HSI:
+		{
+			return RCC_LL_SYSCLK_SRC_HSI;
+		}
+		case RCC_SYS_CLK_HSE:
+		{
+			return RCC_LL_SYSCLK_SRC_HSE;
+		}
+		case RCC_SYS_CLK_PLL:
+		{
+			return RCC_LL_SYSCLK_SRC_PLL;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static rcc_system_clock_t RCC_PrivateDecodeSystemClock(const uint32_t cfgrReg)
+static uint32_t _RCC_MapPLLSource(const rcc_pll_src_t source)
 {
-	switch (cfgrReg & RCC_CFGR_SWS_Msk)
+	switch (source)
 	{
-		case RCC_CFGR_SWS_HSI: return RCC_SYS_CLK_HSI;
-		case RCC_CFGR_SWS_HSE: return RCC_SYS_CLK_HSE;
-		case RCC_CFGR_SWS_PLL: return RCC_SYS_CLK_PLL;
-		default: return RCC_SYS_CLK_HSI;
+		case RCC_PLL_SRC_HSI:
+		{
+			return RCC_LL_PLL_SRC_HSI_DIV2;
+		}
+		case RCC_PLL_SRC_HSE:
+		{
+			return RCC_LL_PLL_SRC_HSE;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static uint32_t RCC_PrivateEncodeAHBPrescaler(const rcc_bus_prescaler_t divider)
+static uint32_t _RCC_MapPLLHSEDivider(const rcc_pll_src_psc_t divider)
 {
 	switch (divider)
 	{
-		case RCC_AHB_DIV_1: return RCC_CFGR_HPRE_DIV1;
-		case RCC_AHB_DIV_2: return RCC_CFGR_HPRE_DIV2;
-		case RCC_AHB_DIV_4: return RCC_CFGR_HPRE_DIV4;
-		case RCC_AHB_DIV_8: return RCC_CFGR_HPRE_DIV8;
-		case RCC_AHB_DIV_16: return RCC_CFGR_HPRE_DIV16;
-		case RCC_AHB_DIV_64: return RCC_CFGR_HPRE_DIV64;
-		case RCC_AHB_DIV_128: return RCC_CFGR_HPRE_DIV128;
-		case RCC_AHB_DIV_256: return RCC_CFGR_HPRE_DIV256;
-		case RCC_AHB_DIV_512: return RCC_CFGR_HPRE_DIV512;
-		default: return RCC_DRIVER_INVALID_FIELD;
+		case RCC_PLL_SRC_HSE_DIV_1:
+		{
+			return RCC_LL_PLL_HSE_DIV_1;
+		}
+		case RCC_PLL_SRC_HSE_DIV_2:
+		{
+			return RCC_LL_PLL_HSE_DIV_2;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static uint32_t RCC_PrivateEncodeAPBPrescaler(const rcc_bus_prescaler_t divider, const rcc_bus_t bus)
-{
-	const bool isApb1 = (bus == RCC_APB1_BUS);
-	switch (divider)
-	{
-		case 1U: return isApb1 ? RCC_CFGR_PPRE1_DIV1 : RCC_CFGR_PPRE2_DIV1;
-		case 2U: return isApb1 ? RCC_CFGR_PPRE1_DIV2 : RCC_CFGR_PPRE2_DIV2;
-		case 4U: return isApb1 ? RCC_CFGR_PPRE1_DIV4 : RCC_CFGR_PPRE2_DIV4;
-		case 8U: return isApb1 ? RCC_CFGR_PPRE1_DIV8 : RCC_CFGR_PPRE2_DIV8;
-		case 16U: return isApb1 ? RCC_CFGR_PPRE1_DIV16 : RCC_CFGR_PPRE2_DIV16;
-		default: return RCC_DRIVER_INVALID_FIELD;
-	}
-}
-
-static rcc_bus_prescaler_t RCC_PrivateDecodeAHBPrescaler(const uint32_t cfgrReg)
-{
-	switch (cfgrReg & RCC_CFGR_HPRE_Msk)
-	{
-		case RCC_CFGR_HPRE_DIV1: return RCC_AHB_DIV_1;
-		case RCC_CFGR_HPRE_DIV2: return RCC_AHB_DIV_2;
-		case RCC_CFGR_HPRE_DIV4: return RCC_AHB_DIV_4;
-		case RCC_CFGR_HPRE_DIV8: return RCC_AHB_DIV_8;
-		case RCC_CFGR_HPRE_DIV16: return RCC_AHB_DIV_16;
-		case RCC_CFGR_HPRE_DIV64: return RCC_AHB_DIV_64;
-		case RCC_CFGR_HPRE_DIV128: return RCC_AHB_DIV_128;
-		case RCC_CFGR_HPRE_DIV256: return RCC_AHB_DIV_256;
-		case RCC_CFGR_HPRE_DIV512: return RCC_AHB_DIV_512;
-		default: return RCC_AHB_DIV_1;
-	}
-}
-
-static rcc_bus_prescaler_t RCC_PrivateDecodeAPB1Prescaler(const uint32_t cfgrReg)
-{
-	switch (cfgrReg & RCC_CFGR_PPRE1_Msk)
-	{
-		case RCC_CFGR_PPRE1_DIV1: return RCC_APB1_DIV_1;
-		case RCC_CFGR_PPRE1_DIV2: return RCC_APB1_DIV_2;
-		case RCC_CFGR_PPRE1_DIV4: return RCC_APB1_DIV_4;
-		case RCC_CFGR_PPRE1_DIV8: return RCC_APB1_DIV_8;
-		case RCC_CFGR_PPRE1_DIV16: return RCC_APB1_DIV_16;
-		default: return RCC_APB1_DIV_1;
-	}
-}
-
-static rcc_bus_prescaler_t RCC_PrivateDecodeAPB2Prescaler(const uint32_t cfgrReg)
-{
-	switch (cfgrReg & RCC_CFGR_PPRE2_Msk)
-	{
-		case RCC_CFGR_PPRE2_DIV1: return RCC_APB2_DIV_1;
-		case RCC_CFGR_PPRE2_DIV2: return RCC_APB2_DIV_2;
-		case RCC_CFGR_PPRE2_DIV4: return RCC_APB2_DIV_4;
-		case RCC_CFGR_PPRE2_DIV8: return RCC_APB2_DIV_8;
-		case RCC_CFGR_PPRE2_DIV16: return RCC_APB2_DIV_16;
-		default: return RCC_APB2_DIV_1;
-	}
-}
-
-static uint32_t RCC_PrivateEncodeADCPrescaler(const rcc_component_prescaler_t divider)
-{
-	switch (divider)
-	{
-		case RCC_ADC_DIV_2: return RCC_CFGR_ADCPRE_DIV2;
-		case RCC_ADC_DIV_4: return RCC_CFGR_ADCPRE_DIV4;
-		case RCC_ADC_DIV_6: return RCC_CFGR_ADCPRE_DIV6;
-		case RCC_ADC_DIV_8: return RCC_CFGR_ADCPRE_DIV8;
-		default: return RCC_DRIVER_INVALID_FIELD;
-	}
-}
-
-static rcc_component_prescaler_t RCC_PrivateDecodeADCPrescaler(const uint32_t cfgrReg)
-{
-	switch (cfgrReg & RCC_CFGR_ADCPRE_Msk)
-	{
-		case RCC_CFGR_ADCPRE_DIV2: return RCC_ADC_DIV_2;
-		case RCC_CFGR_ADCPRE_DIV4: return RCC_ADC_DIV_4;
-		case RCC_CFGR_ADCPRE_DIV6: return RCC_ADC_DIV_6;
-		case RCC_CFGR_ADCPRE_DIV8: return RCC_ADC_DIV_8;
-		default: return RCC_ADC_DIV_2;
-	}
-}
-
-static uint32_t RCC_PrivateEncodeUSBPrescaler(const rcc_component_prescaler_t divider)
-{
-	switch (divider)
-	{
-		case RCC_USB_DIV_1_5: return RCC_CFGR_USBPRE_DIV1_5;
-		case RCC_USB_DIV_1: return RCC_CFGR_USBPRE_DIRECT;
-		default: return RCC_DRIVER_INVALID_FIELD;
-	}
-}
-
-static rcc_component_prescaler_t RCC_PrivateDecodeUSBPrescaler(const uint32_t cfgrReg)
-{
-	return ((cfgrReg & RCC_CFGR_USBPRE_Msk) == RCC_CFGR_USBPRE_DIRECT) ? RCC_USB_DIV_1 : RCC_USB_DIV_1_5;
-}
-
-static uint32_t RCC_PrivateEncodePLLMultiplier(const rcc_pll_mul_t multiplier)
+static uint32_t _RCC_MapPLLMultiplier(const rcc_pll_mul_t multiplier)
 {
 	switch (multiplier)
 	{
-		case RCC_PLL_MUL_2: return RCC_CFGR_PLLMUL_2;
-		case RCC_PLL_MUL_3: return RCC_CFGR_PLLMUL_3;
-		case RCC_PLL_MUL_4: return RCC_CFGR_PLLMUL_4;
-		case RCC_PLL_MUL_5: return RCC_CFGR_PLLMUL_5;
-		case RCC_PLL_MUL_6: return RCC_CFGR_PLLMUL_6;
-		case RCC_PLL_MUL_7: return RCC_CFGR_PLLMUL_7;
-		case RCC_PLL_MUL_8: return RCC_CFGR_PLLMUL_8;
-		case RCC_PLL_MUL_9: return RCC_CFGR_PLLMUL_9;
-		case RCC_PLL_MUL_10: return RCC_CFGR_PLLMUL_10;
-		case RCC_PLL_MUL_11: return RCC_CFGR_PLLMUL_11;
-		case RCC_PLL_MUL_12: return RCC_CFGR_PLLMUL_12;
-		case RCC_PLL_MUL_13: return RCC_CFGR_PLLMUL_13;
-		case RCC_PLL_MUL_14: return RCC_CFGR_PLLMUL_14;
-		case RCC_PLL_MUL_15: return RCC_CFGR_PLLMUL_15;
-		case RCC_PLL_MUL_16: return RCC_CFGR_PLLMUL_16;
-		default: return RCC_DRIVER_INVALID_FIELD;
+		case RCC_PLL_MUL_2:
+		{
+			return RCC_LL_PLL_MUL_2;
+		}
+		case RCC_PLL_MUL_3:
+		{
+			return RCC_LL_PLL_MUL_3;
+		}
+		case RCC_PLL_MUL_4:
+		{
+			return RCC_LL_PLL_MUL_4;
+		}
+		case RCC_PLL_MUL_5:
+		{
+			return RCC_LL_PLL_MUL_5;
+		}
+		case RCC_PLL_MUL_6:
+		{
+			return RCC_LL_PLL_MUL_6;
+		}
+		case RCC_PLL_MUL_7:
+		{
+			return RCC_LL_PLL_MUL_7;
+		}
+		case RCC_PLL_MUL_8:
+		{
+			return RCC_LL_PLL_MUL_8;
+		}
+		case RCC_PLL_MUL_9:
+		{
+			return RCC_LL_PLL_MUL_9;
+		}
+		case RCC_PLL_MUL_10:
+		{
+			return RCC_LL_PLL_MUL_10;
+		}
+		case RCC_PLL_MUL_11:
+		{
+			return RCC_LL_PLL_MUL_11;
+		}
+		case RCC_PLL_MUL_12:
+		{
+			return RCC_LL_PLL_MUL_12;
+		}
+		case RCC_PLL_MUL_13:
+		{
+			return RCC_LL_PLL_MUL_13;
+		}
+		case RCC_PLL_MUL_14:
+		{
+			return RCC_LL_PLL_MUL_14;
+		}
+		case RCC_PLL_MUL_15:
+		{
+			return RCC_LL_PLL_MUL_15;
+		}
+		case RCC_PLL_MUL_16:
+		{
+			return RCC_LL_PLL_MUL_16;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static rcc_pll_mul_t RCC_PrivateDecodePLLMultiplier(const uint32_t cfgrReg)
+static uint32_t _RCC_MapAHBPrescaler(const rcc_bus_prescaler_t divider)
 {
-	switch (cfgrReg & RCC_CFGR_PLLMUL_Msk)
+	switch (divider)
 	{
-		case RCC_CFGR_PLLMUL_2: return RCC_PLL_MUL_2;
-		case RCC_CFGR_PLLMUL_3: return RCC_PLL_MUL_3;
-		case RCC_CFGR_PLLMUL_4: return RCC_PLL_MUL_4;
-		case RCC_CFGR_PLLMUL_5: return RCC_PLL_MUL_5;
-		case RCC_CFGR_PLLMUL_6: return RCC_PLL_MUL_6;
-		case RCC_CFGR_PLLMUL_7: return RCC_PLL_MUL_7;
-		case RCC_CFGR_PLLMUL_8: return RCC_PLL_MUL_8;
-		case RCC_CFGR_PLLMUL_9: return RCC_PLL_MUL_9;
-		case RCC_CFGR_PLLMUL_10: return RCC_PLL_MUL_10;
-		case RCC_CFGR_PLLMUL_11: return RCC_PLL_MUL_11;
-		case RCC_CFGR_PLLMUL_12: return RCC_PLL_MUL_12;
-		case RCC_CFGR_PLLMUL_13: return RCC_PLL_MUL_13;
-		case RCC_CFGR_PLLMUL_14: return RCC_PLL_MUL_14;
-		case RCC_CFGR_PLLMUL_15: return RCC_PLL_MUL_15;
-		case RCC_CFGR_PLLMUL_16: return RCC_PLL_MUL_16;
-		default: return RCC_PLL_MUL_2;
+		case RCC_AHB_DIV_1:
+		{
+			return RCC_LL_AHB_DIV_1;
+		}
+		case RCC_AHB_DIV_2:
+		{
+			return RCC_LL_AHB_DIV_2;
+		}
+		case RCC_AHB_DIV_4:
+		{
+			return RCC_LL_AHB_DIV_4;
+		}
+		case RCC_AHB_DIV_8:
+		{
+			return RCC_LL_AHB_DIV_8;
+		}
+		case RCC_AHB_DIV_16:
+		{
+			return RCC_LL_AHB_DIV_16;
+		}
+		case RCC_AHB_DIV_64:
+		{
+			return RCC_LL_AHB_DIV_64;
+		}
+		case RCC_AHB_DIV_128:
+		{
+			return RCC_LL_AHB_DIV_128;
+		}
+		case RCC_AHB_DIV_256:
+		{
+			return RCC_LL_AHB_DIV_256;
+		}
+		case RCC_AHB_DIV_512:
+		{
+			return RCC_LL_AHB_DIV_512;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static _rcc_freq_t RCC_PrivateComputeSYSCLK(const rcc_config_t* cfg)
+static uint32_t _RCC_MapAPBPrescaler(const rcc_bus_prescaler_t divider)
 {
-	if (cfg->system.clk_src == RCC_SYS_CLK_HSI) return _RCC_HSI_FREQ;
-	if (cfg->system.clk_src == RCC_SYS_CLK_HSE) return _RCC_HSE_FREQ;
-
-	if (cfg->system.pll.source == RCC_PLL_SRC_HSI)
+	switch (divider)
 	{
-		return (_RCC_HSI_FREQ >> 1) * (_rcc_freq_t) cfg->system.pll.multiplication_factor;
+		case RCC_APB1_DIV_1:
+		{
+			return RCC_LL_APB_DIV_1;
+		}
+		case RCC_APB1_DIV_2:
+		{
+			return RCC_LL_APB_DIV_2;
+		}
+		case RCC_APB1_DIV_4:
+		{
+			return RCC_LL_APB_DIV_4;
+		}
+		case RCC_APB1_DIV_8:
+		{
+			return RCC_LL_APB_DIV_8;
+		}
+		case RCC_APB1_DIV_16:
+		{
+			return RCC_LL_APB_DIV_16;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
+}
 
+static uint32_t _RCC_MapADCPrescaler(const rcc_component_prescaler_t divider)
+{
+	switch (divider)
 	{
-		_rcc_freq_t pllInput = _RCC_HSE_FREQ;
-		if (cfg->system.pll.source_prescaler == RCC_PLL_SRC_HSE_DIV_2) pllInput >>= 1;
-		return pllInput * (_rcc_freq_t) cfg->system.pll.multiplication_factor;
+		case RCC_ADC_DIV_2:
+		{
+			return RCC_LL_ADC_DIV_2;
+		}
+		case RCC_ADC_DIV_4:
+		{
+			return RCC_LL_ADC_DIV_4;
+		}
+		case RCC_ADC_DIV_6:
+		{
+			return RCC_LL_ADC_DIV_6;
+		}
+		case RCC_ADC_DIV_8:
+		{
+			return RCC_LL_ADC_DIV_8;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
 	}
 }
 
-static _rcc_freq_t RCC_PrivateComputeHCLK(const rcc_config_t* cfg)
+static uint32_t _RCC_MapUSBPrescaler(const rcc_component_prescaler_t divider)
 {
-	return (RCC_PrivateComputeSYSCLK(cfg) / (_rcc_freq_t) cfg->prescaler.bus.AHB);
+	switch (divider)
+	{
+		case RCC_USB_DIV_1_5:
+		{
+			return RCC_LL_USB_DIV_1_5;
+		}
+		case RCC_USB_DIV_1:
+		{
+			return RCC_LL_USB_DIV_1;
+		}
+		default:
+		{
+			return RCC_DRIVER_INVALID_FIELD;
+		}
+	}
 }
 
-static _rcc_freq_t RCC_PrivateComputePCLK1(const rcc_config_t* cfg)
+static rcc_system_clock_t _RCC_DecodeSystemClockStatus(const rcc_ll_sysclk_status_t status)
 {
-	return (RCC_PrivateComputeHCLK(cfg) / (_rcc_freq_t) cfg->prescaler.bus.APB1);
+	switch (status)
+	{
+		case RCC_LL_SYSCLK_STATUS_HSI:
+		{
+			return RCC_SYS_CLK_HSI;
+		}
+		case RCC_LL_SYSCLK_STATUS_HSE:
+		{
+			return RCC_SYS_CLK_HSE;
+		}
+		case RCC_LL_SYSCLK_STATUS_PLL:
+		{
+			return RCC_SYS_CLK_PLL;
+		}
+		default:
+		{
+			return RCC_SYS_CLK_HSI;
+		}
+	}
 }
 
-static _rcc_freq_t RCC_PrivateComputePCLK2(const rcc_config_t* cfg)
+static rcc_bus_prescaler_t _RCC_DecodeAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler)
 {
-	return (RCC_PrivateComputeHCLK(cfg) / (_rcc_freq_t) cfg->prescaler.bus.APB2);
+	switch (prescaler)
+	{
+		case RCC_LL_AHB_DIV_1:
+		{
+			return RCC_AHB_DIV_1;
+		}
+		case RCC_LL_AHB_DIV_2:
+		{
+			return RCC_AHB_DIV_2;
+		}
+		case RCC_LL_AHB_DIV_4:
+		{
+			return RCC_AHB_DIV_4;
+		}
+		case RCC_LL_AHB_DIV_8:
+		{
+			return RCC_AHB_DIV_8;
+		}
+		case RCC_LL_AHB_DIV_16:
+		{
+			return RCC_AHB_DIV_16;
+		}
+		case RCC_LL_AHB_DIV_64:
+		{
+			return RCC_AHB_DIV_64;
+		}
+		case RCC_LL_AHB_DIV_128:
+		{
+			return RCC_AHB_DIV_128;
+		}
+		case RCC_LL_AHB_DIV_256:
+		{
+			return RCC_AHB_DIV_256;
+		}
+		case RCC_LL_AHB_DIV_512:
+		{
+			return RCC_AHB_DIV_512;
+		}
+		default:
+		{
+			return RCC_AHB_DIV_1;
+		}
+	}
 }
 
-static _rcc_freq_t RCC_PrivateComputeADCCLK(const rcc_config_t* cfg)
+static rcc_bus_prescaler_t _RCC_DecodeAPBPrescaler(const rcc_ll_apb_prescaler_t prescaler)
 {
-	return (RCC_PrivateComputePCLK2(cfg) / (_rcc_freq_t) cfg->prescaler.component.ADC);
+	switch (prescaler)
+	{
+		case RCC_LL_APB_DIV_1:
+		{
+			return RCC_APB1_DIV_1;
+		}
+		case RCC_LL_APB_DIV_2:
+		{
+			return RCC_APB1_DIV_2;
+		}
+		case RCC_LL_APB_DIV_4:
+		{
+			return RCC_APB1_DIV_4;
+		}
+		case RCC_LL_APB_DIV_8:
+		{
+			return RCC_APB1_DIV_8;
+		}
+		case RCC_LL_APB_DIV_16:
+		{
+			return RCC_APB1_DIV_16;
+		}
+		default:
+		{
+			return 1U;
+		}
+	}
 }
 
-static _rcc_freq_t RCC_PrivateComputeUSBCLK(const rcc_config_t* cfg)
+static rcc_component_prescaler_t _RCC_DecodeADCPrescaler(const rcc_ll_adc_prescaler_t prescaler)
 {
-	const _rcc_freq_t pllClk = RCC_PrivateComputeSYSCLK(cfg);
-	if (cfg->system.clk_src != RCC_SYS_CLK_PLL) return 0x00UL;
-	return (cfg->prescaler.component.USB == RCC_USB_DIV_1) ? pllClk : ((pllClk << 1) / 3U);
+	switch (prescaler)
+	{
+		case RCC_LL_ADC_DIV_2:
+		{
+			return RCC_ADC_DIV_2;
+		}
+		case RCC_LL_ADC_DIV_4:
+		{
+			return RCC_ADC_DIV_4;
+		}
+		case RCC_LL_ADC_DIV_6:
+		{
+			return RCC_ADC_DIV_6;
+		}
+		case RCC_LL_ADC_DIV_8:
+		{
+			return RCC_ADC_DIV_8;
+		}
+		default:
+		{
+			return RCC_ADC_DIV_2;
+		}
+	}
+}
+
+static rcc_component_prescaler_t _RCC_DecodeUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler)
+{
+	if (prescaler == RCC_LL_USB_DIV_1)
+	{
+		return RCC_USB_DIV_1;
+	}
+	else
+	{
+		return RCC_USB_DIV_1_5;
+	}
+}
+
+static _rcc_freq_t _RCC_ComputePLLInputFreq(const rcc_clock_tree_config_t* const clockTree)
+{
+	if (clockTree->system.pll.source == RCC_PLL_SRC_HSI)
+	{
+		return (_RCC_HSI_FREQ >> 1);
+	}
+	else
+	{
+		if (clockTree->system.pll.source_prescaler == RCC_PLL_SRC_HSE_DIV_2)
+		{
+			return (_RCC_HSE_FREQ >> 1);
+		}
+		else
+		{
+			return _RCC_HSE_FREQ;
+		}
+	}
+}
+
+static _rcc_freq_t _RCC_ComputeSYSCLK(const rcc_clock_tree_config_t* const clockTree)
+{
+	switch (clockTree->system.clk_src)
+	{
+		case RCC_SYS_CLK_HSI:
+		{
+			return _RCC_HSI_FREQ;
+		}
+		case RCC_SYS_CLK_HSE:
+		{
+			return _RCC_HSE_FREQ;
+		}
+		case RCC_SYS_CLK_PLL:
+		{
+			return (_RCC_ComputePLLInputFreq(clockTree) * (_rcc_freq_t) clockTree->system.pll.multiplication_factor);
+		}
+		default:
+		{
+			return 0x00UL;
+		}
+	}
+}
+
+static _rcc_freq_t _RCC_ComputeHCLK(const rcc_clock_tree_config_t* const clockTree)
+{
+	return (_RCC_ComputeSYSCLK(clockTree) / (_rcc_freq_t) clockTree->bus.AHB);
+}
+
+static _rcc_freq_t _RCC_ComputePCLK1(const rcc_clock_tree_config_t* const clockTree)
+{
+	return (_RCC_ComputeHCLK(clockTree) / (_rcc_freq_t) clockTree->bus.APB1);
+}
+
+static _rcc_freq_t _RCC_ComputePCLK2(const rcc_clock_tree_config_t* const clockTree)
+{
+	return (_RCC_ComputeHCLK(clockTree) / (_rcc_freq_t) clockTree->bus.APB2);
+}
+
+static _rcc_freq_t _RCC_ComputeADCCLK(const rcc_clock_tree_config_t* const clockTree)
+{
+	return (_RCC_ComputePCLK2(clockTree) / (_rcc_freq_t) clockTree->component.ADC);
+}
+
+static _rcc_freq_t _RCC_ComputeUSBCLK(const rcc_clock_tree_config_t* const clockTree)
+{
+	const _rcc_freq_t pllClock = _RCC_ComputePLLInputFreq(clockTree) * (_rcc_freq_t) clockTree->system.pll.multiplication_factor;
+
+	if (clockTree->system.clk_src != RCC_SYS_CLK_PLL)
+	{
+		return 0x00UL;
+	}
+
+	if (clockTree->component.USB == RCC_USB_DIV_1)
+	{
+		return pllClock;
+	}
+	else
+	{
+		return ((pllClock << 1) / 3U);
+	}
 }
 
 /*---------------------------------------------- Driver Clock Gate and Reset APIs ----------------------------------------------*/
-/**
- * @brief Enables AHB peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_AHBENR
- * @return Driver operation status
- */
 driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_SET(&RCC->AHBENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_AHB_EnableClock(clockMask);
 }
 
-/**
- * @brief Disables AHB peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_AHBENR
- * @return Driver operation status
- */
 driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_CLEAR(&RCC->AHBENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_AHB_DisableClock(clockMask);
 }
 
-/**
- * @brief Enables APB2 peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_APB2ENR
- * @return Driver operation status
- */
 driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_SET(&RCC->APB2ENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB2_EnableClock(clockMask);
 }
 
-/**
- * @brief Disables APB2 peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_APB2ENR
- * @return Driver operation status
- */
 driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_CLEAR(&RCC->APB2ENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB2_DisableClock(clockMask);
 }
 
-/**
- * @brief Enables APB1 peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_APB1ENR
- * @return Driver operation status
- */
 driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_SET(&RCC->APB1ENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB1_EnableClock(clockMask);
 }
 
-/**
- * @brief Disables APB1 peripheral clock bits
- * @param[in] clockMask Bitmask from @ref RCC_APB1ENR
- * @return Driver operation status
- */
 driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
 {
-	if (clockMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_CLEAR(&RCC->APB1ENR.REG, clockMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB1_DisableClock(clockMask);
 }
 
-/**
- * @brief Pulses APB2 peripheral reset bits
- * @param[in] resetMask Bitmask from @ref RCC_APB2RSTR
- * @return Driver operation status
- */
 driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
 {
-	if (resetMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_SET(&RCC->APB2RSTR.REG, resetMask);
-	REGOPS_CLEAR(&RCC->APB2RSTR.REG, resetMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB2_ResetPulse(resetMask);
 }
 
-/**
- * @brief Pulses APB1 peripheral reset bits
- * @param[in] resetMask Bitmask from @ref RCC_APB1RSTR
- * @return Driver operation status
- */
 driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
 {
-	if (resetMask == 0x00UL) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	REGOPS_SET(&RCC->APB1RSTR.REG, resetMask);
-	REGOPS_CLEAR(&RCC->APB1RSTR.REG, resetMask);
-	return DRIVER_STATUS_SUCCESS;
+	return RCC_LL_APB1_ResetPulse(resetMask);
 }
 
 /*---------------------------------------------- Driver Configuration APIs ----------------------------------------------*/
-/**
- * @brief Validates complete RCC configuration before applying it
- * @param[in] cfg Pointer to @ref rcc_config_t
- * @return Driver operation status
- */
-driver_status_t RCC_ValidateConfig(const rcc_config_t* cfg)
+driver_status_t RCC_ValidateConfig(const rcc_config_t* const cfg)
 {
-	if (cfg == NULL) return DRIVER_STATUS_ERROR_NULL_PTR;
-	if (RCC_PrivateEncodeSystemClock(cfg->system.clk_src) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if (RCC_PrivateEncodeAHBPrescaler(cfg->prescaler.bus.AHB) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if (RCC_PrivateEncodeAPBPrescaler(cfg->prescaler.bus.APB1, RCC_APB1_BUS) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if (RCC_PrivateEncodeAPBPrescaler(cfg->prescaler.bus.APB2, RCC_APB2_BUS) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if (RCC_PrivateEncodeADCPrescaler(cfg->prescaler.component.ADC) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if (RCC_PrivateEncodeUSBPrescaler(cfg->prescaler.component.USB) == RCC_DRIVER_INVALID_FIELD) return DRIVER_STATUS_ERROR_INVALID_ARG;
-	if ((cfg->flash.latency > RCC_FLASH_LATENCY_2) || (cfg->flash.prefetch > RCC_FLASH_PREFETCH_ENABLE)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+	const rcc_clock_tree_config_t* clockTree = NULL;
+	_rcc_freq_t sysClk = 0x00UL;
+	_rcc_freq_t hClk = 0x00UL;
+	_rcc_freq_t pClk1 = 0x00UL;
+	_rcc_freq_t pClk2 = 0x00UL;
+	_rcc_freq_t adcClk = 0x00UL;
+	_rcc_freq_t usbClk = 0x00UL;
 
-	if (cfg->system.clk_src == RCC_SYS_CLK_PLL)
+	if (cfg == NULL)
 	{
-		if ((cfg->system.pll.source != RCC_PLL_SRC_HSI) && (cfg->system.pll.source != RCC_PLL_SRC_HSE)) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if ((cfg->system.pll.multiplication_factor < RCC_PLL_MUL_2) || (cfg->system.pll.multiplication_factor > RCC_PLL_MUL_16)) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if ((cfg->system.pll.source == RCC_PLL_SRC_HSI) && (cfg->system.pll.source_prescaler != RCC_PLL_SRC_HSI_DIV_2)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	clockTree = &cfg->clock_tree;
+
+	if (_RCC_MapSystemClockSource(clockTree->system.clk_src) == RCC_DRIVER_INVALID_FIELD)
 	{
-		const _rcc_freq_t sysClk = RCC_PrivateComputeSYSCLK(cfg);
-		const _rcc_freq_t hClk = RCC_PrivateComputeHCLK(cfg);
-		const _rcc_freq_t pClk1 = RCC_PrivateComputePCLK1(cfg);
-		const _rcc_freq_t pClk2 = RCC_PrivateComputePCLK2(cfg);
-		const _rcc_freq_t adcClk = RCC_PrivateComputeADCCLK(cfg);
-		const _rcc_freq_t usbClk = RCC_PrivateComputeUSBCLK(cfg);
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 
-		if (sysClk > _RCC_SYSCLK_MAX_FREQ) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if (hClk > _RCC_SYSCLK_MAX_FREQ) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if (pClk1 > _RCC_PCLK1_MAX_FREQ) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if (pClk2 > _RCC_PCLK2_MAX_FREQ) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if (adcClk > _RCC_ADCCLK_MAX_FREQ) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if ((cfg->system.clk_src == RCC_SYS_CLK_PLL) && (usbClk != 0x00UL) && (usbClk != _RCC_USBCLK_TARGET_FREQ)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+	if (_RCC_MapAHBPrescaler(clockTree->bus.AHB) == RCC_DRIVER_INVALID_FIELD)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 
-		if ((sysClk <= 24000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_0)) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if ((sysClk > 24000000UL) && (sysClk <= 48000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_1)) return DRIVER_STATUS_ERROR_INVALID_ARG;
-		if ((sysClk > 48000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_2)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+	if (_RCC_MapAPBPrescaler(clockTree->bus.APB1) == RCC_DRIVER_INVALID_FIELD)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (_RCC_MapAPBPrescaler(clockTree->bus.APB2) == RCC_DRIVER_INVALID_FIELD)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (_RCC_MapADCPrescaler(clockTree->component.ADC) == RCC_DRIVER_INVALID_FIELD)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (_RCC_MapUSBPrescaler(clockTree->component.USB) == RCC_DRIVER_INVALID_FIELD)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if ((cfg->flash.latency > RCC_FLASH_LATENCY_2) || (cfg->flash.prefetch > RCC_FLASH_PREFETCH_ENABLE))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (clockTree->system.clk_src == RCC_SYS_CLK_PLL)
+	{
+		if (_RCC_MapPLLSource(clockTree->system.pll.source) == RCC_DRIVER_INVALID_FIELD)
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+
+		if (_RCC_MapPLLMultiplier(clockTree->system.pll.multiplication_factor) == RCC_DRIVER_INVALID_FIELD)
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+
+		if (clockTree->system.pll.source == RCC_PLL_SRC_HSI)
+		{
+			if (clockTree->system.pll.source_prescaler != RCC_PLL_SRC_HSI_DIV_2)
+			{
+				return DRIVER_STATUS_ERROR_INVALID_ARG;
+			}
+		}
+		else
+		{
+			if (_RCC_MapPLLHSEDivider(clockTree->system.pll.source_prescaler) == RCC_DRIVER_INVALID_FIELD)
+			{
+				return DRIVER_STATUS_ERROR_INVALID_ARG;
+			}
+		}
+	}
+
+	sysClk = _RCC_ComputeSYSCLK(clockTree);
+	hClk = _RCC_ComputeHCLK(clockTree);
+	pClk1 = _RCC_ComputePCLK1(clockTree);
+	pClk2 = _RCC_ComputePCLK2(clockTree);
+	adcClk = _RCC_ComputeADCCLK(clockTree);
+	usbClk = _RCC_ComputeUSBCLK(clockTree);
+
+	if (sysClk > _RCC_SYSCLK_MAX_FREQ)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (hClk > _RCC_HCLK_MAX_FREQ)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (pClk1 > _RCC_PCLK1_MAX_FREQ)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (pClk2 > _RCC_PCLK2_MAX_FREQ)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if (adcClk > _RCC_ADCCLK_MAX_FREQ)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if ((clockTree->system.clk_src == RCC_SYS_CLK_PLL) && (usbClk != 0x00UL) && (usbClk != _RCC_USBCLK_TARGET_FREQ))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if ((sysClk <= 24000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_0))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if ((sysClk > 24000000UL) && (sysClk <= 48000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_1))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	if ((sysClk > 48000000UL) && (cfg->flash.latency != RCC_FLASH_LATENCY_2))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Configures Flash latency and prefetch settings
- * @param[in] flash Pointer to @ref rcc_flash_config_t
- * @return Driver operation status
- */
-driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* flash)
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 {
 	uint32_t flashLatency = FLASH_ACR_LATENCY_0;
 
-	if (flash == NULL) return DRIVER_STATUS_ERROR_NULL_PTR;
+	if (flash == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
 
 	switch (flash->latency)
 	{
-		case RCC_FLASH_LATENCY_0: flashLatency = FLASH_ACR_LATENCY_0; break;
-		case RCC_FLASH_LATENCY_1: flashLatency = FLASH_ACR_LATENCY_1; break;
-		case RCC_FLASH_LATENCY_2: flashLatency = FLASH_ACR_LATENCY_2; break;
-		default: return DRIVER_STATUS_ERROR_INVALID_ARG;
+		case RCC_FLASH_LATENCY_0:
+		{
+			flashLatency = FLASH_ACR_LATENCY_0;
+			break;
+		}
+		case RCC_FLASH_LATENCY_1:
+		{
+			flashLatency = FLASH_ACR_LATENCY_1;
+			break;
+		}
+		case RCC_FLASH_LATENCY_2:
+		{
+			flashLatency = FLASH_ACR_LATENCY_2;
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
 	}
 
 	REGOPS_MODIFY(&FLASH->ACR.REG, FLASH_ACR_LATENCY_Msk, flashLatency);
-	if (flash->prefetch == RCC_FLASH_PREFETCH_ENABLE) REGOPS_SET(&FLASH->ACR.REG, FLASH_ACR_PRFTBE);
-	else REGOPS_CLEAR(&FLASH->ACR.REG, FLASH_ACR_PRFTBE);
+
+	if (flash->prefetch == RCC_FLASH_PREFETCH_ENABLE)
+	{
+		REGOPS_SET(&FLASH->ACR.REG, FLASH_ACR_PRFTBE);
+	}
+	else
+	{
+		REGOPS_CLEAR(&FLASH->ACR.REG, FLASH_ACR_PRFTBE);
+	}
+
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Configures AHB, APB1 and APB2 prescalers
- * @param[in] busCfg Pointer to @ref rcc_bus_config_t
- * @return Driver operation status
- */
-driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* busCfg)
+driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const busCfg)
 {
-	uint32_t cfgrReg = 0x00UL;
 	uint32_t ahbPrescaler = 0x00UL;
 	uint32_t apb1Prescaler = 0x00UL;
 	uint32_t apb2Prescaler = 0x00UL;
 
-	if (busCfg == NULL) return DRIVER_STATUS_ERROR_NULL_PTR;
+	if (busCfg == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
 
-	ahbPrescaler = RCC_PrivateEncodeAHBPrescaler(busCfg->AHB);
-	apb1Prescaler = RCC_PrivateEncodeAPBPrescaler(busCfg->APB1, RCC_APB1_BUS);
-	apb2Prescaler = RCC_PrivateEncodeAPBPrescaler(busCfg->APB2, RCC_APB2_BUS);
-	if ((ahbPrescaler == RCC_DRIVER_INVALID_FIELD) || (apb1Prescaler == RCC_DRIVER_INVALID_FIELD) || (apb2Prescaler == RCC_DRIVER_INVALID_FIELD)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+	ahbPrescaler = _RCC_MapAHBPrescaler(busCfg->AHB);
+	apb1Prescaler = _RCC_MapAPBPrescaler(busCfg->APB1);
+	apb2Prescaler = _RCC_MapAPBPrescaler(busCfg->APB2);
 
-	cfgrReg = RCC->CFGR.REG;
-	cfgrReg &= ~(RCC_CFGR_HPRE_Msk | RCC_CFGR_PPRE1_Msk | RCC_CFGR_PPRE2_Msk);
-	cfgrReg |= (ahbPrescaler | apb1Prescaler | apb2Prescaler);
-	REGOPS_WRITE(&RCC->CFGR.REG, cfgrReg);
+	if ((ahbPrescaler == RCC_DRIVER_INVALID_FIELD) || (apb1Prescaler == RCC_DRIVER_INVALID_FIELD) || (apb2Prescaler == RCC_DRIVER_INVALID_FIELD))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetAHBPrescaler((rcc_ll_ahb_prescaler_t) ahbPrescaler));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetAPB1Prescaler((rcc_ll_apb_prescaler_t) apb1Prescaler));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetAPB2Prescaler((rcc_ll_apb_prescaler_t) apb2Prescaler));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Configures ADC and USB prescalers
- * @param[in] componentCfg Pointer to @ref rcc_component_config_t
- * @return Driver operation status
- */
-driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* componentCfg)
+driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const componentCfg)
 {
-	uint32_t cfgrReg = 0x00UL;
 	uint32_t adcPrescaler = 0x00UL;
 	uint32_t usbPrescaler = 0x00UL;
 
-	if (componentCfg == NULL) return DRIVER_STATUS_ERROR_NULL_PTR;
+	if (componentCfg == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
 
-	adcPrescaler = RCC_PrivateEncodeADCPrescaler(componentCfg->ADC);
-	usbPrescaler = RCC_PrivateEncodeUSBPrescaler(componentCfg->USB);
-	if ((adcPrescaler == RCC_DRIVER_INVALID_FIELD) || (usbPrescaler == RCC_DRIVER_INVALID_FIELD)) return DRIVER_STATUS_ERROR_INVALID_ARG;
+	adcPrescaler = _RCC_MapADCPrescaler(componentCfg->ADC);
+	usbPrescaler = _RCC_MapUSBPrescaler(componentCfg->USB);
 
-	cfgrReg = RCC->CFGR.REG;
-	cfgrReg &= ~(RCC_CFGR_ADCPRE_Msk | RCC_CFGR_USBPRE_Msk);
-	cfgrReg |= (adcPrescaler | usbPrescaler);
-	REGOPS_WRITE(&RCC->CFGR.REG, cfgrReg);
+	if ((adcPrescaler == RCC_DRIVER_INVALID_FIELD) || (usbPrescaler == RCC_DRIVER_INVALID_FIELD))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetADCPrescaler((rcc_ll_adc_prescaler_t) adcPrescaler));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetUSBPrescaler((rcc_ll_usb_prescaler_t) usbPrescaler));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Configures the complete RCC clock tree
- * @param[in] cfg Pointer to @ref rcc_config_t
- * @return Driver operation status
- */
-driver_status_t RCC_Config(const rcc_config_t* cfg)
+driver_status_t RCC_SwitchClockSourceToHSI(void)
 {
-	uint32_t cfgrReg = 0x00UL;
-	uint32_t sysClkSource = 0x00UL;
-	driver_status_t status = RCC_ValidateConfig(cfg);
-	if (status != DRIVER_STATUS_SUCCESS) return status;
+	RCC_LL_HSI_Enable();
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_HSI_GetReadyStatus, DRIVER_STATUS_READY));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetSystemClockSource(RCC_LL_SYSCLK_SRC_HSI));
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitSystemClockSource(RCC_SYS_CLK_HSI));
+	return DRIVER_STATUS_SUCCESS;
+}
 
-	REGOPS_SET(&RCC->CR.REG, RCC_CR_HSION);
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitFlag(&RCC->CR.REG, RCC_CR_HSIRDY, true));
+driver_status_t RCC_SwitchClockSourceToHSE(void)
+{
+	RCC_LL_HSE_Enable();
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_HSE_GetReadyStatus, DRIVER_STATUS_READY));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetSystemClockSource(RCC_LL_SYSCLK_SRC_HSE));
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitSystemClockSource(RCC_SYS_CLK_HSE));
+	return DRIVER_STATUS_SUCCESS;
+}
 
-	if (RCC_GetSysClkSrc() == RCC_SYS_CLK_PLL)
+driver_status_t RCC_SwitchClockSourceToPLL(void)
+{
+	if (RCC_LL_PLL_GetReadyStatus() != DRIVER_STATUS_READY)
 	{
-		REGOPS_MODIFY(&RCC->CFGR.REG, RCC_CFGR_SW_Msk, RCC_CFGR_SW_HSI);
-		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitSystemClockSource(RCC_SYS_CLK_HSI));
+		return DRIVER_STATUS_ERROR_STATE;
 	}
 
-	if ((cfg->system.clk_src == RCC_SYS_CLK_HSE) || ((cfg->system.clk_src == RCC_SYS_CLK_PLL) && (cfg->system.pll.source == RCC_PLL_SRC_HSE)))
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetSystemClockSource(RCC_LL_SYSCLK_SRC_PLL));
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitSystemClockSource(RCC_SYS_CLK_PLL));
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const clockTree)
+{
+	rcc_system_clock_t activeSource = RCC_SYS_CLK_HSI;
+	uint32_t pllSource = 0x00UL;
+	uint32_t pllDivider = 0x00UL;
+	uint32_t pllMultiplier = 0x00UL;
+
+	if (clockTree == NULL)
 	{
-		REGOPS_SET(&RCC->CR.REG, RCC_CR_HSEON);
-		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitFlag(&RCC->CR.REG, RCC_CR_HSERDY, true));
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	if (RCC->CR.REG & RCC_CR_PLLON)
+	activeSource = RCC_GetSysClkSrc();
+	RCC_LL_HSI_Enable();
+	DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_HSI_GetReadyStatus, DRIVER_STATUS_READY));
+
+	if (activeSource == RCC_SYS_CLK_PLL)
 	{
-		REGOPS_CLEAR(&RCC->CR.REG, RCC_CR_PLLON);
-		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitFlag(&RCC->CR.REG, RCC_CR_PLLRDY, false));
+		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_SwitchClockSourceToHSI());
 	}
 
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_ConfigFlash(&cfg->flash));
-
-	cfgrReg = RCC->CFGR.REG;
-	cfgrReg &= ~(RCC_CFGR_HPRE_Msk |
-				 RCC_CFGR_PPRE1_Msk |
-				 RCC_CFGR_PPRE2_Msk |
-				 RCC_CFGR_ADCPRE_Msk |
-				 RCC_CFGR_PLLSRC_Msk |
-				 RCC_CFGR_PLLXTPRE_Msk |
-				 RCC_CFGR_PLLMUL_Msk |
-				 RCC_CFGR_USBPRE_Msk);
-
-	cfgrReg |= RCC_PrivateEncodeAHBPrescaler(cfg->prescaler.bus.AHB);
-	cfgrReg |= RCC_PrivateEncodeAPBPrescaler(cfg->prescaler.bus.APB1, RCC_APB1_BUS);
-	cfgrReg |= RCC_PrivateEncodeAPBPrescaler(cfg->prescaler.bus.APB2, RCC_APB2_BUS);
-	cfgrReg |= RCC_PrivateEncodeADCPrescaler(cfg->prescaler.component.ADC);
-	cfgrReg |= RCC_PrivateEncodeUSBPrescaler(cfg->prescaler.component.USB);
-
-	if (cfg->system.clk_src == RCC_SYS_CLK_PLL)
+	if ((clockTree->system.clk_src == RCC_SYS_CLK_HSE) ||
+		((clockTree->system.clk_src == RCC_SYS_CLK_PLL) && (clockTree->system.pll.source == RCC_PLL_SRC_HSE)))
 	{
-		cfgrReg |= RCC_PrivateEncodePLLMultiplier(cfg->system.pll.multiplication_factor);
-		if (cfg->system.pll.source == RCC_PLL_SRC_HSE)
+		RCC_LL_HSE_Enable();
+		DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_HSE_GetReadyStatus, DRIVER_STATUS_READY));
+	}
+
+	if (RCC_LL_PLL_GetReadyStatus() == DRIVER_STATUS_READY)
+	{
+		RCC_LL_PLL_Disable();
+		DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_PLL_GetReadyStatus, DRIVER_STATUS_OFF));
+	}
+
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_ConfigBusPrescaler(&clockTree->bus));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_ConfigComponentPrescaler(&clockTree->component));
+
+	if (clockTree->system.clk_src == RCC_SYS_CLK_PLL)
+	{
+		pllSource = _RCC_MapPLLSource(clockTree->system.pll.source);
+		pllMultiplier = _RCC_MapPLLMultiplier(clockTree->system.pll.multiplication_factor);
+
+		if ((pllSource == RCC_DRIVER_INVALID_FIELD) || (pllMultiplier == RCC_DRIVER_INVALID_FIELD))
 		{
-			cfgrReg |= RCC_CFGR_PLLSRC_HSE;
-			if (cfg->system.pll.source_prescaler == RCC_PLL_SRC_HSE_DIV_2) cfgrReg |= RCC_CFGR_PLLXTPRE_HSE_DIV2;
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+
+		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetPLLSource((rcc_ll_pll_src_t) pllSource));
+
+		if (clockTree->system.pll.source == RCC_PLL_SRC_HSE)
+		{
+			pllDivider = _RCC_MapPLLHSEDivider(clockTree->system.pll.source_prescaler);
+			if (pllDivider == RCC_DRIVER_INVALID_FIELD)
+			{
+				return DRIVER_STATUS_ERROR_INVALID_ARG;
+			}
+
+			DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetPLLHSEDivider((rcc_ll_pll_hse_div_t) pllDivider));
+		}
+
+		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_LL_SetPLLMultiplier((rcc_ll_pll_mul_t) pllMultiplier));
+		RCC_LL_PLL_Enable();
+		DRIVER_RETURN_IF_NOT_SUCCESS(_RCC_WaitReadyStatus(RCC_LL_PLL_GetReadyStatus, DRIVER_STATUS_READY));
+	}
+
+	switch (clockTree->system.clk_src)
+	{
+		case RCC_SYS_CLK_HSI:
+		{
+			DRIVER_RETURN_IF_NOT_SUCCESS(RCC_SwitchClockSourceToHSI());
+			break;
+		}
+		case RCC_SYS_CLK_HSE:
+		{
+			DRIVER_RETURN_IF_NOT_SUCCESS(RCC_SwitchClockSourceToHSE());
+			break;
+		}
+		case RCC_SYS_CLK_PLL:
+		{
+			DRIVER_RETURN_IF_NOT_SUCCESS(RCC_SwitchClockSourceToPLL());
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
 	}
 
-	REGOPS_WRITE(&RCC->CFGR.REG, cfgrReg);
+	return DRIVER_STATUS_SUCCESS;
+}
+driver_status_t RCC_Config(const rcc_config_t* const cfg)
+{
+	driver_status_t status = DRIVER_STATUS_SUCCESS;
 
-	if (cfg->system.clk_src == RCC_SYS_CLK_PLL)
+	status = RCC_ValidateConfig(cfg);
+	if (status != DRIVER_STATUS_SUCCESS)
 	{
-		REGOPS_SET(&RCC->CR.REG, RCC_CR_PLLON);
-		DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitFlag(&RCC->CR.REG, RCC_CR_PLLRDY, true));
+		return status;
 	}
 
-	sysClkSource = RCC_PrivateEncodeSystemClock(cfg->system.clk_src);
-	REGOPS_MODIFY(&RCC->CFGR.REG, RCC_CFGR_SW_Msk, sysClkSource);
-	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_PrivateWaitSystemClockSource(cfg->system.clk_src));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_ConfigFlash(&cfg->flash));
+	DRIVER_RETURN_IF_NOT_SUCCESS(RCC_ConfigClockTree(&cfg->clock_tree));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Loads default 72 MHz Blue Pill RCC configuration
- * @param[in] cfg Pointer to @ref rcc_config_t
- */
-void RCC_72MHz_LoadDefaultConfig(rcc_config_t* cfg)
+void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const cfg)
 {
-	if (cfg == NULL) return;
+	if (cfg == NULL)
+	{
+		return;
+	}
 
 	cfg->flash.latency = RCC_FLASH_LATENCY_2;
 	cfg->flash.prefetch = RCC_FLASH_PREFETCH_ENABLE;
 
-	cfg->system.clk_src = RCC_SYS_CLK_PLL;
-	cfg->system.pll.source = RCC_PLL_SRC_HSE;
-	cfg->system.pll.source_prescaler = RCC_PLL_SRC_HSE_DIV_1;
-	cfg->system.pll.multiplication_factor = RCC_PLL_MUL_9;
+	cfg->clock_tree.system.clk_src = RCC_SYS_CLK_PLL;
+	cfg->clock_tree.system.pll.source = RCC_PLL_SRC_HSE;
+	cfg->clock_tree.system.pll.source_prescaler = RCC_PLL_SRC_HSE_DIV_1;
+	cfg->clock_tree.system.pll.multiplication_factor = RCC_PLL_MUL_9;
 
-	cfg->prescaler.bus.AHB = RCC_AHB_DIV_1;
-	cfg->prescaler.bus.APB1 = RCC_APB1_DIV_2;
-	cfg->prescaler.bus.APB2 = RCC_APB2_DIV_1;
+	cfg->clock_tree.bus.AHB = RCC_AHB_DIV_1;
+	cfg->clock_tree.bus.APB1 = RCC_APB1_DIV_2;
+	cfg->clock_tree.bus.APB2 = RCC_APB2_DIV_1;
 
-	cfg->prescaler.component.ADC = RCC_ADC_DIV_6;
-	cfg->prescaler.component.USB = RCC_USB_DIV_1_5;
+	cfg->clock_tree.component.ADC = RCC_ADC_DIV_6;
+	cfg->clock_tree.component.USB = RCC_USB_DIV_1_5;
 }
 
-/**
- * @brief Applies default 72 MHz Blue Pill RCC configuration
- * @return Driver operation status
- */
 driver_status_t RCC_Config_72MHz(void)
 {
 	rcc_config_t cfg;
+
 	RCC_72MHz_LoadDefaultConfig(&cfg);
 	return RCC_Config(&cfg);
 }
 
 /*---------------------------------------------- Driver Status and Frequency APIs ----------------------------------------------*/
-/**
- * @brief Retrieves active system clock source from hardware
- * @returns @ref rcc_system_clock_t
- */
 rcc_system_clock_t RCC_GetSysClkSrc(void)
 {
-	return RCC_PrivateDecodeSystemClock(RCC->CFGR.REG);
+	rcc_ll_sysclk_status_t status = RCC_LL_SYSCLK_STATUS_HSI;
+
+	if (RCC_LL_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
+	{
+		return RCC_SYS_CLK_HSI;
+	}
+
+	return _RCC_DecodeSystemClockStatus(status);
 }
 
-/**
- * @brief Retrieves active PLL source from hardware
- * @returns @ref rcc_pll_src_t
- */
 rcc_pll_src_t RCC_GetPLLSource(void)
 {
-	return ((RCC->CFGR.REG & RCC_CFGR_PLLSRC_Msk) == RCC_CFGR_PLLSRC_HSE) ? RCC_PLL_SRC_HSE : RCC_PLL_SRC_HSI;
+	rcc_ll_pll_src_t source = RCC_LL_PLL_SRC_HSI_DIV2;
+
+	if (RCC_LL_GetPLLSource(&source) != DRIVER_STATUS_SUCCESS)
+	{
+		return RCC_PLL_SRC_HSI;
+	}
+
+	if (source == RCC_LL_PLL_SRC_HSE)
+	{
+		return RCC_PLL_SRC_HSE;
+	}
+	else
+	{
+		return RCC_PLL_SRC_HSI;
+	}
 }
 
-/**
- * @brief Retrieves active PLL source prescaler from hardware
- * @returns @ref rcc_pll_src_psc_t
- */
 rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void)
 {
-	if (RCC_GetPLLSource() == RCC_PLL_SRC_HSI) return RCC_PLL_SRC_HSI_DIV_2;
-	return ((RCC->CFGR.REG & RCC_CFGR_PLLXTPRE_Msk) == RCC_CFGR_PLLXTPRE_HSE_DIV2) ? RCC_PLL_SRC_HSE_DIV_2 : RCC_PLL_SRC_HSE_DIV_1;
+	rcc_ll_pll_hse_div_t divider = RCC_LL_PLL_HSE_DIV_1;
+
+	if (RCC_GetPLLSource() == RCC_PLL_SRC_HSI)
+	{
+		return RCC_PLL_SRC_HSI_DIV_2;
+	}
+
+	if (RCC_LL_GetPLLHSEDivider(&divider) != DRIVER_STATUS_SUCCESS)
+	{
+		return RCC_PLL_SRC_HSE_DIV_1;
+	}
+
+	if (divider == RCC_LL_PLL_HSE_DIV_2)
+	{
+		return RCC_PLL_SRC_HSE_DIV_2;
+	}
+	else
+	{
+		return RCC_PLL_SRC_HSE_DIV_1;
+	}
 }
 
-/**
- * @brief Retrieves active PLL multiplication factor from hardware
- * @returns @ref rcc_pll_mul_t
- */
 rcc_pll_mul_t RCC_GetPLLMultiplier(void)
 {
-	return RCC_PrivateDecodePLLMultiplier(RCC->CFGR.REG);
+	rcc_ll_pll_mul_t multiplier = RCC_LL_PLL_MUL_2;
+
+	if (RCC_LL_GetPLLMultiplier(&multiplier) != DRIVER_STATUS_SUCCESS)
+	{
+		return RCC_PLL_MUL_2;
+	}
+
+	switch (multiplier)
+	{
+		case RCC_LL_PLL_MUL_2:
+		{
+			return RCC_PLL_MUL_2;
+		}
+		case RCC_LL_PLL_MUL_3:
+		{
+			return RCC_PLL_MUL_3;
+		}
+		case RCC_LL_PLL_MUL_4:
+		{
+			return RCC_PLL_MUL_4;
+		}
+		case RCC_LL_PLL_MUL_5:
+		{
+			return RCC_PLL_MUL_5;
+		}
+		case RCC_LL_PLL_MUL_6:
+		{
+			return RCC_PLL_MUL_6;
+		}
+		case RCC_LL_PLL_MUL_7:
+		{
+			return RCC_PLL_MUL_7;
+		}
+		case RCC_LL_PLL_MUL_8:
+		{
+			return RCC_PLL_MUL_8;
+		}
+		case RCC_LL_PLL_MUL_9:
+		{
+			return RCC_PLL_MUL_9;
+		}
+		case RCC_LL_PLL_MUL_10:
+		{
+			return RCC_PLL_MUL_10;
+		}
+		case RCC_LL_PLL_MUL_11:
+		{
+			return RCC_PLL_MUL_11;
+		}
+		case RCC_LL_PLL_MUL_12:
+		{
+			return RCC_PLL_MUL_12;
+		}
+		case RCC_LL_PLL_MUL_13:
+		{
+			return RCC_PLL_MUL_13;
+		}
+		case RCC_LL_PLL_MUL_14:
+		{
+			return RCC_PLL_MUL_14;
+		}
+		case RCC_LL_PLL_MUL_15:
+		{
+			return RCC_PLL_MUL_15;
+		}
+		case RCC_LL_PLL_MUL_16:
+		{
+			return RCC_PLL_MUL_16;
+		}
+		default:
+		{
+			return RCC_PLL_MUL_2;
+		}
+	}
 }
 
-/**
- * @brief Retrieves current core clock frequency before AHB prescaler
- * @returns Core clock frequency in Hz
- */
 _rcc_freq_t RCC_GetCoreClockFreq(void)
 {
+	_rcc_freq_t pllInput = 0x00UL;
+
 	switch (RCC_GetSysClkSrc())
 	{
 		case RCC_SYS_CLK_HSI:
+		{
 			return _RCC_HSI_FREQ;
+		}
 		case RCC_SYS_CLK_HSE:
+		{
 			return _RCC_HSE_FREQ;
+		}
 		case RCC_SYS_CLK_PLL:
 		{
-			_rcc_freq_t pllInput = (RCC_GetPLLSource() == RCC_PLL_SRC_HSE) ? _RCC_HSE_FREQ : (_RCC_HSI_FREQ >> 1);
-			if (RCC_GetPLLSourcePrescaler() == RCC_PLL_SRC_HSE_DIV_2) pllInput >>= 1;
-			return pllInput * (_rcc_freq_t) RCC_GetPLLMultiplier();
+			pllInput = (RCC_GetPLLSource() == RCC_PLL_SRC_HSE) ? _RCC_HSE_FREQ : (_RCC_HSI_FREQ >> 1);
+			if (RCC_GetPLLSourcePrescaler() == RCC_PLL_SRC_HSE_DIV_2)
+			{
+				pllInput >>= 1;
+			}
+			return (pllInput * (_rcc_freq_t) RCC_GetPLLMultiplier());
 		}
 		default:
+		{
 			return _RCC_HSI_FREQ;
+		}
 	}
 }
 
-/**
- * @brief Retrieves configured bus prescaler divider
- * @param[in] bus Target bus identifier
- * @returns Prescaler divider value
- */
 rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 {
-	const uint32_t cfgrReg = RCC->CFGR.REG;
+	rcc_ll_ahb_prescaler_t ahbPrescaler = RCC_LL_AHB_DIV_1;
+	rcc_ll_apb_prescaler_t apbPrescaler = RCC_LL_APB_DIV_1;
+
 	switch (bus)
 	{
-		case RCC_AHB_BUS: return RCC_PrivateDecodeAHBPrescaler(cfgrReg);
-		case RCC_APB1_BUS: return RCC_PrivateDecodeAPB1Prescaler(cfgrReg);
-		case RCC_APB2_BUS: return RCC_PrivateDecodeAPB2Prescaler(cfgrReg);
-		default: return 1U;
+		case RCC_AHB_BUS:
+		{
+			if (RCC_LL_GetAHBPrescaler(&ahbPrescaler) != DRIVER_STATUS_SUCCESS)
+			{
+				return RCC_AHB_DIV_1;
+			}
+			return _RCC_DecodeAHBPrescaler(ahbPrescaler);
+		}
+		case RCC_APB1_BUS:
+		{
+			if (RCC_LL_GetAPB1Prescaler(&apbPrescaler) != DRIVER_STATUS_SUCCESS)
+			{
+				return RCC_APB1_DIV_1;
+			}
+			return _RCC_DecodeAPBPrescaler(apbPrescaler);
+		}
+		case RCC_APB2_BUS:
+		{
+			if (RCC_LL_GetAPB2Prescaler(&apbPrescaler) != DRIVER_STATUS_SUCCESS)
+			{
+				return RCC_APB2_DIV_1;
+			}
+			return _RCC_DecodeAPBPrescaler(apbPrescaler);
+		}
+		default:
+		{
+			return 1U;
+		}
 	}
 }
 
-/**
- * @brief Retrieves current bus clock frequency
- * @param[in] bus Target bus identifier
- * @returns Bus frequency in Hz
- */
 _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 {
 	const _rcc_freq_t sysClk = RCC_GetCoreClockFreq();
@@ -681,29 +1180,58 @@ _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 
 	switch (bus)
 	{
-		case RCC_AHB_BUS: return hClk;
-		case RCC_APB1_BUS: return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB1_BUS));
-		case RCC_APB2_BUS: return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB2_BUS));
-		default: return hClk;
+		case RCC_AHB_BUS:
+		{
+			return hClk;
+		}
+		case RCC_APB1_BUS:
+		{
+			return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB1_BUS));
+		}
+		case RCC_APB2_BUS:
+		{
+			return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB2_BUS));
+		}
+		default:
+		{
+			return hClk;
+		}
 	}
 }
 
-/**
- * @brief Retrieves ADC clock frequency
- * @returns ADC clock frequency in Hz
- */
 _rcc_freq_t RCC_GetADCFreq(void)
 {
-	return (RCC_GetBusFreq(RCC_APB2_BUS) / (_rcc_freq_t) RCC_PrivateDecodeADCPrescaler(RCC->CFGR.REG));
+	rcc_ll_adc_prescaler_t adcPrescaler = RCC_LL_ADC_DIV_2;
+
+	if (RCC_LL_GetADCPrescaler(&adcPrescaler) != DRIVER_STATUS_SUCCESS)
+	{
+		return 0x00UL;
+	}
+
+	return (RCC_GetBusFreq(RCC_APB2_BUS) / (_rcc_freq_t) _RCC_DecodeADCPrescaler(adcPrescaler));
 }
 
-/**
- * @brief Retrieves USB clock frequency
- * @returns USB clock frequency in Hz
- */
 _rcc_freq_t RCC_GetUSBFreq(void)
 {
-	const _rcc_freq_t pllClk = (RCC_GetSysClkSrc() == RCC_SYS_CLK_PLL) ? RCC_GetCoreClockFreq() : 0x00UL;
-	if (pllClk == 0x00UL) return 0x00UL;
-	return (RCC_PrivateDecodeUSBPrescaler(RCC->CFGR.REG) == RCC_USB_DIV_1) ? pllClk : ((pllClk << 1) / 3U);
+	rcc_ll_usb_prescaler_t usbPrescaler = RCC_LL_USB_DIV_1_5;
+	const _rcc_freq_t pllClock = (RCC_GetSysClkSrc() == RCC_SYS_CLK_PLL) ? RCC_GetCoreClockFreq() : 0x00UL;
+
+	if (pllClock == 0x00UL)
+	{
+		return 0x00UL;
+	}
+
+	if (RCC_LL_GetUSBPrescaler(&usbPrescaler) != DRIVER_STATUS_SUCCESS)
+	{
+		return 0x00UL;
+	}
+
+	if (_RCC_DecodeUSBPrescaler(usbPrescaler) == RCC_USB_DIV_1)
+	{
+		return pllClock;
+	}
+	else
+	{
+		return ((pllClock << 1) / 3U);
+	}
 }

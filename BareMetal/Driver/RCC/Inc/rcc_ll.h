@@ -393,7 +393,8 @@ __STATIC_FORCEINLINE void RCC_LL_HSI_Disable(void)
  */
 __STATIC_FORCEINLINE driver_status_t RCC_LL_HSI_GetReadyStatus(void)
 {
-	if ((RCC->CR.REG & RCC_CR_HSIRDY) != 0x00UL)
+	const uint32_t rcc_cr = __RCC_ReadCR(RCC);
+	if ((rcc_cr & RCC_CR_HSIRDY) != 0x00UL)
 	{
 		return DRIVER_STATUS_READY;
 	}
