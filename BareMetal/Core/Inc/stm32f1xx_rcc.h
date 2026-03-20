@@ -26,7 +26,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // Includes
 // ------------------------------------------------------------------------------------------
-#include <stdint.h>
+#include "stm32f1xx_data_types.h"
 
 // ------------------------------------------------------------------------------------------
 // Theory of Operation
@@ -580,11 +580,11 @@ extern "C" {
 
 // ------ AFIORST (Alternate Function I/O Reset) ------ //
 /** @brief Alternate Function I/O Reset Position @def RCC_APB2RSTR_AFIORST_Pos */
-#define RCC_APB2RSTR_AFIORST_Pos					((uint8_t) 0U)
+#define RCC_APB2RSTR_AFIORST_Pos						((uint8_t) 0U)
 /** @brief Alternate Function I/O Reset Mask @def RCC_APB2RSTR_AFIORST_Msk */
-#define RCC_APB2RSTR_AFIORST_Msk					((uint32_t)(0x01UL << RCC_APB2RSTR_AFIORST_Pos))
+#define RCC_APB2RSTR_AFIORST_Msk						((uint32_t)(0x01UL << RCC_APB2RSTR_AFIORST_Pos))
 /** @brief Alternate Function I/O Reset @def RCC_APB2RSTR_AFIORST */
-#define RCC_APB2RSTR_AFIORST						RCC_APB2RSTR_AFIORST_Msk
+#define RCC_APB2RSTR_AFIORST							RCC_APB2RSTR_AFIORST_Msk
 
 // ------ IOPARST (I/O Port A Reset) ------ //
 /** @brief I/O Port A Reset Position @def RCC_APB2RSTR_IOPARST_Pos */

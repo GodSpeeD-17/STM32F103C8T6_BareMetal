@@ -27,7 +27,7 @@ extern "C" {
 
 /**
  * @brief Driver Operation Status Type
- * @defgroup 01_STM32F1xx_Utilities_02_DriverStatus Driver Status Definitions
+ * @defgroup 01_STM32F1xx_Utilities_03_DriverStatus Driver Status Definitions
  * @ingroup 01_STM32F1xx_Utilities
  * @{
  */
@@ -85,7 +85,7 @@ do												\
 	}									 		\
 } while (0)
 
-/** @} */ // 01_STM32F1xx_Utilities_02_DriverStatus
+/** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus

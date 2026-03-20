@@ -128,7 +128,89 @@ extern "C" {
 #define BIT_POS(value, base, size) \
 	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)(size)))
 
+#define REGOPS_SET(_REG, _MASK)			((*(_REG)) |= (_MASK))
+
 /** @} */ // 01_STM32F1xx_Utilities_01_Bit
+
+/**
+ * @defgroup 01_STM32F1xx_Utilities_02_RegOpsMacros Generic Register Operation Macros
+ * @ingroup 01_STM32F1xx_Utilities
+ * @brief Generic macros for register operations - Use these everywhere!
+ * 
+ * @details
+ * These macros provide fast, zero-overhead register access operations.
+ * They are designed to be used with any peripheral register pointer.
+ * 
+ * @note All macros expect a valid register pointer - NULL not checked for performance
+ * @warning _REG parameter must be a pointer to a 32-bit volatile register
+ * 
+ * @{
+ */
+
+/**
+ * @brief Read value from register
+ * 
+ * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
+ * @param[out]	_VAR	Variable to store read value
+ * 
+ * @note `_VAR` is modified directly by this macro
+ */
+#define REGOPS_READ(_REG, _VAR)				((_VAR) = *(_REG))
+
+/**
+ * @brief Write value to register
+ * 
+ * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
+ * @param[in]	_VAL	Value to write
+ * 
+ * @note Entire register content is replaced
+ */
+#define REGOPS_WRITE(_REG, _VAL)				(*(_REG) = (_VAL))
+
+/**
+ * @brief Set (OR) bits in register
+ * 
+ * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
+ * @param[in]	_MASK	Bit mask to set
+ * 
+ * @note Only bits set in `_MASK` are affected
+ */
+#define REGOPS_SET(_REG, _MASK)					(*(_REG) |= (_MASK))
+
+/**
+ * @brief Clear (AND NOT) bits in register
+ * 
+ * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
+ * @param[in]	_MASK	Bit mask to clear
+ * 
+ * @note Only bits set in `_MASK` are cleared
+ */
+#define REGOPS_CLEAR(_REG, _MASK)				(*(_REG) &= ~(_MASK))
+
+/**
+ * @brief Toggle (XOR) bits in register
+ * 
+ * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
+ * @param[in]	_MASK	Bit mask to toggle
+ * 
+ * @note Only bits set in `_MASK` are toggled
+ */
+#define REGOPS_TOGGLE(_REG, _MASK)				(*(_REG) ^= (_MASK))
+
+/**
+ * @brief Modify specific bits in register (masked write)
+ * 
+ * @param[in]	_REG	Register pointer
+ * @param[in]	_MASK	Bits to modify
+ * @param[in]	_VAL	Value to write
+ * 
+ * @note - Only bits specified in `_MASK` are modified
+ * @note - `_VAL` must be aligned to `_MASK` position (already shifted)
+ * @note - Bits in `_VAL` outside `_MASK` are masked out
+ */
+#define REGOPS_MODIFY(_REG, _MASK, _VAL)		(*(_REG) = (*(_REG) & ~(_MASK)) | ((_VAL) & (_MASK)))
+
+/** @} */ // 01_STM32F1xx_Utilities_02_RegOpsMacros
 
 // ------------------------------------------------------------------------------------------
 // Register Operations Utilities
@@ -136,7 +218,7 @@ extern "C" {
 
 /**
  * @brief		Register Operations Utilities
- * @defgroup	01_STM32F1xx_Utilities_03_RegisterOps Register Operations Utilities
+ * @defgroup	01_STM32F1xx_Utilities_04_RegisterOps Register Operations Utilities
  * @ingroup		01_STM32F1xx_Utilities
  * @{
  */
@@ -223,7 +305,7 @@ driver_status_t	RegOps_Toggle(volatile uint32_t *reg, uint32_t mask);
  */
 driver_status_t	RegOps_WriteMasked(volatile uint32_t *reg, uint32_t mask, uint32_t value);
 
-/** @} */ // 01_STM32F1xx_Utilities_03_RegisterOps
+/** @} */ // 01_STM32F1xx_Utilities_04_RegisterOps
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus
