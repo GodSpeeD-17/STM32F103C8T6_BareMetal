@@ -452,40 +452,40 @@ static rcc_component_prescaler_t _RCC_DecodeUSBPrescaler(const rcc_ll_usb_presca
 	}
 }
 
-static _rcc_freq_t _RCC_ComputePLLInputFreq(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputePLLInputFreq(const rcc_clock_tree_config_t* const clockTree)
 {
 	if (clockTree->system.pll.source == RCC_PLL_SRC_HSI)
 	{
-		return (_RCC_HSI_FREQ >> 1);
+		return (RCC_HSI_FREQ >> 1);
 	}
 	else
 	{
 		if (clockTree->system.pll.source_prescaler == RCC_PLL_SRC_HSE_DIV_2)
 		{
-			return (_RCC_HSE_FREQ >> 1);
+			return (RCC_HSE_FREQ >> 1);
 		}
 		else
 		{
-			return _RCC_HSE_FREQ;
+			return RCC_HSE_FREQ;
 		}
 	}
 }
 
-static _rcc_freq_t _RCC_ComputeSYSCLK(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputeSYSCLK(const rcc_clock_tree_config_t* const clockTree)
 {
 	switch (clockTree->system.clk_src)
 	{
 		case RCC_SYS_CLK_HSI:
 		{
-			return _RCC_HSI_FREQ;
+			return RCC_HSI_FREQ;
 		}
 		case RCC_SYS_CLK_HSE:
 		{
-			return _RCC_HSE_FREQ;
+			return RCC_HSE_FREQ;
 		}
 		case RCC_SYS_CLK_PLL:
 		{
-			return (_RCC_ComputePLLInputFreq(clockTree) * (_rcc_freq_t) clockTree->system.pll.multiplication_factor);
+			return (_RCC_ComputePLLInputFreq(clockTree) * (rcc_freq_t) clockTree->system.pll.multiplication_factor);
 		}
 		default:
 		{
@@ -494,29 +494,29 @@ static _rcc_freq_t _RCC_ComputeSYSCLK(const rcc_clock_tree_config_t* const clock
 	}
 }
 
-static _rcc_freq_t _RCC_ComputeHCLK(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputeHCLK(const rcc_clock_tree_config_t* const clockTree)
 {
-	return (_RCC_ComputeSYSCLK(clockTree) / (_rcc_freq_t) clockTree->bus.AHB);
+	return (_RCC_ComputeSYSCLK(clockTree) / (rcc_freq_t) clockTree->bus.AHB);
 }
 
-static _rcc_freq_t _RCC_ComputePCLK1(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputePCLK1(const rcc_clock_tree_config_t* const clockTree)
 {
-	return (_RCC_ComputeHCLK(clockTree) / (_rcc_freq_t) clockTree->bus.APB1);
+	return (_RCC_ComputeHCLK(clockTree) / (rcc_freq_t) clockTree->bus.APB1);
 }
 
-static _rcc_freq_t _RCC_ComputePCLK2(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputePCLK2(const rcc_clock_tree_config_t* const clockTree)
 {
-	return (_RCC_ComputeHCLK(clockTree) / (_rcc_freq_t) clockTree->bus.APB2);
+	return (_RCC_ComputeHCLK(clockTree) / (rcc_freq_t) clockTree->bus.APB2);
 }
 
-static _rcc_freq_t _RCC_ComputeADCCLK(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputeADCCLK(const rcc_clock_tree_config_t* const clockTree)
 {
-	return (_RCC_ComputePCLK2(clockTree) / (_rcc_freq_t) clockTree->component.ADC);
+	return (_RCC_ComputePCLK2(clockTree) / (rcc_freq_t) clockTree->component.ADC);
 }
 
-static _rcc_freq_t _RCC_ComputeUSBCLK(const rcc_clock_tree_config_t* const clockTree)
+static rcc_freq_t _RCC_ComputeUSBCLK(const rcc_clock_tree_config_t* const clockTree)
 {
-	const _rcc_freq_t pllClock = _RCC_ComputePLLInputFreq(clockTree) * (_rcc_freq_t) clockTree->system.pll.multiplication_factor;
+	const rcc_freq_t pllClock = _RCC_ComputePLLInputFreq(clockTree) * (rcc_freq_t) clockTree->system.pll.multiplication_factor;
 
 	if (clockTree->system.clk_src != RCC_SYS_CLK_PLL)
 	{
@@ -534,56 +534,15 @@ static _rcc_freq_t _RCC_ComputeUSBCLK(const rcc_clock_tree_config_t* const clock
 }
 
 /*---------------------------------------------- Driver Clock Gate and Reset APIs ----------------------------------------------*/
-driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
-{
-	return RCC_LL_AHB_EnableClock(clockMask);
-}
-
-driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
-{
-	return RCC_LL_AHB_DisableClock(clockMask);
-}
-
-driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
-{
-	return RCC_LL_APB2_EnableClock(clockMask);
-}
-
-driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
-{
-	return RCC_LL_APB2_DisableClock(clockMask);
-}
-
-driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
-{
-	return RCC_LL_APB1_EnableClock(clockMask);
-}
-
-driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
-{
-	return RCC_LL_APB1_DisableClock(clockMask);
-}
-
-driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
-{
-	return RCC_LL_APB2_ResetPulse(resetMask);
-}
-
-driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
-{
-	return RCC_LL_APB1_ResetPulse(resetMask);
-}
-
-/*---------------------------------------------- Driver Configuration APIs ----------------------------------------------*/
 driver_status_t RCC_ValidateConfig(const rcc_config_t* const cfg)
 {
 	const rcc_clock_tree_config_t* clockTree = NULL;
-	_rcc_freq_t sysClk = 0x00UL;
-	_rcc_freq_t hClk = 0x00UL;
-	_rcc_freq_t pClk1 = 0x00UL;
-	_rcc_freq_t pClk2 = 0x00UL;
-	_rcc_freq_t adcClk = 0x00UL;
-	_rcc_freq_t usbClk = 0x00UL;
+	rcc_freq_t sysClk = 0x00UL;
+	rcc_freq_t hClk = 0x00UL;
+	rcc_freq_t pClk1 = 0x00UL;
+	rcc_freq_t pClk2 = 0x00UL;
+	rcc_freq_t adcClk = 0x00UL;
+	rcc_freq_t usbClk = 0x00UL;
 
 	if (cfg == NULL)
 	{
@@ -662,32 +621,32 @@ driver_status_t RCC_ValidateConfig(const rcc_config_t* const cfg)
 	adcClk = _RCC_ComputeADCCLK(clockTree);
 	usbClk = _RCC_ComputeUSBCLK(clockTree);
 
-	if (sysClk > _RCC_SYSCLK_MAX_FREQ)
+	if (sysClk > RCC_SYSCLK_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (hClk > _RCC_HCLK_MAX_FREQ)
+	if (hClk > RCC_HCLK_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (pClk1 > _RCC_PCLK1_MAX_FREQ)
+	if (pClk1 > RCC_PCLK1_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (pClk2 > _RCC_PCLK2_MAX_FREQ)
+	if (pClk2 > RCC_PCLK2_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (adcClk > _RCC_ADCCLK_MAX_FREQ)
+	if (adcClk > RCC_ADCCLK_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if ((clockTree->system.clk_src == RCC_SYS_CLK_PLL) && (usbClk != 0x00UL) && (usbClk != _RCC_USBCLK_TARGET_FREQ))
+	if ((clockTree->system.clk_src == RCC_SYS_CLK_PLL) && (usbClk != 0x00UL) && (usbClk != RCC_USBCLK_TARGET_FREQ))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -710,16 +669,16 @@ driver_status_t RCC_ValidateConfig(const rcc_config_t* const cfg)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
+driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const pFlashConfig)
 {
 	uint32_t flashLatency = FLASH_ACR_LATENCY_0;
 
-	if (flash == NULL)
+	if (pFlashConfig == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	switch (flash->latency)
+	switch (pFlashConfig->latency)
 	{
 		case RCC_FLASH_LATENCY_0:
 		{
@@ -744,7 +703,7 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 
 	REGOPS_MODIFY(&FLASH->ACR.REG, FLASH_ACR_LATENCY_Msk, flashLatency);
 
-	if (flash->prefetch == RCC_FLASH_PREFETCH_ENABLE)
+	if (pFlashConfig->prefetch == RCC_FLASH_PREFETCH_ENABLE)
 	{
 		REGOPS_SET(&FLASH->ACR.REG, FLASH_ACR_PRFTBE);
 	}
@@ -756,20 +715,20 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const flash)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const busCfg)
+driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig)
 {
 	uint32_t ahbPrescaler = 0x00UL;
 	uint32_t apb1Prescaler = 0x00UL;
 	uint32_t apb2Prescaler = 0x00UL;
 
-	if (busCfg == NULL)
+	if (pBusConfig == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	ahbPrescaler = _RCC_MapAHBPrescaler(busCfg->AHB);
-	apb1Prescaler = _RCC_MapAPBPrescaler(busCfg->APB1);
-	apb2Prescaler = _RCC_MapAPBPrescaler(busCfg->APB2);
+	ahbPrescaler = _RCC_MapAHBPrescaler(pBusConfig->AHB);
+	apb1Prescaler = _RCC_MapAPBPrescaler(pBusConfig->APB1);
+	apb2Prescaler = _RCC_MapAPBPrescaler(pBusConfig->APB2);
 
 	if ((ahbPrescaler == RCC_DRIVER_INVALID_FIELD) || (apb1Prescaler == RCC_DRIVER_INVALID_FIELD) || (apb2Prescaler == RCC_DRIVER_INVALID_FIELD))
 	{
@@ -1105,32 +1064,32 @@ rcc_pll_mul_t RCC_GetPLLMultiplier(void)
 	}
 }
 
-_rcc_freq_t RCC_GetCoreClockFreq(void)
+rcc_freq_t RCC_GetCoreClockFreq(void)
 {
-	_rcc_freq_t pllInput = 0x00UL;
+	rcc_freq_t pllInput = 0x00UL;
 
 	switch (RCC_GetSysClkSrc())
 	{
 		case RCC_SYS_CLK_HSI:
 		{
-			return _RCC_HSI_FREQ;
+			return RCC_HSI_FREQ;
 		}
 		case RCC_SYS_CLK_HSE:
 		{
-			return _RCC_HSE_FREQ;
+			return RCC_HSE_FREQ;
 		}
 		case RCC_SYS_CLK_PLL:
 		{
-			pllInput = (RCC_GetPLLSource() == RCC_PLL_SRC_HSE) ? _RCC_HSE_FREQ : (_RCC_HSI_FREQ >> 1);
+			pllInput = (RCC_GetPLLSource() == RCC_PLL_SRC_HSE) ? RCC_HSE_FREQ : (RCC_HSI_FREQ >> 1);
 			if (RCC_GetPLLSourcePrescaler() == RCC_PLL_SRC_HSE_DIV_2)
 			{
 				pllInput >>= 1;
 			}
-			return (pllInput * (_rcc_freq_t) RCC_GetPLLMultiplier());
+			return (pllInput * (rcc_freq_t) RCC_GetPLLMultiplier());
 		}
 		default:
 		{
-			return _RCC_HSI_FREQ;
+			return RCC_HSI_FREQ;
 		}
 	}
 }
@@ -1173,10 +1132,10 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 	}
 }
 
-_rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
+rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 {
-	const _rcc_freq_t sysClk = RCC_GetCoreClockFreq();
-	const _rcc_freq_t hClk = (sysClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_AHB_BUS));
+	const rcc_freq_t sysClk = RCC_GetCoreClockFreq();
+	const rcc_freq_t hClk = (sysClk / (rcc_freq_t) RCC_GetBusPrescaler(RCC_AHB_BUS));
 
 	switch (bus)
 	{
@@ -1186,11 +1145,11 @@ _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 		}
 		case RCC_APB1_BUS:
 		{
-			return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB1_BUS));
+			return (hClk / (rcc_freq_t) RCC_GetBusPrescaler(RCC_APB1_BUS));
 		}
 		case RCC_APB2_BUS:
 		{
-			return (hClk / (_rcc_freq_t) RCC_GetBusPrescaler(RCC_APB2_BUS));
+			return (hClk / (rcc_freq_t) RCC_GetBusPrescaler(RCC_APB2_BUS));
 		}
 		default:
 		{
@@ -1199,7 +1158,7 @@ _rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 	}
 }
 
-_rcc_freq_t RCC_GetADCFreq(void)
+rcc_freq_t RCC_GetADCFreq(void)
 {
 	rcc_ll_adc_prescaler_t adcPrescaler = RCC_LL_ADC_DIV_2;
 
@@ -1208,13 +1167,13 @@ _rcc_freq_t RCC_GetADCFreq(void)
 		return 0x00UL;
 	}
 
-	return (RCC_GetBusFreq(RCC_APB2_BUS) / (_rcc_freq_t) _RCC_DecodeADCPrescaler(adcPrescaler));
+	return (RCC_GetBusFreq(RCC_APB2_BUS) / (rcc_freq_t) _RCC_DecodeADCPrescaler(adcPrescaler));
 }
 
-_rcc_freq_t RCC_GetUSBFreq(void)
+rcc_freq_t RCC_GetUSBFreq(void)
 {
 	rcc_ll_usb_prescaler_t usbPrescaler = RCC_LL_USB_DIV_1_5;
-	const _rcc_freq_t pllClock = (RCC_GetSysClkSrc() == RCC_SYS_CLK_PLL) ? RCC_GetCoreClockFreq() : 0x00UL;
+	const rcc_freq_t pllClock = (RCC_GetSysClkSrc() == RCC_SYS_CLK_PLL) ? RCC_GetCoreClockFreq() : 0x00UL;
 
 	if (pllClock == 0x00UL)
 	{

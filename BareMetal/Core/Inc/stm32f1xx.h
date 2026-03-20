@@ -272,9 +272,9 @@ extern "C" {
 #define SYSTICK_CLK_CORE (0x01)
 
 // SysTick Delay
-#define SYSTICK_DELAY_1_US (RCC_Get_AHBClock() / FREQ_1MHz)
+#define SYSTICK_DELAY_1_US (RCC_GetAHBClock() / FREQ_1MHz)
 #define SYSTICK_DELAY_2_US (SYSTICK_DELAY_1_US << 1)
-#define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / _RCC_FREQ_1kHz)
+#define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / RCC_FREQ_1kHz)
 #define SYSTICK_DELAYS_2_MS (SYSTICK_DELAY_1_MS << 1)
 
 /*----------------------------------------------- Timer MACROS -----------------------------------------------*/

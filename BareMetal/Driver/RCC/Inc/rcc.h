@@ -37,29 +37,28 @@ extern "C" {
  * @{
  */
 
-/** @brief RCC frequency unit type @typedef _rcc_freq_t */
-typedef uint32_t									_rcc_freq_t;
-
-/** @brief 1 kHz frequency constant @def _RCC_FREQ_1kHz */
-#define _RCC_FREQ_1kHz							((_rcc_freq_t) 1000UL)
-/** @brief 1 MHz frequency constant @def _RCC_FREQ_1MHz */
-#define _RCC_FREQ_1MHz							((_rcc_freq_t) 1000000UL)
-/** @brief Internal high-speed oscillator nominal frequency @def _RCC_HSI_FREQ */
-#define _RCC_HSI_FREQ							((_rcc_freq_t) 8000000UL)
-/** @brief External high-speed oscillator nominal frequency @def _RCC_HSE_FREQ */
-#define _RCC_HSE_FREQ							((_rcc_freq_t) 8000000UL)
-/** @brief Maximum SYSCLK frequency @def _RCC_SYSCLK_MAX_FREQ */
-#define _RCC_SYSCLK_MAX_FREQ					((_rcc_freq_t) 72000000UL)
-/** @brief Maximum HCLK frequency @def _RCC_HCLK_MAX_FREQ */
-#define _RCC_HCLK_MAX_FREQ						(_RCC_SYSCLK_MAX_FREQ)
-/** @brief Maximum APB1 frequency @def _RCC_PCLK1_MAX_FREQ */
-#define _RCC_PCLK1_MAX_FREQ					((_rcc_freq_t) 36000000UL)
-/** @brief Maximum APB2 frequency @def _RCC_PCLK2_MAX_FREQ */
-#define _RCC_PCLK2_MAX_FREQ					((_rcc_freq_t) 72000000UL)
-/** @brief Maximum ADC clock frequency @def _RCC_ADCCLK_MAX_FREQ */
-#define _RCC_ADCCLK_MAX_FREQ					((_rcc_freq_t) 14000000UL)
-/** @brief Target USB clock frequency @def _RCC_USBCLK_TARGET_FREQ */
-#define _RCC_USBCLK_TARGET_FREQ				((_rcc_freq_t) 48000000UL)
+/** @brief RCC frequency unit type @typedef rcc_freq_t */
+typedef uint32_t									rcc_freq_t;
+/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
+#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
+/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
+#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
+/** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
+#define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
+/** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
+#define RCC_HSE_FREQ							((rcc_freq_t) 8000000UL)
+/** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
+#define RCC_SYSCLK_MAX_FREQ						((rcc_freq_t) 72000000UL)
+/** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
+#define RCC_HCLK_MAX_FREQ						(RCC_SYSCLK_MAX_FREQ)
+/** @brief Maximum APB1 frequency @def RCC_PCLK1_MAX_FREQ */
+#define RCC_PCLK1_MAX_FREQ						((rcc_freq_t) 36000000UL)
+/** @brief Maximum APB2 frequency @def RCC_PCLK2_MAX_FREQ */
+#define RCC_PCLK2_MAX_FREQ						((rcc_freq_t) 72000000UL)
+/** @brief Maximum ADC clock frequency @def RCC_ADCCLK_MAX_FREQ */
+#define RCC_ADCCLK_MAX_FREQ						((rcc_freq_t) 14000000UL)
+/** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
+#define RCC_USBCLK_TARGET_FREQ					((rcc_freq_t) 48000000UL)
 
 /** @} */ // RCC_03_Driver_01_Frequency
 
@@ -74,26 +73,34 @@ typedef uint32_t									_rcc_freq_t;
 /** @brief Flash latency type @typedef rcc_flash_latency_t */
 typedef uint8_t									rcc_flash_latency_t;
 /** @brief Flash zero wait states @def RCC_FLASH_LATENCY_0 */
-#define RCC_FLASH_LATENCY_0						((rcc_flash_latency_t) 0x00U)
+#define RCC_FLASH_LATENCY_0						((rcc_flash_latency_t) 0U)
 /** @brief Flash one wait state @def RCC_FLASH_LATENCY_1 */
-#define RCC_FLASH_LATENCY_1						((rcc_flash_latency_t) 0x01U)
+#define RCC_FLASH_LATENCY_1						((rcc_flash_latency_t) 1U)
 /** @brief Flash two wait states @def RCC_FLASH_LATENCY_2 */
-#define RCC_FLASH_LATENCY_2						((rcc_flash_latency_t) 0x02U)
+#define RCC_FLASH_LATENCY_2						((rcc_flash_latency_t) 2U)
 
 /** @brief Flash prefetch selector type @typedef rcc_flash_prefetch_t */
 typedef uint8_t									rcc_flash_prefetch_t;
 /** @brief Flash prefetch disabled @def RCC_FLASH_PREFETCH_DISABLE */
-#define RCC_FLASH_PREFETCH_DISABLE				((rcc_flash_prefetch_t) 0x00U)
+#define RCC_FLASH_PREFETCH_DISABLE				((rcc_flash_prefetch_t) 0U)
 /** @brief Flash prefetch enabled @def RCC_FLASH_PREFETCH_ENABLE */
-#define RCC_FLASH_PREFETCH_ENABLE				((rcc_flash_prefetch_t) 0x01U)
+#define RCC_FLASH_PREFETCH_ENABLE				((rcc_flash_prefetch_t) 1U)
 
 /**
  * @brief	Flash configuration descriptor
  * @typedef	rcc_flash_config_t
  */
-typedef struct
+typedef struct _rcc_flash_config_t
 {
+	/**
+	 * @brief Flash Latency
+	 * @memberof rcc_flash_config_t 
+	 */
 	rcc_flash_latency_t		latency;
+	/**
+	 * @brief Flash Pre-fetch
+	 * @memberof rcc_flash_config_t 
+	 */
 	rcc_flash_prefetch_t	prefetch;
 } rcc_flash_config_t;
 
@@ -110,27 +117,27 @@ typedef struct
 /** @brief System clock source selector type @typedef rcc_system_clock_t */
 typedef uint8_t									rcc_system_clock_t;
 /** @brief HSI selected as SYSCLK @def RCC_SYS_CLK_HSI */
-#define RCC_SYS_CLK_HSI							((rcc_system_clock_t) 0x00U)
+#define RCC_SYS_CLK_HSI							((rcc_system_clock_t) 0U)
 /** @brief HSE selected as SYSCLK @def RCC_SYS_CLK_HSE */
-#define RCC_SYS_CLK_HSE							((rcc_system_clock_t) 0x01U)
+#define RCC_SYS_CLK_HSE							((rcc_system_clock_t) 1U)
 /** @brief PLL selected as SYSCLK @def RCC_SYS_CLK_PLL */
-#define RCC_SYS_CLK_PLL							((rcc_system_clock_t) 0x02U)
+#define RCC_SYS_CLK_PLL							((rcc_system_clock_t) 2U)
 
 /** @brief PLL source selector type @typedef rcc_pll_src_t */
 typedef uint8_t									rcc_pll_src_t;
 /** @brief HSI divided by 2 selected as PLL input @def RCC_PLL_SRC_HSI */
-#define RCC_PLL_SRC_HSI							((rcc_pll_src_t) 0x00U)
+#define RCC_PLL_SRC_HSI							((rcc_pll_src_t) 0U)
 /** @brief HSE selected as PLL input @def RCC_PLL_SRC_HSE */
-#define RCC_PLL_SRC_HSE							((rcc_pll_src_t) 0x01U)
+#define RCC_PLL_SRC_HSE							((rcc_pll_src_t) 1U)
 
 /** @brief PLL input prescaler selector type @typedef rcc_pll_src_psc_t */
 typedef uint8_t									rcc_pll_src_psc_t;
 /** @brief Fixed HSI divide-by-2 PLL input @def RCC_PLL_SRC_HSI_DIV_2 */
-#define RCC_PLL_SRC_HSI_DIV_2					((rcc_pll_src_psc_t) 0x00U)
+#define RCC_PLL_SRC_HSI_DIV_2					((rcc_pll_src_psc_t) 0U)
 /** @brief HSE divide-by-1 PLL input @def RCC_PLL_SRC_HSE_DIV_1 */
-#define RCC_PLL_SRC_HSE_DIV_1					((rcc_pll_src_psc_t) 0x01U)
+#define RCC_PLL_SRC_HSE_DIV_1					((rcc_pll_src_psc_t) 1U)
 /** @brief HSE divide-by-2 PLL input @def RCC_PLL_SRC_HSE_DIV_2 */
-#define RCC_PLL_SRC_HSE_DIV_2					((rcc_pll_src_psc_t) 0x02U)
+#define RCC_PLL_SRC_HSE_DIV_2					((rcc_pll_src_psc_t) 2U)
 
 /** @brief PLL multiplication factor type @typedef rcc_pll_mul_t */
 typedef uint8_t									rcc_pll_mul_t;
@@ -169,10 +176,22 @@ typedef uint8_t									rcc_pll_mul_t;
  * @brief	PLL configuration descriptor
  * @typedef	rcc_pll_config_t
  */
-typedef struct
+typedef struct _rcc_pll_config_t
 {
+	/**
+	 * @brief PLL Source
+	 * @memberof rcc_pll_config_t
+	 */
 	rcc_pll_src_t			source;
-	rcc_pll_src_psc_t	source_prescaler;
+	/**
+	 * @brief PLL Source - Prescaler
+	 * @memberof rcc_pll_config_t
+	 */
+	rcc_pll_src_psc_t		source_prescaler;
+	/**
+	 * @brief PLL Multiplication Factor
+	 * @memberof rcc_pll_config_t
+	 */
 	rcc_pll_mul_t			multiplication_factor;
 } rcc_pll_config_t;
 
@@ -180,9 +199,17 @@ typedef struct
  * @brief	System clock configuration descriptor
  * @typedef	rcc_sys_clk_config_t
  */
-typedef struct
+typedef struct _rcc_sys_clk_config_t
 {
+	/**
+	 * @brief System Clock Source
+	 * @memberof rcc_sys_clk_config_t
+	 */
 	rcc_system_clock_t	clk_src;
+	/**
+	 * @brief PLL Configuration (if applicable)
+	 * @memberof rcc_sys_clk_config_t
+	 */
 	rcc_pll_config_t	pll;
 } rcc_sys_clk_config_t;
 
@@ -199,11 +226,11 @@ typedef struct
 /** @brief RCC bus selector type @typedef rcc_bus_t */
 typedef uint8_t									rcc_bus_t;
 /** @brief AHB bus selector @def RCC_AHB_BUS */
-#define RCC_AHB_BUS								((rcc_bus_t) 0x00U)
+#define RCC_AHB_BUS								((rcc_bus_t) 0U)
 /** @brief APB1 bus selector @def RCC_APB1_BUS */
-#define RCC_APB1_BUS							((rcc_bus_t) 0x01U)
+#define RCC_APB1_BUS							((rcc_bus_t) 1U)
 /** @brief APB2 bus selector @def RCC_APB2_BUS */
-#define RCC_APB2_BUS							((rcc_bus_t) 0x02U)
+#define RCC_APB2_BUS							((rcc_bus_t) 2U)
 
 /** @brief Bus prescaler divider type @typedef rcc_bus_prescaler_t */
 typedef uint16_t								rcc_bus_prescaler_t;
@@ -252,10 +279,22 @@ typedef uint16_t								rcc_bus_prescaler_t;
  * @brief	Bus prescaler configuration descriptor
  * @typedef	rcc_bus_config_t
  */
-typedef struct
+typedef struct _rcc_bus_config_t
 {
+	/**
+	 * @brief AHB Prescaler
+	 * @memberof rcc_bus_config_t
+	 */
 	rcc_bus_prescaler_t	AHB;
+	/**
+	 * @brief APB1 Prescaler
+	 * @memberof rcc_bus_config_t
+	 */
 	rcc_bus_prescaler_t	APB1;
+	/**
+	 * @brief APB2 Prescaler
+	 * @memberof rcc_bus_config_t
+	 */
 	rcc_bus_prescaler_t	APB2;
 } rcc_bus_config_t;
 
@@ -278,9 +317,17 @@ typedef uint8_t									rcc_component_prescaler_t;
  * @brief	Component prescaler configuration descriptor
  * @typedef	rcc_component_config_t
  */
-typedef struct
+typedef struct _rcc_component_config_t
 {
+	/**
+	 * @brief ADC - Prescaler 
+	 * @memberof rcc_component_config_t
+	 */
 	rcc_component_prescaler_t	ADC;
+	/**
+	 * @brief USB - Prescaler
+	 * @memberof rcc_component_config_t
+	 */
 	rcc_component_prescaler_t	USB;
 } rcc_component_config_t;
 
@@ -298,20 +345,40 @@ typedef struct
  * @brief	Clock-tree configuration descriptor
  * @typedef	rcc_clock_tree_config_t
  */
-typedef struct
+typedef struct _rcc_clock_tree_config_t
 {
+	/**
+	 * @brief System Configurations
+	 * @memberof rcc_clock_tree_config_t
+	 */
 	rcc_sys_clk_config_t		system;
+	/**
+	 * @brief Bus Prescaler Configurations
+	 * @memberof rcc_clock_tree_config_t
+	 */
 	rcc_bus_config_t			bus;
-	rcc_component_config_t	component;
+	/**
+	 * @brief Components Configurations
+	 * @memberof rcc_clock_tree_config_t
+	 */
+	rcc_component_config_t		component;
 } rcc_clock_tree_config_t;
 
 /**
  * @brief	Complete RCC configuration descriptor
  * @typedef	rcc_config_t
  */
-typedef struct
+typedef struct _rcc_config_t
 {
+	/**
+	 * @brief Flash - Configurations
+	 * @memberof rcc_config_t
+	 */
 	rcc_flash_config_t		flash;
+	/**
+	 * @brief Clock Tree - Configurations
+	 * @memberof rcc_config_t
+	 */
 	rcc_clock_tree_config_t	clock_tree;
 } rcc_config_t;
 
@@ -332,7 +399,10 @@ typedef struct
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were enabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
+{
+	return RCC_LL_AHB_EnableClock(clockMask);
+}
 
 /**
  * @brief	Disables AHB peripheral clock gates
@@ -341,7 +411,10 @@ driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were disabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
+{
+	return RCC_LL_AHB_DisableClock(clockMask);
+}
 
 /**
  * @brief	Enables APB2 peripheral clock gates
@@ -350,7 +423,10 @@ driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were enabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
+{
+	return RCC_LL_APB2_EnableClock(clockMask);
+}
 
 /**
  * @brief	Disables APB2 peripheral clock gates
@@ -359,7 +435,10 @@ driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were disabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
+{
+	return RCC_LL_APB2_DisableClock(clockMask);
+}
 
 /**
  * @brief	Enables APB1 peripheral clock gates
@@ -368,7 +447,10 @@ driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were enabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
+{
+	return RCC_LL_APB1_EnableClock(clockMask);
+}
 
 /**
  * @brief	Disables APB1 peripheral clock gates
@@ -377,7 +459,10 @@ driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were disabled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
  */
-driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask);
+__STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
+{
+	return RCC_LL_APB1_DisableClock(clockMask);
+}
 
 /**
  * @brief	Pulses APB2 peripheral reset bits
@@ -386,7 +471,10 @@ driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 peripherals were reset-pulsed.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid.
  */
-driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask);
+__STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
+{
+	return RCC_LL_APB2_ResetPulse(resetMask);
+}
 
 /**
  * @brief	Pulses APB1 peripheral reset bits
@@ -395,10 +483,10 @@ driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 peripherals were reset-pulsed.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid.
  */
-driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask);
-
-/** @} */ // RCC_03_Driver_06_ClockReset
-
+__STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
+{
+	return RCC_LL_APB1_ResetPulse(resetMask);
+}
 /*---------------------------------------------- RCC Driver APIs ----------------------------------------------*/
 /**
  * @brief	RCC Driver Functional APIs
@@ -543,7 +631,7 @@ rcc_pll_mul_t RCC_GetPLLMultiplier(void);
  * @brief	Returns the current core clock frequency before AHB division
  * @returns	Core clock frequency in Hz
  */
-_rcc_freq_t RCC_GetCoreClockFreq(void);
+rcc_freq_t RCC_GetCoreClockFreq(void);
 
 /**
  * @brief	Returns the configured divider for a requested bus
@@ -557,19 +645,19 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
  * @param[in] bus	Target bus selector of @ref rcc_bus_t
  * @returns	Bus clock frequency in Hz
  */
-_rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
+rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
 
 /**
  * @brief	Returns the current ADC clock frequency
  * @returns	ADC clock frequency in Hz
  */
-_rcc_freq_t RCC_GetADCFreq(void);
+rcc_freq_t RCC_GetADCFreq(void);
 
 /**
  * @brief	Returns the current USB clock frequency
  * @returns	USB clock frequency in Hz
  */
-_rcc_freq_t RCC_GetUSBFreq(void);
+rcc_freq_t RCC_GetUSBFreq(void);
 
 /** @} */ // RCC_03_Driver_07_API
 /*---------------------------------------------- RCC Legacy Compatibility Wrappers ----------------------------------------------*/
@@ -580,39 +668,31 @@ _rcc_freq_t RCC_GetUSBFreq(void);
  * @{
  */
 
-__STATIC_FORCEINLINE _rcc_freq_t RCC_Get_AHBClock(void)
+/**
+ * @brief	Legacy wrapper that returns the current AHB clock frequency
+ * @returns	AHB clock frequency in Hz
+ */
+__STATIC_FORCEINLINE rcc_freq_t RCC_GetAHBClock(void)
 {
 	return RCC_GetBusFreq(RCC_AHB_BUS);
 }
 
-__STATIC_FORCEINLINE _rcc_freq_t RCC_Get_APB1Clock(void)
+/**
+ * @brief	Legacy wrapper that returns the current APB1 clock frequency
+ * @returns	APB1 clock frequency in Hz
+ */
+__STATIC_FORCEINLINE rcc_freq_t RCC_GetAPB1Clock(void)
 {
 	return RCC_GetBusFreq(RCC_APB1_BUS);
 }
 
-__STATIC_FORCEINLINE _rcc_freq_t RCC_Get_APB2Clock(void)
+/**
+ * @brief	Legacy wrapper that returns the current APB2 clock frequency
+ * @returns	APB2 clock frequency in Hz
+ */
+__STATIC_FORCEINLINE rcc_freq_t RCC_GetAPB2Clock(void)
 {
 	return RCC_GetBusFreq(RCC_APB2_BUS);
-}
-
-__STATIC_FORCEINLINE _rcc_freq_t RCC_CoreClockFreq_Get(void)
-{
-	return RCC_GetCoreClockFreq();
-}
-
-__STATIC_FORCEINLINE _rcc_freq_t RCC_AHBClockFreq_Get(void)
-{
-	return RCC_Get_AHBClock();
-}
-
-__STATIC_FORCEINLINE _rcc_freq_t RCC_APB1ClockFreq_Get(void)
-{
-	return RCC_Get_APB1Clock();
-}
-
-__STATIC_FORCEINLINE _rcc_freq_t RCC_APB2ClockFreq_Get(void)
-{
-	return RCC_Get_APB2Clock();
 }
 
 /** @} */ // RCC_03_Driver_08_Legacy
