@@ -14,13 +14,20 @@
 // ==================================================================================================== //
 //													Macros												//
 // ==================================================================================================== //
-
+/** @brief Timeout used while validating switch clock @def RCC_READY_TIMEOUT */
 #define RCC_READY_TIMEOUT					((uint32_t) 1000UL)
 #define RCC_DRIVER_INVALID_FIELD			((uint32_t) 0xFFFFFFFFUL)
 #define RCC_DRIVER_INVALID_INDEX			((uint32_t) 0xFFFFFFFFUL)
 
+// ==================================================================================================== //
+//												Typedefs												//
+// ==================================================================================================== //
+/** @brief Function to be executed inside validating system clock switch @typedef _rcc_ready_getter_t */
 typedef driver_status_t (*_rcc_ready_getter_t)(void);
 
+// ==================================================================================================== //
+//											Look Up Tables (LUTs)										//
+// ==================================================================================================== //
 typedef struct _rcc_lut_entry_t
 {
 	uint32_t	ll_field;
@@ -148,7 +155,7 @@ static uint32_t _RCC_FindLUTIndex(const _rcc_lut_entry_t* const pLUT, const uint
 	return RCC_DRIVER_INVALID_INDEX;
 }
 
-static uint32_t _RCC_GetLUTValue(const _rcc_lut_entry_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultValue)
+__STATIC_FORCEINLINE uint32_t _RCC_GetLUTValue(const _rcc_lut_entry_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultValue)
 {
 	if (index >= itemCount)
 	{
@@ -158,7 +165,7 @@ static uint32_t _RCC_GetLUTValue(const _rcc_lut_entry_t* const pLUT, const uint3
 	return pLUT[index].value;
 }
 
-static rcc_freq_t _RCC_GetAHBDividerValue(const rcc_bus_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBDividerValue(const rcc_bus_prescaler_t dividerSelector)
 {
 	return (rcc_freq_t) _RCC_GetLUTValue
 	(
@@ -169,7 +176,7 @@ static rcc_freq_t _RCC_GetAHBDividerValue(const rcc_bus_prescaler_t dividerSelec
 	);
 }
 
-static rcc_freq_t _RCC_GetAPBDividerValue(const rcc_bus_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPBDividerValue(const rcc_bus_prescaler_t dividerSelector)
 {
 	return (rcc_freq_t) _RCC_GetLUTValue
 	(
@@ -180,7 +187,7 @@ static rcc_freq_t _RCC_GetAPBDividerValue(const rcc_bus_prescaler_t dividerSelec
 	);
 }
 
-static rcc_freq_t _RCC_GetADCDividerValue(const rcc_component_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCDividerValue(const rcc_component_prescaler_t dividerSelector)
 {
 	return (rcc_freq_t) _RCC_GetLUTValue
 	(
@@ -191,7 +198,7 @@ static rcc_freq_t _RCC_GetADCDividerValue(const rcc_component_prescaler_t divide
 	);
 }
 
-static uint32_t _RCC_MapSystemClockSource(const rcc_system_clock_t source)
+__STATIC_FORCEINLINE uint32_t _RCC_MapSystemClockSource(const rcc_system_clock_t source)
 {
 	switch (source)
 	{
@@ -214,7 +221,7 @@ static uint32_t _RCC_MapSystemClockSource(const rcc_system_clock_t source)
 	}
 }
 
-static uint32_t _RCC_MapPLLSource(const rcc_pll_src_t source)
+__STATIC_FORCEINLINE uint32_t _RCC_MapPLLSource(const rcc_pll_src_t source)
 {
 	switch (source)
 	{
@@ -233,7 +240,7 @@ static uint32_t _RCC_MapPLLSource(const rcc_pll_src_t source)
 	}
 }
 
-static uint32_t _RCC_MapPLLHSEDivider(const rcc_pll_src_psc_t divider)
+__STATIC_FORCEINLINE uint32_t _RCC_MapPLLHSEDivider(const rcc_pll_src_psc_t divider)
 {
 	switch (divider)
 	{
@@ -252,7 +259,7 @@ static uint32_t _RCC_MapPLLHSEDivider(const rcc_pll_src_psc_t divider)
 	}
 }
 
-static uint32_t _RCC_MapPLLMultiplier(const rcc_pll_mul_t multiplier)
+__STATIC_FORCEINLINE uint32_t _RCC_MapPLLMultiplier(const rcc_pll_mul_t multiplier)
 {
 	if ((multiplier < RCC_PLL_MUL_2) || (multiplier > RCC_PLL_MUL_16))
 	{
@@ -268,7 +275,7 @@ static uint32_t _RCC_MapPLLMultiplier(const rcc_pll_mul_t multiplier)
 	);
 }
 
-static uint32_t _RCC_MapAHBPrescaler(const rcc_bus_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_MapAHBPrescaler(const rcc_bus_prescaler_t dividerSelector)
 {
 	return _RCC_GetLUTValue
 	(
@@ -279,7 +286,7 @@ static uint32_t _RCC_MapAHBPrescaler(const rcc_bus_prescaler_t dividerSelector)
 	);
 }
 
-static uint32_t _RCC_MapAPBPrescaler(const rcc_bus_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_MapAPBPrescaler(const rcc_bus_prescaler_t dividerSelector)
 {
 	return _RCC_GetLUTValue
 	(
@@ -290,7 +297,7 @@ static uint32_t _RCC_MapAPBPrescaler(const rcc_bus_prescaler_t dividerSelector)
 	);
 }
 
-static uint32_t _RCC_MapADCPrescaler(const rcc_component_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_MapADCPrescaler(const rcc_component_prescaler_t dividerSelector)
 {
 	return _RCC_GetLUTValue
 	(
@@ -301,7 +308,7 @@ static uint32_t _RCC_MapADCPrescaler(const rcc_component_prescaler_t dividerSele
 	);
 }
 
-static uint32_t _RCC_MapUSBPrescaler(const rcc_component_prescaler_t dividerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_MapUSBPrescaler(const rcc_component_prescaler_t dividerSelector)
 {
 	return _RCC_GetLUTValue
 	(
@@ -312,7 +319,7 @@ static uint32_t _RCC_MapUSBPrescaler(const rcc_component_prescaler_t dividerSele
 	);
 }
 
-static rcc_system_clock_t _RCC_DecodeSystemClockStatus(const rcc_ll_sysclk_status_t status)
+__STATIC_FORCEINLINE rcc_system_clock_t _RCC_DecodeSystemClockStatus(const rcc_ll_sysclk_status_t status)
 {
 	switch (status)
 	{
@@ -403,7 +410,7 @@ static rcc_component_prescaler_t _RCC_DecodeUSBPrescaler(const rcc_ll_usb_presca
 	return (rcc_component_prescaler_t) index;
 }
 
-static rcc_freq_t _RCC_ComputePLLInputFreq(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_ComputePLLInputFreq(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	if (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSI)
 	{
@@ -445,22 +452,22 @@ static rcc_freq_t _RCC_ComputeSYSCLK(const rcc_clock_tree_config_t* const pClock
 	}
 }
 
-static rcc_freq_t _RCC_ComputeHCLK(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_ComputeHCLK(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_ComputeSYSCLK(pClockTreeConfig) / _RCC_GetAHBDividerValue(pClockTreeConfig->bus.AHB));
 }
 
-static rcc_freq_t _RCC_ComputePCLK1(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_ComputePCLK1(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_ComputeHCLK(pClockTreeConfig) / _RCC_GetAPBDividerValue(pClockTreeConfig->bus.APB1));
 }
 
-static rcc_freq_t _RCC_ComputePCLK2(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_ComputePCLK2(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_ComputeHCLK(pClockTreeConfig) / _RCC_GetAPBDividerValue(pClockTreeConfig->bus.APB2));
 }
 
-static rcc_freq_t _RCC_ComputeADCCLK(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE rcc_freq_t _RCC_ComputeADCCLK(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_ComputePCLK2(pClockTreeConfig) / _RCC_GetADCDividerValue(pClockTreeConfig->component.ADC));
 }
@@ -503,7 +510,7 @@ driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig)
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	pClockTreeConfig = &pRCCConfig->clock_tree;
+	pClockTreeConfig = &(pRCCConfig->clock_tree);
 
 	if (_RCC_MapSystemClockSource(pClockTreeConfig->system.clk_src) == RCC_DRIVER_INVALID_FIELD)
 	{
@@ -841,16 +848,9 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 
 driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig)
 {
-	driver_status_t status = DRIVER_STATUS_SUCCESS;
-
-	status = RCC_ValidateConfig(pRCCConfig);
-	if (status != DRIVER_STATUS_SUCCESS)
-	{
-		return status;
-	}
-
-	ASSERT_DRIVER_STATUS(RCC_ConfigFlash(&pRCCConfig->flash));
-	ASSERT_DRIVER_STATUS(RCC_ConfigClockTree(&pRCCConfig->clock_tree));
+	ASSERT_DRIVER_STATUS(RCC_ValidateConfig(pRCCConfig));
+	ASSERT_DRIVER_STATUS(RCC_ConfigFlash(&(pRCCConfig->flash)));
+	ASSERT_DRIVER_STATUS(RCC_ConfigClockTree(&(pRCCConfig->clock_tree)));
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -884,8 +884,6 @@ driver_status_t RCC_Config_72MHz(void)
 	RCC_72MHz_LoadDefaultConfig(&cfg);
 	return RCC_Config(&cfg);
 }
-
-
 
 // ==================================================================================================== //
 //                                   Driver Status and Frequency APIs                                   //
