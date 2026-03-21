@@ -55,9 +55,9 @@ extern "C" {
 #include "stm32f1xx_flash.h"
 #include "stm32f1xx_nvic.h"
 
-// ==========================================================================================
-// Address Mapping
-// ==========================================================================================
+// ========================================================================================== //
+//										Address Mapping											//
+// ========================================================================================== //
 
 // ------------------------------------------------------------------------------------------
 // Cortex-M3 Core Peripherals
@@ -231,6 +231,38 @@ extern "C" {
 #define USART1									((USART_TypeDef*) USART1_BASE_ADDRESS)
 /** @brief ADC3  @def ADC3 */
 #define ADC3									((ADC_TypeDef*) ADC3_BASE_ADDRESS)
+
+// ========================================================================================== //
+//										STM32F103C8T6											//
+// ========================================================================================== //
+
+/**
+ * @addtogroup RCC_03_Driver_01_Frequency 
+ * @{
+ */
+
+/** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
+#define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
+/** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
+#define RCC_HSE_FREQ							((rcc_freq_t) 8000000UL)
+/** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
+#define RCC_SYSCLK_MAX_FREQ						((rcc_freq_t) 72000000UL)
+/** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
+#define RCC_HCLK_MAX_FREQ						(RCC_SYSCLK_MAX_FREQ)
+/** @brief Maximum APB1 frequency @def RCC_PCLK1_MAX_FREQ */
+#define RCC_PCLK1_MAX_FREQ						((rcc_freq_t) 36000000UL)
+/** @brief Maximum APB2 frequency @def RCC_PCLK2_MAX_FREQ */
+#define RCC_PCLK2_MAX_FREQ						((rcc_freq_t) 72000000UL)
+/** @brief Maximum ADC clock frequency @def RCC_ADCCLK_MAX_FREQ */
+#define RCC_ADCCLK_MAX_FREQ						((rcc_freq_t) 14000000UL)
+/** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
+#define RCC_USBCLK_TARGET_FREQ					((rcc_freq_t) 48000000UL)
+/** @brief Maximum SYSCLK allowed with Flash latency 0 @def RCC_FLASH_LATENCY_0_MAX_FREQ */
+#define RCC_FLASH_LATENCY_0_MAX_FREQ			((rcc_freq_t) 24000000UL)
+/** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
+#define RCC_FLASH_LATENCY_1_MAX_FREQ			((rcc_freq_t) 48000000UL)
+
+/** @} */ // RCC_03_Driver_01_Frequency
 
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed

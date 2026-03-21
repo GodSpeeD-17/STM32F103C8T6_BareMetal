@@ -127,6 +127,31 @@ do												\
 
 /** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
 
+/**
+ * @addtogroup RCC_03_Driver_04_Prescalers 
+ * @{
+ */
+
+/** @brief RCC bus selector type @typedef rcc_bus_t */
+typedef uint8_t									rcc_bus_t;
+/** @brief Bus prescaler divider selector type @typedef rcc_bus_prescaler_t */
+typedef uint8_t									rcc_bus_prescaler_t;
+/** @brief Component prescaler selector type @typedef rcc_component_prescaler_t */
+typedef uint8_t									rcc_component_prescaler_t;
+/** @brief RCC frequency unit type @typedef rcc_freq_t */
+typedef uint32_t								rcc_freq_t;
+/** @brief Flash latency type @typedef rcc_flash_latency_t */
+typedef uint8_t									rcc_flash_latency_t;
+
+/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
+#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
+/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
+#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
+/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
+#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
+
+/** @} */ // RCC_03_Driver_04_Prescalers
+
 // --- C++ Safeguards ---
 #ifdef __cplusplus
 }

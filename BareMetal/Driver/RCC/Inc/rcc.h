@@ -43,35 +43,6 @@ extern "C" {
  * @{
  */
 
-/** @brief RCC frequency unit type @typedef rcc_freq_t */
-typedef uint32_t									rcc_freq_t;
-/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
-#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
-/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
-#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
-/** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
-#define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
-/** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
-#define RCC_HSE_FREQ							((rcc_freq_t) 8000000UL)
-/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
-#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
-/** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
-#define RCC_SYSCLK_MAX_FREQ						((rcc_freq_t) 72000000UL)
-/** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
-#define RCC_HCLK_MAX_FREQ						(RCC_SYSCLK_MAX_FREQ)
-/** @brief Maximum APB1 frequency @def RCC_PCLK1_MAX_FREQ */
-#define RCC_PCLK1_MAX_FREQ						((rcc_freq_t) 36000000UL)
-/** @brief Maximum APB2 frequency @def RCC_PCLK2_MAX_FREQ */
-#define RCC_PCLK2_MAX_FREQ						((rcc_freq_t) 72000000UL)
-/** @brief Maximum ADC clock frequency @def RCC_ADCCLK_MAX_FREQ */
-#define RCC_ADCCLK_MAX_FREQ						((rcc_freq_t) 14000000UL)
-/** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
-#define RCC_USBCLK_TARGET_FREQ					((rcc_freq_t) 48000000UL)
-/** @brief Maximum SYSCLK allowed with Flash latency 0 @def RCC_FLASH_LATENCY_0_MAX_FREQ */
-#define RCC_FLASH_LATENCY_0_MAX_FREQ				((rcc_freq_t) 24000000UL)
-/** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
-#define RCC_FLASH_LATENCY_1_MAX_FREQ				((rcc_freq_t) 48000000UL)
-
 /** @} */ // RCC_03_Driver_01_Frequency
 
 // ==================================================================================================== //
@@ -85,8 +56,6 @@ typedef uint32_t									rcc_freq_t;
  * @{
  */
 
-/** @brief Flash latency type @typedef rcc_flash_latency_t */
-typedef uint8_t									rcc_flash_latency_t;
 /** @brief Flash zero wait states @def RCC_FLASH_LATENCY_0 */
 #define RCC_FLASH_LATENCY_0						((rcc_flash_latency_t) 0U)
 /** @brief Flash one wait state @def RCC_FLASH_LATENCY_1 */
@@ -244,8 +213,7 @@ typedef struct _rcc_sys_clk_config_t
  * @{
  */
 
-/** @brief RCC bus selector type @typedef rcc_bus_t */
-typedef uint8_t									rcc_bus_t;
+
 /** @brief AHB bus selector @def RCC_AHB_BUS */
 #define RCC_AHB_BUS								((rcc_bus_t) 0U)
 /** @brief APB1 bus selector @def RCC_APB1_BUS */
@@ -253,8 +221,6 @@ typedef uint8_t									rcc_bus_t;
 /** @brief APB2 bus selector @def RCC_APB2_BUS */
 #define RCC_APB2_BUS							((rcc_bus_t) 2U)
 
-/** @brief Bus prescaler divider selector type @typedef rcc_bus_prescaler_t */
-typedef uint8_t									 rcc_bus_prescaler_t;
 /** @brief Divider 1 selection @def RCC_AHB_DIV_1 */
 #define RCC_AHB_DIV_1							((rcc_bus_prescaler_t) 0U)
 /** @brief Divider 2 selection @def RCC_AHB_DIV_2 */
@@ -296,6 +262,20 @@ typedef uint8_t									 rcc_bus_prescaler_t;
 /** @brief Divider 16 selection @def RCC_APB2_DIV_16 */
 #define RCC_APB2_DIV_16							((rcc_bus_prescaler_t) 4U)
 
+/** @brief ADC divider 2 selection @def RCC_ADC_DIV_2 */
+#define RCC_ADC_DIV_2							((rcc_component_prescaler_t) 0U)
+/** @brief ADC divider 4 selection @def RCC_ADC_DIV_4 */
+#define RCC_ADC_DIV_4							((rcc_component_prescaler_t) 1U)
+/** @brief ADC divider 6 selection @def RCC_ADC_DIV_6 */
+#define RCC_ADC_DIV_6							((rcc_component_prescaler_t) 2U)
+/** @brief ADC divider 8 selection @def RCC_ADC_DIV_8 */
+#define RCC_ADC_DIV_8							((rcc_component_prescaler_t) 3U)
+
+/** @brief USB clock equals PLL divided by 1.5 @def RCC_USB_DIV_1_5 */
+#define RCC_USB_DIV_1_5							((rcc_component_prescaler_t) 0U)
+/** @brief USB clock equals PLL directly @def RCC_USB_DIV_1 */
+#define RCC_USB_DIV_1							((rcc_component_prescaler_t) 1U)
+
 /**
  * @brief	Bus prescaler configuration descriptor
  * @typedef	rcc_bus_config_t
@@ -318,21 +298,6 @@ typedef struct _rcc_bus_config_t
 	 */
 	rcc_bus_prescaler_t	APB2;
 } rcc_bus_config_t;
-
-/** @brief Component prescaler selector type @typedef rcc_component_prescaler_t */
-typedef uint8_t									rcc_component_prescaler_t;
-/** @brief ADC divider 2 selection @def RCC_ADC_DIV_2 */
-#define RCC_ADC_DIV_2							((rcc_component_prescaler_t) 0U)
-/** @brief ADC divider 4 selection @def RCC_ADC_DIV_4 */
-#define RCC_ADC_DIV_4							((rcc_component_prescaler_t) 1U)
-/** @brief ADC divider 6 selection @def RCC_ADC_DIV_6 */
-#define RCC_ADC_DIV_6							((rcc_component_prescaler_t) 2U)
-/** @brief ADC divider 8 selection @def RCC_ADC_DIV_8 */
-#define RCC_ADC_DIV_8							((rcc_component_prescaler_t) 3U)
-/** @brief USB clock equals PLL divided by 1.5 @def RCC_USB_DIV_1_5 */
-#define RCC_USB_DIV_1_5							((rcc_component_prescaler_t) 0x00U)
-/** @brief USB clock equals PLL directly @def RCC_USB_DIV_1 */
-#define RCC_USB_DIV_1							((rcc_component_prescaler_t) 0x01U)
 
 /**
  * @brief	Component prescaler configuration descriptor
@@ -405,6 +370,44 @@ typedef struct _rcc_config_t
 	 */
 	rcc_clock_tree_config_t	clock_tree;
 } rcc_config_t;
+
+/**
+ * @brief	Derived RCC clock frequencies snapshot
+ * @typedef	rcc_clock_frequencies_t
+ */
+typedef struct _rcc_clock_frequencies_t
+{
+	/**
+	 * @brief System clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	sysclk;
+	/**
+	 * @brief AHB clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	hclk;
+	/**
+	 * @brief APB1 clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	pclk1;
+	/**
+	 * @brief APB2 clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	pclk2;
+	/**
+	 * @brief ADC clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	adcclk;
+	/**
+	 * @brief USB clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	usbclk;
+} rcc_clock_frequencies_t;
 
 /** @} */ // RCC_03_Driver_05_Config
 
@@ -689,6 +692,16 @@ rcc_freq_t RCC_GetADCFreq(void);
  * @returns	USB clock frequency in Hz
  */
 rcc_freq_t RCC_GetUSBFreq(void);
+
+/**
+ * @brief	Returns the cached or current derived RCC clock frequencies snapshot
+ * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The clock frequency snapshot was returned successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
+ */
+driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies);
 
 /** @} */ // RCC_03_Driver_07_API
 
