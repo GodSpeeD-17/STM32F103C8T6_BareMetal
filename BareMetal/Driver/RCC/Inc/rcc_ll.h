@@ -1,28 +1,20 @@
 /**
  * @file	rcc_ll.h
  * @author	Shrey Shah
- * @brief	RCC Low-Level Register Control Interface
- * @version	v2.5
+ * @brief	RCC Low-Level Control Interface
+ * @version	v3.0
  * @date	22-03-2026
  *
  * @details
- * This header defines the RCC low-level control layer.
- *
- * Theory:
- * - The register layer publishes raw bit positions, masks, and register layouts.
- * - The LL layer translates those raw definitions into typed, register-near
- *   operations for clock-source control, prescaler programming, and bus clock
- *   gate/reset management.
- *
- * Implementation contract:
- * - No policy or frequency validation belongs here.
- * - APIs in this layer directly express hardware actions.
- * - The RCC driver consumes this layer to build safe configuration sequences.
+ * The RCC low-level layer is a thin, typed wrapper over the register definitions from
+ * @ref stm32f1xx_rcc.h. It does not own clock-tree policy or board-level validation.
+ * Its only job is to expose direct hardware actions with meaningful function names.
  */
 
 #ifndef RCC_LL_H_
 #define RCC_LL_H_
 
+// C++ Compatibility
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -30,7 +22,6 @@ extern "C" {
 // ==================================================================================================== //
 //                                               Includes                                               //
 // ==================================================================================================== //
-
 #include "stm32f1xx.h"
 
 /**
@@ -39,361 +30,228 @@ extern "C" {
  */
 
 // ==================================================================================================== //
-//                                    Generic RCC LL Register Macros                                    //
+//                                      RCC LL Register Operation Macros                                //
 // ==================================================================================================== //
 
 /**
- * @brief	RCC Generic Register Access Macros
- * @defgroup RCC_02_LL_01_RegOps RCC LL Register Operation Macros
+ * @brief	RCC LL Register Operation Macros
+ * @defgroup RCC_02_LL_01_RegisterOps RCC LL Register Operation Macros
  * @ingroup	RCC_02_LL
  * @details
- * - These macros directly reuse the generic `REGOPS_*` helpers from the core utility layer.
- * - They operate on the `.REG` field of each RCC register union.
- * - They are intended for use by the RCC LL implementation and other low-level code paths.
+ * These macros build a thin RCC-specific convenience layer on top of the generic
+ * @ref REGOPS_READ, @ref REGOPS_WRITE, @ref REGOPS_SET, @ref REGOPS_CLEAR, and
+ * @ref REGOPS_MODIFY utilities.
+ *
+ * Practical Rule:
+ * - Always access RCC registers through the `.REG` member.
+ * - Do not use the `.BIT` view in the LL layer.
+ * - Do not introduce RCC-specific selector values here; use raw hardware masks
+ *   from @ref stm32f1xx_rcc.h.
  * @{
  */
 
 /**
- * @brief	Retrieves pointer to an RCC register `.REG` field
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @returns	Pointer to the 32-bit register storage
+ * @brief	Returns pointer to RCC register `.REG` image
  * @def		RCC_LL_REG
- * @note Documentation parameter names are normalized for Doxygen rendering; the macro signature is unchanged.
+ * @param[in] _REG	Register member name inside @ref RCC_TypeDef
+ * @returns Pointer to the selected RCC register `.REG` image
  */
-#define RCC_LL_REG(_RCC_, _REG_)							(&((_RCC_)->_REG_.REG))
+#define RCC_LL_REG(_REG)								(&(RCC->_REG.REG))
 
 /**
- * @brief	Reads an RCC register through the generic register utility layer
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[out] var	Destination variable that receives the register image
- * @def		RCC_LL_READ
+ * @brief	Reads full RCC register image
+ * @def		RCC_LL_READ_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[out]	_VAR	Destination variable that receives the register image
  */
-#define RCC_LL_READ(_RCC_, _REG_, _VAR_)					REGOPS_READ(RCC_LL_REG((_RCC_), _REG_), (_VAR_))
+#define RCC_LL_READ_REG(_REG, _VAR)						REGOPS_READ(RCC_LL_REG(_REG), (_VAR))
 
 /**
- * @brief	Writes an RCC register through the generic register utility layer
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[in] value	32-bit value to be written
- * @def		RCC_LL_WRITE
+ * @brief	Writes full RCC register image
+ * @def		RCC_LL_WRITE_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_VAL	Register image to write
  */
-#define RCC_LL_WRITE(_RCC_, _REG_, _VAL_)					REGOPS_WRITE(RCC_LL_REG((_RCC_), _REG_), (_VAL_))
+#define RCC_LL_WRITE_REG(_REG, _VAL)					REGOPS_WRITE(RCC_LL_REG(_REG), (_VAL))
 
 /**
- * @brief	Sets masked bits in an RCC register
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[in] mask	Bit-mask to be ORed into the target register
- * @def		RCC_LL_SET
+ * @brief	Sets RCC register bits
+ * @def		RCC_LL_SET_BITS
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Bit mask to set
  */
-#define RCC_LL_SET(_RCC_, _REG_, _MASK_)					REGOPS_SET(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
+#define RCC_LL_SET_BITS(_REG, _MASK)					REGOPS_SET(RCC_LL_REG(_REG), (_MASK))
 
 /**
- * @brief	Clears masked bits in an RCC register
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[in] mask	Bit-mask to be cleared from the target register
- * @def		RCC_LL_CLEAR
+ * @brief	Clears RCC register bits
+ * @def		RCC_LL_CLEAR_BITS
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Bit mask to clear
  */
-#define RCC_LL_CLEAR(_RCC_, _REG_, _MASK_)					REGOPS_CLEAR(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
+#define RCC_LL_CLEAR_BITS(_REG, _MASK)					REGOPS_CLEAR(RCC_LL_REG(_REG), (_MASK))
 
 /**
- * @brief	Toggles masked bits in an RCC register
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[in] mask	Bit-mask to be toggled in the target register
- * @def		RCC_LL_TOGGLE
+ * @brief	Modifies RCC register masked field
+ * @def		RCC_LL_MODIFY_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Field mask to modify
+ * @param[in]	_VAL	Masked field value to write
+ *
+ * @note `_VAL` must already be aligned to the target field position.
  */
-#define RCC_LL_TOGGLE(_RCC_, _REG_, _MASK_)					REGOPS_TOGGLE(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
+#define RCC_LL_MODIFY_REG(_REG, _MASK, _VAL)			REGOPS_MODIFY(RCC_LL_REG(_REG), (_MASK), (_VAL))
 
 /**
- * @brief	Performs a masked register-field modification
- * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] reg	Register member name inside @ref RCC_TypeDef
- * @param[in] mask	Field mask to clear before update
- * @param[in] value	Pre-shifted field value to be merged into the register
- * @def		RCC_LL_MODIFY
+ * @brief	Checks System Clock Source Field Validity
+ * @def		RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_SW`
+ * @returns System Clock Source Validity Status
+ * @retval - `0x00U`: Invalid System Clock Source
+ * @retval - `0x01U`: Valid System Clock Source
  */
-#define RCC_LL_MODIFY(_RCC_, _REG_, _MASK_, _VAL_)			REGOPS_MODIFY(RCC_LL_REG((_RCC_), _REG_), (_MASK_), (_VAL_))
+#define RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID(_FIELD)										\
+(																						\
+	(((_FIELD) == RCC_CFGR_SW_HSI)	||	((_FIELD) == RCC_CFGR_SW_HSE)	||				\
+	((_FIELD) == RCC_CFGR_SW_PLL)) ? 0x01U : 0x00U										\
+)
 
 /**
- * @brief	Prepares a field value for masked register insertion
- * @param[in] value	Raw unshifted field value
- * @param[in] mask	Target field mask
- * @param[in] _POS_	Target field position
- * @returns	Shifted and masked field value
- * @def		RCC_LL_FIELD_PREP
+ * @brief	Checks PLL Source Field Validity
+ * @def		RCC_LL_IS_PLL_SOURCE_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLSRC`
+ * @returns PLL Source Validity Status
+ * @retval - `0x00U`: Invalid PLL Source
+ * @retval - `0x01U`: Valid PLL Source
  */
-#define RCC_LL_FIELD_PREP(_VAL_, _MASK_, _POS_)				((((uint32_t)(_VAL_)) << (_POS_)) & (_MASK_))
+#define RCC_LL_IS_PLL_SOURCE_VALID(_FIELD)												\
+(																						\
+	(((_FIELD) == RCC_CFGR_PLLSRC_HSI_DIV2)	||	((_FIELD) == RCC_CFGR_PLLSRC_HSE)) ?	\
+	0x01U : 0x00U																			\
+)
 
 /**
- * @brief	Extracts a right-aligned field value from a register image
- * @param[in] reg	Register image
- * @param[in] mask	Target field mask
- * @param[in] _POS_	Target field position
- * @returns	Right-aligned field value
- * @def		RCC_LL_FIELD_GET
+ * @brief	Checks PLL HSE Divider Field Validity
+ * @def		RCC_LL_IS_PLL_HSE_DIVIDER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLXTPRE`
+ * @returns PLL HSE Divider Validity Status
+ * @retval - `0x00U`: Invalid PLL HSE Divider
+ * @retval - `0x01U`: Valid PLL HSE Divider
  */
-#define RCC_LL_FIELD_GET(_REG_, _MASK_, _POS_)				((((uint32_t)(_REG_)) & (_MASK_)) >> (_POS_))
-
-/** @} */ // RCC_02_LL_01_RegOps
-
-// ==================================================================================================== //
-//                                          RCC LL Data Types                                           //
-// ==================================================================================================== //
+#define RCC_LL_IS_PLL_HSE_DIVIDER_VALID(_FIELD)																\
+(																											\
+	(((_FIELD) == RCC_CFGR_PLLXTPRE_HSE)	||	((_FIELD) == RCC_CFGR_PLLXTPRE_HSE_DIV2)) ? 0x01U : 0x00U	\
+)
 
 /**
- * @brief	RCC LL Field Data Types and Encoded Values
- * @defgroup RCC_02_LL_02_FieldEncodings RCC LL Field Encodings
- * @ingroup	RCC_02_LL
- * @details
- * - These values intentionally mirror the hardware field encodings.
- * - They are used directly by the LL functions to avoid unnecessary translation inside the LL layer.
- * - Each exposed macro in this section is part of the LL contract and documented individually.
- * @{
+ * @brief	Checks PLL Multiplier Field Validity
+ * @def		RCC_LL_IS_PLL_MULTIPLIER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLMUL`
+ * @returns PLL Multiplier Validity Status
+ * @retval - `0x00U`: Invalid PLL Multiplier
+ * @retval - `0x01U`: Valid PLL Multiplier
  */
-
-// ==================================================================================================== //
-//                                        LL System Clock Source                                        //
-// ==================================================================================================== //
+#define RCC_LL_IS_PLL_MULTIPLIER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PLLMUL_2)	||	((_FIELD) == RCC_CFGR_PLLMUL_3)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_4)		||	((_FIELD) == RCC_CFGR_PLLMUL_5)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_6)		||	((_FIELD) == RCC_CFGR_PLLMUL_7)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_8)		||	((_FIELD) == RCC_CFGR_PLLMUL_9)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_10)	||	((_FIELD) == RCC_CFGR_PLLMUL_11)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_12)	||	((_FIELD) == RCC_CFGR_PLLMUL_13)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_14)	||	((_FIELD) == RCC_CFGR_PLLMUL_15)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_16)) ? 0x01U : 0x00U									\
+)
 
 /**
- * @brief	LL system clock source request field type
- * @typedef	rcc_ll_sysclk_src_t
+ * @brief	Checks AHB Prescaler Field Validity
+ * @def		RCC_LL_IS_AHB_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_HPRE`
+ * @returns AHB Prescaler Validity Status
+ * @retval - `0x00U`: Invalid AHB Prescaler
+ * @retval - `0x01U`: Valid AHB Prescaler
  */
-typedef uint32_t											rcc_ll_sysclk_src_t;
-/** @brief HSI selected as requested system clock source @def RCC_LL_SYSCLK_SRC_HSI */
-#define RCC_LL_SYSCLK_SRC_HSI								(RCC_CFGR_SW_HSI)
-/** @brief HSE selected as requested system clock source @def RCC_LL_SYSCLK_SRC_HSE */
-#define RCC_LL_SYSCLK_SRC_HSE								(RCC_CFGR_SW_HSE)
-/** @brief PLL selected as requested system clock source @def RCC_LL_SYSCLK_SRC_PLL */
-#define RCC_LL_SYSCLK_SRC_PLL								(RCC_CFGR_SW_PLL)
-
-// ==================================================================================================== //
-//                                        LL System Clock Status                                        //
-// ==================================================================================================== //
+#define RCC_LL_IS_AHB_PRESCALER_VALID(_FIELD)												\
+(																							\
+	(((_FIELD) == RCC_CFGR_HPRE_DIV1)		||	((_FIELD) == RCC_CFGR_HPRE_DIV2)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV4)		||	((_FIELD) == RCC_CFGR_HPRE_DIV8)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV16)		||	((_FIELD) == RCC_CFGR_HPRE_DIV64)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV128)		||	((_FIELD) == RCC_CFGR_HPRE_DIV256)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV512)) ? 0x01U : 0x00U										\
+)
 
 /**
- * @brief	LL system clock status field type
- * @typedef	rcc_ll_sysclk_status_t
+ * @brief	Checks APB1 Prescaler Field Validity
+ * @def		RCC_LL_IS_APB1_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PPRE1`
+ * @returns APB1 Prescaler Validity Status
+ * @retval - `0x00U`: Invalid APB1 Prescaler
+ * @retval - `0x01U`: Valid APB1 Prescaler
  */
-typedef uint32_t											rcc_ll_sysclk_status_t;
-/** @brief HSI is currently driving SYSCLK @def RCC_LL_SYSCLK_STATUS_HSI */
-#define RCC_LL_SYSCLK_STATUS_HSI							(RCC_CFGR_SWS_HSI)
-/** @brief HSE is currently driving SYSCLK @def RCC_LL_SYSCLK_STATUS_HSE */
-#define RCC_LL_SYSCLK_STATUS_HSE							(RCC_CFGR_SWS_HSE)
-/** @brief PLL is currently driving SYSCLK @def RCC_LL_SYSCLK_STATUS_PLL */
-#define RCC_LL_SYSCLK_STATUS_PLL							(RCC_CFGR_SWS_PLL)
-
-// ==================================================================================================== //
-//                                            LL PLL Source                                             //
-// ==================================================================================================== //
+#define RCC_LL_IS_APB1_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PPRE1_DIV1)	||	((_FIELD) == RCC_CFGR_PPRE1_DIV2)	||		\
+	((_FIELD) == RCC_CFGR_PPRE1_DIV4)	||	((_FIELD) == RCC_CFGR_PPRE1_DIV8)	||		\
+	((_FIELD) == RCC_CFGR_PPRE1_DIV16)) ? 0x01U : 0x00U									\
+)
 
 /**
- * @brief	LL PLL source field type
- * @typedef	rcc_ll_pll_src_t
+ * @brief	Checks APB2 Prescaler Field Validity
+ * @def		RCC_LL_IS_APB2_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PPRE2`
+ * @returns APB2 Prescaler Validity Status
+ * @retval - `0x00U`: Invalid APB2 Prescaler
+ * @retval - `0x01U`: Valid APB2 Prescaler
  */
-typedef uint32_t											rcc_ll_pll_src_t;
-/** @brief HSI divided by 2 selected as PLL input @def RCC_LL_PLL_SRC_HSI_DIV2 */
-#define RCC_LL_PLL_SRC_HSI_DIV2								(RCC_CFGR_PLLSRC_HSI_DIV2)
-/** @brief HSE selected as PLL input @def RCC_LL_PLL_SRC_HSE */
-#define RCC_LL_PLL_SRC_HSE									(RCC_CFGR_PLLSRC_HSE)
-
-// ==================================================================================================== //
-//                                          LL PLL HSE Divider                                          //
-// ==================================================================================================== //
+#define RCC_LL_IS_APB2_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PPRE2_DIV1)	||	((_FIELD) == RCC_CFGR_PPRE2_DIV2)	||		\
+	((_FIELD) == RCC_CFGR_PPRE2_DIV4)	||	((_FIELD) == RCC_CFGR_PPRE2_DIV8)	||		\
+	((_FIELD) == RCC_CFGR_PPRE2_DIV16)) ? 0x01U : 0x00U								\
+)
 
 /**
- * @brief	LL PLL HSE divider field type
- * @typedef	rcc_ll_pll_hse_div_t
+ * @brief	Checks ADC Prescaler Field Validity
+ * @def		RCC_LL_IS_ADC_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_ADCPRE`
+ * @returns ADC Prescaler Validity Status
+ * @retval - `0x00U`: Invalid ADC Prescaler
+ * @retval - `0x01U`: Valid ADC Prescaler
  */
-typedef uint32_t											rcc_ll_pll_hse_div_t;
-/** @brief HSE divided by 1 before PLL input @def RCC_LL_PLL_HSE_DIV_1 */
-#define RCC_LL_PLL_HSE_DIV_1								(RCC_CFGR_PLLXTPRE_HSE)
-/** @brief HSE divided by 2 before PLL input @def RCC_LL_PLL_HSE_DIV_2 */
-#define RCC_LL_PLL_HSE_DIV_2								(RCC_CFGR_PLLXTPRE_HSE_DIV2)
-
-// ==================================================================================================== //
-//                                          LL PLL Multiplier                                           //
-// ==================================================================================================== //
+#define RCC_LL_IS_ADC_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_ADCPRE_DIV2)	||	((_FIELD) == RCC_CFGR_ADCPRE_DIV4)	||		\
+	((_FIELD) == RCC_CFGR_ADCPRE_DIV6)	||	((_FIELD) == RCC_CFGR_ADCPRE_DIV8)) ?			\
+	0x01U : 0x00U																			\
+)
 
 /**
- * @brief	LL PLL multiplication field type
- * @typedef	rcc_ll_pll_mul_t
+ * @brief	Checks USB Prescaler Field Validity
+ * @def		RCC_LL_IS_USB_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_USBPRE`
+ * @returns USB Prescaler Validity Status
+ * @retval - `0x00U`: Invalid USB Prescaler
+ * @retval - `0x01U`: Valid USB Prescaler
  */
-typedef uint32_t									rcc_ll_pll_mul_t;
-/** @brief PLL input clock multiplied by 2 @def RCC_LL_PLL_MUL_2 */
-#define RCC_LL_PLL_MUL_2							(RCC_CFGR_PLLMUL_2)
-/** @brief PLL input clock multiplied by 3 @def RCC_LL_PLL_MUL_3 */
-#define RCC_LL_PLL_MUL_3							(RCC_CFGR_PLLMUL_3)
-/** @brief PLL input clock multiplied by 4 @def RCC_LL_PLL_MUL_4 */
-#define RCC_LL_PLL_MUL_4							(RCC_CFGR_PLLMUL_4)
-/** @brief PLL input clock multiplied by 5 @def RCC_LL_PLL_MUL_5 */
-#define RCC_LL_PLL_MUL_5							(RCC_CFGR_PLLMUL_5)
-/** @brief PLL input clock multiplied by 6 @def RCC_LL_PLL_MUL_6 */
-#define RCC_LL_PLL_MUL_6							(RCC_CFGR_PLLMUL_6)
-/** @brief PLL input clock multiplied by 7 @def RCC_LL_PLL_MUL_7 */
-#define RCC_LL_PLL_MUL_7							(RCC_CFGR_PLLMUL_7)
-/** @brief PLL input clock multiplied by 8 @def RCC_LL_PLL_MUL_8 */
-#define RCC_LL_PLL_MUL_8							(RCC_CFGR_PLLMUL_8)
-/** @brief PLL input clock multiplied by 9 @def RCC_LL_PLL_MUL_9 */
-#define RCC_LL_PLL_MUL_9							(RCC_CFGR_PLLMUL_9)
-/** @brief PLL input clock multiplied by 10 @def RCC_LL_PLL_MUL_10 */
-#define RCC_LL_PLL_MUL_10							(RCC_CFGR_PLLMUL_10)
-/** @brief PLL input clock multiplied by 11 @def RCC_LL_PLL_MUL_11 */
-#define RCC_LL_PLL_MUL_11							(RCC_CFGR_PLLMUL_11)
-/** @brief PLL input clock multiplied by 12 @def RCC_LL_PLL_MUL_12 */
-#define RCC_LL_PLL_MUL_12							(RCC_CFGR_PLLMUL_12)
-/** @brief PLL input clock multiplied by 13 @def RCC_LL_PLL_MUL_13 */
-#define RCC_LL_PLL_MUL_13							(RCC_CFGR_PLLMUL_13)
-/** @brief PLL input clock multiplied by 14 @def RCC_LL_PLL_MUL_14 */
-#define RCC_LL_PLL_MUL_14							(RCC_CFGR_PLLMUL_14)
-/** @brief PLL input clock multiplied by 15 @def RCC_LL_PLL_MUL_15 */
-#define RCC_LL_PLL_MUL_15							(RCC_CFGR_PLLMUL_15)
-/** @brief PLL input clock multiplied by 16 @def RCC_LL_PLL_MUL_16 */
-#define RCC_LL_PLL_MUL_16							(RCC_CFGR_PLLMUL_16)
-
-// ==================================================================================================== //
-//                                           LL AHB Prescaler                                           //
-// ==================================================================================================== //
+#define RCC_LL_IS_USB_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_USBPRE_DIV1_5)	||	((_FIELD) == RCC_CFGR_USBPRE_DIRECT)) ?		\
+	0x01U : 0x00U																			\
+)
 
 /**
- * @brief	LL AHB prescaler field type
- * @typedef	rcc_ll_ahb_prescaler_t
+ * @brief	Checks Bit-Mask Validity
+ * @def		RCC_LL_IS_MASK_VALID
+ * @param[in] _MASK	Raw hardware bit-mask
+ * @returns Bit-Mask Validity Status
+ * @retval - `0x00U`: Invalid Bit-Mask
+ * @retval - `0x01U`: Valid Bit-Mask
  */
-typedef uint32_t									rcc_ll_ahb_prescaler_t;
-/** @brief AHB clock not divided @def RCC_LL_AHB_DIV_1 */
-#define RCC_LL_AHB_DIV_1							(RCC_CFGR_HPRE_DIV1)
-/** @brief AHB clock divided by 2 @def RCC_LL_AHB_DIV_2 */
-#define RCC_LL_AHB_DIV_2							(RCC_CFGR_HPRE_DIV2)
-/** @brief AHB clock divided by 4 @def RCC_LL_AHB_DIV_4 */
-#define RCC_LL_AHB_DIV_4							(RCC_CFGR_HPRE_DIV4)
-/** @brief AHB clock divided by 8 @def RCC_LL_AHB_DIV_8 */
-#define RCC_LL_AHB_DIV_8							(RCC_CFGR_HPRE_DIV8)
-/** @brief AHB clock divided by 16 @def RCC_LL_AHB_DIV_16 */
-#define RCC_LL_AHB_DIV_16							(RCC_CFGR_HPRE_DIV16)
-/** @brief AHB clock divided by 64 @def RCC_LL_AHB_DIV_64 */
-#define RCC_LL_AHB_DIV_64							(RCC_CFGR_HPRE_DIV64)
-/** @brief AHB clock divided by 128 @def RCC_LL_AHB_DIV_128 */
-#define RCC_LL_AHB_DIV_128							(RCC_CFGR_HPRE_DIV128)
-/** @brief AHB clock divided by 256 @def RCC_LL_AHB_DIV_256 */
-#define RCC_LL_AHB_DIV_256							(RCC_CFGR_HPRE_DIV256)
-/** @brief AHB clock divided by 512 @def RCC_LL_AHB_DIV_512 */
-#define RCC_LL_AHB_DIV_512							(RCC_CFGR_HPRE_DIV512)
+#define RCC_LL_IS_MASK_VALID(_MASK)															\
+(																						\
+	(((_MASK) != 0x00UL) ? 0x01U : 0x00U)												\
+)
 
-// ==================================================================================================== //
-//                                           LL APB Prescaler                                           //
-// ==================================================================================================== //
-
-/**
- * @brief	LL APB prescaler field type
- * @typedef	rcc_ll_apb_prescaler_t
- */
-typedef uint32_t									rcc_ll_apb_prescaler_t;
-/** @brief APB clock not divided @def RCC_LL_APB_DIV_1 */
-#define RCC_LL_APB_DIV_1							(RCC_CFGR_PPRE1_DIV1)
-/** @brief APB clock divided by 2 @def RCC_LL_APB_DIV_2 */
-#define RCC_LL_APB_DIV_2							(RCC_CFGR_PPRE1_DIV2)
-/** @brief APB clock divided by 4 @def RCC_LL_APB_DIV_4 */
-#define RCC_LL_APB_DIV_4							(RCC_CFGR_PPRE1_DIV4)
-/** @brief APB clock divided by 8 @def RCC_LL_APB_DIV_8 */
-#define RCC_LL_APB_DIV_8							(RCC_CFGR_PPRE1_DIV8)
-/** @brief APB clock divided by 16 @def RCC_LL_APB_DIV_16 */
-#define RCC_LL_APB_DIV_16							(RCC_CFGR_PPRE1_DIV16)
-
-// ==================================================================================================== //
-//                                           LL ADC Prescaler                                           //
-// ==================================================================================================== //
-
-/**
- * @brief	LL ADC prescaler field type
- * @typedef	rcc_ll_adc_prescaler_t
- */
-typedef uint32_t									rcc_ll_adc_prescaler_t;
-/** @brief ADC clock derived from PCLK2 divided by 2 @def RCC_LL_ADC_DIV_2 */
-#define RCC_LL_ADC_DIV_2							(RCC_CFGR_ADCPRE_DIV2)
-/** @brief ADC clock derived from PCLK2 divided by 4 @def RCC_LL_ADC_DIV_4 */
-#define RCC_LL_ADC_DIV_4							(RCC_CFGR_ADCPRE_DIV4)
-/** @brief ADC clock derived from PCLK2 divided by 6 @def RCC_LL_ADC_DIV_6 */
-#define RCC_LL_ADC_DIV_6							(RCC_CFGR_ADCPRE_DIV6)
-/** @brief ADC clock derived from PCLK2 divided by 8 @def RCC_LL_ADC_DIV_8 */
-#define RCC_LL_ADC_DIV_8							(RCC_CFGR_ADCPRE_DIV8)
-
-// ==================================================================================================== //
-//                                           LL USB Prescaler                                           //
-// ==================================================================================================== //
-
-/**
- * @brief	LL USB prescaler field type
- * @typedef	rcc_ll_usb_prescaler_t
- */
-typedef uint32_t								rcc_ll_usb_prescaler_t;
-
-/** @brief PLL clock divided by 1.5 for USB clock generation @def RCC_LL_USB_DIV_1_5 */
-#define RCC_LL_USB_DIV_1_5							(RCC_CFGR_USBPRE_DIV1_5)
-/** @brief PLL clock used directly for USB clock generation @def RCC_LL_USB_DIV_1 */
-#define RCC_LL_USB_DIV_1							(RCC_CFGR_USBPRE_DIRECT)
-
-/** @} */ // RCC_02_LL_02_FieldEncodings
-
-// ==================================================================================================== //
-//                                     RCC LL Compatibility Macros                                      //
-// ==================================================================================================== //
-
-/**
- * @brief	RCC Legacy Compatibility Macros
- * @defgroup RCC_02_LL_06_Legacy RCC LL Legacy Compatibility Helpers
- * @ingroup	RCC_02_LL
- * @details
- * - These aliases are retained for LL modules that still call the historic `__RCC_*` helpers.
- * - They are thin compatibility shims over the generic @ref RCC_02_LL_01_RegOps macros.
- * - New RCC code should prefer the functional LL API or the generic `RCC_LL_*` macros directly.
- * @{
- */
-
-/** @brief Reads @ref RCC_CR "RCC->CR" @def __RCC_ReadCR */
-#define __RCC_ReadCR(_RCC_)									(*RCC_LL_REG((_RCC_), CR))
-/** @brief Writes @ref RCC_CR "RCC->CR" @def __RCC_WriteCR */
-#define __RCC_WriteCR(_RCC_, _VAL_)							RCC_LL_WRITE((_RCC_), CR, (_VAL_))
-/** @brief Sets masked bits in @ref RCC_CR "RCC->CR" @def __RCC_SetCR */
-#define __RCC_SetCR(_RCC_, _MASK_)							RCC_LL_SET((_RCC_), CR, (_MASK_))
-/** @brief Clears masked bits in @ref RCC_CR "RCC->CR" @def __RCC_ClearCR */
-#define __RCC_ClearCR(_RCC_, _MASK_)						RCC_LL_CLEAR((_RCC_), CR, (_MASK_))
-
-/** @brief Reads @ref RCC_CFGR "RCC->CFGR" @def __RCC_ReadCFGR */
-#define __RCC_ReadCFGR(_RCC_)								(*RCC_LL_REG((_RCC_), CFGR))
-/** @brief Writes @ref RCC_CFGR "RCC->CFGR" @def __RCC_WriteCFGR */
-#define __RCC_WriteCFGR(_RCC_, _VAL_)						RCC_LL_WRITE((_RCC_), CFGR, (_VAL_))
-/** @brief Sets masked bits in @ref RCC_CFGR "RCC->CFGR" @def __RCC_SetCFGR */
-#define __RCC_SetCFGR(_RCC_, _MASK_)						RCC_LL_SET((_RCC_), CFGR, (_MASK_))
-/** @brief Clears masked bits in @ref RCC_CFGR "RCC->CFGR" @def __RCC_ClearCFGR */
-#define __RCC_ClearCFGR(_RCC_, _MASK_)						RCC_LL_CLEAR((_RCC_), CFGR, (_MASK_))
-
-/** @brief Sets bits in @ref RCC_AHBENR "RCC->AHBENR" @def __RCC_SetAHBENR */
-#define __RCC_SetAHBENR(_RCC_, _MASK_)						RCC_LL_SET((_RCC_), AHBENR, (_MASK_))
-/** @brief Clears bits in @ref RCC_AHBENR "RCC->AHBENR" @def __RCC_ClearAHBENR */
-#define __RCC_ClearAHBENR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), AHBENR, (_MASK_))
-/** @brief Sets bits in @ref RCC_APB2ENR "RCC->APB2ENR" @def __RCC_SetAPB2ENR */
-#define __RCC_SetAPB2ENR(_RCC_, _MASK_)						RCC_LL_SET((_RCC_), APB2ENR, (_MASK_))
-/** @brief Clears bits in @ref RCC_APB2ENR "RCC->APB2ENR" @def __RCC_ClearAPB2ENR */
-#define __RCC_ClearAPB2ENR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), APB2ENR, (_MASK_))
-/** @brief Sets bits in @ref RCC_APB1ENR "RCC->APB1ENR" @def __RCC_SetAPB1ENR */
-#define __RCC_SetAPB1ENR(_RCC_, _MASK_)						RCC_LL_SET((_RCC_), APB1ENR, (_MASK_))
-/** @brief Clears bits in @ref RCC_APB1ENR "RCC->APB1ENR" @def __RCC_ClearAPB1ENR */
-#define __RCC_ClearAPB1ENR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), APB1ENR, (_MASK_))
-
-/** @brief Sets bits in @ref RCC_APB2RSTR "RCC->APB2RSTR" @def __RCC_SetAPB2RSTR */
-#define __RCC_SetAPB2RSTR(_RCC_, _MASK_)					RCC_LL_SET((_RCC_), APB2RSTR, (_MASK_))
-/** @brief Clears bits in @ref RCC_APB2RSTR "RCC->APB2RSTR" @def __RCC_ClearAPB2RSTR */
-#define __RCC_ClearAPB2RSTR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), APB2RSTR, (_MASK_))
-/** @brief Sets bits in @ref RCC_APB1RSTR "RCC->APB1RSTR" @def __RCC_SetAPB1RSTR */
-#define __RCC_SetAPB1RSTR(_RCC_, _MASK_)					RCC_LL_SET((_RCC_), APB1RSTR, (_MASK_))
-/** @brief Clears bits in @ref RCC_APB1RSTR "RCC->APB1RSTR" @def __RCC_ClearAPB1RSTR */
-#define __RCC_ClearAPB1RSTR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), APB1RSTR, (_MASK_))
-
-/** @} */ // RCC_02_LL_06_Legacy
+/** @} */ // RCC_02_LL_01_RegisterOps
 
 // ==================================================================================================== //
 //                                       RCC LL System Clock APIs                                       //
@@ -401,222 +259,295 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 
 /**
  * @brief	RCC LL System Clock Control
- * @defgroup RCC_02_LL_03_SystemClock RCC LL System Clock Control
+ * @defgroup RCC_02_LL_02_SystemClock RCC LL System Clock Control
  * @ingroup	RCC_02_LL
  * @details
- * This group owns register-near control of HSI, HSE, PLL, SYSCLK source
- * selection, and PLL-related field programming.
+ * This group owns register-near control of HSI, HSE, PLL, SYSCLK source selection,
+ * and PLL-related field programming using raw hardware field values from
+ * @ref stm32f1xx_rcc.h.
  * @{
  */
 
 /**
- * @brief	Enables the internal high-speed oscillator
+ * @brief	Enables HSI Clock Source
+ * @details
+ * Sets the `HSION` bit in `RCC->CR.REG` to request enabling the internal
+ * high-speed oscillator.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSI_Enable(void)
+__STATIC_FORCEINLINE void RCC_LL_EnableHSI(void)
 {
-	RCC_LL_SET(RCC, CR, RCC_CR_HSION);
+	RCC_LL_SET_BITS(CR, RCC_CR_HSION);
 }
 
 /**
- * @brief	Disables the internal high-speed oscillator
+ * @brief	Disables HSI Clock Source
+ * @details
+ * Clears the `HSION` bit in `RCC->CR.REG` to request disabling the internal
+ * high-speed oscillator.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSI_Disable(void)
+__STATIC_FORCEINLINE void RCC_LL_DisableHSI(void)
 {
-	RCC_LL_CLEAR(RCC, CR, RCC_CR_HSION);
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSION);
 }
 
 /**
- * @brief	Retrieves the internal high-speed oscillator ready state
- * @returns - @ref driver_status_t HSI ready-state status
- * @retval - @ref `DRIVER_STATUS_READY`: HSI ready flag is set.
- * @retval - @ref `DRIVER_STATUS_OFF`: HSI ready flag is cleared.
+ * @brief	Gets HSI Ready Status
+ * @details
+ * Reads the `HSIRDY` bit from `RCC->CR.REG` and reports whether HSI is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of HSI ready state
+ * @retval	`DRIVER_STATUS_READY`: HSI clock source is ready
+ * @retval	`DRIVER_STATUS_OFF`: HSI clock source is not ready
  */
-__STATIC_FORCEINLINE driver_status_t RCC_LL_HSI_GetReadyStatus(void)
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetHSIReadyStatus(void)
 {
-	const uint32_t rcc_cr = __RCC_ReadCR(RCC);
-	if ((rcc_cr & RCC_CR_HSIRDY) != 0x00UL)
-	{
-		return DRIVER_STATUS_READY;
-	}
-	else
-	{
-		return DRIVER_STATUS_OFF;
-	}
+	uint32_t regImage = 0x00UL;
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_HSIRDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
 }
 
 /**
- * @brief	Enables the external high-speed oscillator
+ * @brief	Enables HSE Clock Source
+ * @details
+ * Sets the `HSEON` bit in `RCC->CR.REG` to request enabling the external
+ * high-speed oscillator.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSE_Enable(void)
+__STATIC_FORCEINLINE void RCC_LL_EnableHSE(void)
 {
-	RCC_LL_SET(RCC, CR, RCC_CR_HSEON);
+	RCC_LL_SET_BITS(CR, RCC_CR_HSEON);
 }
 
 /**
- * @brief	Disables the external high-speed oscillator
+ * @brief	Disables HSE Clock Source
+ * @details
+ * Clears the `HSEON` bit in `RCC->CR.REG` to request disabling the external
+ * high-speed oscillator.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSE_Disable(void)
+__STATIC_FORCEINLINE void RCC_LL_DisableHSE(void)
 {
-	RCC_LL_CLEAR(RCC, CR, RCC_CR_HSEON);
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSEON);
 }
 
 /**
- * @brief	Enables HSE bypass mode
+ * @brief	Enables HSE Bypass
+ * @details
+ * Sets the `HSEBYP` bit in `RCC->CR.REG` to bypass the crystal oscillator and
+ * use an external clock source on HSE.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSE_BypassEnable(void)
+__STATIC_FORCEINLINE void RCC_LL_EnableHSEBypass(void)
 {
-	RCC_LL_SET(RCC, CR, RCC_CR_HSEBYP);
+	RCC_LL_SET_BITS(CR, RCC_CR_HSEBYP);
 }
 
 /**
- * @brief	Disables HSE bypass mode
+ * @brief	Disables HSE Bypass
+ * @details
+ * Clears the `HSEBYP` bit in `RCC->CR.REG` to use the normal HSE crystal path.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_HSE_BypassDisable(void)
+__STATIC_FORCEINLINE void RCC_LL_DisableHSEBypass(void)
 {
-	RCC_LL_CLEAR(RCC, CR, RCC_CR_HSEBYP);
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSEBYP);
 }
 
 /**
- * @brief	Retrieves the external high-speed oscillator ready state
- * @returns - @ref driver_status_t HSE ready-state status
- * @retval - @ref `DRIVER_STATUS_READY`: HSE ready flag is set.
- * @retval - @ref `DRIVER_STATUS_OFF`: HSE ready flag is cleared.
+ * @brief	Gets HSE Ready Status
+ * @details
+ * Reads the `HSERDY` bit from `RCC->CR.REG` and reports whether HSE is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of HSE ready state
+ * @retval	`DRIVER_STATUS_READY`: HSE clock source is ready
+ * @retval	`DRIVER_STATUS_OFF`: HSE clock source is not ready
  */
-__STATIC_FORCEINLINE driver_status_t RCC_LL_HSE_GetReadyStatus(void)
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetHSEReadyStatus(void)
 {
-	if ((RCC->CR.REG & RCC_CR_HSERDY) != 0x00UL)
-	{
-		return DRIVER_STATUS_READY;
-	}
-	else
-	{
-		return DRIVER_STATUS_OFF;
-	}
+	uint32_t regImage = 0x00UL;
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_HSERDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
 }
 
 /**
- * @brief	Enables the PLL
+ * @brief	Enables PLL
+ * @details
+ * Sets the `PLLON` bit in `RCC->CR.REG` to request enabling the PLL.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_PLL_Enable(void)
+__STATIC_FORCEINLINE void RCC_LL_EnablePLL(void)
 {
-	RCC_LL_SET(RCC, CR, RCC_CR_PLLON);
+	RCC_LL_SET_BITS(CR, RCC_CR_PLLON);
 }
 
 /**
- * @brief	Disables the PLL
+ * @brief	Disables PLL
+ * @details
+ * Clears the `PLLON` bit in `RCC->CR.REG` to request disabling the PLL.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE void RCC_LL_PLL_Disable(void)
+__STATIC_FORCEINLINE void RCC_LL_DisablePLL(void)
 {
-	RCC_LL_CLEAR(RCC, CR, RCC_CR_PLLON);
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_PLLON);
 }
 
 /**
- * @brief	Retrieves the PLL ready state
- * @returns - @ref driver_status_t PLL ready-state status
- * @retval - @ref `DRIVER_STATUS_READY`: PLL ready flag is set.
- * @retval - @ref `DRIVER_STATUS_OFF`: PLL ready flag is cleared.
+ * @brief	Gets PLL Ready Status
+ * @details
+ * Reads the `PLLRDY` bit from `RCC->CR.REG` and reports whether PLL is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of PLL ready state
+ * @retval	`DRIVER_STATUS_READY`: PLL is ready
+ * @retval	`DRIVER_STATUS_OFF`: PLL is not ready
  */
-__STATIC_FORCEINLINE driver_status_t RCC_LL_PLL_GetReadyStatus(void)
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetPLLReadyStatus(void)
 {
-	if ((RCC->CR.REG & RCC_CR_PLLRDY) != 0x00UL)
-	{
-		return DRIVER_STATUS_READY;
-	}
-	else
-	{
-		return DRIVER_STATUS_OFF;
-	}
+	uint32_t regImage = 0x00UL;
+
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_PLLRDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
 }
-// ==================================================================================================== //
-//                                   RCC LL System Clock Field Access                                   //
-// ==================================================================================================== //
 
 /**
- * @brief Register-near setters and getters for SYSCLK and PLL-related fields
+ * @brief	Sets System Clock Source Field
+ * @details
+ * Programs the `SW` field in `RCC->CFGR.REG` using the supplied raw hardware
+ * field value.
+ *
+ * @param[in] sysClkSrcField	Raw hardware field value for `RCC_CFGR_SW`
+ *
+ * @returns	@ref driver_status_t Status of system clock source update
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `sysClkSrcField` is invalid
  */
+driver_status_t RCC_LL_SetSystemClockSource(const uint32_t sysClkSrcField);
 
 /**
- * @brief	Programs the requested SYSCLK source field
- * @param[in] source	Requested system clock source field value of @ref rcc_ll_sysclk_src_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid system clock source field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a valid @ref rcc_ll_sysclk_src_t value.
+ * @brief	Gets System Clock Source Field
+ * @details
+ * Reads the `SW` field from `RCC->CFGR.REG` and stores the raw hardware field
+ * value in the supplied output pointer.
+ *
+ * @param[out] pSysClkSrcField	Pointer to destination variable for `RCC_CFGR_SW` field value
+ *
+ * @returns	@ref driver_status_t Status of system clock source read
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkSrcField` is `NULL`
  */
-driver_status_t RCC_LL_SetSystemClockSource(const rcc_ll_sysclk_src_t source);
+driver_status_t RCC_LL_GetSystemClockSource(uint32_t* const pSysClkSrcField);
 
 /**
- * @brief	Reads the configured SYSCLK source request field
- * @param[out] pSource	Pointer receiving @ref rcc_ll_sysclk_src_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: System clock source field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSource is NULL.
+ * @brief	Gets Active System Clock Status Field
+ * @details
+ * Reads the `SWS` field from `RCC->CFGR.REG` and stores the raw hardware field
+ * value in the supplied output pointer.
+ *
+ * @param[out] pSysClkStatusField	Pointer to destination variable for `RCC_CFGR_SWS` field value
+ *
+ * @returns	@ref driver_status_t Status of system clock status read
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock status field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkStatusField` is `NULL`
  */
-driver_status_t RCC_LL_GetSystemClockSource(rcc_ll_sysclk_src_t* const pSource);
+driver_status_t RCC_LL_GetSystemClockStatus(uint32_t* const pSysClkStatusField);
 
 /**
- * @brief	Reads the active SYSCLK status field
- * @param[out] pStatus	Pointer receiving @ref rcc_ll_sysclk_status_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: System clock status field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pStatus is NULL.
+ * @brief	Sets PLL Source Field
+ * @details
+ * Programs the `PLLSRC` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllSrcField	Raw hardware field value for `RCC_CFGR_PLLSRC`
+ *
+ * @returns	@ref driver_status_t Status of PLL source field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllSrcField` is invalid
  */
-driver_status_t RCC_LL_GetSystemClockStatus(rcc_ll_sysclk_status_t* const pStatus);
+driver_status_t RCC_LL_SetPLLSource(const uint32_t pllSrcField);
 
 /**
- * @brief	Programs the PLL input source field
- * @param[in] source	PLL source field value of @ref rcc_ll_pll_src_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid PLL source field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a valid @ref rcc_ll_pll_src_t value.
+ * @brief	Gets PLL Source Field
+ * @details
+ * Reads the `PLLSRC` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllSrcField	Pointer to destination variable for `RCC_CFGR_PLLSRC` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL source field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllSrcField` is `NULL`
  */
-driver_status_t RCC_LL_SetPLLSource(const rcc_ll_pll_src_t source);
+driver_status_t RCC_LL_GetPLLSource(uint32_t* const pPllSrcField);
 
 /**
- * @brief	Reads the configured PLL source field
- * @param[out] pSource	Pointer receiving @ref rcc_ll_pll_src_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL source field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSource is NULL.
+ * @brief	Sets PLL HSE Divider Field
+ * @details
+ * Programs the `PLLXTPRE` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllHseDividerField	Raw hardware field value for `RCC_CFGR_PLLXTPRE`
+ *
+ * @returns	@ref driver_status_t Status of PLL HSE divider field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllHseDividerField` is invalid
  */
-driver_status_t RCC_LL_GetPLLSource(rcc_ll_pll_src_t* const pSource);
+driver_status_t RCC_LL_SetPLLHSEDivider(const uint32_t pllHseDividerField);
 
 /**
- * @brief	Programs the HSE predivider used before PLL input
- * @param[in] divider	PLL HSE divider value of @ref rcc_ll_pll_hse_div_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid PLL HSE divider field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p divider is not a valid @ref rcc_ll_pll_hse_div_t value.
+ * @brief	Gets PLL HSE Divider Field
+ * @details
+ * Reads the `PLLXTPRE` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllHseDividerField	Pointer to destination variable for `RCC_CFGR_PLLXTPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL HSE divider field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllHseDividerField` is `NULL`
  */
-driver_status_t RCC_LL_SetPLLHSEDivider(const rcc_ll_pll_hse_div_t divider);
+driver_status_t RCC_LL_GetPLLHSEDivider(uint32_t* const pPllHseDividerField);
 
 /**
- * @brief	Reads the configured HSE predivider used before PLL input
- * @param[out] pDivider	Pointer receiving @ref rcc_ll_pll_hse_div_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL HSE divider field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDivider is NULL.
+ * @brief	Sets PLL Multiplier Field
+ * @details
+ * Programs the `PLLMUL` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllMulField	Raw hardware field value for `RCC_CFGR_PLLMUL`
+ *
+ * @returns	@ref driver_status_t Status of PLL multiplier field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllMulField` is invalid
  */
-driver_status_t RCC_LL_GetPLLHSEDivider(rcc_ll_pll_hse_div_t* const pDivider);
+driver_status_t RCC_LL_SetPLLMultiplier(const uint32_t pllMulField);
 
 /**
- * @brief	Programs the PLL multiplication factor field
- * @param[in] multiplier	PLL multiplication field value of @ref rcc_ll_pll_mul_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid PLL multiplication field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p multiplier is not a valid @ref rcc_ll_pll_mul_t value.
+ * @brief	Gets PLL Multiplier Field
+ * @details
+ * Reads the `PLLMUL` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllMulField	Pointer to destination variable for `RCC_CFGR_PLLMUL` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL multiplier field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllMulField` is `NULL`
  */
-driver_status_t RCC_LL_SetPLLMultiplier(const rcc_ll_pll_mul_t multiplier);
+driver_status_t RCC_LL_GetPLLMultiplier(uint32_t* const pPllMulField);
 
-/**
- * @brief	Reads the configured PLL multiplication factor field
- * @param[out] pMultiplier	Pointer receiving @ref rcc_ll_pll_mul_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL multiplication field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pMultiplier is NULL.
- */
-driver_status_t RCC_LL_GetPLLMultiplier(rcc_ll_pll_mul_t* const pMultiplier);
-
-/** @} */ // RCC_02_LL_03_SystemClock
+/** @} */ // RCC_02_LL_02_SystemClock
 
 // ==================================================================================================== //
 //                                        RCC LL Prescaler APIs                                         //
@@ -624,229 +555,318 @@ driver_status_t RCC_LL_GetPLLMultiplier(rcc_ll_pll_mul_t* const pMultiplier);
 
 /**
  * @brief	RCC LL Prescaler Control
- * @defgroup RCC_02_LL_04_Prescalers RCC LL Prescaler Control
+ * @defgroup RCC_02_LL_03_Prescalers RCC LL Prescaler Control
  * @ingroup	RCC_02_LL
  * @details
- * This group owns register-near programming of AHB, APB, ADC, and USB prescaler fields.
+ * This group owns register-near programming of AHB, APB, ADC, and USB prescaler
+ * fields using raw hardware encodings from @ref stm32f1xx_rcc.h.
  * @{
  */
 
 /**
- * @brief	Programs the AHB prescaler field
- * @param[in] prescaler	AHB prescaler field value of @ref rcc_ll_ahb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid AHB prescaler field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p prescaler is not a valid @ref rcc_ll_ahb_prescaler_t value.
+ * @brief	Sets AHB Prescaler Field
+ * @details
+ * Programs the `HPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] ahbPrescalerField	Raw hardware field value for `RCC_CFGR_HPRE`
+ *
+ * @returns	@ref driver_status_t Status of AHB prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `ahbPrescalerField` is invalid
  */
-driver_status_t RCC_LL_SetAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler);
+driver_status_t RCC_LL_SetAHBPrescaler(const uint32_t ahbPrescalerField);
 
 /**
- * @brief	Reads the configured AHB prescaler field
- * @param[out] pPrescaler	Pointer receiving @ref rcc_ll_ahb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB prescaler field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is NULL.
+ * @brief	Gets AHB Prescaler Field
+ * @details
+ * Reads the `HPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pAhbPrescalerField	Pointer to destination variable for `RCC_CFGR_HPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of AHB prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAhbPrescalerField` is `NULL`
  */
-driver_status_t RCC_LL_GetAHBPrescaler(rcc_ll_ahb_prescaler_t* const pPrescaler);
+driver_status_t RCC_LL_GetAHBPrescaler(uint32_t* const pAhbPrescalerField);
 
 /**
- * @brief	Programs the APB1 prescaler field
- * @param[in] prescaler	APB prescaler field value of @ref rcc_ll_apb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid APB1 prescaler field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p prescaler is not a valid @ref rcc_ll_apb_prescaler_t value.
+ * @brief	Sets APB1 Prescaler Field
+ * @details
+ * Programs the `PPRE1` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] apb1PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE1`
+ *
+ * @returns	@ref driver_status_t Status of APB1 prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb1PrescalerField` is invalid
  */
-driver_status_t RCC_LL_SetAPB1Prescaler(const rcc_ll_apb_prescaler_t prescaler);
+driver_status_t RCC_LL_SetAPB1Prescaler(const uint32_t apb1PrescalerField);
 
 /**
- * @brief	Reads the configured APB1 prescaler field
- * @param[out] pPrescaler	Pointer receiving @ref rcc_ll_apb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 prescaler field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is NULL.
+ * @brief	Gets APB1 Prescaler Field
+ * @details
+ * Reads the `PPRE1` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pApb1PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE1` field value
+ *
+ * @returns	@ref driver_status_t Status of APB1 prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb1PrescalerField` is `NULL`
  */
-driver_status_t RCC_LL_GetAPB1Prescaler(rcc_ll_apb_prescaler_t* const pPrescaler);
+driver_status_t RCC_LL_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField);
 
 /**
- * @brief	Programs the APB2 prescaler field
- * @param[in] prescaler	APB prescaler field value of @ref rcc_ll_apb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid APB2 prescaler field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p prescaler is not a valid @ref rcc_ll_apb_prescaler_t value.
+ * @brief	Sets APB2 Prescaler Field
+ * @details
+ * Programs the `PPRE2` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] apb2PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE2`
+ *
+ * @returns	@ref driver_status_t Status of APB2 prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb2PrescalerField` is invalid
  */
-driver_status_t RCC_LL_SetAPB2Prescaler(const rcc_ll_apb_prescaler_t prescaler);
+driver_status_t RCC_LL_SetAPB2Prescaler(const uint32_t apb2PrescalerField);
 
 /**
- * @brief	Reads the configured APB2 prescaler field
- * @param[out] pPrescaler	Pointer receiving @ref rcc_ll_apb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 prescaler field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is NULL.
+ * @brief	Gets APB2 Prescaler Field
+ * @details
+ * Reads the `PPRE2` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pApb2PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE2` field value
+ *
+ * @returns	@ref driver_status_t Status of APB2 prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb2PrescalerField` is `NULL`
  */
-driver_status_t RCC_LL_GetAPB2Prescaler(rcc_ll_apb_prescaler_t* const pPrescaler);
+driver_status_t RCC_LL_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField);
 
 /**
- * @brief	Programs the ADC prescaler field
- * @param[in] prescaler	ADC prescaler field value of @ref rcc_ll_adc_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid ADC prescaler field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p prescaler is not a valid @ref rcc_ll_adc_prescaler_t value.
+ * @brief	Sets ADC Prescaler Field
+ * @details
+ * Programs the `ADCPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] adcPrescalerField	Raw hardware field value for `RCC_CFGR_ADCPRE`
+ *
+ * @returns	@ref driver_status_t Status of ADC prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `adcPrescalerField` is invalid
  */
-driver_status_t RCC_LL_SetADCPrescaler(const rcc_ll_adc_prescaler_t prescaler);
+driver_status_t RCC_LL_SetADCPrescaler(const uint32_t adcPrescalerField);
 
 /**
- * @brief	Reads the configured ADC prescaler field
- * @param[out] pPrescaler	Pointer receiving @ref rcc_ll_adc_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: ADC prescaler field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is NULL.
+ * @brief	Gets ADC Prescaler Field
+ * @details
+ * Reads the `ADCPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pAdcPrescalerField	Pointer to destination variable for `RCC_CFGR_ADCPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of ADC prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAdcPrescalerField` is `NULL`
  */
-driver_status_t RCC_LL_GetADCPrescaler(rcc_ll_adc_prescaler_t* const pPrescaler);
+driver_status_t RCC_LL_GetADCPrescaler(uint32_t* const pAdcPrescalerField);
 
 /**
- * @brief	Programs the USB prescaler field
- * @param[in] prescaler	USB prescaler field value of @ref rcc_ll_usb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Valid USB prescaler field was programmed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p prescaler is not a valid @ref rcc_ll_usb_prescaler_t value.
+ * @brief	Sets USB Prescaler Field
+ * @details
+ * Programs the `USBPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] usbPrescalerField	Raw hardware field value for `RCC_CFGR_USBPRE`
+ *
+ * @returns	@ref driver_status_t Status of USB prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `usbPrescalerField` is invalid
  */
-driver_status_t RCC_LL_SetUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler);
+driver_status_t RCC_LL_SetUSBPrescaler(const uint32_t usbPrescalerField);
 
 /**
- * @brief	Reads the configured USB prescaler field
- * @param[out] pPrescaler	Pointer receiving @ref rcc_ll_usb_prescaler_t
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: USB prescaler field was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is NULL.
+ * @brief	Gets USB Prescaler Field
+ * @details
+ * Reads the `USBPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pUsbPrescalerField	Pointer to destination variable for `RCC_CFGR_USBPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of USB prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pUsbPrescalerField` is `NULL`
  */
-driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler);
+driver_status_t RCC_LL_GetUSBPrescaler(uint32_t* const pUsbPrescalerField);
 
-/** @} */ // RCC_02_LL_04_Prescalers
+/** @} */ // RCC_02_LL_03_Prescalers
 
 // ==================================================================================================== //
 //                                     RCC LL Clock Gate and Reset                                      //
 // ==================================================================================================== //
 
 /**
- * @brief	RCC LL Clock Gate and Reset APIs
- * @defgroup RCC_02_LL_05_ClockReset RCC LL Clock Gate and Reset Control
+ * @brief	RCC LL Clock Gate and Reset Control
+ * @defgroup RCC_02_LL_04_ClockReset RCC LL Clock Gate and Reset Control
  * @ingroup	RCC_02_LL
  * @{
  */
 
 /**
- * @brief	Enables AHB peripheral clocks using a raw AHBENR mask
- * @param[in] mask	AHBENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB clock bits were enabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Enables AHB Peripheral Clock
+ * @details
+ * Sets the requested enable bits in `RCC->AHBENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for AHB peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of AHB clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_AHB_EnableClock(const uint32_t mask);
+driver_status_t RCC_LL_EnableAHBClock(const uint32_t mask);
 
 /**
- * @brief	Disables AHB peripheral clocks using a raw AHBENR mask
- * @param[in] mask	AHBENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB clock bits were disabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Disables AHB Peripheral Clock
+ * @details
+ * Clears the requested enable bits in `RCC->AHBENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for AHB peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of AHB clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_AHB_DisableClock(const uint32_t mask);
+driver_status_t RCC_LL_DisableAHBClock(const uint32_t mask);
 
 /**
- * @brief	Enables APB2 peripheral clocks using a raw APB2ENR mask
- * @param[in] mask	APB2ENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 clock bits were enabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Enables APB2 Peripheral Clock
+ * @details
+ * Sets the requested enable bits in `RCC->APB2ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of APB2 clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB2_EnableClock(const uint32_t mask);
+driver_status_t RCC_LL_EnableAPB2Clock(const uint32_t mask);
 
 /**
- * @brief	Disables APB2 peripheral clocks using a raw APB2ENR mask
- * @param[in] mask	APB2ENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 clock bits were disabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Disables APB2 Peripheral Clock
+ * @details
+ * Clears the requested enable bits in `RCC->APB2ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of APB2 clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB2_DisableClock(const uint32_t mask);
+driver_status_t RCC_LL_DisableAPB2Clock(const uint32_t mask);
 
 /**
- * @brief	Enables APB1 peripheral clocks using a raw APB1ENR mask
- * @param[in] mask	APB1ENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 clock bits were enabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Enables APB1 Peripheral Clock
+ * @details
+ * Sets the requested enable bits in `RCC->APB1ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of APB1 clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB1_EnableClock(const uint32_t mask);
+driver_status_t RCC_LL_EnableAPB1Clock(const uint32_t mask);
 
 /**
- * @brief	Disables APB1 peripheral clocks using a raw APB1ENR mask
- * @param[in] mask	APB1ENR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 clock bits were disabled successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Disables APB1 Peripheral Clock
+ * @details
+ * Clears the requested enable bits in `RCC->APB1ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of APB1 clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB1_DisableClock(const uint32_t mask);
+driver_status_t RCC_LL_DisableAPB1Clock(const uint32_t mask);
 
 /**
- * @brief	Asserts APB2 peripheral reset bits using a raw APB2RSTR mask
- * @param[in] mask	APB2RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset bits were asserted successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Forces APB2 Peripheral Reset
+ * @details
+ * Sets the requested reset bits in `RCC->APB2RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset force operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset asserted successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB2_ForceReset(const uint32_t mask);
+driver_status_t RCC_LL_ForceAPB2Reset(const uint32_t mask);
 
 /**
- * @brief	Releases APB2 peripheral reset bits using a raw APB2RSTR mask
- * @param[in] mask	APB2RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset bits were released successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Releases APB2 Peripheral Reset
+ * @details
+ * Clears the requested reset bits in `RCC->APB2RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset release
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset release operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset released successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB2_ReleaseReset(const uint32_t mask);
+driver_status_t RCC_LL_ReleaseAPB2Reset(const uint32_t mask);
 
 /**
- * @brief	Asserts APB1 peripheral reset bits using a raw APB1RSTR mask
- * @param[in] mask	APB1RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset bits were asserted successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Forces APB1 Peripheral Reset
+ * @details
+ * Sets the requested reset bits in `RCC->APB1RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset force operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset asserted successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB1_ForceReset(const uint32_t mask);
+driver_status_t RCC_LL_ForceAPB1Reset(const uint32_t mask);
 
 /**
- * @brief	Releases APB1 peripheral reset bits using a raw APB1RSTR mask
- * @param[in] mask	APB1RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset bits were released successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Releases APB1 Peripheral Reset
+ * @details
+ * Clears the requested reset bits in `RCC->APB1RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset release
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset release operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset released successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB1_ReleaseReset(const uint32_t mask);
+driver_status_t RCC_LL_ReleaseAPB1Reset(const uint32_t mask);
 
 /**
- * @brief	Generates an APB2 reset pulse using a raw APB2RSTR mask
- * @param[in] mask	APB2RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset pulse was generated successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Pulses APB2 Peripheral Reset
+ * @details
+ * Asserts and then releases the requested APB2 reset bits.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset pulse
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset pulse operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset pulsed successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB2_ResetPulse(const uint32_t mask);
+driver_status_t RCC_LL_PulseAPB2Reset(const uint32_t mask);
 
 /**
- * @brief	Generates an APB1 reset pulse using a raw APB1RSTR mask
- * @param[in] mask	APB1RSTR peripheral mask
- * @returns - @ref driver_status_t Operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset pulse was generated successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mask is zero.
+ * @brief	Pulses APB1 Peripheral Reset
+ * @details
+ * Asserts and then releases the requested APB1 reset bits.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset pulse
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset pulse operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset pulsed successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-driver_status_t RCC_LL_APB1_ResetPulse(const uint32_t mask);
+driver_status_t RCC_LL_PulseAPB1Reset(const uint32_t mask);
 
-/** @} */ // RCC_02_LL_05_ClockReset
-
+/** @} */ // RCC_02_LL_04_ClockReset
 
 /** @} */ // RCC_02_LL
 
+// C++ Compatibility
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

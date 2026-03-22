@@ -467,7 +467,7 @@ typedef struct _rcc_config_t
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_AHB_EnableClock(clockMask);
+	return RCC_LL_EnableAHBClock(clockMask);
 }
 
 /**
@@ -479,7 +479,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMas
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_AHB_DisableClock(clockMask);
+	return RCC_LL_DisableAHBClock(clockMask);
 }
 
 /**
@@ -491,7 +491,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_APB2_EnableClock(clockMask);
+	return RCC_LL_EnableAPB2Clock(clockMask);
 }
 
 /**
@@ -503,7 +503,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_APB2_DisableClock(clockMask);
+	return RCC_LL_DisableAPB2Clock(clockMask);
 }
 
 /**
@@ -515,7 +515,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockM
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_APB1_EnableClock(clockMask);
+	return RCC_LL_EnableAPB1Clock(clockMask);
 }
 
 /**
@@ -527,7 +527,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_APB1_DisableClock(clockMask);
+	return RCC_LL_DisableAPB1Clock(clockMask);
 }
 
 /**
@@ -539,7 +539,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockM
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
 {
-	return RCC_LL_APB2_ResetPulse(resetMask);
+	return RCC_LL_PulseAPB2Reset(resetMask);
 }
 
 /**
@@ -551,7 +551,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMas
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
 {
-	return RCC_LL_APB1_ResetPulse(resetMask);
+	return RCC_LL_PulseAPB1Reset(resetMask);
 }
 
 /** @} */ // RCC_03_Driver_07_ClockReset

@@ -1,14 +1,14 @@
 /**
  * @file	rcc_ll.c
  * @author	Shrey Shah
- * @brief	RCC Low-Level Register Control Implementation
- * @version	v2.4
+ * @brief	RCC Low-Level Control Implementation
+ * @version	v3.0
  * @date	22-03-2026
  *
  * @details
- * This source file implements the register-near RCC operations declared in
- * `rcc_ll.h`. It intentionally stays close to the RCC registers and keeps
- * validation limited to raw field legality and mask sanity.
+ * This source file implements the thin RCC low-level wrapper declared in
+ * @ref rcc_ll.h. The implementation stays register-near and validates only
+ * raw LL selector legality and basic mask sanity.
  */
 
 // ==================================================================================================== //
@@ -17,476 +17,368 @@
 #include "rcc_ll.h"
 
 // ==================================================================================================== //
-//                               RCC LL Internal Validation and Helpers                                 //
-// ==================================================================================================== //
-
-/**
- * @addtogroup RCC_02_LL_03_SystemClock
- * @{
- */
-
-static bool _RCC_LL_IsSystemClockSource(const rcc_ll_sysclk_src_t source)
-{
-	if ((source == RCC_LL_SYSCLK_SRC_HSI) || (source == RCC_LL_SYSCLK_SRC_HSE) || (source == RCC_LL_SYSCLK_SRC_PLL))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool _RCC_LL_IsPLLSource(const rcc_ll_pll_src_t source)
-{
-	if ((source == RCC_LL_PLL_SRC_HSI_DIV2) || (source == RCC_LL_PLL_SRC_HSE))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool _RCC_LL_IsPLLHSEDivider(const rcc_ll_pll_hse_div_t divider)
-{
-	if ((divider == RCC_LL_PLL_HSE_DIV_1) || (divider == RCC_LL_PLL_HSE_DIV_2))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool _RCC_LL_IsPLLMultiplier(const rcc_ll_pll_mul_t multiplier)
-{
-	switch (multiplier)
-	{
-		case RCC_LL_PLL_MUL_2:
-		case RCC_LL_PLL_MUL_3:
-		case RCC_LL_PLL_MUL_4:
-		case RCC_LL_PLL_MUL_5:
-		case RCC_LL_PLL_MUL_6:
-		case RCC_LL_PLL_MUL_7:
-		case RCC_LL_PLL_MUL_8:
-		case RCC_LL_PLL_MUL_9:
-		case RCC_LL_PLL_MUL_10:
-		case RCC_LL_PLL_MUL_11:
-		case RCC_LL_PLL_MUL_12:
-		case RCC_LL_PLL_MUL_13:
-		case RCC_LL_PLL_MUL_14:
-		case RCC_LL_PLL_MUL_15:
-		case RCC_LL_PLL_MUL_16:
-		{
-			return true;
-		}
-		default:
-		{
-			return false;
-		}
-	}
-}
-
-/** @} */ // RCC_02_LL_03_SystemClock
-
-/**
- * @addtogroup RCC_02_LL_04_Prescalers
- * @{
- */
-
-static bool _RCC_LL_IsAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler)
-{
-	switch (prescaler)
-	{
-		case RCC_LL_AHB_DIV_1:
-		case RCC_LL_AHB_DIV_2:
-		case RCC_LL_AHB_DIV_4:
-		case RCC_LL_AHB_DIV_8:
-		case RCC_LL_AHB_DIV_16:
-		case RCC_LL_AHB_DIV_64:
-		case RCC_LL_AHB_DIV_128:
-		case RCC_LL_AHB_DIV_256:
-		case RCC_LL_AHB_DIV_512:
-		{
-			return true;
-		}
-		default:
-		{
-			return false;
-		}
-	}
-}
-
-static bool _RCC_LL_IsAPBPrescaler(const rcc_ll_apb_prescaler_t prescaler)
-{
-	if ((prescaler == RCC_LL_APB_DIV_1) || (prescaler == RCC_LL_APB_DIV_2) || (prescaler == RCC_LL_APB_DIV_4) ||
-		(prescaler == RCC_LL_APB_DIV_8) || (prescaler == RCC_LL_APB_DIV_16))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool _RCC_LL_IsADCPrescaler(const rcc_ll_adc_prescaler_t prescaler)
-{
-	if ((prescaler == RCC_LL_ADC_DIV_2) || (prescaler == RCC_LL_ADC_DIV_4) || (prescaler == RCC_LL_ADC_DIV_6) ||
-		(prescaler == RCC_LL_ADC_DIV_8))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool _RCC_LL_IsUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler)
-{
-	if ((prescaler == RCC_LL_USB_DIV_1_5) || (prescaler == RCC_LL_USB_DIV_1))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-/** @} */ // RCC_02_LL_04_Prescalers
-
-/**
- * @addtogroup RCC_02_LL_05_ClockReset
- * @{
- */
-
-static driver_status_t _RCC_LL_ValidateMask(const uint32_t mask)
-{
-	if (mask == 0x00UL)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	else
-	{
-		return DRIVER_STATUS_SUCCESS;
-	}
-}
-
-
-/** @} */ // RCC_02_LL_05_ClockReset
-
-// ==================================================================================================== //
 //                                   RCC LL System Clock Implementation                                 //
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_03_SystemClock
+ * @addtogroup RCC_02_LL_02_SystemClock
  * @{
  */
 
-driver_status_t RCC_LL_SetSystemClockSource(const rcc_ll_sysclk_src_t source)
+driver_status_t RCC_LL_SetSystemClockSource(const uint32_t sysClkSrcField)
 {
-	if (_RCC_LL_IsSystemClockSource(source) == false)
+	if (RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID(sysClkSrcField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_SW_Msk, source);
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_SW_Msk, sysClkSrcField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetSystemClockSource(rcc_ll_sysclk_src_t* const pSource)
+driver_status_t RCC_LL_GetSystemClockSource(uint32_t* const pSysClkSrcField)
 {
-	if (pSource == NULL)
+	if (pSysClkSrcField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	*pSource = (RCC->CFGR.REG & RCC_CFGR_SW_Msk);
+
+	RCC_LL_READ_REG(CFGR, *pSysClkSrcField);
+	*pSysClkSrcField &= RCC_CFGR_SW_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetSystemClockStatus(rcc_ll_sysclk_status_t* const pStatus)
+driver_status_t RCC_LL_GetSystemClockStatus(uint32_t* const pSysClkStatusField)
 {
-	if (pStatus == NULL)
+	if (pSysClkStatusField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	*pStatus = (RCC->CFGR.REG & RCC_CFGR_SWS_Msk);
+
+	RCC_LL_READ_REG(CFGR, *pSysClkStatusField);
+	*pSysClkStatusField &= RCC_CFGR_SWS_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLSource(const rcc_ll_pll_src_t source)
+driver_status_t RCC_LL_SetPLLSource(const uint32_t pllSrcField)
 {
-	if (_RCC_LL_IsPLLSource(source) == false)
+	if (RCC_LL_IS_PLL_SOURCE_VALID(pllSrcField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_PLLSRC_Msk, source);
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLSRC_Msk, pllSrcField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLSource(rcc_ll_pll_src_t* const pSource)
+driver_status_t RCC_LL_GetPLLSource(uint32_t* const pPllSrcField)
 {
-	if (pSource == NULL)
+	if (pPllSrcField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	*pSource = (RCC->CFGR.REG & RCC_CFGR_PLLSRC_Msk);
+
+	RCC_LL_READ_REG(CFGR, *pPllSrcField);
+	*pPllSrcField &= RCC_CFGR_PLLSRC_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLHSEDivider(const rcc_ll_pll_hse_div_t divider)
+driver_status_t RCC_LL_SetPLLHSEDivider(const uint32_t pllHseDividerField)
 {
-	if (_RCC_LL_IsPLLHSEDivider(divider) == false)
+	if (RCC_LL_IS_PLL_HSE_DIVIDER_VALID(pllHseDividerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_PLLXTPRE_Msk, divider);
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLXTPRE_Msk, pllHseDividerField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLHSEDivider(rcc_ll_pll_hse_div_t* const pDivider)
+driver_status_t RCC_LL_GetPLLHSEDivider(uint32_t* const pPllHseDividerField)
 {
-	if (pDivider == NULL)
+	if (pPllHseDividerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	*pDivider = (RCC->CFGR.REG & RCC_CFGR_PLLXTPRE_Msk);
+
+	RCC_LL_READ_REG(CFGR, *pPllHseDividerField);
+	*pPllHseDividerField &= RCC_CFGR_PLLXTPRE_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLMultiplier(const rcc_ll_pll_mul_t multiplier)
+driver_status_t RCC_LL_SetPLLMultiplier(const uint32_t pllMulField)
 {
-	if (_RCC_LL_IsPLLMultiplier(multiplier) == false)
+	if (RCC_LL_IS_PLL_MULTIPLIER_VALID(pllMulField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_PLLMUL_Msk, multiplier);
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLMUL_Msk, pllMulField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLMultiplier(rcc_ll_pll_mul_t* const pMultiplier)
+driver_status_t RCC_LL_GetPLLMultiplier(uint32_t* const pPllMulField)
 {
-	if (pMultiplier == NULL)
+	if (pPllMulField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	*pMultiplier = (RCC->CFGR.REG & RCC_CFGR_PLLMUL_Msk);
+
+	RCC_LL_READ_REG(CFGR, *pPllMulField);
+	*pPllMulField &= RCC_CFGR_PLLMUL_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @} */ // RCC_02_LL_03_SystemClock
+/** @} */ // RCC_02_LL_02_SystemClock
 
 // ==================================================================================================== //
 //                                    RCC LL Prescaler Implementation                                   //
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_04_Prescalers
+ * @addtogroup RCC_02_LL_03_Prescalers
  * @{
  */
 
-driver_status_t RCC_LL_SetAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler)
+driver_status_t RCC_LL_SetAHBPrescaler(const uint32_t ahbPrescalerField)
 {
-	if (_RCC_LL_IsAHBPrescaler(prescaler) == false)
+	if (RCC_LL_IS_AHB_PRESCALER_VALID(ahbPrescalerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_HPRE_Msk, prescaler);
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_HPRE_Msk, ahbPrescalerField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetAHBPrescaler(rcc_ll_ahb_prescaler_t* const pPrescaler)
+driver_status_t RCC_LL_GetAHBPrescaler(uint32_t* const pAhbPrescalerField)
 {
-	if (pPrescaler == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	*pPrescaler = (RCC->CFGR.REG & RCC_CFGR_HPRE_Msk);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_SetAPB1Prescaler(const rcc_ll_apb_prescaler_t prescaler)
-{
-	if (_RCC_LL_IsAPBPrescaler(prescaler) == false)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_PPRE1_Msk, prescaler);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_GetAPB1Prescaler(rcc_ll_apb_prescaler_t* const pPrescaler)
-{
-	if (pPrescaler == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	*pPrescaler = (RCC->CFGR.REG & RCC_CFGR_PPRE1_Msk);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_SetAPB2Prescaler(const rcc_ll_apb_prescaler_t prescaler)
-{
-	if (_RCC_LL_IsAPBPrescaler(prescaler) == false)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_PPRE2_Msk, (((prescaler >> RCC_CFGR_PPRE1_Pos) << RCC_CFGR_PPRE2_Pos) & RCC_CFGR_PPRE2_Msk));
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_GetAPB2Prescaler(rcc_ll_apb_prescaler_t* const pPrescaler)
-{
-	if (pPrescaler == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	*pPrescaler = ((RCC->CFGR.REG & RCC_CFGR_PPRE2_Msk) >> (RCC_CFGR_PPRE2_Pos - RCC_CFGR_PPRE1_Pos)) << RCC_CFGR_PPRE1_Pos;
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_SetADCPrescaler(const rcc_ll_adc_prescaler_t prescaler)
-{
-	if (_RCC_LL_IsADCPrescaler(prescaler) == false)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_ADCPRE_Msk, prescaler);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_GetADCPrescaler(rcc_ll_adc_prescaler_t* const pPrescaler)
-{
-	if (pPrescaler == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	*pPrescaler = (RCC->CFGR.REG & RCC_CFGR_ADCPRE_Msk);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_SetUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler)
-{
-	if (_RCC_LL_IsUSBPrescaler(prescaler) == false)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	RCC_LL_MODIFY(RCC, CFGR, RCC_CFGR_USBPRE_Msk, prescaler);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler)
-{
-	if (pPrescaler == NULL)
+	if (pAhbPrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	*pPrescaler = (RCC->CFGR.REG & RCC_CFGR_USBPRE);
+	RCC_LL_READ_REG(CFGR, *pAhbPrescalerField);
+	*pAhbPrescalerField &= RCC_CFGR_HPRE_Msk;
 	return DRIVER_STATUS_SUCCESS;
 }
 
+driver_status_t RCC_LL_SetAPB1Prescaler(const uint32_t apb1PrescalerField)
+{
+	if (RCC_LL_IS_APB1_PRESCALER_VALID(apb1PrescalerField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 
-// ==================================================================================================== //
-//                                      RCC LL Clock Gate and Reset                                      //
-/** @} */ // RCC_02_LL_04_Prescalers
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PPRE1_Msk, apb1PrescalerField);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField)
+{
+	if (pApb1PrescalerField == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	RCC_LL_READ_REG(CFGR, *pApb1PrescalerField);
+	*pApb1PrescalerField &= RCC_CFGR_PPRE1_Msk;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_SetAPB2Prescaler(const uint32_t apb2PrescalerField)
+{
+	if (((apb2PrescalerField & ~RCC_CFGR_PPRE2_Msk) != 0x00UL) ||
+		(RCC_LL_IS_APB2_PRESCALER_VALID((apb2PrescalerField & RCC_CFGR_PPRE2_Msk)) == 0x00U))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PPRE2_Msk, (apb2PrescalerField & RCC_CFGR_PPRE2_Msk));
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField)
+{
+	if (pApb2PrescalerField == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	RCC_LL_READ_REG(CFGR, *pApb2PrescalerField);
+	*pApb2PrescalerField &= RCC_CFGR_PPRE2_Msk;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_SetADCPrescaler(const uint32_t adcPrescalerField)
+{
+	if (RCC_LL_IS_ADC_PRESCALER_VALID(adcPrescalerField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_ADCPRE_Msk, adcPrescalerField);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_GetADCPrescaler(uint32_t* const pAdcPrescalerField)
+{
+	if (pAdcPrescalerField == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	RCC_LL_READ_REG(CFGR, *pAdcPrescalerField);
+	*pAdcPrescalerField &= RCC_CFGR_ADCPRE_Msk;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_SetUSBPrescaler(const uint32_t usbPrescalerField)
+{
+	if (RCC_LL_IS_USB_PRESCALER_VALID(usbPrescalerField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_USBPRE_Msk, usbPrescalerField);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t RCC_LL_GetUSBPrescaler(uint32_t* const pUsbPrescalerField)
+{
+	if (pUsbPrescalerField == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	RCC_LL_READ_REG(CFGR, *pUsbPrescalerField);
+	*pUsbPrescalerField &= RCC_CFGR_USBPRE_Msk;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+/** @} */ // RCC_02_LL_03_Prescalers
 
 // ==================================================================================================== //
 //                                   RCC LL Clock Reset Implementation                                  //
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_05_ClockReset
+ * @addtogroup RCC_02_LL_04_ClockReset
  * @{
  */
 
-driver_status_t RCC_LL_AHB_EnableClock(const uint32_t mask)
+driver_status_t RCC_LL_EnableAHBClock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_SET(RCC, AHBENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_SET_BITS(AHBENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_AHB_DisableClock(const uint32_t mask)
+driver_status_t RCC_LL_DisableAHBClock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_CLEAR(RCC, AHBENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_CLEAR_BITS(AHBENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB2_EnableClock(const uint32_t mask)
+driver_status_t RCC_LL_EnableAPB2Clock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_SET(RCC, APB2ENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_SET_BITS(APB2ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB2_DisableClock(const uint32_t mask)
+driver_status_t RCC_LL_DisableAPB2Clock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_CLEAR(RCC, APB2ENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_CLEAR_BITS(APB2ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB1_EnableClock(const uint32_t mask)
+driver_status_t RCC_LL_EnableAPB1Clock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_SET(RCC, APB1ENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_SET_BITS(APB1ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB1_DisableClock(const uint32_t mask)
+driver_status_t RCC_LL_DisableAPB1Clock(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_CLEAR(RCC, APB1ENR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_CLEAR_BITS(APB1ENR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB2_ForceReset(const uint32_t mask)
+driver_status_t RCC_LL_ForceAPB2Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_SET(RCC, APB2RSTR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_SET_BITS(APB2RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB2_ReleaseReset(const uint32_t mask)
+driver_status_t RCC_LL_ReleaseAPB2Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_CLEAR(RCC, APB2RSTR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_CLEAR_BITS(APB2RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB1_ForceReset(const uint32_t mask)
+driver_status_t RCC_LL_ForceAPB1Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_SET(RCC, APB1RSTR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_SET_BITS(APB1RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB1_ReleaseReset(const uint32_t mask)
+driver_status_t RCC_LL_ReleaseAPB1Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(_RCC_LL_ValidateMask(mask));
-	RCC_LL_CLEAR(RCC, APB1RSTR, mask);
+	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	RCC_LL_CLEAR_BITS(APB1RSTR, mask);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB2_ResetPulse(const uint32_t mask)
+driver_status_t RCC_LL_PulseAPB2Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(RCC_LL_APB2_ForceReset(mask));
-	ASSERT_DRIVER_STATUS(RCC_LL_APB2_ReleaseReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_ForceAPB2Reset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_ReleaseAPB2Reset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_APB1_ResetPulse(const uint32_t mask)
+driver_status_t RCC_LL_PulseAPB1Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(RCC_LL_APB1_ForceReset(mask));
-	ASSERT_DRIVER_STATUS(RCC_LL_APB1_ReleaseReset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_ForceAPB1Reset(mask));
+	ASSERT_DRIVER_STATUS(RCC_LL_ReleaseAPB1Reset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @} */ // RCC_02_LL_05_ClockReset
+/** @} */ // RCC_02_LL_04_ClockReset
