@@ -2,14 +2,20 @@
  * @file	rcc.c
  * @author	Shrey Shah
  * @brief	RCC Driver Source File
- * @version	v2.2
- * @date	20-03-2026
+ * @version	v2.3
+ * @date	22-03-2026
+ *
+ * @details
+ * This source file implements the RCC driver orchestration layer.
+ * It sits above the LL layer and converts validated driver-level selections into
+ * safe RCC hardware sequences while maintaining derived frequency snapshots.
  */
 
 // ==================================================================================================== //
 //													Includes											  //
 // ==================================================================================================== //
 #include "rcc.h"
+
 // ==================================================================================================== //
 //													Macros												//
 // ==================================================================================================== //

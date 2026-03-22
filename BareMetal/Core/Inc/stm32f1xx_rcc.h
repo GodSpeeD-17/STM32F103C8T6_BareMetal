@@ -1,20 +1,10 @@
 /**
  * @file stm32f1xx_rcc.h
  * @author Shrey Shah
- * @version v1.0
- * @date 08-11-2025
- * @defgroup RCC Reset & Clock Control (RCC)
- * @details
- * This module provides complete access to RCC peripheral including:
- * - @ref stm32f1xx_rcc.h "Register mapping"
- * - @ref stm32f1xx.h "Memory Address"
- * - @ref rcc_ll.h "RCC Low Level (LL) APIs"
- * - @ref rcc.h "RCC Driver APIs"
- *
- * @note    All peripheral clock operations require proper RCC configuration
- * @warning Direct register access should only be used when performance is critical
+ * @brief STM32F1 RCC Register-Layer Definitions
+ * @version v1.1
+ * @date 22-03-2026
  */
-// Header Guards
 #ifndef STM32F1XX_RCC_H_
 #define STM32F1XX_RCC_H_
 
@@ -28,91 +18,74 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 #include "stm32f1xx_data_types.h"
 
-// ------------------------------------------------------------------------------------------
-// Theory of Operation
-// ------------------------------------------------------------------------------------------
 /**
- * @brief RCC Peripheral Hardware Register Mapping
- * @defgroup  RCC_01_Registers RCC Registers
- * @ingroup   RCC
+ * @defgroup RCC Reset and Clock Control (RCC)
+ * @brief STM32F1 reset, clock source, prescaler, gate, and reset infrastructure
  * @details
- * - STM32F103C8T6 RCC peripheral controls system clocks, resets, and clock gating
- * - Manages multiple clock sources and distribution to all peripherals
+ * RM0008 Section 7 describes RCC as the hardware block that:
+ * - starts and monitors clock sources such as HSI, HSE, PLL, LSI, and LSE,
+ * - selects the system clock source,
+ * - derives bus clocks through AHB and APB prescalers,
+ * - derives peripheral-specific clocks such as ADC and USB,
+ * - gates and resets peripherals to control power and initialization order.
  *
- * - RCC Register Map:
+ * @section RCC_RegisterLayoutBrief Register Layout Brief
+ * <table>
+ * <tr><th>Register</th><th>Offset</th><th>Primary Practical Role</th></tr>
+ * <tr><td><code>RCC_CR</code></td><td><code>0x00</code></td><td>Clock-source enable, ready, bypass, CSS, and PLL state control</td></tr>
+ * <tr><td><code>RCC_CFGR</code></td><td><code>0x04</code></td><td>SYSCLK selection/status, bus prescalers, PLL configuration, USB, and MCO</td></tr>
+ * <tr><td><code>RCC_CIR</code></td><td><code>0x08</code></td><td>Clock-ready interrupts, status flags, and clear bits</td></tr>
+ * <tr><td><code>RCC_APB2RSTR</code> / <code>RCC_APB1RSTR</code></td><td><code>0x0C</code> / <code>0x10</code></td><td>Peripheral reset control on APB2 and APB1 buses</td></tr>
+ * <tr><td><code>RCC_AHBENR</code> / <code>RCC_APB2ENR</code> / <code>RCC_APB1ENR</code></td><td><code>0x14</code> / <code>0x18</code> / <code>0x1C</code></td><td>Peripheral clock gating on AHB, APB2, and APB1 buses</td></tr>
+ * <tr><td><code>RCC_BDCR</code> / <code>RCC_CSR</code></td><td><code>0x20</code> / <code>0x24</code></td><td>Backup-domain control, low-speed clocks, and reset-status flags</td></tr>
+ * </table>
  *
- * | Offset | Register | Name | Description |
- * |--------|----------|------|-------------|
- * | `0x00`   | @ref `RCC_CR`     | Clock Control Register | Controls internal/external clock sources |
- * | `0x04`   | @ref `RCC_CFGR`   | Clock Configuration Register | Configures clock dividers and PLL |
- * | `0x08`   | @ref `RCC_CIR`    | Clock Interrupt Register | Manages clock-related interrupts |
- * | `0x0C`   | @ref `RCC_APB2RSTR` | APB2 Peripheral Reset Register | Resets APB2 peripherals |
- * | `0x10`   | @ref `RCC_APB1RSTR` | APB1 Peripheral Reset Register | Resets APB1 peripherals |
- * | `0x14`   | @ref `RCC_AHBENR`  | AHB Peripheral Clock Enable Register | Enables AHB peripherals |
- * | `0x18`   | @ref `RCC_APB2ENR` | APB2 Peripheral Clock Enable Register | Enables APB2 peripherals |
- * | `0x1C`   | @ref `RCC_APB1ENR` | APB1 Peripheral Clock Enable Register | Enables APB1 peripherals |
- * | `0x20`   | @ref `RCC_BDCR`    | Backup Domain Control Register | Controls RTC and backup domain |
- * | `0x24`   | @ref `RCC_CSR`     | Control/Status Register | Controls LSI and reset status |
- *
- * - Key Features:
- * <ul>
- * <li> Multiple clock sources:
- * 	<ul>
- *   <li> HSI: 8 MHz internal RC oscillator </li>
- *   <li> HSE: 4-16 MHz external crystal/oscillator </li>
- *   <li> PLL: Clock multiplier for system clock </li>
- *   <li> LSI: 40 kHz internal RC for IWDG </li>
- *   <li> LSE: 32.768 kHz external crystal for RTC </li>
- * 	</ul>
- * </li>
- * <li> Flexible clock distribution with prescalers </li>
- * <li> Individual peripheral clock gating for power management </li>
- * <li> Clock security system (CSS) for HSE failure detection </li>
- * <li> Backup domain with independent power supply </li>
- * </ul>
- *
- * @note System clock configuration must follow proper sequence
- * @warning Changing clock settings during operation may cause system instability
- *
- * @see Reference Manual RM0008 - Section 7. Reset and Clock Control (RCC)
- * @see Datasheet DS5319 - Section 5. Memory mapping
- * @{ 
- */
-
-// ------------------------------------------------------------------------------------------
-// Doxygen Groups
-// ------------------------------------------------------------------------------------------ 
-
-/**
- * @defgroup RCC_01_Registers_01_Structure RCC Registers Encapsulation
- * @ingroup  RCC_01_Registers
- * @brief    RCC Registers representation using structure
+ * This codebase documents RCC in three software layers in execution order:
+ * - Register layer: @ref `stm32f1xx_rcc.h`
+ * - Low-level control layer: @ref `rcc_ll.h` and @ref `rcc_ll.c`
+ * - Driver/orchestration layer: @ref `rcc.h` and @ref `rcc.c`
  */
 
 /**
- * @defgroup RCC_01_Registers_02_Memory RCC Memory Address
- * @ingroup  RCC_01_Registers 
- * @brief    STM32F1xx RCC Memory Address Mapping
+ * @defgroup RCC_01_RegisterLayer RCC Register Layer
+ * @ingroup RCC
+ * @brief Raw RCC register structures, register fields, and device-level encodings
+ * @details
+ * This layer mirrors the hardware-visible RCC chapter from the reference manual.
+ * It is intentionally close to the register map so the LL layer can program the
+ * hardware without re-describing bit positions or field encodings.
+ *
+ * Theory to implementation mapping:
+ * - Clock-source control lives in `RCC_CR`.
+ * - Clock-tree selection and prescalers live in `RCC_CFGR`.
+ * - Bus gate and reset masks live in `RCC_AHBENR`, `RCC_APB2ENR`, `RCC_APB1ENR`,
+ *   `RCC_APB2RSTR`, and `RCC_APB1RSTR`.
+ * - Backup and low-speed clock control live in `RCC_BDCR` and `RCC_CSR`.
  */
 
 /**
- * @defgroup RCC_01_Registers_03_API RCC Register Access APIs
- * @ingroup  RCC_01_Registers 
- * @brief    APIs to access @ref RCC_01_Registers_01_Structure "RCC Registers"
- */
-
-/** @} */ // RCC_01_Registers
-
-/**
- * @defgroup RCC_02_LL RCC Low Level APIs
- * @ingroup  RCC
- * @brief 	 RCC Low Level APIs
+ * @defgroup RCC_02_LL RCC Low-Level Control Layer
+ * @ingroup RCC
+ * @brief Register-near RCC control interface used by the driver layer
+ * @details
+ * This layer converts raw RCC register definitions into typed operations that directly
+ * express hardware actions. It owns register access helpers, hardware field encodings,
+ * system-clock source control, prescaler programming, and peripheral clock/reset access.
  */
 
 /**
- * @defgroup RCC_03_Driver RCC Driver APIs
- * @ingroup  RCC
- * @brief 	 RCC Driver APIs
+ * @defgroup RCC_03_Driver RCC Driver Layer
+ * @ingroup RCC
+ * @brief Validated RCC orchestration layer built on top of `rcc_ll.h`
+ * @details
+ * This layer turns a requested clock-tree policy into a safe runtime sequence.
+ * It owns validation, derived-frequency calculation, transition planning, clock-tree
+ * orchestration, and public runtime query APIs.
+ */
+
+/**
+ * @addtogroup RCC_01_RegisterLayer
+ * @{
  */
 
 // ------------------------------------------------------------------------------------------
@@ -120,9 +93,23 @@ extern "C" {
 // ------------------------------------------------------------------------------------------ 
 
 /**
- * @brief Clock Control Register (RCC_CR)
- * @defgroup RCC_CR RCC Clock Control Register
- * @ingroup  RCC_01_Registers
+ * @brief RCC Clock Source Control Register Definitions
+ * @defgroup RCC_01_RegisterLayer_01_ClockControl RCC Clock Control Register
+ * @ingroup RCC_01_RegisterLayer
+ * @details
+ * @section RCC_CR_Theory Theory and Practical Role
+ * This page documents `RCC_CR`, which controls oscillator enable states, ready flags,
+ * HSI trimming/calibration, HSE bypass, CSS, and PLL enable sequencing.
+ * It is the practical entry point for bringing clock sources online before any
+ * system-clock switch can occur.
+ *
+ * @section RCC_CR_Macros Register-Specific Macros
+ * The macro definitions below expose the raw bit positions, masks, and convenience aliases
+ * used by the LL layer when it needs direct symbolic access to `RCC_CR` fields.
+ *
+ * @section RCC_CR_Union Register Union View
+ * The `union RCC_CR` view inside @ref RCC_TypeDef mirrors the same register in software so
+ * a developer can compare the full register image (`.REG`) against the named bitfield view (`.BIT`).
  * @{
  */
 
@@ -213,9 +200,22 @@ extern "C" {
 // ------------------------------------------------------------------------------------------ 
 
 /**
- * @brief Clock Configuration Register (RCC_CFGR)
- * @defgroup RCC_CFGR RCC Clock Configuration Register
- * @ingroup  RCC_01_Registers
+ * @brief RCC Clock Tree Configuration Register Definitions
+ * @defgroup RCC_01_RegisterLayer_02_ClockConfiguration RCC Clock Configuration Register
+ * @ingroup RCC_01_RegisterLayer
+ * @details
+ * @section RCC_CFGR_Theory Theory and Practical Role
+ * This page documents `RCC_CFGR`, which owns SYSCLK switching, SWS status, AHB/APB
+ * prescalers, ADC prescaler, PLL source/divider/multiplier selection, USB prescaler,
+ * and MCO output selection.
+ *
+ * @section RCC_CFGR_Macros Register-Specific Macros
+ * The macro definitions below describe the field encodings used to build or decode the
+ * practical clock-tree state stored in `RCC_CFGR`.
+ *
+ * @section RCC_CFGR_Union Register Union View
+ * The `union RCC_CFGR` view inside @ref RCC_TypeDef provides both whole-register access and a
+ * bitfield representation so the register theory maps directly to implementation.
  * @{
  */
 
@@ -355,8 +355,6 @@ extern "C" {
 #define RCC_CFGR_PLLMUL_Msk						((uint32_t)(0x0FUL << RCC_CFGR_PLLMUL_Pos))
 /** @brief PLL Multiplication Factor @def RCC_CFGR_PLLMUL */
 #define RCC_CFGR_PLLMUL							RCC_CFGR_PLLMUL_Msk
-
-// ------ PLLMUL Values (PLL Multiplication Factor Selection) ------ //
 /** @brief PLL input clock x 2 @def RCC_CFGR_PLLMUL_2 */
 #define RCC_CFGR_PLLMUL_2						((uint32_t)(0x00UL << RCC_CFGR_PLLMUL_Pos))
 /** @brief PLL input clock x 3 @def RCC_CFGR_PLLMUL_3 */
@@ -427,9 +425,21 @@ extern "C" {
 // ------------------------------------------------------------------------------------------ 
 
 /**
- * @brief Clock Interrupt Register (RCC_CIR)
- * @defgroup RCC_CIR RCC Clock Interrupt Register
- * @ingroup  RCC_01_Registers
+ * @brief RCC Clock Interrupt Register Definitions
+ * @defgroup RCC_01_RegisterLayer_03_ClockInterrupt RCC Clock Interrupt Register
+ * @ingroup RCC_01_RegisterLayer
+ * @details
+ * @section RCC_CIR_Theory Theory and Practical Role
+ * This page documents `RCC_CIR`, which collects ready interrupts and clear flags for
+ * internal/external oscillators, PLL lock, and the clock security system.
+ *
+ * @section RCC_CIR_Macros Register-Specific Macros
+ * The macro definitions below map the interrupt/status, enable, and clear fields that the
+ * LL layer uses when working with RCC ready interrupts and CSS reporting.
+ *
+ * @section RCC_CIR_Union Register Union View
+ * The `union RCC_CIR` view inside @ref RCC_TypeDef lets you inspect the same register either
+ * as a 32-bit image or as individual interrupt-related fields.
  * @{
  */
 
@@ -572,9 +582,22 @@ extern "C" {
 /** @} */ // RCC_CIR
 
 /**
- * @brief APB2 Peripheral Reset Register (RCC_APB2RSTR)
- * @defgroup RCC_APB2RSTR RCC APB2 Peripheral Reset Register
- * @ingroup	RCC_01_Registers
+ * @brief RCC Peripheral Reset Register Definitions
+ * @defgroup RCC_01_RegisterLayer_04_PeripheralReset RCC Peripheral Reset Registers
+ * @ingroup RCC_01_RegisterLayer
+ * @details
+ * @section RCC_RSTR_Theory Theory and Practical Role
+ * This page documents the reset-register view used by the RCC software stack.
+ * The explicit bit-mask definitions currently cover `RCC_APB2RSTR`, while the full
+ * register block structure below carries the remaining APB1 reset fields.
+ *
+ * @section RCC_RSTR_Macros Register-Specific Macros
+ * The macro definitions below describe the APB2 peripheral reset bits that can be asserted
+ * and released through RCC reset control.
+ *
+ * @section RCC_RSTR_Union Register Union View
+ * The register map later in this file exposes both `union RCC_APB2RSTR` and `union RCC_APB1RSTR`
+ * so the reset theory and the concrete memory layout stay visible together.
  * @{
  */
 
@@ -729,18 +752,37 @@ extern "C" {
 // ------------------------------------------------------------------------------------------ 
 
 /**
- * @addtogroup RCC_01_Registers_01_Structure
- * @{
+ * @defgroup RCC_01_RegisterLayer_05_RegisterMap RCC Register Block Map
+ * @ingroup RCC_01_RegisterLayer
+ * @brief Memory-mapped RCC register block and practical register layout
  * @details
- * - This structure represents the complete register set for RCC peripheral
- * - It is memory-mapped to the RCC base address
- * @note The structure uses unions to provide both bit-level and register-level access
- * @see Reference Manual RM0008 - Section 7.3 RCC registers (Page 113) 
+ * @section RCC_RegisterMap_Theory Theory and Practical Role
+ * This page ties the theory pages above to the actual software representation used in
+ * the project. `RCC_TypeDef` is the concrete register map consumed by the LL layer.
+ *
+ * Practical role in this codebase:
+ * - the register layer defines the layout,
+ * - the LL layer accesses `.REG` and bitfield views from this structure,
+ * - the driver layer never edits fields directly and instead uses LL services.
+ *
+ * @section RCC_RegisterMap_Structure RCC Register Block Structure
+ * The structure below is the final memory-mapped layout. Use it when you want to see the
+ * complete RCC map exactly as the software stack accesses it at runtime.
+ * @{
+ */
+
+/**
+ * @brief RCC Register Block Structure
+ * @details
+ * This structure represents the complete memory-mapped RCC peripheral.
+ *
+ * @see RM0008 Section 7.3 RCC registers
  * @typedef RCC_TypeDef
  */
 typedef volatile struct _RCC_TypeDef
 {
 	/**
+	 * @ingroup RCC_01_RegisterLayer_01_ClockControl RCC_01_RegisterLayer_05_RegisterMap
 	 * @brief Clock Control Register
 	 * @details
 	 * Controls the internal and external clock sources including HSI, HSE, and PLL.
@@ -771,6 +813,7 @@ typedef volatile struct _RCC_TypeDef
 	} CR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_02_ClockConfiguration RCC_01_RegisterLayer_05_RegisterMap
 	 * @brief Clock Configuration Register  
 	 * @details
 	 * Configures the system clock source, prescalers for AHB, APB1, APB2 buses,
@@ -801,6 +844,7 @@ typedef volatile struct _RCC_TypeDef
 	} CFGR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_03_ClockInterrupt RCC_01_RegisterLayer_05_RegisterMap
 	 * @brief Clock Interrupt Register
 	 * @details
 	 * Manages interrupt flags and enable bits for various clock events including
@@ -839,6 +883,7 @@ typedef volatile struct _RCC_TypeDef
 	} CIR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_05_RegisterMap
 	 * @brief APB2 Peripheral Reset Register
 	 * @details
 	 * Controls the reset functionality for peripherals connected to APB2 bus.
@@ -877,6 +922,7 @@ typedef volatile struct _RCC_TypeDef
 	} APB2RSTR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_05_RegisterMap
 	 * @brief APB1 Peripheral Reset Register
 	 * @details
 	 * Controls the reset functionality for peripherals connected to APB1 bus.
@@ -1090,7 +1136,8 @@ typedef volatile struct _RCC_TypeDef
 	} CSR;
 } RCC_TypeDef;
 
-/** @} */ // RCC_01_Registers_01_Structure
+/** @} */ // RCC_01_RegisterLayer_05_RegisterMap
+/** @} */ // RCC_01_RegisterLayer
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus

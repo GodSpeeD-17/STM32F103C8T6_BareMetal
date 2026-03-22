@@ -136,7 +136,21 @@ do												\
 /** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
 
 /**
- * @addtogroup RCC_03_Driver_04_Prescalers 
+ * @brief RCC Shared Scalar Aliases
+ * @defgroup RCC_03_Driver_01_DataTypes RCC Driver Data Types
+ * @ingroup RCC_03_Driver
+ * @details
+ * This group owns the scalar aliases shared by the RCC driver stack.
+ *
+ * Dependency route:
+ * - `stm32f1xx_data_types.h` defines portable scalar aliases.
+ * - `stm32f1xx_rcc.h` defines the RCC register model and bit fields.
+ * - `stm32f1xx.h` publishes board-level RCC operating limits.
+ * - `rcc_ll.h` and `rcc_ll.c` implement register-near control.
+ * - `rcc.h` and `rcc.c` implement policy, validation, and orchestration.
+ *
+ * Keeping these aliases here allows every RCC layer to share the same type
+ * names without introducing circular header dependencies.
  * @{
  */
 
@@ -146,19 +160,22 @@ typedef uint8_t									rcc_bus_t;
 typedef uint8_t									rcc_bus_prescaler_t;
 /** @brief Component prescaler selector type @typedef rcc_component_prescaler_t */
 typedef uint8_t									rcc_component_prescaler_t;
-/** @brief RCC frequency unit type @typedef rcc_freq_t */
-typedef uint32_t								rcc_freq_t;
 /** @brief Flash latency type @typedef rcc_flash_latency_t */
 typedef uint8_t									rcc_flash_latency_t;
+/** @brief Flash prefetch selector type @typedef rcc_flash_prefetch_t */
+typedef uint8_t									rcc_flash_prefetch_t;
+/** @brief System clock source selector type @typedef rcc_system_clock_t */
+typedef uint8_t									rcc_system_clock_t;
+/** @brief PLL source selector type @typedef rcc_pll_src_t */
+typedef uint8_t									rcc_pll_src_t;
+/** @brief PLL input prescaler selector type @typedef rcc_pll_src_psc_t */
+typedef uint8_t									rcc_pll_src_psc_t;
+/** @brief PLL multiplication factor type @typedef rcc_pll_mul_t */
+typedef uint8_t									rcc_pll_mul_t;
+/** @brief RCC frequency unit type @typedef rcc_freq_t */
+typedef uint32_t								rcc_freq_t;
 
-/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
-#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
-/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
-#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
-/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
-#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
-
-/** @} */ // RCC_03_Driver_04_Prescalers
+/** @} */ // RCC_03_Driver_01_DataTypes
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus

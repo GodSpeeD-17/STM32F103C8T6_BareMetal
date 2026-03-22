@@ -237,10 +237,30 @@ extern "C" {
 // ========================================================================================== //
 
 /**
- * @addtogroup RCC_03_Driver_01_Frequency 
+ * @addtogroup RCC_03_Driver_02_Frequency
+ * @brief STM32F103C8T6 RCC Operating Limits and Board Assumptions
+ * @details
+ * These constants capture the practical operating assumptions used by the RCC
+ * driver for the Blue Pill target.
+ *
+ * Theory:
+ * - RM0008 Section 7 defines the clock tree rooted at HSI, HSE, and PLL.
+ * - AHB derives HCLK from SYSCLK.
+ * - APB1 and APB2 derive PCLK1 and PCLK2 from HCLK.
+ * - ADC clock derives from PCLK2.
+ * - USB clock derives from the PLL output.
+ *
+ * Implementation:
+ * - `rcc.c` uses these limits while validating requested clock trees.
+ * - Query helpers and presets use these values as the board-level reference.
  * @{
  */
-
+/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
+#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
+/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
+#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
+/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
+#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
 /** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
 #define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
 /** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
@@ -262,7 +282,7 @@ extern "C" {
 /** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
 #define RCC_FLASH_LATENCY_1_MAX_FREQ			((rcc_freq_t) 48000000UL)
 
-/** @} */ // RCC_03_Driver_01_Frequency
+/** @} */ // RCC_03_Driver_02_Frequency
 
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed

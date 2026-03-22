@@ -1,24 +1,29 @@
 /**
  * @file	rcc_ll.c
  * @author	Shrey Shah
- * @brief	RCC Low-Level Register Access Layer Implementation
- * @version	v2.3
- * @date	20-03-2026
+ * @brief	RCC Low-Level Register Control Implementation
+ * @version	v2.4
+ * @date	22-03-2026
+ *
+ * @details
+ * This source file implements the register-near RCC operations declared in
+ * `rcc_ll.h`. It intentionally stays close to the RCC registers and keeps
+ * validation limited to raw field legality and mask sanity.
  */
-
-
 
 // ==================================================================================================== //
 //                                               Includes                                               //
 // ==================================================================================================== //
-
 #include "rcc_ll.h"
 
-
-
 // ==================================================================================================== //
-//                                  RCC LL Private Validation Helpers                                   //
+//                               RCC LL Internal Validation and Helpers                                 //
 // ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_02_LL_03_SystemClock
+ * @{
+ */
 
 static bool _RCC_LL_IsSystemClockSource(const rcc_ll_sysclk_src_t source)
 {
@@ -85,6 +90,13 @@ static bool _RCC_LL_IsPLLMultiplier(const rcc_ll_pll_mul_t multiplier)
 	}
 }
 
+/** @} */ // RCC_02_LL_03_SystemClock
+
+/**
+ * @addtogroup RCC_02_LL_04_Prescalers
+ * @{
+ */
+
 static bool _RCC_LL_IsAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler)
 {
 	switch (prescaler)
@@ -146,6 +158,13 @@ static bool _RCC_LL_IsUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler)
 	}
 }
 
+/** @} */ // RCC_02_LL_04_Prescalers
+
+/**
+ * @addtogroup RCC_02_LL_05_ClockReset
+ * @{
+ */
+
 static driver_status_t _RCC_LL_ValidateMask(const uint32_t mask)
 {
 	if (mask == 0x00UL)
@@ -159,9 +178,16 @@ static driver_status_t _RCC_LL_ValidateMask(const uint32_t mask)
 }
 
 
+/** @} */ // RCC_02_LL_05_ClockReset
+
 // ==================================================================================================== //
-//                                    RCC LL Clock Tree Field Access                                    //
+//                                   RCC LL System Clock Implementation                                 //
 // ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_02_LL_03_SystemClock
+ * @{
+ */
 
 driver_status_t RCC_LL_SetSystemClockSource(const rcc_ll_sysclk_src_t source)
 {
@@ -252,6 +278,17 @@ driver_status_t RCC_LL_GetPLLMultiplier(rcc_ll_pll_mul_t* const pMultiplier)
 	*pMultiplier = (RCC->CFGR.REG & RCC_CFGR_PLLMUL_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
+
+/** @} */ // RCC_02_LL_03_SystemClock
+
+// ==================================================================================================== //
+//                                    RCC LL Prescaler Implementation                                   //
+// ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_02_LL_04_Prescalers
+ * @{
+ */
 
 driver_status_t RCC_LL_SetAHBPrescaler(const rcc_ll_ahb_prescaler_t prescaler)
 {
@@ -357,7 +394,16 @@ driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler)
 
 // ==================================================================================================== //
 //                                      RCC LL Clock Gate and Reset                                      //
+/** @} */ // RCC_02_LL_04_Prescalers
+
 // ==================================================================================================== //
+//                                   RCC LL Clock Reset Implementation                                  //
+// ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_02_LL_05_ClockReset
+ * @{
+ */
 
 driver_status_t RCC_LL_AHB_EnableClock(const uint32_t mask)
 {
@@ -442,3 +488,5 @@ driver_status_t RCC_LL_APB1_ResetPulse(const uint32_t mask)
 	ASSERT_DRIVER_STATUS(RCC_LL_APB1_ReleaseReset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
+
+/** @} */ // RCC_02_LL_05_ClockReset

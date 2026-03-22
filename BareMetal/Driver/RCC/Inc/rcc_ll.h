@@ -1,23 +1,25 @@
 /**
  * @file	rcc_ll.h
  * @author	Shrey Shah
- * @brief	RCC Low-Level Register Access Layer
- * @version	v2.4
- * @date	20-03-2026
+ * @brief	RCC Low-Level Register Control Interface
+ * @version	v2.5
+ * @date	22-03-2026
  *
  * @details
- * This header exposes the **Low-Level (LL)** RCC interface for direct hardware register
- * read/modify/write operations. The LL layer owns register-near primitives, while the driver
- * layer in `rcc.h` owns orchestration, validation policy, clock-tree workflows, and presets.
+ * This header defines the RCC low-level control layer.
  *
- * The LL module is intentionally split into:
- * - Generic RCC register utility macros.
- * - RCC LL data types that mirror hardware field encodings.
- * - RCC LL functions for source control, prescalers, clock gating, and reset control.
- * - Compatibility aliases retained for existing LL users such as GPIO and I2C.
+ * Theory:
+ * - The register layer publishes raw bit positions, masks, and register layouts.
+ * - The LL layer translates those raw definitions into typed, register-near
+ *   operations for clock-source control, prescaler programming, and bus clock
+ *   gate/reset management.
+ *
+ * Implementation contract:
+ * - No policy or frequency validation belongs here.
+ * - APIs in this layer directly express hardware actions.
+ * - The RCC driver consumes this layer to build safe configuration sequences.
  */
 
-// Header Guards
 #ifndef RCC_LL_H_
 #define RCC_LL_H_
 
@@ -53,72 +55,73 @@ extern "C" {
 
 /**
  * @brief	Retrieves pointer to an RCC register `.REG` field
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
  * @returns	Pointer to the 32-bit register storage
  * @def		RCC_LL_REG
+ * @note Documentation parameter names are normalized for Doxygen rendering; the macro signature is unchanged.
  */
 #define RCC_LL_REG(_RCC_, _REG_)							(&((_RCC_)->_REG_.REG))
 
 /**
  * @brief	Reads an RCC register through the generic register utility layer
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[out] _VAR_	Destination variable that receives the register image
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[out] var	Destination variable that receives the register image
  * @def		RCC_LL_READ
  */
 #define RCC_LL_READ(_RCC_, _REG_, _VAR_)					REGOPS_READ(RCC_LL_REG((_RCC_), _REG_), (_VAR_))
 
 /**
  * @brief	Writes an RCC register through the generic register utility layer
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[in] _VAL_	32-bit value to be written
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[in] value	32-bit value to be written
  * @def		RCC_LL_WRITE
  */
 #define RCC_LL_WRITE(_RCC_, _REG_, _VAL_)					REGOPS_WRITE(RCC_LL_REG((_RCC_), _REG_), (_VAL_))
 
 /**
  * @brief	Sets masked bits in an RCC register
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[in] _MASK_	Bit-mask to be ORed into the target register
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[in] mask	Bit-mask to be ORed into the target register
  * @def		RCC_LL_SET
  */
 #define RCC_LL_SET(_RCC_, _REG_, _MASK_)					REGOPS_SET(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
 
 /**
  * @brief	Clears masked bits in an RCC register
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[in] _MASK_	Bit-mask to be cleared from the target register
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[in] mask	Bit-mask to be cleared from the target register
  * @def		RCC_LL_CLEAR
  */
 #define RCC_LL_CLEAR(_RCC_, _REG_, _MASK_)					REGOPS_CLEAR(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
 
 /**
  * @brief	Toggles masked bits in an RCC register
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[in] _MASK_	Bit-mask to be toggled in the target register
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[in] mask	Bit-mask to be toggled in the target register
  * @def		RCC_LL_TOGGLE
  */
 #define RCC_LL_TOGGLE(_RCC_, _REG_, _MASK_)					REGOPS_TOGGLE(RCC_LL_REG((_RCC_), _REG_), (_MASK_))
 
 /**
  * @brief	Performs a masked register-field modification
- * @param[in] _RCC_	Target @ref RCC_TypeDef peripheral pointer
- * @param[in] _REG_	Register member name inside @ref RCC_TypeDef
- * @param[in] _MASK_	Field mask to clear before update
- * @param[in] _VAL_	Pre-shifted field value to be merged into the register
+ * @param[in] rcc	Target @ref RCC_TypeDef peripheral pointer
+ * @param[in] reg	Register member name inside @ref RCC_TypeDef
+ * @param[in] mask	Field mask to clear before update
+ * @param[in] value	Pre-shifted field value to be merged into the register
  * @def		RCC_LL_MODIFY
  */
 #define RCC_LL_MODIFY(_RCC_, _REG_, _MASK_, _VAL_)			REGOPS_MODIFY(RCC_LL_REG((_RCC_), _REG_), (_MASK_), (_VAL_))
 
 /**
  * @brief	Prepares a field value for masked register insertion
- * @param[in] _VAL_	Raw unshifted field value
- * @param[in] _MASK_	Target field mask
+ * @param[in] value	Raw unshifted field value
+ * @param[in] mask	Target field mask
  * @param[in] _POS_	Target field position
  * @returns	Shifted and masked field value
  * @def		RCC_LL_FIELD_PREP
@@ -127,8 +130,8 @@ extern "C" {
 
 /**
  * @brief	Extracts a right-aligned field value from a register image
- * @param[in] _REG_	Register image
- * @param[in] _MASK_	Target field mask
+ * @param[in] reg	Register image
+ * @param[in] mask	Target field mask
  * @param[in] _POS_	Target field position
  * @returns	Right-aligned field value
  * @def		RCC_LL_FIELD_GET
@@ -143,7 +146,7 @@ extern "C" {
 
 /**
  * @brief	RCC LL Field Data Types and Encoded Values
- * @defgroup RCC_02_LL_02_Types RCC LL Field Types and Macros
+ * @defgroup RCC_02_LL_02_FieldEncodings RCC LL Field Encodings
  * @ingroup	RCC_02_LL
  * @details
  * - These values intentionally mirror the hardware field encodings.
@@ -333,7 +336,7 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 /** @brief PLL clock used directly for USB clock generation @def RCC_LL_USB_DIV_1 */
 #define RCC_LL_USB_DIV_1							(RCC_CFGR_USBPRE_DIRECT)
 
-/** @} */ // RCC_02_LL_02_Types
+/** @} */ // RCC_02_LL_02_FieldEncodings
 
 // ==================================================================================================== //
 //                                     RCC LL Compatibility Macros                                      //
@@ -341,7 +344,7 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 
 /**
  * @brief	RCC Legacy Compatibility Macros
- * @defgroup RCC_02_LL_03_RegAccess RCC LL Compatibility Helpers
+ * @defgroup RCC_02_LL_06_Legacy RCC LL Legacy Compatibility Helpers
  * @ingroup	RCC_02_LL
  * @details
  * - These aliases are retained for LL modules that still call the historic `__RCC_*` helpers.
@@ -390,27 +393,19 @@ typedef uint32_t								rcc_ll_usb_prescaler_t;
 /** @brief Clears bits in @ref RCC_APB1RSTR "RCC->APB1RSTR" @def __RCC_ClearAPB1RSTR */
 #define __RCC_ClearAPB1RSTR(_RCC_, _MASK_)					RCC_LL_CLEAR((_RCC_), APB1RSTR, (_MASK_))
 
-/** @} */ // RCC_02_LL_03_RegAccess
+/** @} */ // RCC_02_LL_06_Legacy
 
 // ==================================================================================================== //
-//                                        RCC LL Functional APIs                                        //
+//                                       RCC LL System Clock APIs                                       //
 // ==================================================================================================== //
 
 /**
- * @brief	RCC LL Functional APIs
- * @defgroup RCC_02_LL_04_API RCC LL Functional APIs
+ * @brief	RCC LL System Clock Control
+ * @defgroup RCC_02_LL_03_SystemClock RCC LL System Clock Control
  * @ingroup	RCC_02_LL
- * @{
- */
-
-// ==================================================================================================== //
-//                                     RCC LL Clock Source Control                                      //
-// ==================================================================================================== //
-
-/**
- * @brief	RCC LL Clock Source Control APIs
- * @defgroup RCC_02_LL_04_API_01_SourceControl RCC LL Clock Source Control
- * @ingroup	RCC_02_LL_04_API
+ * @details
+ * This group owns register-near control of HSI, HSE, PLL, SYSCLK source
+ * selection, and PLL-related field programming.
  * @{
  */
 
@@ -532,17 +527,12 @@ __STATIC_FORCEINLINE driver_status_t RCC_LL_PLL_GetReadyStatus(void)
 		return DRIVER_STATUS_OFF;
 	}
 }
-/** @} */ // RCC_02_LL_04_API_01_SourceControl
-
 // ==================================================================================================== //
-//                                       RCC LL Clock Tree Fields                                       //
+//                                   RCC LL System Clock Field Access                                   //
 // ==================================================================================================== //
 
 /**
- * @brief	RCC LL Clock Tree Field APIs
- * @defgroup RCC_02_LL_04_API_02_ClockTree RCC LL Clock Tree Field Access
- * @ingroup	RCC_02_LL_04_API
- * @{
+ * @brief Register-near setters and getters for SYSCLK and PLL-related fields
  */
 
 /**
@@ -625,6 +615,21 @@ driver_status_t RCC_LL_SetPLLMultiplier(const rcc_ll_pll_mul_t multiplier);
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pMultiplier is NULL.
  */
 driver_status_t RCC_LL_GetPLLMultiplier(rcc_ll_pll_mul_t* const pMultiplier);
+
+/** @} */ // RCC_02_LL_03_SystemClock
+
+// ==================================================================================================== //
+//                                        RCC LL Prescaler APIs                                         //
+// ==================================================================================================== //
+
+/**
+ * @brief	RCC LL Prescaler Control
+ * @defgroup RCC_02_LL_04_Prescalers RCC LL Prescaler Control
+ * @ingroup	RCC_02_LL
+ * @details
+ * This group owns register-near programming of AHB, APB, ADC, and USB prescaler fields.
+ * @{
+ */
 
 /**
  * @brief	Programs the AHB prescaler field
@@ -716,7 +721,7 @@ driver_status_t RCC_LL_SetUSBPrescaler(const rcc_ll_usb_prescaler_t prescaler);
  */
 driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler);
 
-/** @} */ // RCC_02_LL_04_API_02_ClockTree
+/** @} */ // RCC_02_LL_04_Prescalers
 
 // ==================================================================================================== //
 //                                     RCC LL Clock Gate and Reset                                      //
@@ -724,8 +729,8 @@ driver_status_t RCC_LL_GetUSBPrescaler(rcc_ll_usb_prescaler_t* const pPrescaler)
 
 /**
  * @brief	RCC LL Clock Gate and Reset APIs
- * @defgroup RCC_02_LL_04_API_03_ClockGateReset RCC LL Clock Gate and Reset Control
- * @ingroup	RCC_02_LL_04_API
+ * @defgroup RCC_02_LL_05_ClockReset RCC LL Clock Gate and Reset Control
+ * @ingroup	RCC_02_LL
  * @{
  */
 
@@ -837,9 +842,8 @@ driver_status_t RCC_LL_APB2_ResetPulse(const uint32_t mask);
  */
 driver_status_t RCC_LL_APB1_ResetPulse(const uint32_t mask);
 
-/** @} */ // RCC_02_LL_04_API_03_ClockGateReset
+/** @} */ // RCC_02_LL_05_ClockReset
 
-/** @} */ // RCC_02_LL_04_API
 
 /** @} */ // RCC_02_LL
 

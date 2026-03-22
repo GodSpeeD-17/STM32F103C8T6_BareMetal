@@ -2,16 +2,17 @@
  * @file	rcc.h
  * @author	Shrey Shah
  * @brief	RCC Driver Public Interface
- * @version	v2.3
- * @date	20-03-2026
+ * @version	v2.4
+ * @date	22-03-2026
  *
  * @details
- * This header exposes the public RCC driver layer. The driver owns:
- * - clock-tree configuration structures,
- * - validation of requested clock configurations,
- * - orchestration of the RCC LL sequencing,
- * - bus clock gate and reset services,
- * - runtime clock-frequency queries.
+ * This header defines the RCC driver layer built on top of `rcc_ll.h`.
+ *
+ * Theory:
+ * - The RCC hardware exposes clock sources, prescalers, and gate/reset control.
+ * - The LL layer performs direct register-near actions.
+ * - The driver layer validates requested policies, sequences safe transitions,
+ *   and exposes frequency-oriented runtime queries.
  */
 
 #ifndef RCC_H_
@@ -33,17 +34,79 @@ extern "C" {
  */
 
 // ==================================================================================================== //
+//                                         RCC Driver Data Types                                        //
+// ==================================================================================================== //
+
+/**
+ * @brief	RCC Driver Shared Type Aliases
+ * @defgroup RCC_03_Driver_01_DataTypes RCC Driver Data Types
+ * @ingroup	RCC_03_Driver
+ * @details
+ * The RCC scalar typedef aliases are declared in `stm32f1xx_data_types.h` so
+ * they are available to the core layer, LL layer, and driver layer without
+ * requiring inclusion of `rcc.h`.
+ * @{
+ */
+
+/** @} */ // RCC_03_Driver_01_DataTypes
+
+// ==================================================================================================== //
 //                                      RCC Frequency Definitions                                       //
 // ==================================================================================================== //
 
 /**
  * @brief	RCC Frequency Types and Limits
- * @defgroup RCC_03_Driver_01_Frequency RCC Driver Frequency Types and Macros
+ * @defgroup RCC_03_Driver_02_Frequency RCC Driver Frequency Types and Macros
  * @ingroup	RCC_03_Driver
  * @{
  */
 
-/** @} */ // RCC_03_Driver_01_Frequency
+/**
+ * @brief	Derived RCC clock frequencies snapshot
+ * @typedef	rcc_clock_frequencies_t
+ */
+typedef struct _rcc_clock_frequencies_t
+{
+
+	/**
+	 * @brief System clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	sysclk;
+
+	/**
+	 * @brief AHB clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	hclk;
+
+	/**
+	 * @brief APB1 clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	pclk1;
+	
+	/**
+	 * @brief APB2 clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	pclk2;
+
+	/**
+	 * @brief ADC clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	adcclk;
+
+	/**
+	 * @brief USB clock frequency in Hz
+	 * @memberof rcc_clock_frequencies_t
+	 */
+	rcc_freq_t	usbclk;
+
+} rcc_clock_frequencies_t;
+
+/** @} */ // RCC_03_Driver_02_Frequency
 
 // ==================================================================================================== //
 //									   RCC Flash Configuration										//
@@ -51,7 +114,7 @@ extern "C" {
 
 /**
  * @brief	RCC Flash Configuration Types
- * @defgroup RCC_03_Driver_02_Flash RCC Driver Flash Configuration
+ * @defgroup RCC_03_Driver_03_Flash RCC Driver Flash Configuration
  * @ingroup	RCC_03_Driver
  * @{
  */
@@ -63,8 +126,6 @@ extern "C" {
 /** @brief Flash two wait states @def RCC_FLASH_LATENCY_2 */
 #define RCC_FLASH_LATENCY_2						((rcc_flash_latency_t) 2U)
 
-/** @brief Flash prefetch selector type @typedef rcc_flash_prefetch_t */
-typedef uint8_t									rcc_flash_prefetch_t;
 /** @brief Flash prefetch disabled @def RCC_FLASH_PREFETCH_DISABLE */
 #define RCC_FLASH_PREFETCH_DISABLE				((rcc_flash_prefetch_t) 0U)
 /** @brief Flash prefetch enabled @def RCC_FLASH_PREFETCH_ENABLE */
@@ -76,6 +137,7 @@ typedef uint8_t									rcc_flash_prefetch_t;
  */
 typedef struct _rcc_flash_config_t
 {
+
 	/**
 	 * @brief Flash Latency
 	 * @memberof rcc_flash_config_t 
@@ -86,9 +148,10 @@ typedef struct _rcc_flash_config_t
 	 * @memberof rcc_flash_config_t 
 	 */
 	rcc_flash_prefetch_t	prefetch;
+
 } rcc_flash_config_t;
 
-/** @} */ // RCC_03_Driver_02_Flash
+/** @} */ // RCC_03_Driver_03_Flash
 
 // ==================================================================================================== //
 //                                           RCC System Clock                                           //
@@ -96,13 +159,11 @@ typedef struct _rcc_flash_config_t
 
 /**
  * @brief	RCC System Clock and PLL Types
- * @defgroup RCC_03_Driver_03_SystemClock RCC Driver System Clock Configuration
+ * @defgroup RCC_03_Driver_04_SystemClock RCC Driver System Clock Configuration
  * @ingroup	RCC_03_Driver
  * @{
  */
 
-/** @brief System clock source selector type @typedef rcc_system_clock_t */
-typedef uint8_t									rcc_system_clock_t;
 /** @brief HSI selected as SYSCLK @def RCC_SYS_CLK_HSI */
 #define RCC_SYS_CLK_HSI							((rcc_system_clock_t) 0U)
 /** @brief HSE selected as SYSCLK @def RCC_SYS_CLK_HSE */
@@ -110,15 +171,11 @@ typedef uint8_t									rcc_system_clock_t;
 /** @brief PLL selected as SYSCLK @def RCC_SYS_CLK_PLL */
 #define RCC_SYS_CLK_PLL							((rcc_system_clock_t) 2U)
 
-/** @brief PLL source selector type @typedef rcc_pll_src_t */
-typedef uint8_t									rcc_pll_src_t;
 /** @brief HSI divided by 2 selected as PLL input @def RCC_PLL_SRC_HSI */
 #define RCC_PLL_SRC_HSI							((rcc_pll_src_t) 0U)
 /** @brief HSE selected as PLL input @def RCC_PLL_SRC_HSE */
 #define RCC_PLL_SRC_HSE							((rcc_pll_src_t) 1U)
 
-/** @brief PLL input prescaler selector type @typedef rcc_pll_src_psc_t */
-typedef uint8_t									rcc_pll_src_psc_t;
 /** @brief Fixed HSI divide-by-2 PLL input @def RCC_PLL_SRC_HSI_DIV_2 */
 #define RCC_PLL_SRC_HSI_DIV_2					((rcc_pll_src_psc_t) 0U)
 /** @brief HSE divide-by-1 PLL input @def RCC_PLL_SRC_HSE_DIV_1 */
@@ -126,8 +183,6 @@ typedef uint8_t									rcc_pll_src_psc_t;
 /** @brief HSE divide-by-2 PLL input @def RCC_PLL_SRC_HSE_DIV_2 */
 #define RCC_PLL_SRC_HSE_DIV_2					((rcc_pll_src_psc_t) 2U)
 
-/** @brief PLL multiplication factor type @typedef rcc_pll_mul_t */
-typedef uint8_t									rcc_pll_mul_t;
 /** @brief PLL multiplication factor x2 @def RCC_PLL_MUL_2 */
 #define RCC_PLL_MUL_2							((rcc_pll_mul_t) 2U)
 /** @brief PLL multiplication factor x3 @def RCC_PLL_MUL_3 */
@@ -165,21 +220,25 @@ typedef uint8_t									rcc_pll_mul_t;
  */
 typedef struct _rcc_pll_config_t
 {
+
 	/**
 	 * @brief PLL Source
 	 * @memberof rcc_pll_config_t
 	 */
 	rcc_pll_src_t			source;
+
 	/**
 	 * @brief PLL Source - Prescaler
 	 * @memberof rcc_pll_config_t
 	 */
 	rcc_pll_src_psc_t		source_prescaler;
+
 	/**
 	 * @brief PLL Multiplication Factor
 	 * @memberof rcc_pll_config_t
 	 */
 	rcc_pll_mul_t			multiplication_factor;
+
 } rcc_pll_config_t;
 
 /**
@@ -188,19 +247,22 @@ typedef struct _rcc_pll_config_t
  */
 typedef struct _rcc_sys_clk_config_t
 {
+
 	/**
 	 * @brief System Clock Source
 	 * @memberof rcc_sys_clk_config_t
 	 */
 	rcc_system_clock_t	clk_src;
+
 	/**
 	 * @brief PLL Configuration (if applicable)
 	 * @memberof rcc_sys_clk_config_t
 	 */
 	rcc_pll_config_t	pll;
+
 } rcc_sys_clk_config_t;
 
-/** @} */ // RCC_03_Driver_03_SystemClock
+/** @} */ // RCC_03_Driver_04_SystemClock
 
 // ==================================================================================================== //
 //                                            RCC Prescalers                                            //
@@ -208,11 +270,10 @@ typedef struct _rcc_sys_clk_config_t
 
 /**
  * @brief	RCC Bus and Component Prescaler Types
- * @defgroup RCC_03_Driver_04_Prescalers RCC Driver Prescaler Configuration
+ * @defgroup RCC_03_Driver_05_Prescalers RCC Driver Prescaler Configuration
  * @ingroup	RCC_03_Driver
  * @{
  */
-
 
 /** @brief AHB bus selector @def RCC_AHB_BUS */
 #define RCC_AHB_BUS								((rcc_bus_t) 0U)
@@ -282,21 +343,25 @@ typedef struct _rcc_sys_clk_config_t
  */
 typedef struct _rcc_bus_config_t
 {
+
 	/**
 	 * @brief AHB Prescaler
 	 * @memberof rcc_bus_config_t
 	 */
 	rcc_bus_prescaler_t	AHB;
+
 	/**
 	 * @brief APB1 Prescaler
 	 * @memberof rcc_bus_config_t
 	 */
 	rcc_bus_prescaler_t	APB1;
+	
 	/**
 	 * @brief APB2 Prescaler
 	 * @memberof rcc_bus_config_t
 	 */
 	rcc_bus_prescaler_t	APB2;
+
 } rcc_bus_config_t;
 
 /**
@@ -310,14 +375,16 @@ typedef struct _rcc_component_config_t
 	 * @memberof rcc_component_config_t
 	 */
 	rcc_component_prescaler_t	ADC;
+
 	/**
 	 * @brief USB - Prescaler
 	 * @memberof rcc_component_config_t
 	 */
 	rcc_component_prescaler_t	USB;
+
 } rcc_component_config_t;
 
-/** @} */ // RCC_03_Driver_04_Prescalers
+/** @} */ // RCC_03_Driver_05_Prescalers
 
 // ==================================================================================================== //
 //                                     RCC Aggregate Configuration                                      //
@@ -325,7 +392,7 @@ typedef struct _rcc_component_config_t
 
 /**
  * @brief	RCC Aggregate Configuration Types
- * @defgroup RCC_03_Driver_05_Config RCC Driver Aggregate Configuration
+ * @defgroup RCC_03_Driver_06_Config RCC Driver Aggregate Configuration
  * @ingroup	RCC_03_Driver
  * @{
  */
@@ -336,21 +403,25 @@ typedef struct _rcc_component_config_t
  */
 typedef struct _rcc_clock_tree_config_t
 {
+
 	/**
 	 * @brief System Configurations
 	 * @memberof rcc_clock_tree_config_t
 	 */
 	rcc_sys_clk_config_t		system;
+
 	/**
 	 * @brief Bus Prescaler Configurations
 	 * @memberof rcc_clock_tree_config_t
 	 */
 	rcc_bus_config_t			bus;
+
 	/**
 	 * @brief Components Configurations
 	 * @memberof rcc_clock_tree_config_t
 	 */
 	rcc_component_config_t		component;
+
 } rcc_clock_tree_config_t;
 
 /**
@@ -359,57 +430,22 @@ typedef struct _rcc_clock_tree_config_t
  */
 typedef struct _rcc_config_t
 {
+
 	/**
 	 * @brief Flash - Configurations
 	 * @memberof rcc_config_t
 	 */
 	rcc_flash_config_t		flash;
+
 	/**
 	 * @brief Clock Tree - Configurations
 	 * @memberof rcc_config_t
 	 */
 	rcc_clock_tree_config_t	clock_tree;
+
 } rcc_config_t;
 
-/**
- * @brief	Derived RCC clock frequencies snapshot
- * @typedef	rcc_clock_frequencies_t
- */
-typedef struct _rcc_clock_frequencies_t
-{
-	/**
-	 * @brief System clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	sysclk;
-	/**
-	 * @brief AHB clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	hclk;
-	/**
-	 * @brief APB1 clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	pclk1;
-	/**
-	 * @brief APB2 clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	pclk2;
-	/**
-	 * @brief ADC clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	adcclk;
-	/**
-	 * @brief USB clock frequency in Hz
-	 * @memberof rcc_clock_frequencies_t
-	 */
-	rcc_freq_t	usbclk;
-} rcc_clock_frequencies_t;
-
-/** @} */ // RCC_03_Driver_05_Config
+/** @} */ // RCC_03_Driver_06_Config
 
 // ==================================================================================================== //
 //                                    RCC Clock Gate and Reset APIs                                     //
@@ -417,7 +453,7 @@ typedef struct _rcc_clock_frequencies_t
 
 /**
  * @brief	RCC Clock Gate and Reset APIs
- * @defgroup RCC_03_Driver_06_ClockReset RCC Driver Clock Enable and Reset APIs
+ * @defgroup RCC_03_Driver_07_ClockReset RCC Driver Clock Enable and Reset APIs
  * @ingroup	RCC_03_Driver
  * @{
  */
@@ -518,26 +554,62 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMas
 	return RCC_LL_APB1_ResetPulse(resetMask);
 }
 
+/** @} */ // RCC_03_Driver_07_ClockReset
+
 // ==================================================================================================== //
-//                                           RCC Driver APIs                                            //
+//                                        RCC Frequency APIs                                            //
 // ==================================================================================================== //
 
 /**
- * @brief	RCC Driver Functional APIs
- * @defgroup RCC_03_Driver_07_API RCC Driver Functional APIs
- * @ingroup	RCC_03_Driver
+ * @addtogroup RCC_03_Driver_02_Frequency
  * @{
  */
 
 /**
- * @brief	Validates a complete RCC configuration descriptor
- * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
- * @returns - @ref driver_status_t Validation result
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Configuration is valid and internally consistent.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contains an invalid source, divider, multiplier, or limit violation.
+ * @brief	Returns the current core clock frequency before AHB division
+ * @returns	Core clock frequency in Hz
  */
-driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig);
+rcc_freq_t RCC_GetCoreClockFreq(void);
+
+/**
+ * @brief	Returns the current frequency of a requested bus
+ * @param[in] bus	Target bus selector of @ref rcc_bus_t
+ * @returns	Bus clock frequency in Hz
+ */
+rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
+
+/**
+ * @brief	Returns the current ADC clock frequency
+ * @returns	ADC clock frequency in Hz
+ */
+rcc_freq_t RCC_GetADCFreq(void);
+
+/**
+ * @brief	Returns the current USB clock frequency
+ * @returns	USB clock frequency in Hz
+ */
+rcc_freq_t RCC_GetUSBFreq(void);
+
+/**
+ * @brief	Returns the cached or current derived RCC clock frequencies snapshot
+ * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The clock frequency snapshot was returned successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
+ */
+driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies);
+
+/** @} */ // RCC_03_Driver_02_Frequency
+
+// ==================================================================================================== //
+//                                          RCC Flash APIs                                              //
+// ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_03_Driver_03_Flash
+ * @{
+ */
 
 /**
  * @brief	Applies Flash latency and prefetch configuration
@@ -549,25 +621,16 @@ driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig);
  */
 driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const pFlashConfig);
 
-/**
- * @brief	Applies AHB, APB1, and APB2 prescaler configuration
- * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested bus prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid.
- */
-driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig);
+/** @} */ // RCC_03_Driver_03_Flash
+
+// ==================================================================================================== //
+//                                       RCC System Clock APIs                                          //
+// ==================================================================================================== //
 
 /**
- * @brief	Applies ADC and USB prescaler configuration
- * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested component prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid.
+ * @addtogroup RCC_03_Driver_04_SystemClock
+ * @{
  */
-driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig);
 
 /**
  * @brief	Switches SYSCLK to HSI and validates the transition with a timeout
@@ -596,6 +659,89 @@ driver_status_t RCC_SwitchClockSourceToHSE(void);
  * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
  */
 driver_status_t RCC_SwitchClockSourceToPLL(void);
+
+/**
+ * @brief	Returns the active system clock source
+ * @returns	Current system clock source as @ref rcc_system_clock_t
+ */
+rcc_system_clock_t RCC_GetSysClkSrc(void);
+
+/**
+ * @brief	Returns the active PLL source selection
+ * @returns	Current PLL source as @ref rcc_pll_src_t
+ */
+rcc_pll_src_t RCC_GetPLLSource(void);
+
+/**
+ * @brief	Returns the active PLL input prescaler selection
+ * @returns	Current PLL source prescaler as @ref rcc_pll_src_psc_t
+ */
+rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void);
+
+/**
+ * @brief	Returns the active PLL multiplication factor
+ * @returns	Current PLL multiplication factor as @ref rcc_pll_mul_t
+ */
+rcc_pll_mul_t RCC_GetPLLMultiplier(void);
+
+/** @} */ // RCC_03_Driver_04_SystemClock
+
+// ==================================================================================================== //
+//                                        RCC Prescaler APIs                                            //
+// ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_03_Driver_05_Prescalers
+ * @{
+ */
+
+/**
+ * @brief	Applies AHB, APB1, and APB2 prescaler configuration
+ * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested bus prescalers were applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid.
+ */
+driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig);
+
+/**
+ * @brief	Applies ADC and USB prescaler configuration
+ * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested component prescalers were applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid.
+ */
+driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig);
+
+/**
+ * @brief	Returns the configured divider for a requested bus
+ * @param[in] bus	Target bus selector of @ref rcc_bus_t
+ * @returns	Configured bus divider value
+ */
+rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
+
+/** @} */ // RCC_03_Driver_05_Prescalers
+
+// ==================================================================================================== //
+//                                         RCC Config APIs                                              //
+// ==================================================================================================== //
+
+/**
+ * @addtogroup RCC_03_Driver_06_Config
+ * @{
+ */
+
+/**
+ * @brief	Validates a complete RCC configuration descriptor
+ * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
+ * @returns - @ref driver_status_t Validation result
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Configuration is valid and internally consistent.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contains an invalid source, divider, multiplier, or limit violation.
+ */
+driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies a complete clock-tree configuration through the RCC driver orchestrator
@@ -637,73 +783,7 @@ void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig);
  */
 driver_status_t RCC_Config_72MHz(void);
 
-/**
- * @brief	Returns the active system clock source
- * @returns	Current system clock source as @ref rcc_system_clock_t
- */
-rcc_system_clock_t RCC_GetSysClkSrc(void);
-
-/**
- * @brief	Returns the active PLL source selection
- * @returns	Current PLL source as @ref rcc_pll_src_t
- */
-rcc_pll_src_t RCC_GetPLLSource(void);
-
-/**
- * @brief	Returns the active PLL input prescaler selection
- * @returns	Current PLL source prescaler as @ref rcc_pll_src_psc_t
- */
-rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void);
-
-/**
- * @brief	Returns the active PLL multiplication factor
- * @returns	Current PLL multiplication factor as @ref rcc_pll_mul_t
- */
-rcc_pll_mul_t RCC_GetPLLMultiplier(void);
-
-/**
- * @brief	Returns the current core clock frequency before AHB division
- * @returns	Core clock frequency in Hz
- */
-rcc_freq_t RCC_GetCoreClockFreq(void);
-
-/**
- * @brief	Returns the configured divider for a requested bus
- * @param[in] bus	Target bus selector of @ref rcc_bus_t
- * @returns	Configured bus divider value
- */
-rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
-
-/**
- * @brief	Returns the current frequency of a requested bus
- * @param[in] bus	Target bus selector of @ref rcc_bus_t
- * @returns	Bus clock frequency in Hz
- */
-rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
-
-/**
- * @brief	Returns the current ADC clock frequency
- * @returns	ADC clock frequency in Hz
- */
-rcc_freq_t RCC_GetADCFreq(void);
-
-/**
- * @brief	Returns the current USB clock frequency
- * @returns	USB clock frequency in Hz
- */
-rcc_freq_t RCC_GetUSBFreq(void);
-
-/**
- * @brief	Returns the cached or current derived RCC clock frequencies snapshot
- * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The clock frequency snapshot was returned successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
- */
-driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies);
-
-/** @} */ // RCC_03_Driver_07_API
+/** @} */ // RCC_03_Driver_06_Config
 
 // ==================================================================================================== //
 //                                  RCC Legacy Compatibility Wrappers                                   //
