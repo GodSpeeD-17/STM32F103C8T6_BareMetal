@@ -10,7 +10,6 @@
 //													Includes											  //
 // ==================================================================================================== //
 #include "rcc.h"
-
 // ==================================================================================================== //
 //													Macros												//
 // ==================================================================================================== //
@@ -171,9 +170,9 @@ static driver_status_t _RCC_WaitForSystemClockSourceSwitch(const rcc_system_cloc
 
 /**
  * @brief Finds the LUT index whose LL field matches the requested field value.
- * @param pLUT Pointer to the LUT to scan.
- * @param itemCount Number of valid items in the LUT.
- * @param fieldValue LL field value to search for.
+ * @param[in] pLUT Pointer to the LUT to scan.
+ * @param[in] itemCount Number of valid items in the LUT.
+ * @param[in] fieldValue LL field value to search for.
  * @returns Matching LUT index when found, otherwise @ref RCC_DRIVER_INVALID_INDEX.
  */
 __STATIC_FORCEINLINE uint32_t _RCC_FindFieldValueMapIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t fieldValue)
@@ -193,10 +192,10 @@ __STATIC_FORCEINLINE uint32_t _RCC_FindFieldValueMapIndex(const _rcc_field_value
 
 /**
  * @brief Returns the logical value stored at the requested LUT index.
- * @param pLUT Pointer to the LUT to read.
- * @param itemCount Number of valid items in the LUT.
- * @param index Requested LUT index.
- * @param defaultValue Fallback value used when the index is outside the LUT range.
+ * @param[in] pLUT Pointer to the LUT to read.
+ * @param[in] itemCount Number of valid items in the LUT.
+ * @param[in] index Requested LUT index.
+ * @param[in] defaultValue Fallback value used when the index is outside the LUT range.
  * @returns Logical value stored in the LUT, or @p defaultValue when the index is invalid.
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapValueByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultValue)
@@ -209,43 +208,59 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapValueByIndex(const _rcc_field
 	return pLUT[index].value;
 }
 
-/** @brief Returns the effective AHB divider for the supplied driver selector. */
+/**
+ * @brief Returns the effective AHB divider for the supplied driver selector.
+ * @param[in] prescalerSelector The AHB prescaler selector.
+ * @returns The effective divider value.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
 {
 	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_AHBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_AHBPrescalerLUT) / sizeof(_RCC_AHBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		1UL
 	);
 }
 
-/** @brief Returns the effective APB divider for the supplied driver selector. */
+/**
+ * @brief Returns the effective APB divider for the supplied driver selector.
+ * @param[in] prescalerSelector The APB prescaler selector.
+ * @returns The effective divider value.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPBBusPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
 {
 	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_APBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_APBPrescalerLUT) / sizeof(_RCC_APBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_APBPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		1UL
 	);
 }
 
-/** @brief Returns the effective ADC divider for the supplied driver selector. */
+/**
+ * @brief Returns the effective ADC divider for the supplied driver selector.
+ * @param[in] prescalerSelector The ADC prescaler selector.
+ * @returns The effective divider value.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCPrescalerDividerBySelector(const rcc_component_prescaler_t prescalerSelector)
 {
 	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_ADCPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_ADCPrescalerLUT) / sizeof(_RCC_ADCPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		2UL
 	);
 }
 
-/** @brief Resolves the public system clock selection to the LL field encoding. */
+/**
+ * @brief Resolves the public system clock selection to the LL field encoding.
+ * @param[in] source The system clock source selection.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetSystemClockSourceLLField(const rcc_system_clock_t source)
 {
 	switch (source)
@@ -269,7 +284,11 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetSystemClockSourceLLField(const rcc_system_
 	}
 }
 
-/** @brief Resolves the public PLL source selection to the LL field encoding. */
+/**
+ * @brief Resolves the public PLL source selection to the LL field encoding.
+ * @param[in] source The PLL source selection.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetPLLSourceLLField(const rcc_pll_src_t source)
 {
 	switch (source)
@@ -289,7 +308,11 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetPLLSourceLLField(const rcc_pll_src_t sourc
 	}
 }
 
-/** @brief Resolves the public HSE PLL divider selection to the LL field encoding. */
+/**
+ * @brief Resolves the public HSE PLL divider selection to the LL field encoding.
+ * @param[in] divider The HSE PLL divider selection.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetPLLHSEDividerLLField(const rcc_pll_src_psc_t divider)
 {
 	switch (divider)
@@ -309,7 +332,11 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetPLLHSEDividerLLField(const rcc_pll_src_psc
 	}
 }
 
-/** @brief Resolves the public PLL multiplier selection to the LL field encoding. */
+/**
+ * @brief Resolves the public PLL multiplier selection to the LL field encoding.
+ * @param[in] multiplier The PLL multiplier selection.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetPLLMultiplierLLField(const rcc_pll_mul_t multiplier)
 {
 	if ((multiplier < RCC_PLL_MUL_2) || (multiplier > RCC_PLL_MUL_16))
@@ -320,61 +347,81 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetPLLMultiplierLLField(const rcc_pll_mul_t m
 	return _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_PLLMultiplierLUT,
-		(uint32_t) (sizeof(_RCC_PLLMultiplierLUT) / sizeof(_RCC_PLLMultiplierLUT[0])),
+		ARRAY_SIZE(_RCC_PLLMultiplierLUT),
 		(uint32_t) (multiplier - RCC_PLL_MUL_2),
 		RCC_DRIVER_INVALID_FIELD
 	);
 }
 
-/** @brief Resolves the public AHB prescaler selector to the LL field encoding. */
+/**
+ * @brief Resolves the public AHB prescaler selector to the LL field encoding.
+ * @param[in] prescalerSelector The AHB prescaler selector.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
 {
 	return _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_AHBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_AHBPrescalerLUT) / sizeof(_RCC_AHBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		RCC_DRIVER_INVALID_FIELD
 	);
 }
 
-/** @brief Resolves the public APB prescaler selector to the LL field encoding. */
+/**
+ * @brief Resolves the public APB prescaler selector to the LL field encoding.
+ * @param[in] prescalerSelector The APB prescaler selector.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetAPBPrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
 {
 	return _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_APBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_APBPrescalerLUT) / sizeof(_RCC_APBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_APBPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		RCC_DRIVER_INVALID_FIELD
 	);
 }
 
-/** @brief Resolves the public ADC prescaler selector to the LL field encoding. */
+/**
+ * @brief Resolves the public ADC prescaler selector to the LL field encoding.
+ * @param[in] prescalerSelector The ADC prescaler selector.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
 {
 	return _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_ADCPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_ADCPrescalerLUT) / sizeof(_RCC_ADCPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		RCC_DRIVER_INVALID_FIELD
 	);
 }
 
-/** @brief Resolves the public USB prescaler selector to the LL field encoding. */
+/**
+ * @brief Resolves the public USB prescaler selector to the LL field encoding.
+ * @param[in] prescalerSelector The USB prescaler selector.
+ * @returns The corresponding LL field value.
+ */
 __STATIC_FORCEINLINE uint32_t _RCC_GetUSBPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
 {
 	return _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_USBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_USBPrescalerLUT) / sizeof(_RCC_USBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_USBPrescalerLUT),
 		(uint32_t) prescalerSelector,
 		RCC_DRIVER_INVALID_FIELD
 	);
 }
 
-/** @brief Decodes the LL system clock status field to the public driver value. */
+/**
+ * @brief Decodes the LL system clock status field to the public driver value.
+ * @param[in] status The LL system clock status field.
+ * @returns The corresponding public driver value.
+ */
 __STATIC_FORCEINLINE rcc_system_clock_t _RCC_GetSystemClockSourceFromLLStatus(const rcc_ll_sysclk_status_t status)
 {
 	switch (status)
@@ -398,13 +445,17 @@ __STATIC_FORCEINLINE rcc_system_clock_t _RCC_GetSystemClockSourceFromLLStatus(co
 	}
 }
 
-/** @brief Decodes the LL AHB prescaler field to the public selector value. */
+/**
+ * @brief Decodes the LL AHB prescaler field to the public selector value.
+ * @param[in] prescalerField The LL AHB prescaler field.
+ * @returns The corresponding public selector value.
+ */
 __STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAHBPrescalerSelectorFromLLField(const rcc_ll_ahb_prescaler_t prescalerField)
 {
 	const uint32_t index = _RCC_FindFieldValueMapIndex
 	(
 		_RCC_AHBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_AHBPrescalerLUT) / sizeof(_RCC_AHBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
 		(uint32_t) prescalerField
 	);
 
@@ -416,13 +467,17 @@ __STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAHBPrescalerSelectorFromLLField
 	return (rcc_bus_prescaler_t) index;
 }
 
-/** @brief Decodes the LL APB prescaler field to the public selector value. */
+/**
+ * @brief Decodes the LL APB prescaler field to the public selector value.
+ * @param[in] prescalerField The LL APB prescaler field.
+ * @returns The corresponding public selector value.
+ */
 __STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAPBPrescalerSelectorFromLLField(const rcc_ll_apb_prescaler_t prescalerField)
 {
 	const uint32_t index = _RCC_FindFieldValueMapIndex
 	(
 		_RCC_APBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_APBPrescalerLUT) / sizeof(_RCC_APBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_APBPrescalerLUT),
 		(uint32_t) prescalerField
 	);
 
@@ -434,13 +489,17 @@ __STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAPBPrescalerSelectorFromLLField
 	return (rcc_bus_prescaler_t) index;
 }
 
-/** @brief Decodes the LL ADC prescaler field to the public selector value. */
+/**
+ * @brief Decodes the LL ADC prescaler field to the public selector value.
+ * @param[in] prescalerField The LL ADC prescaler field.
+ * @returns The corresponding public selector value.
+ */
 __STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetADCPrescalerSelectorFromLLField(const rcc_ll_adc_prescaler_t prescalerField)
 {
 	const uint32_t index = _RCC_FindFieldValueMapIndex
 	(
 		_RCC_ADCPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_ADCPrescalerLUT) / sizeof(_RCC_ADCPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
 		(uint32_t) prescalerField
 	);
 
@@ -452,13 +511,17 @@ __STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetADCPrescalerSelectorFromL
 	return (rcc_component_prescaler_t) index;
 }
 
-/** @brief Decodes the LL USB prescaler field to the public selector value. */
+/**
+ * @brief Decodes the LL USB prescaler field to the public selector value.
+ * @param[in] prescalerField The LL USB prescaler field.
+ * @returns The corresponding public selector value.
+ */
 __STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetUSBPrescalerSelectorFromLLField(const rcc_ll_usb_prescaler_t prescalerField)
 {
 	const uint32_t index = _RCC_FindFieldValueMapIndex
 	(
 		_RCC_USBPrescalerLUT,
-		(uint32_t) (sizeof(_RCC_USBPrescalerLUT) / sizeof(_RCC_USBPrescalerLUT[0])),
+		ARRAY_SIZE(_RCC_USBPrescalerLUT),
 		(uint32_t) prescalerField
 	);
 
@@ -470,7 +533,11 @@ __STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetUSBPrescalerSelectorFromL
 	return (rcc_component_prescaler_t) index;
 }
 
-/** @brief Returns the PLL input frequency for the supplied clock tree configuration. */
+/**
+ * @brief Returns the PLL input frequency for the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The PLL input frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetPLLInputClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	if (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSI)
@@ -486,7 +553,11 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetPLLInputClockFrequency(const rcc_clock_t
 	return RCC_HSE_FREQ;
 }
 
-/** @brief Returns the target SYSCLK frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target SYSCLK frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target SYSCLK frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetSystemClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	switch (pClockTreeConfig->system.clk_src)
@@ -510,31 +581,51 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetSystemClockFrequency(const rcc_clock_tre
 	}
 }
 
-/** @brief Returns the target HCLK frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target HCLK frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target HCLK frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetSystemClockFrequency(pClockTreeConfig) / _RCC_GetAHBPrescalerDividerBySelector(pClockTreeConfig->bus.AHB));
 }
 
-/** @brief Returns the target APB1 frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target APB1 frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target APB1 frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB1));
 }
 
-/** @brief Returns the target APB2 frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target APB2 frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target APB2 frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB2));
 }
 
-/** @brief Returns the target ADC frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target ADC frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target ADC frequency.
+ */
 __STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAPB2ClockFrequency(pClockTreeConfig) / _RCC_GetADCPrescalerDividerBySelector(pClockTreeConfig->component.ADC));
 }
 
-/** @brief Returns the target USB frequency described by the supplied clock tree configuration. */
+/**
+ * @brief Returns the target USB frequency described by the supplied clock tree configuration.
+ * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
+ * @returns The target USB frequency.
+ */
 static rcc_freq_t _RCC_GetUSBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	const rcc_freq_t pllClock = _RCC_GetPLLInputClockFrequency(pClockTreeConfig) * (rcc_freq_t) pClockTreeConfig->system.pll.multiplication_factor;
@@ -687,7 +778,10 @@ static driver_status_t _RCC_ValidateClockTreeConfiguration(const rcc_config_t* c
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @brief Stores the supplied clock frequencies into the RCC driver cache. */
+/**
+ * @brief Stores the supplied clock frequencies into the RCC driver cache.
+ * @param[in] pClockFrequencies Pointer to the clock frequencies snapshot.
+ */
 __STATIC_FORCEINLINE void _RCC_UpdateClockFrequenciesSnapshotCache(const rcc_clock_frequencies_t* const pClockFrequencies)
 {
 	if (pClockFrequencies == NULL)

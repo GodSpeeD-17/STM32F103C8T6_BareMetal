@@ -125,6 +125,14 @@ do												\
 	}									 		\
 } while (0)
 
+/** 
+ * @brief Calculates the number of elements in an array
+ * @def ARRAY_SIZE
+ * @param[in] arr The array
+ * @returns Number of elements in the array
+ */
+#define ARRAY_SIZE(arr)							(sizeof(arr) / sizeof((arr)[0]))
+
 /** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
 
 /**
