@@ -18,6 +18,7 @@
 #ifndef RCC_H_
 #define RCC_H_
 
+// C++ Compatibility
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -42,9 +43,9 @@ extern "C" {
  * @defgroup RCC_03_Driver_01_DataTypes RCC Driver Data Types
  * @ingroup	RCC_03_Driver
  * @details
- * The RCC scalar typedef aliases are declared in `stm32f1xx_data_types.h` so
+ * The RCC scalar typedef aliases are declared in @ref `stm32f1xx_data_types.h` so
  * they are available to the core layer, LL layer, and driver layer without
- * requiring inclusion of `rcc.h`.
+ * requiring inclusion of @ref `rcc.h`
  * @{
  */
 
@@ -143,6 +144,7 @@ typedef struct _rcc_flash_config_t
 	 * @memberof rcc_flash_config_t 
 	 */
 	rcc_flash_latency_t		latency;
+	
 	/**
 	 * @brief Flash Pre-fetch
 	 * @memberof rcc_flash_config_t 
@@ -598,7 +600,7 @@ rcc_freq_t RCC_GetUSBFreq(void);
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
  */
-driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies);
+driver_status_t RCC_GetClockFrequencies(rcc_clock_frequencies_t* const pClockFrequencies);
 
 /** @} */ // RCC_03_Driver_02_Frequency
 
@@ -703,7 +705,7 @@ rcc_pll_mul_t RCC_GetPLLMultiplier(void);
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid.
  */
-driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig);
+driver_status_t RCC_ConfigBusPrescalers(const rcc_bus_config_t* const pBusConfig);
 
 /**
  * @brief	Applies ADC and USB prescaler configuration
@@ -713,12 +715,12 @@ driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig)
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid.
  */
-driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig);
+driver_status_t RCC_ConfigComponentPrescalers(const rcc_component_config_t* const pComponentConfig);
 
 /**
- * @brief	Returns the configured divider for a requested bus
+ * @brief	Returns the configured prescaler selector for a requested bus
  * @param[in] bus	Target bus selector of @ref rcc_bus_t
- * @returns	Configured bus divider value
+ * @returns	Configured bus prescaler selector value
  */
 rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
 
@@ -771,7 +773,7 @@ driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig);
  * @brief	Loads the default 72 MHz Blue Pill clock-tree preset
  * @param[out] pRCCConfig	Pointer to @ref rcc_config_t
  */
-void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig);
+void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies the default 72 MHz Blue Pill RCC configuration
@@ -781,7 +783,7 @@ void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig);
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
  * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
  */
-driver_status_t RCC_Config_72MHz(void);
+driver_status_t RCC_Config72MHz(void);
 
 /** @} */ // RCC_03_Driver_06_Config
 
@@ -823,10 +825,60 @@ __STATIC_FORCEINLINE rcc_freq_t RCC_GetAPB2Clock(void)
 	return RCC_GetBusFreq(RCC_APB2_BUS);
 }
 
+/**
+ * @brief	Legacy wrapper for @ref RCC_GetClockFrequencies
+ * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
+ * @returns	@ref driver_status_t Driver operation status
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies)
+{
+	return RCC_GetClockFrequencies(pClockFrequencies);
+}
+
+/**
+ * @brief	Legacy wrapper for @ref RCC_ConfigBusPrescalers
+ * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
+ * @returns	@ref driver_status_t Driver operation status
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig)
+{
+	return RCC_ConfigBusPrescalers(pBusConfig);
+}
+
+/**
+ * @brief	Legacy wrapper for @ref RCC_ConfigComponentPrescalers
+ * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
+ * @returns	@ref driver_status_t Driver operation status
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig)
+{
+	return RCC_ConfigComponentPrescalers(pComponentConfig);
+}
+
+/**
+ * @brief	Legacy wrapper for @ref RCC_Load72MHzDefaultConfig
+ * @param[out] pRCCConfig	Pointer to @ref rcc_config_t
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig)
+{
+	RCC_Load72MHzDefaultConfig(pRCCConfig);
+}
+
+/**
+ * @brief	Legacy wrapper for @ref RCC_Config72MHz
+ * @returns	@ref driver_status_t Driver operation status
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
+{
+	return RCC_Config72MHz();
+}
+
 /** @} */ // RCC_03_Driver_08_Legacy
 
 /** @} */ // RCC_03_Driver
 
+// C++ Compatibility
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
