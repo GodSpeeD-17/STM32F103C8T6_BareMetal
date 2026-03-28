@@ -40,9 +40,7 @@
  * @{
  */
 
-/** @brief GPIO Port Identifier type @typedef gpio_port_t  */
-typedef uint8_t											gpio_port_t;
-/** 
+/**
  * @section GPIO_Driver_Port_Macros GPIO Driver Port Macros
  * @details GPIO Driver Macros 
  * @{ 
@@ -88,7 +86,7 @@ typedef uint8_t											gpio_port_t;
  * @return GPIO Port Data Type used by LL
  * @note Pointer to GPIO Memory Address
  */
-__STATIC_FORCEINLINE GPIO_TypeDef* const GPIO_D2L_GetPort(const gpio_port_t gpio)
+__STATIC_FORCEINLINE GPIO_TypeDef* GPIO_D2L_GetPort(const gpio_port_t gpio)
 {
 	/** @brief Driver GPIO Port Mapping Lookup Table */
 	static GPIO_TypeDef* const _driverGPIOPortMapping[] =
@@ -105,70 +103,6 @@ __STATIC_FORCEINLINE GPIO_TypeDef* const GPIO_D2L_GetPort(const gpio_port_t gpio
 }
 
 /** @} */ // GPIO_03_Driver_01_Types_01_Ports
-
-/*---------------------------------------------- Driver GPIO Pins ----------------------------------------------*/
-/**
- * @brief    Driver GPIO Pins Declarations
- * @defgroup GPIO_03_Driver_01_Types_02_Pins Driver GPIO Pins
- * @ingroup  GPIO_03_Driver_01_Types
- * @details
- * - These constants represent individual pins as bitmasks
- * - Thus, allowing multiple pins to be selected using bitwise OR operations
- * @warning Not all pins are available on all ports - check device datasheet
- * @{
- */
-
-/** @typedef GPIO pin bitmask type @typedef gpio_pin_t*/
-typedef uint16_t 										gpio_pin_t;
-/**
- * @section GPIO_Driver_Pin_Macros GPIO Driver Pin Macros 
- * @details GPIO Driver Pin Macros
- * @{
- */
-/** @brief No pins bitmask @def GPIO_PIN_NONE @note Use @ref GPIO_PIN_NONE "GPIO_PIN_NONE" for no pins */
-#define GPIO_PIN_NONE									((gpio_pin_t) 0x0000)
-/** @brief Pin 0 bitmask @def GPIO_PIN_0 */
-#define GPIO_PIN_0										((gpio_pin_t) 0x0001)
-/** @brief Pin 1 bitmask @def GPIO_PIN_1 */
-#define GPIO_PIN_1										((gpio_pin_t) 0x0002)
-/** @brief Pin 2 bitmask @def GPIO_PIN_2 */
-#define GPIO_PIN_2										((gpio_pin_t) 0x0004)
-/** @brief Pin 3 bitmask @def GPIO_PIN_3 */
-#define GPIO_PIN_3										((gpio_pin_t) 0x0008)
-/** @brief Pin 4 bitmask @def GPIO_PIN_4 */
-#define GPIO_PIN_4										((gpio_pin_t) 0x0010)
-/** @brief Pin 5 bitmask @def GPIO_PIN_5 */
-#define GPIO_PIN_5										((gpio_pin_t) 0x0020)
-/** @brief Pin 6 bitmask @def GPIO_PIN_6 */
-#define GPIO_PIN_6										((gpio_pin_t) 0x0040)
-/** @brief Pin 7 bitmask @def GPIO_PIN_7 */
-#define GPIO_PIN_7										((gpio_pin_t) 0x0080)
-/** @brief Pin 8 bitmask @def GPIO_PIN_8 */
-#define GPIO_PIN_8										((gpio_pin_t) 0x0100)
-/** @brief Pin 9 bitmask @def GPIO_PIN_9 */
-#define GPIO_PIN_9										((gpio_pin_t) 0x0200)
-/** @brief Pin 10 bitmask @def GPIO_PIN_10 */
-#define GPIO_PIN_10										((gpio_pin_t) 0x0400)
-/** @brief Pin 11 bitmask @def GPIO_PIN_11 */
-#define GPIO_PIN_11										((gpio_pin_t) 0x0800)
-/** @brief Pin 12 bitmask @def GPIO_PIN_12 */
-#define GPIO_PIN_12										((gpio_pin_t) 0x1000)
-/** @brief Pin 13 bitmask @def GPIO_PIN_13 */
-#define GPIO_PIN_13										((gpio_pin_t) 0x2000)
-/** @brief Pin 14 bitmask @def GPIO_PIN_14 */
-#define GPIO_PIN_14										((gpio_pin_t) 0x4000)
-/** @brief Pin 15 bitmask @def GPIO_PIN_15 */
-#define GPIO_PIN_15										((gpio_pin_t)0x8000)
-/** @brief All pins bitmask @def GPIO_PIN_ALL @note Use @ref GPIO_PIN_ALL "GPIO_PIN_ALL" for all pins */
-#define GPIO_PIN_ALL									((gpio_pin_t) 0xFFFF)
-
-/** @} */ // GPIO_Driver_Pin_Macros
-
-// Board Specific Configuration
-#ifdef STM32F103C8T6__
-	#define GPIO_OB_LED_PORT 									GPIO_PORT_C
-	#define GPIO_OB_LED_PIN 									GPIO_PIN_13
-#endif /* STM32F103C8T6__ */
 
 /**
  * @brief Checks if a GPIO pin mask is valid
@@ -200,12 +134,24 @@ typedef uint16_t 										gpio_pin_t;
  * @param[in] pin @ref GPIO_Driver_Pin_Macros "GPIO Pin Mask" to check 
  * @return GPIO Pin Data Type used by LL 
  */
-__STATIC_FORCEINLINE _gpio_pin_t GPIO_D2L_GetPin(const gpio_pin_t pin)
+__STATIC_FORCEINLINE uint8_t GPIO_D2L_GetPin(const gpio_pin_t pin)
 {
-	return (((pin != GPIO_PIN_NONE) && (pin & GPIO_PIN_ALL) && ((pin & (pin - 1)) == GPIO_PIN_NONE)) ? ((_gpio_pin_t) (__builtin_ctz(pin))) : ((_gpio_pin_t) 0x10));
-} 
+	uint8_t pinIndex = 0x00U;
+	gpio_pin_t pinMask = pin;
 
-/** @} */ // GPIO_03_Driver_01_Types_02_Pins
+	if ((pin == GPIO_PIN_NONE) || ((pin & GPIO_PIN_ALL) != pin) || ((pin & (pin - 1U)) != GPIO_PIN_NONE))
+	{
+		return (uint8_t) 0x10U;
+	}
+
+	while ((pinMask & (gpio_pin_t) 0x0001U) == (gpio_pin_t) 0x0000U)
+	{
+		pinMask = (gpio_pin_t) (pinMask >> 1U);
+		++pinIndex;
+	}
+
+	return pinIndex;
+}
 
 /*---------------------------------------------- Driver GPIO Pin Modes ----------------------------------------------*/
 /**
@@ -220,8 +166,6 @@ __STATIC_FORCEINLINE _gpio_pin_t GPIO_D2L_GetPin(const gpio_pin_t pin)
  * * @{
  */
 
-/** @brief GPIO Pin Mode @typedef gpio_pin_mode_t */
-typedef uint8_t											gpio_pin_mode_t;
 /**
  * @section GPIO_Driver_PinMode_Macros GPIO Driver Pin Mode Macros 
  * @details GPIO Driver Pin Mode Macros 
@@ -258,14 +202,15 @@ typedef uint8_t											gpio_pin_mode_t;
  * @return GPIO mode
  * @note Make sure to validate the mode using @ref GPIO_DRIVER_IS_MODE before calling
  */
-__STATIC_FORCEINLINE const _gpio_pin_mode_t GPIO_D2L_GetPinMode(const gpio_pin_mode_t mode)
+__STATIC_FORCEINLINE uint8_t GPIO_D2L_GetPinMode(const gpio_pin_mode_t mode)
 {
 	switch(mode)
 	{
-		case GPIO_PIN_MODE_INPUT: return _GPIO_PIN_MODE_INPUT; break;
-		case GPIO_PIN_MODE_OUTPUT_10MHz: return _GPIO_PIN_MODE_OUTPUT_10MHz; break;
-		case GPIO_PIN_MODE_OUTPUT_2MHz: return _GPIO_PIN_MODE_OUTPUT_2MHz; break;
-		case GPIO_PIN_MODE_OUTPUT_50MHz: return _GPIO_PIN_MODE_OUTPUT_50MHz; break;
+		case GPIO_PIN_MODE_INPUT: return 0x00U; break;
+		case GPIO_PIN_MODE_OUTPUT_10MHz: return 0x01U; break;
+		case GPIO_PIN_MODE_OUTPUT_2MHz: return 0x02U; break;
+		case GPIO_PIN_MODE_OUTPUT_50MHz: return 0x03U; break;
+		default: return 0x00U;
 	}
 }
 
@@ -286,8 +231,6 @@ __STATIC_FORCEINLINE const _gpio_pin_mode_t GPIO_D2L_GetPinMode(const gpio_pin_m
  * * @{
  */
 
-/** @brief GPIO Pin Configuration type @typedef gpio_pin_config_t */
-typedef uint8_t											gpio_pin_config_t;
 /**
  * @section GPIO_Driver_PinConfiguration_Macros GPIO Driver Pin Configuration Macros
  * @details GPIO Driver Pin Configuration Macros
@@ -343,24 +286,24 @@ typedef uint8_t											gpio_pin_config_t;
 /**
  * @brief Maps driver-side GPIO configuration to LL GPIO configuration
  * @param[in] config GPIO pin configuration (gpio_pin_config_t)
- * @return Corresponding LL configuration (_gpio_pin_config_t)
+ * @return Corresponding raw GPIO configuration field value
  */
-__STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_D2L_GetPinConfig(const gpio_pin_config_t config)
+__STATIC_FORCEINLINE uint8_t GPIO_D2L_GetPinConfig(const gpio_pin_config_t config)
 {
 	switch (config)
 	{
 		// Input configurations
-		case GPIO_PIN_CNF_IN_ANALOG: return _GPIO_PIN_CNF_INPUT_ANALOG; break;	
-		case GPIO_PIN_CNF_IN_FLOAT: return _GPIO_PIN_CNF_INPUT_FLOATING; break;	
+		case GPIO_PIN_CNF_IN_ANALOG: return 0x00U; break;	
+		case GPIO_PIN_CNF_IN_FLOAT: return 0x01U; break;	
 		case GPIO_PIN_CNF_IN_PULL_DOWN:
-		case GPIO_PIN_CNF_IN_PULL_UP: return _GPIO_PIN_CNF_INPUT_PULL; break;	
+		case GPIO_PIN_CNF_IN_PULL_UP: return 0x02U; break;	
 		// Output configurations
-		case GPIO_PIN_CNF_OUT_GP_PP: return _GPIO_PIN_CNF_OUTPUT_PP; break;	
-		case GPIO_PIN_CNF_OUT_GP_OD: return _GPIO_PIN_CNF_OUTPUT_OD; break;	
-		case GPIO_PIN_CNF_OUT_AF_PP: return _GPIO_PIN_CNF_AF_PP; break;	
-		case GPIO_PIN_CNF_OUT_AF_OD: return _GPIO_PIN_CNF_AF_OD; break;	
+		case GPIO_PIN_CNF_OUT_GP_PP: return 0x00U; break;	
+		case GPIO_PIN_CNF_OUT_GP_OD: return 0x01U; break;	
+		case GPIO_PIN_CNF_OUT_AF_PP: return 0x02U; break;	
+		case GPIO_PIN_CNF_OUT_AF_OD: return 0x03U; break;	
 		// Default fallback for invalid values
-		default: break;
+		default: return 0x00U;
 	}
 }
 
@@ -409,85 +352,32 @@ __STATIC_FORCEINLINE const _gpio_pin_config_t GPIO_D2L_GetPinConfig(const gpio_p
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN)  || \
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_UP)       \
 	)) || \
-	((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
+	(((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
 	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_2MHz)  || \
 	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_50MHz)) && ( \
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_PP)     || \
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_OD)     || \
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP)     || \
 		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)       \
-	) \
+	)) \
 )
 
 /**
  * @brief Extracts GPIO Pull-Up or Pull-Down configuration from a driver pin configuration value.
  * @param[in] config GPIO configuration value of type @ref gpio_pin_config_t.
  *
- * @returns `_GPIO_PIN_CNF_INPUT_PULL_UP` if the configuration value has any bits set in
- *         the upper nibble (`0xF0`), otherwise `_GPIO_PIN_CNF_INPUT_PULL_DOWN`.
+ * @returns `0x01U` if the configuration value has any bits set in
+ *         the upper nibble (`0xF0`), otherwise `0x00U`.
  *
  * @note This macro assumes that the pull direction is encoded in the upper nibble
  *       of the driver configuration constants:
  *       - Pull-Down → Low nibble (0x02)
  *       - Pull-Up   → High nibble (0x12)
  *
- * @see _GPIO_PIN_CNF_INPUT_PULL_UP
- * @see _GPIO_PIN_CNF_INPUT_PULL_DOWN
- * @def GPIO_LL_PIN_GET_PULL_CONFIG
+ * @def GPIO_DRIVER_GET_PULL_BIT
  */
-#define GPIO_LL_PIN_GET_PULL_CONFIG(config) \
-	((((gpio_pin_config_t)(config)) & ((gpio_pin_config_t) 0xF0)) ? _GPIO_PIN_CNF_INPUT_PULL_UP : _GPIO_PIN_CNF_INPUT_PULL_DOWN)
-
-/**
- * @brief GPIO pin parameter type
- * @typedef gpio_pin_parameter_t
- * @details 
- * - Represents an encoded 8-bit value containing both mode and configuration information for a GPIO pin.  
- * - Used internally for parameter passing and low-level driver encoding
- * - Each field is defined as follows:
- * <ul>
- * <li>Bits [1:0] → GPIO mode bits (MODE[1:0])</li>
- * <li>Bits [3:2] → GPIO configuration bits (CNF[1:0])</li>
- * </ul>
- * - Remaining bits may be reserved for additional flags or pin attributes
- */
-typedef uint8_t gpio_pin_parameter_t;
-
-/**
- * @brief Extracts the GPIO pin mode from a combined @ref gpio_pin_parameter_t "pin parameter" value
- * @param[in] pinParameter Encoded GPIO pin parameter of type @ref gpio_pin_parameter_t.
- * @return GPIO pin mode value of type @ref _gpio_pin_mode_t.
- * 
- * @details
- * The mode information is stored in bits [1:0] of the pin parameter.  
- * This macro masks and returns only those bits, interpreting the result as a 
- * @ref gpio_pin_mode_t value.
- * 
- * @note
- * - This macro should be used when decoding composite GPIO configuration data 
- * - Example: Initializing or validating pin configuration structures
- * @def GPIO_LL_PIN_PARAMETER_EXTRACT_MODE
- */
-#define GPIO_LL_PIN_PARAMETER_EXTRACT_MODE(pinParameter) \
-	((_gpio_pin_mode_t)(((gpio_pin_parameter_t)(pinParameter)) & ((gpio_pin_parameter_t) 0x03)))
-
-/**
- * @brief Extracts the GPIO pin configuration from a combined @ref gpio_pin_parameter_t "pin parameter" value
- * @param[in] pinParameter Encoded GPIO pin parameter of type @ref gpio_pin_parameter_t.
- * @return GPIO pin mode value of type @ref _gpio_pin_config_t
- * 
- * @details
- * The mode information is stored in bits [1:0] of the pin parameter.  
- * This macro masks and returns only those bits, interpreting the result as a 
- * @ref gpio_pin_mode_t value.
- * 
- * @note
- * - This macro should be used when decoding composite GPIO configuration data 
- * - Example: Initializing or validating pin configuration structures
- * @def GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION
- */
-#define GPIO_LL_PIN_PARAMETER_EXTRACT_CONFIGURATION(pinParameter) \
-	((_gpio_pin_config_t)((((gpio_pin_parameter_t)(pinParameter)) >> 0x02) & ((gpio_pin_parameter_t) 0x03)))
+#define GPIO_DRIVER_GET_PULL_BIT(config) \
+	((((gpio_pin_config_t)(config)) & ((gpio_pin_config_t) 0xF0)) ? 0x01U : 0x00U)
 	
 /** @} */ // GPIO_03_Driver_01_Types_04_PinConfig
 
@@ -503,8 +393,6 @@ typedef uint8_t gpio_pin_parameter_t;
  * @{
  */
 
-/** @brief EXTI trigger type @typedef gpio_exti_trigger_t */
-typedef uint8_t												gpio_exti_trigger_t;
 /** @brief Trigger on falling edge @def GPIO_EXTI_TRIGGER_FALLING */
 #define GPIO_EXTI_TRIGGER_FALLING							((gpio_exti_trigger_t) 0x01)
 /** @brief Trigger on rising edge @def GPIO_EXTI_TRIGGER_RISING */
@@ -525,8 +413,6 @@ typedef uint8_t												gpio_exti_trigger_t;
  * @{
  */
 
-/** @brief EXTI port source type @typedef gpio_exti_port_t */
-typedef uint8_t gpio_exti_port_t;
 /** @brief EXTI source: GPIO Port A (0000) @def GPIO_EXTI_PORT_A */
 #define GPIO_EXTI_PORT_A									((gpio_exti_port_t) 0x00)
 /** @brief EXTI source: GPIO Port B (0001) @def GPIO_EXTI_PORT_B */
@@ -607,7 +493,7 @@ typedef struct
 	 *
 	 * @see @ref GPIO_03_Driver_01_Types_03_PinModes "GPIO Pin Modes"
 	 */
-	gpio_pin_mode_t mode : 2;
+		gpio_pin_mode_t mode;
 
 	/**
 	 * @brief Pin electrical configuration
@@ -629,7 +515,7 @@ typedef struct
 	 *
 	 * @see @ref GPIO_03_Driver_01_Types_04_PinConfig "GPIO Pin Configuration"
 	 */
-	gpio_pin_config_t config : 2;
+		gpio_pin_config_t config;
 } gpio_config_t;
 
 /** @} */ // GPIO_03_Driver_02_Config
@@ -647,22 +533,22 @@ typedef struct
  * @brief Sets the GPIO
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @note Atomicity
+ * @note Atomic operation through `BSRR`
  */
 __STATIC_FORCEINLINE void GPIO_PinSet(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_WriteBSRR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
+	GPIO_LL_WRITE_REG(GPIO_D2L_GetPort(gpio), BSRR, (uint32_t) pin);
 }
 
 /**
  * @brief Resets the GPIO
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @note Atomicity
+ * @note Atomic operation through `BRR`
  */
 __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_WriteBRR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
+	GPIO_LL_WRITE_REG(GPIO_D2L_GetPort(gpio), BRR, (uint32_t) pin);
 }
 
 /**
@@ -672,19 +558,33 @@ __STATIC_FORCEINLINE void GPIO_PinReset(const gpio_port_t gpio, const gpio_pin_t
  */
 __STATIC_FORCEINLINE void GPIO_PinToggle(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	__GPIO_ToggleODR(GPIO_D2L_GetPort(gpio), (uint32_t) pin);
+	GPIO_TypeDef* const GPIOx = GPIO_D2L_GetPort(gpio);
+	uint32_t regImage = 0x00UL;
+
+	GPIO_LL_READ_REG(GPIOx, ODR, regImage);
+	regImage ^= (uint32_t) pin;
+	GPIO_LL_WRITE_REG(GPIOx, ODR, regImage);
 }
 
 /**
  * @brief Retrieves the GPIO Status
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @returns 
+ * @returns `0x00U` when the selected pin is low, else `0x01U`
+ * @note This API expects a single-pin mask.
  */
 __STATIC_FORCEINLINE uint8_t GPIO_Get(const gpio_port_t gpio, const gpio_pin_t pin)
 {
-	uint32_t reg = __GPIO_ReadIDR(GPIO_D2L_GetPort(gpio));
-	reg = (reg & ((uint32_t) pin)) >> GPIO_D2L_GetPin(pin);
+	uint32_t reg = 0x00UL;
+	const uint8_t pinIndex = GPIO_D2L_GetPin(pin);
+
+	if (pinIndex == (uint8_t) 0x10U)
+	{
+		return (uint8_t) 0x00U;
+	}
+
+	GPIO_LL_READ_REG(GPIO_D2L_GetPort(gpio), IDR, reg);
+	reg = (reg & ((uint32_t) pin)) >> pinIndex;
 	return ((uint8_t) reg);
 }
 
@@ -718,33 +618,6 @@ __STATIC_FORCEINLINE void OB_LED_Toggle(void)
 /*---------------------------------------------- Driver APIs ----------------------------------------------*/
 
 /**
- * @brief Get GPIO Pin Configuration Register Value
- * @param[in] gpio @ref gpio_port_t "GPIO Port"
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @return @ref gpio_pin_parameter_t "4-bit parameter value (CNF[3:2] | MODE[1:0])"
- * @see @ref GPIO_Pins_Summary "Summary of Configuration"
- * 
- * @details
- * Retrieves the complete 4-bit configuration value for a specified GPIO pin
- * directly from the hardware registers. The returned value matches the exact
- * bit pattern stored in the CRL/CRH registers.
- * 
- * - **Bit 3:2**: CNF configuration field
- * - **Bit 1:0**: MODE configuration field  
- * 
- * @note The returned value can be directly compared with predefined constants
- *       or used for bit manipulation operations.
- * 
- */
-__STATIC_FORCEINLINE gpio_pin_parameter_t GPIO_GetPinParameters(const gpio_port_t gpio, const gpio_pin_t pin)
-{
-	_gpio_pin_t pinLL = GPIO_D2L_GetPin(pin); 
-	uint32_t reg = (pinLL & _GPIO_PIN_7) ? __GPIO_ReadCRH(GPIO_D2L_GetPort(gpio)) : __GPIO_ReadCRL(GPIO_D2L_GetPort(gpio));
-	reg &= _GPIO_PIN_CNF_MODE_MASK(pinLL);
-	return ((gpio_pin_parameter_t)(reg >> pinLL));
-}
-
-/**
  * @brief  Configures GPIO pin mode and electrical parameters.
  * @details
  * Updates the MODE and CNF fields in the GPIO control registers (CRL/CRH),
@@ -762,10 +635,12 @@ __STATIC_FORCEINLINE gpio_pin_parameter_t GPIO_GetPinParameters(const gpio_port_
  * - Existing register bits for unaffected pins remain unchanged.
  * - Does not perform validation; call-site must ensure compatible parameters.
  *
- * @retval None
+ * @retval `DRIVER_STATUS_SUCCESS`:				Configuration applied successfully
+ * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`gpio`, `pin`, `mode`, or `config` was invalid
+ * @retval `DRIVER_STATUS_ERROR_STATE`:			Staged configuration update failed
  *
  */
-void GPIO_SetPinParameters(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
+driver_status_t GPIO_SetPinModeConfig(const gpio_port_t gpio, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
 
 /**
  * @brief Get GPIO Pin Mode Configuration
@@ -848,7 +723,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfi
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: FailureGPIO_03_Driver_01_Types01_Types
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);

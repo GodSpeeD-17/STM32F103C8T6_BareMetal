@@ -123,10 +123,9 @@ extern "C" {
  * @retval - `0x00U`: Invalid PLL Source
  * @retval - `0x01U`: Valid PLL Source
  */
-#define RCC_LL_IS_PLL_SOURCE_VALID(_FIELD)												\
-(																						\
-	(((_FIELD) == RCC_CFGR_PLLSRC_HSI_DIV2)	||	((_FIELD) == RCC_CFGR_PLLSRC_HSE)) ?	\
-	0x01U : 0x00U																			\
+#define RCC_LL_IS_PLL_SOURCE_VALID(_FIELD)															\
+(																									\
+	(((_FIELD) == RCC_CFGR_PLLSRC_HSI_DIV2)	|| ((_FIELD) == RCC_CFGR_PLLSRC_HSE)) ? 0x01U : 0x00U	\
 )
 
 /**
@@ -137,9 +136,9 @@ extern "C" {
  * @retval - `0x00U`: Invalid PLL HSE Divider
  * @retval - `0x01U`: Valid PLL HSE Divider
  */
-#define RCC_LL_IS_PLL_HSE_DIVIDER_VALID(_FIELD)																\
-(																											\
-	(((_FIELD) == RCC_CFGR_PLLXTPRE_HSE)	||	((_FIELD) == RCC_CFGR_PLLXTPRE_HSE_DIV2)) ? 0x01U : 0x00U	\
+#define RCC_LL_IS_PLL_HSE_DIVIDER_VALID(_FIELD)															\
+(																										\
+	(((_FIELD) == RCC_CFGR_PLLXTPRE_HSE) ||	((_FIELD) == RCC_CFGR_PLLXTPRE_HSE_DIV2)) ? 0x01U : 0x00U	\
 )
 
 /**
