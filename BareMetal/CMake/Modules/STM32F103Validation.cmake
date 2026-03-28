@@ -1,5 +1,8 @@
 include_guard(GLOBAL)
 
+# Validation/default handling is kept separate so the shared template can fail
+# fast on missing inputs before any side effects such as directory creation.
+
 function(stm32_validate_project_inputs)
     foreach(required_var
         PROJ_DIR
@@ -20,6 +23,7 @@ function(stm32_validate_project_inputs)
 endfunction()
 
 function(stm32_apply_project_defaults)
+    # Derive GNU binutils names from the configured cross-toolchain prefix.
     set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy PARENT_SCOPE)
     set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump PARENT_SCOPE)
     set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm PARENT_SCOPE)
@@ -29,6 +33,8 @@ function(stm32_apply_project_defaults)
         message(FATAL_ERROR "DRIVER_MODULES not set! Please set it before including this template")
     endif()
 
+    # These defaults are intentionally conservative. Projects can override them
+    # explicitly in their own CMakeLists without touching shared logic.
     if(NOT DEFINED OPTIMIZATION_LEVEL)
         message(WARNING "OPTIMIZATION_LEVEL not set! Assuming -O1")
         set(OPTIMIZATION_LEVEL 1 PARENT_SCOPE)

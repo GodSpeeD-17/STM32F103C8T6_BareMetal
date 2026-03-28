@@ -1,3 +1,9 @@
+#
+# Post-build memory reporter for the ELF artifact.
+# It parses `arm-none-eabi-size --format=berkeley` output and renders a
+# compact terminal summary that separates region usage from section roles.
+#
+
 if(NOT DEFINED SIZE_TOOL)
     message(FATAL_ERROR "SIZE_TOOL is required")
 endif()
@@ -19,6 +25,7 @@ if(NOT DEFINED RAM_SIZE_BYTES)
 endif()
 
 function(stm32_format_kib bytes out_var)
+    # Keep KiB formatting deterministic so the table width stays stable.
     math(EXPR kib_whole "${bytes} / 1024")
     math(EXPR kib_frac "(${bytes} % 1024) * 100 / 1024")
     if(kib_frac LESS 10)
@@ -31,6 +38,8 @@ function(stm32_format_kib bytes out_var)
 endfunction()
 
 function(stm32_format_percent used total out_var)
+    # CMake integer math only supports whole numbers, so percentages are
+    # computed as x100 and then split into integer/fractional parts.
     if(total EQUAL 0)
         set(${out_var} "0.00" PARENT_SCOPE)
         return()
@@ -49,6 +58,7 @@ function(stm32_format_percent used total out_var)
 endfunction()
 
 function(stm32_pad_right input width out_var)
+    # Fixed-width cell helpers keep the ASCII table aligned in plain terminals.
     set(result "${input}")
     string(LENGTH "${result}" result_length)
     math(EXPR pad_count "${width} - ${result_length}")
@@ -100,6 +110,8 @@ list(GET size_values 0 text_size)
 list(GET size_values 1 data_size)
 list(GET size_values 2 bss_size)
 
+# FLASH stores `.text` plus initialized data image.
+# RAM holds initialized `.data` plus zero-initialized `.bss`.
 math(EXPR flash_used "${text_size} + ${data_size}")
 math(EXPR ram_used "${data_size} + ${bss_size}")
 

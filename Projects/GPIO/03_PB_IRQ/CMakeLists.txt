@@ -13,7 +13,7 @@ include("${_stm32_repo_search_dir}/BareMetal/CMake/STM32F103Project.cmake")
 
 # Shared toolchain bootstrap.
 stm32f103_setup_toolchain()
-project(03_PB_IRQ VERSION 1.0.0 LANGUAGES C CXX ASM)
+project(01_OB_LED VERSION 1.0.0 LANGUAGES C CXX ASM)
 
 # Project-specific configuration stays here.
 stm32f103_configure_project(

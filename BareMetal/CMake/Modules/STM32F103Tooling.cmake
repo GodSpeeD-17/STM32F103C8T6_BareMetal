@@ -1,5 +1,8 @@
 include_guard(GLOBAL)
 
+# Tool/path validation is split from flag setup so configure failures are
+# reported early and clearly before any target logic is registered.
+
 function(stm32_print_path_summary)
     stm32_validate_existing_path("Project Directory" "${PROJ_DIR}")
     stm32_validate_existing_path("Repository Root" "${REPO_ROOT}")
@@ -21,6 +24,7 @@ function(stm32_print_path_summary)
     stm32_validate_existing_path("NM" "${CMAKE_NM}")
     stm32_validate_existing_path("Size Utility" "${CMAKE_SIZE}")
 
+    # Print the resolved path/tool state only after validation succeeds.
     stm32_print_section("Workspace")
     stm32_print_kv("Project Dir" "${PROJ_DIR}")
     stm32_print_kv("Repository Root" "${REPO_ROOT}")
@@ -48,6 +52,7 @@ function(stm32_print_path_summary)
 endfunction()
 
 function(stm32_configure_host_tools)
+    # These are the runtime utilities used by custom maintenance/debug targets.
     set(ST_FLASH "${ST_FLASH_PATH}" PARENT_SCOPE)
     set(ST_UTIL "${ST_UTIL_PATH}" PARENT_SCOPE)
     set(OPENOCD "${OPENOCD_PATH}" PARENT_SCOPE)
@@ -55,6 +60,9 @@ function(stm32_configure_host_tools)
     find_program(ST_INFO_PATH NAMES st-info)
     find_program(ST_UART_FLASH_PATH NAMES stm32flash)
 
+    # `st-info` and `stm32flash` are optional helpers. Keep the configure step
+    # usable even when they are not installed, but warn that related targets
+    # may fail if invoked.
     if(NOT ST_INFO_PATH)
         set(ST_INFO_PATH st-info)
         message(WARNING "st-info not found in PATH. The 'info' target may fail.")

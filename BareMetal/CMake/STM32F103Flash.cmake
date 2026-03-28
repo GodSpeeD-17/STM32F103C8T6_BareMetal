@@ -1,3 +1,9 @@
+#
+# Helper script used by the `flash` target.
+# The second attempt with `--connect-under-reset` is a recovery path for
+# firmware states that block a regular ST-Link attach.
+#
+
 if(NOT DEFINED ST_FLASH)
     message(FATAL_ERROR "ST_FLASH is required")
 endif()

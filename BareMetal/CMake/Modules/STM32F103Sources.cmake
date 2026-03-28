@@ -1,5 +1,8 @@
 include_guard(GLOBAL)
 
+# Source discovery and module-tree rendering live together because they both
+# derive from the selected driver module list.
+
 function(stm32_tree_emit_line prefix is_last label)
     if(is_last)
         message(STATUS "${prefix}└── ${label}")
@@ -9,6 +12,8 @@ function(stm32_tree_emit_line prefix is_last label)
 endfunction()
 
 function(add_driver_module)
+    # The first optional argument controls whether the tree shows full paths
+    # or just filenames. Everything else is interpreted as a driver module.
     set(show_full_path OFF)
     set(module_names "")
 
@@ -22,6 +27,8 @@ function(add_driver_module)
         endif()
     endforeach()
 
+    # These are collected locally first and then exported back to the parent
+    # scope once all modules have been processed.
     set(selected_driver_sources "")
     set(selected_driver_includes "")
     list(LENGTH module_names module_count)
@@ -42,6 +49,8 @@ function(add_driver_module)
                 list(APPEND selected_driver_includes ${DRIVER_MODULE_DIR}/Inc)
             endif()
 
+            # The tree printer needs to know whether this module is the last
+            # sibling so vertical connectors are drawn correctly.
             if(module_index EQUAL total_modules)
                 set(module_is_last TRUE)
                 set(module_child_prefix "    ")
@@ -66,6 +75,8 @@ function(add_driver_module)
                 set(module_sources "")
             endif()
 
+            # Render header and source subtrees separately to mirror the on-disk
+            # structure under each driver module.
             set(section_names Inc Src)
             foreach(section_name IN LISTS section_names)
                 if(section_name STREQUAL "Inc")
@@ -116,6 +127,8 @@ function(add_driver_module)
 endfunction()
 
 function(stm32_collect_sources)
+    # Project sources override nothing here; we simply aggregate project,
+    # selected-driver, and core files into a single firmware target list.
     set(SELECTED_DRIVER_SOURCES "")
     set(SELECTED_DRIVER_INCLUDES "")
 

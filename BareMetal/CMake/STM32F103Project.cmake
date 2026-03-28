@@ -1,5 +1,10 @@
 include_guard(GLOBAL)
 
+# Public project-facing entrypoints.
+# `stm32f103_setup_toolchain()` is called before `project(...)`, while
+# `stm32f103_configure_project()` is called after `project(...)` to push
+# project-specific options into the shared template pipeline.
+
 set(STM32F103_PROJECT_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 macro(stm32f103_setup_toolchain)
@@ -7,12 +12,16 @@ macro(stm32f103_setup_toolchain)
     set(one_value_args TOOLCHAIN_PATH)
     cmake_parse_arguments(STM32_TOOLCHAIN "${options}" "${one_value_args}" "" ${ARGN})
 
+    # Allow per-project override, but keep the common workstation path as
+    # the default so most example projects stay zero-config.
     set(_toolchain_path "/opt/arm-gnu-toolchain-14.3/bin")
     if(STM32_TOOLCHAIN_TOOLCHAIN_PATH)
         set(_toolchain_path "${STM32_TOOLCHAIN_TOOLCHAIN_PATH}")
     endif()
     set(TOOLCHAIN_PATH "${_toolchain_path}" CACHE PATH "Arm GNU toolchain binary directory")
 
+    # These cache/toolchain variables must be established before `project()`
+    # so CMake does not probe the host compiler first.
     set(CMAKE_SYSTEM_NAME Generic)
     set(CMAKE_SYSTEM_PROCESSOR arm)
     set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
@@ -46,6 +55,8 @@ macro(stm32f103_configure_project)
         message(FATAL_ERROR "stm32f103_configure_project() requires at least one DRIVER_MODULES entry")
     endif()
 
+    # Resolve the repository layout once so every downstream module can rely
+    # on the same canonical paths.
     get_filename_component(PROJ_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
     get_filename_component(BAREMETAL_ROOT "${STM32F103_PROJECT_MODULE_DIR}/.." ABSOLUTE)
     set(CMAKE_ROOT "${BAREMETAL_ROOT}/CMake")
@@ -53,6 +64,9 @@ macro(stm32f103_configure_project)
     get_filename_component(REPO_ROOT "${BAREMETAL_ROOT}/.." ABSOLUTE)
     set(DRIVER_ROOT "${BAREMETAL_ROOT}/Driver")
 
+    # Everything below remains project-specific on purpose. These are the
+    # knobs a project may reasonably change for bootloaders, custom linkers,
+    # alternate tool paths, or different output locations.
     set(_build_output_dir "${PROJ_DIR}/Build")
     if(STM32_BUILD_OUTPUT_DIR)
         set(_build_output_dir "${STM32_BUILD_OUTPUT_DIR}")
@@ -121,5 +135,6 @@ macro(stm32f103_configure_project)
 
     set(DRIVER_MODULES ${STM32_DRIVER_MODULES})
 
+    # Hand off to the shared build pipeline once the project config is ready.
     include("${CMAKE_ROOT}/CMake_Template.cmake")
 endmacro()

@@ -1,5 +1,9 @@
 include_guard(GLOBAL)
 
+# Small formatting helpers used by the configure summary.
+# Keeping all `message(STATUS ...)` patterns here avoids repeating
+# padding/alignment logic across the other modules.
+
 function(stm32_print_section title)
     message(STATUS "")
     message(STATUS "[${title}]")
@@ -35,6 +39,8 @@ function(stm32_join_list out_var)
 endfunction()
 
 function(stm32_print_configuration_summary)
+    # Present the final resolved configuration after defaults, paths, and
+    # host-tool discovery have all been applied.
     stm32_join_list(driver_modules ${DRIVER_MODULES})
     stm32_print_section("Build Configuration")
     stm32_print_kv("Project" "${PROJECT_NAME}")
@@ -56,6 +62,8 @@ function(stm32_print_configuration_summary)
 endfunction()
 
 function(stm32_print_source_summary)
+    # Source counts are printed after collection so the user can confirm
+    # which parts of the firmware graph were actually included.
     list(LENGTH PROJECT_SOURCES project_source_count)
     list(LENGTH CORE_SOURCES core_source_count)
     list(LENGTH SELECTED_DRIVER_SOURCES driver_source_count)

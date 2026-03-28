@@ -1,3 +1,9 @@
+#
+# Helper script used by the `erase_flash` target.
+# It first attempts a normal ST-Link erase and automatically retries with
+# `--connect-under-reset` for boards that cannot be attached in a live state.
+#
+
 if(NOT DEFINED ST_FLASH)
     message(FATAL_ERROR "ST_FLASH is required")
 endif()

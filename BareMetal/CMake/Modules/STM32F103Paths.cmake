@@ -1,5 +1,8 @@
 include_guard(GLOBAL)
 
+# Output-path preparation is isolated here so configure-time directory creation
+# and artifact naming remain consistent across all projects.
+
 function(stm32_configure_output_paths)
     set(VSCODE_DIR ${PROJ_DIR}/.vscode)
     if(NOT EXISTS ${VSCODE_DIR})
@@ -19,6 +22,8 @@ function(stm32_configure_output_paths)
         set(build_dir_status "existing")
     endif()
 
+    # Force all generated artifacts into the same Build folder instead of
+    # mixing generator files with firmware outputs.
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)

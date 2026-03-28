@@ -1,6 +1,10 @@
 include_guard(GLOBAL)
 
+# Non-firmware helper targets live here: VS Code metadata generation, flashing,
+# erase helpers, and repository maintenance shortcuts.
+
 function(stm32_add_vscode_targets)
+    # Generate VS Code launch.json for Cortex-Debug / OpenOCD flows.
     add_custom_target(vscode_launch
       COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
       COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/launch.json
@@ -32,6 +36,8 @@ function(stm32_add_vscode_targets)
       COMMENT "----------------------------------- launch.json -----------------------------------"
     )
 
+    # Tool paths are written separately so local workstation differences can be
+    # regenerated from CMake instead of hand-editing JSON files.
     add_custom_target(vscode_settings
       COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
       COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/settings.json
@@ -43,6 +49,8 @@ function(stm32_add_vscode_targets)
       COMMENT "----------------------------------- settings.json -----------------------------------"
     )
 
+    # Keep VS Code tasks aligned with the same CMake build entrypoints the
+    # terminal workflow already uses.
     add_custom_target(vscode_tasks
       COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
       COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/tasks.json
@@ -70,6 +78,8 @@ function(stm32_add_vscode_targets)
       COMMENT "----------------------------------- tasks.json -----------------------------------"
     )
 
+    # IntelliSense settings mirror the active build configuration so headers
+    # and MCU defines stay consistent in the editor.
     add_custom_target(vscode_c_cpp_properties
       COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
       COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
@@ -111,6 +121,8 @@ function(stm32_add_vscode_targets)
 endfunction()
 
 function(stm32_add_flash_targets)
+    # `debug_flash` is a dry-run helper that prints the resolved flash command
+    # without touching hardware.
     add_custom_target(debug_flash
         COMMAND ${CMAKE_COMMAND} -E echo "ST_FLASH: ${ST_FLASH}"
         COMMAND ${CMAKE_COMMAND} -E echo "BINARY_FILE: ${BINARY_FILE}"
@@ -118,6 +130,8 @@ function(stm32_add_flash_targets)
         COMMAND ${CMAKE_COMMAND} -E echo "Full command: ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}"
     )
 
+    # `flash` and `erase_flash` delegate to helper scripts so they can retry
+    # with connect-under-reset when the target cannot be attached normally.
     add_custom_target(flash
         DEPENDS ${PROJECT_NAME}.elf
         COMMAND ${CMAKE_COMMAND}
@@ -154,12 +168,16 @@ function(stm32_add_flash_targets)
 endfunction()
 
 function(stm32_add_maintenance_targets)
+    # `clean_all` intentionally removes both generated firmware artifacts and
+    # generated editor metadata to bring the project back to a clean state.
     add_custom_target(clean_all
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${BUILD_OUTPUT_DIR}
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${VSCODE_DIR}
         COMMENT "Completely cleaning project: build artifacts and VSCode configurations"
     )
 
+    # Repository-wide sync helpers are convenience targets for template-style
+    # files that are intentionally kept identical across multiple projects.
     function(add_replace_target TARGET_NAME FILE_PATH IN_PROJECT_DIR)
         add_custom_target(${TARGET_NAME}
             COMMAND ${CMAKE_COMMAND} -E echo "Replacing ${FILE_PATH} in all projects"
