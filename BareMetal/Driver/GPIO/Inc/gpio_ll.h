@@ -809,6 +809,8 @@ typedef uint8_t _gpio_pin_pull_state_t;
 
 /** @} */ // GPIO_LL_PinParams_Config_Macros
 
+/** @} */ // GPIO_LL_PinParams_Config
+
 /**
  * @brief Creates a mask for the CNF field (bits 3:2 of the 4-bit block).
  * @param[in] pin The @ref GPIO_02_LL_02_Pin "GPIO Pin Number"
@@ -834,8 +836,6 @@ typedef uint8_t _gpio_pin_pull_state_t;
  * @def _GPIO_PIN_CNF_RESET_MASK
  */
 #define _GPIO_PIN_CNF_RESET_MASK(pin)							_GPIO_PIN_CNF_GET_MASK(pin, 0x03)	
-
-/** @} */ // GPIO_LL_PinParams_Config
 
 /**
  * @brief Masks the CNF & MODE field (bits 3:0 of the 4-bit block)

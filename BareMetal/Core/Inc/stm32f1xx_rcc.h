@@ -8,7 +8,7 @@
 #ifndef STM32F1XX_RCC_H_
 #define STM32F1XX_RCC_H_
 
-// --- C++ Safeguards ---
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -16,7 +16,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // Includes
 // ------------------------------------------------------------------------------------------
-#include "stm32f1xx_data_types.h"
+#include "stm32f1xx_utils.h"
 
 /**
  * @defgroup RCC Reset and Clock Control (RCC)
@@ -42,8 +42,8 @@ extern "C" {
  *
  * This codebase documents RCC in three software layers in execution order:
  * - Register layer: @ref `stm32f1xx_rcc.h`
- * - Low-level control layer: @ref `rcc_ll.h` and @ref `rcc_ll.c`
- * - Driver/orchestration layer: @ref `rcc.h` and @ref `rcc.c`
+ * - Low-level control layer: @ref `rcc_ll.h`
+ * - Driver/orchestration layer: @ref `rcc.h`
  */
 
 /**
@@ -1677,9 +1677,10 @@ typedef volatile struct _RCC_TypeDef
 } RCC_TypeDef;
 
 /** @} */ // RCC_01_RegisterLayer_06_RegisterMap
+
 /** @} */ // RCC_01_RegisterLayer
 
-// --- C++ Safeguards ---
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

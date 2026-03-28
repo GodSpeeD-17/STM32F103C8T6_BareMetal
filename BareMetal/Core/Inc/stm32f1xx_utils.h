@@ -2,7 +2,7 @@
  * @file stm32f1xx_utils.h
  * @author	Shrey Shah
  * @brief	Basic Utilities for STM32F1xx
- * @version v1.0
+ * @version v1.2
  * @date 01-03-2026
  * @defgroup 01_STM32F1xx_Utilities Basic Utilities
  * @ingroup STM32F1xx
@@ -25,7 +25,7 @@
  *                        🔧 Bit Manipulation Built-ins (GCC)
  * -------------------------------------------------------------------------------------
  * | Built-in Function      | Description                                          |
- * |--------------------------|------------------------------------------------------|
+ * |------------------------|------------------------------------------------------|
  * | __builtin_clz(x)       | Counts leading zeros from MSB (Undefined if x == 0) |
  * | __builtin_ctz(x)       | Counts trailing zeros from LSB (Undefined if x == 0)|
  * | __builtin_popcount(x)  | Counts number of bits set to 1 (Hamming weight)     |
@@ -69,18 +69,21 @@ extern "C" {
 /** 
  * @brief Provides bit mask for input position
  * @def BIT_MASK
- * @param[in] X Bit position (0-based)
+ * @param[in] _Pos Bit position (0-based)
  * @returns Bit mask with only bit at position X set (1 << X)
- * @note Assumes 32-bit width; adjust type if using with different widths
+ * @note Assumes 32-bit width
  */
-#define BIT_MASK(X)								((uint32_t) (0x01UL << (X)))
+#define BIT_MASK(_Pos)								((uint32_t) (0x01UL << (_Pos)))
 
-/** 
- * @brief Sets bit at `POS`
- * @param[in] POS Bit position
- * @note Assumed 32-bits
+/**
+ * @brief Shifts an input value to the requested bit position
+ * @def BIT_VALUE
+ * @param[in] _Val Raw value before shifting
+ * @param[in] _Pos Bit position (0-based)
+ * @returns Shifted 32-bit value `((uint32_t)(_Val) << (_Pos))`
+ * @note Useful for register field masks and encoded field values
  */
-#define BIT_SET(POS)							((uint32_t) (0x01UL << (POS)))
+#define BIT_VALUE(_Val, _Pos)						((uint32_t) ((uint32_t) (_Val) << (_Pos)))
 
 /**
  * @brief   Compute peripheral index based on base addresses and peripheral size
