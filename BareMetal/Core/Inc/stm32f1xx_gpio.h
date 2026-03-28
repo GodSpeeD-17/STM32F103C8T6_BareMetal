@@ -1271,24 +1271,20 @@ extern "C" {
  * @brief Memory-mapped GPIO register block and practical register layout
  * @details
  * @section GPIO_RegisterMap_Theory Theory and Practical Role
- * This page ties the theory pages above to the actual software representation used in
- * the project. `GPIO_TypeDef` is the concrete register map consumed by the LL layer.
- *
- * Practical role in this codebase:
- * - the register layer defines the layout,
- * - the LL layer accesses `.REG` and bitfield views from this structure,
- * - the driver layer never edits fields directly and instead uses LL services.
+ * This page ties the register definitions above to the concrete memory map used by
+ * the software stack. @ref GPIO_TypeDef is the raw peripheral view consumed by the
+ * LL layer when it reads, writes, or stages GPIO register state.
  *
  * @section GPIO_RegisterMap_Structure GPIO Register Block Structure
- * The structure below is the final memory-mapped layout. Use it when you want to see the
- * complete GPIO map exactly as the software stack accesses it at runtime.
+ * The structure below is the software-visible GPIO register layout in offset order.
+ * Each register exposes a full-register view (`.REG`) and a named bitfield view (`.BIT`).
  * @{
  */
 
 /**
  * @brief GPIO Register Block Structure
  * @details
- * This structure represents the complete memory-mapped GPIO peripheral.
+ * Complete memory-mapped GPIO peripheral register map.
  *
  * @see RM0008 Section 9.2 GPIO registers
  * @typedef GPIO_TypeDef
@@ -1298,86 +1294,76 @@ typedef volatile struct _GPIO_TypeDef
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_01_PortConfigLow GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_CRL GPIO Port Configuration Register Low (CRL)
-	 * @brief [R/W] Configures pins 0-7 for mode and output type/speed
+	 * @brief [R/W] Configuration register for pins 0 to 7
 	 * @details
-	 * - Each pin uses 4 bits: 2 for MODE, 2 for CNF
-	 * - Pins are configured sequentially from bit 0 to bit 31
-	 * - Reset value: 0x4444 4444 (All pins in input floating mode)
-	 * - Raw MODE/CNF field encodings are documented in
-	 *   @ref GPIO_01_RegisterLayer_01_PortConfigLow and
-	 *   @ref GPIO_01_RegisterLayer_02_PortConfigHigh
+	 * Each pin occupies one 4-bit slot composed of MODE[1:0] and CNF[1:0].
+	 * This register controls pins 0 to 7. The raw field encodings are documented
+	 * in @ref GPIO_01_RegisterLayer_01_PortConfigLow.
 	 */
 	union GPIO_CRL
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t MODE0 : 2;
-			volatile uint32_t CNF0 : 2;
-			volatile uint32_t MODE1 : 2;
-			volatile uint32_t CNF1 : 2;
-			volatile uint32_t MODE2 : 2;
-			volatile uint32_t CNF2 : 2;
-			volatile uint32_t MODE3 : 2;
-			volatile uint32_t CNF3 : 2;
-			volatile uint32_t MODE4 : 2;
-			volatile uint32_t CNF4 : 2;
-			volatile uint32_t MODE5 : 2;
-			volatile uint32_t CNF5 : 2;
-			volatile uint32_t MODE6 : 2;
-			volatile uint32_t CNF6 : 2;
-			volatile uint32_t MODE7 : 2;
-			volatile uint32_t CNF7 : 2;
+			_IO MODE0 : 2;
+			_IO CNF0 : 2;
+			_IO MODE1 : 2;
+			_IO CNF1 : 2;
+			_IO MODE2 : 2;
+			_IO CNF2 : 2;
+			_IO MODE3 : 2;
+			_IO CNF3 : 2;
+			_IO MODE4 : 2;
+			_IO CNF4 : 2;
+			_IO MODE5 : 2;
+			_IO CNF5 : 2;
+			_IO MODE6 : 2;
+			_IO CNF6 : 2;
+			_IO MODE7 : 2;
+			_IO CNF7 : 2;
 		} BIT;
 	} CRL;
 
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_02_PortConfigHigh GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_CRH GPIO Port Configuration Register High (CRH)
-	 * @brief [R/W] Configures pins 8-15 for mode and output type/speed
+	 * @brief [R/W] Configuration register for pins 8 to 15
 	 * @details
-	 * - Same bit structure as CRL but for higher pins
-	 * - Each pin uses 4 bits: 2 for MODE, 2 for CNF
-	 * - Pins are configured sequentially from bit 0 to bit 31
-	 * - Reset value: 0x4444 4444 (All pins in input floating mode)
-	 * - Raw MODE/CNF field encodings are documented in
-	 *   @ref GPIO_01_RegisterLayer_01_PortConfigLow and
-	 *   @ref GPIO_01_RegisterLayer_02_PortConfigHigh
+	 * Same slot structure as `GPIOx_CRL`, but for pins 8 to 15.
+	 * Each pin occupies one 4-bit MODE/CNF field pair. The raw field encodings
+	 * are documented in @ref GPIO_01_RegisterLayer_02_PortConfigHigh.
 	 */
 	union GPIO_CRH
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t MODE8 : 2;
-			volatile uint32_t CNF8 : 2;
-			volatile uint32_t MODE9 : 2;
-			volatile uint32_t CNF9 : 2;
-			volatile uint32_t MODE10 : 2;
-			volatile uint32_t CNF10 : 2;
-			volatile uint32_t MODE11 : 2;
-			volatile uint32_t CNF11 : 2;
-			volatile uint32_t MODE12 : 2;
-			volatile uint32_t CNF12 : 2;
-			volatile uint32_t MODE13 : 2;
-			volatile uint32_t CNF13 : 2;
-			volatile uint32_t MODE14 : 2;
-			volatile uint32_t CNF14 : 2;
-			volatile uint32_t MODE15 : 2;
-			volatile uint32_t CNF15 : 2;
+			_IO MODE8 : 2;
+			_IO CNF8 : 2;
+			_IO MODE9 : 2;
+			_IO CNF9 : 2;
+			_IO MODE10 : 2;
+			_IO CNF10 : 2;
+			_IO MODE11 : 2;
+			_IO CNF11 : 2;
+			_IO MODE12 : 2;
+			_IO CNF12 : 2;
+			_IO MODE13 : 2;
+			_IO CNF13 : 2;
+			_IO MODE14 : 2;
+			_IO CNF14 : 2;
+			_IO MODE15 : 2;
+			_IO CNF15 : 2;
 		} BIT;
 	} CRH;
 
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_03_InputData GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_IDR GPIO Port Input Data Register (IDR)
-	 * @brief [R] Current State of GPIO Pins
-	 * @details Read-only register containing current state of input pins
-	 * - Each bit represents the logic level on the corresponding GPIO pin
-	 * - Only valid for pins configured as input
-	 * - Reading this register returns the actual pin state
-	 * - Bits 16-31 are reserved and read as 0
-	 * - Reset value: 0x0000 XXXX (depends on external circuitry)
+	 * @brief [R] Sampled input state of the GPIO port
+	 * @details
+	 * Bits 0 to 15 reflect the logic level currently observed on pins 0 to 15.
+	 * Bits 16 to 31 are reserved.
 	 */
 	union GPIO_IDR
 	{
@@ -1407,186 +1393,152 @@ typedef volatile struct _GPIO_TypeDef
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_04_OutputData GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_ODR GPIO Port Output Data Register (ODR)
-	 * @brief [W] Output State of GPIO Pins
-	 * @details Sets output state for pins configured as output
-	 * - Each bit sets the logic level for the corresponding GPIO pin
-	 * - Only effective for pins configured as output
-	 * - Writing 1 sets pin high, writing 0 sets pin low
-	 * - Reading returns the last written value
-	 * - Bits 16-31 are reserved and should be written as 0
-	 * - Reset value: 0x0000 0000
+	 * @brief [R/W] Latched output state of the GPIO port
+	 * @details
+	 * Bits 0 to 15 hold the output value driven by pins configured as outputs.
+	 * For input pull-up/pull-down mode, these bits also stage the pull direction.
+	 * Bits 16 to 31 are reserved.
 	 */
 	union GPIO_ODR
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t ODR0 : 1;
-			volatile uint32_t ODR1 : 1;
-			volatile uint32_t ODR2 : 1;
-			volatile uint32_t ODR3 : 1;
-			volatile uint32_t ODR4 : 1;
-			volatile uint32_t ODR5 : 1;
-			volatile uint32_t ODR6 : 1;
-			volatile uint32_t ODR7 : 1;
-			volatile uint32_t ODR8 : 1;
-			volatile uint32_t ODR9 : 1;
-			volatile uint32_t ODR10 : 1;
-			volatile uint32_t ODR11 : 1;
-			volatile uint32_t ODR12 : 1;
-			volatile uint32_t ODR13 : 1;
-			volatile uint32_t ODR14 : 1;
-			volatile uint32_t ODR15 : 1;
-			volatile uint32_t RESERVED_ODR : 16;
+			_IO ODR0 : 1;
+			_IO ODR1 : 1;
+			_IO ODR2 : 1;
+			_IO ODR3 : 1;
+			_IO ODR4 : 1;
+			_IO ODR5 : 1;
+			_IO ODR6 : 1;
+			_IO ODR7 : 1;
+			_IO ODR8 : 1;
+			_IO ODR9 : 1;
+			_IO ODR10 : 1;
+			_IO ODR11 : 1;
+			_IO ODR12 : 1;
+			_IO ODR13 : 1;
+			_IO ODR14 : 1;
+			_IO ODR15 : 1;
+			_IO RESERVED_ODR : 16;
 		} BIT;
 	} ODR;
 
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_05_BitSetReset GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_BSRR GPIO Port Bit Set/Reset Register (BSRR)
-	 * @brief [W] Atomic Set (0-15) + Atomic Reset (16-31) GPIO Pins
+	 * @brief [W] Atomic set/reset register for GPIO outputs
 	 * @details
-	 * - Write-only register for atomic pin control
-	 * - Bits 0-15: Set corresponding pin (write 1 to set high)
-	 * - Bits 16-31: Reset corresponding pin (write 1 to set low)
-	 * - Setting both set and reset bits has undefined behavior
-	 * - Reading returns 0x0000
-	 * - No read-modify-write required for atomic operations
-	 * - Reset value: 0x0000 0000
+	 * Bits 0 to 15 set the corresponding output bits. Bits 16 to 31 reset the
+	 * corresponding output bits. This register exists to update outputs without a
+	 * read-modify-write sequence on `GPIOx_ODR`.
 	 */
 	union GPIO_BSRR
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t BS0 : 1;
-			volatile uint32_t BS1 : 1;
-			volatile uint32_t BS2 : 1;
-			volatile uint32_t BS3 : 1;
-			volatile uint32_t BS4 : 1;
-			volatile uint32_t BS5 : 1;
-			volatile uint32_t BS6 : 1;
-			volatile uint32_t BS7 : 1;
-			volatile uint32_t BS8 : 1;
-			volatile uint32_t BS9 : 1;
-			volatile uint32_t BS10 : 1;
-			volatile uint32_t BS11 : 1;
-			volatile uint32_t BS12 : 1;
-			volatile uint32_t BS13 : 1;
-			volatile uint32_t BS14 : 1;
-			volatile uint32_t BS15 : 1;
-			volatile uint32_t BR0 : 1;
-			volatile uint32_t BR1 : 1;
-			volatile uint32_t BR2 : 1;
-			volatile uint32_t BR3 : 1;
-			volatile uint32_t BR4 : 1;
-			volatile uint32_t BR5 : 1;
-			volatile uint32_t BR6 : 1;
-			volatile uint32_t BR7 : 1;
-			volatile uint32_t BR8 : 1;
-			volatile uint32_t BR9 : 1;
-			volatile uint32_t BR10 : 1;
-			volatile uint32_t BR11 : 1;
-			volatile uint32_t BR12 : 1;
-			volatile uint32_t BR13 : 1;
-			volatile uint32_t BR14 : 1;
-			volatile uint32_t BR15 : 1;
+			_IO BS0 : 1;
+			_IO BS1 : 1;
+			_IO BS2 : 1;
+			_IO BS3 : 1;
+			_IO BS4 : 1;
+			_IO BS5 : 1;
+			_IO BS6 : 1;
+			_IO BS7 : 1;
+			_IO BS8 : 1;
+			_IO BS9 : 1;
+			_IO BS10 : 1;
+			_IO BS11 : 1;
+			_IO BS12 : 1;
+			_IO BS13 : 1;
+			_IO BS14 : 1;
+			_IO BS15 : 1;
+			_IO BR0 : 1;
+			_IO BR1 : 1;
+			_IO BR2 : 1;
+			_IO BR3 : 1;
+			_IO BR4 : 1;
+			_IO BR5 : 1;
+			_IO BR6 : 1;
+			_IO BR7 : 1;
+			_IO BR8 : 1;
+			_IO BR9 : 1;
+			_IO BR10 : 1;
+			_IO BR11 : 1;
+			_IO BR12 : 1;
+			_IO BR13 : 1;
+			_IO BR14 : 1;
+			_IO BR15 : 1;
 		} BIT;
 	} BSRR;
 
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_06_BitReset GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_BRR GPIO Port Bit Reset Register (BRR)
-	 * @brief [W] Atomic Reset for GPIO Pins
+	 * @brief [W] Atomic reset register for GPIO outputs
 	 * @details
-	 * - Write-only register for resetting pins
-	 * - Each bit resets the corresponding GPIO pin (write 1 to set low)
-	 * - Bits 16-31 are reserved and should be written as 0
-	 * - Reading returns 0x0000
-	 * - Provides backward compatibility with older STM32 families
-	 * - Reset value: 0x0000 0000
+	 * Bits 0 to 15 reset the corresponding output bits. This register provides a
+	 * dedicated reset path alongside the upper reset half of `GPIOx_BSRR`.
 	 */
 	union GPIO_BRR
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t BR0 : 1;
-			volatile uint32_t BR1 : 1;
-			volatile uint32_t BR2 : 1;
-			volatile uint32_t BR3 : 1;
-			volatile uint32_t BR4 : 1;
-			volatile uint32_t BR5 : 1;
-			volatile uint32_t BR6 : 1;
-			volatile uint32_t BR7 : 1;
-			volatile uint32_t BR8 : 1;
-			volatile uint32_t BR9 : 1;
-			volatile uint32_t BR10 : 1;
-			volatile uint32_t BR11 : 1;
-			volatile uint32_t BR12 : 1;
-			volatile uint32_t BR13 : 1;
-			volatile uint32_t BR14 : 1;
-			volatile uint32_t BR15 : 1;
-			volatile uint32_t RESERVED_BRR : 16;
+			_IO BR0 : 1;
+			_IO BR1 : 1;
+			_IO BR2 : 1;
+			_IO BR3 : 1;
+			_IO BR4 : 1;
+			_IO BR5 : 1;
+			_IO BR6 : 1;
+			_IO BR7 : 1;
+			_IO BR8 : 1;
+			_IO BR9 : 1;
+			_IO BR10 : 1;
+			_IO BR11 : 1;
+			_IO BR12 : 1;
+			_IO BR13 : 1;
+			_IO BR14 : 1;
+			_IO BR15 : 1;
+			_IO RESERVED_BRR : 16;
 		} BIT;
 	} BRR;
 
 	/**
 	 * @ingroup GPIO_01_RegisterLayer_07_ConfigLock GPIO_01_RegisterLayer_08_RegisterMap
 	 * @section GPIO_TypeDef_LCKR GPIO Port Configuration Lock Register (LCKR)
-	 * @brief [W] Prevents accidental modification of GPIO until next reset
+	 * @brief [R/W] Configuration lock register for GPIO pins
 	 * @details
-	 * The **GPIO Lock Mechanism** provides hardware-level protection against
-	 * accidental or malicious modification of GPIO configuration registers.
-	 *
-	 * ##### Locking Principle:
-	 * - Once a pin is locked, its configuration in **CRL/CRH registers becomes read-only**
-	 * - Locked configuration persists until the **next system reset**
-	 * - Lock status is indicated by the **LCKK (Lock Key) bit** (bit 16)
-	 * - Lock affects **entire port** but only the specified pins are protected
-	 *
-	 * ##### Hardware Lock Sequence:
-	 * The STM32F1 requires a specific write sequence to activate locking:
-	 * 1. **Write 1**: `LCKR[15:0] = pins_to_lock + LCKK = 1`
-	 * 2. **Write 2**: `LCKR[15:0] = pins_to_lock + LCKK = 0`
-	 * 3. **Write 3**: `LCKR[15:0] = pins_to_lock + LCKK = 1`
-	 * 4. **Read Verify**: Check `LCKR[16] == 1` to confirm lock
-	 *
-	 * ##### Use Cases:
-	 * - **Safety-critical** applications (emergency stop, watchdog)
-	 * - **Production firmware** to prevent field modifications
-	 * - **Secure boot** configurations
-	 * - **Regulatory compliance** requiring hardware protection
-	 *
-	 * ##### Important Limitations:
-	 * - 🔒 **Lock applies to entire GPIO port** (cannot lock individual pins separately)
-	 * - 🔒 **Locked pins cannot be reconfigured** until system reset
-	 * - 🔒 **Lock cannot be selectively removed** - only reset clears it
-	 * - ⚠️  **Use with extreme caution** in development
+	 * Bits 0 to 15 select which pins participate in the lock sequence, and bit 16
+	 * (`LCKK`) is the lock key used to finalize the hardware configuration lock.
+	 * Once the sequence completes successfully, the selected pin configuration
+	 * remains locked until the next reset.
 	 */
 	union GPIO_LCKR
 	{
 		_IO REG;
 		struct
 		{
-			volatile uint32_t LCK0 : 1;
-			volatile uint32_t LCK1 : 1;
-			volatile uint32_t LCK2 : 1;
-			volatile uint32_t LCK3 : 1;
-			volatile uint32_t LCK4 : 1;
-			volatile uint32_t LCK5 : 1;
-			volatile uint32_t LCK6 : 1;
-			volatile uint32_t LCK7 : 1;
-			volatile uint32_t LCK8 : 1;
-			volatile uint32_t LCK9 : 1;
-			volatile uint32_t LCK10 : 1;
-			volatile uint32_t LCK11 : 1;
-			volatile uint32_t LCK12 : 1;
-			volatile uint32_t LCK13 : 1;
-			volatile uint32_t LCK14 : 1;
-			volatile uint32_t LCK15 : 1;
-			volatile uint32_t LCKK : 1;
-			volatile uint32_t RESERVED_LCKR : 15;
+			_IO LCK0 : 1;
+			_IO LCK1 : 1;
+			_IO LCK2 : 1;
+			_IO LCK3 : 1;
+			_IO LCK4 : 1;
+			_IO LCK5 : 1;
+			_IO LCK6 : 1;
+			_IO LCK7 : 1;
+			_IO LCK8 : 1;
+			_IO LCK9 : 1;
+			_IO LCK10 : 1;
+			_IO LCK11 : 1;
+			_IO LCK12 : 1;
+			_IO LCK13 : 1;
+			_IO LCK14 : 1;
+			_IO LCK15 : 1;
+			_IO LCKK : 1;
+			_IO RESERVED_LCKR : 15;
 		} BIT;
 	} LCKR;
 	
