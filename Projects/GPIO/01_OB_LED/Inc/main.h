@@ -11,7 +11,8 @@
 
 /*-------------------------------------------------------------------------------*/
 // MACROS
-#define LOOP_DELAY_MS						(1000UL)
+#define LED_LAMP_TEST_DELAY_MS				(250UL)
+#define LED_STEP_DELAY_MS					(400UL)
 #define RED_LED_PORT						GPIO_PORT_A
 #define RED_LED_PIN							GPIO_PIN_2
 #define YELLOW_LED_PORT						GPIO_PORT_A

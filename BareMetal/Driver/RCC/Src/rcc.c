@@ -105,7 +105,7 @@ static const _rcc_field_value_map_t _RCC_PLLMultiplierLUT[] =
 };
 
 /** @brief Cached RCC clock frequencies snapshot maintained by the driver. */
-static rcc_clock_frequencies_t _rccClockFrequenciesSnapshot =
+static volatile rcc_clock_frequencies_t _rccClockFrequenciesSnapshot =
 {
 	RCC_FREQ_ZERO,
 	RCC_FREQ_ZERO,
@@ -221,6 +221,24 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapValueByIndex(const _rcc_field
 	}
 
 	return pLUT[index].value;
+}
+
+/**
+ * @brief Returns the LL field stored at the requested LUT index.
+ * @param[in] pLUT Pointer to the LUT to read.
+ * @param[in] itemCount Number of valid items in the LUT.
+ * @param[in] index Requested LUT index.
+ * @param[in] defaultField Fallback LL field used when the index is outside the LUT range.
+ * @returns LL field stored in the LUT, or @p defaultField when the index is invalid.
+ */
+__STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapLLFieldByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultField)
+{
+	if (index >= itemCount)
+	{
+		return defaultField;
+	}
+
+	return pLUT[index].ll_field;
 }
 
 /**
@@ -359,7 +377,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetPLLMultiplierLLField(const rcc_pll_mul_t m
 		return RCC_DRIVER_INVALID_FIELD;
 	}
 
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_PLLMultiplierLUT,
 		ARRAY_SIZE(_RCC_PLLMultiplierLUT),
@@ -375,7 +393,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetPLLMultiplierLLField(const rcc_pll_mul_t m
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
 {
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_AHBPrescalerLUT,
 		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
@@ -391,7 +409,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerLLField(const rcc_bus_prescale
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetAPB1PrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
 {
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_APBPrescalerLUT,
 		ARRAY_SIZE(_RCC_APBPrescalerLUT),
@@ -407,7 +425,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetAPB1PrescalerLLField(const rcc_bus_prescal
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetAPB2PrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
 {
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_APB2PrescalerLUT,
 		ARRAY_SIZE(_RCC_APB2PrescalerLUT),
@@ -423,7 +441,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetAPB2PrescalerLLField(const rcc_bus_prescal
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
 {
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_ADCPrescalerLUT,
 		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
@@ -439,7 +457,7 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerLLField(const rcc_component_pr
  */
 __STATIC_FORCEINLINE uint32_t _RCC_GetUSBPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
 {
-	return _RCC_GetFieldValueMapValueByIndex
+	return _RCC_GetFieldValueMapLLFieldByIndex
 	(
 		_RCC_USBPrescalerLUT,
 		ARRAY_SIZE(_RCC_USBPrescalerLUT),
@@ -948,9 +966,12 @@ static driver_status_t _RCC_ApplyBusPrescalerConfig(const rcc_bus_config_t* cons
 	apb1PrescalerField = _RCC_GetAPB1PrescalerLLField(pBusConfig->APB1);
 	apb2PrescalerField = _RCC_GetAPB2PrescalerLLField(pBusConfig->APB2);
 
-	if ((ahbPrescalerField == RCC_DRIVER_INVALID_FIELD) ||
-		(apb1PrescalerField == RCC_DRIVER_INVALID_FIELD) ||
-		(apb2PrescalerField == RCC_DRIVER_INVALID_FIELD))
+	if
+	(
+		(ahbPrescalerField == RCC_DRIVER_INVALID_FIELD)		||
+		(apb1PrescalerField == RCC_DRIVER_INVALID_FIELD)	||
+		(apb2PrescalerField == RCC_DRIVER_INVALID_FIELD)
+	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -1449,8 +1470,7 @@ void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig)
 
 driver_status_t RCC_Config72MHz(void)
 {
-	rcc_config_t cfg;
-
+	rcc_config_t cfg = {0};
 	RCC_Load72MHzDefaultConfig(&cfg);
 	return RCC_Config(&cfg);
 }
