@@ -1,0 +1,28 @@
+include_guard(GLOBAL)
+
+function(stm32_configure_output_paths)
+    set(VSCODE_DIR ${PROJ_DIR}/.vscode)
+    if(NOT EXISTS ${VSCODE_DIR})
+        file(MAKE_DIRECTORY ${VSCODE_DIR})
+        message(STATUS "VSCode directory: ${VSCODE_DIR}")
+    endif()
+
+    set(BINARY_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.bin)
+    set(HEX_FILE ${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.hex)
+
+    if(NOT EXISTS ${BUILD_OUTPUT_DIR})
+        file(MAKE_DIRECTORY ${BUILD_OUTPUT_DIR})
+        get_filename_component(filename ${BUILD_OUTPUT_DIR} NAME)
+        message(STATUS "Created build directory: ${filename}")
+    else()
+        get_filename_component(filename ${BUILD_OUTPUT_DIR} NAME)
+        message(STATUS "Build directory: ${filename}")
+    endif()
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR} PARENT_SCOPE)
+    set(VSCODE_DIR "${VSCODE_DIR}" PARENT_SCOPE)
+    set(BINARY_FILE "${BINARY_FILE}" PARENT_SCOPE)
+    set(HEX_FILE "${HEX_FILE}" PARENT_SCOPE)
+endfunction()
