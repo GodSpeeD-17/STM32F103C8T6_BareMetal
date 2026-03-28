@@ -1,0 +1,167 @@
+#
+# Post-build memory reporter for the ELF artifact.
+# It parses `arm-none-eabi-size --format=berkeley` output and renders a
+# compact terminal summary that separates region usage from section roles.
+#
+
+if(NOT DEFINED SIZE_TOOL)
+    message(FATAL_ERROR "SIZE_TOOL is required")
+endif()
+
+if(NOT DEFINED ELF_FILE)
+    message(FATAL_ERROR "ELF_FILE is required")
+endif()
+
+if(NOT DEFINED PROJECT_LABEL)
+    message(FATAL_ERROR "PROJECT_LABEL is required")
+endif()
+
+if(NOT DEFINED FLASH_SIZE_BYTES)
+    message(FATAL_ERROR "FLASH_SIZE_BYTES is required")
+endif()
+
+if(NOT DEFINED RAM_SIZE_BYTES)
+    message(FATAL_ERROR "RAM_SIZE_BYTES is required")
+endif()
+
+function(stm32_format_kib bytes out_var)
+    # Keep KiB formatting deterministic so the table width stays stable.
+    math(EXPR kib_whole "${bytes} / 1024")
+    math(EXPR kib_frac "(${bytes} % 1024) * 100 / 1024")
+    if(kib_frac LESS 10)
+        set(kib_frac_str "0${kib_frac}")
+    else()
+        set(kib_frac_str "${kib_frac}")
+    endif()
+    set(formatted_value "${kib_whole}.${kib_frac_str} KiB")
+    set(${out_var} "${formatted_value}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_format_percent used total out_var)
+    # CMake integer math only supports whole numbers, so percentages are
+    # computed as x100 and then split into integer/fractional parts.
+    if(total EQUAL 0)
+        set(${out_var} "0.00" PARENT_SCOPE)
+        return()
+    endif()
+
+    math(EXPR percent_x100 "${used} * 10000 / ${total}")
+    math(EXPR percent_whole "${percent_x100} / 100")
+    math(EXPR percent_frac "${percent_x100} % 100")
+    if(percent_frac LESS 10)
+        set(percent_frac_str "0${percent_frac}")
+    else()
+        set(percent_frac_str "${percent_frac}")
+    endif()
+    set(formatted_value "${percent_whole}.${percent_frac_str}")
+    set(${out_var} "${formatted_value}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_pad_right input width out_var)
+    # Fixed-width cell helpers keep the ASCII table aligned in plain terminals.
+    set(result "${input}")
+    string(LENGTH "${result}" result_length)
+    math(EXPR pad_count "${width} - ${result_length}")
+    while(pad_count GREATER 0)
+        string(APPEND result " ")
+        math(EXPR pad_count "${pad_count} - 1")
+    endwhile()
+    set(${out_var} "${result}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_pad_left input width out_var)
+    set(result "${input}")
+    string(LENGTH "${result}" result_length)
+    math(EXPR pad_count "${width} - ${result_length}")
+    set(prefix "")
+    while(pad_count GREATER 0)
+        string(APPEND prefix " ")
+        math(EXPR pad_count "${pad_count} - 1")
+    endwhile()
+    set(${out_var} "${prefix}${result}" PARENT_SCOPE)
+endfunction()
+
+execute_process(
+    COMMAND "${SIZE_TOOL}" --format=berkeley "${ELF_FILE}"
+    OUTPUT_VARIABLE size_output
+    ERROR_VARIABLE size_error
+    RESULT_VARIABLE size_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if(NOT size_result EQUAL 0)
+    message(FATAL_ERROR "Failed to run size tool:\n${size_error}")
+endif()
+
+string(REPLACE "\n" ";" size_lines "${size_output}")
+list(LENGTH size_lines size_line_count)
+if(size_line_count LESS 2)
+    message(FATAL_ERROR "Unexpected size output:\n${size_output}")
+endif()
+
+list(GET size_lines 1 size_values_line)
+string(REGEX MATCHALL "[0-9]+" size_values "${size_values_line}")
+list(LENGTH size_values value_count)
+if(value_count LESS 3)
+    message(FATAL_ERROR "Unable to parse size output:\n${size_output}")
+endif()
+
+list(GET size_values 0 text_size)
+list(GET size_values 1 data_size)
+list(GET size_values 2 bss_size)
+
+# FLASH stores `.text` plus initialized data image.
+# RAM holds initialized `.data` plus zero-initialized `.bss`.
+math(EXPR flash_used "${text_size} + ${data_size}")
+math(EXPR ram_used "${data_size} + ${bss_size}")
+
+stm32_format_percent(${flash_used} ${FLASH_SIZE_BYTES} flash_percent)
+stm32_format_percent(${ram_used} ${RAM_SIZE_BYTES} ram_percent)
+stm32_format_kib(${flash_used} flash_used_kib)
+stm32_format_kib(${ram_used} ram_used_kib)
+stm32_format_kib(${FLASH_SIZE_BYTES} flash_capacity)
+stm32_format_kib(${RAM_SIZE_BYTES} ram_capacity)
+
+stm32_pad_right("Region" 6 header_region)
+stm32_pad_right("Used" 19 header_used)
+stm32_pad_right("Capacity" 20 header_capacity)
+stm32_pad_right("Utilized" 8 header_utilized)
+
+stm32_pad_right("FLASH" 6 flash_region)
+stm32_pad_left("${flash_used} B (${flash_used_kib})" 19 flash_used_value)
+stm32_pad_left("${FLASH_SIZE_BYTES} B (${flash_capacity})" 20 flash_capacity_value)
+stm32_pad_left("${flash_percent}%" 8 flash_used_percent)
+
+stm32_pad_right("RAM" 6 ram_region)
+stm32_pad_left("${ram_used} B (${ram_used_kib})" 19 ram_used_value)
+stm32_pad_left("${RAM_SIZE_BYTES} B (${ram_capacity})" 20 ram_capacity_value)
+stm32_pad_left("${ram_percent}%" 8 ram_used_percent)
+
+stm32_pad_right("Section" 7 section_header)
+stm32_pad_right("Bytes" 8 bytes_header)
+stm32_pad_right("Role" 26 role_header)
+stm32_pad_right("text" 7 text_name)
+stm32_pad_left("${text_size}" 8 text_value)
+stm32_pad_right("Code + const data in FLASH" 26 text_role)
+stm32_pad_right("data" 7 data_name)
+stm32_pad_left("${data_size}" 8 data_value)
+stm32_pad_right("Init data in RAM" 26 data_role)
+stm32_pad_right("bss" 7 bss_name)
+stm32_pad_left("${bss_size}" 8 bss_value)
+stm32_pad_right("Zero-init data in RAM" 26 bss_role)
+
+message(STATUS "")
+message(STATUS "[Memory Usage]")
+message(STATUS "  Target: ${PROJECT_LABEL}")
+message(STATUS "  +--------+---------------------+----------------------+----------+")
+message(STATUS "  | ${header_region} | ${header_used} | ${header_capacity} | ${header_utilized} |")
+message(STATUS "  +--------+---------------------+----------------------+----------+")
+message(STATUS "  | ${flash_region} | ${flash_used_value} | ${flash_capacity_value} | ${flash_used_percent} |")
+message(STATUS "  | ${ram_region} | ${ram_used_value} | ${ram_capacity_value} | ${ram_used_percent} |")
+message(STATUS "  +--------+---------------------+----------------------+----------+")
+message(STATUS "  | Section |    Bytes | Role                       |")
+message(STATUS "  +---------+----------+----------------------------+")
+message(STATUS "  | ${text_name} | ${text_value} | ${text_role} |")
+message(STATUS "  | ${data_name} | ${data_value} | ${data_role} |")
+message(STATUS "  | ${bss_name} | ${bss_value} | ${bss_role} |")
+message(STATUS "  +---------+----------+----------------------------+")

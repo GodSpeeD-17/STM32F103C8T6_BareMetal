@@ -1,0 +1,78 @@
+include_guard(GLOBAL)
+
+# Tool/path validation is split from flag setup so configure failures are
+# reported early and clearly before any target logic is registered.
+
+function(stm32_print_path_summary)
+    stm32_validate_existing_path("Project Directory" "${PROJ_DIR}")
+    stm32_validate_existing_path("Repository Root" "${REPO_ROOT}")
+    stm32_validate_existing_path("BareMetal Root" "${BAREMETAL_ROOT}")
+    stm32_validate_existing_path("CMake Root" "${CMAKE_ROOT}")
+    stm32_validate_existing_path("Core Root" "${CORE_ROOT}")
+    stm32_validate_existing_path("Driver Root" "${DRIVER_ROOT}")
+    stm32_validate_existing_path("Linker Script" "${LINKER_FILE}")
+    stm32_validate_existing_path("Toolchain Path" "${TOOLCHAIN_PATH}")
+    stm32_validate_existing_path("ST-Flash" "${ST_FLASH_PATH}")
+    stm32_validate_existing_path("ST-Util" "${ST_UTIL_PATH}")
+    stm32_validate_existing_path("OpenOCD" "${OPENOCD_PATH}")
+    stm32_validate_existing_path("GDB Multiarch" "${GDB_PATH_MULTIARCH_PATH}")
+    stm32_validate_existing_path("GCC Compiler" "${CMAKE_C_COMPILER}")
+    stm32_validate_existing_path("ASM Compiler" "${CMAKE_ASM_COMPILER}")
+    stm32_validate_existing_path("G++ Compiler" "${CMAKE_CXX_COMPILER}")
+    stm32_validate_existing_path("Objcopy" "${CMAKE_OBJCOPY}")
+    stm32_validate_existing_path("Objdump" "${CMAKE_OBJDUMP}")
+    stm32_validate_existing_path("NM" "${CMAKE_NM}")
+    stm32_validate_existing_path("Size Utility" "${CMAKE_SIZE}")
+
+    # Print the resolved path/tool state only after validation succeeds.
+    stm32_print_section("Workspace")
+    stm32_print_kv("Project Dir" "${PROJ_DIR}")
+    stm32_print_kv("Repository Root" "${REPO_ROOT}")
+    stm32_print_kv("BareMetal Root" "${BAREMETAL_ROOT}")
+    stm32_print_kv("CMake Root" "${CMAKE_ROOT}")
+    stm32_print_kv("Core Root" "${CORE_ROOT}")
+    stm32_print_kv("Driver Root" "${DRIVER_ROOT}")
+    stm32_print_kv("Linker Script" "${LINKER_FILE}")
+
+    stm32_print_section("Toolchain")
+    stm32_print_kv("Toolchain Path" "${TOOLCHAIN_PATH}")
+    stm32_print_kv("GCC" "${CMAKE_C_COMPILER}")
+    stm32_print_kv("G++" "${CMAKE_CXX_COMPILER}")
+    stm32_print_kv("ASM" "${CMAKE_ASM_COMPILER}")
+    stm32_print_kv("Objcopy" "${CMAKE_OBJCOPY}")
+    stm32_print_kv("Objdump" "${CMAKE_OBJDUMP}")
+    stm32_print_kv("NM" "${CMAKE_NM}")
+    stm32_print_kv("Size" "${CMAKE_SIZE}")
+
+    stm32_print_section("Host Tools")
+    stm32_print_kv("ST-Flash" "${ST_FLASH_PATH}")
+    stm32_print_kv("ST-Util" "${ST_UTIL_PATH}")
+    stm32_print_kv("OpenOCD" "${OPENOCD_PATH}")
+    stm32_print_kv("GDB Multiarch" "${GDB_PATH_MULTIARCH_PATH}")
+endfunction()
+
+function(stm32_configure_host_tools)
+    # These are the runtime utilities used by custom maintenance/debug targets.
+    set(ST_FLASH "${ST_FLASH_PATH}" PARENT_SCOPE)
+    set(ST_UTIL "${ST_UTIL_PATH}" PARENT_SCOPE)
+    set(OPENOCD "${OPENOCD_PATH}" PARENT_SCOPE)
+
+    find_program(ST_INFO_PATH NAMES st-info)
+    find_program(ST_UART_FLASH_PATH NAMES stm32flash)
+
+    # `st-info` and `stm32flash` are optional helpers. Keep the configure step
+    # usable even when they are not installed, but warn that related targets
+    # may fail if invoked.
+    if(NOT ST_INFO_PATH)
+        set(ST_INFO_PATH st-info)
+        message(WARNING "st-info not found in PATH. The 'info' target may fail.")
+    endif()
+
+    if(NOT ST_UART_FLASH_PATH)
+        set(ST_UART_FLASH_PATH stm32flash)
+        message(WARNING "stm32flash not found in PATH. UART flashing targets may fail.")
+    endif()
+
+    set(ST_INFO "${ST_INFO_PATH}" PARENT_SCOPE)
+    set(ST_UART_FLASH "${ST_UART_FLASH_PATH}" PARENT_SCOPE)
+endfunction()

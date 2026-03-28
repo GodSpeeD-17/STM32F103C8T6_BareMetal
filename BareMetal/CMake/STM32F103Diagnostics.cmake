@@ -1,0 +1,79 @@
+include_guard(GLOBAL)
+
+# Small formatting helpers used by the configure summary.
+# Keeping all `message(STATUS ...)` patterns here avoids repeating
+# padding/alignment logic across the other modules.
+
+function(stm32_print_section title)
+    message(STATUS "")
+    message(STATUS "[${title}]")
+endfunction()
+
+function(stm32_print_kv label value)
+    string(LENGTH "${label}" label_length)
+    math(EXPR padding_length "18 - ${label_length}")
+    if(padding_length LESS 1)
+        set(padding_length 1)
+    endif()
+    string(REPEAT " " ${padding_length} padding)
+    message(STATUS "  ${label}${padding}: ${value}")
+endfunction()
+
+function(stm32_validate_existing_path label path_value)
+    if("${path_value}" STREQUAL "")
+        message(FATAL_ERROR "${label} is empty")
+    endif()
+
+    if(NOT EXISTS "${path_value}")
+        message(FATAL_ERROR "${label} not found: ${path_value}")
+    endif()
+endfunction()
+
+function(stm32_join_list out_var)
+    if(ARGN)
+        list(JOIN ARGN ", " joined_items)
+    else()
+        set(joined_items "<none>")
+    endif()
+    set(${out_var} "${joined_items}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_print_configuration_summary)
+    # Present the final resolved configuration after defaults, paths, and
+    # host-tool discovery have all been applied.
+    stm32_join_list(driver_modules ${DRIVER_MODULES})
+    stm32_print_section("Build Configuration")
+    stm32_print_kv("Project" "${PROJECT_NAME}")
+    stm32_print_kv("Version" "${PROJECT_VERSION}")
+    stm32_print_kv("Target" "${PROJECT_NAME}.elf")
+    stm32_print_kv("MCU" "${MCU} (${MCU_CPU})")
+    stm32_print_kv("Optimization" "-O${OPTIMIZATION_LEVEL}")
+    stm32_print_kv("Flash Address" "${FLASH_ADDRESS}")
+    stm32_print_kv("Save Temps" "${SAVE_TEMPS}")
+    stm32_print_kv("Build Dir" "${BUILD_OUTPUT_DIR}")
+    stm32_print_kv("Build Dir State" "${BUILD_DIR_STATUS}")
+    stm32_print_kv("VSCode Dir" "${VSCODE_DIR}")
+    stm32_print_kv("VSCode State" "${VSCODE_DIR_STATUS}")
+    stm32_print_kv("Binary Output" "${BINARY_FILE}")
+    stm32_print_kv("HEX Output" "${HEX_FILE}")
+    stm32_print_kv("Driver Modules" "${driver_modules}")
+    stm32_print_kv("Module View" "${DRIVER_MODULE_TREE}")
+    stm32_print_kv("Main Targets" "flash, flash_uart, debug, clean_all, info, erase_flash")
+endfunction()
+
+function(stm32_print_source_summary)
+    # Source counts are printed after collection so the user can confirm
+    # which parts of the firmware graph were actually included.
+    list(LENGTH PROJECT_SOURCES project_source_count)
+    list(LENGTH CORE_SOURCES core_source_count)
+    list(LENGTH SELECTED_DRIVER_SOURCES driver_source_count)
+    list(LENGTH SELECTED_DRIVER_INCLUDES driver_include_count)
+    math(EXPR total_source_count "${project_source_count} + ${driver_source_count} + ${core_source_count}")
+
+    stm32_print_section("Source Summary")
+    stm32_print_kv("Project Sources" "${project_source_count}")
+    stm32_print_kv("Driver Sources" "${driver_source_count}")
+    stm32_print_kv("Driver Includes" "${driver_include_count}")
+    stm32_print_kv("Core Sources" "${core_source_count}")
+    stm32_print_kv("Total Sources" "${total_source_count}")
+endfunction()
