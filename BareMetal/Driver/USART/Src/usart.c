@@ -22,9 +22,9 @@ void USART_Config(usart_config_t* USART_CONFIGx){
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate
 	if(USART_CONFIGx->USARTx == USART1)
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_Get_APB2Clock()/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetAPB2Clock()/(USART_CONFIGx->baud_rate));
 	else
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusPrescaler(RCC_APB1_BUS)/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusFreq(RCC_APB1_BUS)/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
 	USART_CONFIGx->USARTx->CR2.REG |= ((USART_CONFIGx->stop_bits & 0x03) << USART_CR2_STOP_Pos);
 	// Configure Rest of the Parameters
@@ -288,12 +288,12 @@ const static uint32_t __usartDriverBaudRateMapping__[] = {
  * @param hardware Refer `usart_hardware_enable_t`
  * @param usartGpioConfig Refer `usart_gpio_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig){
 	// Status
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	// Configure TX Pin
 	if(hardware & USART_TX_ENABLE){
 		status = GPIO_Init(usartGpioConfig->TX.GPIO, &usartGpioConfig->TX.setup); 
@@ -328,15 +328,15 @@ driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @param baudRate Refer `usart_baud_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success 
  */
 driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudRate){
 	// Get Clock Frequency
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	if((usart < USART_MIN) || (usart > USART_MAX))
 		return status;
-	uint32_t clockFreq = (usart == USART_1)? RCC_Get_APB2Clock() : RCC_GetBusPrescaler(RCC_APB1_BUS);
+	uint32_t clockFreq = (usart == USART_1)? RCC_GetAPB2Clock() : RCC_GetBusFreq(RCC_APB1_BUS);
 	// Update Baud Rate Register Value
 	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(__usartDriverBaudRateMapping__[baudRate]));
 	// Return status
@@ -403,12 +403,12 @@ static void __USART_updateCR2__(const usart_hardware_enable_t hardware, const us
  * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
  * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success 
  */
 driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig){
 	// Status
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	// Validate Parameters
 	if((usart < USART_MIN) || (usart > USART_MAX))
 		return status;
@@ -435,12 +435,12 @@ driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_e
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
  * @param usartConfig Pointer to USART Configuration Structure
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig){
 	// Status
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	// Validate Parameters
 	if((usart < USART_MIN) || (usart > USART_MAX) || (usartConfig == NULL)){
 		return status;
@@ -467,12 +467,12 @@ driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartCon
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq){
 	// Status
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	USART_Get_Mapping(usart)->CR1.REG |= (uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos);
 	NVIC_IRQEnable(USART_Get_IRQn(usart));
 	// Return Status
@@ -485,12 +485,12 @@ driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq){
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq){
 	// Status
-	driver_status_t status = DRIVER_STATUS_FAIL;
+	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	USART_Get_Mapping(usart)->CR1.REG &= ~((uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos));
 	NVIC_IRQEnable(USART_Get_IRQn(usart));
 	// Return status

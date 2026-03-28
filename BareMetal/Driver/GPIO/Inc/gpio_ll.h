@@ -544,7 +544,7 @@ __STATIC_FORCEINLINE void __GPIO_ToggleLCKR(GPIO_TypeDef* const GPIOx, const uin
  */
 __STATIC_FORCEINLINE void _GPIO_EnableClock(GPIO_TypeDef* const GPIOx)
 {
-	__RCC_SetAPB2ENR(RCC, GPIO_CLK_MASK(GPIOx));
+	(void) RCC_LL_EnableAPB2Clock(GPIO_CLK_MASK(GPIOx));
 }
 
 /**
@@ -553,7 +553,7 @@ __STATIC_FORCEINLINE void _GPIO_EnableClock(GPIO_TypeDef* const GPIOx)
  */
 __STATIC_FORCEINLINE void _GPIO_DisableClock(GPIO_TypeDef* const GPIOx)
 {
-	__RCC_ClearAPB2ENR(RCC, GPIO_CLK_MASK(GPIOx));
+	(void) RCC_LL_DisableAPB2Clock(GPIO_CLK_MASK(GPIOx));
 }
 
 /**
@@ -561,7 +561,7 @@ __STATIC_FORCEINLINE void _GPIO_DisableClock(GPIO_TypeDef* const GPIOx)
  */
 __STATIC_FORCEINLINE void _GPIO_EnableAFIOClock(void)
 {
-	__RCC_SetAPB2ENR(RCC, RCC_APB2ENR_AFIOEN);
+	(void) RCC_LL_EnableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 
 /** @} */ // GPIO_02_LL_01_Clock

@@ -1,1281 +1,872 @@
 /**
- * @file rcc_ll.h
- * @author Shrey Shah
- * @version v1.2
- * @date 08-11-2025
+ * @file	rcc_ll.h
+ * @author	Shrey Shah
+ * @brief	RCC Low-Level Control Interface
+ * @version	v3.0
+ * @date	22-03-2026
+ *
+ * @details
+ * The RCC low-level layer is a thin, typed wrapper over the register definitions from
+ * @ref stm32f1xx_rcc.h. It does not own clock-tree policy or board-level validation.
+ * Its only job is to expose direct hardware actions with meaningful function names.
  */
+
 #ifndef RCC_LL_H_
 #define RCC_LL_H_
 
+// C++ Compatibility
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/** 
- * @brief For register mapping base types
- * @include @file stm32f1xx.h 
- */
+// ==================================================================================================== //
+//                                               Includes                                               //
+// ==================================================================================================== //
 #include "stm32f1xx.h"
-
-// ======================================================================================================
-// RCC Register APIs
-// ======================================================================================================
-
-/**
- * @addtogroup RCC_01_Registers_03_API
- * @{
- */
-
-/*---------------------------------------------- RCC CR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_01_CR Clock Control Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for Clock Control Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_CR "RCC->CR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->CR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadCR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->CR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_CR "RCC->CR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_CR "RCC->CR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND + ~ Operation on @ref RCC_CR "RCC->CR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND + ~ with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_CR "RCC->CR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_01_CR
-
-/*---------------------------------------------- RCC CFGR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_02_CFGR Clock Configuration Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for Clock Configuration Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_CFGR "RCC->CFGR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->CFGR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadCFGR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->CFGR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_CFGR "RCC->CFGR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CFGR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_CFGR "RCC->CFGR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CFGR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CFGR "RCC->CFGR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CFGR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_CFGR "RCC->CFGR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleCFGR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CFGR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_02_CFGR
-
-/*---------------------------------------------- RCC CIR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_03_CIR Clock Interrupt Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for Clock Interrupt Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_CIR "RCC->CIR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->CIR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadCIR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->CIR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_CIR "RCC->CIR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteCIR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CIR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_CIR "RCC->CIR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetCIR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CIR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CIR "RCC->CIR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearCIR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CIR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_CIR "RCC->CIR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleCIR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CIR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_03_CIR
-
-/*---------------------------------------------- RCC APB2RSTR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_04_APB2RSTR APB2 Peripheral Reset Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for APB2 Peripheral Reset Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_APB2RSTR "RCC->APB2RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->APB2RSTR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadAPB2RSTR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->APB2RSTR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_APB2RSTR "RCC->APB2RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2RSTR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_APB2RSTR "RCC->APB2RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2RSTR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB2RSTR "RCC->APB2RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2RSTR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_APB2RSTR "RCC->APB2RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleAPB2RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2RSTR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_04_APB2RSTR
-
-/*---------------------------------------------- RCC APB1RSTR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_05_APB1RSTR APB1 Peripheral Reset Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for APB1 Peripheral Reset Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_APB1RSTR "RCC->APB1RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->APB1RSTR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadAPB1RSTR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->APB1RSTR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_APB1RSTR "RCC->APB1RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1RSTR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_APB1RSTR "RCC->APB1RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1RSTR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB1RSTR "RCC->APB1RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1RSTR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_APB1RSTR "RCC->APB1RSTR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleAPB1RSTR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1RSTR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_05_APB1RSTR
-
-/*---------------------------------------------- RCC AHBENR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_06_AHBENR AHB Peripheral Clock Enable Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for AHB Peripheral Clock Enable Register
- * @{
- */
-
-/**
- * @brief 				Reads @ref RCC_AHBENR "RCC->AHBENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->AHBENR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadAHBENR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->AHBENR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_AHBENR "RCC->AHBENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->AHBENR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_AHBENR "RCC->AHBENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->AHBENR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_AHBENR "RCC->AHBENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->AHBENR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_AHBENR "RCC->AHBENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleAHBENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->AHBENR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_06_AHBENR
-
-/*---------------------------------------------- RCC APB2ENR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_07_APB2ENR APB2 Peripheral Clock Enable Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for APB2 Peripheral Clock Enable Register
- * @{ 
- */
-
-/**
- * @brief 				Reads @ref RCC_APB2ENR "RCC->APB2ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->APB2ENR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadAPB2ENR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->APB2ENR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_APB2ENR "RCC->APB2ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2ENR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_APB2ENR "RCC->APB2ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2ENR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB2ENR "RCC->APB2ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2ENR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_APB2ENR "RCC->APB2ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleAPB2ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB2ENR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_07_APB2ENR
-
-/*---------------------------------------------- RCC APB1ENR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_08_APB1ENR APB1 Peripheral Clock Enable Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for APB1 Peripheral Clock Enable Register
- * @{ 
- */
-
-/**
- * @brief 				Reads @ref RCC_APB1ENR "RCC->APB1ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->APB1ENR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadAPB1ENR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->APB1ENR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_APB1ENR "RCC->APB1ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1ENR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_APB1ENR "RCC->APB1ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1ENR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_APB1ENR "RCC->APB1ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1ENR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_APB1ENR "RCC->APB1ENR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleAPB1ENR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->APB1ENR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_08_APB1ENR
-
-/*---------------------------------------------- RCC BDCR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_09_BDCR Backup Domain Control Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for Backup Domain Control Register
- * @{ 
- */
-
-/**
- * @brief 				Reads @ref RCC_BDCR "RCC->BDCR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->BDCR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadBDCR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->BDCR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_BDCR "RCC->BDCR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->BDCR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_BDCR "RCC->BDCR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->BDCR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_BDCR "RCC->BDCR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->BDCR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_BDCR "RCC->BDCR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleBDCR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->BDCR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_09_BDCR
-
-/*---------------------------------------------- RCC CSR ----------------------------------------------*/
-
-/**
- * @defgroup RCC_01_Registers_03_API_10_CSR Control/Status Register
- * @ingroup RCC_01_Registers_03_API
- * @brief APIs for Control/Status Register
- * @{ 
- */
-
-/**
- * @brief 				Reads @ref RCC_CSR "RCC->CSR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @returns				RCC->CSR register value
- */
-__STATIC_FORCEINLINE uint32_t __RCC_ReadCSR(RCC_TypeDef* const RCCx)
-{
-	return (uint32_t) RCCx->CSR.REG;
-}
-
-/**
- * @brief				Writes @ref RCC_CSR "RCC->CSR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Updated Value to be written
- */
-__STATIC_FORCEINLINE void __RCC_WriteCSR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CSR.REG = value;
-}
-
-/**
- * @brief				Performs a bitwise OR Operation on @ref RCC_CSR "RCC->CSR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to OR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_SetCSR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CSR.REG |= value;
-}
-
-/**
- * @brief				Performs a bitwise AND, ~ Operation on @ref RCC_CSR "RCC->CSR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to AND with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ClearCSR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CSR.REG &= ~value;
-}
-
-/**
- * @brief				Performs a bitwise EXOR Operation on @ref RCC_CSR "RCC->CSR"
- * @param[in] RCCx		Target @ref RCC_01_Registers "RCC Peripheral"
- * @param[in] value		Value to EXOR with current register value
- */
-__STATIC_FORCEINLINE void __RCC_ToggleCSR(RCC_TypeDef* const RCCx, const uint32_t value)
-{
-	RCCx->CSR.REG ^= value;
-}
-
-/** @} */ // RCC_01_Registers_03_API_10_CSR
-
-/** @} */ // RCC_01_Registers_03_API
-
-// ======================================================================================================
-// RCC Low Level APIs
-// ======================================================================================================
 
 /**
  * @addtogroup RCC_02_LL
  * @{
  */
 
-/*---------------------------------------------- RCC Flash ----------------------------------------------*/
-/** @brief Low-level flash latency type definition @typedef _rcc_flash_latency_t */
-typedef uint8_t 								_rcc_flash_latency_t;
-
-/** @brief Zero wait state @def _RCC_FLASH_LATENCY_0 */
-#define _RCC_FLASH_LATENCY_0					((_rcc_flash_latency_t) 0x00)
-/** @brief One wait state @def _RCC_FLASH_LATENCY_1 */
-#define _RCC_FLASH_LATENCY_1					((_rcc_flash_latency_t) 0x01)
-/** @brief Two wait states @def _RCC_FLASH_LATENCY_2 */
-#define _RCC_FLASH_LATENCY_2					((_rcc_flash_latency_t) 0x02)
-
-/** @brief Low-level flash prefetch type definition @typedef _rcc_flash_prefetch_t */
-typedef uint8_t _rcc_flash_prefetch_t;
-
-/** @brief Prefetch disabled @def _RCC_FLASH_PREFETCH_DISABLE */
-#define _RCC_FLASH_PREFETCH_DISABLE				((_rcc_flash_prefetch_t) 0x00)
-/** @brief Prefetch enabled @def _RCC_FLASH_PREFETCH_ENABLE */
-#define _RCC_FLASH_PREFETCH_ENABLE				((_rcc_flash_prefetch_t) 0x01)
+// ==================================================================================================== //
+//                                      RCC LL Register Operation Macros                                //
+// ==================================================================================================== //
 
 /**
- * @brief Stage Flash Latency configuration into FLASH_ACR register value
- * @param[in] latency Flash latency configuration (@ref RCC_FLASH_LATENCY_0, RCC_FLASH_LATENCY_1, RCC_FLASH_LATENCY_2)
- * @param[in] acrReg Current FLASH_ACR register value
- * @returns The updated staged FLASH_ACR register value with new latency configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageFlashLatency(const _rcc_flash_latency_t latency, uint32_t acrReg)
-{
-	// Clear latency bits (bits 0-2 for LATENCY[2:0])
-	acrReg &= ~FLASH_ACR_LATENCY;
-	// Stage latency configuration
-	acrReg |= (uint32_t)(latency << FLASH_ACR_LATENCY_Pos);
-	return acrReg;
-}
-
-/**
- * @brief Stage Flash Prefetch Buffer configuration into FLASH_ACR register value
- * @param[in] prefetch Flash prefetch configuration (@ref RCC_FLASH_PREFETCH_DISABLE, RCC_FLASH_PREFETCH_ENABLE)
- * @param[in] acrReg Current FLASH_ACR register value
- * @returns The updated staged FLASH_ACR register value with new prefetch configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageFlashPrefetch(const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
-{
-	// Clear prefetch buffer enable bit
-	acrReg &= ~FLASH_ACR_PRFTBE;
-	// Stage prefetch configuration
-	if(prefetch == _RCC_FLASH_PREFETCH_ENABLE) acrReg |= FLASH_ACR_PRFTBE;
-	return acrReg;
-}
-
-/**
- * @brief Stage complete Flash ACR configuration into register value
- * @param[in] latency Flash latency configuration (@ref RCC_FLASH_LATENCY_0, RCC_FLASH_LATENCY_1, RCC_FLASH_LATENCY_2) 
- * @param[in] prefetch Flash prefetch configuration (@ref RCC_FLASH_PREFETCH_DISABLE, RCC_FLASH_PREFETCH_ENABLE)
- * @param[in] acrReg Current FLASH_ACR register value
- * @returns The updated staged FLASH_ACR register value with new flash configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- * @note - This combines both latency and prefetch configurations
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageFlashConfig(const _rcc_flash_latency_t latency, const _rcc_flash_prefetch_t prefetch, uint32_t acrReg)
-{
-	acrReg = _RCC_StageFlashLatency(latency, acrReg);
-	acrReg = _RCC_StageFlashPrefetch(prefetch, acrReg);
-	return acrReg;
-}
-
-/** @} */ // RCC_02_LL_01_FlashConfig
-
-/*---------------------------------------------- RCC Frequency ----------------------------------------------*/
-/**
- * @brief		RCC Low Level Frequency Type and Definitions
- * @defgroup 	RCC_02_LL_02_Freq RCC Low Level Frequency
- * @ingroup 	RCC_02_LL
+ * @brief	RCC LL Register Operation Macros
+ * @defgroup RCC_02_LL_01_RegisterOps RCC LL Register Operation Macros
+ * @ingroup	RCC_02_LL
  * @details
- * - These constants define standard frequency values used in RCC configuration
- * - Used for timer configurations, peripheral clock settings, and system clock setup
- * - All values are in Hertz (Hz)
- * @see Reference Manual RM0008 - Section 7. Clock Configuration
+ * These macros build a thin RCC-specific convenience layer on top of the generic
+ * @ref REGOPS_READ, @ref REGOPS_WRITE, @ref REGOPS_SET, @ref REGOPS_CLEAR, and
+ * @ref REGOPS_MODIFY utilities.
+ *
+ * Practical Rule:
+ * - Always access RCC registers through the `.REG` member.
+ * - Do not use the `.BIT` view in the LL layer.
+ * - Do not introduce RCC-specific selector values here; use raw hardware masks
+ *   from @ref stm32f1xx_rcc.h.
  * @{
  */
 
-/** @brief Frequency type definition @typedef _rcc_freq_t */
-typedef uint32_t _rcc_freq_t;
-/** @brief 12 Hz frequency @def _RCC_FREQ_12Hz */
-#define _RCC_FREQ_12Hz 									((_rcc_freq_t) 12)
-/** @brief 25 Hz frequency @def _RCC_FREQ_25Hz */
-#define _RCC_FREQ_25Hz 									((_rcc_freq_t) 25)
-/** @brief 50 Hz frequency @def _RCC_FREQ_50Hz */
-#define _RCC_FREQ_50Hz 									((_rcc_freq_t) 50)
-/** @brief 100 Hz frequency @def _RCC_FREQ_100Hz */
-#define _RCC_FREQ_100Hz 								((_rcc_freq_t) 100)
-/** @brief 500 Hz frequency @def _RCC_FREQ_500Hz */
-#define _RCC_FREQ_500Hz 								((_rcc_freq_t) 500)
-/** @brief 1 kHz frequency @def _RCC_FREQ_1kHz */
-#define _RCC_FREQ_1kHz 									((_rcc_freq_t) 1000)
-/** @brief 2 kHz frequency @def _RCC_FREQ_2kHz */
-#define _RCC_FREQ_2kHz 									((_rcc_freq_t) 2000)
-/** @brief 5 kHz frequency @def _RCC_FREQ_5kHz */
-#define _RCC_FREQ_5kHz 									((_rcc_freq_t) 5000)
-/** @brief 10 kHz frequency @def _RCC_FREQ_10kHz */
-#define _RCC_FREQ_10kHz 								((_rcc_freq_t) 10000)
-/** @brief 50 kHz frequency @def _RCC_FREQ_50kHz */
-#define _RCC_FREQ_50kHz 								((_rcc_freq_t) 50000)
-/** @brief 72 kHz frequency @def _RCC_FREQ_72kHz */
-#define _RCC_FREQ_72kHz 								((_rcc_freq_t) 72000)
-/** @brief 100 kHz frequency @def _RCC_FREQ_100kHz */
-#define _RCC_FREQ_100kHz 								((_rcc_freq_t) 100000)
-/** @brief 200 kHz frequency @def _RCC_FREQ_200kHz */
-#define _RCC_FREQ_200kHz 								((_rcc_freq_t) 200000)
-/** @brief 1 MHz frequency @def _RCC_FREQ_1MHz */
-#define _RCC_FREQ_1MHz 									((_rcc_freq_t) 1000000)
-/** @brief 10 MHz frequency @def _RCC_FREQ_10MHz */
-#define _RCC_FREQ_10MHz 								((_rcc_freq_t) 10000000)
-/** @brief HSI (High Speed Internal) oscillator frequency @def _RCC_HSI_FREQ */
-#define _RCC_HSI_FREQ 									((_rcc_freq_t) 8000000)
-/** @brief HSE (High Speed External) oscillator frequency @def _RCC_HSE_FREQ */
-#define _RCC_HSE_FREQ 									((_rcc_freq_t) 8000000)
-/** @brief Minimum PLL output frequency @def _RCC_PLL_MIN_FREQ */
-#define _RCC_PLL_MIN_FREQ 								((_rcc_freq_t) 16000000)
-/** @brief Maximum PLL output frequency @def _RCC_PLL_MAX_FREQ */
-#define _RCC_PLL_MAX_FREQ 								((_rcc_freq_t) 72000000)
-
-/** @} */ // RCC_02_LL_02_Freq
-
-/*---------------------------------------------- RCC Clock Source ----------------------------------------------*/
 /**
- * @brief		RCC Low Level Clock Source Definitions
- * @defgroup	RCC_02_LL_03_ClockSource RCC Low Level Clock Source
- * @ingroup		RCC_02_LL
+ * @brief	Returns pointer to RCC register `.REG` image
+ * @def		RCC_LL_REG
+ * @param[in] _REG	Register member name inside @ref RCC_TypeDef
+ * @returns Pointer to the selected RCC register `.REG` image
+ */
+#define RCC_LL_REG(_REG)								(&(RCC->_REG.REG))
+
+/**
+ * @brief	Reads full RCC register image
+ * @def		RCC_LL_READ_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[out]	_VAR	Destination variable that receives the register image
+ */
+#define RCC_LL_READ_REG(_REG, _VAR)						REGOPS_READ(RCC_LL_REG(_REG), (_VAR))
+
+/**
+ * @brief	Writes full RCC register image
+ * @def		RCC_LL_WRITE_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_VAL	Register image to write
+ */
+#define RCC_LL_WRITE_REG(_REG, _VAL)					REGOPS_WRITE(RCC_LL_REG(_REG), (_VAL))
+
+/**
+ * @brief	Sets RCC register bits
+ * @def		RCC_LL_SET_BITS
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Bit mask to set
+ */
+#define RCC_LL_SET_BITS(_REG, _MASK)					REGOPS_SET(RCC_LL_REG(_REG), (_MASK))
+
+/**
+ * @brief	Clears RCC register bits
+ * @def		RCC_LL_CLEAR_BITS
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Bit mask to clear
+ */
+#define RCC_LL_CLEAR_BITS(_REG, _MASK)					REGOPS_CLEAR(RCC_LL_REG(_REG), (_MASK))
+
+/**
+ * @brief	Modifies RCC register masked field
+ * @def		RCC_LL_MODIFY_REG
+ * @param[in]	_REG	Register member name inside @ref RCC_TypeDef
+ * @param[in]	_MASK	Field mask to modify
+ * @param[in]	_VAL	Masked field value to write
+ *
+ * @note `_VAL` must already be aligned to the target field position.
+ */
+#define RCC_LL_MODIFY_REG(_REG, _MASK, _VAL)			REGOPS_MODIFY(RCC_LL_REG(_REG), (_MASK), (_VAL))
+
+/**
+ * @brief	Checks System Clock Source Field Validity
+ * @def		RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_SW`
+ * @returns System Clock Source Validity Status
+ * @retval - `0x00U`: Invalid System Clock Source
+ * @retval - `0x01U`: Valid System Clock Source
+ */
+#define RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID(_FIELD)										\
+(																						\
+	(((_FIELD) == RCC_CFGR_SW_HSI)	||	((_FIELD) == RCC_CFGR_SW_HSE)	||				\
+	((_FIELD) == RCC_CFGR_SW_PLL)) ? 0x01U : 0x00U										\
+)
+
+/**
+ * @brief	Checks PLL Source Field Validity
+ * @def		RCC_LL_IS_PLL_SOURCE_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLSRC`
+ * @returns PLL Source Validity Status
+ * @retval - `0x00U`: Invalid PLL Source
+ * @retval - `0x01U`: Valid PLL Source
+ */
+#define RCC_LL_IS_PLL_SOURCE_VALID(_FIELD)												\
+(																						\
+	(((_FIELD) == RCC_CFGR_PLLSRC_HSI_DIV2)	||	((_FIELD) == RCC_CFGR_PLLSRC_HSE)) ?	\
+	0x01U : 0x00U																			\
+)
+
+/**
+ * @brief	Checks PLL HSE Divider Field Validity
+ * @def		RCC_LL_IS_PLL_HSE_DIVIDER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLXTPRE`
+ * @returns PLL HSE Divider Validity Status
+ * @retval - `0x00U`: Invalid PLL HSE Divider
+ * @retval - `0x01U`: Valid PLL HSE Divider
+ */
+#define RCC_LL_IS_PLL_HSE_DIVIDER_VALID(_FIELD)																\
+(																											\
+	(((_FIELD) == RCC_CFGR_PLLXTPRE_HSE)	||	((_FIELD) == RCC_CFGR_PLLXTPRE_HSE_DIV2)) ? 0x01U : 0x00U	\
+)
+
+/**
+ * @brief	Checks PLL Multiplier Field Validity
+ * @def		RCC_LL_IS_PLL_MULTIPLIER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PLLMUL`
+ * @returns PLL Multiplier Validity Status
+ * @retval - `0x00U`: Invalid PLL Multiplier
+ * @retval - `0x01U`: Valid PLL Multiplier
+ */
+#define RCC_LL_IS_PLL_MULTIPLIER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PLLMUL_2)	||	((_FIELD) == RCC_CFGR_PLLMUL_3)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_4)		||	((_FIELD) == RCC_CFGR_PLLMUL_5)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_6)		||	((_FIELD) == RCC_CFGR_PLLMUL_7)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_8)		||	((_FIELD) == RCC_CFGR_PLLMUL_9)		||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_10)	||	((_FIELD) == RCC_CFGR_PLLMUL_11)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_12)	||	((_FIELD) == RCC_CFGR_PLLMUL_13)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_14)	||	((_FIELD) == RCC_CFGR_PLLMUL_15)	||		\
+	((_FIELD) == RCC_CFGR_PLLMUL_16)) ? 0x01U : 0x00U									\
+)
+
+/**
+ * @brief	Checks AHB Prescaler Field Validity
+ * @def		RCC_LL_IS_AHB_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_HPRE`
+ * @returns AHB Prescaler Validity Status
+ * @retval - `0x00U`: Invalid AHB Prescaler
+ * @retval - `0x01U`: Valid AHB Prescaler
+ */
+#define RCC_LL_IS_AHB_PRESCALER_VALID(_FIELD)												\
+(																							\
+	(((_FIELD) == RCC_CFGR_HPRE_DIV1)		||	((_FIELD) == RCC_CFGR_HPRE_DIV2)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV4)		||	((_FIELD) == RCC_CFGR_HPRE_DIV8)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV16)		||	((_FIELD) == RCC_CFGR_HPRE_DIV64)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV128)		||	((_FIELD) == RCC_CFGR_HPRE_DIV256)		||	\
+	((_FIELD) == RCC_CFGR_HPRE_DIV512)) ? 0x01U : 0x00U										\
+)
+
+/**
+ * @brief	Checks APB1 Prescaler Field Validity
+ * @def		RCC_LL_IS_APB1_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PPRE1`
+ * @returns APB1 Prescaler Validity Status
+ * @retval - `0x00U`: Invalid APB1 Prescaler
+ * @retval - `0x01U`: Valid APB1 Prescaler
+ */
+#define RCC_LL_IS_APB1_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PPRE1_DIV1)	||	((_FIELD) == RCC_CFGR_PPRE1_DIV2)	||		\
+	((_FIELD) == RCC_CFGR_PPRE1_DIV4)	||	((_FIELD) == RCC_CFGR_PPRE1_DIV8)	||		\
+	((_FIELD) == RCC_CFGR_PPRE1_DIV16)) ? 0x01U : 0x00U									\
+)
+
+/**
+ * @brief	Checks APB2 Prescaler Field Validity
+ * @def		RCC_LL_IS_APB2_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_PPRE2`
+ * @returns APB2 Prescaler Validity Status
+ * @retval - `0x00U`: Invalid APB2 Prescaler
+ * @retval - `0x01U`: Valid APB2 Prescaler
+ */
+#define RCC_LL_IS_APB2_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_PPRE2_DIV1)	||	((_FIELD) == RCC_CFGR_PPRE2_DIV2)	||		\
+	((_FIELD) == RCC_CFGR_PPRE2_DIV4)	||	((_FIELD) == RCC_CFGR_PPRE2_DIV8)	||		\
+	((_FIELD) == RCC_CFGR_PPRE2_DIV16)) ? 0x01U : 0x00U								\
+)
+
+/**
+ * @brief	Checks ADC Prescaler Field Validity
+ * @def		RCC_LL_IS_ADC_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_ADCPRE`
+ * @returns ADC Prescaler Validity Status
+ * @retval - `0x00U`: Invalid ADC Prescaler
+ * @retval - `0x01U`: Valid ADC Prescaler
+ */
+#define RCC_LL_IS_ADC_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_ADCPRE_DIV2)	||	((_FIELD) == RCC_CFGR_ADCPRE_DIV4)	||		\
+	((_FIELD) == RCC_CFGR_ADCPRE_DIV6)	||	((_FIELD) == RCC_CFGR_ADCPRE_DIV8)) ?			\
+	0x01U : 0x00U																			\
+)
+
+/**
+ * @brief	Checks USB Prescaler Field Validity
+ * @def		RCC_LL_IS_USB_PRESCALER_VALID
+ * @param[in] _FIELD	Raw hardware field value for `RCC_CFGR_USBPRE`
+ * @returns USB Prescaler Validity Status
+ * @retval - `0x00U`: Invalid USB Prescaler
+ * @retval - `0x01U`: Valid USB Prescaler
+ */
+#define RCC_LL_IS_USB_PRESCALER_VALID(_FIELD)											\
+(																						\
+	(((_FIELD) == RCC_CFGR_USBPRE_DIV1_5)	||	((_FIELD) == RCC_CFGR_USBPRE_DIRECT)) ?		\
+	0x01U : 0x00U																			\
+)
+
+/**
+ * @brief	Checks Bit-Mask Validity
+ * @def		RCC_LL_IS_MASK_VALID
+ * @param[in] _MASK	Raw hardware bit-mask
+ * @returns Bit-Mask Validity Status
+ * @retval - `0x00U`: Invalid Bit-Mask
+ * @retval - `0x01U`: Valid Bit-Mask
+ */
+#define RCC_LL_IS_MASK_VALID(_MASK)															\
+(																						\
+	(((_MASK) != 0x00UL) ? 0x01U : 0x00U)												\
+)
+
+/** @} */ // RCC_02_LL_01_RegisterOps
+
+// ==================================================================================================== //
+//                                       RCC LL System Clock APIs                                       //
+// ==================================================================================================== //
+
+/**
+ * @brief	RCC LL System Clock Control
+ * @defgroup RCC_02_LL_02_SystemClock RCC LL System Clock Control
+ * @ingroup	RCC_02_LL
  * @details
- * - These constants define the available system clock sources for RCC configuration
- * - Used for selecting the main system clock source during initialization
- * - Each source has different characteristics and use cases
- * 
- * @see Reference Manual RM0008 - Section 7.3.1 Clock control register (RCC_CR)
+ * This group owns register-near control of HSI, HSE, PLL, SYSCLK source selection,
+ * and PLL-related field programming using raw hardware field values from
+ * @ref stm32f1xx_rcc.h.
  * @{
  */
 
-/** @brief System clock source type definition @typedef _rcc_sys_clk_t */
-typedef uint8_t 										_rcc_sys_clk_t;
-/** @brief HSI (High Speed Internal) RC oscillator @def _RCC_SYS_CLK_HSI */
-#define _RCC_SYS_CLK_HSI 								((_rcc_sys_clk_t) 0x00)
-/** @brief HSE (High Speed External) crystal oscillator @def _RCC_SYS_CLK_HSE */
-#define _RCC_SYS_CLK_HSE 								((_rcc_sys_clk_t) 0x01)
-/** @brief PLL (Phase Locked Loop) output @def _RCC_SYS_CLK_PLL */
-#define _RCC_SYS_CLK_PLL 								((_rcc_sys_clk_t) 0x02)
-
 /**
- * @brief Stage System Clock Source configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] sysClk System clock source configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new system clock source configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
+ * @brief	Enables HSI Clock Source
+ * @details
+ * Sets the `HSION` bit in `RCC->CR.REG` to request enabling the internal
+ * high-speed oscillator.
+ *
+ * @returns	Void
  */
-__STATIC_FORCEINLINE uint32_t _RCC_StageSystemClockSource(const _rcc_sys_clk_t sysClk, uint32_t cfgrReg)
+__STATIC_FORCEINLINE void RCC_LL_EnableHSI(void)
 {
-	cfgrReg &= ~RCC_CFGR_SW;
-	cfgrReg |= (uint32_t)(sysClk << RCC_CFGR_SW_Pos);
-	return cfgrReg;
+	RCC_LL_SET_BITS(CR, RCC_CR_HSION);
 }
 
-/** @} */ // RCC_02_LL_03_ClockSource
-
-/*---------------------------------------------- RCC Prescaler ----------------------------------------------*/
+/**
+ * @brief	Disables HSI Clock Source
+ * @details
+ * Clears the `HSION` bit in `RCC->CR.REG` to request disabling the internal
+ * high-speed oscillator.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_DisableHSI(void)
+{
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSION);
+}
 
 /**
- * @brief		RCC Low Level Prescaler Definitions
- * @defgroup 	RCC_02_LL_04_Prescaler RCC Low Level Prescalers
- * @ingroup 	RCC_02_LL
+ * @brief	Gets HSI Ready Status
  * @details
- * - These constants define the AHB (Advanced High-performance Bus) prescaler values
- * - Used to divide the system clock frequency for AHB peripherals
- * - AHB bus connects to core, memory, and DMA
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
+ * Reads the `HSIRDY` bit from `RCC->CR.REG` and reports whether HSI is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of HSI ready state
+ * @retval	`DRIVER_STATUS_READY`: HSI clock source is ready
+ * @retval	`DRIVER_STATUS_OFF`: HSI clock source is not ready
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetHSIReadyStatus(void)
+{
+	uint32_t regImage = 0x00UL;
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_HSIRDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
+}
+
+/**
+ * @brief	Enables HSE Clock Source
+ * @details
+ * Sets the `HSEON` bit in `RCC->CR.REG` to request enabling the external
+ * high-speed oscillator.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_EnableHSE(void)
+{
+	RCC_LL_SET_BITS(CR, RCC_CR_HSEON);
+}
+
+/**
+ * @brief	Disables HSE Clock Source
+ * @details
+ * Clears the `HSEON` bit in `RCC->CR.REG` to request disabling the external
+ * high-speed oscillator.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_DisableHSE(void)
+{
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSEON);
+}
+
+/**
+ * @brief	Enables HSE Bypass
+ * @details
+ * Sets the `HSEBYP` bit in `RCC->CR.REG` to bypass the crystal oscillator and
+ * use an external clock source on HSE.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_EnableHSEBypass(void)
+{
+	RCC_LL_SET_BITS(CR, RCC_CR_HSEBYP);
+}
+
+/**
+ * @brief	Disables HSE Bypass
+ * @details
+ * Clears the `HSEBYP` bit in `RCC->CR.REG` to use the normal HSE crystal path.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_DisableHSEBypass(void)
+{
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_HSEBYP);
+}
+
+/**
+ * @brief	Gets HSE Ready Status
+ * @details
+ * Reads the `HSERDY` bit from `RCC->CR.REG` and reports whether HSE is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of HSE ready state
+ * @retval	`DRIVER_STATUS_READY`: HSE clock source is ready
+ * @retval	`DRIVER_STATUS_OFF`: HSE clock source is not ready
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetHSEReadyStatus(void)
+{
+	uint32_t regImage = 0x00UL;
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_HSERDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
+}
+
+/**
+ * @brief	Enables PLL
+ * @details
+ * Sets the `PLLON` bit in `RCC->CR.REG` to request enabling the PLL.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_EnablePLL(void)
+{
+	RCC_LL_SET_BITS(CR, RCC_CR_PLLON);
+}
+
+/**
+ * @brief	Disables PLL
+ * @details
+ * Clears the `PLLON` bit in `RCC->CR.REG` to request disabling the PLL.
+ *
+ * @returns	Void
+ */
+__STATIC_FORCEINLINE void RCC_LL_DisablePLL(void)
+{
+	RCC_LL_CLEAR_BITS(CR, RCC_CR_PLLON);
+}
+
+/**
+ * @brief	Gets PLL Ready Status
+ * @details
+ * Reads the `PLLRDY` bit from `RCC->CR.REG` and reports whether PLL is stable
+ * and ready for use.
+ *
+ * @returns	@ref driver_status_t Status of PLL ready state
+ * @retval	`DRIVER_STATUS_READY`: PLL is ready
+ * @retval	`DRIVER_STATUS_OFF`: PLL is not ready
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_LL_GetPLLReadyStatus(void)
+{
+	uint32_t regImage = 0x00UL;
+
+	RCC_LL_READ_REG(CR, regImage);
+	return (((regImage & RCC_CR_PLLRDY) != 0x00UL) ? DRIVER_STATUS_READY : DRIVER_STATUS_OFF);
+}
+
+/**
+ * @brief	Sets System Clock Source Field
+ * @details
+ * Programs the `SW` field in `RCC->CFGR.REG` using the supplied raw hardware
+ * field value.
+ *
+ * @param[in] sysClkSrcField	Raw hardware field value for `RCC_CFGR_SW`
+ *
+ * @returns	@ref driver_status_t Status of system clock source update
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `sysClkSrcField` is invalid
+ */
+driver_status_t RCC_LL_SetSystemClockSource(const uint32_t sysClkSrcField);
+
+/**
+ * @brief	Gets System Clock Source Field
+ * @details
+ * Reads the `SW` field from `RCC->CFGR.REG` and stores the raw hardware field
+ * value in the supplied output pointer.
+ *
+ * @param[out] pSysClkSrcField	Pointer to destination variable for `RCC_CFGR_SW` field value
+ *
+ * @returns	@ref driver_status_t Status of system clock source read
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkSrcField` is `NULL`
+ */
+driver_status_t RCC_LL_GetSystemClockSource(uint32_t* const pSysClkSrcField);
+
+/**
+ * @brief	Gets Active System Clock Status Field
+ * @details
+ * Reads the `SWS` field from `RCC->CFGR.REG` and stores the raw hardware field
+ * value in the supplied output pointer.
+ *
+ * @param[out] pSysClkStatusField	Pointer to destination variable for `RCC_CFGR_SWS` field value
+ *
+ * @returns	@ref driver_status_t Status of system clock status read
+ * @retval	`DRIVER_STATUS_SUCCESS`: System clock status field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkStatusField` is `NULL`
+ */
+driver_status_t RCC_LL_GetSystemClockStatus(uint32_t* const pSysClkStatusField);
+
+/**
+ * @brief	Sets PLL Source Field
+ * @details
+ * Programs the `PLLSRC` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllSrcField	Raw hardware field value for `RCC_CFGR_PLLSRC`
+ *
+ * @returns	@ref driver_status_t Status of PLL source field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllSrcField` is invalid
+ */
+driver_status_t RCC_LL_SetPLLSource(const uint32_t pllSrcField);
+
+/**
+ * @brief	Gets PLL Source Field
+ * @details
+ * Reads the `PLLSRC` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllSrcField	Pointer to destination variable for `RCC_CFGR_PLLSRC` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL source field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllSrcField` is `NULL`
+ */
+driver_status_t RCC_LL_GetPLLSource(uint32_t* const pPllSrcField);
+
+/**
+ * @brief	Sets PLL HSE Divider Field
+ * @details
+ * Programs the `PLLXTPRE` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllHseDividerField	Raw hardware field value for `RCC_CFGR_PLLXTPRE`
+ *
+ * @returns	@ref driver_status_t Status of PLL HSE divider field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllHseDividerField` is invalid
+ */
+driver_status_t RCC_LL_SetPLLHSEDivider(const uint32_t pllHseDividerField);
+
+/**
+ * @brief	Gets PLL HSE Divider Field
+ * @details
+ * Reads the `PLLXTPRE` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllHseDividerField	Pointer to destination variable for `RCC_CFGR_PLLXTPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL HSE divider field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllHseDividerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetPLLHSEDivider(uint32_t* const pPllHseDividerField);
+
+/**
+ * @brief	Sets PLL Multiplier Field
+ * @details
+ * Programs the `PLLMUL` field in `RCC->CFGR.REG` using the supplied raw
+ * hardware field value.
+ *
+ * @param[in] pllMulField	Raw hardware field value for `RCC_CFGR_PLLMUL`
+ *
+ * @returns	@ref driver_status_t Status of PLL multiplier field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllMulField` is invalid
+ */
+driver_status_t RCC_LL_SetPLLMultiplier(const uint32_t pllMulField);
+
+/**
+ * @brief	Gets PLL Multiplier Field
+ * @details
+ * Reads the `PLLMUL` field from `RCC->CFGR.REG` and stores the raw hardware
+ * field value in the supplied output pointer.
+ *
+ * @param[out] pPllMulField	Pointer to destination variable for `RCC_CFGR_PLLMUL` field value
+ *
+ * @returns	@ref driver_status_t Status of PLL multiplier field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllMulField` is `NULL`
+ */
+driver_status_t RCC_LL_GetPLLMultiplier(uint32_t* const pPllMulField);
+
+/** @} */ // RCC_02_LL_02_SystemClock
+
+// ==================================================================================================== //
+//                                        RCC LL Prescaler APIs                                         //
+// ==================================================================================================== //
+
+/**
+ * @brief	RCC LL Prescaler Control
+ * @defgroup RCC_02_LL_03_Prescalers RCC LL Prescaler Control
+ * @ingroup	RCC_02_LL
+ * @details
+ * This group owns register-near programming of AHB, APB, ADC, and USB prescaler
+ * fields using raw hardware encodings from @ref stm32f1xx_rcc.h.
  * @{
  */
 
-/** @brief AHB bus prescaler type definition @typedef _rcc_bus_prescaler_t */
-typedef uint8_t 								_rcc_bus_prescaler_t; 
+/**
+ * @brief	Sets AHB Prescaler Field
+ * @details
+ * Programs the `HPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] ahbPrescalerField	Raw hardware field value for `RCC_CFGR_HPRE`
+ *
+ * @returns	@ref driver_status_t Status of AHB prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `ahbPrescalerField` is invalid
+ */
+driver_status_t RCC_LL_SetAHBPrescaler(const uint32_t ahbPrescalerField);
 
 /**
- * @brief		RCC Low Level AHB Prescaler Definitions
- * @defgroup 	RCC_02_LL_04_Prescaler_01_AHB RCC Low Level AHB Prescaler
- * @ingroup 	RCC_02_LL_04_Prescaler
+ * @brief	Gets AHB Prescaler Field
  * @details
- * - These constants define the AHB (Advanced High-performance Bus) prescaler values
- * - Used to divide the system clock frequency for AHB peripherals
- * - AHB bus connects to core, memory, and DMA
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
+ * Reads the `HPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pAhbPrescalerField	Pointer to destination variable for `RCC_CFGR_HPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of AHB prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAhbPrescalerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetAHBPrescaler(uint32_t* const pAhbPrescalerField);
+
+/**
+ * @brief	Sets APB1 Prescaler Field
+ * @details
+ * Programs the `PPRE1` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] apb1PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE1`
+ *
+ * @returns	@ref driver_status_t Status of APB1 prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb1PrescalerField` is invalid
+ */
+driver_status_t RCC_LL_SetAPB1Prescaler(const uint32_t apb1PrescalerField);
+
+/**
+ * @brief	Gets APB1 Prescaler Field
+ * @details
+ * Reads the `PPRE1` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pApb1PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE1` field value
+ *
+ * @returns	@ref driver_status_t Status of APB1 prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb1PrescalerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField);
+
+/**
+ * @brief	Sets APB2 Prescaler Field
+ * @details
+ * Programs the `PPRE2` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] apb2PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE2`
+ *
+ * @returns	@ref driver_status_t Status of APB2 prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb2PrescalerField` is invalid
+ */
+driver_status_t RCC_LL_SetAPB2Prescaler(const uint32_t apb2PrescalerField);
+
+/**
+ * @brief	Gets APB2 Prescaler Field
+ * @details
+ * Reads the `PPRE2` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pApb2PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE2` field value
+ *
+ * @returns	@ref driver_status_t Status of APB2 prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb2PrescalerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField);
+
+/**
+ * @brief	Sets ADC Prescaler Field
+ * @details
+ * Programs the `ADCPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] adcPrescalerField	Raw hardware field value for `RCC_CFGR_ADCPRE`
+ *
+ * @returns	@ref driver_status_t Status of ADC prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `adcPrescalerField` is invalid
+ */
+driver_status_t RCC_LL_SetADCPrescaler(const uint32_t adcPrescalerField);
+
+/**
+ * @brief	Gets ADC Prescaler Field
+ * @details
+ * Reads the `ADCPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pAdcPrescalerField	Pointer to destination variable for `RCC_CFGR_ADCPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of ADC prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAdcPrescalerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetADCPrescaler(uint32_t* const pAdcPrescalerField);
+
+/**
+ * @brief	Sets USB Prescaler Field
+ * @details
+ * Programs the `USBPRE` field in `RCC->CFGR.REG`.
+ *
+ * @param[in] usbPrescalerField	Raw hardware field value for `RCC_CFGR_USBPRE`
+ *
+ * @returns	@ref driver_status_t Status of USB prescaler field update
+ * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field updated successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `usbPrescalerField` is invalid
+ */
+driver_status_t RCC_LL_SetUSBPrescaler(const uint32_t usbPrescalerField);
+
+/**
+ * @brief	Gets USB Prescaler Field
+ * @details
+ * Reads the `USBPRE` field from `RCC->CFGR.REG`.
+ *
+ * @param[out] pUsbPrescalerField	Pointer to destination variable for `RCC_CFGR_USBPRE` field value
+ *
+ * @returns	@ref driver_status_t Status of USB prescaler field read
+ * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field read successfully
+ * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pUsbPrescalerField` is `NULL`
+ */
+driver_status_t RCC_LL_GetUSBPrescaler(uint32_t* const pUsbPrescalerField);
+
+/** @} */ // RCC_02_LL_03_Prescalers
+
+// ==================================================================================================== //
+//                                     RCC LL Clock Gate and Reset                                      //
+// ==================================================================================================== //
+
+/**
+ * @brief	RCC LL Clock Gate and Reset Control
+ * @defgroup RCC_02_LL_04_ClockReset RCC LL Clock Gate and Reset Control
+ * @ingroup	RCC_02_LL
  * @{
  */
 
-/** @brief AHB division by 1 (no prescaling) @def _RCC_AHB_DIV_1 */
-#define _RCC_AHB_DIV_1 							((_rcc_bus_prescaler_t) 0x00)
-/** @brief AHB division by 2 @def _RCC_AHB_DIV_2 */
-#define _RCC_AHB_DIV_2 							((_rcc_bus_prescaler_t) 0x08)
-/** @brief AHB division by 4 @def _RCC_AHB_DIV_4 */
-#define _RCC_AHB_DIV_4 							((_rcc_bus_prescaler_t) 0x09)
-/** @brief AHB division by 8 @def _RCC_AHB_DIV_8 */
-#define _RCC_AHB_DIV_8 							((_rcc_bus_prescaler_t) 0x0A)
-/** @brief AHB division by 16 @def _RCC_AHB_DIV_16 */
-#define _RCC_AHB_DIV_16 						((_rcc_bus_prescaler_t) 0x0B)
-/** @brief AHB division by 64 @def _RCC_AHB_DIV_64 */
-#define _RCC_AHB_DIV_64 						((_rcc_bus_prescaler_t) 0x0C)
-/** @brief AHB division by 128 @def _RCC_AHB_DIV_128 */
-#define _RCC_AHB_DIV_128 						((_rcc_bus_prescaler_t) 0x0D)
-/** @brief AHB division by 256 @def _RCC_AHB_DIV_256 */
-#define _RCC_AHB_DIV_256 						((_rcc_bus_prescaler_t) 0x0E)
-/** @brief AHB division by 512 @def _RCC_AHB_DIV_512 */
-#define _RCC_AHB_DIV_512 						((_rcc_bus_prescaler_t) 0x0F)
-
-/** @} */ // RCC_02_LL_04_Prescaler_01_AHB
-
 /**
- * @brief		RCC Low Level APB1 Prescaler Definitions
- * @defgroup 	RCC_02_LL_04_Prescaler_02_APB1 RCC Low Level APB1 Prescaler
- * @ingroup 	RCC_02_LL_04_Prescaler
+ * @brief	Enables AHB Peripheral Clock
  * @details
- * - These constants define the APB1 (Advanced Peripheral Bus 1) prescaler values
- * - Used to divide the AHB clock frequency for low-speed peripherals
- * - APB1 bus connects to timers 2-7, USART2-5, I2C1-2, SPI2-3, etc.
- * - Maximum APB1 frequency is 36 MHz
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Sets the requested enable bits in `RCC->AHBENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for AHB peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of AHB clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-/** @brief APB1 division by 1 (no prescaling) @def _RCC_APB1_DIV_1 */
-#define _RCC_APB1_DIV_1 							((_rcc_bus_prescaler_t) 0x00)
-/** @brief APB1 division by 2 @def _RCC_APB1_DIV_2 */
-#define _RCC_APB1_DIV_2 							((_rcc_bus_prescaler_t) 0x04)
-/** @brief APB1 division by 4 @def _RCC_APB1_DIV_4 */
-#define _RCC_APB1_DIV_4 							((_rcc_bus_prescaler_t) 0x05)
-/** @brief APB1 division by 8 @def _RCC_APB1_DIV_8 */
-#define _RCC_APB1_DIV_8 							((_rcc_bus_prescaler_t) 0x06)
-/** @brief APB1 division by 16 @def _RCC_APB1_DIV_16 */
-#define _RCC_APB1_DIV_16 							((_rcc_bus_prescaler_t) 0x07)
-/** @} */ // RCC_02_LL_04_Prescaler_02_APB1
+driver_status_t RCC_LL_EnableAHBClock(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level APB2 Prescaler Definitions
- * @defgroup 	RCC_02_LL_04_Prescaler_03_APB2 RCC Low Level APB2 Prescaler
- * @ingroup 	RCC_02_LL_04_Prescaler
+ * @brief	Disables AHB Peripheral Clock
  * @details
- * - These constants define the APB2 (Advanced Peripheral Bus 2) prescaler values
- * - Used to divide the AHB clock frequency for high-speed peripherals
- * - APB2 bus connects to GPIO ports, ADC, TIM1, TIM8, USART1, SPI1, etc.
- * - Maximum APB2 frequency is 72 MHz
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Clears the requested enable bits in `RCC->AHBENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for AHB peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of AHB clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-/** @brief APB2 division by 1 (no prescaling) @def _RCC_APB2_DIV_1 */
-#define _RCC_APB2_DIV_1 							((_rcc_bus_prescaler_t) 0x00)
-/** @brief APB2 division by 2 @def _RCC_APB2_DIV_2 */
-#define _RCC_APB2_DIV_2 							((_rcc_bus_prescaler_t) 0x04)
-/** @brief APB2 division by 4 @def _RCC_APB2_DIV_4 */
-#define _RCC_APB2_DIV_4 							((_rcc_bus_prescaler_t) 0x05)
-/** @brief APB2 division by 8 @def _RCC_APB2_DIV_8 */
-#define _RCC_APB2_DIV_8 							((_rcc_bus_prescaler_t) 0x06)
-/** @brief APB2 division by 16 @def _RCC_APB2_DIV_16 */
-#define _RCC_APB2_DIV_16 							((_rcc_bus_prescaler_t) 0x07)
-
-/** @} */ // RCC_02_LL_04_Prescaler_03_APB2
+driver_status_t RCC_LL_DisableAHBClock(const uint32_t mask);
 
 /**
- * @brief Stage AHB Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] ahbPrescaler AHB prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new AHB prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageAHBPrescaler(const _rcc_bus_prescaler_t ahbPrescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_HPRE;
-	cfgrReg |= (uint32_t)(ahbPrescaler << RCC_CFGR_HPRE_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage APB1 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] apb1Prescaler APB1 prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new APB1 prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageAPB1Prescaler(const _rcc_bus_prescaler_t apb1Prescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_PPRE1;
-	cfgrReg |= (uint32_t)(apb1Prescaler << RCC_CFGR_PPRE1_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage APB2 Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] apb2Prescaler APB2 prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new APB2 prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageAPB2Prescaler(const _rcc_bus_prescaler_t apb2Prescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_PPRE2;
-	cfgrReg |= (uint32_t)(apb2Prescaler << RCC_CFGR_PPRE2_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage complete Bus Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] ahbPrescaler AHB prescaler configuration
- * @param[in] apb1Prescaler APB1 prescaler configuration
- * @param[in] apb2Prescaler APB2 prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new bus prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- * @note - This combines AHB, APB1, and APB2 prescaler configurations
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StageBusPrescaler(const _rcc_bus_prescaler_t ahbPrescaler, const _rcc_bus_prescaler_t apb1Prescaler, const _rcc_bus_prescaler_t apb2Prescaler, uint32_t cfgrReg)
-{
-	cfgrReg = _RCC_StageAHBPrescaler(ahbPrescaler, cfgrReg);
-	cfgrReg = _RCC_StageAPB1Prescaler(apb1Prescaler, cfgrReg);
-	cfgrReg = _RCC_StageAPB2Prescaler(apb2Prescaler, cfgrReg);
-	return cfgrReg;
-}
-
-/** @} */ // RCC_02_LL_04_Prescaler
-
-/*---------------------------------------------- RCC PLL ----------------------------------------------*/
-/**
- * @brief		RCC Low Level PLL Configuration Definitions
- * @defgroup 	RCC_02_LL_05_PLL RCC Low Level PLL Configuration
- * @ingroup 	RCC_02_LL
+ * @brief	Enables APB2 Peripheral Clock
  * @details
- * - These constants define the PLL (Phase Locked Loop) configuration parameters
- * - Used to configure PLL source, prescaler, and multiplication factor
- * - PLL generates high-frequency system clock from lower frequency sources
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Sets the requested enable bits in `RCC->APB2ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of APB2 clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief PLL source type definition @typedef _rcc_pll_src_t */
-typedef uint8_t 								_rcc_pll_src_t;
-/** @brief PLL source prescaler type definition @typedef _rcc_pll_src_psc_t */
-typedef uint8_t 								_rcc_pll_src_psc_t;
-/** @brief PLL multiplication factor type definition @typedef _rcc_pll_mul_t */
-typedef uint8_t 								_rcc_pll_mul_t;
+driver_status_t RCC_LL_EnableAPB2Clock(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level PLL Source Definitions
- * @defgroup 	RCC_02_LL_05_PLL_01_Source RCC Low Level PLL Source
- * @ingroup 	RCC_02_LL_05_PLL
+ * @brief	Disables APB2 Peripheral Clock
  * @details
- * - These constants define the available clock sources for PLL input
- * - PLL can use either HSI or HSE as its input source
- * - Source selection affects PLL output frequency and stability
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Clears the requested enable bits in `RCC->APB2ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of APB2 clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief PLL source HSI (High Speed Internal) @def _RCC_PLL_SRC_HSI */
-#define _RCC_PLL_SRC_HSI 						((_rcc_pll_src_t) 0x00)
-/** @brief PLL source HSE (High Speed External) @def _RCC_PLL_SRC_HSE */
-#define _RCC_PLL_SRC_HSE 						((_rcc_pll_src_t) 0x01)
-
-/** @} */ // RCC_02_LL_05_PLL_01_Source
+driver_status_t RCC_LL_DisableAPB2Clock(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level PLL Source Prescaler Definitions
- * @defgroup 	RCC_02_LL_05_PLL_02_SourcePrescaler RCC Low Level PLL Source Prescaler
- * @ingroup 	RCC_02_LL_05_PLL
+ * @brief	Enables APB1 Peripheral Clock
  * @details
- * - These constants define the prescaler for PLL input source
- * - HSE can be divided by 1 or 2 before PLL input
- * - HSI is always divided by 2 for PLL input
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Sets the requested enable bits in `RCC->APB1ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock enable
+ *
+ * @returns	@ref driver_status_t Status of APB1 clock enable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock enabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief HSI division by 2 for PLL input @def _RCC_PLL_SRC_HSI_DIV_2 */
-#define _RCC_PLL_SRC_HSI_DIV_2 					((_rcc_pll_src_psc_t) 0x00)
-/** @brief HSE division by 1 for PLL input @def _RCC_PLL_SRC_HSE_DIV_1 */
-#define _RCC_PLL_SRC_HSE_DIV_1 					((_rcc_pll_src_psc_t) 0x00)
-/** @brief HSE division by 2 for PLL input @def _RCC_PLL_SRC_HSE_DIV_2 */
-#define _RCC_PLL_SRC_HSE_DIV_2 					((_rcc_pll_src_psc_t) 0x01)
-
-/** @} */ // RCC_02_LL_05_PLL_02_SourcePrescaler
+driver_status_t RCC_LL_EnableAPB1Clock(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level PLL Multiplication Factor Definitions
- * @defgroup 	RCC_02_LL_05_PLL_03_Multiplication RCC Low Level PLL Multiplication
- * @ingroup 	RCC_02_LL_05_PLL
+ * @brief	Disables APB1 Peripheral Clock
  * @details
- * - These constants define the PLL multiplication factors
- * - PLL output frequency = (PLL input frequency) × (PLL multiplication factor)
- * - Valid multiplication factors range from 2 to 16
- * - PLL output must be between 16 MHz and 72 MHz
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Clears the requested enable bits in `RCC->APB1ENR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock disable
+ *
+ * @returns	@ref driver_status_t Status of APB1 clock disable operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock disabled successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief PLL multiplication by 2 @def _RCC_PLL_MUL_2 */
-#define _RCC_PLL_MUL_2 							((_rcc_pll_mul_t) 0x00)
-/** @brief PLL multiplication by 3 @def _RCC_PLL_MUL_3 */
-#define _RCC_PLL_MUL_3 							((_rcc_pll_mul_t) 0x01)
-/** @brief PLL multiplication by 4 @def _RCC_PLL_MUL_4 */
-#define _RCC_PLL_MUL_4 							((_rcc_pll_mul_t) 0x02)
-/** @brief PLL multiplication by 5 @def _RCC_PLL_MUL_5 */
-#define _RCC_PLL_MUL_5 							((_rcc_pll_mul_t) 0x03)
-/** @brief PLL multiplication by 6 @def _RCC_PLL_MUL_6 */
-#define _RCC_PLL_MUL_6 							((_rcc_pll_mul_t) 0x04)
-/** @brief PLL multiplication by 7 @def _RCC_PLL_MUL_7 */
-#define _RCC_PLL_MUL_7 							((_rcc_pll_mul_t) 0x05)
-/** @brief PLL multiplication by 8 @def _RCC_PLL_MUL_8 */
-#define _RCC_PLL_MUL_8 							((_rcc_pll_mul_t) 0x06)
-/** @brief PLL multiplication by 9 @def _RCC_PLL_MUL_9 */
-#define _RCC_PLL_MUL_9 							((_rcc_pll_mul_t) 0x07)
-/** @brief PLL multiplication by 10 @def _RCC_PLL_MUL_10 */
-#define _RCC_PLL_MUL_10 						((_rcc_pll_mul_t) 0x08)
-/** @brief PLL multiplication by 11 @def _RCC_PLL_MUL_11 */
-#define _RCC_PLL_MUL_11 						((_rcc_pll_mul_t) 0x09)
-/** @brief PLL multiplication by 12 @def _RCC_PLL_MUL_12 */
-#define _RCC_PLL_MUL_12 						((_rcc_pll_mul_t) 0x0A)
-/** @brief PLL multiplication by 13 @def _RCC_PLL_MUL_13 */
-#define _RCC_PLL_MUL_13 						((_rcc_pll_mul_t) 0x0B)
-/** @brief PLL multiplication by 14 @def _RCC_PLL_MUL_14 */
-#define _RCC_PLL_MUL_14 						((_rcc_pll_mul_t) 0x0C)
-/** @brief PLL multiplication by 15 @def _RCC_PLL_MUL_15 */
-#define _RCC_PLL_MUL_15 						((_rcc_pll_mul_t) 0x0D)
-/** @brief PLL multiplication by 16 @def _RCC_PLL_MUL_16 */
-#define _RCC_PLL_MUL_16 						((_rcc_pll_mul_t) 0x0E)
-
-/** @} */ // RCC_02_LL_05_PLL_03_Multiplication
+driver_status_t RCC_LL_DisableAPB1Clock(const uint32_t mask);
 
 /**
- * @brief Stage PLL Source configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] pllSrc PLL source configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL source configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StagePLLSource(const _rcc_pll_src_t pllSrc, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_PLLSRC;
-	cfgrReg |= (uint32_t)(pllSrc << RCC_CFGR_PLLSRC_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage PLL HSE Source Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL HSE source prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- * @note - Only applicable when PLL source is HSE
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StagePLLSourceHSEPrescaler(const _rcc_pll_src_psc_t pllSrcPrescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_PLLXTPRE;
-	cfgrReg |= (uint32_t)(pllSrcPrescaler << RCC_CFGR_PLLXTPRE_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage PLL Multiplier configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] pllMultiplier PLL multiplier configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL multiplier configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StagePLLMultiplier(const _rcc_pll_mul_t pllMultiplier, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_PLLMULL;
-	cfgrReg |= (uint32_t)(pllMultiplier << RCC_CFGR_PLLMULL_Pos);
-	return cfgrReg;
-}
-
-/**
- * @brief Stage complete PLL Parameters configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] pllSrc PLL source configuration
- * @param[in] pllSrcPrescaler PLL HSE source prescaler configuration
- * @param[in] pllMultiplier PLL multiplier configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new PLL parameters configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- * @note - This combines PLL source, HSE prescaler, and multiplier configurations
- */
-__STATIC_FORCEINLINE uint32_t _RCC_StagePLLParameters(const _rcc_pll_src_t pllSrc, const _rcc_pll_src_psc_t pllSrcPrescaler, const _rcc_pll_mul_t pllMultiplier, uint32_t cfgrReg)
-{
-	cfgrReg = _RCC_StagePLLSource(pllSrc, cfgrReg);
-	cfgrReg = _RCC_StagePLLSourceHSEPrescaler(pllSrcPrescaler, cfgrReg);
-	cfgrReg = _RCC_StagePLLMultiplier(pllMultiplier, cfgrReg);
-	return cfgrReg;
-}
-
-/** @} */ // RCC_02_LL_05_PLL
-
-/*---------------------------------------------- RCC Component Prescaler ----------------------------------------------*/
-
-/**
- * @brief		RCC Low Level Component Prescaler Definitions
- * @defgroup 	RCC_02_LL_06_ComponentPrescaler RCC Low Level Component Prescaler
- * @ingroup 	RCC_02_LL
+ * @brief	Forces APB2 Peripheral Reset
  * @details
- * - These constants define the prescaler values for specific peripherals
- * - Used to divide the APB2 clock for ADC and USB peripherals
- * - Each peripheral has specific prescaler requirements and limitations
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Sets the requested reset bits in `RCC->APB2RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset force operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset asserted successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief Component prescaler type definition @typedef _rcc_component_prescaler_t */
-typedef uint8_t 								_rcc_component_prescaler_t;
+driver_status_t RCC_LL_ForceAPB2Reset(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level ADC Prescaler Definitions
- * @defgroup 	RCC_02_LL_06_ComponentPrescaler_01_ADC RCC Low Level ADC Prescaler
- * @ingroup 	RCC_02_LL_06_ComponentPrescaler
+ * @brief	Releases APB2 Peripheral Reset
  * @details
- * - These constants define the ADC (Analog-to-Digital Converter) prescaler values
- * - Used to divide the APB2 clock frequency for ADC peripheral
- * - ADC clock must not exceed 14 MHz for accurate conversions
- * - APB2 clock is divided to generate ADC clock
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Clears the requested reset bits in `RCC->APB2RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset release
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset release operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset released successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief ADC division by 2 @def _RCC_ADC_DIV_2 */
-#define _RCC_ADC_DIV_2 							((_rcc_component_prescaler_t) 0x00)
-/** @brief ADC division by 4 @def _RCC_ADC_DIV_4 */
-#define _RCC_ADC_DIV_4 							((_rcc_component_prescaler_t) 0x01)
-/** @brief ADC division by 6 @def _RCC_ADC_DIV_6 */
-#define _RCC_ADC_DIV_6 							((_rcc_component_prescaler_t) 0x02)
-/** @brief ADC division by 8 @def _RCC_ADC_DIV_8 */
-#define _RCC_ADC_DIV_8 							((_rcc_component_prescaler_t) 0x03)
-
-/** @} */ // RCC_02_LL_06_ComponentPrescaler_01_ADC
+driver_status_t RCC_LL_ReleaseAPB2Reset(const uint32_t mask);
 
 /**
- * @brief		RCC Low Level USB Prescaler Definitions
- * @defgroup 	RCC_02_LL_06_ComponentPrescaler_02_USB RCC Low Level USB Prescaler
- * @ingroup 	RCC_02_LL_06_ComponentPrescaler
+ * @brief	Forces APB1 Peripheral Reset
  * @details
- * - These constants define the USB (Universal Serial Bus) prescaler values
- * - Used to generate the 48 MHz clock required for USB peripheral
- * - USB requires precise 48 MHz clock for proper operation
- * - PLL output is divided to generate USB clock
- * 
- * @see Reference Manual RM0008 - Section 7.3.2 Clock configuration register (@ref RCC_CFGR "RCC->CFGR")
- * @{
+ * Sets the requested reset bits in `RCC->APB1RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset force operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset asserted successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-
-/** @brief USB division by 1.5 @def _RCC_USB_DIV_1_5 */
-#define _RCC_USB_DIV_1_5 						((_rcc_component_prescaler_t) 0x00)
-/** @brief USB division by 1 (no prescaling) @def _RCC_USB_DIV_1 */
-#define _RCC_USB_DIV_1 							((_rcc_component_prescaler_t) 0x01)
-
-/** @} */ // RCC_02_LL_06_ComponentPrescaler_02_USB
+driver_status_t RCC_LL_ForceAPB1Reset(const uint32_t mask);
 
 /**
- * @brief Stage ADC Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] adcPrescaler ADC prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new ADC prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
+ * @brief	Releases APB1 Peripheral Reset
+ * @details
+ * Clears the requested reset bits in `RCC->APB1RSTR.REG`.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset release
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset release operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset released successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-__STATIC_FORCEINLINE uint32_t _RCC_StageADCPrescaler(const _rcc_component_prescaler_t adcPrescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_ADCPRE;
-	cfgrReg |= (uint32_t)(adcPrescaler << RCC_CFGR_ADCPRE_Pos);
-	return cfgrReg;
-}
+driver_status_t RCC_LL_ReleaseAPB1Reset(const uint32_t mask);
 
 /**
- * @brief Stage USB Prescaler configuration into @ref RCC_CFGR "RCC->CFGR" register value
- * @param[in] usbPrescaler USB prescaler configuration
- * @param[in] cfgrReg Current @ref RCC_CFGR "RCC->CFGR" register value
- * @returns The updated staged @ref RCC_CFGR "RCC->CFGR" register value with new USB prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
+ * @brief	Pulses APB2 Peripheral Reset
+ * @details
+ * Asserts and then releases the requested APB2 reset bits.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset pulse
+ *
+ * @returns	@ref driver_status_t Status of APB2 reset pulse operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset pulsed successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-__STATIC_FORCEINLINE uint32_t _RCC_StageUSBPrescaler(const _rcc_component_prescaler_t usbPrescaler, uint32_t cfgrReg)
-{
-	cfgrReg &= ~RCC_CFGR_USBPRE;
-	cfgrReg |= (uint32_t)(usbPrescaler << RCC_CFGR_USBPRE_Pos);
-	return cfgrReg;
-}
+driver_status_t RCC_LL_PulseAPB2Reset(const uint32_t mask);
 
 /**
- * @brief Stage complete Component Prescaler configuration into RCC_CFGR register value
- * @param[in] adcPrescaler ADC prescaler configuration
- * @param[in] usbPrescaler USB prescaler configuration
- * @param[in] cfgrReg Current RCC_CFGR register value
- * @returns The updated staged RCC_CFGR register value with new component prescaler configuration
- * @note - Preferred usage is during batch update for configuration
- * @note - Register Value to be provided as input
- * @note - This combines both ADC and USB prescaler configurations
+ * @brief	Pulses APB1 Peripheral Reset
+ * @details
+ * Asserts and then releases the requested APB1 reset bits.
+ *
+ * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset pulse
+ *
+ * @returns	@ref driver_status_t Status of APB1 reset pulse operation
+ * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset pulsed successfully
+ * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
-__STATIC_FORCEINLINE uint32_t _RCC_StageComponentPrescaler(const _rcc_component_prescaler_t adcPrescaler, const _rcc_component_prescaler_t usbPrescaler, uint32_t cfgrReg)
-{
-	cfgrReg = _RCC_StageADCPrescaler(adcPrescaler, cfgrReg);
-	cfgrReg = _RCC_StageUSBPrescaler(usbPrescaler, cfgrReg);
-	return cfgrReg;
-}
+driver_status_t RCC_LL_PulseAPB1Reset(const uint32_t mask);
 
-/** @} */ // RCC_02_LL_06_ComponentPrescaler
+/** @} */ // RCC_02_LL_04_ClockReset
 
 /** @} */ // RCC_02_LL
 
+// C++ Compatibility
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

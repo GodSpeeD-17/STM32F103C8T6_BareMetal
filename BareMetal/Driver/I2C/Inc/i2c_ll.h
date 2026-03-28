@@ -15,6 +15,7 @@
  * @include @file stm32f1xx.h 
  */
 #include "stm32f1xx.h"
+#include "rcc_ll.h"
 
 // ======================================================================================================
 // I2C Register APIs
@@ -652,7 +653,7 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
  */	
 __STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
 {
-	__RCC_SetAPB1ENR(RCC, I2C_CLK_MASK(I2Cx));
+	(void) RCC_LL_EnableAPB1Clock(I2C_CLK_MASK(I2Cx));
 }
 
 /**
@@ -661,7 +662,7 @@ __STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
  */	
 __STATIC_FORCEINLINE _I2C_DisableClock(I2C_TypeDef* const I2Cx)
 {
-	__RCC_ClearAPB1ENR(RCC, I2C_CLK_MASK(I2Cx));
+	(void) RCC_LL_DisableAPB1Clock(I2C_CLK_MASK(I2Cx));
 }
 
 /** @} */ // I2C_02_LL_01_Clock

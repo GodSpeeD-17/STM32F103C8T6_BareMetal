@@ -790,7 +790,7 @@ gpio_pin_mode_t GPIO_GetPinMode(const gpio_port_t gpio, const gpio_pin_t pin);
  * @param[in] mode   Desired pin mode (see @ref gpio_pin_mode_t)
  *
  * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or mode).
+ * @retval `DRIVER_STATUS_ERROR_FAIL`:     Invalid parameter (port, pin, or mode).
  *
  * @note
  * - Automatically determines whether CRL or CRH needs to be updated.
@@ -823,7 +823,7 @@ gpio_pin_config_t GPIO_GetPinConfig(const gpio_port_t gpio, const gpio_pin_t pin
  * @param[in] config  Desired configuration (see @ref gpio_pin_config_t)
  *
  * @retval `DRIVER_STATUS_SUCCESS`:  Configuration applied successfully.
- * @retval `DRIVER_STATUS_FAIL`:     Invalid parameter (port, pin, or configuration).
+ * @retval `DRIVER_STATUS_ERROR_FAIL`:     Invalid parameter (port, pin, or configuration).
  *
  * @note
  * - Automatically determines whether CRL or CRH registers are affected.
@@ -838,7 +838,7 @@ driver_status_t GPIO_SetPinConfig(const gpio_port_t gpio, gpio_pin_t pin, const 
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] gpioConfig GPIO Configuration Structure (Refer `gpio_config_t`)
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfig);
@@ -848,7 +848,7 @@ driver_status_t GPIO_Init(const gpio_port_t gpio, gpio_config_t *const gpioConfi
  * @param[in] gpio GPIO Port (Refer `gpio_port_t`)
  * @param[in] pin @ref gpio_pin_t "GPIO Pin"
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: FailureGPIO_03_Driver_01_Types01_Types
+ * @returns - DRIVER_STATUS_ERROR_FAIL: FailureGPIO_03_Driver_01_Types01_Types
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);
@@ -856,7 +856,7 @@ driver_status_t GPIO_Deinit(const gpio_port_t gpio, const gpio_pin_t pin);
 /**
  * @brief Configures the On-board LED
  * @returns Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 driver_status_t OB_LED_Init(void);
@@ -866,7 +866,7 @@ driver_status_t OB_LED_Init(void);
  * @param[in] gpio @ref gpio_port_t "GPIO Port"
  * @param[in] gpioConfig @ref gpio_config_t "GPIO Configuration Structure"
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  * @note Assumes Pin is already filled
  */
@@ -882,7 +882,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(const gpio_port_t gpio, gpio_
 /**
  * @brief Deinitialize the On-board LED
  * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_FAIL: Failure
+ * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
  */
 __STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)

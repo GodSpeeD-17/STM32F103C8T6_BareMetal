@@ -56,6 +56,29 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
+ * @brief	I2C Peripheral Memory Size
+ * @def		 I2C_PERIPHERAL_SIZE 
+ * @details  
+ * Each I2C peripheral (I2C1–I2C2) on the STM32F103C8T6 occupies a fixed <b>1 kB (0x400 bytes)</b>
+ * address block in the <b>APB1 peripheral memory space</b>
+ *
+ * Although the @ref I2C_TypeDef "I2C register structure" uses only 0x24 bytes
+ * (the sum of all defined registers), the hardware reserves a full 0x400-byte
+ * region per I2C instance. This spacing ensures aligned, uniform addressing
+ * for all I2C peripherals and simplifies peripheral bus decoding logic.
+ *
+ * @note 
+ * - Use this constant when computing peripheral index offsets or bit positions.
+ * - Do **not** use `sizeof(I2C_TypeDef)` for address-based calculations, as it
+ *   does not reflect the physical memory spacing.
+ *
+ * @see Reference Manual RM0008, Section 3.2 "Memory Map"
+ * @see @ref I2C_01_Registers_02_Memory "I2C Peripheral Memory Address"
+ * @see @ref BIT_POS() "Peripheral Index Computation"
+ */
+#define I2C_PERIPHERAL_SIZE						((uint32_t) 0x400UL)
+
+/**
  * @brief I2C Peripheral Hardware Register Mapping
  * @defgroup  I2C_01_Registers I2C Registers
  * @ingroup   I2C
