@@ -128,14 +128,6 @@ extern "C" {
 #define BIT_POS(value, base, size) \
 	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)(size)))
 
-/**
- * @brief Set @c _REG with input @c _MASK
- * @def REGOPS_SET
- * @param[in] _REG	Register to operate
- * @param[in] _MASK	Bit-Mask to Set
- */
-#define REGOPS_SET(_REG, _MASK)					((*(_REG)) |= (_MASK))
-
 /** @} */ // 01_STM32F1xx_Utilities_01_Bit
 
 /**

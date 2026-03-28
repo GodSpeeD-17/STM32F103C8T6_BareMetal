@@ -588,12 +588,12 @@ extern "C" {
  * @details
  * @section RCC_RSTR_Theory Theory and Practical Role
  * This page documents the reset-register view used by the RCC software stack.
- * The explicit bit-mask definitions currently cover `RCC_APB2RSTR`, while the full
- * register block structure below carries the remaining APB1 reset fields.
+ * The explicit bit-mask definitions cover both `RCC_APB2RSTR` and `RCC_APB1RSTR`
+ * so driver code can use symbolic reset masks without depending on bitfield access.
  *
  * @section RCC_RSTR_Macros Register-Specific Macros
- * The macro definitions below describe the APB2 peripheral reset bits that can be asserted
- * and released through RCC reset control.
+ * The macro definitions below describe the APB2 and APB1 peripheral reset bits that can
+ * be asserted and released through RCC reset control.
  *
  * @section RCC_RSTR_Union Register Union View
  * The register map later in this file exposes both `union RCC_APB2RSTR` and `union RCC_APB1RSTR`
@@ -748,11 +748,548 @@ extern "C" {
 /** @} */ // RCC_APB2RSTR
 
 // ------------------------------------------------------------------------------------------
+// RCC_APB1RSTR (APB1 Peripheral Reset Register)
+// ------------------------------------------------------------------------------------------
+
+/** @brief TIM2 Reset Position @def RCC_APB1RSTR_TIM2RST_Pos */
+#define RCC_APB1RSTR_TIM2RST_Pos						((uint8_t) 0U)
+/** @brief TIM2 Reset Mask @def RCC_APB1RSTR_TIM2RST_Msk */
+#define RCC_APB1RSTR_TIM2RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM2RST_Pos))
+/** @brief TIM2 Reset @def RCC_APB1RSTR_TIM2RST */
+#define RCC_APB1RSTR_TIM2RST							RCC_APB1RSTR_TIM2RST_Msk
+
+/** @brief TIM3 Reset Position @def RCC_APB1RSTR_TIM3RST_Pos */
+#define RCC_APB1RSTR_TIM3RST_Pos						((uint8_t) 1U)
+/** @brief TIM3 Reset Mask @def RCC_APB1RSTR_TIM3RST_Msk */
+#define RCC_APB1RSTR_TIM3RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM3RST_Pos))
+/** @brief TIM3 Reset @def RCC_APB1RSTR_TIM3RST */
+#define RCC_APB1RSTR_TIM3RST							RCC_APB1RSTR_TIM3RST_Msk
+
+/** @brief TIM4 Reset Position @def RCC_APB1RSTR_TIM4RST_Pos */
+#define RCC_APB1RSTR_TIM4RST_Pos						((uint8_t) 2U)
+/** @brief TIM4 Reset Mask @def RCC_APB1RSTR_TIM4RST_Msk */
+#define RCC_APB1RSTR_TIM4RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM4RST_Pos))
+/** @brief TIM4 Reset @def RCC_APB1RSTR_TIM4RST */
+#define RCC_APB1RSTR_TIM4RST							RCC_APB1RSTR_TIM4RST_Msk
+
+/** @brief TIM5 Reset Position @def RCC_APB1RSTR_TIM5RST_Pos */
+#define RCC_APB1RSTR_TIM5RST_Pos						((uint8_t) 3U)
+/** @brief TIM5 Reset Mask @def RCC_APB1RSTR_TIM5RST_Msk */
+#define RCC_APB1RSTR_TIM5RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM5RST_Pos))
+/** @brief TIM5 Reset @def RCC_APB1RSTR_TIM5RST */
+#define RCC_APB1RSTR_TIM5RST							RCC_APB1RSTR_TIM5RST_Msk
+
+/** @brief TIM6 Reset Position @def RCC_APB1RSTR_TIM6RST_Pos */
+#define RCC_APB1RSTR_TIM6RST_Pos						((uint8_t) 4U)
+/** @brief TIM6 Reset Mask @def RCC_APB1RSTR_TIM6RST_Msk */
+#define RCC_APB1RSTR_TIM6RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM6RST_Pos))
+/** @brief TIM6 Reset @def RCC_APB1RSTR_TIM6RST */
+#define RCC_APB1RSTR_TIM6RST							RCC_APB1RSTR_TIM6RST_Msk
+
+/** @brief TIM7 Reset Position @def RCC_APB1RSTR_TIM7RST_Pos */
+#define RCC_APB1RSTR_TIM7RST_Pos						((uint8_t) 5U)
+/** @brief TIM7 Reset Mask @def RCC_APB1RSTR_TIM7RST_Msk */
+#define RCC_APB1RSTR_TIM7RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM7RST_Pos))
+/** @brief TIM7 Reset @def RCC_APB1RSTR_TIM7RST */
+#define RCC_APB1RSTR_TIM7RST							RCC_APB1RSTR_TIM7RST_Msk
+
+/** @brief TIM12 Reset Position @def RCC_APB1RSTR_TIM12RST_Pos */
+#define RCC_APB1RSTR_TIM12RST_Pos						((uint8_t) 6U)
+/** @brief TIM12 Reset Mask @def RCC_APB1RSTR_TIM12RST_Msk */
+#define RCC_APB1RSTR_TIM12RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM12RST_Pos))
+/** @brief TIM12 Reset @def RCC_APB1RSTR_TIM12RST */
+#define RCC_APB1RSTR_TIM12RST							RCC_APB1RSTR_TIM12RST_Msk
+
+/** @brief TIM13 Reset Position @def RCC_APB1RSTR_TIM13RST_Pos */
+#define RCC_APB1RSTR_TIM13RST_Pos						((uint8_t) 7U)
+/** @brief TIM13 Reset Mask @def RCC_APB1RSTR_TIM13RST_Msk */
+#define RCC_APB1RSTR_TIM13RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM13RST_Pos))
+/** @brief TIM13 Reset @def RCC_APB1RSTR_TIM13RST */
+#define RCC_APB1RSTR_TIM13RST							RCC_APB1RSTR_TIM13RST_Msk
+
+/** @brief TIM14 Reset Position @def RCC_APB1RSTR_TIM14RST_Pos */
+#define RCC_APB1RSTR_TIM14RST_Pos						((uint8_t) 8U)
+/** @brief TIM14 Reset Mask @def RCC_APB1RSTR_TIM14RST_Msk */
+#define RCC_APB1RSTR_TIM14RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_TIM14RST_Pos))
+/** @brief TIM14 Reset @def RCC_APB1RSTR_TIM14RST */
+#define RCC_APB1RSTR_TIM14RST							RCC_APB1RSTR_TIM14RST_Msk
+
+/** @brief WWDG Reset Position @def RCC_APB1RSTR_WWDGRST_Pos */
+#define RCC_APB1RSTR_WWDGRST_Pos						((uint8_t) 11U)
+/** @brief WWDG Reset Mask @def RCC_APB1RSTR_WWDGRST_Msk */
+#define RCC_APB1RSTR_WWDGRST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_WWDGRST_Pos))
+/** @brief WWDG Reset @def RCC_APB1RSTR_WWDGRST */
+#define RCC_APB1RSTR_WWDGRST							RCC_APB1RSTR_WWDGRST_Msk
+
+/** @brief SPI2 Reset Position @def RCC_APB1RSTR_SPI2RST_Pos */
+#define RCC_APB1RSTR_SPI2RST_Pos						((uint8_t) 14U)
+/** @brief SPI2 Reset Mask @def RCC_APB1RSTR_SPI2RST_Msk */
+#define RCC_APB1RSTR_SPI2RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_SPI2RST_Pos))
+/** @brief SPI2 Reset @def RCC_APB1RSTR_SPI2RST */
+#define RCC_APB1RSTR_SPI2RST							RCC_APB1RSTR_SPI2RST_Msk
+
+/** @brief SPI3 Reset Position @def RCC_APB1RSTR_SPI3RST_Pos */
+#define RCC_APB1RSTR_SPI3RST_Pos						((uint8_t) 15U)
+/** @brief SPI3 Reset Mask @def RCC_APB1RSTR_SPI3RST_Msk */
+#define RCC_APB1RSTR_SPI3RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_SPI3RST_Pos))
+/** @brief SPI3 Reset @def RCC_APB1RSTR_SPI3RST */
+#define RCC_APB1RSTR_SPI3RST							RCC_APB1RSTR_SPI3RST_Msk
+
+/** @brief USART2 Reset Position @def RCC_APB1RSTR_USART2RST_Pos */
+#define RCC_APB1RSTR_USART2RST_Pos						((uint8_t) 17U)
+/** @brief USART2 Reset Mask @def RCC_APB1RSTR_USART2RST_Msk */
+#define RCC_APB1RSTR_USART2RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_USART2RST_Pos))
+/** @brief USART2 Reset @def RCC_APB1RSTR_USART2RST */
+#define RCC_APB1RSTR_USART2RST							RCC_APB1RSTR_USART2RST_Msk
+
+/** @brief USART3 Reset Position @def RCC_APB1RSTR_USART3RST_Pos */
+#define RCC_APB1RSTR_USART3RST_Pos						((uint8_t) 18U)
+/** @brief USART3 Reset Mask @def RCC_APB1RSTR_USART3RST_Msk */
+#define RCC_APB1RSTR_USART3RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_USART3RST_Pos))
+/** @brief USART3 Reset @def RCC_APB1RSTR_USART3RST */
+#define RCC_APB1RSTR_USART3RST							RCC_APB1RSTR_USART3RST_Msk
+
+/** @brief UART4 Reset Position @def RCC_APB1RSTR_UART4RST_Pos */
+#define RCC_APB1RSTR_UART4RST_Pos						((uint8_t) 19U)
+/** @brief UART4 Reset Mask @def RCC_APB1RSTR_UART4RST_Msk */
+#define RCC_APB1RSTR_UART4RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_UART4RST_Pos))
+/** @brief UART4 Reset @def RCC_APB1RSTR_UART4RST */
+#define RCC_APB1RSTR_UART4RST							RCC_APB1RSTR_UART4RST_Msk
+
+/** @brief UART5 Reset Position @def RCC_APB1RSTR_UART5RST_Pos */
+#define RCC_APB1RSTR_UART5RST_Pos						((uint8_t) 20U)
+/** @brief UART5 Reset Mask @def RCC_APB1RSTR_UART5RST_Msk */
+#define RCC_APB1RSTR_UART5RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_UART5RST_Pos))
+/** @brief UART5 Reset @def RCC_APB1RSTR_UART5RST */
+#define RCC_APB1RSTR_UART5RST							RCC_APB1RSTR_UART5RST_Msk
+
+/** @brief I2C1 Reset Position @def RCC_APB1RSTR_I2C1RST_Pos */
+#define RCC_APB1RSTR_I2C1RST_Pos						((uint8_t) 21U)
+/** @brief I2C1 Reset Mask @def RCC_APB1RSTR_I2C1RST_Msk */
+#define RCC_APB1RSTR_I2C1RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_I2C1RST_Pos))
+/** @brief I2C1 Reset @def RCC_APB1RSTR_I2C1RST */
+#define RCC_APB1RSTR_I2C1RST							RCC_APB1RSTR_I2C1RST_Msk
+
+/** @brief I2C2 Reset Position @def RCC_APB1RSTR_I2C2RST_Pos */
+#define RCC_APB1RSTR_I2C2RST_Pos						((uint8_t) 22U)
+/** @brief I2C2 Reset Mask @def RCC_APB1RSTR_I2C2RST_Msk */
+#define RCC_APB1RSTR_I2C2RST_Msk						((uint32_t)(0x01UL << RCC_APB1RSTR_I2C2RST_Pos))
+/** @brief I2C2 Reset @def RCC_APB1RSTR_I2C2RST */
+#define RCC_APB1RSTR_I2C2RST							RCC_APB1RSTR_I2C2RST_Msk
+
+/** @brief USB Reset Position @def RCC_APB1RSTR_USBRST_Pos */
+#define RCC_APB1RSTR_USBRST_Pos							((uint8_t) 23U)
+/** @brief USB Reset Mask @def RCC_APB1RSTR_USBRST_Msk */
+#define RCC_APB1RSTR_USBRST_Msk							((uint32_t)(0x01UL << RCC_APB1RSTR_USBRST_Pos))
+/** @brief USB Reset @def RCC_APB1RSTR_USBRST */
+#define RCC_APB1RSTR_USBRST								RCC_APB1RSTR_USBRST_Msk
+
+/** @brief CAN Reset Position @def RCC_APB1RSTR_CANRST_Pos */
+#define RCC_APB1RSTR_CANRST_Pos							((uint8_t) 25U)
+/** @brief CAN Reset Mask @def RCC_APB1RSTR_CANRST_Msk */
+#define RCC_APB1RSTR_CANRST_Msk							((uint32_t)(0x01UL << RCC_APB1RSTR_CANRST_Pos))
+/** @brief CAN Reset @def RCC_APB1RSTR_CANRST */
+#define RCC_APB1RSTR_CANRST								RCC_APB1RSTR_CANRST_Msk
+
+/** @brief BKP Reset Position @def RCC_APB1RSTR_BKPRST_Pos */
+#define RCC_APB1RSTR_BKPRST_Pos							((uint8_t) 27U)
+/** @brief BKP Reset Mask @def RCC_APB1RSTR_BKPRST_Msk */
+#define RCC_APB1RSTR_BKPRST_Msk							((uint32_t)(0x01UL << RCC_APB1RSTR_BKPRST_Pos))
+/** @brief BKP Reset @def RCC_APB1RSTR_BKPRST */
+#define RCC_APB1RSTR_BKPRST								RCC_APB1RSTR_BKPRST_Msk
+
+/** @brief PWR Reset Position @def RCC_APB1RSTR_PWRRST_Pos */
+#define RCC_APB1RSTR_PWRRST_Pos							((uint8_t) 28U)
+/** @brief PWR Reset Mask @def RCC_APB1RSTR_PWRRST_Msk */
+#define RCC_APB1RSTR_PWRRST_Msk							((uint32_t)(0x01UL << RCC_APB1RSTR_PWRRST_Pos))
+/** @brief PWR Reset @def RCC_APB1RSTR_PWRRST */
+#define RCC_APB1RSTR_PWRRST								RCC_APB1RSTR_PWRRST_Msk
+
+/** @brief DAC Reset Position @def RCC_APB1RSTR_DACRST_Pos */
+#define RCC_APB1RSTR_DACRST_Pos							((uint8_t) 29U)
+/** @brief DAC Reset Mask @def RCC_APB1RSTR_DACRST_Msk */
+#define RCC_APB1RSTR_DACRST_Msk							((uint32_t)(0x01UL << RCC_APB1RSTR_DACRST_Pos))
+/** @brief DAC Reset @def RCC_APB1RSTR_DACRST */
+#define RCC_APB1RSTR_DACRST								RCC_APB1RSTR_DACRST_Msk
+
+/** @} */ // RCC_01_RegisterLayer_04_PeripheralReset
+
+/**
+ * @brief RCC Peripheral Clock Enable Register Definitions
+ * @defgroup RCC_01_RegisterLayer_05_PeripheralClockEnable RCC Peripheral Clock Enable Registers
+ * @ingroup RCC_01_RegisterLayer
+ * @details
+ * @section RCC_ENR_Theory Theory and Practical Role
+ * This page documents the explicit clock-gate masks used by the RCC software stack.
+ * These definitions cover `RCC_AHBENR`, `RCC_APB2ENR`, and `RCC_APB1ENR` so LL and
+ * driver layers can enable or disable peripheral clocks through raw hardware masks.
+ *
+ * @section RCC_ENR_Macros Register-Specific Macros
+ * The macro definitions below describe the AHB, APB2, and APB1 peripheral clock-enable
+ * bits that can be asserted or cleared through RCC gate control.
+ *
+ * @section RCC_ENR_Union Register Union View
+ * The register map later in this file exposes `union RCC_AHBENR`, `union RCC_APB2ENR`,
+ * and `union RCC_APB1ENR` so the documented masks line up with the final memory layout.
+ * @{
+ */
+
+// ------------------------------------------------------------------------------------------
+// RCC_AHBENR (AHB Peripheral Clock Enable Register)
+// ------------------------------------------------------------------------------------------
+
+/** @brief DMA1 Clock Enable Position @def RCC_AHBENR_DMA1EN_Pos */
+#define RCC_AHBENR_DMA1EN_Pos							((uint8_t) 0U)
+/** @brief DMA1 Clock Enable Mask @def RCC_AHBENR_DMA1EN_Msk */
+#define RCC_AHBENR_DMA1EN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_DMA1EN_Pos))
+/** @brief DMA1 Clock Enable @def RCC_AHBENR_DMA1EN */
+#define RCC_AHBENR_DMA1EN								RCC_AHBENR_DMA1EN_Msk
+
+/** @brief DMA2 Clock Enable Position @def RCC_AHBENR_DMA2EN_Pos */
+#define RCC_AHBENR_DMA2EN_Pos							((uint8_t) 1U)
+/** @brief DMA2 Clock Enable Mask @def RCC_AHBENR_DMA2EN_Msk */
+#define RCC_AHBENR_DMA2EN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_DMA2EN_Pos))
+/** @brief DMA2 Clock Enable @def RCC_AHBENR_DMA2EN */
+#define RCC_AHBENR_DMA2EN								RCC_AHBENR_DMA2EN_Msk
+
+/** @brief SRAM Clock Enable Position @def RCC_AHBENR_SRAMEN_Pos */
+#define RCC_AHBENR_SRAMEN_Pos							((uint8_t) 2U)
+/** @brief SRAM Clock Enable Mask @def RCC_AHBENR_SRAMEN_Msk */
+#define RCC_AHBENR_SRAMEN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_SRAMEN_Pos))
+/** @brief SRAM Clock Enable @def RCC_AHBENR_SRAMEN */
+#define RCC_AHBENR_SRAMEN								RCC_AHBENR_SRAMEN_Msk
+
+/** @brief FLITF Clock Enable Position @def RCC_AHBENR_FLITFEN_Pos */
+#define RCC_AHBENR_FLITFEN_Pos							((uint8_t) 4U)
+/** @brief FLITF Clock Enable Mask @def RCC_AHBENR_FLITFEN_Msk */
+#define RCC_AHBENR_FLITFEN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_FLITFEN_Pos))
+/** @brief FLITF Clock Enable @def RCC_AHBENR_FLITFEN */
+#define RCC_AHBENR_FLITFEN								RCC_AHBENR_FLITFEN_Msk
+
+/** @brief CRC Clock Enable Position @def RCC_AHBENR_CRCEN_Pos */
+#define RCC_AHBENR_CRCEN_Pos							((uint8_t) 6U)
+/** @brief CRC Clock Enable Mask @def RCC_AHBENR_CRCEN_Msk */
+#define RCC_AHBENR_CRCEN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_CRCEN_Pos))
+/** @brief CRC Clock Enable @def RCC_AHBENR_CRCEN */
+#define RCC_AHBENR_CRCEN								RCC_AHBENR_CRCEN_Msk
+
+/** @brief FSMC Clock Enable Position @def RCC_AHBENR_FSMCEN_Pos */
+#define RCC_AHBENR_FSMCEN_Pos							((uint8_t) 8U)
+/** @brief FSMC Clock Enable Mask @def RCC_AHBENR_FSMCEN_Msk */
+#define RCC_AHBENR_FSMCEN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_FSMCEN_Pos))
+/** @brief FSMC Clock Enable @def RCC_AHBENR_FSMCEN */
+#define RCC_AHBENR_FSMCEN								RCC_AHBENR_FSMCEN_Msk
+
+/** @brief SDIO Clock Enable Position @def RCC_AHBENR_SDIOEN_Pos */
+#define RCC_AHBENR_SDIOEN_Pos							((uint8_t) 10U)
+/** @brief SDIO Clock Enable Mask @def RCC_AHBENR_SDIOEN_Msk */
+#define RCC_AHBENR_SDIOEN_Msk							((uint32_t)(0x01UL << RCC_AHBENR_SDIOEN_Pos))
+/** @brief SDIO Clock Enable @def RCC_AHBENR_SDIOEN */
+#define RCC_AHBENR_SDIOEN								RCC_AHBENR_SDIOEN_Msk
+
+// ------------------------------------------------------------------------------------------
+// RCC_APB2ENR (APB2 Peripheral Clock Enable Register)
+// ------------------------------------------------------------------------------------------
+
+/** @brief AFIO Clock Enable Position @def RCC_APB2ENR_AFIOEN_Pos */
+#define RCC_APB2ENR_AFIOEN_Pos							((uint8_t) 0U)
+/** @brief AFIO Clock Enable Mask @def RCC_APB2ENR_AFIOEN_Msk */
+#define RCC_APB2ENR_AFIOEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_AFIOEN_Pos))
+/** @brief AFIO Clock Enable @def RCC_APB2ENR_AFIOEN */
+#define RCC_APB2ENR_AFIOEN								RCC_APB2ENR_AFIOEN_Msk
+
+/** @brief GPIOA Clock Enable Position @def RCC_APB2ENR_IOPAEN_Pos */
+#define RCC_APB2ENR_IOPAEN_Pos							((uint8_t) 2U)
+/** @brief GPIOA Clock Enable Mask @def RCC_APB2ENR_IOPAEN_Msk */
+#define RCC_APB2ENR_IOPAEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPAEN_Pos))
+/** @brief GPIOA Clock Enable @def RCC_APB2ENR_IOPAEN */
+#define RCC_APB2ENR_IOPAEN								RCC_APB2ENR_IOPAEN_Msk
+
+/** @brief GPIOB Clock Enable Position @def RCC_APB2ENR_IOPBEN_Pos */
+#define RCC_APB2ENR_IOPBEN_Pos							((uint8_t) 3U)
+/** @brief GPIOB Clock Enable Mask @def RCC_APB2ENR_IOPBEN_Msk */
+#define RCC_APB2ENR_IOPBEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPBEN_Pos))
+/** @brief GPIOB Clock Enable @def RCC_APB2ENR_IOPBEN */
+#define RCC_APB2ENR_IOPBEN								RCC_APB2ENR_IOPBEN_Msk
+
+/** @brief GPIOC Clock Enable Position @def RCC_APB2ENR_IOPCEN_Pos */
+#define RCC_APB2ENR_IOPCEN_Pos							((uint8_t) 4U)
+/** @brief GPIOC Clock Enable Mask @def RCC_APB2ENR_IOPCEN_Msk */
+#define RCC_APB2ENR_IOPCEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPCEN_Pos))
+/** @brief GPIOC Clock Enable @def RCC_APB2ENR_IOPCEN */
+#define RCC_APB2ENR_IOPCEN								RCC_APB2ENR_IOPCEN_Msk
+
+/** @brief GPIOD Clock Enable Position @def RCC_APB2ENR_IOPDEN_Pos */
+#define RCC_APB2ENR_IOPDEN_Pos							((uint8_t) 5U)
+/** @brief GPIOD Clock Enable Mask @def RCC_APB2ENR_IOPDEN_Msk */
+#define RCC_APB2ENR_IOPDEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPDEN_Pos))
+/** @brief GPIOD Clock Enable @def RCC_APB2ENR_IOPDEN */
+#define RCC_APB2ENR_IOPDEN								RCC_APB2ENR_IOPDEN_Msk
+
+/** @brief GPIOE Clock Enable Position @def RCC_APB2ENR_IOPEEN_Pos */
+#define RCC_APB2ENR_IOPEEN_Pos							((uint8_t) 6U)
+/** @brief GPIOE Clock Enable Mask @def RCC_APB2ENR_IOPEEN_Msk */
+#define RCC_APB2ENR_IOPEEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPEEN_Pos))
+/** @brief GPIOE Clock Enable @def RCC_APB2ENR_IOPEEN */
+#define RCC_APB2ENR_IOPEEN								RCC_APB2ENR_IOPEEN_Msk
+
+/** @brief GPIOF Clock Enable Position @def RCC_APB2ENR_IOPFEN_Pos */
+#define RCC_APB2ENR_IOPFEN_Pos							((uint8_t) 7U)
+/** @brief GPIOF Clock Enable Mask @def RCC_APB2ENR_IOPFEN_Msk */
+#define RCC_APB2ENR_IOPFEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPFEN_Pos))
+/** @brief GPIOF Clock Enable @def RCC_APB2ENR_IOPFEN */
+#define RCC_APB2ENR_IOPFEN								RCC_APB2ENR_IOPFEN_Msk
+
+/** @brief GPIOG Clock Enable Position @def RCC_APB2ENR_IOPGEN_Pos */
+#define RCC_APB2ENR_IOPGEN_Pos							((uint8_t) 8U)
+/** @brief GPIOG Clock Enable Mask @def RCC_APB2ENR_IOPGEN_Msk */
+#define RCC_APB2ENR_IOPGEN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_IOPGEN_Pos))
+/** @brief GPIOG Clock Enable @def RCC_APB2ENR_IOPGEN */
+#define RCC_APB2ENR_IOPGEN								RCC_APB2ENR_IOPGEN_Msk
+
+/** @brief ADC1 Clock Enable Position @def RCC_APB2ENR_ADC1EN_Pos */
+#define RCC_APB2ENR_ADC1EN_Pos							((uint8_t) 9U)
+/** @brief ADC1 Clock Enable Mask @def RCC_APB2ENR_ADC1EN_Msk */
+#define RCC_APB2ENR_ADC1EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_ADC1EN_Pos))
+/** @brief ADC1 Clock Enable @def RCC_APB2ENR_ADC1EN */
+#define RCC_APB2ENR_ADC1EN								RCC_APB2ENR_ADC1EN_Msk
+
+/** @brief ADC2 Clock Enable Position @def RCC_APB2ENR_ADC2EN_Pos */
+#define RCC_APB2ENR_ADC2EN_Pos							((uint8_t) 10U)
+/** @brief ADC2 Clock Enable Mask @def RCC_APB2ENR_ADC2EN_Msk */
+#define RCC_APB2ENR_ADC2EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_ADC2EN_Pos))
+/** @brief ADC2 Clock Enable @def RCC_APB2ENR_ADC2EN */
+#define RCC_APB2ENR_ADC2EN								RCC_APB2ENR_ADC2EN_Msk
+
+/** @brief TIM1 Clock Enable Position @def RCC_APB2ENR_TIM1EN_Pos */
+#define RCC_APB2ENR_TIM1EN_Pos							((uint8_t) 11U)
+/** @brief TIM1 Clock Enable Mask @def RCC_APB2ENR_TIM1EN_Msk */
+#define RCC_APB2ENR_TIM1EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_TIM1EN_Pos))
+/** @brief TIM1 Clock Enable @def RCC_APB2ENR_TIM1EN */
+#define RCC_APB2ENR_TIM1EN								RCC_APB2ENR_TIM1EN_Msk
+
+/** @brief SPI1 Clock Enable Position @def RCC_APB2ENR_SPI1EN_Pos */
+#define RCC_APB2ENR_SPI1EN_Pos							((uint8_t) 12U)
+/** @brief SPI1 Clock Enable Mask @def RCC_APB2ENR_SPI1EN_Msk */
+#define RCC_APB2ENR_SPI1EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_SPI1EN_Pos))
+/** @brief SPI1 Clock Enable @def RCC_APB2ENR_SPI1EN */
+#define RCC_APB2ENR_SPI1EN								RCC_APB2ENR_SPI1EN_Msk
+
+/** @brief TIM8 Clock Enable Position @def RCC_APB2ENR_TIM8EN_Pos */
+#define RCC_APB2ENR_TIM8EN_Pos							((uint8_t) 13U)
+/** @brief TIM8 Clock Enable Mask @def RCC_APB2ENR_TIM8EN_Msk */
+#define RCC_APB2ENR_TIM8EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_TIM8EN_Pos))
+/** @brief TIM8 Clock Enable @def RCC_APB2ENR_TIM8EN */
+#define RCC_APB2ENR_TIM8EN								RCC_APB2ENR_TIM8EN_Msk
+
+/** @brief USART1 Clock Enable Position @def RCC_APB2ENR_USART1EN_Pos */
+#define RCC_APB2ENR_USART1EN_Pos						((uint8_t) 14U)
+/** @brief USART1 Clock Enable Mask @def RCC_APB2ENR_USART1EN_Msk */
+#define RCC_APB2ENR_USART1EN_Msk						((uint32_t)(0x01UL << RCC_APB2ENR_USART1EN_Pos))
+/** @brief USART1 Clock Enable @def RCC_APB2ENR_USART1EN */
+#define RCC_APB2ENR_USART1EN							RCC_APB2ENR_USART1EN_Msk
+
+/** @brief ADC3 Clock Enable Position @def RCC_APB2ENR_ADC3EN_Pos */
+#define RCC_APB2ENR_ADC3EN_Pos							((uint8_t) 15U)
+/** @brief ADC3 Clock Enable Mask @def RCC_APB2ENR_ADC3EN_Msk */
+#define RCC_APB2ENR_ADC3EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_ADC3EN_Pos))
+/** @brief ADC3 Clock Enable @def RCC_APB2ENR_ADC3EN */
+#define RCC_APB2ENR_ADC3EN								RCC_APB2ENR_ADC3EN_Msk
+
+/** @brief TIM9 Clock Enable Position @def RCC_APB2ENR_TIM9EN_Pos */
+#define RCC_APB2ENR_TIM9EN_Pos							((uint8_t) 19U)
+/** @brief TIM9 Clock Enable Mask @def RCC_APB2ENR_TIM9EN_Msk */
+#define RCC_APB2ENR_TIM9EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_TIM9EN_Pos))
+/** @brief TIM9 Clock Enable @def RCC_APB2ENR_TIM9EN */
+#define RCC_APB2ENR_TIM9EN								RCC_APB2ENR_TIM9EN_Msk
+
+/** @brief TIM10 Clock Enable Position @def RCC_APB2ENR_TIM10EN_Pos */
+#define RCC_APB2ENR_TIM10EN_Pos							((uint8_t) 20U)
+/** @brief TIM10 Clock Enable Mask @def RCC_APB2ENR_TIM10EN_Msk */
+#define RCC_APB2ENR_TIM10EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_TIM10EN_Pos))
+/** @brief TIM10 Clock Enable @def RCC_APB2ENR_TIM10EN */
+#define RCC_APB2ENR_TIM10EN								RCC_APB2ENR_TIM10EN_Msk
+
+/** @brief TIM11 Clock Enable Position @def RCC_APB2ENR_TIM11EN_Pos */
+#define RCC_APB2ENR_TIM11EN_Pos							((uint8_t) 21U)
+/** @brief TIM11 Clock Enable Mask @def RCC_APB2ENR_TIM11EN_Msk */
+#define RCC_APB2ENR_TIM11EN_Msk							((uint32_t)(0x01UL << RCC_APB2ENR_TIM11EN_Pos))
+/** @brief TIM11 Clock Enable @def RCC_APB2ENR_TIM11EN */
+#define RCC_APB2ENR_TIM11EN								RCC_APB2ENR_TIM11EN_Msk
+
+// ------------------------------------------------------------------------------------------
+// RCC_APB1ENR (APB1 Peripheral Clock Enable Register)
+// ------------------------------------------------------------------------------------------
+
+/** @brief TIM2 Clock Enable Position @def RCC_APB1ENR_TIM2EN_Pos */
+#define RCC_APB1ENR_TIM2EN_Pos							((uint8_t) 0U)
+/** @brief TIM2 Clock Enable Mask @def RCC_APB1ENR_TIM2EN_Msk */
+#define RCC_APB1ENR_TIM2EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM2EN_Pos))
+/** @brief TIM2 Clock Enable @def RCC_APB1ENR_TIM2EN */
+#define RCC_APB1ENR_TIM2EN								RCC_APB1ENR_TIM2EN_Msk
+
+/** @brief TIM3 Clock Enable Position @def RCC_APB1ENR_TIM3EN_Pos */
+#define RCC_APB1ENR_TIM3EN_Pos							((uint8_t) 1U)
+/** @brief TIM3 Clock Enable Mask @def RCC_APB1ENR_TIM3EN_Msk */
+#define RCC_APB1ENR_TIM3EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM3EN_Pos))
+/** @brief TIM3 Clock Enable @def RCC_APB1ENR_TIM3EN */
+#define RCC_APB1ENR_TIM3EN								RCC_APB1ENR_TIM3EN_Msk
+
+/** @brief TIM4 Clock Enable Position @def RCC_APB1ENR_TIM4EN_Pos */
+#define RCC_APB1ENR_TIM4EN_Pos							((uint8_t) 2U)
+/** @brief TIM4 Clock Enable Mask @def RCC_APB1ENR_TIM4EN_Msk */
+#define RCC_APB1ENR_TIM4EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM4EN_Pos))
+/** @brief TIM4 Clock Enable @def RCC_APB1ENR_TIM4EN */
+#define RCC_APB1ENR_TIM4EN								RCC_APB1ENR_TIM4EN_Msk
+
+/** @brief TIM5 Clock Enable Position @def RCC_APB1ENR_TIM5EN_Pos */
+#define RCC_APB1ENR_TIM5EN_Pos							((uint8_t) 3U)
+/** @brief TIM5 Clock Enable Mask @def RCC_APB1ENR_TIM5EN_Msk */
+#define RCC_APB1ENR_TIM5EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM5EN_Pos))
+/** @brief TIM5 Clock Enable @def RCC_APB1ENR_TIM5EN */
+#define RCC_APB1ENR_TIM5EN								RCC_APB1ENR_TIM5EN_Msk
+
+/** @brief TIM6 Clock Enable Position @def RCC_APB1ENR_TIM6EN_Pos */
+#define RCC_APB1ENR_TIM6EN_Pos							((uint8_t) 4U)
+/** @brief TIM6 Clock Enable Mask @def RCC_APB1ENR_TIM6EN_Msk */
+#define RCC_APB1ENR_TIM6EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM6EN_Pos))
+/** @brief TIM6 Clock Enable @def RCC_APB1ENR_TIM6EN */
+#define RCC_APB1ENR_TIM6EN								RCC_APB1ENR_TIM6EN_Msk
+
+/** @brief TIM7 Clock Enable Position @def RCC_APB1ENR_TIM7EN_Pos */
+#define RCC_APB1ENR_TIM7EN_Pos							((uint8_t) 5U)
+/** @brief TIM7 Clock Enable Mask @def RCC_APB1ENR_TIM7EN_Msk */
+#define RCC_APB1ENR_TIM7EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM7EN_Pos))
+/** @brief TIM7 Clock Enable @def RCC_APB1ENR_TIM7EN */
+#define RCC_APB1ENR_TIM7EN								RCC_APB1ENR_TIM7EN_Msk
+
+/** @brief TIM12 Clock Enable Position @def RCC_APB1ENR_TIM12EN_Pos */
+#define RCC_APB1ENR_TIM12EN_Pos							((uint8_t) 6U)
+/** @brief TIM12 Clock Enable Mask @def RCC_APB1ENR_TIM12EN_Msk */
+#define RCC_APB1ENR_TIM12EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM12EN_Pos))
+/** @brief TIM12 Clock Enable @def RCC_APB1ENR_TIM12EN */
+#define RCC_APB1ENR_TIM12EN								RCC_APB1ENR_TIM12EN_Msk
+
+/** @brief TIM13 Clock Enable Position @def RCC_APB1ENR_TIM13EN_Pos */
+#define RCC_APB1ENR_TIM13EN_Pos							((uint8_t) 7U)
+/** @brief TIM13 Clock Enable Mask @def RCC_APB1ENR_TIM13EN_Msk */
+#define RCC_APB1ENR_TIM13EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM13EN_Pos))
+/** @brief TIM13 Clock Enable @def RCC_APB1ENR_TIM13EN */
+#define RCC_APB1ENR_TIM13EN								RCC_APB1ENR_TIM13EN_Msk
+
+/** @brief TIM14 Clock Enable Position @def RCC_APB1ENR_TIM14EN_Pos */
+#define RCC_APB1ENR_TIM14EN_Pos							((uint8_t) 8U)
+/** @brief TIM14 Clock Enable Mask @def RCC_APB1ENR_TIM14EN_Msk */
+#define RCC_APB1ENR_TIM14EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_TIM14EN_Pos))
+/** @brief TIM14 Clock Enable @def RCC_APB1ENR_TIM14EN */
+#define RCC_APB1ENR_TIM14EN								RCC_APB1ENR_TIM14EN_Msk
+
+/** @brief WWDG Clock Enable Position @def RCC_APB1ENR_WWDGEN_Pos */
+#define RCC_APB1ENR_WWDGEN_Pos							((uint8_t) 11U)
+/** @brief WWDG Clock Enable Mask @def RCC_APB1ENR_WWDGEN_Msk */
+#define RCC_APB1ENR_WWDGEN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_WWDGEN_Pos))
+/** @brief WWDG Clock Enable @def RCC_APB1ENR_WWDGEN */
+#define RCC_APB1ENR_WWDGEN								RCC_APB1ENR_WWDGEN_Msk
+
+/** @brief SPI2 Clock Enable Position @def RCC_APB1ENR_SPI2EN_Pos */
+#define RCC_APB1ENR_SPI2EN_Pos							((uint8_t) 14U)
+/** @brief SPI2 Clock Enable Mask @def RCC_APB1ENR_SPI2EN_Msk */
+#define RCC_APB1ENR_SPI2EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_SPI2EN_Pos))
+/** @brief SPI2 Clock Enable @def RCC_APB1ENR_SPI2EN */
+#define RCC_APB1ENR_SPI2EN								RCC_APB1ENR_SPI2EN_Msk
+
+/** @brief SPI3 Clock Enable Position @def RCC_APB1ENR_SPI3EN_Pos */
+#define RCC_APB1ENR_SPI3EN_Pos							((uint8_t) 15U)
+/** @brief SPI3 Clock Enable Mask @def RCC_APB1ENR_SPI3EN_Msk */
+#define RCC_APB1ENR_SPI3EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_SPI3EN_Pos))
+/** @brief SPI3 Clock Enable @def RCC_APB1ENR_SPI3EN */
+#define RCC_APB1ENR_SPI3EN								RCC_APB1ENR_SPI3EN_Msk
+
+/** @brief USART2 Clock Enable Position @def RCC_APB1ENR_USART2EN_Pos */
+#define RCC_APB1ENR_USART2EN_Pos						((uint8_t) 17U)
+/** @brief USART2 Clock Enable Mask @def RCC_APB1ENR_USART2EN_Msk */
+#define RCC_APB1ENR_USART2EN_Msk						((uint32_t)(0x01UL << RCC_APB1ENR_USART2EN_Pos))
+/** @brief USART2 Clock Enable @def RCC_APB1ENR_USART2EN */
+#define RCC_APB1ENR_USART2EN							RCC_APB1ENR_USART2EN_Msk
+
+/** @brief USART3 Clock Enable Position @def RCC_APB1ENR_USART3EN_Pos */
+#define RCC_APB1ENR_USART3EN_Pos						((uint8_t) 18U)
+/** @brief USART3 Clock Enable Mask @def RCC_APB1ENR_USART3EN_Msk */
+#define RCC_APB1ENR_USART3EN_Msk						((uint32_t)(0x01UL << RCC_APB1ENR_USART3EN_Pos))
+/** @brief USART3 Clock Enable @def RCC_APB1ENR_USART3EN */
+#define RCC_APB1ENR_USART3EN							RCC_APB1ENR_USART3EN_Msk
+
+/** @brief UART4 Clock Enable Position @def RCC_APB1ENR_UART4EN_Pos */
+#define RCC_APB1ENR_UART4EN_Pos							((uint8_t) 19U)
+/** @brief UART4 Clock Enable Mask @def RCC_APB1ENR_UART4EN_Msk */
+#define RCC_APB1ENR_UART4EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_UART4EN_Pos))
+/** @brief UART4 Clock Enable @def RCC_APB1ENR_UART4EN */
+#define RCC_APB1ENR_UART4EN								RCC_APB1ENR_UART4EN_Msk
+
+/** @brief UART5 Clock Enable Position @def RCC_APB1ENR_UART5EN_Pos */
+#define RCC_APB1ENR_UART5EN_Pos							((uint8_t) 20U)
+/** @brief UART5 Clock Enable Mask @def RCC_APB1ENR_UART5EN_Msk */
+#define RCC_APB1ENR_UART5EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_UART5EN_Pos))
+/** @brief UART5 Clock Enable @def RCC_APB1ENR_UART5EN */
+#define RCC_APB1ENR_UART5EN								RCC_APB1ENR_UART5EN_Msk
+
+/** @brief I2C1 Clock Enable Position @def RCC_APB1ENR_I2C1EN_Pos */
+#define RCC_APB1ENR_I2C1EN_Pos							((uint8_t) 21U)
+/** @brief I2C1 Clock Enable Mask @def RCC_APB1ENR_I2C1EN_Msk */
+#define RCC_APB1ENR_I2C1EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_I2C1EN_Pos))
+/** @brief I2C1 Clock Enable @def RCC_APB1ENR_I2C1EN */
+#define RCC_APB1ENR_I2C1EN								RCC_APB1ENR_I2C1EN_Msk
+
+/** @brief I2C2 Clock Enable Position @def RCC_APB1ENR_I2C2EN_Pos */
+#define RCC_APB1ENR_I2C2EN_Pos							((uint8_t) 22U)
+/** @brief I2C2 Clock Enable Mask @def RCC_APB1ENR_I2C2EN_Msk */
+#define RCC_APB1ENR_I2C2EN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_I2C2EN_Pos))
+/** @brief I2C2 Clock Enable @def RCC_APB1ENR_I2C2EN */
+#define RCC_APB1ENR_I2C2EN								RCC_APB1ENR_I2C2EN_Msk
+
+/** @brief USB Clock Enable Position @def RCC_APB1ENR_USBEN_Pos */
+#define RCC_APB1ENR_USBEN_Pos							((uint8_t) 23U)
+/** @brief USB Clock Enable Mask @def RCC_APB1ENR_USBEN_Msk */
+#define RCC_APB1ENR_USBEN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_USBEN_Pos))
+/** @brief USB Clock Enable @def RCC_APB1ENR_USBEN */
+#define RCC_APB1ENR_USBEN								RCC_APB1ENR_USBEN_Msk
+
+/** @brief CAN Clock Enable Position @def RCC_APB1ENR_CANEN_Pos */
+#define RCC_APB1ENR_CANEN_Pos							((uint8_t) 25U)
+/** @brief CAN Clock Enable Mask @def RCC_APB1ENR_CANEN_Msk */
+#define RCC_APB1ENR_CANEN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_CANEN_Pos))
+/** @brief CAN Clock Enable @def RCC_APB1ENR_CANEN */
+#define RCC_APB1ENR_CANEN								RCC_APB1ENR_CANEN_Msk
+
+/** @brief BKP Clock Enable Position @def RCC_APB1ENR_BKPEN_Pos */
+#define RCC_APB1ENR_BKPEN_Pos							((uint8_t) 27U)
+/** @brief BKP Clock Enable Mask @def RCC_APB1ENR_BKPEN_Msk */
+#define RCC_APB1ENR_BKPEN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_BKPEN_Pos))
+/** @brief BKP Clock Enable @def RCC_APB1ENR_BKPEN */
+#define RCC_APB1ENR_BKPEN								RCC_APB1ENR_BKPEN_Msk
+
+/** @brief PWR Clock Enable Position @def RCC_APB1ENR_PWREN_Pos */
+#define RCC_APB1ENR_PWREN_Pos							((uint8_t) 28U)
+/** @brief PWR Clock Enable Mask @def RCC_APB1ENR_PWREN_Msk */
+#define RCC_APB1ENR_PWREN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_PWREN_Pos))
+/** @brief PWR Clock Enable @def RCC_APB1ENR_PWREN */
+#define RCC_APB1ENR_PWREN								RCC_APB1ENR_PWREN_Msk
+
+/** @brief DAC Clock Enable Position @def RCC_APB1ENR_DACEN_Pos */
+#define RCC_APB1ENR_DACEN_Pos							((uint8_t) 29U)
+/** @brief DAC Clock Enable Mask @def RCC_APB1ENR_DACEN_Msk */
+#define RCC_APB1ENR_DACEN_Msk							((uint32_t)(0x01UL << RCC_APB1ENR_DACEN_Pos))
+/** @brief DAC Clock Enable @def RCC_APB1ENR_DACEN */
+#define RCC_APB1ENR_DACEN								RCC_APB1ENR_DACEN_Msk
+
+/** @} */ // RCC_01_RegisterLayer_05_PeripheralClockEnable
+
+// ------------------------------------------------------------------------------------------
 // RCC Structure
 // ------------------------------------------------------------------------------------------ 
 
 /**
- * @defgroup RCC_01_RegisterLayer_05_RegisterMap RCC Register Block Map
+ * @defgroup RCC_01_RegisterLayer_06_RegisterMap RCC Register Block Map
  * @ingroup RCC_01_RegisterLayer
  * @brief Memory-mapped RCC register block and practical register layout
  * @details
@@ -782,7 +1319,7 @@ extern "C" {
 typedef volatile struct _RCC_TypeDef
 {
 	/**
-	 * @ingroup RCC_01_RegisterLayer_01_ClockControl RCC_01_RegisterLayer_05_RegisterMap
+	 * @ingroup RCC_01_RegisterLayer_01_ClockControl RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief Clock Control Register
 	 * @details
 	 * Controls the internal and external clock sources including HSI, HSE, and PLL.
@@ -813,7 +1350,7 @@ typedef volatile struct _RCC_TypeDef
 	} CR;
 
 	/**
-	 * @ingroup RCC_01_RegisterLayer_02_ClockConfiguration RCC_01_RegisterLayer_05_RegisterMap
+	 * @ingroup RCC_01_RegisterLayer_02_ClockConfiguration RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief Clock Configuration Register  
 	 * @details
 	 * Configures the system clock source, prescalers for AHB, APB1, APB2 buses,
@@ -844,7 +1381,7 @@ typedef volatile struct _RCC_TypeDef
 	} CFGR;
 
 	/**
-	 * @ingroup RCC_01_RegisterLayer_03_ClockInterrupt RCC_01_RegisterLayer_05_RegisterMap
+	 * @ingroup RCC_01_RegisterLayer_03_ClockInterrupt RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief Clock Interrupt Register
 	 * @details
 	 * Manages interrupt flags and enable bits for various clock events including
@@ -883,7 +1420,7 @@ typedef volatile struct _RCC_TypeDef
 	} CIR;
 
 	/**
-	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_05_RegisterMap
+	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief APB2 Peripheral Reset Register
 	 * @details
 	 * Controls the reset functionality for peripherals connected to APB2 bus.
@@ -922,7 +1459,7 @@ typedef volatile struct _RCC_TypeDef
 	} APB2RSTR;
 
 	/**
-	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_05_RegisterMap
+	 * @ingroup RCC_01_RegisterLayer_04_PeripheralReset RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief APB1 Peripheral Reset Register
 	 * @details
 	 * Controls the reset functionality for peripherals connected to APB1 bus.
@@ -969,6 +1506,7 @@ typedef volatile struct _RCC_TypeDef
 	} APB1RSTR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_05_PeripheralClockEnable RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief AHB Peripheral Clock Enable Register
 	 * @details
 	 * Controls clock gating for peripherals connected to AHB bus.
@@ -998,6 +1536,7 @@ typedef volatile struct _RCC_TypeDef
 	} AHBENR;
 
 	/**
+	 * @ingroup RCC_01_RegisterLayer_05_PeripheralClockEnable RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief APB2 Peripheral Clock Enable Register
 	 * @details
 	 * Controls clock gating for peripherals connected to APB2 bus.
@@ -1035,6 +1574,7 @@ typedef volatile struct _RCC_TypeDef
 		} BIT;
 	} APB2ENR;
 	/**
+	 * @ingroup RCC_01_RegisterLayer_05_PeripheralClockEnable RCC_01_RegisterLayer_06_RegisterMap
 	 * @brief APB1 Peripheral Clock Enable Register
 	 * @details
 	 * Controls clock gating for peripherals connected to APB1 bus.
@@ -1136,7 +1676,7 @@ typedef volatile struct _RCC_TypeDef
 	} CSR;
 } RCC_TypeDef;
 
-/** @} */ // RCC_01_RegisterLayer_05_RegisterMap
+/** @} */ // RCC_01_RegisterLayer_06_RegisterMap
 /** @} */ // RCC_01_RegisterLayer
 
 // --- C++ Safeguards ---
