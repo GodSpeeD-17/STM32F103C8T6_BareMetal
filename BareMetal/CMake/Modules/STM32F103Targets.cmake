@@ -21,6 +21,11 @@ function(stm32_add_firmware_target)
         ${LINKER_FLAGS}
     )
 
+    add_custom_command(TARGET ${PROJECT_NAME}.elf PRE_LINK
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_OUTPUT_DIR}
+        COMMENT "Ensuring firmware output directory exists..."
+    )
+
     add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BINARY_FILE}
         COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
