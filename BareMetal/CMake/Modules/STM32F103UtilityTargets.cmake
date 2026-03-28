@@ -120,8 +120,12 @@ function(stm32_add_flash_targets)
 
     add_custom_target(flash
         DEPENDS ${PROJECT_NAME}.elf
-        COMMAND ${ST_FLASH} --reset write ${BINARY_FILE} ${FLASH_ADDRESS}
-        COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 via ST-Link v2 (SWD)"
+        COMMAND ${CMAKE_COMMAND}
+            -DST_FLASH=${ST_FLASH}
+            -DBINARY_FILE=${BINARY_FILE}
+            -DFLASH_ADDRESS=${FLASH_ADDRESS}
+            -P ${CMAKE_ROOT}/STM32F103Flash.cmake
+        COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 via ST-Link v2 (SWD) with automatic recovery"
     )
 
     add_custom_target(flash_uart
@@ -136,8 +140,10 @@ function(stm32_add_flash_targets)
     )
 
     add_custom_target(erase_flash
-        COMMAND ${ST_FLASH} erase
-        COMMENT "Erasing entire STM32 flash memory via ST-Link"
+        COMMAND ${CMAKE_COMMAND}
+            -DST_FLASH=${ST_FLASH}
+            -P ${CMAKE_ROOT}/STM32F103EraseFlash.cmake
+        COMMENT "Erasing entire STM32 flash memory via ST-Link with automatic recovery"
     )
 
     add_custom_target(erase_flash_uart
