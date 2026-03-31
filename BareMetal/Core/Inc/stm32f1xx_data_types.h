@@ -196,8 +196,6 @@ typedef uint32_t								rcc_freq_t;
  * @{
  */
 
-/** @brief GPIO port selector type @typedef gpio_port_t */
-typedef uint8_t									gpio_port_t;
 /** @brief GPIO pin bit-mask type @typedef gpio_pin_t */
 typedef uint16_t								gpio_pin_t;
 /** @brief GPIO pin mode selector type @typedef gpio_pin_mode_t */

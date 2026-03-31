@@ -22,8 +22,10 @@
  * Practical Layering Rule:
  * - Layer 0 (`stm32f1xx_gpio.h`) defines raw register symbols and register map.
  * - Layer 1 (`gpio_ll.h`) provides register-near access primitives using those symbols.
- * - Layer 2 (`gpio.h` / `gpio.c`) translates user-facing GPIO configuration into
- *   raw register fields and sequences the required LL calls.
+ * - Layer 2 (`gpio_helper.h` / `gpio_helper.c`) bridges driver-facing selectors to
+ *   raw register images.
+ * - Layer 3 (`gpio.h` / `gpio.c`) validates requests, stages batched updates, and
+ *   sequences the required LL calls.
  */
 
 #ifndef GPIO_LL_H_
@@ -56,7 +58,7 @@ extern "C" {
  * @details
  * These macros build a thin GPIO-specific convenience layer on top of the
  * generic @ref REGOPS_READ, @ref REGOPS_WRITE, @ref REGOPS_SET,
- * @ref REGOPS_CLEAR, and @ref REGOPS_MODIFY utilities.
+ * @ref REGOPS_CLEAR, @ref REGOPS_TOGGLE, and @ref REGOPS_MODIFY utilities.
  *
  * Practical Rule:
  * - Always access GPIO registers through the `.REG` member.
@@ -111,6 +113,15 @@ extern "C" {
 #define GPIO_LL_CLEAR_BITS(_GPIOX, _REG, _MASK)				REGOPS_CLEAR(GPIO_LL_REG((_GPIOX), _REG), (_MASK))
 
 /**
+ * @brief Toggles GPIO register bits
+ * @def GPIO_LL_TOGGLE_BITS
+ * @param[in] _GPIOX Target GPIO peripheral instance
+ * @param[in] _REG Register member name inside @ref GPIO_TypeDef
+ * @param[in] _MASK Bit mask to toggle
+ */
+#define GPIO_LL_TOGGLE_BITS(_GPIOX, _REG, _MASK)			REGOPS_TOGGLE(GPIO_LL_REG((_GPIOX), _REG), (_MASK))
+
+/**
  * @brief Modifies GPIO register masked field
  * @def GPIO_LL_MODIFY_REG
  * @param[in] _GPIOX Target GPIO peripheral instance
@@ -127,6 +138,60 @@ extern "C" {
 // ==================================================================================================== //
 //										  GPIO LL Clock Control									   //
 // ==================================================================================================== //
+
+/**
+ * @brief Resolves a GPIO peripheral instance to the matching APB2 clock-gate mask
+ * @param[in] GPIOx Target GPIO peripheral instance
+ * @returns Matching APB2 clock-gate mask for the selected GPIO port
+ * @retval `RCC_APB2ENR_IOPAEN`: GPIOA clock-gate mask
+ * @retval `RCC_APB2ENR_IOPBEN`: GPIOB clock-gate mask
+ * @retval `RCC_APB2ENR_IOPCEN`: GPIOC clock-gate mask
+ * @retval `RCC_APB2ENR_IOPDEN`: GPIOD clock-gate mask
+ * @retval `RCC_APB2ENR_IOPEEN`: GPIOE clock-gate mask
+ * @retval `RCC_APB2ENR_IOPFEN`: GPIOF clock-gate mask
+ * @retval `RCC_APB2ENR_IOPGEN`: GPIOG clock-gate mask
+ * @retval `0x00000000UL`: @p GPIOx did not map to a supported GPIO port
+ */
+__STATIC_FORCEINLINE uint32_t _GPIO_LL_GetPortClockMask(const GPIO_TypeDef* const GPIOx)
+{
+	const uint32_t gpioIndex = BIT_POS(GPIOx, GPIOA, GPIO_PERIPHERAL_SIZE);
+
+	switch (gpioIndex)
+	{
+		case 0x00UL:
+		{
+			return RCC_APB2ENR_IOPAEN;
+		}
+		case 0x01UL:
+		{
+			return RCC_APB2ENR_IOPBEN;
+		}
+		case 0x02UL:
+		{
+			return RCC_APB2ENR_IOPCEN;
+		}
+		case 0x03UL:
+		{
+			return RCC_APB2ENR_IOPDEN;
+		}
+		case 0x04UL:
+		{
+			return RCC_APB2ENR_IOPEEN;
+		}
+		case 0x05UL:
+		{
+			return RCC_APB2ENR_IOPFEN;
+		}
+		case 0x06UL:
+		{
+			return RCC_APB2ENR_IOPGEN;
+		}
+		default:
+			{
+				return 0x00000000UL;
+			}
+	}
+}
 
 /**
  * @brief	GPIO LL Clock Control
@@ -150,8 +215,8 @@ extern "C" {
 /**
  * @brief Enables the APB2 clock gate for a GPIO port
  * @details
- * Converts the supplied GPIO peripheral instance into the matching APB2 enable
- * bit and forwards that raw mask to @ref RCC_LL_EnableAPB2Clock.
+ * Resolves the supplied GPIO peripheral instance to the matching APB2 enable
+ * bit, then forwards that raw mask to @ref RCC_LL_EnableAPB2Clock.
  *
  * @param[in] GPIOx Target GPIO peripheral instance
  *
@@ -159,14 +224,18 @@ extern "C" {
  */
 __STATIC_FORCEINLINE void GPIO_LL_EnablePortClock(GPIO_TypeDef* const GPIOx)
 {
-	(void) RCC_LL_EnableAPB2Clock(BIT_VALUE(0x01UL, (RCC_APB2ENR_IOPAEN_Pos + BIT_POS(GPIOx, GPIOA, GPIO_PERIPHERAL_SIZE))));
+	const uint32_t clockMask = _GPIO_LL_GetPortClockMask(GPIOx);
+	if (clockMask != 0x00000000UL)
+	{
+		(void) RCC_LL_EnableAPB2Clock(clockMask);
+	}
 }
 
 /**
  * @brief Disables the APB2 clock gate for a GPIO port
  * @details
- * Converts the supplied GPIO peripheral instance into the matching APB2 enable
- * bit and forwards that raw mask to @ref RCC_LL_DisableAPB2Clock.
+ * Resolves the supplied GPIO peripheral instance to the matching APB2 enable
+ * bit, then forwards that raw mask to @ref RCC_LL_DisableAPB2Clock.
  *
  * @param[in] GPIOx Target GPIO peripheral instance
  *
@@ -174,7 +243,11 @@ __STATIC_FORCEINLINE void GPIO_LL_EnablePortClock(GPIO_TypeDef* const GPIOx)
  */
 __STATIC_FORCEINLINE void GPIO_LL_DisablePortClock(GPIO_TypeDef* const GPIOx)
 {
-	(void) RCC_LL_DisableAPB2Clock(BIT_VALUE(0x01UL, (RCC_APB2ENR_IOPAEN_Pos + BIT_POS(GPIOx, GPIOA, GPIO_PERIPHERAL_SIZE))));
+	const uint32_t clockMask = _GPIO_LL_GetPortClockMask(GPIOx);
+	if (clockMask != 0x00000000UL)
+	{
+		(void) RCC_LL_DisableAPB2Clock(clockMask);
+	}
 }
 
 /**

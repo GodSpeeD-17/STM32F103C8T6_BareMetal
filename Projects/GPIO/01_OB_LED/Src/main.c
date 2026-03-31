@@ -18,15 +18,15 @@ static void APP_SetOnboardLed(const uint8_t isOn)
 	}
 }
 
-static void APP_SetUserLed(const gpio_port_t port, const gpio_pin_t pin, const uint8_t isOn)
+static void APP_SetUserLed(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin, const uint8_t isOn)
 {
 	if (isOn != 0x00U)
 	{
-		GPIO_PinSet(port, pin);
+		GPIO_PinSet(GPIOx, pin);
 	}
 	else
 	{
-		GPIO_PinReset(port, pin);
+		GPIO_PinReset(GPIOx, pin);
 	}
 }
 

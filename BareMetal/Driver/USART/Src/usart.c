@@ -296,27 +296,27 @@ driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_
 	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	// Configure TX Pin
 	if(hardware & USART_TX_ENABLE){
-		status = GPIO_Init(usartGpioConfig->TX.GPIO, &usartGpioConfig->TX.setup); 
+		status = GPIO_Init(usartGpioConfig->TX.GPIOx, &usartGpioConfig->TX.setup); 
 		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure RX Pin
 	if(hardware & USART_RX_ENABLE){
-		status = GPIO_Init(usartGpioConfig->RX.GPIO, &usartGpioConfig->RX.setup);
+		status = GPIO_Init(usartGpioConfig->RX.GPIOx, &usartGpioConfig->RX.setup);
 		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure RTS Pin
 	if(hardware & USART_RTS_ENABLE){
-		status = GPIO_Init(usartGpioConfig->RTS.GPIO, &usartGpioConfig->RTS.setup);
+		status = GPIO_Init(usartGpioConfig->RTS.GPIOx, &usartGpioConfig->RTS.setup);
 		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure CTS Pin
 	if(hardware & USART_CTS_ENABLE){
-		status = GPIO_Init(usartGpioConfig->CTS.GPIO, &usartGpioConfig->CTS.setup);
+		status = GPIO_Init(usartGpioConfig->CTS.GPIOx, &usartGpioConfig->CTS.setup);
 		ASSERT_DRIVER_STATUS(status);
 	}
 	// Configure CK Pin
 	if(hardware & USART_CK_ENABLE){
-		status = GPIO_Init(usartGpioConfig->CK.GPIO, &usartGpioConfig->CK.setup);
+		status = GPIO_Init(usartGpioConfig->CK.GPIOx, &usartGpioConfig->CK.setup);
 		ASSERT_DRIVER_STATUS(status);
 	}
 	// Status

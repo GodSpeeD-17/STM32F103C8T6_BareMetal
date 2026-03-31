@@ -18,39 +18,39 @@
 #define USART_MAX						USART_3
 
 /*********************************************** USART1 MACROs ***********************************************/
-#define USART1_CK_GPIO					GPIO_PORT_A
+#define USART1_CK_GPIO					GPIOA
 #define USART1_CK_PIN					GPIO_PIN_8
-#define USART1_TX_GPIO					GPIO_PORT_A
+#define USART1_TX_GPIO					GPIOA
 #define USART1_TX_PIN					GPIO_PIN_9
-#define USART1_RX_GPIO					GPIO_PORT_A
+#define USART1_RX_GPIO					GPIOA
 #define USART1_RX_PIN					GPIO_PIN_10
-#define USART1_CTS_GPIO					GPIO_PORT_A
+#define USART1_CTS_GPIO					GPIOA
 #define USART1_CTS_PIN					GPIO_PIN_11
-#define USART1_RTS_GPIO					GPIO_PORT_A
+#define USART1_RTS_GPIO					GPIOA
 #define USART1_RTS_PIN					GPIO_PIN_12
 
 /*********************************************** USART2 MACROs ***********************************************/
-#define USART2_CK_GPIO					GPIO_PORT_A
+#define USART2_CK_GPIO					GPIOA
 #define USART2_CK_PIN					GPIO_PIN_4
-#define USART2_TX_GPIO					GPIO_PORT_A
+#define USART2_TX_GPIO					GPIOA
 #define USART2_TX_PIN					GPIO_PIN_2
-#define USART2_RX_GPIO					GPIO_PORT_A
+#define USART2_RX_GPIO					GPIOA
 #define USART2_RX_PIN					GPIO_PIN_3
-#define USART2_CTS_GPIO					GPIO_PORT_A
+#define USART2_CTS_GPIO					GPIOA
 #define USART2_CTS_PIN					GPIO_PIN_0
-#define USART2_RTS_GPIO					GPIO_PORT_A
+#define USART2_RTS_GPIO					GPIOA
 #define USART2_RTS_PIN					GPIO_PIN_1
 
 /*********************************************** USART3 MACROs ***********************************************/
-#define USART3_CK_GPIO					GPIO_PORT_B
+#define USART3_CK_GPIO					GPIOB
 #define USART3_CK_PIN					GPIO_PIN_12
-#define USART3_TX_GPIO					GPIO_PORT_B
+#define USART3_TX_GPIO					GPIOB
 #define USART3_TX_PIN					GPIO_PIN_10
-#define USART3_RX_GPIO					GPIO_PORT_B
+#define USART3_RX_GPIO					GPIOB
 #define USART3_RX_PIN					GPIO_PIN_11
-#define USART3_CTS_GPIO					GPIO_PORT_B
+#define USART3_CTS_GPIO					GPIOB
 #define USART3_CTS_PIN					GPIO_PIN_13
-#define USART3_RTS_GPIO					GPIO_PORT_B
+#define USART3_RTS_GPIO					GPIOB
 #define USART3_RTS_PIN					GPIO_PIN_14
 
 /*********************************************** USART Pin Generic Configuration ***********************************************/
@@ -181,7 +181,7 @@ typedef enum {
 /*********************************************** Custom USART Hardware Mapping Structure ***********************************************/
 typedef struct {
 	// GPIO Port
-	gpio_port_t GPIO;
+	GPIO_TypeDef* GPIOx;
 	// GPIO Pin Configuration
 	gpio_config_t setup;
 } usart_pin_t;

@@ -16,9 +16,9 @@
  * This is not a user-facing GPIO interface.
  *
  * Practical Rule:
- * - `gpio.c` owns driver policy and register-level batching.
- * - `gpio_helper.c` owns the per-pin staged-image updates and hardware-state
- *   decoding needed to keep `gpio.c` free from bit-position plumbing.
+ * - Layer 2 (`gpio_helper.c`) owns per-pin staged-image updates and hardware-state
+ *   decoding.
+ * - Layer 3 (`gpio.c`) owns driver policy, validation, and register-level batching.
  */
 
 #ifndef GPIO_HELPER_H_
@@ -34,75 +34,6 @@ extern "C" {
 #include "gpio_ll.h"
 
 /**
- * @brief Checks whether a GPIO pin mask selects exactly one valid pin
- * @def _GPIO_HELPER_IS_SINGLE_PIN_MASK_VALID
- * @param[in] _PIN GPIO pin mask
- * @returns Single-pin-mask validity status
- * @retval - `0x00U`: Pin Mask Invalid
- * @retval - `0x01U`: Pin Mask Valid
- */
-#define _GPIO_HELPER_IS_SINGLE_PIN_MASK_VALID(_PIN)													\
-(																										\
-	((((gpio_pin_t)(_PIN)) != GPIO_PIN_NONE) && ((((gpio_pin_t)(_PIN)) & ~GPIO_PIN_ALL) == GPIO_PIN_NONE) &&	\
-	((((gpio_pin_t)(_PIN)) & (((gpio_pin_t)(_PIN)) - (gpio_pin_t) 1U)) == GPIO_PIN_NONE)) ? 0x01U : 0x00U	\
-)
-
-/**
- * @brief Checks whether a raw MODE field value is valid
- * @def _GPIO_HELPER_IS_MODE_BITS_VALID
- * @param[in] _MODE_BITS Raw 2-bit MODE field value
- * @returns MODE field validity status
- * @retval - `0x00U`:	MODE Invalid
- * @retval - `0x01U`:	MODE Valid
- */
-#define _GPIO_HELPER_IS_MODE_BITS_VALID(_MODE_BITS)													\
-	((((gpio_mode_t)(_MODE_BITS) & (gpio_mode_t) ~0x03U) == (gpio_mode_t) 0x00U) ? 0x01U : 0x00U)
-
-/**
- * @brief Checks whether a raw CNF field value is valid
- * @def _GPIO_HELPER_IS_CNF_BITS_VALID
- * @param[in] _CNF_BITS Raw 2-bit CNF field value
- * @returns CNF field validity status
- * @retval - `0x00U`:	CNF Invalid
- * @retval - `0x01U`:	CNF Valid
- */
-#define _GPIO_HELPER_IS_CNF_BITS_VALID(_CNF_BITS)													\
-	((((gpio_cnf_t)(_CNF_BITS) & ((gpio_cnf_t) ~0x03U)) == (gpio_cnf_t) 0x00U) ? 0x01U : 0x00U)
-
-/**
- * @brief Checks whether a raw pull-direction bit value is valid
- * @def _GPIO_HELPER_IS_PULL_BIT_VALID
- * @param[in] _PULL_BIT Raw pull-direction bit
- * @returns Pull-bit validity status
- * @retval - `0x00U`:	Pull Invalid
- * @retval - `0x01U`:	Pull Valid
- */
-#define _GPIO_HELPER_IS_PULL_BIT_VALID(_PULL_BIT)													\
-	((((gpio_pull_t)(_PULL_BIT)) <= ((gpio_pull_t) 0x01U)) ? 0x01U : 0x00U)
-
-/**
- * @brief Checks whether a packed raw pin configuration field is valid
- * @def _GPIO_HELPER_IS_PIN_CONFIG_BITS_VALID
- * @param[in] _PIN_CONFIG_BITS Packed raw pin configuration bits
- * @returns Packed pin-configuration validity status
- * @retval - `0x00U`:	Pin Configuration Invalid
- * @retval - `0x01U`:	Pin Configuration Valid
- */
-#define _GPIO_HELPER_IS_PIN_CONFIG_BITS_VALID(_PIN_CONFIG_BITS)										\
-	((((gpio_pin_config_bits_t)(_PIN_CONFIG_BITS) & (gpio_pin_config_bits_t) ~0x0FU) == (gpio_pin_config_bits_t) 0x00U) ? 0x01U : 0x00U)
-
-/**
- * @brief Packs raw CNF and MODE bits into one 4-bit GPIO pin configuration field
- * @def _GPIO_HELPER_GET_PIN_CONFIG_BITS
- * @param[in] _MODE_BITS Raw 2-bit MODE field value
- * @param[in] _CNF_BITS Raw 2-bit CNF field value
- * @returns Packed raw GPIO pin configuration field as `CNF[3:2] | MODE[1:0]`
- */
-#define _GPIO_HELPER_GET_PIN_CONFIG_BITS(_MODE_BITS, _CNF_BITS)										\
-	((gpio_pin_config_bits_t)((((gpio_cnf_t)(_CNF_BITS)) & (gpio_cnf_t) 0x03U) << 2U) |	\
-	((gpio_mode_t)(_MODE_BITS) & (gpio_mode_t) 0x03U))
-
-/**
  * @brief Updates one pin slot inside a staged `CRL` or `CRH` image
  * @details
  * This helper forms the driver-to-LL bridge for full pin configuration.
@@ -115,10 +46,10 @@ extern "C" {
  * @param[in] mode Driver-layer GPIO mode selector
  * @param[in] config Driver-layer GPIO configuration selector
  * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pin mode/config image updated successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		`pCrxRegImage` was `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`pin`, `mode`, or `config` was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin mode/config image updated successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin, @p mode, or @p config was invalid.
  */
 driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
 (
@@ -138,10 +69,10 @@ driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
  * @param[in] pin GPIO single-pin mask
  * @param[in] mode Driver-layer GPIO mode selector
  * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pin MODE field updated successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		`pCrxRegImage` was `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`pin` or `mode` was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin MODE field updated successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p mode was invalid.
  */
 driver_status_t _GPIO_Helper_UpdatePinModeImage
 (
@@ -160,10 +91,10 @@ driver_status_t _GPIO_Helper_UpdatePinModeImage
  * @param[in] pin GPIO single-pin mask
  * @param[in] config Driver-layer GPIO configuration selector
  * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pin CNF field updated successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		`pCrxRegImage` was `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`pin` or `config` was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin CNF field updated successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config was invalid.
  */
 driver_status_t _GPIO_Helper_UpdatePinConfigImage
 (
@@ -176,10 +107,10 @@ driver_status_t _GPIO_Helper_UpdatePinConfigImage
  * @brief Restores one pin slot to the STM32F1 reset configuration image
  * @param[in] pin GPIO single-pin mask
  * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to reset in place
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pin reset image staged successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		`pCrxRegImage` was `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`pin` was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin reset image staged successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
  */
 driver_status_t _GPIO_Helper_ResetPinConfigImage
 (
@@ -197,10 +128,10 @@ driver_status_t _GPIO_Helper_ResetPinConfigImage
  * @param[in] pin GPIO single-pin mask
  * @param[in] config Driver-layer GPIO configuration selector
  * @param[in,out] pOdrRegImage Staged `ODR` image to update in place
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pull state staged successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		`pOdrRegImage` was `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`pin` or `config` was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pull state staged successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOdrRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config was invalid.
  */
 driver_status_t _GPIO_Helper_UpdatePinPullImage
 (
@@ -225,10 +156,10 @@ driver_status_t _GPIO_Helper_UpdatePinPullImage
  * @param[in] pin GPIO single-pin mask
  * @param[out] pMode Driver-facing GPIO mode selector
  * @param[out] pConfig Driver-facing GPIO configuration selector
- * @returns Driver operation status
- * @retval `DRIVER_STATUS_SUCCESS`:				Pin mode/config read successfully
- * @retval `DRIVER_STATUS_ERROR_NULL_PTR`:		Both `pMode` and `pConfig` were `NULL`
- * @retval `DRIVER_STATUS_ERROR_INVALID_ARG`:	`GPIOx`, `pin`, or the raw pin slot state was invalid
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin mode/config was read successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Both @p pMode and @p pConfig were null pointers.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or the raw pin slot state was invalid.
  */
 driver_status_t _GPIO_Helper_ReadPinModeConfig
 (

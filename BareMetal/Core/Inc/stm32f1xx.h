@@ -946,7 +946,7 @@ typedef enum
 #ifdef STM32F103C8T6__
 
 /** @brief On-board LED GPIO port @def GPIO_OB_LED_PORT */
-#define GPIO_OB_LED_PORT						GPIO_PORT_C
+#define GPIO_OB_LED_PORT						GPIOC
 /** @brief On-board LED GPIO pin @def GPIO_OB_LED_PIN */
 #define GPIO_OB_LED_PIN							GPIO_PIN_13
 /** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */

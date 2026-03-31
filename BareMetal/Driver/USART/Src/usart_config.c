@@ -15,7 +15,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	// USART1 GPIO Mapping
 	[USART_1] = {
 		.TX = {
-			.GPIO = USART1_TX_GPIO,
+			.GPIOx = USART1_TX_GPIO,
 			.setup = {
 				.pin = USART1_TX_PIN,
 				.mode = USART_TX_PIN_MODE,
@@ -23,7 +23,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RX = {
-			.GPIO = USART1_RX_GPIO,
+			.GPIOx = USART1_RX_GPIO,
 			.setup = {
 				.pin = USART1_RX_PIN,
 				.mode = USART_RX_PIN_MODE,
@@ -31,7 +31,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RTS = {
-			.GPIO = USART1_RTS_GPIO,
+			.GPIOx = USART1_RTS_GPIO,
 			.setup = {
 				.pin = USART1_RTS_PIN,
 				.mode = USART_RTS_PIN_MODE,
@@ -39,7 +39,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CTS = {
-			.GPIO = USART1_CTS_GPIO,
+			.GPIOx = USART1_CTS_GPIO,
 			.setup = {
 				.pin = USART1_CTS_PIN,
 				.mode = USART_CTS_PIN_MODE,
@@ -47,7 +47,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CK = {
-			.GPIO = USART1_CK_GPIO,
+			.GPIOx = USART1_CK_GPIO,
 			.setup = {
 				.pin = USART1_CK_PIN,
 				.mode = USART_CK_PIN_MODE,
@@ -58,7 +58,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	// USART2 GPIO Mapping
 	[USART_2] = {
 		.TX = {
-			.GPIO = USART2_TX_GPIO,
+			.GPIOx = USART2_TX_GPIO,
 			.setup = {
 				.pin = USART2_TX_PIN,
 				.mode = USART_TX_PIN_MODE,
@@ -66,7 +66,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RX = {
-			.GPIO = USART2_RX_GPIO,
+			.GPIOx = USART2_RX_GPIO,
 			.setup = {
 				.pin = USART2_RX_PIN,
 				.mode = USART_RX_PIN_MODE,
@@ -74,7 +74,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RTS = {
-			.GPIO = USART2_RTS_GPIO,
+			.GPIOx = USART2_RTS_GPIO,
 			.setup = {
 				.pin = USART2_RTS_PIN,
 				.mode = USART_RTS_PIN_MODE,
@@ -82,7 +82,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CTS = {
-			.GPIO = USART2_CTS_GPIO,
+			.GPIOx = USART2_CTS_GPIO,
 			.setup = {
 				.pin = USART2_CTS_PIN,
 				.mode = USART_CTS_PIN_MODE,
@@ -90,7 +90,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CK = {
-			.GPIO = USART2_CK_GPIO,
+			.GPIOx = USART2_CK_GPIO,
 			.setup = {
 				.pin = USART2_CK_PIN,
 				.mode = USART_CK_PIN_MODE,
@@ -101,7 +101,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	// USART3 GPIO Mapping
 	[USART_3] = {
 		.TX = {
-			.GPIO = USART3_TX_GPIO,
+			.GPIOx = USART3_TX_GPIO,
 			.setup = {
 				.pin = USART3_TX_PIN,
 				.mode = USART_TX_PIN_MODE,
@@ -109,7 +109,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RX = {
-			.GPIO = USART3_RX_GPIO,
+			.GPIOx = USART3_RX_GPIO,
 			.setup = {
 				.pin = USART3_RX_PIN,
 				.mode = USART_RX_PIN_MODE,
@@ -117,7 +117,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.RTS = {
-			.GPIO = USART3_RTS_GPIO,
+			.GPIOx = USART3_RTS_GPIO,
 			.setup = {
 				.pin = USART3_RTS_PIN,
 				.mode = USART_RTS_PIN_MODE,
@@ -125,7 +125,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CTS = {
-			.GPIO = USART3_CTS_GPIO,
+			.GPIOx = USART3_CTS_GPIO,
 			.setup = {
 				.pin = USART3_CTS_PIN,
 				.mode = USART_CTS_PIN_MODE,
@@ -133,7 +133,7 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 			}
 		},
 		.CK = {
-			.GPIO = USART3_CK_GPIO,
+			.GPIOx = USART3_CK_GPIO,
 			.setup = {
 				.pin = USART3_CK_PIN,
 				.mode = USART_CK_PIN_MODE,
