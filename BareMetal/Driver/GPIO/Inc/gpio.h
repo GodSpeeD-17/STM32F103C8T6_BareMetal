@@ -224,7 +224,7 @@ __STATIC_FORCEINLINE uint8_t _GPIO_GetPinIndexFromMask(const gpio_pin_t pin)
  *       verify mode-to-configuration compatibility (handled at runtime)
  * @def GPIO_PIN_IS_CONFIG
  */
-#define GPIO_PIN_IS_CONFIG(config)								\
+#define GPIO_PIN_IS_CONFIG(config)										\
 (																		\
     (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_ANALOG)     ||	\
     (((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_FLOAT)      ||	\
@@ -246,11 +246,11 @@ __STATIC_FORCEINLINE uint8_t _GPIO_GetPinIndexFromMask(const gpio_pin_t pin)
  *       - @ref GPIO_PIN_CNF_OUT_AF_OD  → AF Open-Drain
  * @def GPIO_PIN_IS_AF_CONFIG
  */
-#define GPIO_PIN_IS_AF_CONFIG(config)								\
-	(																		\
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP) ||		\
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
-	)
+#define GPIO_PIN_IS_AF_CONFIG(config)									\
+(																		\
+	(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP) ||		\
+	(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
+)
 
 /**
  * @brief Checks whether a driver mode/config pair selects input pull-up or pull-down
@@ -259,7 +259,7 @@ __STATIC_FORCEINLINE uint8_t _GPIO_GetPinIndexFromMask(const gpio_pin_t pin)
  * @param[in] config Driver GPIO configuration selector
  * @returns Non-zero when the pair selects input pull-up or pull-down
  */
-#define GPIO_PIN_IS_PULL_CONFIG(mode, config)					\
+#define GPIO_PIN_IS_PULL_CONFIG(mode, config)							\
 (																		\
 	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_INPUT) &&				\
 	((((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN) ||	\
@@ -276,77 +276,28 @@ __STATIC_FORCEINLINE uint8_t _GPIO_GetPinIndexFromMask(const gpio_pin_t pin)
  * - When MODE > 0b00 (Output/AF), CNF must be one of the `GPIO_PIN_CNF_OUT_*` values.
  * @def GPIO_PIN_IS_MODE_CONFIG_COMPATIBLE
  */
-#define GPIO_PIN_IS_MODE_CONFIG_COMPATIBLE(mode, config) ( \
-	((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_INPUT) && ( \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_ANALOG)     || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_FLOAT)      || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN)  || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_UP)       \
-	)) || \
-	(((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) || \
-	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_2MHz)  || \
-	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_50MHz)) && ( \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_PP)     || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_OD)     || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP)     || \
-		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)       \
-	)) \
+#define GPIO_PIN_IS_MODE_CONFIG_COMPATIBLE(mode, config)					\
+(																			\
+	((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_INPUT) &&					\
+	(																		\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_ANALOG)     ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_FLOAT)      ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_DOWN)  ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_IN_PULL_UP)			\
+	))																		\
+									||										\
+	(((((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_10MHz) ||			\
+	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_2MHz)  ||			\
+	(((gpio_pin_mode_t) (mode)) == GPIO_PIN_MODE_OUTPUT_50MHz)) &&			\
+	(																		\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_PP)     ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_GP_OD)     ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_PP)     ||	\
+		(((gpio_pin_config_t) (config)) == GPIO_PIN_CNF_OUT_AF_OD)			\
+	))																		\
 )
 
 /** @} */ // GPIO_03_Driver_01_Types_04_PinConfig
-
-// ==================================================================================================== //
-//                                            GPIO EXTI Types                                           //
-// ==================================================================================================== //
-/**
- * @brief    Driver EXTI trigger selectors
- * @defgroup GPIO_03_Driver_01_Types_05_EXTITriggers Driver EXTI Trigger Types
- * @ingroup  GPIO_03_Driver_01_Types
- * @details
- * - These constants define when an external interrupt should trigger for a given line.
- * - Used with EXTI configuration registers (RTSR/FTSR).
- * @see Reference Manual RM0008 - Section 10.2.3 EXTI rising/falling trigger selection
- * @{
- */
-
-/** @brief Trigger on falling edge @def GPIO_EXTI_TRIGGER_FALLING */
-#define GPIO_EXTI_TRIGGER_FALLING							((gpio_exti_trigger_t) 0x01)
-/** @brief Trigger on rising edge @def GPIO_EXTI_TRIGGER_RISING */
-#define GPIO_EXTI_TRIGGER_RISING							((gpio_exti_trigger_t) 0x02)
-/** @brief Trigger on both edges @def GPIO_EXTI_TRIGGER_BOTH */
-#define GPIO_EXTI_TRIGGER_BOTH								(GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING)
-
-/** @} */ // GPIO_03_Driver_01_Types_05_EXTITriggers
-
-// ==================================================================================================== //
-//                                        GPIO EXTI Port Source Types                                   //
-// ==================================================================================================== //
-/**
- * @brief    Driver EXTI port source selectors
- * @defgroup GPIO_03_Driver_01_Types_06_EXTIPorts Driver EXTI Port Sources
- * @ingroup  GPIO_03_Driver_01_Types
- * @details These constants define which GPIO port is connected to the EXTI lines
- * (EXTI lines 0-15). The values correspond to the selection bits in the $\text{AFIO}$ registers.
- * @see Reference Manual RM0008 - Section 9.2.5 AFIO_EXTICR1-4 registers
- * @{
- */
-
-/** @brief EXTI source: GPIO Port A (0000) @def GPIO_EXTI_PORT_A */
-#define GPIO_EXTI_PORT_A									((gpio_exti_port_t) 0x00)
-/** @brief EXTI source: GPIO Port B (0001) @def GPIO_EXTI_PORT_B */
-#define GPIO_EXTI_PORT_B									((gpio_exti_port_t) 0x01)
-/** @brief EXTI source: GPIO Port C (0010) @def GPIO_EXTI_PORT_C */
-#define GPIO_EXTI_PORT_C									((gpio_exti_port_t) 0x02)
-/** @brief EXTI source: GPIO Port D (0011) @def GPIO_EXTI_PORT_D */
-#define GPIO_EXTI_PORT_D									((gpio_exti_port_t) 0x03)
-/** @brief EXTI source: GPIO Port E (0100) @def GPIO_EXTI_PORT_E */
-#define GPIO_EXTI_PORT_E									((gpio_exti_port_t) 0x04)
-/** @brief EXTI source: GPIO Port F (0101) @def GPIO_EXTI_PORT_F */
-#define GPIO_EXTI_PORT_F									((gpio_exti_port_t) 0x05)
-/** @brief EXTI source: GPIO Port G (0110) @def GPIO_EXTI_PORT_G */
-#define GPIO_EXTI_PORT_G									((gpio_exti_port_t) 0x06)
-
-/** @} */ // GPIO_03_Driver_01_Types_06_EXTIPorts
 
 /** @} */ // GPIO_03_Driver_01_Types
 
@@ -442,7 +393,6 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-
 	GPIO_LL_WRITE_REG(GPIOx, BSRR, (uint32_t) pin);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -462,7 +412,6 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-
 	GPIO_LL_WRITE_REG(GPIOx, BRR, (uint32_t) pin);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -503,7 +452,6 @@ __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_
 	{
 		return (uint8_t) 0x00U;
 	}
-
 	GPIO_LL_READ_REG(GPIOx, IDR, reg);
 	reg = (reg & ((uint32_t) pin)) >> pinIndex;
 	return ((uint8_t) reg);

@@ -1,127 +1,177 @@
-// /**
-//  * @file gpio_exti.h
-//  * @author Shrey Shah
-//  * @brief GPIO Interrupt APIs
-//  * @version v1.2
-//  * @date 14-09-2025
-//  */
+/**
+ * @file	gpio_exti.h
+ * @author	Shrey Shah
+ * @brief	GPIO EXTI Driver Public Interface
+ * @version	v1.0
+ * @date	31-03-2026
+ *
+ * @details
+ * This header defines the public EXTI driver built on top of the GPIO driver.
+ *
+ * Theory:
+ * - Layer 0 owns the raw EXTI and AFIO register model and shared EXTI scalar types.
+ * - Layer 1 (`gpio_exti_ll.h`) owns thin EXTI, AFIO, and NVIC-near primitives.
+ * - Layer 2 (`gpio_exti_helper.h` / `gpio_exti_helper.c`) bridges `GPIOx + pin`
+ *   selectors to staged EXTI and AFIO register images.
+ * - Layer 3 (`gpio_exti.h` / `gpio_exti.c`) owns the public EXTI API, validation,
+ *   GPIO integration, orchestration, and batched register writes.
+ */
 
-// // Header Guards
-// #ifndef GPIO_EXTI_H_
-// #define GPIO_EXTI_H_
+#ifndef GPIO_EXTI_H_
+#define GPIO_EXTI_H_
 
-// /*********************************************** Includes ***********************************************/
-// // GPIO Configuration
-// #include "gpio.h"
-// // Global Interrupt
-// #include "nvic.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-// /*********************************************** Helper APIs ***********************************************/
-// /**
-//  * @brief Enables the External Interrupt
-//  * @param pin Refer to `gpio_pin_t` enum
-//  */
-// __STATIC_FORCEINLINE void GPIO_EXTI_Enable(const gpio_pin_t pin){
-// 	// Unmask the IRQ
-// 	EXTI->IMR.REG |= pin;
-// }
+// ==================================================================================================== //
+//                                               Includes                                               //
+// ==================================================================================================== //
 
-// /**
-//  * @brief Disables the External Interrupt
-//  * @param pin Refer to `gpio_pin_t` enum
-//  */
-// __STATIC_FORCEINLINE void GPIO_EXTI_Disable(const gpio_pin_t pin){
-// 	// Unmask the IRQ
-// 	EXTI->IMR.REG &= ~(pin);
-// }
+#include "gpio.h"
 
-// /**
-//  * @brief Returns the Pending Bit of External Interrupt
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @returns Pending Bit Status for Input Pin
-//  */
-// __STATIC_FORCEINLINE uint16_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin){
-// 	// Return the value
-// 	return (uint16_t) (EXTI->PR.REG & pin);
-// }
+/**
+ * @addtogroup GPIO_EXTI_03_Driver
+ * @{
+ */
 
-// /**
-//  * @brief Acknowledge the Pending Bit of External Interrupt
-//  * @param pin Refer to `gpio_pin_t` enum
-//  */
-// __STATIC_FORCEINLINE void GPIO_EXTI_Ack(const gpio_pin_t pin){
-// 	// Acknowledge the Pending Bit
-// 	EXTI->PR.REG |= pin;
-// }
+// ==================================================================================================== //
+//                                         GPIO EXTI Data Types                                         //
+// ==================================================================================================== //
 
-// /**
-//  * @brief Retrieves the EXTI Configuration Register based upon the Pin Number
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @returns Pointer to the relevant EXTI configuration register
-//  * @note Pass only one pin at a time
-//  */
-// __STATIC_FORCEINLINE uint32_t* __GPIO_EXTI_GetCR__(const gpio_pin_t pin){
-// 	// Return the Register Address
-// 	return (uint32_t *) (&AFIO->EXTICR1.REG + (__GPIO_getPin__(pin) >> 2));
-// }
+/**
+ * @brief GPIO EXTI driver types
+ * @defgroup GPIO_EXTI_03_Driver_01_Types GPIO EXTI Driver Data Types
+ * @ingroup GPIO_EXTI_03_Driver
+ * @{
+ */
 
-// /*********************************************** Driver APIs ***********************************************/
-// /**
-//  * @brief @brief Maps the EXTI Source Port to Interrupt
-//  * @param GPIOx Target GPIO peripheral instance
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
-//  * @note Pass only one pin at a time
-//  */
-// void GPIO_EXTI_MapPort(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin, uint32_t* extiConfigReg);
+/**
+ * @brief Driver EXTI trigger selectors
+ * @defgroup GPIO_EXTI_03_Driver_01_Types_01_Triggers GPIO EXTI Trigger Selectors
+ * @ingroup GPIO_EXTI_03_Driver_01_Types
+ * @{
+ */
 
-// /**
-//  * @brief Unmaps the EXTI Source Port from Interrupt
-//  * @param GPIOx Target GPIO peripheral instance
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @param extiConfigReg Pointer to the relevant EXTI Configuration Register
-//  * @note Pass only one pin at a time
-//  */
-// void GPIO_EXTI_UnmapPort(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin, uint32_t* extiConfigReg);
+/** @brief Trigger on falling edge */
+#define GPIO_EXTI_TRIGGER_FALLING						((gpio_exti_trigger_t) 0x01U)
+/** @brief Trigger on rising edge */
+#define GPIO_EXTI_TRIGGER_RISING						((gpio_exti_trigger_t) 0x02U)
+/** @brief Trigger on both rising and falling edges */
+#define GPIO_EXTI_TRIGGER_BOTH							((gpio_exti_trigger_t) (GPIO_EXTI_TRIGGER_FALLING | GPIO_EXTI_TRIGGER_RISING))
 
-// /**
-//  * @brief Sets the EXTI Trigger Selection
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @param trigger Refer to `gpio_exti_trigger_t` enum
-//  */
-// void GPIO_EXTI_SetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
+/**
+ * @brief Checks whether an EXTI trigger selector is valid
+ * @param[in] trigger Driver EXTI trigger selector
+ * @returns Non-zero if valid, otherwise `0`
+ * @def GPIO_EXTI_IS_TRIGGER
+ */
+#define GPIO_EXTI_IS_TRIGGER(trigger)						\
+(															\
+	(((gpio_exti_trigger_t) (trigger)) != (gpio_exti_trigger_t) 0x00U) &&	\
+	((((gpio_exti_trigger_t) (trigger)) &						\
+	(~((gpio_exti_trigger_t) GPIO_EXTI_TRIGGER_BOTH))) == (gpio_exti_trigger_t) 0x00U)	\
+)
 
-// /**
-//  * @brief Resets the EXTI Trigger Selection
-//  * @param pin Refer to `gpio_pin_t` enum
-//  * @param trigger Refer to `gpio_exti_trigger_t` enum
-//  */
-// void GPIO_EXTI_ResetTrigger(const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
+/** @} */ // GPIO_EXTI_03_Driver_01_Types_01_Triggers
 
-// /**
-//  * @brief Initializes the External Interrupt
-//  * @param GPIOx Target GPIO peripheral instance
-//  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
-//  * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
-//  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
-//  * @note - Failing to do so may cause driver to misbehave
-//  * @returns - @ref driver_status_t Driver operation status
-//  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: Failure
-//  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Success
-//  */
-// driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
+/**
+ * @brief Driver AFIO EXTI port-source selectors
+ * @defgroup GPIO_EXTI_03_Driver_01_Types_02_PortSources GPIO EXTI Port Source Selectors
+ * @ingroup GPIO_EXTI_03_Driver_01_Types
+ * @{
+ */
 
-// /**
-//  * @brief Deinitialize the External Interrupt
-//  * @param GPIOx Target GPIO peripheral instance
-//  * @param pin GPIO Pin (Refer to `gpio_pin_t` enum)
-//  * @param trigger GPIO Trigger (Refer to `gpio_exti_trigger_t` enum)
-//  * @note - GPIO should be configured as Input: Floating or Pull-Up/Pull-Down
-//  * @note - Failing to do so may cause driver to misbehave
-//  * @returns - @ref driver_status_t Driver operation status
-//  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: Failure
-//  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Success
-//  */
-// driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin, const gpio_exti_trigger_t trigger);
+/** @brief EXTI source: GPIO Port A */
+#define GPIO_EXTI_PORT_A								((gpio_exti_port_t) 0x00U)
+/** @brief EXTI source: GPIO Port B */
+#define GPIO_EXTI_PORT_B								((gpio_exti_port_t) 0x01U)
+/** @brief EXTI source: GPIO Port C */
+#define GPIO_EXTI_PORT_C								((gpio_exti_port_t) 0x02U)
+/** @brief EXTI source: GPIO Port D */
+#define GPIO_EXTI_PORT_D								((gpio_exti_port_t) 0x03U)
+/** @brief EXTI source: GPIO Port E */
+#define GPIO_EXTI_PORT_E								((gpio_exti_port_t) 0x04U)
+/** @brief EXTI source: GPIO Port F */
+#define GPIO_EXTI_PORT_F								((gpio_exti_port_t) 0x05U)
+/** @brief EXTI source: GPIO Port G */
+#define GPIO_EXTI_PORT_G								((gpio_exti_port_t) 0x06U)
 
-// #endif /* GPIO_EXTI_H_ */
+/**
+ * @brief Checks whether an AFIO EXTI port-source selector is valid
+ * @param[in] portSource Driver EXTI port-source selector
+ * @returns Non-zero if valid, otherwise `0`
+ * @def GPIO_EXTI_IS_PORT_SOURCE
+ */
+#define GPIO_EXTI_IS_PORT_SOURCE(portSource)				\
+(															\
+	((gpio_exti_port_t) (portSource)) <= GPIO_EXTI_PORT_G	\
+)
+
+/** @} */ // GPIO_EXTI_03_Driver_01_Types_02_PortSources
+
+/** @} */ // GPIO_EXTI_03_Driver_01_Types
+
+// ==================================================================================================== //
+//                                              Driver APIs                                             //
+// ==================================================================================================== //
+
+/**
+ * @brief Initializes one or more GPIO EXTI lines for the selected GPIO port
+ * @details
+ * Reads each touched AFIO and EXTI register once, updates staged images per
+ * selected line, then writes each touched register once.
+ *
+ * The selected GPIO pins must already be configured as digital inputs using the
+ * GPIO driver.
+ *
+ * @param[in] GPIOx GPIO peripheral instance that owns the selected EXTI line(s)
+ * @param[in] pin GPIO pin mask identifying the EXTI line(s)
+ * @param[in] trigger Driver EXTI trigger selector
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: EXTI line initialization completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or @p trigger was invalid, or the selected GPIO pin(s) were not configured as digital inputs.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ */
+driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_exti_trigger_t trigger);
+
+/**
+ * @brief Deinitializes one or more GPIO EXTI lines for the selected GPIO port
+ * @details
+ * Clears interrupt masking, clears rising/falling trigger selection, restores
+ * the AFIO EXTI routing field(s) to reset state, and clears the selected
+ * pending bit(s).
+ *
+ * @param[in] GPIOx GPIO peripheral instance that owns the selected EXTI line(s)
+ * @param[in] pin GPIO pin mask identifying the EXTI line(s)
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: EXTI line deinitialization completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ */
+driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin);
+
+/**
+ * @brief Returns whether any selected EXTI line is pending
+ * @param[in] pin GPIO pin mask identifying the EXTI line(s)
+ * @returns `0x01U` when any selected line is pending, otherwise `0x00U`
+ * @note Returns `0x00U` when @p pin is invalid.
+ */
+uint8_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin);
+
+/**
+ * @brief Acknowledges one or more EXTI pending line bits
+ * @param[in] pin GPIO pin mask identifying the EXTI line(s)
+ * @returns - @ref driver_status_t Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pending bit(s) were acknowledged.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
+ */
+driver_status_t GPIO_EXTI_Ack(const gpio_pin_t pin);
+
+/** @} */ // GPIO_EXTI_03_Driver
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* GPIO_EXTI_H_ */
