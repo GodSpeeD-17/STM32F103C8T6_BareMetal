@@ -15,7 +15,7 @@
 // Register Operations Utilities
 // ------------------------------------------------------------------------------------------
 
-driver_status_t RegOps_Read(volatile uint32_t *reg, uint32_t *out_value)
+driver_status_t RegOps_Read(_IO *reg, uint32_t* const out_value)
 {
 	if ((reg == NULL) || (out_value == NULL))
 	{
@@ -27,7 +27,7 @@ driver_status_t RegOps_Read(volatile uint32_t *reg, uint32_t *out_value)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RegOps_Write(volatile uint32_t *reg, uint32_t value)
+driver_status_t RegOps_Write(_IO *reg, uint32_t value)
 {
 	if (reg == NULL)
 	{
@@ -39,7 +39,7 @@ driver_status_t RegOps_Write(volatile uint32_t *reg, uint32_t value)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RegOps_Set(volatile uint32_t *reg, uint32_t mask)
+driver_status_t RegOps_Set(_IO *reg, uint32_t mask)
 {
 	if (reg == NULL)
 	{
@@ -51,7 +51,7 @@ driver_status_t RegOps_Set(volatile uint32_t *reg, uint32_t mask)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RegOps_Clear(volatile uint32_t *reg, uint32_t mask)
+driver_status_t RegOps_Clear(_IO *reg, uint32_t mask)
 {
 	if (reg == NULL)
 	{
@@ -63,7 +63,7 @@ driver_status_t RegOps_Clear(volatile uint32_t *reg, uint32_t mask)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RegOps_Toggle(volatile uint32_t *reg, uint32_t mask)
+driver_status_t RegOps_Toggle(_IO *reg, uint32_t mask)
 {
 	if (reg == NULL)
 	{
@@ -75,7 +75,7 @@ driver_status_t RegOps_Toggle(volatile uint32_t *reg, uint32_t mask)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RegOps_WriteMasked(volatile uint32_t *reg, uint32_t mask, uint32_t value)
+driver_status_t RegOps_WriteMasked(_IO *reg, uint32_t mask, uint32_t value)
 {
 	if (reg == NULL)
 	{

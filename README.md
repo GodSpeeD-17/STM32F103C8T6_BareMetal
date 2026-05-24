@@ -1,72 +1,86 @@
-# ***STM32F103C8T6 (Blue Pill) Bare Metal Repository***
+# STM32F103C8T6 Blue Pill Bare-Metal Repository
 
----
-Hi! I am a beginner and trying to program the Blue Pill Module using Bare Metal (Register-Level) Programming. This repository is only meant for learning purpose. Kindly inform in case of any mistake and if possible suggestions to resolve it. For any other suggestions you can connect with me on LinkedIn: [Shrey Shah](https://www.linkedin.com/in/shreyshah1710/)
+This repository is a learning-focused bare-metal codebase for the STM32F103C8T6
+Blue Pill board. The goal is to understand the MCU at register level while
+gradually shaping the drivers into a modular, layered architecture that can be
+maintained and extended without mixing hardware register details with public
+driver policy.
 
-Few GitHub Repositories that I had used for learning purpose during development phase:
-- [stm32f1-baremetal](https://github.com/csrohit/stm32f1-baremetal/tree/main)
-- [stm32f103-1](https://github.com/freesources/stm32f103-1)
----
+The current normalization work is centered on the GPIO stack. GPIO is being used
+as the reference design for how future peripheral drivers should be structured.
 
----
-## ***Description***
-	- Basic Repository for understanding the Registers present in Blue Pill Development (STM32F103C8T6) Module
-	- Created basic source files to use Registers for controlling purpose
-	- `Projects/Template` is the reference template
+## Scope
 
----
-## ***Repository Structure***
-	- `BareMetal`: Consists of all the Register Address Mapping along with Driver Source Code
-	- `Projects`: Consists of User Specific Application
-	- `Reference_Docs`: All the Reference Documentation relevant to the topic
+- `BareMetal/Core` owns MCU register maps, base addresses, shared scalar types,
+  generic register utilities, startup/linker support, and device constants.
+- `BareMetal/Driver` owns reusable peripheral drivers built above the Core
+  register model.
+- `Projects` owns application examples. Each project selects the driver modules
+  it needs through CMake.
+- `Reference_Docs` stores datasheets, reference manuals, and board documents.
 
----
-## ***STM32F103C8T6 Reference Manual***
-[STM32F103C_Reference_Manual.pdf](./Reference_Docs/STM32F103C_Reference_Manual.pdf)
+## GPIO Reference Architecture
 
----
-## ***STM32F103C8T6 Pinout***
-![Blue_PIll_Pinout](./Reference_Docs/Blue_Pill_Pinout.gif)
+The GPIO layer is intentionally split by responsibility. The same separation is
+the intended architectural direction for other drivers.
 
----
-## ***STM32F103C8T6 Features (Medium Density Device)***
-| Specification      | Details        | Comments            |
-|--------------------|----------------|---------------------|
-| Processor          | ARM Cortex-M3  | Single Core         |
-| Clock Frequency    | Min: 8MHz      | HSI: 8MHz           |
-|                    | Max: 72MHz     | HSE: 8MHz           |
-| Flash              | Size: 64kB     | Address: 0x08000000 |
-| SRAM               | Size: 20kB     | Address: 0x20000000 |
+| Layer | Files | Owns | Does Not Own |
+|------:|-------|------|--------------|
+| Layer 0 | `BareMetal/Core/Inc/stm32f1xx_gpio.h`, `stm32f1xx.h`, `stm32f1xx_data_types.h`, `stm32f1xx_utils.h` | Raw register layout, raw bit masks, base addresses, shared aliases, generic register operations | Driver policy, public configuration vocabulary, board behavior |
+| Layer 1 | `BareMetal/Driver/GPIO/Inc/gpio_ll.h`, `gpio_exti_ll.h` | Register-near actions, `.REG` access macros, APB2 GPIO/AFIO clock gates, EXTI/AFIO/NVIC low-level hooks | Public GPIO validation, mode/config compatibility, selector translation |
+| Layer 2 | `gpio_helper.h/.c`, `gpio_exti_helper.h/.c` | Translation between driver selectors and raw register fields, staged CRL/CRH/ODR images, hardware-state decoding | Application behavior, clock policy, public API sequencing |
+| Layer 3 | `gpio.h/.c`, `gpio_exti.h/.c` | Public GPIO API, argument validation, mode/config compatibility checks, batched register writes, clock-enable sequencing | Raw register definitions, board-specific application logic |
+| Layer 4 | `Projects/GPIO/*` | Application use cases such as LED output, button polling, and button interrupts | Driver internals |
 
----
-## ***IRQ Details***
-| **Vector Table**         | 76 |
-|---------------------------|----|
-| ***ARM Cortex-M3 IRQ***   | 11 |
-| ***STM32F103C8T6 IRQ***   | 59 |
-| ***Reserved***            | 6  |
+### GPIO Design Rules
 
----
-## ***Boot Process***
-1. **Power ON**
-2. **Stack Pointer (SP)** 
-	 - Points to the top of SRAM (Vector Table Offset: `0x00`)
-3. **`Reset_Handler()` is called** 
-	 - Vector Table Offset: `0x01`
-	 - **Initialization Steps:**
-		 1. Copy the **`.data`** section from FLASH to SRAM 
-				- **Note:** `.data` refers to initialized variables.
-		 2. Initialize the **`.bss`** section to `0` 
-				- **Note:** `.bss` refers to uninitialized variables.
-		 3. Call the **Main function**
+- Core headers describe hardware. They should stay close to the STM32F1
+  reference manual.
+- LL headers perform direct hardware-facing operations and use raw register
+  masks. They should access registers through `.REG` and avoid driver-level
+  selector vocabulary.
+- Helper files translate public driver selectors into raw MODE/CNF/pull fields
+  and update staged register images before the driver writes hardware.
+- Driver files validate requests, enforce mode/config compatibility, batch
+  touched register writes, and decide when to enable GPIO or AFIO clocks.
+- Project code should call public driver APIs and should not reach into LL or
+  helper internals.
 
----
-## ***Repository Structure***
-```
+### GPIO Functional Scope
+
+The normalized GPIO stack is intended to cover:
+
+- GPIO port clock enable/disable through RCC APB2 clock gates.
+- Pin mode and configuration programming through CRL/CRH MODE/CNF fields.
+- Input pull-up/pull-down selection through ODR state when required.
+- Input sampling through IDR.
+- Atomic output set/reset through BSRR/BRR.
+- Output toggle through ODR.
+- On-board LED convenience helpers built above the public GPIO API.
+- EXTI line routing through AFIO EXTICR, trigger configuration, pending-bit
+  acknowledgement, and NVIC IRQ enable/disable.
+
+## Repository Layout
+
+```text
 .
 ├── BareMetal
+│   ├── CMake
 │   ├── Core
+│   │   ├── Inc
+│   │   └── Src
 │   └── Driver
+│       ├── ADC
+│       ├── DMA
+│       ├── GPIO
+│       ├── I2C
+│       ├── NVIC
+│       ├── PWM
+│       ├── RCC
+│       ├── Ring_Buffer
+│       ├── SSD1306
+│       ├── Timer
+│       └── USART
 ├── Projects
 │   ├── DMA
 │   ├── GPIO
@@ -74,132 +88,77 @@ Few GitHub Repositories that I had used for learning purpose during development 
 │   ├── Template
 │   ├── Timer
 │   └── USART
-├── README.md
-└── Reference_Docs
-    ├── Arm Cortex M3 Reference.pdf
-    ├── Blue_Pill_Pinout.gif
-    ├── MAX30102_TD.pdf
-    ├── OLED SSD1306.pdf
-    ├── STM32F103C8T6_Datasheet.pdf
-    ├── STM32F103C_Flash_Programming_Manual.pdf
-    ├── STM32F103C_Reference_Manual.pdf
-    ├── STM32F103xx_Flash_Reference_Manual.pdf
-    └── The STM32F103 Arm Microcontroller_Majizidi.pdf
+├── Reference_Docs
+├── Doxyfile
+└── README.md
 ```
 
-## ***Driver Structure***
-```
-Driver
-├── ADC
-│   ├── Inc
-│   │   └── adc.h
-│   └── Src
-│       └── adc.c
-├── bare_metal.h
-├── DMA
-│   ├── Inc
-│   │   └── dma.h
-│   └── Src
-│       └── dma.c
-├── EXTI
-│   ├── Inc
-│   │   ├── exti.h
-│   │   └── nvic.h
-│   └── Src
-│       └── exti.c
-├── GPIO
-│   ├── Inc
-│   │   ├── gpio_config.h
-│   │   └── gpio.h
-│   └── Src
-│       └── gpio.c
-├── I2C
-│   ├── Inc
-│   │   ├── i2c_config.h
-│   │   ├── i2c_dma.h
-│   │   ├── i2c.h
-│   │   ├── i2c_irq.h
-│   │   └── i2c_rb.h
-│   └── Src
-│       ├── i2c.c
-│       ├── i2c_config.c
-│       ├── i2c_dma.c
-│       ├── i2c_irq.c
-│       └── i2c_rb.c
-├── PWM
-│   ├── Inc
-│   │   ├── pwm_config.h
-│   │   └── pwm.h
-│   └── Src
-│       ├── pwm.c
-│       └── pwm_config.c
-├── RCC
-│   ├── Inc
-│   │   ├── rcc_config.h
-│   │   └── rcc.h
-│   └── Src
-│       ├── rcc.c
-│       └── rcc_config.c
-├── stm32f1xx.h
-├── Ring_Buffer
-│   ├── Inc
-│   │   ├── ring_buffer_config.h
-│   │   └── ring_buffer.h
-│   └── Src
-│       └── ring_buffer.c
-├── SSD1306
-│   ├── Inc
-│   │   ├── ssd1306_config.h
-│   │   ├── ssd1306_disp.h
-│   │   ├── ssd1306_font.h
-│   │   ├── ssd1306_frame_rb.h
-│   │   ├── ssd1306.h
-│   │   ├── ssd1306_i2c.h
-│   │   ├── ssd1306_rb_codec.h
-│   │   └── ssd1306_rb.h
-│   └── Src
-│       ├── ssd1306.c
-│       ├── ssd1306_frame_rb.c
-│       ├── ssd1306_rb.c
-│       └── ssd1306_rb_codec.c
-├── startup.h
-├── Timer
-│   ├── Inc
-│   │   ├── timer_config.h
-│   │   └── timer.h
-│   └── Src
-│       └── timer.c
-└── USART
-		├── Inc
-		│   └── usart.h
-		└── Src
-				└── usart.c
-```
+## Project Layout
 
-## ***Project Structure***
----
-```
+Each example project follows the same shape:
+
+```text
 <Project_Name>
-├── CMakeLists.txt						# CMake Configuration File
-├── generate_vscode.cmake     # Generates /.vscode
+├── CMakeLists.txt
 ├── Inc
-│   ├── main.h								# Main Header File
-│   └── systick.h							# Systick Header File
-├── Src
-│   ├── main.c								# Main Source File
-│   ├── startup.c							# Startup Source File
-│   ├── systick.c							# Systick Source File
-└── Startup
-    └── stm32f1_ls.ld					# Linker Script File
+│   ├── main.h
+│   └── systick.h
+└── Src
+    ├── main.c
+    ├── startup.c
+    └── systick.c
 ```
 
----
-## ***Makefile Basic Commands***
-	- `make all`: Compiles all the relevant files and generates the executable in a "Build" Directory
-	- `make clean`: Removes the "Build" Directory
-	- `make flash`: Flashes .bin file at Flash Address (`0x080000000`)
-	- `make erase_flash`: Erases the Flash Memory of Blue Pill Module
-	- `make debug`: Creates the .json debug related files for Arm-Cortex Debug (VS Code) inside a .vscode directory
-	- `make replace_makefiles`: Updates all Makefiles inside "Project" directory with current Makefile
-	- `make info`: Provides information about the connected STM32 device
----
+Project `CMakeLists.txt` files call:
+
+- `stm32f103_setup_toolchain()` before `project(...)`.
+- `stm32f103_configure_project(...)` after `project(...)`.
+- `DRIVER_MODULES` to select only the required driver modules.
+
+## Build Workflow
+
+Example using the on-board LED GPIO project:
+
+```bash
+cd Projects/GPIO/01_OB_LED
+cmake -S . -B Build
+cmake --build Build
+```
+
+Useful CMake targets:
+
+```bash
+cmake --build Build --target flash
+cmake --build Build --target flash_uart
+cmake --build Build --target erase_flash
+cmake --build Build --target debug
+cmake --build Build --target clean_all
+cmake --build Build --target info
+```
+
+The shared CMake pipeline generates `.elf`, `.bin`, `.hex`, a memory report, and
+optional VS Code debug metadata. The default Arm GNU toolchain path is configured
+in `BareMetal/CMake/STM32F103Project.cmake`.
+
+## Device Notes
+
+| Specification | Details | Notes |
+|---------------|---------|-------|
+| MCU | STM32F103C8T6 | Medium-density STM32F1 |
+| Core | Arm Cortex-M3 | Single core |
+| HSI | 8 MHz | Internal oscillator |
+| HSE | 8 MHz | Common Blue Pill external crystal |
+| Max SYSCLK | 72 MHz | Device limit |
+| Flash | 64 KB | Base `0x08000000` |
+| SRAM | 20 KB | Base `0x20000000` |
+
+## References
+
+- [STM32F103C Reference Manual](./Reference_Docs/STM32F103C_Reference_Manual.pdf)
+- [STM32F103C8T6 Datasheet](./Reference_Docs/STM32F103C8T6_Datasheet.pdf)
+- [Blue Pill Pinout](./Reference_Docs/Blue_Pill_Pinout.gif)
+
+Learning references used during development:
+
+- [stm32f1-baremetal](https://github.com/csrohit/stm32f1-baremetal/tree/main)
+- [stm32f103-1](https://github.com/freesources/stm32f103-1)

@@ -102,30 +102,28 @@ extern "C" {
  * **array indices** for peripherals of the same type (e.g., GPIOA–GPIOG,
  * USART1–USART3, TIM2–TIM5, etc.).
  *
- * @note
- * - Performs **pure compile-time address arithmetic** when constant operands are used.
- * - No hardware register access is performed.
- * - Peripheral instances must have equal address spacing in the memory map.
+ * @note - Performs pure compile-time address arithmetic when constant operands are used.
+ * @note - No hardware register access is performed.
+ * @note - Peripheral instances must have equal address spacing in the memory map.
  *
  * @param[in] value   The address (or pointer) of the target peripheral instance  
- *					(e.g., @ref GPIOC, @ref USART2, @ref TIM4)
+ *					(e.g., @ref `GPIOC`, @ref `USART2`, @ref `TIM4`)
  * @param[in] base	The address (or pointer) of the reference peripheral instance  
- *					(e.g., @ref GPIOA, @ref USART1, @ref TIM2)
+ *					(e.g., @ref `GPIOA`, @ref `USART1`, @ref `TIM2`)
  * @param[in] size	The memory spacing (in bytes) between consecutive instances  
  *					of the same peripheral type  
- *					(e.g., @ref GPIO_PERIPHERAL_SIZE "GPIO_PERIPHERAL_SIZE")
+ *					(e.g., @ref `GPIO_PERIPHERAL_SIZE` "GPIO_PERIPHERAL_SIZE")
  *
- * @return The **zero-based index** of the target peripheral relative to the base.
+ * @returns The zero-based index of the target peripheral relative to the base.
  *
  * @pre Both `base` and `value` must belong to peripherals of the same family
  *	  and share the same address spacing.
+ * @see - @ref `GPIO_PERIPHERAL_SIZE`: GPIO memory spacing.
+ * @see - @ref `RCC_APB2ENR`: Clock enable bit positions.
  *
- * @warning
- * - The result is undefined if `base` and `value` are not aligned to `size`.
- * - Passing an incorrect `size` value may result in invalid peripheral indices.
+ * @warning - The result is undefined if `base` and `value` are not aligned to `size`.
+ * @warning - Passing an incorrect `size` value may result in invalid peripheral indices.
  *
- * @see @ref GPIO_PERIPHERAL_SIZE for GPIO memory spacing.
- * @see @ref RCC_APB2ENR for clock enable bit positions.
  * @def BIT_POS
  */
 #define BIT_POS(value, base, size) \
@@ -236,7 +234,7 @@ extern "C" {
  * @note
  * This API does not validate the address range. It assumes `reg` points to valid Memory Mapped IO
  */
-driver_status_t	RegOps_Read(volatile uint32_t *reg, uint32_t *out_value);
+driver_status_t	RegOps_Read(_IO *reg, uint32_t* const out_value);
 
 /**
  * @brief Write a 32-bit memory-mapped register.
@@ -248,7 +246,7 @@ driver_status_t	RegOps_Read(volatile uint32_t *reg, uint32_t *out_value);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
-driver_status_t	RegOps_Write(volatile uint32_t *reg, uint32_t value);
+driver_status_t	RegOps_Write(_IO *reg, uint32_t value);
 
 /**
  * @brief Set bits in a 32-bit memory-mapped register (OR operation).
@@ -260,7 +258,7 @@ driver_status_t	RegOps_Write(volatile uint32_t *reg, uint32_t value);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
-driver_status_t	RegOps_Set(volatile uint32_t *reg, uint32_t mask);
+driver_status_t	RegOps_Set(_IO *reg, uint32_t mask);
 
 /**
  * @brief Clear bits in a 32-bit memory-mapped register (AND with ~mask).
@@ -272,7 +270,7 @@ driver_status_t	RegOps_Set(volatile uint32_t *reg, uint32_t mask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
-driver_status_t	RegOps_Clear(volatile uint32_t *reg, uint32_t mask);
+driver_status_t	RegOps_Clear(_IO *reg, uint32_t mask);
 
 /**
  * @brief Toggle bits in a 32-bit memory-mapped register (XOR operation).
@@ -284,7 +282,7 @@ driver_status_t	RegOps_Clear(volatile uint32_t *reg, uint32_t mask);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
  */
-driver_status_t	RegOps_Toggle(volatile uint32_t *reg, uint32_t mask);
+driver_status_t	RegOps_Toggle(_IO *reg, uint32_t mask);
 
 /**
  * @brief Write a masked field inside a 32-bit register.
@@ -304,7 +302,7 @@ driver_status_t	RegOps_Toggle(volatile uint32_t *reg, uint32_t mask);
  * @warning
  * Caller must ensure `value` is correctly shifted and does not set bits outside `mask`.
  */
-driver_status_t	RegOps_WriteMasked(volatile uint32_t *reg, uint32_t mask, uint32_t value);
+driver_status_t	RegOps_WriteMasked(_IO *reg, uint32_t mask, uint32_t value);
 
 /** @} */ // 01_STM32F1xx_Utilities_04_RegisterOps
 

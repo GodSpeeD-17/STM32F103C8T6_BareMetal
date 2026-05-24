@@ -232,73 +232,6 @@ extern "C" {
 /** @brief ADC3  @def ADC3 */
 #define ADC3									((ADC_TypeDef*) ADC3_BASE_ADDRESS)
 
-// ========================================================================================== //
-//										STM32F103C8T6											//
-// ========================================================================================== //
-
-/**
- * @brief	GPIO Shared Pin Bitmasks
- * @defgroup GPIO_03_Driver_01_Types_02_Pins GPIO Driver Pins
- * @ingroup GPIO_03_Driver_01_Types
- * @details
- * These constants represent GPIO pins as bitmasks so the driver layer can
- * address one or more pins at a time using the same public type.
- *
- * Practical Use:
- * - Use `GPIO_PIN_x` for single-pin operations.
- * - Combine multiple masks with bitwise OR for grouped operations.
- * - Use `GPIO_PIN_NONE` for an empty selection and `GPIO_PIN_ALL` for the
- *   whole port.
- * @{
- */
-
-/**
- * @section GPIO_Driver_Pin_Macros GPIO Driver Pin Macros
- * @details
- * Shared GPIO pin bitmasks used by the GPIO driver stack.
- * @{
- */
-/** @brief No pins bitmask @def GPIO_PIN_NONE @note Use @ref GPIO_PIN_NONE "GPIO_PIN_NONE" for no pins */
-#define GPIO_PIN_NONE							((gpio_pin_t) 0x0000U)
-/** @brief Pin 0 bitmask @def GPIO_PIN_0 */
-#define GPIO_PIN_0								((gpio_pin_t) 0x0001U)
-/** @brief Pin 1 bitmask @def GPIO_PIN_1 */
-#define GPIO_PIN_1								((gpio_pin_t) 0x0002U)
-/** @brief Pin 2 bitmask @def GPIO_PIN_2 */
-#define GPIO_PIN_2								((gpio_pin_t) 0x0004U)
-/** @brief Pin 3 bitmask @def GPIO_PIN_3 */
-#define GPIO_PIN_3								((gpio_pin_t) 0x0008U)
-/** @brief Pin 4 bitmask @def GPIO_PIN_4 */
-#define GPIO_PIN_4								((gpio_pin_t) 0x0010U)
-/** @brief Pin 5 bitmask @def GPIO_PIN_5 */
-#define GPIO_PIN_5								((gpio_pin_t) 0x0020U)
-/** @brief Pin 6 bitmask @def GPIO_PIN_6 */
-#define GPIO_PIN_6								((gpio_pin_t) 0x0040U)
-/** @brief Pin 7 bitmask @def GPIO_PIN_7 */
-#define GPIO_PIN_7								((gpio_pin_t) 0x0080U)
-/** @brief Pin 8 bitmask @def GPIO_PIN_8 */
-#define GPIO_PIN_8								((gpio_pin_t) 0x0100U)
-/** @brief Pin 9 bitmask @def GPIO_PIN_9 */
-#define GPIO_PIN_9								((gpio_pin_t) 0x0200U)
-/** @brief Pin 10 bitmask @def GPIO_PIN_10 */
-#define GPIO_PIN_10								((gpio_pin_t) 0x0400U)
-/** @brief Pin 11 bitmask @def GPIO_PIN_11 */
-#define GPIO_PIN_11								((gpio_pin_t) 0x0800U)
-/** @brief Pin 12 bitmask @def GPIO_PIN_12 */
-#define GPIO_PIN_12								((gpio_pin_t) 0x1000U)
-/** @brief Pin 13 bitmask @def GPIO_PIN_13 */
-#define GPIO_PIN_13								((gpio_pin_t) 0x2000U)
-/** @brief Pin 14 bitmask @def GPIO_PIN_14 */
-#define GPIO_PIN_14								((gpio_pin_t) 0x4000U)
-/** @brief Pin 15 bitmask @def GPIO_PIN_15 */
-#define GPIO_PIN_15								((gpio_pin_t) 0x8000U)
-/** @brief All pins bitmask @def GPIO_PIN_ALL @note Use @ref GPIO_PIN_ALL "GPIO_PIN_ALL" for all pins */
-#define GPIO_PIN_ALL							((gpio_pin_t) 0xFFFFU)
-
-/** @} */ // GPIO_Driver_Pin_Macros
-
-/** @} */ // GPIO_03_Driver_01_Types_02_Pins
-
 /**
  * @addtogroup RCC_03_Driver_02_Frequency
  * @brief STM32F103C8T6 RCC Operating Limits and Board Assumptions
@@ -940,15 +873,7 @@ typedef enum
 #define DMA_TIM2_CH4 (DMA1_Channel7)
 #define DMA_TIM4_UP (DMA1_Channel7)
 
-// ------------------------------------ //
-//	Board Specific GPIO Configuration	//
-// ------------------------------------ //
 #ifdef STM32F103C8T6__
-
-/** @brief On-board LED GPIO port @def GPIO_OB_LED_PORT */
-#define GPIO_OB_LED_PORT						GPIOC
-/** @brief On-board LED GPIO pin @def GPIO_OB_LED_PIN */
-#define GPIO_OB_LED_PIN							GPIO_PIN_13
 /** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
 #define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
 /** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */

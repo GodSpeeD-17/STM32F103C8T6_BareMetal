@@ -51,9 +51,9 @@ static uint8_t _GPIO_EXTI_IsInputConfigCompatible(const gpio_pin_config_t config
 
 	switch (config)
 	{
-		case GPIO_PIN_CNF_IN_FLOAT:
-		case GPIO_PIN_CNF_IN_PULL_DOWN:
-		case GPIO_PIN_CNF_IN_PULL_UP:
+		case GPIO_PIN_CONFIG_INPUT_FLOATING:
+		case GPIO_PIN_CONFIG_INPUT_PULL_DOWN:
+		case GPIO_PIN_CONFIG_INPUT_PULL_UP:
 		{
 			isCompatible = 0x01U;
 			break;
@@ -133,14 +133,14 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
 	gpio_pin_mode_t pinMode = GPIO_PIN_MODE_INPUT;
-	gpio_pin_config_t pinConfig = GPIO_PIN_CNF_IN_ANALOG;
+	gpio_pin_config_t pinConfig = GPIO_PIN_CONFIG_INPUT_ANALOG;
 	irq_t IRQn = (irq_t) 0x00U;
 	uint8_t exticrReadStatus = 0x00U;
 	uint8_t exticrUpdateStatus = 0x00U;
 	uint8_t regIndex = 0x00U;
 
-	if ((GPIO_IS_PORT(GPIOx) == 0x00U) ||
-		(GPIO_IS_PIN(pin) == 0x00U) ||
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) ||
+		(GPIO_PIN_MASK_IS_VALID(pin) == 0x00U) ||
 		(GPIO_EXTI_IS_TRIGGER(trigger) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -166,7 +166,7 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
 
-		regIndex = (uint8_t) (_GPIO_GetPinIndexFromMask(currentPin) >> 2U);
+		regIndex = (uint8_t) (GPIO_PinMaskToIndex(currentPin) >> 2U);
 		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
 		{
 			GPIO_EXTI_LL_ReadConfigRegister(regIndex, &afioExticrRegImage[regIndex]);
@@ -211,7 +211,7 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 	uint8_t exticrUpdateStatus = 0x00U;
 	uint8_t regIndex = 0x00U;
 
-	if ((GPIO_IS_PORT(GPIOx) == 0x00U) || (GPIO_IS_PIN(pin) == 0x00U))
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -229,7 +229,7 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		regIndex = (uint8_t) (_GPIO_GetPinIndexFromMask(currentPin) >> 2U);
+		regIndex = (uint8_t) (GPIO_PinMaskToIndex(currentPin) >> 2U);
 		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
 		{
 			GPIO_EXTI_LL_ReadConfigRegister(regIndex, &afioExticrRegImage[regIndex]);
@@ -265,7 +265,7 @@ uint8_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin)
 {
 	uint32_t pendingRegImage = 0x00000000UL;
 
-	if (GPIO_IS_PIN(pin) == 0x00U)
+	if (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U)
 	{
 		return (uint8_t) 0x00U;
 	}
@@ -276,7 +276,7 @@ uint8_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin)
 
 driver_status_t GPIO_EXTI_Ack(const gpio_pin_t pin)
 {
-	if (GPIO_IS_PIN(pin) == 0x00U)
+	if (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}

@@ -22,7 +22,8 @@
 
 __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_IsSinglePinMaskValid(const gpio_pin_t pin)
 {
-	return (_GPIO_GetPinIndexFromMask(pin) <= (uint8_t) 0x0FU) ? 0x01U : 0x00U;
+	return ((GPIO_PIN_MASK_IS_VALID(pin) != 0x00U) &&
+		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) != 0x00U)) ? 0x01U : 0x00U;
 }
 
 __STATIC_FORCEINLINE gpio_exti_port_t _GPIO_EXTI_Helper_GetPortSource(const GPIO_TypeDef* const GPIOx)
@@ -78,12 +79,12 @@ __STATIC_FORCEINLINE gpio_exti_port_t _GPIO_EXTI_Helper_GetPortSource(const GPIO
 
 __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_GetConfigRegisterIndex(const gpio_pin_t pin)
 {
-	return (uint8_t) (_GPIO_GetPinIndexFromMask(pin) >> 2U);
+	return (uint8_t) (GPIO_PinMaskToIndex(pin) >> 2U);
 }
 
 __STATIC_FORCEINLINE uint32_t _GPIO_EXTI_Helper_GetConfigFieldShift(const gpio_pin_t pin)
 {
-	return ((uint32_t) (_GPIO_GetPinIndexFromMask(pin) & (uint8_t) 0x03U) << 2U);
+	return ((uint32_t) (GPIO_PinMaskToIndex(pin) & (uint8_t) 0x03U) << 2U);
 }
 
 driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
@@ -102,7 +103,7 @@ driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIO_IS_PORT(GPIOx) == 0x00U) || (_GPIO_EXTI_Helper_IsSinglePinMaskValid(pin) == 0x00U))
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (_GPIO_EXTI_Helper_IsSinglePinMaskValid(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -232,7 +233,7 @@ driver_status_t _GPIO_EXTI_Helper_GetIRQn
 	irq_t* const pIRQn
 )
 {
-	const uint8_t lineIndex = _GPIO_GetPinIndexFromMask(pin);
+	const uint8_t lineIndex = GPIO_PinMaskToIndex(pin);
 
 	if (pIRQn == NULL)
 	{

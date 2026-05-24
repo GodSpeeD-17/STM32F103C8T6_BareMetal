@@ -28,6 +28,7 @@ extern "C" {
 // ==================================================================================================== //
 
 #include "stm32f1xx.h"
+#include "gpio_types.h"
 #include "nvic.h"
 #include "rcc_ll.h"
 

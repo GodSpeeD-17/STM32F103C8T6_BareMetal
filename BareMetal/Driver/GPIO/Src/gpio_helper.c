@@ -40,7 +40,8 @@ __STATIC_FORCEINLINE uint32_t _GPIO_Helper_GetPinFieldShift(const gpio_pin_t pin
 
 __STATIC_FORCEINLINE uint8_t _GPIO_Helper_IsSinglePinMaskValid(const gpio_pin_t pin)
 {
-	return (_GPIO_GetPinIndexFromMask(pin) <= (uint8_t) 0x0FU) ? 0x01U : 0x00U;
+	return ((GPIO_PIN_MASK_IS_VALID(pin) != 0x00U) &&
+		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) != 0x00U)) ? 0x01U : 0x00U;
 }
 
 __STATIC_FORCEINLINE uint8_t _GPIO_Helper_IsPullBitValid(const gpio_pull_t pullBit)
@@ -59,17 +60,17 @@ __STATIC_FORCEINLINE gpio_mode_t _GPIO_Helper_GetPinModeField(const gpio_pin_mod
 			modeBits = (gpio_mode_t) 0x00U;
 			break;
 		}
-		case GPIO_PIN_MODE_OUTPUT_10MHz:
+		case GPIO_PIN_MODE_OUTPUT_10MHZ:
 		{
 			modeBits = (gpio_mode_t) 0x01U;
 			break;
 		}
-		case GPIO_PIN_MODE_OUTPUT_2MHz:
+		case GPIO_PIN_MODE_OUTPUT_2MHZ:
 		{
 			modeBits = (gpio_mode_t) 0x02U;
 			break;
 		}
-		case GPIO_PIN_MODE_OUTPUT_50MHz:
+		case GPIO_PIN_MODE_OUTPUT_50MHZ:
 		{
 			modeBits = (gpio_mode_t) 0x03U;
 			break;
@@ -90,38 +91,38 @@ __STATIC_FORCEINLINE gpio_cnf_t _GPIO_Helper_GetPinConfigField(const gpio_pin_co
 
 	switch (config)
 	{
-		case GPIO_PIN_CNF_IN_ANALOG:
+		case GPIO_PIN_CONFIG_INPUT_ANALOG:
 		{
 			cnfBits = (gpio_cnf_t) 0x00U;
 			break;
 		}
-		case GPIO_PIN_CNF_IN_FLOAT:
+		case GPIO_PIN_CONFIG_INPUT_FLOATING:
 		{
 			cnfBits = (gpio_cnf_t) 0x01U;
 			break;
 		}
-		case GPIO_PIN_CNF_IN_PULL_DOWN:
-		case GPIO_PIN_CNF_IN_PULL_UP:
+		case GPIO_PIN_CONFIG_INPUT_PULL_DOWN:
+		case GPIO_PIN_CONFIG_INPUT_PULL_UP:
 		{
 			cnfBits = (gpio_cnf_t) 0x02U;
 			break;
 		}
-		case GPIO_PIN_CNF_OUT_GP_PP:
+		case GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL:
 		{
 			cnfBits = (gpio_cnf_t) 0x00U;
 			break;
 		}
-		case GPIO_PIN_CNF_OUT_GP_OD:
+		case GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN:
 		{
 			cnfBits = (gpio_cnf_t) 0x01U;
 			break;
 		}
-		case GPIO_PIN_CNF_OUT_AF_PP:
+		case GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL:
 		{
 			cnfBits = (gpio_cnf_t) 0x02U;
 			break;
 		}
-		case GPIO_PIN_CNF_OUT_AF_OD:
+		case GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN:
 		{
 			cnfBits = (gpio_cnf_t) 0x03U;
 			break;
@@ -192,9 +193,9 @@ driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) ||
-		(GPIO_PIN_IS_MODE(mode) == 0x00U) ||
-		(GPIO_PIN_IS_CONFIG(config) == 0x00U) ||
-		(GPIO_PIN_IS_MODE_CONFIG_COMPATIBLE(mode, config) == 0x00U))
+		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U) ||
+		(GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U) ||
+		(GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -232,7 +233,7 @@ driver_status_t _GPIO_Helper_UpdatePinModeImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_IS_MODE(mode) == 0x00U))
+	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -264,7 +265,7 @@ driver_status_t _GPIO_Helper_UpdatePinConfigImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_IS_CONFIG(config) == 0x00U))
+	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -290,7 +291,7 @@ driver_status_t _GPIO_Helper_ResetPinConfigImage
 	(
 		pin,
 		GPIO_PIN_MODE_INPUT,
-		GPIO_PIN_CNF_IN_FLOAT,
+		GPIO_PIN_CONFIG_INPUT_FLOATING,
 		pCrxRegImage
 	);
 }
@@ -309,7 +310,7 @@ driver_status_t _GPIO_Helper_UpdatePinPullImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_IS_CONFIG(config) == 0x00U))
+	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -390,17 +391,17 @@ driver_status_t _GPIO_Helper_ReadPinModeConfig
 			}
 			case (gpio_mode_t) 0x01U:
 			{
-				*pMode = GPIO_PIN_MODE_OUTPUT_10MHz;
+				*pMode = GPIO_PIN_MODE_OUTPUT_10MHZ;
 				break;
 			}
 			case (gpio_mode_t) 0x02U:
 			{
-				*pMode = GPIO_PIN_MODE_OUTPUT_2MHz;
+				*pMode = GPIO_PIN_MODE_OUTPUT_2MHZ;
 				break;
 			}
 			case (gpio_mode_t) 0x03U:
 			{
-				*pMode = GPIO_PIN_MODE_OUTPUT_50MHz;
+				*pMode = GPIO_PIN_MODE_OUTPUT_50MHZ;
 				break;
 			}
 			default:
@@ -420,18 +421,18 @@ driver_status_t _GPIO_Helper_ReadPinModeConfig
 				{
 					case (gpio_cnf_t) 0x00U:
 					{
-						*pConfig = GPIO_PIN_CNF_IN_ANALOG;
+						*pConfig = GPIO_PIN_CONFIG_INPUT_ANALOG;
 						break;
 					}
 					case (gpio_cnf_t) 0x01U:
 					{
-						*pConfig = GPIO_PIN_CNF_IN_FLOAT;
+						*pConfig = GPIO_PIN_CONFIG_INPUT_FLOATING;
 						break;
 					}
 					case (gpio_cnf_t) 0x02U:
 					{
 						GPIO_LL_READ_REG(GPIOx, ODR, odrRegImage);
-						*pConfig = ((odrRegImage & (uint32_t) pin) != 0x00UL) ? GPIO_PIN_CNF_IN_PULL_UP : GPIO_PIN_CNF_IN_PULL_DOWN;
+						*pConfig = ((odrRegImage & (uint32_t) pin) != 0x00UL) ? GPIO_PIN_CONFIG_INPUT_PULL_UP : GPIO_PIN_CONFIG_INPUT_PULL_DOWN;
 						break;
 					}
 					default:
@@ -449,22 +450,22 @@ driver_status_t _GPIO_Helper_ReadPinModeConfig
 				{
 					case (gpio_cnf_t) 0x00U:
 					{
-						*pConfig = GPIO_PIN_CNF_OUT_GP_PP;
+						*pConfig = GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL;
 						break;
 					}
 					case (gpio_cnf_t) 0x01U:
 					{
-						*pConfig = GPIO_PIN_CNF_OUT_GP_OD;
+						*pConfig = GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN;
 						break;
 					}
 					case (gpio_cnf_t) 0x02U:
 					{
-						*pConfig = GPIO_PIN_CNF_OUT_AF_PP;
+						*pConfig = GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL;
 						break;
 					}
 					case (gpio_cnf_t) 0x03U:
 					{
-						*pConfig = GPIO_PIN_CNF_OUT_AF_OD;
+						*pConfig = GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN;
 						break;
 					}
 					default:

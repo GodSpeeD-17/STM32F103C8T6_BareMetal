@@ -141,56 +141,67 @@ extern "C" {
 
 /**
  * @brief Resolves a GPIO peripheral instance to the matching APB2 clock-gate mask
- * @param[in] GPIOx Target GPIO peripheral instance
+ * @param[in] GPIOx Target GPIO peripheral instance (eg: @ref `GPIOA`, @ref `GPIOB`, etc.)
  * @returns Matching APB2 clock-gate mask for the selected GPIO port
- * @retval `RCC_APB2ENR_IOPAEN`: GPIOA clock-gate mask
- * @retval `RCC_APB2ENR_IOPBEN`: GPIOB clock-gate mask
- * @retval `RCC_APB2ENR_IOPCEN`: GPIOC clock-gate mask
- * @retval `RCC_APB2ENR_IOPDEN`: GPIOD clock-gate mask
- * @retval `RCC_APB2ENR_IOPEEN`: GPIOE clock-gate mask
- * @retval `RCC_APB2ENR_IOPFEN`: GPIOF clock-gate mask
- * @retval `RCC_APB2ENR_IOPGEN`: GPIOG clock-gate mask
- * @retval `0x00000000UL`: @p GPIOx did not map to a supported GPIO port
+ * @retval - @ref `RCC_APB2ENR_IOPAEN`: GPIOA clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPBEN`: GPIOB clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPCEN`: GPIOC clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPDEN`: GPIOD clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPEEN`: GPIOE clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPFEN`: GPIOF clock-gate mask
+ * @retval - @ref `RCC_APB2ENR_IOPGEN`: GPIOG clock-gate mask
+ * @retval - `0x00000000UL`: @p `GPIOx` did not map to a supported GPIO port
  */
 __STATIC_FORCEINLINE uint32_t _GPIO_LL_GetPortClockMask(const GPIO_TypeDef* const GPIOx)
 {
+	//! Determine bit position
 	const uint32_t gpioIndex = BIT_POS(GPIOx, GPIOA, GPIO_PERIPHERAL_SIZE);
-
+	uint32_t clockMask = 0x00000000UL;
+	//! Return the mask
 	switch (gpioIndex)
 	{
 		case 0x00UL:
 		{
-			return RCC_APB2ENR_IOPAEN;
+			clockMask = RCC_APB2ENR_IOPAEN;
+			break;
 		}
 		case 0x01UL:
 		{
-			return RCC_APB2ENR_IOPBEN;
+			clockMask = RCC_APB2ENR_IOPBEN;
+			break;
 		}
 		case 0x02UL:
 		{
-			return RCC_APB2ENR_IOPCEN;
+			clockMask = RCC_APB2ENR_IOPCEN;
+			break;
 		}
 		case 0x03UL:
 		{
-			return RCC_APB2ENR_IOPDEN;
+			clockMask = RCC_APB2ENR_IOPDEN;
+			break;
 		}
 		case 0x04UL:
 		{
-			return RCC_APB2ENR_IOPEEN;
+			clockMask = RCC_APB2ENR_IOPEEN;
+			break;
 		}
 		case 0x05UL:
 		{
-			return RCC_APB2ENR_IOPFEN;
+			clockMask = RCC_APB2ENR_IOPFEN;
+			break;
 		}
 		case 0x06UL:
 		{
-			return RCC_APB2ENR_IOPGEN;
+			clockMask = RCC_APB2ENR_IOPGEN;
+			break;
 		}
 		default:
-			{
-				return 0x00000000UL;
-			}
+		{
+			clockMask = 0x00000000UL;
+			break;
+		}
 	}
+	return clockMask;
 }
 
 /**
