@@ -1,24 +1,15 @@
 /**
  * @file	gpio_helper.h
  * @author	Shrey Shah
- * @brief	GPIO Internal Driver Helper Interface
+ * @brief	GPIO Internal Translation and Staging Helper Interface
  * @version	v1.0
- * @date	29-03-2026
+ * @date	24-05-2026
  *
  * @details
- * This header defines the internal helper utilities that bridge the GPIO
- * driver layer and the GPIO low-level layer.
- *
- * The helper layer accepts driver-facing GPIO selectors, translates them into
- * raw STM32F1 GPIO register fields, and updates staged register images so the
- * driver can perform one read-modify-write cycle per touched register.
- *
- * This is not a user-facing GPIO interface.
- *
- * Practical Rule:
- * - Layer 2 (`gpio_helper.c`) owns per-pin staged-image updates and hardware-state
- *   decoding.
- * - Layer 3 (`gpio.c`) owns driver policy, validation, and register-level batching.
+ * This header defines the GPIO helper layer between GPIO LL and the public
+ * GPIO driver. Helper APIs translate driver-facing selectors into raw STM32F1
+ * GPIO fields and mutate caller-owned register images. They do not read or
+ * write peripheral hardware.
  */
 
 #ifndef GPIO_HELPER_H_
@@ -29,30 +20,39 @@ extern "C" {
 #endif /* __cplusplus */
 
 // ==================================================================================================== //
-//											   Includes											   //
+//                                               Includes                                               //
 // ==================================================================================================== //
-#include "gpio_types.h"
+
 #include "gpio_ll.h"
 
 /**
- * @brief Updates one pin slot inside a staged `CRL` or `CRH` image
- * @details
- * This helper forms the driver-to-LL bridge for full pin configuration.
- * It accepts driver-layer `mode` and `config` selectors, translates them into
- * the raw `MODE[1:0]` and `CNF[1:0]` fields expected by the STM32F1 register
- * layout, and updates only the selected pin slot inside the staged register
- * image.
- *
- * @param[in] pin GPIO single-pin mask
- * @param[in] mode Driver-layer GPIO mode selector
- * @param[in] config Driver-layer GPIO configuration selector
- * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin mode/config image updated successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin, @p mode, or @p config was invalid.
+ * @addtogroup GPIO_03_Driver
+ * @{
  */
-driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
+
+/**
+ * @brief	GPIO Helper Translation and Staging APIs
+ * @defgroup GPIO_03_Driver_02_Helper GPIO Helper Translation and Staging APIs
+ * @ingroup	GPIO_03_Driver
+ * @details
+ * These APIs own selector translation and staged register-image mutation for
+ * the GPIO driver. They may validate translation inputs and return
+ * @ref driver_status_t, but they must not touch hardware registers directly.
+ * @{
+ */
+
+/**
+ * @brief Stages one pin's complete CRL/CRH mode/config field in a register image
+ * @param[in]		pin				GPIO single-pin mask
+ * @param[in]		mode			Driver-facing GPIO mode selector
+ * @param[in]		config			Driver-facing GPIO configuration selector
+ * @param[in,out]	pCrxRegImage	Caller-owned CRL or CRH image
+ * @returns Staging status for the requested pin mode/config field
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin mode/config field was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin, @p mode, or @p config is invalid
+ */
+driver_status_t GPIO_Helper_StagePinModeConfigImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_mode_t	mode,
@@ -61,21 +61,16 @@ driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
 );
 
 /**
- * @brief Updates the MODE field for one pin inside a staged `CRL` or `CRH` image
- * @details
- * This helper accepts a driver-layer mode selector, translates it into the raw
- * STM32F1 `MODE[1:0]` field, and updates only the selected pin slot inside the
- * staged register image.
- *
- * @param[in] pin GPIO single-pin mask
- * @param[in] mode Driver-layer GPIO mode selector
- * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin MODE field updated successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p mode was invalid.
+ * @brief Stages one pin's CRL/CRH MODE field in a register image
+ * @param[in]		pin				GPIO single-pin mask
+ * @param[in]		mode			Driver-facing GPIO mode selector
+ * @param[in,out]	pCrxRegImage	Caller-owned CRL or CRH image
+ * @returns Staging status for the requested pin MODE field
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin MODE field was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p mode is invalid
  */
-driver_status_t _GPIO_Helper_UpdatePinModeImage
+driver_status_t GPIO_Helper_StagePinModeImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_mode_t	mode,
@@ -83,21 +78,16 @@ driver_status_t _GPIO_Helper_UpdatePinModeImage
 );
 
 /**
- * @brief Updates the CNF field for one pin inside a staged `CRL` or `CRH` image
- * @details
- * This helper accepts a driver-layer configuration selector, translates it into
- * the raw STM32F1 `CNF[1:0]` field, and updates only the selected pin slot
- * inside the staged register image.
- *
- * @param[in] pin GPIO single-pin mask
- * @param[in] config Driver-layer GPIO configuration selector
- * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to update in place
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin CNF field updated successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config was invalid.
+ * @brief Stages one pin's CRL/CRH CNF field in a register image
+ * @param[in]		pin				GPIO single-pin mask
+ * @param[in]		config			Driver-facing GPIO configuration selector
+ * @param[in,out]	pCrxRegImage	Caller-owned CRL or CRH image
+ * @returns Staging status for the requested pin CNF field
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin CNF field was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config is invalid
  */
-driver_status_t _GPIO_Helper_UpdatePinConfigImage
+driver_status_t GPIO_Helper_StagePinConfigImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_config_t	config,
@@ -105,36 +95,31 @@ driver_status_t _GPIO_Helper_UpdatePinConfigImage
 );
 
 /**
- * @brief Restores one pin slot to the STM32F1 reset configuration image
- * @param[in] pin GPIO single-pin mask
- * @param[in,out] pCrxRegImage Staged `CRL` or `CRH` image to reset in place
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin reset image staged successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
+ * @brief Stages one pin's reset CRL/CRH field in a register image
+ * @param[in]		pin				GPIO single-pin mask
+ * @param[in,out]	pCrxRegImage	Caller-owned CRL or CRH image
+ * @returns Staging status for the requested pin reset field
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin reset field was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is invalid
  */
-driver_status_t _GPIO_Helper_ResetPinConfigImage
+driver_status_t GPIO_Helper_StagePinResetConfigImage
 (
 	const gpio_pin_t	pin,
 	uint32_t* const		pCrxRegImage
 );
 
 /**
- * @brief Updates the staged `ODR` image for input pull-up or pull-down selection
- * @details
- * This helper accepts a driver-layer GPIO configuration selector, extracts the
- * pull direction required by the configuration, and updates the staged `ODR`
- * image for the selected pin.
- *
- * @param[in] pin GPIO single-pin mask
- * @param[in] config Driver-layer GPIO configuration selector
- * @param[in,out] pOdrRegImage Staged `ODR` image to update in place
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pull state staged successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOdrRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config was invalid.
+ * @brief Stages one pin's input pull state in an ODR register image
+ * @param[in]		pin				GPIO single-pin mask
+ * @param[in]		config			Driver-facing GPIO pull configuration selector
+ * @param[in,out]	pOdrRegImage	Caller-owned ODR image
+ * @returns Staging status for the requested pull state
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pull state was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOdrRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config is invalid
  */
-driver_status_t _GPIO_Helper_UpdatePinPullImage
+driver_status_t GPIO_Helper_StagePinPullImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_config_t	config,
@@ -142,33 +127,28 @@ driver_status_t _GPIO_Helper_UpdatePinPullImage
 );
 
 /**
- * @brief Reads one GPIO pin slot and translates it into driver-facing mode/config selectors
- * @details
- * This helper reads the selected pin slot from `CRL` or `CRH`, decodes the raw
- * `MODE[1:0]` and `CNF[1:0]` fields, and translates them into the driver-layer
- * `gpio_pin_mode_t` and `gpio_pin_config_t` values.
- *
- * For input pull-up or pull-down mode, this helper also reads `ODR` to resolve
- * whether the configured pull direction is UP or DOWN.
- *
- * At least one of `pMode` or `pConfig` must be non-`NULL`.
- *
- * @param[in] GPIOx Target GPIO peripheral instance
- * @param[in] pin GPIO single-pin mask
- * @param[out] pMode Driver-facing GPIO mode selector
- * @param[out] pConfig Driver-facing GPIO configuration selector
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin mode/config was read successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Both @p pMode and @p pConfig were null pointers.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or the raw pin slot state was invalid.
+ * @brief Decodes one raw MODE/CNF field and ODR image into driver-facing selectors
+ * @param[in]	crxField	Right-aligned raw `CNF[1:0] | MODE[1:0]` field
+ * @param[in]	odrRegImage	ODR image used to resolve input pull-up/pull-down state
+ * @param[in]	pin			GPIO single-pin mask
+ * @param[out]	pMode		Destination for decoded GPIO mode selector
+ * @param[out]	pConfig	Destination for decoded GPIO configuration selector
+ * @returns Decode status for the requested pin state
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin state was decoded
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Both @p pMode and @p pConfig are `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p crxField is invalid
  */
-driver_status_t _GPIO_Helper_ReadPinModeConfig
+driver_status_t GPIO_Helper_DecodePinModeConfigField
 (
-	GPIO_TypeDef* const			GPIOx,
+	const gpio_pin_config_bits_t	crxField,
+	const uint32_t				odrRegImage,
 	const gpio_pin_t			pin,
 	gpio_pin_mode_t* const		pMode,
-	gpio_pin_config_t* const	pConfig
+	gpio_pin_config_t* const		pConfig
 );
+
+/** @} */ // GPIO_03_Driver_02_Helper
+/** @} */ // GPIO_03_Driver
 
 #ifdef __cplusplus
 }

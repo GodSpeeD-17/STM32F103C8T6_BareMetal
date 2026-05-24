@@ -66,24 +66,26 @@ extern "C" {
  * @{
  */
 
-/** 
- * @brief Provides bit mask for input position
- * @def BIT_MASK
- * @param[in] _Pos Bit position (0-based)
- * @returns Bit mask with only bit at position X set (1 << X)
- * @note Assumes 32-bit width
- */
-#define BIT_MASK(_Pos)								((uint32_t) (0x01UL << (_Pos)))
-
 /**
- * @brief Shifts an input value to the requested bit position
+ * @brief Shifts a raw value into a register field position
  * @def BIT_VALUE
  * @param[in] _Val Raw value before shifting
- * @param[in] _Pos Bit position (0-based)
- * @returns Shifted 32-bit value `((uint32_t)(_Val) << (_Pos))`
- * @note Useful for register field masks and encoded field values
+ * @param[in] _Pos Bit position, zero-based
+ * @returns Shifted 32-bit value
+ * @note @p _Pos must be in the range `0U..31U`.
+ * @note @p _Val must already be masked to the intended field width.
  */
 #define BIT_VALUE(_Val, _Pos)						((uint32_t) ((uint32_t) (_Val) << (_Pos)))
+
+/**
+ * @brief Creates a single-bit mask at the requested bit position
+ * @def BIT_MASK
+ * @see `BIT_VALUE`
+ * @param[in] _Pos Bit position, zero-based
+ * @returns 32-bit mask with only bit @p _Pos set
+ * @note @p _Pos must be in the range `0U..31U`.
+ */
+#define BIT_MASK(_Pos)								BIT_VALUE(0x01UL, (_Pos))
 
 /**
  * @brief   Compute peripheral index based on base addresses and peripheral size

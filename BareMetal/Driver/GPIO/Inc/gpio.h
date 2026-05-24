@@ -6,17 +6,16 @@
  * @date	31-03-2026
  *
  * @details
- * This header defines the GPIO driver layer built on top of `gpio_ll.h` and
- * `gpio_helper.h`.
+ * This header defines the GPIO driver layer built on top of `gpio_ll.h`.
  *
  * Theory:
  * - Layer 0 owns the raw STM32F1 register model.
  * - Shared GPIO selector types live in `gpio_types.h`.
- * - Layer 1 (`gpio_ll.h`) owns thin register-near access primitives.
- * - Layer 2 (`gpio_helper.h` / `gpio_helper.c`) bridges driver selectors to
- *   staged raw register images.
- * - Layer 3 (`gpio.h` / `gpio.c`) owns the public GPIO API, validation,
- *   orchestration, and batched register writes.
+ * - `gpio_ll.h/.c` owns raw register-near access and GPIO register-layout
+ *   primitives.
+ * - `gpio_helper.h/.c` owns translation and staged register-image mutation.
+ * - `gpio.h` / `gpio.c` owns the public GPIO API, validation, orchestration,
+ *   and batched register writes.
  */
 
 #ifndef GPIO_H_
@@ -54,7 +53,8 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	GPIO_LL_WRITE_REG(GPIOx, BSRR, (uint32_t) pin);
+
+	GPIO_LL_SetPin(GPIOx, pin);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -73,7 +73,8 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	GPIO_LL_WRITE_REG(GPIOx, BRR, (uint32_t) pin);
+
+	GPIO_LL_ResetPin(GPIOx, pin);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -92,7 +93,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_LL_TOGGLE_BITS(GPIOx, ODR, (uint32_t) pin);
+	GPIO_LL_TogglePin(GPIOx, pin);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -106,16 +107,12 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
  */
 __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	uint32_t reg = 0x00UL;
-	const uint8_t pinIndex = GPIO_PinMaskToIndex(pin);
-
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PinMaskToIndex(pin) == GPIO_PIN_INDEX_INVALID))
 	{
 		return (uint8_t) 0x00U;
 	}
-	GPIO_LL_READ_REG(GPIOx, IDR, reg);
-	reg = (reg & ((uint32_t) pin)) >> pinIndex;
-	return ((uint8_t) reg);
+
+	return (GPIO_LL_ReadPin(GPIOx, pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
 }
 
 /**

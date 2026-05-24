@@ -27,7 +27,7 @@ extern "C" {
 
 /**
  * @brief Read/Write access type
- * 
+ * @typedef _IO
  * @details
  * - Used for registers that support both read and write operations
  * - Qualifies the register as volatile to prevent compiler optimizations
@@ -39,7 +39,7 @@ typedef volatile uint32_t						_IO;
 
 /**
  * @brief Read-only access type
- * 
+ * @typedef _I
  * @details
  * - Used for registers that are read-only (status registers, flags)
  * - Qualifies as volatile to ensure fresh read on each access
@@ -51,7 +51,7 @@ typedef volatile const uint32_t					_I;
 
 /**
  * @brief Write-only access type
- * 
+ * @typedef _O
  * @details
  * - Used for registers that are write-only (data output, control)
  * - Qualifies as volatile to ensure write is not optimized away
@@ -60,6 +60,12 @@ typedef volatile const uint32_t					_I;
  * @note Common for FIFO buffers and output-only control registers
  */
 typedef volatile uint32_t						_O;
+
+/**
+ * @brief Register type
+ * @typedef reg
+ */
+typedef uint32_t								reg;
 
 // ------------------------------------------------------------------------------------------
 // Driver Operation Status Type

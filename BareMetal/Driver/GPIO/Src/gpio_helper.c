@@ -1,55 +1,54 @@
 /**
  * @file	gpio_helper.c
  * @author	Shrey Shah
- * @brief	GPIO Internal Driver Helper Implementation
+ * @brief	GPIO Internal Translation and Staging Helper Implementation
  * @version	v1.0
- * @date	29-03-2026
+ * @date	24-05-2026
  *
  * @details
- * This source file implements the internal helper utilities that bridge the
- * GPIO driver layer and the GPIO low-level layer.
- *
- * The helper layer translates driver-facing GPIO selectors into the raw
- * STM32F1 GPIO register fields required by the low-level layer and updates
- * staged register images so the driver can batch hardware writes efficiently.
+ * This source file implements the GPIO helper layer. It translates
+ * driver-facing GPIO selectors to raw STM32F1 GPIO fields and mutates
+ * caller-owned register images. It does not read or write peripheral hardware.
  */
 
 // ==================================================================================================== //
-//											   Includes											   //
+//                                               Includes                                               //
 // ==================================================================================================== //
-#include "gpio.h"
+
 #include "gpio_helper.h"
 
 // ==================================================================================================== //
-//										   Local Helpers											  //
+//                                           Local Helpers                                              //
 // ==================================================================================================== //
 
-__STATIC_FORCEINLINE uint32_t _GPIO_Helper_GetPinFieldShift(const gpio_pin_t pin)
+/**
+ * @brief Validates that a GPIO pin mask selects exactly one valid pin
+ * @param[in]	pin	GPIO pin mask to check
+ * @returns Single-pin validation status of @p pin
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin selects exactly one valid GPIO pin
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is invalid, empty, or selects multiple pins
+ */
+__STATIC_FORCEINLINE driver_status_t GPIO_Helper_ValidateSinglePinMask(const gpio_pin_t pin)
 {
-	uint32_t fieldShift = 0x00UL;
-	gpio_pin_t tempPin = pin;
-
-	while ((tempPin & (gpio_pin_t) 0x0001U) == GPIO_PIN_NONE)
+	if ((GPIO_PIN_MASK_IS_VALID(pin) == 0x00U) || (GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) == 0x00U))
 	{
-		tempPin = (gpio_pin_t)(tempPin >> 1U);
-		++fieldShift;
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	return ((fieldShift & 0x07UL) << 2U);
+	return DRIVER_STATUS_SUCCESS;
 }
 
-__STATIC_FORCEINLINE uint8_t _GPIO_Helper_IsSinglePinMaskValid(const gpio_pin_t pin)
-{
-	return ((GPIO_PIN_MASK_IS_VALID(pin) != 0x00U) &&
-		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) != 0x00U)) ? 0x01U : 0x00U;
-}
-
-__STATIC_FORCEINLINE uint8_t _GPIO_Helper_IsPullBitValid(const gpio_pull_t pullBit)
-{
-	return (pullBit <= (gpio_pull_t) 0x01U) ? 0x01U : 0x00U;
-}
-
-__STATIC_FORCEINLINE gpio_mode_t _GPIO_Helper_GetPinModeField(const gpio_pin_mode_t mode)
+/**
+ * @brief Encodes a driver GPIO mode selector into raw STM32F1 `MODE[1:0]` bits
+ * @param[in]	mode	Driver-facing GPIO mode selector
+ * @returns Raw GPIO `MODE[1:0]` field value
+ * @retval - `0x00U`: Input mode field
+ * @retval - `0x01U`: Output 10 MHz mode field
+ * @retval - `0x02U`: Output 2 MHz mode field
+ * @retval - `0x03U`: Output 50 MHz mode field
+ * @note Caller should pass a valid @ref gpio_pin_mode_t selector.
+ */
+__STATIC_FORCEINLINE gpio_mode_t GPIO_Helper_EncodeModeBits(const gpio_pin_mode_t mode)
 {
 	gpio_mode_t modeBits = (gpio_mode_t) 0x00U;
 
@@ -85,38 +84,36 @@ __STATIC_FORCEINLINE gpio_mode_t _GPIO_Helper_GetPinModeField(const gpio_pin_mod
 	return modeBits;
 }
 
-__STATIC_FORCEINLINE gpio_cnf_t _GPIO_Helper_GetPinConfigField(const gpio_pin_config_t config)
+/**
+ * @brief Encodes a driver GPIO config selector into raw STM32F1 `CNF[1:0]` bits
+ * @param[in]	config	Driver-facing GPIO configuration selector
+ * @returns Raw GPIO `CNF[1:0]` field value
+ * @retval - `0x00U`: Analog input or push-pull output field
+ * @retval - `0x01U`: Floating input or open-drain output field
+ * @retval - `0x02U`: Pull input or alternate push-pull output field
+ * @retval - `0x03U`: Alternate open-drain output field
+ * @note Caller should pass a valid @ref gpio_pin_config_t selector.
+ */
+__STATIC_FORCEINLINE gpio_cnf_t GPIO_Helper_EncodeConfigBits(const gpio_pin_config_t config)
 {
 	gpio_cnf_t cnfBits = (gpio_cnf_t) 0x00U;
 
 	switch (config)
 	{
 		case GPIO_PIN_CONFIG_INPUT_ANALOG:
+		case GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL:
 		{
 			cnfBits = (gpio_cnf_t) 0x00U;
 			break;
 		}
 		case GPIO_PIN_CONFIG_INPUT_FLOATING:
+		case GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN:
 		{
 			cnfBits = (gpio_cnf_t) 0x01U;
 			break;
 		}
 		case GPIO_PIN_CONFIG_INPUT_PULL_DOWN:
 		case GPIO_PIN_CONFIG_INPUT_PULL_UP:
-		{
-			cnfBits = (gpio_cnf_t) 0x02U;
-			break;
-		}
-		case GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL:
-		{
-			cnfBits = (gpio_cnf_t) 0x00U;
-			break;
-		}
-		case GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN:
-		{
-			cnfBits = (gpio_cnf_t) 0x01U;
-			break;
-		}
 		case GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL:
 		{
 			cnfBits = (gpio_cnf_t) 0x02U;
@@ -137,42 +134,11 @@ __STATIC_FORCEINLINE gpio_cnf_t _GPIO_Helper_GetPinConfigField(const gpio_pin_co
 	return cnfBits;
 }
 
-__STATIC_FORCEINLINE gpio_pull_t _GPIO_Helper_GetPullBit(const gpio_pin_config_t config)
-{
-	return ((((gpio_pin_config_t) config) & ((gpio_pin_config_t) 0xF0U)) != (gpio_pin_config_t) 0x00U) ?
-		(gpio_pull_t) 0x01U :
-		(gpio_pull_t) 0x00U;
-}
+// ==================================================================================================== //
+//                                           Helper APIs                                                //
+// ==================================================================================================== //
 
-__STATIC_FORCEINLINE gpio_pin_config_bits_t _GPIO_Helper_GetPinConfigBits
-(
-	const gpio_mode_t modeBits,
-	const gpio_cnf_t cnfBits
-)
-{
-	return (gpio_pin_config_bits_t)
-	(
-		((((gpio_pin_config_bits_t) cnfBits) & (gpio_pin_config_bits_t) 0x03U) << 2U) |
-		(((gpio_pin_config_bits_t) modeBits) & (gpio_pin_config_bits_t) 0x03U)
-	);
-}
-
-__STATIC_FORCEINLINE uint32_t _GPIO_Helper_GetPinModeMask(const gpio_pin_t pin)
-{
-	return BIT_VALUE(0x03UL, _GPIO_Helper_GetPinFieldShift(pin));
-}
-
-__STATIC_FORCEINLINE uint32_t _GPIO_Helper_GetPinCnfMask(const gpio_pin_t pin)
-{
-	return BIT_VALUE(0x03UL, (_GPIO_Helper_GetPinFieldShift(pin) + 2U));
-}
-
-__STATIC_FORCEINLINE uint32_t _GPIO_Helper_GetPinControlMask(const gpio_pin_t pin)
-{
-	return BIT_VALUE(0x0FUL, _GPIO_Helper_GetPinFieldShift(pin));
-}
-
-driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
+driver_status_t GPIO_Helper_StagePinModeConfigImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_mode_t mode,
@@ -180,19 +146,13 @@ driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
 	uint32_t* const pCrxRegImage
 )
 {
-	gpio_mode_t modeBits = (gpio_mode_t) 0x00U;
-	gpio_cnf_t cnfBits = (gpio_cnf_t) 0x00U;
-	gpio_pin_config_bits_t pinConfigBits = (gpio_pin_config_bits_t) 0x00U;
-	uint32_t fieldShift = 0x00UL;
-	uint32_t pinModeMask = 0x00UL;
-	uint32_t pinCnfMask = 0x00UL;
-	uint32_t regImage = 0x00UL;
+	gpio_pin_config_bits_t pinField = (gpio_pin_config_bits_t) 0x00U;
 
 	if (pCrxRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) ||
+	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
 		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U) ||
 		(GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U) ||
 		(GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, config) == 0x00U))
@@ -200,94 +160,59 @@ driver_status_t _GPIO_Helper_UpdatePinModeConfigImage
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	modeBits = _GPIO_Helper_GetPinModeField(mode);
-	cnfBits = _GPIO_Helper_GetPinConfigField(config);
-	pinConfigBits = _GPIO_Helper_GetPinConfigBits(modeBits, cnfBits);
-	fieldShift = _GPIO_Helper_GetPinFieldShift(pin);
-	pinModeMask = _GPIO_Helper_GetPinModeMask(pin);
-	pinCnfMask = _GPIO_Helper_GetPinCnfMask(pin);
+	pinField = GPIO_LL_PackPinModeCNFField(GPIO_Helper_EncodeModeBits(mode), GPIO_Helper_EncodeConfigBits(config));
 
-	regImage = *pCrxRegImage;
-	regImage &= ~pinModeMask;
-	regImage |= BIT_VALUE(((uint32_t) pinConfigBits & 0x03UL), fieldShift);
-	regImage &= ~pinCnfMask;
-	regImage |= BIT_VALUE((((uint32_t) pinConfigBits >> 2U) & 0x03UL), (fieldShift + 2U));
-
-	*pCrxRegImage = regImage;
+	*pCrxRegImage = GPIO_LL_SetPinModeCNFFieldInCRx(*pCrxRegImage, pin, pinField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t _GPIO_Helper_UpdatePinModeImage
+driver_status_t GPIO_Helper_StagePinModeImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_mode_t mode,
 	uint32_t* const pCrxRegImage
 )
 {
-	gpio_mode_t modeBits = (gpio_mode_t) 0x00U;
-	uint32_t fieldShift = 0x00UL;
-	uint32_t pinModeMask = 0x00UL;
-	uint32_t regImage = 0x00UL;
-
 	if (pCrxRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
+	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	modeBits = _GPIO_Helper_GetPinModeField(mode);
-	fieldShift = _GPIO_Helper_GetPinFieldShift(pin);
-	pinModeMask = _GPIO_Helper_GetPinModeMask(pin);
-	regImage = *pCrxRegImage;
-	regImage &= ~pinModeMask;
-	regImage |= BIT_VALUE(((uint32_t) modeBits & 0x03UL), fieldShift);
-
-	*pCrxRegImage = regImage;
+	*pCrxRegImage = GPIO_LL_SetPinModeBitsInCRx(*pCrxRegImage, pin, GPIO_Helper_EncodeModeBits(mode));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t _GPIO_Helper_UpdatePinConfigImage
+driver_status_t GPIO_Helper_StagePinConfigImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_config_t config,
 	uint32_t* const pCrxRegImage
 )
 {
-	gpio_cnf_t cnfBits = (gpio_cnf_t) 0x00U;
-	uint32_t fieldShift = 0x00UL;
-	uint32_t pinCnfMask = 0x00UL;
-	uint32_t regImage = 0x00UL;
-
 	if (pCrxRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
+	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	cnfBits = _GPIO_Helper_GetPinConfigField(config);
-	fieldShift = _GPIO_Helper_GetPinFieldShift(pin);
-	pinCnfMask = _GPIO_Helper_GetPinCnfMask(pin);
-	regImage = *pCrxRegImage;
-	regImage &= ~pinCnfMask;
-	regImage |= BIT_VALUE(((uint32_t) cnfBits & 0x03UL), (fieldShift + 2U));
-
-	*pCrxRegImage = regImage;
+	*pCrxRegImage = GPIO_LL_SetPinCNFBitsInCRx(*pCrxRegImage, pin, GPIO_Helper_EncodeConfigBits(config));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t _GPIO_Helper_ResetPinConfigImage
+driver_status_t GPIO_Helper_StagePinResetConfigImage
 (
 	const gpio_pin_t pin,
 	uint32_t* const pCrxRegImage
 )
 {
-	return _GPIO_Helper_UpdatePinModeConfigImage
+	return GPIO_Helper_StagePinModeConfigImage
 	(
 		pin,
 		GPIO_PIN_MODE_INPUT,
@@ -296,33 +221,30 @@ driver_status_t _GPIO_Helper_ResetPinConfigImage
 	);
 }
 
-driver_status_t _GPIO_Helper_UpdatePinPullImage
+driver_status_t GPIO_Helper_StagePinPullImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_config_t config,
 	uint32_t* const pOdrRegImage
 )
 {
-	gpio_pull_t pullBit = (gpio_pull_t) 0x00U;
-	uint32_t regImage = 0x00UL;
+	uint32_t regImage = 0x00000000UL;
 
 	if (pOdrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	pullBit = _GPIO_Helper_GetPullBit(config);
-	if (_GPIO_Helper_IsPullBitValid(pullBit) == 0x00U)
+	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
+		(
+			((gpio_pin_config_t) config != GPIO_PIN_CONFIG_INPUT_PULL_DOWN) &&
+			((gpio_pin_config_t) config != GPIO_PIN_CONFIG_INPUT_PULL_UP)
+		))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
 	regImage = *pOdrRegImage;
-	if (pullBit == (gpio_pull_t) 0x00U)
+	if ((gpio_pin_config_t) config == GPIO_PIN_CONFIG_INPUT_PULL_DOWN)
 	{
 		regImage &= ~(uint32_t) pin;
 	}
@@ -335,50 +257,29 @@ driver_status_t _GPIO_Helper_UpdatePinPullImage
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t _GPIO_Helper_ReadPinModeConfig
+driver_status_t GPIO_Helper_DecodePinModeConfigField
 (
-	GPIO_TypeDef* const GPIOx,
-	const gpio_pin_t pin,
-	gpio_pin_mode_t* const pMode,
-	gpio_pin_config_t* const pConfig
+	const gpio_pin_config_bits_t	crxField,
+	const uint32_t				odrRegImage,
+	const gpio_pin_t			pin,
+	gpio_pin_mode_t* const		pMode,
+	gpio_pin_config_t* const		pConfig
 )
 {
-	gpio_pin_config_bits_t pinConfigBits = (gpio_pin_config_bits_t) 0x00U;
 	gpio_mode_t modeBits = (gpio_mode_t) 0x00U;
 	gpio_cnf_t cnfBits = (gpio_cnf_t) 0x00U;
-	uint32_t fieldShift = 0x00UL;
-	uint32_t pinControlMask = 0x00UL;
-	uint32_t regImage = 0x00UL;
-	uint32_t odrRegImage = 0x00UL;
 
 	if ((pMode == NULL) && (pConfig == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIOx == NULL) || (_GPIO_Helper_IsSinglePinMaskValid(pin) == 0x00U))
+	if (GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if ((((uint32_t) pin) & 0xFF00UL) != 0x00UL)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRH, regImage);
-	}
-	else
-	{
-		GPIO_LL_READ_REG(GPIOx, CRL, regImage);
-	}
-
-	fieldShift = _GPIO_Helper_GetPinFieldShift(pin);
-	pinControlMask = _GPIO_Helper_GetPinControlMask(pin);
-
-	pinConfigBits = (gpio_pin_config_bits_t)
-	(
-		(regImage & pinControlMask) >> fieldShift
-	);
-
-	modeBits = (gpio_mode_t) (pinConfigBits & (gpio_pin_config_bits_t) 0x03U);
-	cnfBits = (gpio_cnf_t) ((pinConfigBits >> 2U) & (gpio_pin_config_bits_t) 0x03U);
+	modeBits = GPIO_LL_GetModeBitsFromPinModeCNFField(crxField);
+	cnfBits = GPIO_LL_GetCNFBitsFromPinModeCNFField(crxField);
 
 	if (pMode != NULL)
 	{
@@ -431,8 +332,9 @@ driver_status_t _GPIO_Helper_ReadPinModeConfig
 					}
 					case (gpio_cnf_t) 0x02U:
 					{
-						GPIO_LL_READ_REG(GPIOx, ODR, odrRegImage);
-						*pConfig = ((odrRegImage & (uint32_t) pin) != 0x00UL) ? GPIO_PIN_CONFIG_INPUT_PULL_UP : GPIO_PIN_CONFIG_INPUT_PULL_DOWN;
+						*pConfig = ((odrRegImage & (uint32_t) pin) != 0x00000000UL) ?
+							GPIO_PIN_CONFIG_INPUT_PULL_UP :
+							GPIO_PIN_CONFIG_INPUT_PULL_DOWN;
 						break;
 					}
 					default:

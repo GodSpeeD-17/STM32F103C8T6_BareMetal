@@ -75,9 +75,6 @@ typedef uint8_t									gpio_exti_port_t;
  * @{
  */
 
-/** @brief No pins bitmask @def GPIO_PIN_NONE */
-#define GPIO_PIN_NONE							((gpio_pin_t) 0x0000U)
-
 /** @brief First valid zero-based GPIO pin index @def GPIO_PIN_INDEX_FIRST */
 #define GPIO_PIN_INDEX_FIRST					((uint8_t) 0U)
 /** @brief Last valid zero-based GPIO pin index @def GPIO_PIN_INDEX_LAST */
@@ -162,8 +159,13 @@ typedef uint8_t									gpio_exti_port_t;
  * @brief Bitmask selecting every valid GPIO pin on one GPIO port
  * @def GPIO_PIN_ALL
  */
-#define GPIO_PIN_ALL								\
-	((gpio_pin_t) (GPIO_PIN_MASK_CRL_RANGE | GPIO_PIN_MASK_CRH_RANGE))
+#define GPIO_PIN_ALL							((gpio_pin_t) (GPIO_PIN_MASK_CRL_RANGE | GPIO_PIN_MASK_CRH_RANGE))
+
+/**
+ * @brief No pins bitmask
+ * @def GPIO_PIN_NONE
+ */
+#define GPIO_PIN_NONE							((gpio_pin_t) 0x0000U)
 
 /** @} */ // GPIO_03_Driver_01_Types_02_Pins
 
@@ -177,12 +179,9 @@ typedef uint8_t									gpio_exti_port_t;
  */
 #define GPIO_PORT_IS_VALID(GPIOx)					\
 (													\
-	((GPIOx) == GPIOA)	||							\
-	((GPIOx) == GPIOB)	||							\
-	((GPIOx) == GPIOC)	||							\
-	((GPIOx) == GPIOD)	||							\
-	((GPIOx) == GPIOE)	||							\
-	((GPIOx) == GPIOF)	||							\
+	((GPIOx) == GPIOA)	|| ((GPIOx) == GPIOB)	||	\
+	((GPIOx) == GPIOC)	|| ((GPIOx) == GPIOD)	||	\
+	((GPIOx) == GPIOE)	|| ((GPIOx) == GPIOF)	||	\
 	((GPIOx) == GPIOG)								\
 )
 
