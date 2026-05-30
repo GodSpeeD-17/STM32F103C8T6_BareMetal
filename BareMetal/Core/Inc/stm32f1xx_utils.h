@@ -74,7 +74,7 @@ extern "C" {
  * @note @p _Pos must be in the range `0U..31U`.
  * @note @p _Val must already be masked to the intended field width.
  */
-#define BIT_VALUE(_Val, _Pos)						((uint32_t) ((uint32_t) (_Val) << (_Pos)))
+#define BIT_VALUE(_Val, _Pos)						((reg) ((uint32_t) (_Val) << (_Pos)))
 
 /**
  * @brief Creates a single-bit mask at the requested bit position
@@ -85,6 +85,19 @@ extern "C" {
  * @note @p _Pos must be in the range `0U..31U`.
  */
 #define BIT_MASK(_Pos)								BIT_VALUE(0x01UL, (_Pos))
+
+/**
+ * @brief Masks a right-aligned field value and shifts it into register position
+ * @def BIT_FIELD_VALUE
+ * @see `BIT_VALUE`
+ * @param[in] _Val Right-aligned raw field value
+ * @param[in] _Mask Right-aligned raw field mask
+ * @param[in] _Pos Target bit position, zero-based
+ * @returns Shifted 32-bit register field value
+ * @note @p _Pos must be in the range `0U..31U`.
+ */
+#define BIT_FIELD_VALUE(_Val, _Mask, _Pos)			\
+	BIT_VALUE((((uint32_t) (_Val)) & ((uint32_t) (_Mask))), (_Pos))
 
 /**
  * @brief   Compute peripheral index based on base addresses and peripheral size

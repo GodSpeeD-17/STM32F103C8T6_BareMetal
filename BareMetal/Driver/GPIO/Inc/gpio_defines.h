@@ -188,7 +188,9 @@ extern "C" {
  */
 __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 {
+	// Local Variable
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
+
 	//! Validate that the input pin mask is a single valid pin selection
 	if ((GPIO_PIN_MASK_IS_VALID(pinMask) == 0U) || (GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pinMask) == 0U))
 	{

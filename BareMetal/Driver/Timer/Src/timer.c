@@ -351,41 +351,41 @@ void TIM_IRQ_Disable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
 void TIM_Reset(TIM_TypeDef *TIMx)
 {
 	// Register
-	uint32_t reg = RCC->APB1RSTR.REG;
+	uint32_t regImage = RCC->APB1RSTR.REG;
 	// Set based on Timer
 	if (TIMx == TIM2)
 	{
-		reg |= RCC_APB1RSTR_TIM2RST;
+		regImage |= RCC_APB1RSTR_TIM2RST;
 	}
 	if (TIMx == TIM3)
 	{
-		reg |= RCC_APB1RSTR_TIM3RST;
+		regImage |= RCC_APB1RSTR_TIM3RST;
 	}
 	if (TIMx == TIM4)
 	{
-		reg |= RCC_APB1RSTR_TIM4RST;
+		regImage |= RCC_APB1RSTR_TIM4RST;
 	}
 	// Write to Register
-	RCC->APB1RSTR.REG = reg;
+	RCC->APB1RSTR.REG = regImage;
 	// Reset Based on Timer
 	if (TIMx == TIM2)
 	{
-		reg &= ~RCC_APB1RSTR_TIM2RST;
+		regImage &= ~RCC_APB1RSTR_TIM2RST;
 	}
 	if (TIMx == TIM3)
 	{
-		reg &= ~RCC_APB1RSTR_TIM3RST;
+		regImage &= ~RCC_APB1RSTR_TIM3RST;
 	}
 	if (TIMx == TIM4)
 	{
-		reg &= ~RCC_APB1RSTR_TIM4RST;
+		regImage &= ~RCC_APB1RSTR_TIM4RST;
 	}
 	// Local Delay
 	volatile uint16_t i = 10 * 1000;
 	while (i--)
 		;
 	// Write to Register
-	RCC->APB1RSTR.REG = reg;
+	RCC->APB1RSTR.REG = regImage;
 }
 
 /**

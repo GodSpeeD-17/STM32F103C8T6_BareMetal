@@ -144,9 +144,67 @@ For GPIO, the intended namespace is `Codec_GPIO_*`. The codec layer should be a
 single point for selector encoding/decoding and register-image mutation:
 
 ```c
-field = Codec_GPIO_ExtractPinModeConfigField(image, pinIndex);
-image = Codec_GPIO_StagePinModeConfigImage(image, pinIndex, mode, config);
-image = Codec_GPIO_StagePinPullImage(image, pinIndex, config);
+status = Codec_GPIO_StagePinConfigMode
+(
+    crxImage,
+    odrImage,
+    pinIndex,
+    config,
+    mode,
+    &crxImage,
+    &odrImage
+);
+status = Codec_GPIO_ExtractPinConfigMode
+(
+    crxImage,
+    odrImage,
+    pinIndex,
+    &config,
+    &mode
+);
+status = Codec_GPIO_StagePinOutputState
+(
+    odrImage,
+    pinIndex,
+    DRIVER_STATUS_ON,
+    &odrImage
+);
+status = Codec_GPIO_ExtractPinOutputState
+(
+    odrImage,
+    pinIndex,
+    &pinState
+);
+status = Codec_GPIO_ExtractPinInputState
+(
+    idrImage,
+    pinIndex,
+    &pinState
+);
+status = Codec_GPIO_StagePinLockState
+(
+    lckrImage,
+    pinIndex,
+    DRIVER_STATUS_ON,
+    &lckrImage
+);
+status = Codec_GPIO_StageLockKeyState
+(
+    lckrImage,
+    DRIVER_STATUS_ON,
+    &lckrImage
+);
+status = Codec_GPIO_ExtractPinLockState
+(
+    lckrImage,
+    pinIndex,
+    &lockState
+);
+status = Codec_GPIO_ExtractLockKeyState
+(
+    lckrImage,
+    &lockKeyState
+);
 ```
 
 Avoid adding new codec APIs with the legacy module-before-layer shape.

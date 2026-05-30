@@ -31,6 +31,7 @@ extern "C" {
 // ==================================================================================================== //
 
 #include "gpio_defines.h"
+#include "gpio_codec.h"
 #include "gpio_ll.h"
 
 /**
@@ -89,11 +90,13 @@ typedef struct _gpio_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were set.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  * @note Uses the driver read-modify-write policy on `ODR`.
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	reg gpioOdrRegImage = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -101,7 +104,22 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage |= (reg) pin;
+	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
+	{
+		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
+		{
+			if (Codec_GPIO_StagePinOutputState
+			(
+				gpioOdrRegImage,
+				pinIndex,
+				DRIVER_STATUS_ON,
+				&gpioOdrRegImage
+			) != DRIVER_STATUS_SUCCESS)
+			{
+				return DRIVER_STATUS_ERROR_STATE;
+			}
+		}
+	}
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -113,11 +131,13 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were reset.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  * @note Uses the driver read-modify-write policy on `ODR`.
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	reg gpioOdrRegImage = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -125,7 +145,22 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage &= ~((reg) pin);
+	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
+	{
+		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
+		{
+			if (Codec_GPIO_StagePinOutputState
+			(
+				gpioOdrRegImage,
+				pinIndex,
+				DRIVER_STATUS_OFF,
+				&gpioOdrRegImage
+			) != DRIVER_STATUS_SUCCESS)
+			{
+				return DRIVER_STATUS_ERROR_STATE;
+			}
+		}
+	}
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -137,10 +172,13 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were toggled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	reg gpioOdrRegImage = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
+	driver_status_t pinState = DRIVER_STATUS_OFF;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -148,7 +186,32 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage ^= (reg) pin;
+	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
+	{
+		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
+		{
+			if (Codec_GPIO_ExtractPinOutputState
+			(
+				gpioOdrRegImage,
+				pinIndex,
+				&pinState
+			) != DRIVER_STATUS_SUCCESS)
+			{
+				return DRIVER_STATUS_ERROR_STATE;
+			}
+			pinState = (pinState == DRIVER_STATUS_ON) ? DRIVER_STATUS_OFF : DRIVER_STATUS_ON;
+			if (Codec_GPIO_StagePinOutputState
+			(
+				gpioOdrRegImage,
+				pinIndex,
+				pinState,
+				&gpioOdrRegImage
+			) != DRIVER_STATUS_SUCCESS)
+			{
+				return DRIVER_STATUS_ERROR_STATE;
+			}
+		}
+	}
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -164,6 +227,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
 __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	reg gpioIdrRegImage = 0x00000000UL;
+	driver_status_t pinState = DRIVER_STATUS_OFF;
 	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
@@ -172,7 +236,17 @@ __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_
 	}
 
 	gpioIdrRegImage = LL_GPIO_ReadIDR(GPIOx);
-	return ((gpioIdrRegImage & (reg) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
+	if (Codec_GPIO_ExtractPinInputState
+	(
+		gpioIdrRegImage,
+		pinIndex,
+		&pinState
+	) != DRIVER_STATUS_SUCCESS)
+	{
+		return (uint8_t) 0x00U;
+	}
+
+	return (pinState == DRIVER_STATUS_ON) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
 }
 
 /**
