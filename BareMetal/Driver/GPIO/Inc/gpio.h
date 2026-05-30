@@ -93,7 +93,7 @@ typedef struct _gpio_config_t
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	uint32_t gpioOdrRegImage = 0x00000000UL;
+	reg gpioOdrRegImage = 0x00000000UL;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -101,7 +101,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage |= (uint32_t) pin;
+	gpioOdrRegImage |= (reg) pin;
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -117,7 +117,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	uint32_t gpioOdrRegImage = 0x00000000UL;
+	reg gpioOdrRegImage = 0x00000000UL;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -125,7 +125,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage &= ~((uint32_t) pin);
+	gpioOdrRegImage &= ~((reg) pin);
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -140,7 +140,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	uint32_t gpioOdrRegImage = 0x00000000UL;
+	reg gpioOdrRegImage = 0x00000000UL;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
@@ -148,7 +148,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
 	}
 
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage ^= (uint32_t) pin;
+	gpioOdrRegImage ^= (reg) pin;
 	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -163,7 +163,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
  */
 __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	uint32_t gpioIdrRegImage = 0x00000000UL;
+	reg gpioIdrRegImage = 0x00000000UL;
 	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
@@ -172,7 +172,7 @@ __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_
 	}
 
 	gpioIdrRegImage = LL_GPIO_ReadIDR(GPIOx);
-	return ((gpioIdrRegImage & (uint32_t) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
+	return ((gpioIdrRegImage & (reg) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
 }
 
 /**
@@ -249,7 +249,8 @@ gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
  * @note
  * - Automatically determines whether CRL or CRH needs to be updated.
  * - Existing configuration bits for unaffected pins remain unchanged.
- * - Use with @ref GPIO_SetPinConfig or @ref GPIO_SetPinModeConfig for complete configuration.
+ * - Decodes the current config field and rejects invalid final MODE/CNF pairs.
+ * - Use @ref GPIO_SetPinModeConfig when changing mode and config together.
  */
 driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_pin_mode_t mode);
 
@@ -279,9 +280,9 @@ gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t 
  *
  * @note
  * - Automatically determines whether CRL or CRH registers are affected.
- * - Use with @ref GPIO_SetPinMode to fully configure a pin.
+ * - Decodes the current mode field and rejects invalid final MODE/CNF pairs.
  * - Safe for multi-pin configuration; unaffected bits are preserved.
- * - This API does not update `ODR` for input pull-up/pull-down selection.
+ * - Updates staged `ODR` before `CRL/CRH` for input pull-up/down selection.
  */
 driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_pin_config_t config);
 

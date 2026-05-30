@@ -59,6 +59,9 @@ The current split is:
   selectors, indices, masks, and public scalar types.
 - Keep public selector translation, raw field placement, and staged image
   mutation in the codec layer.
+- Codec staging APIs must take a full register image as input and return the
+  updated register image. They should not mutate caller-owned images through
+  pointers or return user-facing status codes for already-validated selectors.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
 - Keep board-specific behavior outside the generic GPIO driver.
 - Prefer `GPIO_SetPinModeConfig()` for semantic pin configuration on STM32F1.
@@ -81,8 +84,8 @@ Use the codec layer for:
 - staged mutation of caller-owned register images
 - image-only side effects such as input pull-up/pull-down ODR staging
 
-Do not use the codec layer for direct hardware access, clock sequencing,
-batching decisions, or board-specific pin policy.
+Do not use the codec layer for direct hardware access, public input validation,
+clock sequencing, batching decisions, or board-specific pin policy.
 
 ## Layer Ownership
 
@@ -134,6 +137,19 @@ GPIO_EXTI_LL_EnableIRQ(...);
 The implementation exposes only the `LL_GPIO_*` and `LL_GPIO_EXTI_*` names. Do
 not keep compatibility aliases for old `GPIO_LL_*` or `GPIO_EXTI_LL_*` shapes
 inside GPIO.
+
+Use `Codec_<Module>_<Action>` for codec APIs.
+
+For GPIO, the intended namespace is `Codec_GPIO_*`. The codec layer should be a
+single point for selector encoding/decoding and register-image mutation:
+
+```c
+field = Codec_GPIO_ExtractPinModeConfigField(image, pinIndex);
+image = Codec_GPIO_StagePinModeConfigImage(image, pinIndex, mode, config);
+image = Codec_GPIO_StagePinPullImage(image, pinIndex, config);
+```
+
+Avoid adding new codec APIs with the legacy module-before-layer shape.
 
 ## Intended Configuration Flow
 
@@ -190,9 +206,10 @@ On STM32F1, `CNF[1:0]` is not independently semantic:
 | non-zero | `10` | Alternate-function output push-pull |
 | non-zero | `11` | Alternate-function output open-drain |
 
-Because of this, standalone public calls that set only mode or only config are
-unsafe unless they decode the current counterpart field and validate the final
-pair. The preferred public API should configure mode and config together.
+Because of this, standalone public calls that set only mode or only config must
+decode the current counterpart field and validate the final pair before writing
+any staged image. The preferred public API should configure mode and config
+together.
 
 ## GPIO EXTI Architecture
 
@@ -238,15 +255,14 @@ from trigger and port-source selector macros.
      into a Blue Pill board module or project-local board support file.
    - Keep generic GPIO unaware of active-low LEDs.
 
-4. Make semantic configuration atomic at the API level.
+4. Keep semantic configuration atomic at the API level.
    - Prefer `GPIO_SetPinModeConfig()` for public pin setup.
-   - Deprecate or restrict `GPIO_SetPinMode()` and `GPIO_SetPinConfig()`.
-   - If the split APIs remain public, make them decode the current pin field and
-     reject invalid final mode/config combinations.
+   - Keep `GPIO_SetPinMode()` and `GPIO_SetPinConfig()` guarded by decoding the
+     current pin field and rejecting invalid final mode/config combinations.
    - Keep public GPIO set/reset/toggle on read-modify-write `ODR` staging, not
      one write per selected pin.
 
-5. Fix input pull write ordering.
+5. Preserve input pull write ordering.
    - Stage `ODR` before `CRL/CRH` for pull-up/pull-down configuration.
    - Document the order in the public API notes.
 

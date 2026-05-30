@@ -16,15 +16,16 @@
 #ifndef GPIO_DEFINES_H_
 #define GPIO_DEFINES_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 // ==================================================================================================== //
 //												Includes												//
 // ==================================================================================================== //
 #include "stm32f1xx.h"
 #include "gpio_data_types.h"
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
  * @addtogroup GPIO_03_Driver

@@ -54,8 +54,6 @@ typedef uint8_t									gpio_speed_t;
 typedef uint8_t									gpio_cnf_t;
 /** @brief Raw GPIO pull direction bit type @typedef gpio_pull_t */
 typedef uint8_t									gpio_pull_t;
-/** @brief Raw packed GPIO pin configuration field type @typedef gpio_pin_config_bits_t */
-typedef uint8_t									gpio_pin_config_bits_t;
 /** @brief GPIO EXTI trigger selector type @typedef gpio_exti_trigger_t */
 typedef uint8_t									gpio_exti_trigger_t;
 /** @brief GPIO EXTI port source selector type @typedef gpio_exti_port_t */

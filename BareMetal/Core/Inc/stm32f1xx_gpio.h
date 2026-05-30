@@ -93,6 +93,54 @@ extern "C" {
 #define GPIO_PERIPHERAL_SIZE					((uint32_t) 0x400UL)
 
 // ------------------------------------------------------------------------------------------
+// GPIO_CRx Raw MODE/CNF Field Encodings
+// ------------------------------------------------------------------------------------------
+
+/**
+ * @brief GPIO CRL/CRH Raw MODE/CNF Field Encodings
+ * @defgroup GPIO_01_RegisterLayer_00_PortConfigEncoding GPIO Port Configuration Field Encodings
+ * @ingroup GPIO_01_RegisterLayer
+ * @details
+ * These definitions expose the right-aligned hardware values documented by
+ * the STM32F1 GPIO port bit configuration table. They are intentionally raw
+ * register-field values; driver-facing selectors live above this register
+ * layer and are translated by the GPIO codec.
+ * @{
+ */
+
+// ------ MODE[1:0] Raw Field Values ------ //
+/** @brief Input mode raw MODE value @def GPIO_CRX_MODE_INPUT */
+#define GPIO_CRX_MODE_INPUT						((reg_field_t) 0x00U)
+/** @brief Output mode, max speed 10 MHz raw MODE value @def GPIO_CRX_MODE_OUTPUT_10MHZ */
+#define GPIO_CRX_MODE_OUTPUT_10MHZ				((reg_field_t) 0x01U)
+/** @brief Output mode, max speed 2 MHz raw MODE value @def GPIO_CRX_MODE_OUTPUT_2MHZ */
+#define GPIO_CRX_MODE_OUTPUT_2MHZ				((reg_field_t) 0x02U)
+/** @brief Output mode, max speed 50 MHz raw MODE value @def GPIO_CRX_MODE_OUTPUT_50MHZ */
+#define GPIO_CRX_MODE_OUTPUT_50MHZ				((reg_field_t) 0x03U)
+
+// ------ CNF[1:0] Raw Field Values When MODE[1:0] == 00 ------ //
+/** @brief Analog input raw CNF value @def GPIO_CRX_CNF_INPUT_ANALOG */
+#define GPIO_CRX_CNF_INPUT_ANALOG				((reg_field_t) 0x00U)
+/** @brief Floating input raw CNF value @def GPIO_CRX_CNF_INPUT_FLOATING */
+#define GPIO_CRX_CNF_INPUT_FLOATING				((reg_field_t) 0x01U)
+/** @brief Input pull-up/pull-down raw CNF value @def GPIO_CRX_CNF_INPUT_PULL */
+#define GPIO_CRX_CNF_INPUT_PULL					((reg_field_t) 0x02U)
+/** @brief Reserved input raw CNF value @def GPIO_CRX_CNF_INPUT_RESERVED */
+#define GPIO_CRX_CNF_INPUT_RESERVED				((reg_field_t) 0x03U)
+
+// ------ CNF[1:0] Raw Field Values When MODE[1:0] > 00 ------ //
+/** @brief General-purpose output push-pull raw CNF value @def GPIO_CRX_CNF_OUTPUT_PUSH_PULL */
+#define GPIO_CRX_CNF_OUTPUT_PUSH_PULL			((reg_field_t) 0x00U)
+/** @brief General-purpose output open-drain raw CNF value @def GPIO_CRX_CNF_OUTPUT_OPEN_DRAIN */
+#define GPIO_CRX_CNF_OUTPUT_OPEN_DRAIN			((reg_field_t) 0x01U)
+/** @brief Alternate-function output push-pull raw CNF value @def GPIO_CRX_CNF_ALTERNATE_PUSH_PULL */
+#define GPIO_CRX_CNF_ALTERNATE_PUSH_PULL		((reg_field_t) 0x02U)
+/** @brief Alternate-function output open-drain raw CNF value @def GPIO_CRX_CNF_ALTERNATE_OPEN_DRAIN */
+#define GPIO_CRX_CNF_ALTERNATE_OPEN_DRAIN		((reg_field_t) 0x03U)
+
+/** @} */ // GPIO_01_RegisterLayer_00_PortConfigEncoding
+
+// ------------------------------------------------------------------------------------------
 // GPIO_CRL (Port Configuration Register Low)
 // ------------------------------------------------------------------------------------------
 

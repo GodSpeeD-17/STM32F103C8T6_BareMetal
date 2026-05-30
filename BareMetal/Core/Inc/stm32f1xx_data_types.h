@@ -67,6 +67,12 @@ typedef volatile uint32_t						_O;
  */
 typedef uint32_t								reg;
 
+/**
+ * @brief Raw register field value type
+ * @typedef reg_field_t
+ */
+typedef uint8_t									reg_field_t;
+
 // ==================================================================================================== //
 //										Driver Operation Status Type									//
 // ==================================================================================================== //
