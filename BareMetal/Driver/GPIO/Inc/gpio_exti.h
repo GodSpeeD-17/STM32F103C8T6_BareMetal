@@ -10,11 +10,12 @@
  *
  * Theory:
  * - Layer 0 owns the raw EXTI and AFIO register model and shared EXTI scalar types.
- * - Layer 1 (`gpio_exti_ll.h`) owns thin EXTI, AFIO, and NVIC-near primitives.
+ * - Layer 1 (`gpio_exti_ll.h`) owns dumb EXTI/AFIO register access and AFIO
+ *   clock forwarding.
  * - Layer 2 (`gpio_exti_helper.h` / `gpio_exti_helper.c`) bridges `GPIOx + pin`
  *   selectors to staged EXTI and AFIO register images.
  * - Layer 3 (`gpio_exti.h` / `gpio_exti.c`) owns the public EXTI API, validation,
- *   GPIO integration, orchestration, and batched register writes.
+ *   GPIO integration, NVIC policy, orchestration, and batched register writes.
  */
 
 #ifndef GPIO_EXTI_H_

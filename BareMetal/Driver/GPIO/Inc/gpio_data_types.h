@@ -40,6 +40,8 @@ extern "C" {
 
 /** @brief GPIO pin bit-mask type @typedef gpio_pin_t */
 typedef uint16_t								gpio_pin_t;
+/** @brief GPIO zero-based pin index type @typedef gpio_pin_index_t */
+typedef uint8_t									gpio_pin_index_t;
 /** @brief GPIO pin mode selector type @typedef gpio_pin_mode_t */
 typedef uint8_t									gpio_pin_mode_t;
 /** @brief GPIO pin configuration selector type @typedef gpio_pin_config_t */

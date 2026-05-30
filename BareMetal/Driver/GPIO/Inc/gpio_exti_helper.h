@@ -7,7 +7,7 @@
  *
  * @details
  * This header defines the internal helper utilities that bridge the GPIO EXTI
- * driver layer and the EXTI low-level layer.
+ * driver layer and staged EXTI/AFIO register images.
  */
 
 #ifndef GPIO_EXTI_HELPER_H_
@@ -22,7 +22,7 @@ extern "C" {
 // ==================================================================================================== //
 
 #include "gpio_exti.h"
-#include "gpio_exti_ll.h"
+#include "nvic_types.h"
 
 /**
  * @brief Updates one AFIO EXTICR line slot inside a staged register image

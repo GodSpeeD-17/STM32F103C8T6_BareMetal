@@ -15,14 +15,16 @@
 
 #include "gpio_exti.h"
 #include "gpio_exti_helper.h"
+#include "gpio_exti_ll.h"
+#include "nvic.h"
 
 // ==================================================================================================== //
 //                                              Local Macros                                            //
 // ==================================================================================================== //
 
 #define GPIO_EXTI_AFIO_EXTICR_COUNT						((uint8_t) 0x04U)
-#define GPIO_EXTI_GROUP_05_09_MASK						((uint32_t) 0x000003E0UL)
-#define GPIO_EXTI_GROUP_10_15_MASK						((uint32_t) 0x0000FC00UL)
+#define GPIO_EXTI_GROUP_05_09_MASK						((reg) 0x000003E0UL)
+#define GPIO_EXTI_GROUP_10_15_MASK						((reg) 0x0000FC00UL)
 
 // ==================================================================================================== //
 //                                              Local Helpers                                           //
@@ -67,55 +69,126 @@ static uint8_t _GPIO_EXTI_IsInputConfigCompatible(const gpio_pin_config_t config
 	return isCompatible;
 }
 
-static void _GPIO_EXTI_DisableIRQsForMaskedLines(const gpio_pin_t pin, const uint32_t imrRegImage)
+static driver_status_t _GPIO_EXTI_ReadConfigRegisterImage(const uint8_t regIndex, reg* const pRegImage)
 {
-	if ((((uint32_t) pin) & (uint32_t) GPIO_PIN_0) != 0x00000000UL)
+	if (pRegImage == NULL)
 	{
-		if ((imrRegImage & (uint32_t) GPIO_PIN_0) == 0x00000000UL)
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	switch (regIndex)
+	{
+		case 0x00U:
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI0_IRQn);
+			*pRegImage = LL_GPIO_EXTI_ReadEXTICR1();
+			break;
+		}
+		case 0x01U:
+		{
+			*pRegImage = LL_GPIO_EXTI_ReadEXTICR2();
+			break;
+		}
+		case 0x02U:
+		{
+			*pRegImage = LL_GPIO_EXTI_ReadEXTICR3();
+			break;
+		}
+		case 0x03U:
+		{
+			*pRegImage = LL_GPIO_EXTI_ReadEXTICR4();
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
 	}
-	if ((((uint32_t) pin) & (uint32_t) GPIO_PIN_1) != 0x00000000UL)
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+static driver_status_t _GPIO_EXTI_WriteConfigRegisterImage(const uint8_t regIndex, const reg regImage)
+{
+	switch (regIndex)
 	{
-		if ((imrRegImage & (uint32_t) GPIO_PIN_1) == 0x00000000UL)
+		case 0x00U:
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI1_IRQn);
+			LL_GPIO_EXTI_WriteEXTICR1(regImage);
+			break;
+		}
+		case 0x01U:
+		{
+			LL_GPIO_EXTI_WriteEXTICR2(regImage);
+			break;
+		}
+		case 0x02U:
+		{
+			LL_GPIO_EXTI_WriteEXTICR3(regImage);
+			break;
+		}
+		case 0x03U:
+		{
+			LL_GPIO_EXTI_WriteEXTICR4(regImage);
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
 	}
-	if ((((uint32_t) pin) & (uint32_t) GPIO_PIN_2) != 0x00000000UL)
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+static void _GPIO_EXTI_DisableIRQsForMaskedLines(const gpio_pin_t pin, const reg imrRegImage)
+{
+	if (((reg) pin & (reg) GPIO_PIN_0) != 0x00000000UL)
 	{
-		if ((imrRegImage & (uint32_t) GPIO_PIN_2) == 0x00000000UL)
+		if ((imrRegImage & (reg) GPIO_PIN_0) == 0x00000000UL)
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI2_IRQn);
+			NVIC_IRQDisable((uint8_t) EXTI0_IRQn);
 		}
 	}
-	if ((((uint32_t) pin) & (uint32_t) GPIO_PIN_3) != 0x00000000UL)
+	if (((reg) pin & (reg) GPIO_PIN_1) != 0x00000000UL)
 	{
-		if ((imrRegImage & (uint32_t) GPIO_PIN_3) == 0x00000000UL)
+		if ((imrRegImage & (reg) GPIO_PIN_1) == 0x00000000UL)
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI3_IRQn);
+			NVIC_IRQDisable((uint8_t) EXTI1_IRQn);
 		}
 	}
-	if ((((uint32_t) pin) & (uint32_t) GPIO_PIN_4) != 0x00000000UL)
+	if (((reg) pin & (reg) GPIO_PIN_2) != 0x00000000UL)
 	{
-		if ((imrRegImage & (uint32_t) GPIO_PIN_4) == 0x00000000UL)
+		if ((imrRegImage & (reg) GPIO_PIN_2) == 0x00000000UL)
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI4_IRQn);
+			NVIC_IRQDisable((uint8_t) EXTI2_IRQn);
 		}
 	}
-	if ((((uint32_t) pin) & GPIO_EXTI_GROUP_05_09_MASK) != 0x00000000UL)
+	if (((reg) pin & (reg) GPIO_PIN_3) != 0x00000000UL)
+	{
+		if ((imrRegImage & (reg) GPIO_PIN_3) == 0x00000000UL)
+		{
+			NVIC_IRQDisable((uint8_t) EXTI3_IRQn);
+		}
+	}
+	if (((reg) pin & (reg) GPIO_PIN_4) != 0x00000000UL)
+	{
+		if ((imrRegImage & (reg) GPIO_PIN_4) == 0x00000000UL)
+		{
+			NVIC_IRQDisable((uint8_t) EXTI4_IRQn);
+		}
+	}
+	if (((reg) pin & GPIO_EXTI_GROUP_05_09_MASK) != 0x00000000UL)
 	{
 		if ((imrRegImage & GPIO_EXTI_GROUP_05_09_MASK) == 0x00000000UL)
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI9_5_IRQn);
+			NVIC_IRQDisable((uint8_t) EXTI9_5_IRQn);
 		}
 	}
-	if ((((uint32_t) pin) & GPIO_EXTI_GROUP_10_15_MASK) != 0x00000000UL)
+	if (((reg) pin & GPIO_EXTI_GROUP_10_15_MASK) != 0x00000000UL)
 	{
 		if ((imrRegImage & GPIO_EXTI_GROUP_10_15_MASK) == 0x00000000UL)
 		{
-			GPIO_EXTI_LL_DisableIRQ(EXTI15_10_IRQn);
+			NVIC_IRQDisable((uint8_t) EXTI15_10_IRQn);
 		}
 	}
 }
@@ -126,10 +199,10 @@ static void _GPIO_EXTI_DisableIRQsForMaskedLines(const gpio_pin_t pin, const uin
 
 driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_exti_trigger_t trigger)
 {
-	uint32_t extiImrRegImage = 0x00000000UL;
-	uint32_t extiRtsrRegImage = 0x00000000UL;
-	uint32_t extiFtsrRegImage = 0x00000000UL;
-	uint32_t afioExticrRegImage[GPIO_EXTI_AFIO_EXTICR_COUNT] = {0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL};
+	reg extiImrRegImage = 0x00000000UL;
+	reg extiRtsrRegImage = 0x00000000UL;
+	reg extiFtsrRegImage = 0x00000000UL;
+	reg afioExticrRegImage[GPIO_EXTI_AFIO_EXTICR_COUNT] = {0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL};
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
 	gpio_pin_mode_t pinMode = GPIO_PIN_MODE_INPUT;
@@ -146,10 +219,10 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_EXTI_LL_EnableAFIOClock();
-	GPIO_EXTI_LL_EXTI_READ_REG(IMR, extiImrRegImage);
-	GPIO_EXTI_LL_EXTI_READ_REG(RTSR, extiRtsrRegImage);
-	GPIO_EXTI_LL_EXTI_READ_REG(FTSR, extiFtsrRegImage);
+	ASSERT_DRIVER_STATUS(LL_GPIO_EXTI_EnableAFIOClock());
+	extiImrRegImage = LL_GPIO_EXTI_ReadIMR();
+	extiRtsrRegImage = LL_GPIO_EXTI_ReadRTSR();
+	extiFtsrRegImage = LL_GPIO_EXTI_ReadFTSR();
 
 	while (remainingPins != GPIO_PIN_NONE)
 	{
@@ -169,7 +242,7 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 		regIndex = (uint8_t) (GPIO_PinMaskToIndex(currentPin) >> 2U);
 		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
 		{
-			GPIO_EXTI_LL_ReadConfigRegister(regIndex, &afioExticrRegImage[regIndex]);
+			ASSERT_DRIVER_STATUS(_GPIO_EXTI_ReadConfigRegisterImage(regIndex, &afioExticrRegImage[regIndex]));
 			exticrReadStatus |= (uint8_t) (0x01U << regIndex);
 		}
 
@@ -178,8 +251,8 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 		ASSERT_DRIVER_STATUS(_GPIO_EXTI_Helper_GetIRQn(currentPin, &IRQn));
 
 		exticrUpdateStatus |= (uint8_t) (0x01U << regIndex);
-		extiImrRegImage |= (uint32_t) currentPin;
-		GPIO_EXTI_LL_EnableIRQ(IRQn);
+		extiImrRegImage |= (reg) currentPin;
+		NVIC_IRQEnable((uint8_t) IRQn);
 		remainingPins = (gpio_pin_t) (remainingPins & (gpio_pin_t) (~currentPin));
 	}
 
@@ -187,24 +260,24 @@ driver_status_t GPIO_EXTI_Init(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const 
 	{
 		if ((exticrUpdateStatus & (uint8_t) (0x01U << regIndex)) != 0x00U)
 		{
-			GPIO_EXTI_LL_WriteConfigRegister(regIndex, afioExticrRegImage[regIndex]);
+			ASSERT_DRIVER_STATUS(_GPIO_EXTI_WriteConfigRegisterImage(regIndex, afioExticrRegImage[regIndex]));
 		}
 	}
 
-	GPIO_EXTI_LL_EXTI_WRITE_REG(RTSR, extiRtsrRegImage);
-	GPIO_EXTI_LL_EXTI_WRITE_REG(FTSR, extiFtsrRegImage);
-	GPIO_EXTI_LL_AckPendingLines(pin);
-	GPIO_EXTI_LL_EXTI_WRITE_REG(IMR, extiImrRegImage);
+	LL_GPIO_EXTI_WriteRTSR(extiRtsrRegImage);
+	LL_GPIO_EXTI_WriteFTSR(extiFtsrRegImage);
+	LL_GPIO_EXTI_WritePR((reg) pin);
+	LL_GPIO_EXTI_WriteIMR(extiImrRegImage);
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 {
-	uint32_t extiImrRegImage = 0x00000000UL;
-	uint32_t extiRtsrRegImage = 0x00000000UL;
-	uint32_t extiFtsrRegImage = 0x00000000UL;
-	uint32_t afioExticrRegImage[GPIO_EXTI_AFIO_EXTICR_COUNT] = {0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL};
+	reg extiImrRegImage = 0x00000000UL;
+	reg extiRtsrRegImage = 0x00000000UL;
+	reg extiFtsrRegImage = 0x00000000UL;
+	reg afioExticrRegImage[GPIO_EXTI_AFIO_EXTICR_COUNT] = {0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL};
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
 	uint8_t exticrReadStatus = 0x00U;
@@ -216,10 +289,10 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_EXTI_LL_EnableAFIOClock();
-	GPIO_EXTI_LL_EXTI_READ_REG(IMR, extiImrRegImage);
-	GPIO_EXTI_LL_EXTI_READ_REG(RTSR, extiRtsrRegImage);
-	GPIO_EXTI_LL_EXTI_READ_REG(FTSR, extiFtsrRegImage);
+	ASSERT_DRIVER_STATUS(LL_GPIO_EXTI_EnableAFIOClock());
+	extiImrRegImage = LL_GPIO_EXTI_ReadIMR();
+	extiRtsrRegImage = LL_GPIO_EXTI_ReadRTSR();
+	extiFtsrRegImage = LL_GPIO_EXTI_ReadFTSR();
 
 	while (remainingPins != GPIO_PIN_NONE)
 	{
@@ -232,7 +305,7 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 		regIndex = (uint8_t) (GPIO_PinMaskToIndex(currentPin) >> 2U);
 		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
 		{
-			GPIO_EXTI_LL_ReadConfigRegister(regIndex, &afioExticrRegImage[regIndex]);
+			ASSERT_DRIVER_STATUS(_GPIO_EXTI_ReadConfigRegisterImage(regIndex, &afioExticrRegImage[regIndex]));
 			exticrReadStatus |= (uint8_t) (0x01U << regIndex);
 		}
 
@@ -240,7 +313,7 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 		ASSERT_DRIVER_STATUS(_GPIO_EXTI_Helper_ResetTriggerImages(currentPin, &extiRtsrRegImage, &extiFtsrRegImage));
 
 		exticrUpdateStatus |= (uint8_t) (0x01U << regIndex);
-		extiImrRegImage &= ~((uint32_t) currentPin);
+		extiImrRegImage &= ~((reg) currentPin);
 		remainingPins = (gpio_pin_t) (remainingPins & (gpio_pin_t) (~currentPin));
 	}
 
@@ -248,14 +321,14 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 	{
 		if ((exticrUpdateStatus & (uint8_t) (0x01U << regIndex)) != 0x00U)
 		{
-			GPIO_EXTI_LL_WriteConfigRegister(regIndex, afioExticrRegImage[regIndex]);
+			ASSERT_DRIVER_STATUS(_GPIO_EXTI_WriteConfigRegisterImage(regIndex, afioExticrRegImage[regIndex]));
 		}
 	}
 
-	GPIO_EXTI_LL_EXTI_WRITE_REG(RTSR, extiRtsrRegImage);
-	GPIO_EXTI_LL_EXTI_WRITE_REG(FTSR, extiFtsrRegImage);
-	GPIO_EXTI_LL_AckPendingLines(pin);
-	GPIO_EXTI_LL_EXTI_WRITE_REG(IMR, extiImrRegImage);
+	LL_GPIO_EXTI_WriteRTSR(extiRtsrRegImage);
+	LL_GPIO_EXTI_WriteFTSR(extiFtsrRegImage);
+	LL_GPIO_EXTI_WritePR((reg) pin);
+	LL_GPIO_EXTI_WriteIMR(extiImrRegImage);
 	_GPIO_EXTI_DisableIRQsForMaskedLines(pin, extiImrRegImage);
 
 	return DRIVER_STATUS_SUCCESS;
@@ -263,15 +336,15 @@ driver_status_t GPIO_EXTI_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin)
 
 uint8_t GPIO_EXTI_IsTriggered(const gpio_pin_t pin)
 {
-	uint32_t pendingRegImage = 0x00000000UL;
+	reg pendingRegImage = 0x00000000UL;
 
 	if (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U)
 	{
 		return (uint8_t) 0x00U;
 	}
 
-	GPIO_EXTI_LL_EXTI_READ_REG(PR, pendingRegImage);
-	return ((pendingRegImage & (uint32_t) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
+	pendingRegImage = LL_GPIO_EXTI_ReadPR();
+	return ((pendingRegImage & (reg) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
 }
 
 driver_status_t GPIO_EXTI_Ack(const gpio_pin_t pin)
@@ -281,6 +354,6 @@ driver_status_t GPIO_EXTI_Ack(const gpio_pin_t pin)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_EXTI_LL_AckPendingLines(pin);
+	LL_GPIO_EXTI_WritePR((reg) pin);
 	return DRIVER_STATUS_SUCCESS;
 }

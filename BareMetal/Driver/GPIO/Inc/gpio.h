@@ -12,8 +12,7 @@
  * - Layer 0 owns the raw STM32F1 register model.
  * - Shared GPIO typedef aliases live in `gpio_data_types.h`.
  * - Public GPIO selectors and pure validation macros live in `gpio_defines.h`.
- * - `gpio_ll.h/.c` owns raw register-near access and GPIO register-layout
- *   primitives.
+ * - `gpio_ll.h/.c` owns dumb GPIO register read/write access.
  * - `gpio_codec.h/.c` owns translation and staged register-image mutation.
  * - `gpio.h` / `gpio.c` owns the public GPIO API, validation, orchestration,
  *   and batched register writes.
@@ -90,16 +89,20 @@ typedef struct _gpio_config_t
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were set.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @note Atomic operation through `BSRR`.
+ * @note Uses the driver read-modify-write policy on `ODR`.
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
+	uint32_t gpioOdrRegImage = 0x00000000UL;
+
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_LL_SetPin(GPIOx, pin);
+	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
+	gpioOdrRegImage |= (uint32_t) pin;
+	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -110,16 +113,20 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, cons
  * @returns - @ref driver_status_t Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were reset.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @note Atomic operation through `BRR`.
+ * @note Uses the driver read-modify-write policy on `ODR`.
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
+	uint32_t gpioOdrRegImage = 0x00000000UL;
+
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_LL_ResetPin(GPIOx, pin);
+	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
+	gpioOdrRegImage &= ~((uint32_t) pin);
+	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -133,12 +140,16 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, co
  */
 __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
+	uint32_t gpioOdrRegImage = 0x00000000UL;
+
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	GPIO_LL_TogglePin(GPIOx, pin);
+	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
+	gpioOdrRegImage ^= (uint32_t) pin;
+	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -152,12 +163,16 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, c
  */
 __STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PinMaskToIndex(pin) == GPIO_PIN_INDEX_INVALID))
+	uint32_t gpioIdrRegImage = 0x00000000UL;
+	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
+
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
 	{
 		return (uint8_t) 0x00U;
 	}
 
-	return (GPIO_LL_ReadPin(GPIOx, pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
+	gpioIdrRegImage = LL_GPIO_ReadIDR(GPIOx);
+	return ((gpioIdrRegImage & (uint32_t) pin) != 0x00000000UL) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
 }
 
 /**

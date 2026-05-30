@@ -13,8 +13,8 @@ implementation rules, naming policy, and alignment plan.
 |------|-------|----------------|
 | `Inc/gpio_data_types.h` | Data Types | GPIO scalar typedef aliases |
 | `Inc/gpio_defines.h` | GPIO Defines/Validation | Public GPIO selector macros and pure validation/policy macros |
-| `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for raw GPIO register access, clock forwarding, and raw CRL/CRH field packing |
-| `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding and staged register-image mutation |
+| `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
+| `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding, raw CRL/CRH field placement, and staged register-image mutation |
 | `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, `gpio_config_t`, validation, sequencing, batching, status returns, and temporary board LED helpers |
 | `Inc/gpio_exti*.h`, `Src/gpio_exti*.c` | GPIO EXTI | GPIO-backed EXTI routing, trigger staging, NVIC integration |
 
@@ -22,14 +22,16 @@ The current split is:
 
 - `gpio_data_types.h`: typedef aliases only.
 - `gpio_defines.h`: public GPIO selector macros and pure validation macros.
-- `gpio_ll.h/.c`: raw register access and STM32F1 CRL/CRH layout helpers,
-  exposed with `LL_GPIO_*` names.
+- `gpio_ll.h/.c`: named static inline register accessors exposed with
+  `LL_GPIO_*` names.
 - `gpio_codec.h/.c`: central selector-to-bitfield encoding/decoding and
-  register-image staging.
+  CRL/CRH/ODR register-image staging.
 
 ## Goals
 
-- Keep STM32F1 GPIO register layout knowledge close to the low-level layer.
+- Keep direct GPIO register access in the low-level layer.
+- Keep STM32F1 CRL/CRH field placement and selector translation in the codec
+  layer.
 - Keep GPIO data type aliases independent from selector and validation macros.
 - Keep public mode/config selectors away from raw hardware access.
 - Keep the low-level layer as the only direct GPIO register access point.
@@ -49,9 +51,14 @@ The current split is:
 - Keep public selector macros and pure validation macros together in
   `gpio_defines.h`.
 - Keep direct hardware reads/writes in the low-level layer.
-- Keep low-level APIs raw and policy-free; they should not decide public
-  mode/config compatibility.
-- Keep public selector translation and staged image mutation in the codec layer.
+- Keep low-level APIs as named full-register read/write accessors. They should
+  not know pin masks, pin indices, CRL/CRH shifts, or public mode/config
+  compatibility.
+- Use the core `reg` alias for full register-image return values, parameters,
+  and local staged register images. Use fixed-width aliases only for smaller
+  selectors, indices, masks, and public scalar types.
+- Keep public selector translation, raw field placement, and staged image
+  mutation in the codec layer.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
 - Keep board-specific behavior outside the generic GPIO driver.
 - Prefer `GPIO_SetPinModeConfig()` for semantic pin configuration on STM32F1.
@@ -84,8 +91,8 @@ batching decisions, or board-specific pin policy.
 | Core | `BareMetal/Core/Inc/stm32f1xx_gpio.h` | GPIO register structs, offsets, raw masks, and reset-level hardware facts | Driver selectors, board aliases, public validation |
 | Data Types | `Inc/gpio_data_types.h` | GPIO scalar typedef aliases such as `gpio_pin_t`, `gpio_pin_mode_t`, and `gpio_pin_config_t` | Public selector macros, validation macros, `GPIO_TypeDef`, full MCU include coupling, register layout, board behavior |
 | Defines/Validation | `Inc/gpio_defines.h` | Public GPIO selector macros and pure validation/policy macros that guard those selectors | Hardware reads/writes, clock sequencing, batching decisions, raw register field placement |
-| Low-Level | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Raw register operations, raw pin set/reset/read/toggle operations, raw CRL/CRH field placement, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, public compatibility policy, batching decisions, board behavior |
-| Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, staging CRL/CRH and ODR images, reset-image staging | Hardware reads/writes, clock sequencing, public API policy |
+| Low-Level | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Named static inline register read/write accessors, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, pin-index field mapping, raw CRL/CRH field placement, public compatibility policy, batching decisions, board behavior |
+| Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, pin-index to CRL/CRH image mapping, raw CRL/CRH field placement, staging CRL/CRH and ODR images, reset-image staging | Hardware reads/writes, clock sequencing, public API policy |
 | Driver | `Inc/gpio.h`, `Src/gpio.c` | Public APIs, public configuration structures such as `gpio_config_t`, validation, mode/config compatibility, clock sequencing, read/write batching, dirty tracking, status returns | Raw register map definitions, board-specific shortcuts |
 | Board/Project | Future board module and `Projects/*` | Blue Pill LED aliases, package pin availability decisions, examples | GPIO internals and raw register assumptions |
 
@@ -98,34 +105,35 @@ Use full descriptive header suffixes:
 - `gpio_codec.h` for selector-to-hardware-bitfield encoding/decoding.
 - Do not introduce abbreviated forms such as `gpio_defs.h`.
 
-Use `LL_<Module>_<Action>` for new low-level APIs.
+Use `LL_<Module>_<Action>` for new low-level APIs and macros.
 
-For GPIO, the intended namespace is `LL_GPIO_*`. The LL layer should be a dumb
-single point of access to hardware: direct register access and raw field helpers
-live there, while public selector compatibility and orchestration stay above it.
+For GPIO, the intended namespaces are `LL_GPIO_*` and `LL_GPIO_EXTI_*`. The LL
+layer should be a dumb single point of register access: named static inline
+functions read and write full register images, while public selector
+compatibility, field placement, and orchestration stay above it.
 
 Preferred:
 
 ```c
-LL_GPIO_ReadReg(GPIOx, CRL, image);
-LL_GPIO_WriteReg(GPIOx, CRL, image);
-LL_GPIO_SetPin(GPIOx, pinMask);
-LL_GPIO_ResetPin(GPIOx, pinMask);
-LL_GPIO_PackPinModeCNFField(modeBits, cnfBits);
+image = LL_GPIO_ReadCRL(GPIOx);
+LL_GPIO_WriteCRL(GPIOx, image);
+image = LL_GPIO_ReadODR(GPIOx);
+LL_GPIO_WriteODR(GPIOx, image);
+image = LL_GPIO_EXTI_ReadIMR();
+LL_GPIO_EXTI_WriteIMR(image);
 ```
 
 Avoid adding new APIs with the legacy shape:
 
 ```c
-GPIO_LL_ReadReg(...);
+GPIO_LL_READ_REG(...);
 GPIO_LL_SetPin(...);
 GPIO_EXTI_LL_EnableIRQ(...);
 ```
 
-The current implementation still uses legacy names such as `GPIO_LL_READ_REG()`
-and `GPIO_LL_SetPin()`. Do not expand that pattern for new APIs. Rename
-existing symbols in a dedicated compatibility pass so call sites, Doxygen
-groups, and examples stay coherent.
+The implementation exposes only the `LL_GPIO_*` and `LL_GPIO_EXTI_*` names. Do
+not keep compatibility aliases for old `GPIO_LL_*` or `GPIO_EXTI_LL_*` shapes
+inside GPIO.
 
 ## Intended Configuration Flow
 
@@ -145,10 +153,24 @@ The driver should:
 2. Validate the mode/config pair.
 3. Enable the GPIO port clock when the API is an initialization path.
 4. Enable AFIO only when alternate function or EXTI routing requires it.
-5. Read each touched `CRL`, `CRH`, and `ODR` image once.
-6. Stage each selected pin through codec functions.
-7. Write dirty images in the hardware-safe order.
-8. Return a user-facing `driver_status_t`.
+5. Convert each selected pin mask to a `gpio_pin_index_t` before entering
+   codec helpers.
+6. Read each touched `CRL`, `CRH`, and `ODR` image once.
+7. Stage each selected pin through codec functions.
+8. Write dirty images in the hardware-safe order.
+9. Return a user-facing `driver_status_t`.
+
+Driver APIs must follow a read-modify-write model for GPIO register state. Even
+single-bit operations such as public set/reset/toggle should read the relevant
+register image, modify the local image, and write it back once. This keeps the
+single-pin path consistent with multi-pin configuration and prevents repeated
+writes to the same register when one staged image can represent the whole
+request.
+
+Codec functions that operate on one pin should take `gpio_pin_index_t`, not
+`gpio_pin_t`. Public APIs may accept pin masks because they own user-facing
+multi-pin selection; the driver is responsible for converting those masks to pin
+indices before codec staging or decoding.
 
 For input pull-up/pull-down, write the staged `ODR` pull state before exposing
 the new `CNF=10` input-pull configuration in `CRL/CRH`.
@@ -179,7 +201,8 @@ GPIO-backed EXTI should use the same ownership rules:
 - EXTI scalar aliases belong in an EXTI data-types header if they are shared.
 - EXTI public selectors and pure validation macros belong in an EXTI defines
   header, not in the generic GPIO data-types header.
-- EXTI LL owns raw EXTI, AFIO, and NVIC-near operations.
+- EXTI LL owns named full-register EXTI/AFIO accessors and AFIO clock
+  forwarding only.
 - EXTI codec owns AFIO EXTICR field placement and trigger-image staging.
 - EXTI driver owns GPIO input compatibility checks, AFIO clock sequencing,
   EXTI register batching, NVIC enable/disable policy, and pending-bit ordering.
@@ -191,20 +214,20 @@ from trigger and port-source selector macros.
 ## Alignment Plan
 
 1. Normalize naming policy.
-   - Introduce `LL_GPIO_*` and `LL_GPIO_EXTI_*` names.
-   - Keep temporary compatibility macros for old `GPIO_LL_*` names.
-   - Update call sites layer by layer.
+   - Use `LL_GPIO_*` and `LL_GPIO_EXTI_*` names.
+   - Do not keep compatibility macros for old `GPIO_LL_*` or
+     `GPIO_EXTI_LL_*` names.
+   - Update any remaining external call sites directly.
    - Remove public-policy validation from LL APIs once callers validate before
      entering the low-level layer.
-   - Remove compatibility aliases after examples and dependent drivers compile.
 
 2. Continue GPIO data/defines cleanup.
    - Keep only pure scalar typedef aliases in `gpio_data_types.h`.
    - Keep public pin/mode/config selector macros in `gpio_defines.h`.
    - Keep pure validation/policy macros in `gpio_defines.h`.
-   - Keep CRL/CRH layout helpers in LL or private GPIO internals.
-   - Review raw MODE/CNF aliases and move them closer to LL if they stop being
-     shared by codec/driver code.
+   - Keep CRL/CRH layout helpers in codec internals.
+   - Review raw MODE/CNF aliases and keep them available only where codec or
+     driver code genuinely needs the shared type.
    - Keep `gpio_config_t` in `gpio.h`.
    - Keep pointer-based port validation out of `gpio_data_types.h`; place it in
      `gpio_defines.h` initially, then move target/package restrictions to board
@@ -220,6 +243,8 @@ from trigger and port-source selector macros.
    - Deprecate or restrict `GPIO_SetPinMode()` and `GPIO_SetPinConfig()`.
    - If the split APIs remain public, make them decode the current pin field and
      reject invalid final mode/config combinations.
+   - Keep public GPIO set/reset/toggle on read-modify-write `ODR` staging, not
+     one write per selected pin.
 
 5. Fix input pull write ordering.
    - Stage `ODR` before `CRL/CRH` for pull-up/pull-down configuration.
@@ -240,7 +265,8 @@ from trigger and port-source selector macros.
    - Add `gpio_exti_defines.h` for trigger and port-source selector macros.
    - Rename EXTI helper files/APIs to codec files/APIs when normalizing EXTI.
    - Move trigger and port-source selectors out of `gpio_exti.h`.
-   - Rename EXTI LL symbols to `LL_GPIO_EXTI_*`.
+   - Keep EXTI LL symbols on `LL_GPIO_EXTI_*` and restrict them to named
+     full-register accessors plus AFIO clock forwarding.
    - Decide whether `GPIO_EXTI_Deinit()` should verify current port ownership or
      drop its unused `GPIOx` argument.
 
@@ -253,7 +279,7 @@ from trigger and port-source selector macros.
 
 1. Documentation and naming policy.
 2. Data aliases, selector defines, and validation split.
-3. Low-level compatibility aliases and `LL_GPIO_*` rename.
+3. Low-level `LL_GPIO_*` / `LL_GPIO_EXTI_*` rename.
 4. Codec cleanup and pull-order staging support.
 5. Driver API behavior changes.
 6. Board module extraction.

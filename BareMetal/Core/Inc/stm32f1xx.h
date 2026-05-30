@@ -204,7 +204,7 @@ extern "C" {
 /** @brief Alternate Function I/O @def AFIO */
 #define AFIO									((AFIO_TypeDef*) AFIO_BASE_ADDRESS)
 /** @brief External Interrupt/Event Controller @def EXTI */
-#define EXTI									((EXTI_REG_STRUCT*) EXTI_BASE_ADDRESS)
+#define EXTI									((EXTI_TypeDef*) EXTI_BASE_ADDRESS)
 /** @brief General Purpose I/O Port A @def GPIOA */
 #define GPIOA									((GPIO_TypeDef*) GPIOA_BASE_ADDRESS)
 /** @brief General Purpose I/O Port B @def GPIOB */

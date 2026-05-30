@@ -84,7 +84,7 @@ __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_GetConfigRegisterIndex(const gpio
 
 __STATIC_FORCEINLINE uint32_t _GPIO_EXTI_Helper_GetConfigFieldShift(const gpio_pin_t pin)
 {
-	return ((uint32_t) (GPIO_PinMaskToIndex(pin) & (uint8_t) 0x03U) << 2U);
+	return ((uint32_t) (GPIO_PinMaskToIndex(pin) & (gpio_pin_index_t) 0x03U) << 2U);
 }
 
 driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
@@ -233,13 +233,13 @@ driver_status_t _GPIO_EXTI_Helper_GetIRQn
 	irq_t* const pIRQn
 )
 {
-	const uint8_t lineIndex = GPIO_PinMaskToIndex(pin);
+	const gpio_pin_index_t lineIndex = GPIO_PinMaskToIndex(pin);
 
 	if (pIRQn == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (lineIndex > (uint8_t) 0x0FU)
+	if (lineIndex > GPIO_PIN_INDEX_LAST)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}

@@ -32,6 +32,32 @@ static gpio_pin_t _GPIO_GetLowestSelectedPin(const gpio_pin_t pinMask)
 	return GPIO_PIN_NONE;
 }
 
+static driver_status_t _GPIO_ReadPinModeConfigField
+(
+	GPIO_TypeDef* const				GPIOx,
+	const gpio_pin_index_t			pinIndex,
+	gpio_pin_config_bits_t* const	pPinField
+)
+{
+	uint32_t crxRegImage = 0x00000000UL;
+
+	if (pPinField == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	if (GPIO_Codec_GetCRxRegisterIndexFromPinIndex(pinIndex) == GPIO_CODEC_CRX_REGISTER_INDEX_CRH)
+	{
+		crxRegImage = LL_GPIO_ReadCRH(GPIOx);
+	}
+	else
+	{
+		crxRegImage = LL_GPIO_ReadCRL(GPIOx);
+	}
+
+	return GPIO_Codec_GetPinModeConfigField(crxRegImage, pinIndex, pPinField);
+}
+
 // ==================================================================================================== //
 //                                               Driver APIs                                            //
 // ==================================================================================================== //
@@ -49,6 +75,7 @@ driver_status_t GPIO_SetPinModeConfig
 	uint32_t gpioOdrRegImage = 0x00000000UL;
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
+	gpio_pin_index_t currentPinIndex = GPIO_PIN_INDEX_INVALID;
 	uint8_t regStatus = 0x00U;
 	const uint8_t pullConfigUsed = (GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config) != 0x00U) ? 0x01U : 0x00U;
 
@@ -61,17 +88,9 @@ driver_status_t GPIO_SetPinModeConfig
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (GPIO_PIN_MASK_REQUIRES_CRL(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRL, gpioCrlRegImage);
-	}
-	if (GPIO_PIN_MASK_REQUIRES_CRH(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRH, gpioCrhRegImage);
-	}
 	if (pullConfigUsed != 0x00U)
 	{
-		GPIO_LL_READ_REG(GPIOx, ODR, gpioOdrRegImage);
+		gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
 	}
 
 	while (remainingPins != GPIO_PIN_NONE)
@@ -82,20 +101,34 @@ driver_status_t GPIO_SetPinModeConfig
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		if (GPIO_PIN_MASK_REQUIRES_CRH(currentPin) != 0x00U)
+		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
+		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeConfigImage(currentPin, mode, config, &gpioCrhRegImage));
+			return DRIVER_STATUS_ERROR_STATE;
+		}
+
+		if (GPIO_Codec_GetCRxRegisterIndexFromPinIndex(currentPinIndex) == GPIO_CODEC_CRX_REGISTER_INDEX_CRH)
+		{
+			if ((regStatus & GPIO_CRH_UPDATED) == 0x00U)
+			{
+				gpioCrhRegImage = LL_GPIO_ReadCRH(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeConfigImage(currentPinIndex, mode, config, &gpioCrhRegImage));
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeConfigImage(currentPin, mode, config, &gpioCrlRegImage));
+			if ((regStatus & GPIO_CRL_UPDATED) == 0x00U)
+			{
+				gpioCrlRegImage = LL_GPIO_ReadCRL(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeConfigImage(currentPinIndex, mode, config, &gpioCrlRegImage));
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 
 		if (pullConfigUsed != 0x00U)
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinPullImage(currentPin, config, &gpioOdrRegImage));
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinPullImage(currentPinIndex, config, &gpioOdrRegImage));
 			regStatus |= GPIO_ODR_UPDATED;
 		}
 
@@ -104,15 +137,15 @@ driver_status_t GPIO_SetPinModeConfig
 
 	if ((regStatus & GPIO_CRH_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRH, gpioCrhRegImage);
+		LL_GPIO_WriteCRH(GPIOx, gpioCrhRegImage);
 	}
 	if ((regStatus & GPIO_CRL_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRL, gpioCrlRegImage);
+		LL_GPIO_WriteCRL(GPIOx, gpioCrlRegImage);
 	}
 	if ((regStatus & GPIO_ODR_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, ODR, gpioOdrRegImage);
+		LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -122,14 +155,18 @@ gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	gpio_pin_mode_t mode = GPIO_PIN_MODE_INPUT;
 	gpio_pin_config_bits_t pinField = (gpio_pin_config_bits_t) 0x00U;
+	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PinMaskToIndex(pin) == GPIO_PIN_INDEX_INVALID))
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
 	{
 		return GPIO_PIN_MODE_INPUT;
 	}
 
-	pinField = GPIO_LL_ReadPinModeCNFField(GPIOx, pin);
-	if (GPIO_Codec_DecodePinModeConfigField(pinField, 0x00000000UL, pin, &mode, NULL) != DRIVER_STATUS_SUCCESS)
+	if (_GPIO_ReadPinModeConfigField(GPIOx, pinIndex, &pinField) != DRIVER_STATUS_SUCCESS)
+	{
+		return GPIO_PIN_MODE_INPUT;
+	}
+	if (GPIO_Codec_DecodePinModeConfigField(pinField, 0x00000000UL, pinIndex, &mode, NULL) != DRIVER_STATUS_SUCCESS)
 	{
 		return GPIO_PIN_MODE_INPUT;
 	}
@@ -143,6 +180,7 @@ driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const
 	uint32_t gpioCrlRegImage = 0x00000000UL;
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
+	gpio_pin_index_t currentPinIndex = GPIO_PIN_INDEX_INVALID;
 	uint8_t regStatus = 0x00U;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) ||
@@ -150,15 +188,6 @@ driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const
 		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	if (GPIO_PIN_MASK_REQUIRES_CRH(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRH, gpioCrhRegImage);
-	}
-	if (GPIO_PIN_MASK_REQUIRES_CRL(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRL, gpioCrlRegImage);
 	}
 
 	while (remainingPins != GPIO_PIN_NONE)
@@ -169,14 +198,28 @@ driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		if (GPIO_PIN_MASK_REQUIRES_CRH(currentPin) != 0x00U)
+		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
+		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeImage(currentPin, mode, &gpioCrhRegImage));
+			return DRIVER_STATUS_ERROR_STATE;
+		}
+
+		if (GPIO_Codec_GetCRxRegisterIndexFromPinIndex(currentPinIndex) == GPIO_CODEC_CRX_REGISTER_INDEX_CRH)
+		{
+			if ((regStatus & GPIO_CRH_UPDATED) == 0x00U)
+			{
+				gpioCrhRegImage = LL_GPIO_ReadCRH(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeImage(currentPinIndex, mode, &gpioCrhRegImage));
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeImage(currentPin, mode, &gpioCrlRegImage));
+			if ((regStatus & GPIO_CRL_UPDATED) == 0x00U)
+			{
+				gpioCrlRegImage = LL_GPIO_ReadCRL(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinModeImage(currentPinIndex, mode, &gpioCrlRegImage));
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 
@@ -185,11 +228,11 @@ driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const
 
 	if ((regStatus & GPIO_CRH_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRH, gpioCrhRegImage);
+		LL_GPIO_WriteCRH(GPIOx, gpioCrhRegImage);
 	}
 	if ((regStatus & GPIO_CRL_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRL, gpioCrlRegImage);
+		LL_GPIO_WriteCRL(GPIOx, gpioCrlRegImage);
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -200,16 +243,20 @@ gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t 
 	gpio_pin_config_t config = GPIO_PIN_CONFIG_INPUT_ANALOG;
 	gpio_pin_config_bits_t pinField = (gpio_pin_config_bits_t) 0x00U;
 	uint32_t gpioOdrRegImage = 0x00000000UL;
+	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PinMaskToIndex(pin) == GPIO_PIN_INDEX_INVALID))
+	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
 	{
 		return GPIO_PIN_CONFIG_INPUT_ANALOG;
 	}
 
-	pinField = GPIO_LL_ReadPinModeCNFField(GPIOx, pin);
-	GPIO_LL_READ_REG(GPIOx, ODR, gpioOdrRegImage);
+	if (_GPIO_ReadPinModeConfigField(GPIOx, pinIndex, &pinField) != DRIVER_STATUS_SUCCESS)
+	{
+		return GPIO_PIN_CONFIG_INPUT_ANALOG;
+	}
+	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
 
-	if (GPIO_Codec_DecodePinModeConfigField(pinField, gpioOdrRegImage, pin, NULL, &config) != DRIVER_STATUS_SUCCESS)
+	if (GPIO_Codec_DecodePinModeConfigField(pinField, gpioOdrRegImage, pinIndex, NULL, &config) != DRIVER_STATUS_SUCCESS)
 	{
 		return GPIO_PIN_CONFIG_INPUT_ANALOG;
 	}
@@ -223,6 +270,7 @@ driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, con
 	uint32_t gpioCrlRegImage = 0x00000000UL;
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
+	gpio_pin_index_t currentPinIndex = GPIO_PIN_INDEX_INVALID;
 	uint8_t regStatus = 0x00U;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) ||
@@ -230,15 +278,6 @@ driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, con
 		(GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	if (GPIO_PIN_MASK_REQUIRES_CRH(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRH, gpioCrhRegImage);
-	}
-	if (GPIO_PIN_MASK_REQUIRES_CRL(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRL, gpioCrlRegImage);
 	}
 
 	while (remainingPins != GPIO_PIN_NONE)
@@ -249,14 +288,28 @@ driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, con
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		if (GPIO_PIN_MASK_REQUIRES_CRH(currentPin) != 0x00U)
+		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
+		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinConfigImage(currentPin, config, &gpioCrhRegImage));
+			return DRIVER_STATUS_ERROR_STATE;
+		}
+
+		if (GPIO_Codec_GetCRxRegisterIndexFromPinIndex(currentPinIndex) == GPIO_CODEC_CRX_REGISTER_INDEX_CRH)
+		{
+			if ((regStatus & GPIO_CRH_UPDATED) == 0x00U)
+			{
+				gpioCrhRegImage = LL_GPIO_ReadCRH(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinConfigImage(currentPinIndex, config, &gpioCrhRegImage));
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinConfigImage(currentPin, config, &gpioCrlRegImage));
+			if ((regStatus & GPIO_CRL_UPDATED) == 0x00U)
+			{
+				gpioCrlRegImage = LL_GPIO_ReadCRL(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinConfigImage(currentPinIndex, config, &gpioCrlRegImage));
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 
@@ -265,11 +318,11 @@ driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, con
 
 	if ((regStatus & GPIO_CRH_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRH, gpioCrhRegImage);
+		LL_GPIO_WriteCRH(GPIOx, gpioCrhRegImage);
 	}
 	if ((regStatus & GPIO_CRL_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRL, gpioCrlRegImage);
+		LL_GPIO_WriteCRL(GPIOx, gpioCrlRegImage);
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -290,10 +343,10 @@ driver_status_t GPIO_Init(GPIO_TypeDef* const GPIOx, const gpio_config_t* const 
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	ASSERT_DRIVER_STATUS(GPIO_LL_EnableClock(GPIOx));
+	ASSERT_DRIVER_STATUS(LL_GPIO_EnableClock(GPIOx));
 	if (GPIO_PIN_CONFIG_IS_ALTERNATE(pGPIOConfig->config) != 0x00U)
 	{
-		ASSERT_DRIVER_STATUS(GPIO_LL_EnableAFIOClock());
+		ASSERT_DRIVER_STATUS(LL_GPIO_EnableAFIOClock());
 	}
 
 	ASSERT_DRIVER_STATUS(GPIO_SetPinModeConfig(GPIOx, pGPIOConfig->pin, pGPIOConfig->mode, pGPIOConfig->config));
@@ -304,9 +357,10 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	uint32_t gpioCrhRegImage = 0x00000000UL;
 	uint32_t gpioCrlRegImage = 0x00000000UL;
-	uint32_t gpioBrrRegImage = 0x00000000UL;
+	uint32_t gpioOdrRegImage = 0x00000000UL;
 	gpio_pin_t remainingPins = pin;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
+	gpio_pin_index_t currentPinIndex = GPIO_PIN_INDEX_INVALID;
 	uint8_t regStatus = 0x00U;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
@@ -314,14 +368,7 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (GPIO_PIN_MASK_REQUIRES_CRL(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRL, gpioCrlRegImage);
-	}
-	if (GPIO_PIN_MASK_REQUIRES_CRH(pin) != 0x00U)
-	{
-		GPIO_LL_READ_REG(GPIOx, CRH, gpioCrhRegImage);
-	}
+	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
 
 	while (remainingPins != GPIO_PIN_NONE)
 	{
@@ -331,30 +378,44 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		if (GPIO_PIN_MASK_REQUIRES_CRH(currentPin) != 0x00U)
+		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
+		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinResetConfigImage(currentPin, &gpioCrhRegImage));
+			return DRIVER_STATUS_ERROR_STATE;
+		}
+
+		if (GPIO_Codec_GetCRxRegisterIndexFromPinIndex(currentPinIndex) == GPIO_CODEC_CRX_REGISTER_INDEX_CRH)
+		{
+			if ((regStatus & GPIO_CRH_UPDATED) == 0x00U)
+			{
+				gpioCrhRegImage = LL_GPIO_ReadCRH(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinResetConfigImage(currentPinIndex, &gpioCrhRegImage));
 			regStatus |= GPIO_CRH_UPDATED;
 		}
 		else
 		{
-			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinResetConfigImage(currentPin, &gpioCrlRegImage));
+			if ((regStatus & GPIO_CRL_UPDATED) == 0x00U)
+			{
+				gpioCrlRegImage = LL_GPIO_ReadCRL(GPIOx);
+			}
+			ASSERT_DRIVER_STATUS(GPIO_Codec_StagePinResetConfigImage(currentPinIndex, &gpioCrlRegImage));
 			regStatus |= GPIO_CRL_UPDATED;
 		}
 
-		gpioBrrRegImage |= (uint32_t) currentPin;
+		gpioOdrRegImage &= ~((uint32_t) currentPin);
 		remainingPins = (gpio_pin_t) (remainingPins & (gpio_pin_t) (~currentPin));
 	}
 
 	if ((regStatus & GPIO_CRH_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRH, gpioCrhRegImage);
+		LL_GPIO_WriteCRH(GPIOx, gpioCrhRegImage);
 	}
 	if ((regStatus & GPIO_CRL_UPDATED) != 0x00U)
 	{
-		GPIO_LL_WRITE_REG(GPIOx, CRL, gpioCrlRegImage);
+		LL_GPIO_WriteCRL(GPIOx, gpioCrlRegImage);
 	}
-	GPIO_LL_ResetPin(GPIOx, (gpio_pin_t) gpioBrrRegImage);
+	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
 
 	return DRIVER_STATUS_SUCCESS;
 }

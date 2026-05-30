@@ -43,13 +43,23 @@ extern "C" {
  */
 
 /** @brief First valid zero-based GPIO pin index @def GPIO_PIN_INDEX_FIRST */
-#define GPIO_PIN_INDEX_FIRST					((uint8_t) 0U)
+#define GPIO_PIN_INDEX_FIRST					((gpio_pin_index_t) 0U)
 /** @brief Last valid zero-based GPIO pin index @def GPIO_PIN_INDEX_LAST */
-#define GPIO_PIN_INDEX_LAST						((uint8_t) 15U)
+#define GPIO_PIN_INDEX_LAST						((gpio_pin_index_t) 15U)
 /** @brief Number of GPIO pins available on one GPIO port @def GPIO_PORT_PIN_COUNT */
-#define GPIO_PORT_PIN_COUNT						((uint8_t) (GPIO_PIN_INDEX_LAST + 1U))
+#define GPIO_PORT_PIN_COUNT						((gpio_pin_index_t) (GPIO_PIN_INDEX_LAST + 1U))
 /** @brief Invalid GPIO pin index sentinel @def GPIO_PIN_INDEX_INVALID */
 #define GPIO_PIN_INDEX_INVALID					GPIO_PORT_PIN_COUNT
+/**
+ * @brief Checks if a GPIO pin index is inside the supported GPIO pin-index range
+ * @param[in] pinIndex Zero-based GPIO pin index to check
+ * @returns Pin-index validity status
+ * @retval - `0U`: @p pinIndex is outside `0..15`
+ * @retval - Non-zero: @p pinIndex is inside `0..15`
+ * @def GPIO_PIN_INDEX_IS_VALID
+ */
+#define GPIO_PIN_INDEX_IS_VALID(pinIndex)		\
+	(((uint32_t) (pinIndex)) <= ((uint32_t) GPIO_PIN_INDEX_LAST))
 
 /**
  * @brief Converts a zero-based GPIO pin index to a single-pin mask
@@ -175,15 +185,15 @@ extern "C" {
  * @retval - `0U..15U`: Valid GPIO pin index
  * @retval - @ref `GPIO_PIN_INDEX_INVALID`: Invalid, empty, or multi-pin mask
  */
-__STATIC_FORCEINLINE uint8_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
+__STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 {
-	uint8_t pinIndex = 0U;
-
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
+	//! Validate that the input pin mask is a single valid pin selection
 	if ((GPIO_PIN_MASK_IS_VALID(pinMask) == 0U) || (GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pinMask) == 0U))
 	{
 		return GPIO_PIN_INDEX_INVALID;
 	}
-
+	//! Iterate through valid pin indices to find the index corresponding to the input pin mask
 	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
 	{
 		if (pinMask == GPIO_PIN_INDEX_TO_MASK(pinIndex))

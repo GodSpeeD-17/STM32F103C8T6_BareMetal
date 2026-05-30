@@ -14,9 +14,9 @@ one kind of knowledge.
 
 - Keep raw MCU register definitions close to the reference manual.
 - Keep public driver vocabulary separate from register access.
-- Let low-level layers expose hardware-layout primitives without absorbing
-  driver policy.
-- Keep semantic translation and staged register-image mutation in codec layers.
+- Keep low-level layers as dumb register access points.
+- Keep semantic translation, raw field placement, and staged register-image
+  mutation in codec layers.
 - Let public driver APIs own validation, sequencing, and batching decisions.
 - Make application code depend on stable public APIs, not driver internals.
 - Optimize repeated register access where it matters without hiding ownership.
@@ -28,8 +28,8 @@ one kind of knowledge.
 | Core | MCU register structs, base addresses, raw peripheral constants, shared scalar aliases, generic bit/register utilities | Peripheral driver policy, public driver selectors, application behavior |
 | Driver Data Types | Driver-facing scalar typedef aliases and plain shared data aliases | Public selector macros, validation policy, register access, hardware writes, sequencing |
 | Driver Defines/Validation | Public selector macros and pure validation/policy macros shared within one driver family | Register access, hardware writes, sequencing, raw register field placement |
-| Low-Level | Direct register access, raw peripheral operations, clock-gate forwarding when needed, raw hardware-layout helpers such as field offsets and masks | Public selector translation, compatibility policy, batching policy, board behavior |
-| Codec | Translation between driver selectors and raw hardware fields, encode/decode logic, mutation of caller-owned staged register images | Hardware reads/writes, clock sequencing, public API decisions |
+| Low-Level | Named static inline register read/write accessors, minimal register-address macros, clock-gate forwarding when needed | Public selector translation, raw field placement, compatibility policy, batching policy, board behavior |
+| Codec | Translation between driver selectors and raw hardware fields, raw field placement, encode/decode logic, mutation of caller-owned staged register images | Hardware reads/writes, clock sequencing, public API decisions |
 | Driver | Public API, argument validation, selector compatibility, clock sequencing, batching, dirty-register write decisions, user-facing status | Raw register map definitions, board-specific behavior |
 | Project | Board/application behavior and examples | Driver internals |
 
@@ -77,9 +77,9 @@ related drivers that need the same vocabulary. It must stay independent of
 hardware reads/writes and sequencing.
 
 Macro syntax alone does not decide ownership. A selector macro belongs in the
-defines layer, a validation macro belongs in the defines/validation
-layer, and a raw register-layout macro belongs in the low-level or private
-hardware-near layer.
+defines layer, a validation macro belongs in the defines/validation layer, and
+raw field-placement knowledge belongs in the codec layer unless it is a direct
+register-map fact already owned by Core.
 
 Public configuration/request structures belong in the public driver layer unless
 there is a specific reason for another layer or related driver to depend on that
@@ -89,35 +89,31 @@ structure as plain shared data.
 
 Each driver may have a low-level layer, for example `<driver>_ll.h/.c`.
 
-The low-level layer owns hardware-near operations:
+The low-level layer owns hardware-near register access:
 
-- direct read/write/set/clear/modify wrappers for peripheral registers
-- raw operations that map closely to one register action
+- named static inline readers for full peripheral register images
+- named static inline writers for full peripheral register images
+- minimal register-address macros when C token selection requires them
 - raw clock-gate forwarding when the peripheral driver needs it
-- hardware-layout primitives such as register field offsets, masks, and raw
-  field placement
 
-The low-level layer may know bit positions because bit position is hardware
-layout knowledge. It may expose helpers that operate on raw register images and
-raw hardware fields.
+The low-level layer should stay intentionally dumb. It should not know how a
+pin index maps to a field shift, which register image a public request touches,
+or how a public selector maps to raw hardware bits.
 
 The low-level layer must not know public semantic selectors or policy. It should
 not translate public driver states into behavior, decide batching strategy, or
 validate full public API requests.
 
-LL should be the single direct access point for a peripheral's low-level
-hardware operations. Higher layers should call LL instead of directly touching
+LL should be the single direct access point for peripheral register reads and
+writes. Higher layers should call LL accessors instead of directly touching
 peripheral registers.
 
 Good low-level responsibilities:
 
 ```c
-LL_DRIVER_ReadReg(PERIPHx, reg);
-LL_DRIVER_WriteReg(PERIPHx, reg, value);
-LL_DRIVER_SetRawMask(PERIPHx, mask);
-LL_DRIVER_GetFieldShift(rawIndex);
-LL_DRIVER_GetFieldMask(fieldShift);
-LL_DRIVER_SetRawField(regImage, fieldShift, rawField);
+LL_DRIVER_ReadRegisterA(PERIPHx);
+LL_DRIVER_WriteRegisterA(PERIPHx, regImage);
+LL_DRIVER_EnableClock(PERIPHx);
 ```
 
 Bad low-level responsibilities:
@@ -125,6 +121,8 @@ Bad low-level responsibilities:
 ```c
 LL_DRIVER_ValidatePublicConfig(config);
 LL_DRIVER_TranslatePublicModeToRawMode(mode);
+LL_DRIVER_GetFieldShift(rawIndex);
+LL_DRIVER_SetRawField(regImage, fieldShift, rawField);
 LL_DRIVER_DecideWhichRegistersToRead(selectorMask);
 LL_DRIVER_EnableClockBecausePublicModeNeedsIt(mode);
 ```
@@ -139,6 +137,10 @@ The codec layer owns translation and staged image mutation:
 
 - encode public selectors into raw hardware fields
 - decode raw hardware fields into public selectors
+- select the relevant staged register image for a decoded raw index when that
+  selection depends on field layout
+- calculate field shifts, masks, and raw field placement inside caller-owned
+  register images
 - update caller-owned register images
 - stage reset/default register images
 - stage related side effects that are still image-based, not hardware writes
@@ -160,6 +162,7 @@ Good codec responsibilities:
 ```c
 DRIVER_Codec_EncodeSelector(selector, &rawField);
 DRIVER_Codec_DecodeField(rawField, &selector);
+DRIVER_Codec_GetFieldShift(rawIndex);
 DRIVER_Codec_StageField(selector, &regImage);
 DRIVER_Codec_StageReset(rawIndex, &regImage);
 ```
@@ -183,7 +186,6 @@ It must own:
 - compatibility checks between public selectors
 - clock sequencing
 - deciding which registers must be read
-- deciding whether an operation can use atomic set/reset registers
 - batching selected fields or pins
 - dirty-register tracking
 - writing each dirty register at the correct time
@@ -226,7 +228,7 @@ Direct LL access is allowed only when the caller intentionally accepts all raw
 responsibility:
 
 - valid peripheral instance
-- valid raw masks
+- valid raw fields, masks, or indices expected by the LL API being called
 - clock already enabled
 - register side effects understood
 - no public driver policy applied
@@ -243,9 +245,9 @@ Optimize by putting batching in the driver layer:
 - read each touched register once
 - mutate local images through codec functions
 - write each dirty register once
-- use atomic set/reset registers where the hardware provides them
-- avoid full read-modify-write cycles when a write-only atomic register can
-  express the operation
+- keep driver-level GPIO state changes in read-modify-write form, including
+  single-bit public operations, so single-pin and multi-pin paths share the same
+  staged-image model
 
 Initialization code is usually not a hot path, but this repository intentionally
 uses it to learn where optimization belongs architecturally.
@@ -263,7 +265,7 @@ Names should reveal ownership and intent:
 - Low-level names should use `LL_<Module>_<Action>` so IntelliSense groups all
   low-level operations together.
 - Avoid adding new low-level names in the legacy `<Module>_LL_<Action>` shape
-  except as temporary compatibility aliases during a rename.
+  and migrate call sites directly when normalizing old code.
 - `LL` names should sound raw and hardware-near.
 - `Codec` names should sound like translation, encoding, decoding, or staging.
 - `Driver` names should sound like public operations.
@@ -277,8 +279,8 @@ Normalize one layer per commit.
 Recommended order for a driver normalization:
 
 1. Data aliases, selector defines, and validation vocabulary.
-2. LL raw access, naming, and hardware-layout primitives.
-3. Codec translation and staging.
+2. LL raw register access and naming.
+3. Codec translation, hardware field placement, and staging.
 4. Driver orchestration and batching.
 5. Project/application compatibility cleanup.
 
