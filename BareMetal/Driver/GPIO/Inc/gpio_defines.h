@@ -69,7 +69,7 @@ extern "C" {
  * @retval - @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`: @p pinIndex is in the valid GPIO pin-index range
  * @def GPIO_PIN_INDEX_TO_MASK
  */
-#define GPIO_PIN_INDEX_TO_MASK(pinIndex)		((gpio_pin_t) BIT_MASK(pinIndex))
+#define GPIO_PIN_INDEX_TO_MASK(pinIndex)		((gpio_pin_t) REG_BIT_MASK(pinIndex))
 /** @brief Pin 0 bitmask @def GPIO_PIN_0 */
 #define GPIO_PIN_0								GPIO_PIN_INDEX_TO_MASK(0U)
 /** @brief Pin 1 bitmask @def GPIO_PIN_1 */
@@ -188,7 +188,8 @@ extern "C" {
  */
 __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 {
-	// Local Variable
+	// Local Variables
+	gpio_pin_t pinMaskImage = pinMask;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
 
 	//! Validate that the input pin mask is a single valid pin selection
@@ -196,16 +197,15 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 	{
 		return GPIO_PIN_INDEX_INVALID;
 	}
-	//! Iterate through valid pin indices to find the index corresponding to the input pin mask
-	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
+
+	//! Shift the single selected bit down to bit 0 while counting the bit position
+	while (pinMaskImage > GPIO_PIN_0)
 	{
-		if (pinMask == GPIO_PIN_INDEX_TO_MASK(pinIndex))
-		{
-			return pinIndex;
-		}
+		pinMaskImage = (gpio_pin_t) (((uint32_t) pinMaskImage) >> 1U);
+		++pinIndex;
 	}
 
-	return GPIO_PIN_INDEX_INVALID;
+	return pinIndex;
 }
 
 // ==================================================================================================== //

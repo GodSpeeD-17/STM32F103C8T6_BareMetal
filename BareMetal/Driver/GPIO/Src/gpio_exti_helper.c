@@ -115,10 +115,10 @@ driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
 	}
 
 	fieldShift = _GPIO_EXTI_Helper_GetConfigFieldShift(pin);
-	fieldMask = BIT_VALUE(0x0FUL, fieldShift);
+	fieldMask = REG_FIELD_VALUE(0x0FUL, fieldShift);
 	regImage = *pExticrRegImage;
 	regImage &= ~fieldMask;
-	regImage |= BIT_VALUE(((uint32_t) portSource & 0x0FUL), fieldShift);
+	regImage |= REG_FIELD_VALUE(((uint32_t) portSource & 0x0FUL), fieldShift);
 
 	*pExticrRegImage = regImage;
 	return DRIVER_STATUS_SUCCESS;
@@ -144,7 +144,7 @@ driver_status_t _GPIO_EXTI_Helper_ResetPortConfigImage
 	}
 
 	fieldShift = _GPIO_EXTI_Helper_GetConfigFieldShift(pin);
-	fieldMask = BIT_VALUE(0x0FUL, fieldShift);
+	fieldMask = REG_FIELD_VALUE(0x0FUL, fieldShift);
 	regImage = *pExticrRegImage;
 	regImage &= ~fieldMask;
 

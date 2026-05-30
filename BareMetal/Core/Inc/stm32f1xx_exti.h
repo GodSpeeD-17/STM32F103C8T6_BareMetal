@@ -76,147 +76,147 @@ extern "C" {
 /** @brief EXTI_IMR_MR Position @def EXTI_IMR_MR_Pos */
 #define EXTI_IMR_MR_Pos						(0U)
 /** @brief EXTI_IMR_MR Mask @def EXTI_IMR_MR_Msk */
-#define EXTI_IMR_MR_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_IMR_MR_Pos))
+#define EXTI_IMR_MR_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_IMR_MR_Pos))
 /** @brief Interrupt Mask Bits @def EXTI_IMR_MR */
 #define EXTI_IMR_MR							EXTI_IMR_MR_Msk
 
 /** @brief EXTI_IMR_MR0 Position @def EXTI_IMR_MR0_Pos */
 #define EXTI_IMR_MR0_Pos						(0U)
 /** @brief EXTI_IMR_MR0 Mask @def EXTI_IMR_MR0_Msk */
-#define EXTI_IMR_MR0_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR0_Pos))
+#define EXTI_IMR_MR0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR0_Pos))
 /** @brief Interrupt Mask bit for EXTI line 0 @def EXTI_IMR_MR0 */
 #define EXTI_IMR_MR0							EXTI_IMR_MR0_Msk
 
 /** @brief EXTI_IMR_MR1 Position @def EXTI_IMR_MR1_Pos */
 #define EXTI_IMR_MR1_Pos						(1U)
 /** @brief EXTI_IMR_MR1 Mask @def EXTI_IMR_MR1_Msk */
-#define EXTI_IMR_MR1_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR1_Pos))
+#define EXTI_IMR_MR1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR1_Pos))
 /** @brief Interrupt Mask bit for EXTI line 1 @def EXTI_IMR_MR1 */
 #define EXTI_IMR_MR1							EXTI_IMR_MR1_Msk
 
 /** @brief EXTI_IMR_MR2 Position @def EXTI_IMR_MR2_Pos */
 #define EXTI_IMR_MR2_Pos						(2U)
 /** @brief EXTI_IMR_MR2 Mask @def EXTI_IMR_MR2_Msk */
-#define EXTI_IMR_MR2_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR2_Pos))
+#define EXTI_IMR_MR2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR2_Pos))
 /** @brief Interrupt Mask bit for EXTI line 2 @def EXTI_IMR_MR2 */
 #define EXTI_IMR_MR2							EXTI_IMR_MR2_Msk
 
 /** @brief EXTI_IMR_MR3 Position @def EXTI_IMR_MR3_Pos */
 #define EXTI_IMR_MR3_Pos						(3U)
 /** @brief EXTI_IMR_MR3 Mask @def EXTI_IMR_MR3_Msk */
-#define EXTI_IMR_MR3_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR3_Pos))
+#define EXTI_IMR_MR3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR3_Pos))
 /** @brief Interrupt Mask bit for EXTI line 3 @def EXTI_IMR_MR3 */
 #define EXTI_IMR_MR3							EXTI_IMR_MR3_Msk
 
 /** @brief EXTI_IMR_MR4 Position @def EXTI_IMR_MR4_Pos */
 #define EXTI_IMR_MR4_Pos						(4U)
 /** @brief EXTI_IMR_MR4 Mask @def EXTI_IMR_MR4_Msk */
-#define EXTI_IMR_MR4_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR4_Pos))
+#define EXTI_IMR_MR4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR4_Pos))
 /** @brief Interrupt Mask bit for EXTI line 4 @def EXTI_IMR_MR4 */
 #define EXTI_IMR_MR4							EXTI_IMR_MR4_Msk
 
 /** @brief EXTI_IMR_MR5 Position @def EXTI_IMR_MR5_Pos */
 #define EXTI_IMR_MR5_Pos						(5U)
 /** @brief EXTI_IMR_MR5 Mask @def EXTI_IMR_MR5_Msk */
-#define EXTI_IMR_MR5_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR5_Pos))
+#define EXTI_IMR_MR5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR5_Pos))
 /** @brief Interrupt Mask bit for EXTI line 5 @def EXTI_IMR_MR5 */
 #define EXTI_IMR_MR5							EXTI_IMR_MR5_Msk
 
 /** @brief EXTI_IMR_MR6 Position @def EXTI_IMR_MR6_Pos */
 #define EXTI_IMR_MR6_Pos						(6U)
 /** @brief EXTI_IMR_MR6 Mask @def EXTI_IMR_MR6_Msk */
-#define EXTI_IMR_MR6_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR6_Pos))
+#define EXTI_IMR_MR6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR6_Pos))
 /** @brief Interrupt Mask bit for EXTI line 6 @def EXTI_IMR_MR6 */
 #define EXTI_IMR_MR6							EXTI_IMR_MR6_Msk
 
 /** @brief EXTI_IMR_MR7 Position @def EXTI_IMR_MR7_Pos */
 #define EXTI_IMR_MR7_Pos						(7U)
 /** @brief EXTI_IMR_MR7 Mask @def EXTI_IMR_MR7_Msk */
-#define EXTI_IMR_MR7_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR7_Pos))
+#define EXTI_IMR_MR7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR7_Pos))
 /** @brief Interrupt Mask bit for EXTI line 7 @def EXTI_IMR_MR7 */
 #define EXTI_IMR_MR7							EXTI_IMR_MR7_Msk
 
 /** @brief EXTI_IMR_MR8 Position @def EXTI_IMR_MR8_Pos */
 #define EXTI_IMR_MR8_Pos						(8U)
 /** @brief EXTI_IMR_MR8 Mask @def EXTI_IMR_MR8_Msk */
-#define EXTI_IMR_MR8_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR8_Pos))
+#define EXTI_IMR_MR8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR8_Pos))
 /** @brief Interrupt Mask bit for EXTI line 8 @def EXTI_IMR_MR8 */
 #define EXTI_IMR_MR8							EXTI_IMR_MR8_Msk
 
 /** @brief EXTI_IMR_MR9 Position @def EXTI_IMR_MR9_Pos */
 #define EXTI_IMR_MR9_Pos						(9U)
 /** @brief EXTI_IMR_MR9 Mask @def EXTI_IMR_MR9_Msk */
-#define EXTI_IMR_MR9_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR9_Pos))
+#define EXTI_IMR_MR9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR9_Pos))
 /** @brief Interrupt Mask bit for EXTI line 9 @def EXTI_IMR_MR9 */
 #define EXTI_IMR_MR9							EXTI_IMR_MR9_Msk
 
 /** @brief EXTI_IMR_MR10 Position @def EXTI_IMR_MR10_Pos */
 #define EXTI_IMR_MR10_Pos						(10U)
 /** @brief EXTI_IMR_MR10 Mask @def EXTI_IMR_MR10_Msk */
-#define EXTI_IMR_MR10_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR10_Pos))
+#define EXTI_IMR_MR10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR10_Pos))
 /** @brief Interrupt Mask bit for EXTI line 10 @def EXTI_IMR_MR10 */
 #define EXTI_IMR_MR10							EXTI_IMR_MR10_Msk
 
 /** @brief EXTI_IMR_MR11 Position @def EXTI_IMR_MR11_Pos */
 #define EXTI_IMR_MR11_Pos						(11U)
 /** @brief EXTI_IMR_MR11 Mask @def EXTI_IMR_MR11_Msk */
-#define EXTI_IMR_MR11_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR11_Pos))
+#define EXTI_IMR_MR11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR11_Pos))
 /** @brief Interrupt Mask bit for EXTI line 11 @def EXTI_IMR_MR11 */
 #define EXTI_IMR_MR11							EXTI_IMR_MR11_Msk
 
 /** @brief EXTI_IMR_MR12 Position @def EXTI_IMR_MR12_Pos */
 #define EXTI_IMR_MR12_Pos						(12U)
 /** @brief EXTI_IMR_MR12 Mask @def EXTI_IMR_MR12_Msk */
-#define EXTI_IMR_MR12_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR12_Pos))
+#define EXTI_IMR_MR12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR12_Pos))
 /** @brief Interrupt Mask bit for EXTI line 12 @def EXTI_IMR_MR12 */
 #define EXTI_IMR_MR12							EXTI_IMR_MR12_Msk
 
 /** @brief EXTI_IMR_MR13 Position @def EXTI_IMR_MR13_Pos */
 #define EXTI_IMR_MR13_Pos						(13U)
 /** @brief EXTI_IMR_MR13 Mask @def EXTI_IMR_MR13_Msk */
-#define EXTI_IMR_MR13_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR13_Pos))
+#define EXTI_IMR_MR13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR13_Pos))
 /** @brief Interrupt Mask bit for EXTI line 13 @def EXTI_IMR_MR13 */
 #define EXTI_IMR_MR13							EXTI_IMR_MR13_Msk
 
 /** @brief EXTI_IMR_MR14 Position @def EXTI_IMR_MR14_Pos */
 #define EXTI_IMR_MR14_Pos						(14U)
 /** @brief EXTI_IMR_MR14 Mask @def EXTI_IMR_MR14_Msk */
-#define EXTI_IMR_MR14_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR14_Pos))
+#define EXTI_IMR_MR14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR14_Pos))
 /** @brief Interrupt Mask bit for EXTI line 14 @def EXTI_IMR_MR14 */
 #define EXTI_IMR_MR14							EXTI_IMR_MR14_Msk
 
 /** @brief EXTI_IMR_MR15 Position @def EXTI_IMR_MR15_Pos */
 #define EXTI_IMR_MR15_Pos						(15U)
 /** @brief EXTI_IMR_MR15 Mask @def EXTI_IMR_MR15_Msk */
-#define EXTI_IMR_MR15_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR15_Pos))
+#define EXTI_IMR_MR15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR15_Pos))
 /** @brief Interrupt Mask bit for EXTI line 15 @def EXTI_IMR_MR15 */
 #define EXTI_IMR_MR15							EXTI_IMR_MR15_Msk
 
 /** @brief EXTI_IMR_MR16 Position @def EXTI_IMR_MR16_Pos */
 #define EXTI_IMR_MR16_Pos						(16U)
 /** @brief EXTI_IMR_MR16 Mask @def EXTI_IMR_MR16_Msk */
-#define EXTI_IMR_MR16_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR16_Pos))
+#define EXTI_IMR_MR16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR16_Pos))
 /** @brief Interrupt Mask bit for EXTI line 16 @def EXTI_IMR_MR16 */
 #define EXTI_IMR_MR16							EXTI_IMR_MR16_Msk
 
 /** @brief EXTI_IMR_MR17 Position @def EXTI_IMR_MR17_Pos */
 #define EXTI_IMR_MR17_Pos						(17U)
 /** @brief EXTI_IMR_MR17 Mask @def EXTI_IMR_MR17_Msk */
-#define EXTI_IMR_MR17_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR17_Pos))
+#define EXTI_IMR_MR17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR17_Pos))
 /** @brief Interrupt Mask bit for EXTI line 17 @def EXTI_IMR_MR17 */
 #define EXTI_IMR_MR17							EXTI_IMR_MR17_Msk
 
 /** @brief EXTI_IMR_MR18 Position @def EXTI_IMR_MR18_Pos */
 #define EXTI_IMR_MR18_Pos						(18U)
 /** @brief EXTI_IMR_MR18 Mask @def EXTI_IMR_MR18_Msk */
-#define EXTI_IMR_MR18_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR18_Pos))
+#define EXTI_IMR_MR18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR18_Pos))
 /** @brief Interrupt Mask bit for EXTI line 18 @def EXTI_IMR_MR18 */
 #define EXTI_IMR_MR18							EXTI_IMR_MR18_Msk
 
 /** @brief EXTI_IMR_MR19 Position @def EXTI_IMR_MR19_Pos */
 #define EXTI_IMR_MR19_Pos						(19U)
 /** @brief EXTI_IMR_MR19 Mask @def EXTI_IMR_MR19_Msk */
-#define EXTI_IMR_MR19_Msk						(BIT_VALUE(0x1UL, EXTI_IMR_MR19_Pos))
+#define EXTI_IMR_MR19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_IMR_MR19_Pos))
 /** @brief Interrupt Mask bit for EXTI line 19 @def EXTI_IMR_MR19 */
 #define EXTI_IMR_MR19							EXTI_IMR_MR19_Msk
 
@@ -249,147 +249,147 @@ extern "C" {
 /** @brief EXTI_EMR_MR Position @def EXTI_EMR_MR_Pos */
 #define EXTI_EMR_MR_Pos						(0U)
 /** @brief EXTI_EMR_MR Mask @def EXTI_EMR_MR_Msk */
-#define EXTI_EMR_MR_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_EMR_MR_Pos))
+#define EXTI_EMR_MR_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_EMR_MR_Pos))
 /** @brief Event Mask Bits @def EXTI_EMR_MR */
 #define EXTI_EMR_MR							EXTI_EMR_MR_Msk
 
 /** @brief EXTI_EMR_MR0 Position @def EXTI_EMR_MR0_Pos */
 #define EXTI_EMR_MR0_Pos						(0U)
 /** @brief EXTI_EMR_MR0 Mask @def EXTI_EMR_MR0_Msk */
-#define EXTI_EMR_MR0_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR0_Pos))
+#define EXTI_EMR_MR0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR0_Pos))
 /** @brief Event Mask bit for EXTI line 0 @def EXTI_EMR_MR0 */
 #define EXTI_EMR_MR0							EXTI_EMR_MR0_Msk
 
 /** @brief EXTI_EMR_MR1 Position @def EXTI_EMR_MR1_Pos */
 #define EXTI_EMR_MR1_Pos						(1U)
 /** @brief EXTI_EMR_MR1 Mask @def EXTI_EMR_MR1_Msk */
-#define EXTI_EMR_MR1_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR1_Pos))
+#define EXTI_EMR_MR1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR1_Pos))
 /** @brief Event Mask bit for EXTI line 1 @def EXTI_EMR_MR1 */
 #define EXTI_EMR_MR1							EXTI_EMR_MR1_Msk
 
 /** @brief EXTI_EMR_MR2 Position @def EXTI_EMR_MR2_Pos */
 #define EXTI_EMR_MR2_Pos						(2U)
 /** @brief EXTI_EMR_MR2 Mask @def EXTI_EMR_MR2_Msk */
-#define EXTI_EMR_MR2_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR2_Pos))
+#define EXTI_EMR_MR2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR2_Pos))
 /** @brief Event Mask bit for EXTI line 2 @def EXTI_EMR_MR2 */
 #define EXTI_EMR_MR2							EXTI_EMR_MR2_Msk
 
 /** @brief EXTI_EMR_MR3 Position @def EXTI_EMR_MR3_Pos */
 #define EXTI_EMR_MR3_Pos						(3U)
 /** @brief EXTI_EMR_MR3 Mask @def EXTI_EMR_MR3_Msk */
-#define EXTI_EMR_MR3_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR3_Pos))
+#define EXTI_EMR_MR3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR3_Pos))
 /** @brief Event Mask bit for EXTI line 3 @def EXTI_EMR_MR3 */
 #define EXTI_EMR_MR3							EXTI_EMR_MR3_Msk
 
 /** @brief EXTI_EMR_MR4 Position @def EXTI_EMR_MR4_Pos */
 #define EXTI_EMR_MR4_Pos						(4U)
 /** @brief EXTI_EMR_MR4 Mask @def EXTI_EMR_MR4_Msk */
-#define EXTI_EMR_MR4_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR4_Pos))
+#define EXTI_EMR_MR4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR4_Pos))
 /** @brief Event Mask bit for EXTI line 4 @def EXTI_EMR_MR4 */
 #define EXTI_EMR_MR4							EXTI_EMR_MR4_Msk
 
 /** @brief EXTI_EMR_MR5 Position @def EXTI_EMR_MR5_Pos */
 #define EXTI_EMR_MR5_Pos						(5U)
 /** @brief EXTI_EMR_MR5 Mask @def EXTI_EMR_MR5_Msk */
-#define EXTI_EMR_MR5_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR5_Pos))
+#define EXTI_EMR_MR5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR5_Pos))
 /** @brief Event Mask bit for EXTI line 5 @def EXTI_EMR_MR5 */
 #define EXTI_EMR_MR5							EXTI_EMR_MR5_Msk
 
 /** @brief EXTI_EMR_MR6 Position @def EXTI_EMR_MR6_Pos */
 #define EXTI_EMR_MR6_Pos						(6U)
 /** @brief EXTI_EMR_MR6 Mask @def EXTI_EMR_MR6_Msk */
-#define EXTI_EMR_MR6_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR6_Pos))
+#define EXTI_EMR_MR6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR6_Pos))
 /** @brief Event Mask bit for EXTI line 6 @def EXTI_EMR_MR6 */
 #define EXTI_EMR_MR6							EXTI_EMR_MR6_Msk
 
 /** @brief EXTI_EMR_MR7 Position @def EXTI_EMR_MR7_Pos */
 #define EXTI_EMR_MR7_Pos						(7U)
 /** @brief EXTI_EMR_MR7 Mask @def EXTI_EMR_MR7_Msk */
-#define EXTI_EMR_MR7_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR7_Pos))
+#define EXTI_EMR_MR7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR7_Pos))
 /** @brief Event Mask bit for EXTI line 7 @def EXTI_EMR_MR7 */
 #define EXTI_EMR_MR7							EXTI_EMR_MR7_Msk
 
 /** @brief EXTI_EMR_MR8 Position @def EXTI_EMR_MR8_Pos */
 #define EXTI_EMR_MR8_Pos						(8U)
 /** @brief EXTI_EMR_MR8 Mask @def EXTI_EMR_MR8_Msk */
-#define EXTI_EMR_MR8_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR8_Pos))
+#define EXTI_EMR_MR8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR8_Pos))
 /** @brief Event Mask bit for EXTI line 8 @def EXTI_EMR_MR8 */
 #define EXTI_EMR_MR8							EXTI_EMR_MR8_Msk
 
 /** @brief EXTI_EMR_MR9 Position @def EXTI_EMR_MR9_Pos */
 #define EXTI_EMR_MR9_Pos						(9U)
 /** @brief EXTI_EMR_MR9 Mask @def EXTI_EMR_MR9_Msk */
-#define EXTI_EMR_MR9_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR9_Pos))
+#define EXTI_EMR_MR9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR9_Pos))
 /** @brief Event Mask bit for EXTI line 9 @def EXTI_EMR_MR9 */
 #define EXTI_EMR_MR9							EXTI_EMR_MR9_Msk
 
 /** @brief EXTI_EMR_MR10 Position @def EXTI_EMR_MR10_Pos */
 #define EXTI_EMR_MR10_Pos						(10U)
 /** @brief EXTI_EMR_MR10 Mask @def EXTI_EMR_MR10_Msk */
-#define EXTI_EMR_MR10_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR10_Pos))
+#define EXTI_EMR_MR10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR10_Pos))
 /** @brief Event Mask bit for EXTI line 10 @def EXTI_EMR_MR10 */
 #define EXTI_EMR_MR10							EXTI_EMR_MR10_Msk
 
 /** @brief EXTI_EMR_MR11 Position @def EXTI_EMR_MR11_Pos */
 #define EXTI_EMR_MR11_Pos						(11U)
 /** @brief EXTI_EMR_MR11 Mask @def EXTI_EMR_MR11_Msk */
-#define EXTI_EMR_MR11_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR11_Pos))
+#define EXTI_EMR_MR11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR11_Pos))
 /** @brief Event Mask bit for EXTI line 11 @def EXTI_EMR_MR11 */
 #define EXTI_EMR_MR11							EXTI_EMR_MR11_Msk
 
 /** @brief EXTI_EMR_MR12 Position @def EXTI_EMR_MR12_Pos */
 #define EXTI_EMR_MR12_Pos						(12U)
 /** @brief EXTI_EMR_MR12 Mask @def EXTI_EMR_MR12_Msk */
-#define EXTI_EMR_MR12_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR12_Pos))
+#define EXTI_EMR_MR12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR12_Pos))
 /** @brief Event Mask bit for EXTI line 12 @def EXTI_EMR_MR12 */
 #define EXTI_EMR_MR12							EXTI_EMR_MR12_Msk
 
 /** @brief EXTI_EMR_MR13 Position @def EXTI_EMR_MR13_Pos */
 #define EXTI_EMR_MR13_Pos						(13U)
 /** @brief EXTI_EMR_MR13 Mask @def EXTI_EMR_MR13_Msk */
-#define EXTI_EMR_MR13_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR13_Pos))
+#define EXTI_EMR_MR13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR13_Pos))
 /** @brief Event Mask bit for EXTI line 13 @def EXTI_EMR_MR13 */
 #define EXTI_EMR_MR13							EXTI_EMR_MR13_Msk
 
 /** @brief EXTI_EMR_MR14 Position @def EXTI_EMR_MR14_Pos */
 #define EXTI_EMR_MR14_Pos						(14U)
 /** @brief EXTI_EMR_MR14 Mask @def EXTI_EMR_MR14_Msk */
-#define EXTI_EMR_MR14_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR14_Pos))
+#define EXTI_EMR_MR14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR14_Pos))
 /** @brief Event Mask bit for EXTI line 14 @def EXTI_EMR_MR14 */
 #define EXTI_EMR_MR14							EXTI_EMR_MR14_Msk
 
 /** @brief EXTI_EMR_MR15 Position @def EXTI_EMR_MR15_Pos */
 #define EXTI_EMR_MR15_Pos						(15U)
 /** @brief EXTI_EMR_MR15 Mask @def EXTI_EMR_MR15_Msk */
-#define EXTI_EMR_MR15_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR15_Pos))
+#define EXTI_EMR_MR15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR15_Pos))
 /** @brief Event Mask bit for EXTI line 15 @def EXTI_EMR_MR15 */
 #define EXTI_EMR_MR15							EXTI_EMR_MR15_Msk
 
 /** @brief EXTI_EMR_MR16 Position @def EXTI_EMR_MR16_Pos */
 #define EXTI_EMR_MR16_Pos						(16U)
 /** @brief EXTI_EMR_MR16 Mask @def EXTI_EMR_MR16_Msk */
-#define EXTI_EMR_MR16_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR16_Pos))
+#define EXTI_EMR_MR16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR16_Pos))
 /** @brief Event Mask bit for EXTI line 16 @def EXTI_EMR_MR16 */
 #define EXTI_EMR_MR16							EXTI_EMR_MR16_Msk
 
 /** @brief EXTI_EMR_MR17 Position @def EXTI_EMR_MR17_Pos */
 #define EXTI_EMR_MR17_Pos						(17U)
 /** @brief EXTI_EMR_MR17 Mask @def EXTI_EMR_MR17_Msk */
-#define EXTI_EMR_MR17_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR17_Pos))
+#define EXTI_EMR_MR17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR17_Pos))
 /** @brief Event Mask bit for EXTI line 17 @def EXTI_EMR_MR17 */
 #define EXTI_EMR_MR17							EXTI_EMR_MR17_Msk
 
 /** @brief EXTI_EMR_MR18 Position @def EXTI_EMR_MR18_Pos */
 #define EXTI_EMR_MR18_Pos						(18U)
 /** @brief EXTI_EMR_MR18 Mask @def EXTI_EMR_MR18_Msk */
-#define EXTI_EMR_MR18_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR18_Pos))
+#define EXTI_EMR_MR18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR18_Pos))
 /** @brief Event Mask bit for EXTI line 18 @def EXTI_EMR_MR18 */
 #define EXTI_EMR_MR18							EXTI_EMR_MR18_Msk
 
 /** @brief EXTI_EMR_MR19 Position @def EXTI_EMR_MR19_Pos */
 #define EXTI_EMR_MR19_Pos						(19U)
 /** @brief EXTI_EMR_MR19 Mask @def EXTI_EMR_MR19_Msk */
-#define EXTI_EMR_MR19_Msk						(BIT_VALUE(0x1UL, EXTI_EMR_MR19_Pos))
+#define EXTI_EMR_MR19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_EMR_MR19_Pos))
 /** @brief Event Mask bit for EXTI line 19 @def EXTI_EMR_MR19 */
 #define EXTI_EMR_MR19							EXTI_EMR_MR19_Msk
 
@@ -422,147 +422,147 @@ extern "C" {
 /** @brief EXTI_RTSR_TR Position @def EXTI_RTSR_TR_Pos */
 #define EXTI_RTSR_TR_Pos						(0U)
 /** @brief EXTI_RTSR_TR Mask @def EXTI_RTSR_TR_Msk */
-#define EXTI_RTSR_TR_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_RTSR_TR_Pos))
+#define EXTI_RTSR_TR_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_RTSR_TR_Pos))
 /** @brief Rising Trigger Selection Bits @def EXTI_RTSR_TR */
 #define EXTI_RTSR_TR							EXTI_RTSR_TR_Msk
 
 /** @brief EXTI_RTSR_TR0 Position @def EXTI_RTSR_TR0_Pos */
 #define EXTI_RTSR_TR0_Pos						(0U)
 /** @brief EXTI_RTSR_TR0 Mask @def EXTI_RTSR_TR0_Msk */
-#define EXTI_RTSR_TR0_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR0_Pos))
+#define EXTI_RTSR_TR0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR0_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 0 @def EXTI_RTSR_TR0 */
 #define EXTI_RTSR_TR0							EXTI_RTSR_TR0_Msk
 
 /** @brief EXTI_RTSR_TR1 Position @def EXTI_RTSR_TR1_Pos */
 #define EXTI_RTSR_TR1_Pos						(1U)
 /** @brief EXTI_RTSR_TR1 Mask @def EXTI_RTSR_TR1_Msk */
-#define EXTI_RTSR_TR1_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR1_Pos))
+#define EXTI_RTSR_TR1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR1_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 1 @def EXTI_RTSR_TR1 */
 #define EXTI_RTSR_TR1							EXTI_RTSR_TR1_Msk
 
 /** @brief EXTI_RTSR_TR2 Position @def EXTI_RTSR_TR2_Pos */
 #define EXTI_RTSR_TR2_Pos						(2U)
 /** @brief EXTI_RTSR_TR2 Mask @def EXTI_RTSR_TR2_Msk */
-#define EXTI_RTSR_TR2_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR2_Pos))
+#define EXTI_RTSR_TR2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR2_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 2 @def EXTI_RTSR_TR2 */
 #define EXTI_RTSR_TR2							EXTI_RTSR_TR2_Msk
 
 /** @brief EXTI_RTSR_TR3 Position @def EXTI_RTSR_TR3_Pos */
 #define EXTI_RTSR_TR3_Pos						(3U)
 /** @brief EXTI_RTSR_TR3 Mask @def EXTI_RTSR_TR3_Msk */
-#define EXTI_RTSR_TR3_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR3_Pos))
+#define EXTI_RTSR_TR3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR3_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 3 @def EXTI_RTSR_TR3 */
 #define EXTI_RTSR_TR3							EXTI_RTSR_TR3_Msk
 
 /** @brief EXTI_RTSR_TR4 Position @def EXTI_RTSR_TR4_Pos */
 #define EXTI_RTSR_TR4_Pos						(4U)
 /** @brief EXTI_RTSR_TR4 Mask @def EXTI_RTSR_TR4_Msk */
-#define EXTI_RTSR_TR4_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR4_Pos))
+#define EXTI_RTSR_TR4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR4_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 4 @def EXTI_RTSR_TR4 */
 #define EXTI_RTSR_TR4							EXTI_RTSR_TR4_Msk
 
 /** @brief EXTI_RTSR_TR5 Position @def EXTI_RTSR_TR5_Pos */
 #define EXTI_RTSR_TR5_Pos						(5U)
 /** @brief EXTI_RTSR_TR5 Mask @def EXTI_RTSR_TR5_Msk */
-#define EXTI_RTSR_TR5_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR5_Pos))
+#define EXTI_RTSR_TR5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR5_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 5 @def EXTI_RTSR_TR5 */
 #define EXTI_RTSR_TR5							EXTI_RTSR_TR5_Msk
 
 /** @brief EXTI_RTSR_TR6 Position @def EXTI_RTSR_TR6_Pos */
 #define EXTI_RTSR_TR6_Pos						(6U)
 /** @brief EXTI_RTSR_TR6 Mask @def EXTI_RTSR_TR6_Msk */
-#define EXTI_RTSR_TR6_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR6_Pos))
+#define EXTI_RTSR_TR6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR6_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 6 @def EXTI_RTSR_TR6 */
 #define EXTI_RTSR_TR6							EXTI_RTSR_TR6_Msk
 
 /** @brief EXTI_RTSR_TR7 Position @def EXTI_RTSR_TR7_Pos */
 #define EXTI_RTSR_TR7_Pos						(7U)
 /** @brief EXTI_RTSR_TR7 Mask @def EXTI_RTSR_TR7_Msk */
-#define EXTI_RTSR_TR7_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR7_Pos))
+#define EXTI_RTSR_TR7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR7_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 7 @def EXTI_RTSR_TR7 */
 #define EXTI_RTSR_TR7							EXTI_RTSR_TR7_Msk
 
 /** @brief EXTI_RTSR_TR8 Position @def EXTI_RTSR_TR8_Pos */
 #define EXTI_RTSR_TR8_Pos						(8U)
 /** @brief EXTI_RTSR_TR8 Mask @def EXTI_RTSR_TR8_Msk */
-#define EXTI_RTSR_TR8_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR8_Pos))
+#define EXTI_RTSR_TR8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR8_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 8 @def EXTI_RTSR_TR8 */
 #define EXTI_RTSR_TR8							EXTI_RTSR_TR8_Msk
 
 /** @brief EXTI_RTSR_TR9 Position @def EXTI_RTSR_TR9_Pos */
 #define EXTI_RTSR_TR9_Pos						(9U)
 /** @brief EXTI_RTSR_TR9 Mask @def EXTI_RTSR_TR9_Msk */
-#define EXTI_RTSR_TR9_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR9_Pos))
+#define EXTI_RTSR_TR9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR9_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 9 @def EXTI_RTSR_TR9 */
 #define EXTI_RTSR_TR9							EXTI_RTSR_TR9_Msk
 
 /** @brief EXTI_RTSR_TR10 Position @def EXTI_RTSR_TR10_Pos */
 #define EXTI_RTSR_TR10_Pos						(10U)
 /** @brief EXTI_RTSR_TR10 Mask @def EXTI_RTSR_TR10_Msk */
-#define EXTI_RTSR_TR10_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR10_Pos))
+#define EXTI_RTSR_TR10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR10_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 10 @def EXTI_RTSR_TR10 */
 #define EXTI_RTSR_TR10							EXTI_RTSR_TR10_Msk
 
 /** @brief EXTI_RTSR_TR11 Position @def EXTI_RTSR_TR11_Pos */
 #define EXTI_RTSR_TR11_Pos						(11U)
 /** @brief EXTI_RTSR_TR11 Mask @def EXTI_RTSR_TR11_Msk */
-#define EXTI_RTSR_TR11_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR11_Pos))
+#define EXTI_RTSR_TR11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR11_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 11 @def EXTI_RTSR_TR11 */
 #define EXTI_RTSR_TR11							EXTI_RTSR_TR11_Msk
 
 /** @brief EXTI_RTSR_TR12 Position @def EXTI_RTSR_TR12_Pos */
 #define EXTI_RTSR_TR12_Pos						(12U)
 /** @brief EXTI_RTSR_TR12 Mask @def EXTI_RTSR_TR12_Msk */
-#define EXTI_RTSR_TR12_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR12_Pos))
+#define EXTI_RTSR_TR12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR12_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 12 @def EXTI_RTSR_TR12 */
 #define EXTI_RTSR_TR12							EXTI_RTSR_TR12_Msk
 
 /** @brief EXTI_RTSR_TR13 Position @def EXTI_RTSR_TR13_Pos */
 #define EXTI_RTSR_TR13_Pos						(13U)
 /** @brief EXTI_RTSR_TR13 Mask @def EXTI_RTSR_TR13_Msk */
-#define EXTI_RTSR_TR13_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR13_Pos))
+#define EXTI_RTSR_TR13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR13_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 13 @def EXTI_RTSR_TR13 */
 #define EXTI_RTSR_TR13							EXTI_RTSR_TR13_Msk
 
 /** @brief EXTI_RTSR_TR14 Position @def EXTI_RTSR_TR14_Pos */
 #define EXTI_RTSR_TR14_Pos						(14U)
 /** @brief EXTI_RTSR_TR14 Mask @def EXTI_RTSR_TR14_Msk */
-#define EXTI_RTSR_TR14_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR14_Pos))
+#define EXTI_RTSR_TR14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR14_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 14 @def EXTI_RTSR_TR14 */
 #define EXTI_RTSR_TR14							EXTI_RTSR_TR14_Msk
 
 /** @brief EXTI_RTSR_TR15 Position @def EXTI_RTSR_TR15_Pos */
 #define EXTI_RTSR_TR15_Pos						(15U)
 /** @brief EXTI_RTSR_TR15 Mask @def EXTI_RTSR_TR15_Msk */
-#define EXTI_RTSR_TR15_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR15_Pos))
+#define EXTI_RTSR_TR15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR15_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 15 @def EXTI_RTSR_TR15 */
 #define EXTI_RTSR_TR15							EXTI_RTSR_TR15_Msk
 
 /** @brief EXTI_RTSR_TR16 Position @def EXTI_RTSR_TR16_Pos */
 #define EXTI_RTSR_TR16_Pos						(16U)
 /** @brief EXTI_RTSR_TR16 Mask @def EXTI_RTSR_TR16_Msk */
-#define EXTI_RTSR_TR16_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR16_Pos))
+#define EXTI_RTSR_TR16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR16_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 16 @def EXTI_RTSR_TR16 */
 #define EXTI_RTSR_TR16							EXTI_RTSR_TR16_Msk
 
 /** @brief EXTI_RTSR_TR17 Position @def EXTI_RTSR_TR17_Pos */
 #define EXTI_RTSR_TR17_Pos						(17U)
 /** @brief EXTI_RTSR_TR17 Mask @def EXTI_RTSR_TR17_Msk */
-#define EXTI_RTSR_TR17_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR17_Pos))
+#define EXTI_RTSR_TR17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR17_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 17 @def EXTI_RTSR_TR17 */
 #define EXTI_RTSR_TR17							EXTI_RTSR_TR17_Msk
 
 /** @brief EXTI_RTSR_TR18 Position @def EXTI_RTSR_TR18_Pos */
 #define EXTI_RTSR_TR18_Pos						(18U)
 /** @brief EXTI_RTSR_TR18 Mask @def EXTI_RTSR_TR18_Msk */
-#define EXTI_RTSR_TR18_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR18_Pos))
+#define EXTI_RTSR_TR18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR18_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 18 @def EXTI_RTSR_TR18 */
 #define EXTI_RTSR_TR18							EXTI_RTSR_TR18_Msk
 
 /** @brief EXTI_RTSR_TR19 Position @def EXTI_RTSR_TR19_Pos */
 #define EXTI_RTSR_TR19_Pos						(19U)
 /** @brief EXTI_RTSR_TR19 Mask @def EXTI_RTSR_TR19_Msk */
-#define EXTI_RTSR_TR19_Msk						(BIT_VALUE(0x1UL, EXTI_RTSR_TR19_Pos))
+#define EXTI_RTSR_TR19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_RTSR_TR19_Pos))
 /** @brief Rising Trigger Selection bit for EXTI line 19 @def EXTI_RTSR_TR19 */
 #define EXTI_RTSR_TR19							EXTI_RTSR_TR19_Msk
 
@@ -595,147 +595,147 @@ extern "C" {
 /** @brief EXTI_FTSR_TR Position @def EXTI_FTSR_TR_Pos */
 #define EXTI_FTSR_TR_Pos						(0U)
 /** @brief EXTI_FTSR_TR Mask @def EXTI_FTSR_TR_Msk */
-#define EXTI_FTSR_TR_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_FTSR_TR_Pos))
+#define EXTI_FTSR_TR_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_FTSR_TR_Pos))
 /** @brief Falling Trigger Selection Bits @def EXTI_FTSR_TR */
 #define EXTI_FTSR_TR							EXTI_FTSR_TR_Msk
 
 /** @brief EXTI_FTSR_TR0 Position @def EXTI_FTSR_TR0_Pos */
 #define EXTI_FTSR_TR0_Pos						(0U)
 /** @brief EXTI_FTSR_TR0 Mask @def EXTI_FTSR_TR0_Msk */
-#define EXTI_FTSR_TR0_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR0_Pos))
+#define EXTI_FTSR_TR0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR0_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 0 @def EXTI_FTSR_TR0 */
 #define EXTI_FTSR_TR0							EXTI_FTSR_TR0_Msk
 
 /** @brief EXTI_FTSR_TR1 Position @def EXTI_FTSR_TR1_Pos */
 #define EXTI_FTSR_TR1_Pos						(1U)
 /** @brief EXTI_FTSR_TR1 Mask @def EXTI_FTSR_TR1_Msk */
-#define EXTI_FTSR_TR1_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR1_Pos))
+#define EXTI_FTSR_TR1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR1_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 1 @def EXTI_FTSR_TR1 */
 #define EXTI_FTSR_TR1							EXTI_FTSR_TR1_Msk
 
 /** @brief EXTI_FTSR_TR2 Position @def EXTI_FTSR_TR2_Pos */
 #define EXTI_FTSR_TR2_Pos						(2U)
 /** @brief EXTI_FTSR_TR2 Mask @def EXTI_FTSR_TR2_Msk */
-#define EXTI_FTSR_TR2_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR2_Pos))
+#define EXTI_FTSR_TR2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR2_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 2 @def EXTI_FTSR_TR2 */
 #define EXTI_FTSR_TR2							EXTI_FTSR_TR2_Msk
 
 /** @brief EXTI_FTSR_TR3 Position @def EXTI_FTSR_TR3_Pos */
 #define EXTI_FTSR_TR3_Pos						(3U)
 /** @brief EXTI_FTSR_TR3 Mask @def EXTI_FTSR_TR3_Msk */
-#define EXTI_FTSR_TR3_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR3_Pos))
+#define EXTI_FTSR_TR3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR3_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 3 @def EXTI_FTSR_TR3 */
 #define EXTI_FTSR_TR3							EXTI_FTSR_TR3_Msk
 
 /** @brief EXTI_FTSR_TR4 Position @def EXTI_FTSR_TR4_Pos */
 #define EXTI_FTSR_TR4_Pos						(4U)
 /** @brief EXTI_FTSR_TR4 Mask @def EXTI_FTSR_TR4_Msk */
-#define EXTI_FTSR_TR4_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR4_Pos))
+#define EXTI_FTSR_TR4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR4_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 4 @def EXTI_FTSR_TR4 */
 #define EXTI_FTSR_TR4							EXTI_FTSR_TR4_Msk
 
 /** @brief EXTI_FTSR_TR5 Position @def EXTI_FTSR_TR5_Pos */
 #define EXTI_FTSR_TR5_Pos						(5U)
 /** @brief EXTI_FTSR_TR5 Mask @def EXTI_FTSR_TR5_Msk */
-#define EXTI_FTSR_TR5_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR5_Pos))
+#define EXTI_FTSR_TR5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR5_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 5 @def EXTI_FTSR_TR5 */
 #define EXTI_FTSR_TR5							EXTI_FTSR_TR5_Msk
 
 /** @brief EXTI_FTSR_TR6 Position @def EXTI_FTSR_TR6_Pos */
 #define EXTI_FTSR_TR6_Pos						(6U)
 /** @brief EXTI_FTSR_TR6 Mask @def EXTI_FTSR_TR6_Msk */
-#define EXTI_FTSR_TR6_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR6_Pos))
+#define EXTI_FTSR_TR6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR6_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 6 @def EXTI_FTSR_TR6 */
 #define EXTI_FTSR_TR6							EXTI_FTSR_TR6_Msk
 
 /** @brief EXTI_FTSR_TR7 Position @def EXTI_FTSR_TR7_Pos */
 #define EXTI_FTSR_TR7_Pos						(7U)
 /** @brief EXTI_FTSR_TR7 Mask @def EXTI_FTSR_TR7_Msk */
-#define EXTI_FTSR_TR7_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR7_Pos))
+#define EXTI_FTSR_TR7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR7_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 7 @def EXTI_FTSR_TR7 */
 #define EXTI_FTSR_TR7							EXTI_FTSR_TR7_Msk
 
 /** @brief EXTI_FTSR_TR8 Position @def EXTI_FTSR_TR8_Pos */
 #define EXTI_FTSR_TR8_Pos						(8U)
 /** @brief EXTI_FTSR_TR8 Mask @def EXTI_FTSR_TR8_Msk */
-#define EXTI_FTSR_TR8_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR8_Pos))
+#define EXTI_FTSR_TR8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR8_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 8 @def EXTI_FTSR_TR8 */
 #define EXTI_FTSR_TR8							EXTI_FTSR_TR8_Msk
 
 /** @brief EXTI_FTSR_TR9 Position @def EXTI_FTSR_TR9_Pos */
 #define EXTI_FTSR_TR9_Pos						(9U)
 /** @brief EXTI_FTSR_TR9 Mask @def EXTI_FTSR_TR9_Msk */
-#define EXTI_FTSR_TR9_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR9_Pos))
+#define EXTI_FTSR_TR9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR9_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 9 @def EXTI_FTSR_TR9 */
 #define EXTI_FTSR_TR9							EXTI_FTSR_TR9_Msk
 
 /** @brief EXTI_FTSR_TR10 Position @def EXTI_FTSR_TR10_Pos */
 #define EXTI_FTSR_TR10_Pos						(10U)
 /** @brief EXTI_FTSR_TR10 Mask @def EXTI_FTSR_TR10_Msk */
-#define EXTI_FTSR_TR10_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR10_Pos))
+#define EXTI_FTSR_TR10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR10_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 10 @def EXTI_FTSR_TR10 */
 #define EXTI_FTSR_TR10							EXTI_FTSR_TR10_Msk
 
 /** @brief EXTI_FTSR_TR11 Position @def EXTI_FTSR_TR11_Pos */
 #define EXTI_FTSR_TR11_Pos						(11U)
 /** @brief EXTI_FTSR_TR11 Mask @def EXTI_FTSR_TR11_Msk */
-#define EXTI_FTSR_TR11_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR11_Pos))
+#define EXTI_FTSR_TR11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR11_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 11 @def EXTI_FTSR_TR11 */
 #define EXTI_FTSR_TR11							EXTI_FTSR_TR11_Msk
 
 /** @brief EXTI_FTSR_TR12 Position @def EXTI_FTSR_TR12_Pos */
 #define EXTI_FTSR_TR12_Pos						(12U)
 /** @brief EXTI_FTSR_TR12 Mask @def EXTI_FTSR_TR12_Msk */
-#define EXTI_FTSR_TR12_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR12_Pos))
+#define EXTI_FTSR_TR12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR12_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 12 @def EXTI_FTSR_TR12 */
 #define EXTI_FTSR_TR12							EXTI_FTSR_TR12_Msk
 
 /** @brief EXTI_FTSR_TR13 Position @def EXTI_FTSR_TR13_Pos */
 #define EXTI_FTSR_TR13_Pos						(13U)
 /** @brief EXTI_FTSR_TR13 Mask @def EXTI_FTSR_TR13_Msk */
-#define EXTI_FTSR_TR13_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR13_Pos))
+#define EXTI_FTSR_TR13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR13_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 13 @def EXTI_FTSR_TR13 */
 #define EXTI_FTSR_TR13							EXTI_FTSR_TR13_Msk
 
 /** @brief EXTI_FTSR_TR14 Position @def EXTI_FTSR_TR14_Pos */
 #define EXTI_FTSR_TR14_Pos						(14U)
 /** @brief EXTI_FTSR_TR14 Mask @def EXTI_FTSR_TR14_Msk */
-#define EXTI_FTSR_TR14_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR14_Pos))
+#define EXTI_FTSR_TR14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR14_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 14 @def EXTI_FTSR_TR14 */
 #define EXTI_FTSR_TR14							EXTI_FTSR_TR14_Msk
 
 /** @brief EXTI_FTSR_TR15 Position @def EXTI_FTSR_TR15_Pos */
 #define EXTI_FTSR_TR15_Pos						(15U)
 /** @brief EXTI_FTSR_TR15 Mask @def EXTI_FTSR_TR15_Msk */
-#define EXTI_FTSR_TR15_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR15_Pos))
+#define EXTI_FTSR_TR15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR15_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 15 @def EXTI_FTSR_TR15 */
 #define EXTI_FTSR_TR15							EXTI_FTSR_TR15_Msk
 
 /** @brief EXTI_FTSR_TR16 Position @def EXTI_FTSR_TR16_Pos */
 #define EXTI_FTSR_TR16_Pos						(16U)
 /** @brief EXTI_FTSR_TR16 Mask @def EXTI_FTSR_TR16_Msk */
-#define EXTI_FTSR_TR16_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR16_Pos))
+#define EXTI_FTSR_TR16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR16_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 16 @def EXTI_FTSR_TR16 */
 #define EXTI_FTSR_TR16							EXTI_FTSR_TR16_Msk
 
 /** @brief EXTI_FTSR_TR17 Position @def EXTI_FTSR_TR17_Pos */
 #define EXTI_FTSR_TR17_Pos						(17U)
 /** @brief EXTI_FTSR_TR17 Mask @def EXTI_FTSR_TR17_Msk */
-#define EXTI_FTSR_TR17_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR17_Pos))
+#define EXTI_FTSR_TR17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR17_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 17 @def EXTI_FTSR_TR17 */
 #define EXTI_FTSR_TR17							EXTI_FTSR_TR17_Msk
 
 /** @brief EXTI_FTSR_TR18 Position @def EXTI_FTSR_TR18_Pos */
 #define EXTI_FTSR_TR18_Pos						(18U)
 /** @brief EXTI_FTSR_TR18 Mask @def EXTI_FTSR_TR18_Msk */
-#define EXTI_FTSR_TR18_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR18_Pos))
+#define EXTI_FTSR_TR18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR18_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 18 @def EXTI_FTSR_TR18 */
 #define EXTI_FTSR_TR18							EXTI_FTSR_TR18_Msk
 
 /** @brief EXTI_FTSR_TR19 Position @def EXTI_FTSR_TR19_Pos */
 #define EXTI_FTSR_TR19_Pos						(19U)
 /** @brief EXTI_FTSR_TR19 Mask @def EXTI_FTSR_TR19_Msk */
-#define EXTI_FTSR_TR19_Msk						(BIT_VALUE(0x1UL, EXTI_FTSR_TR19_Pos))
+#define EXTI_FTSR_TR19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_FTSR_TR19_Pos))
 /** @brief Falling Trigger Selection bit for EXTI line 19 @def EXTI_FTSR_TR19 */
 #define EXTI_FTSR_TR19							EXTI_FTSR_TR19_Msk
 
@@ -768,147 +768,147 @@ extern "C" {
 /** @brief EXTI_SWIER_SWIER Position @def EXTI_SWIER_SWIER_Pos */
 #define EXTI_SWIER_SWIER_Pos						(0U)
 /** @brief EXTI_SWIER_SWIER Mask @def EXTI_SWIER_SWIER_Msk */
-#define EXTI_SWIER_SWIER_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_SWIER_SWIER_Pos))
+#define EXTI_SWIER_SWIER_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_SWIER_SWIER_Pos))
 /** @brief Software Interrupt Event Bits @def EXTI_SWIER_SWIER */
 #define EXTI_SWIER_SWIER							EXTI_SWIER_SWIER_Msk
 
 /** @brief EXTI_SWIER_SWIER0 Position @def EXTI_SWIER_SWIER0_Pos */
 #define EXTI_SWIER_SWIER0_Pos						(0U)
 /** @brief EXTI_SWIER_SWIER0 Mask @def EXTI_SWIER_SWIER0_Msk */
-#define EXTI_SWIER_SWIER0_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER0_Pos))
+#define EXTI_SWIER_SWIER0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER0_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 0 @def EXTI_SWIER_SWIER0 */
 #define EXTI_SWIER_SWIER0							EXTI_SWIER_SWIER0_Msk
 
 /** @brief EXTI_SWIER_SWIER1 Position @def EXTI_SWIER_SWIER1_Pos */
 #define EXTI_SWIER_SWIER1_Pos						(1U)
 /** @brief EXTI_SWIER_SWIER1 Mask @def EXTI_SWIER_SWIER1_Msk */
-#define EXTI_SWIER_SWIER1_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER1_Pos))
+#define EXTI_SWIER_SWIER1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER1_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 1 @def EXTI_SWIER_SWIER1 */
 #define EXTI_SWIER_SWIER1							EXTI_SWIER_SWIER1_Msk
 
 /** @brief EXTI_SWIER_SWIER2 Position @def EXTI_SWIER_SWIER2_Pos */
 #define EXTI_SWIER_SWIER2_Pos						(2U)
 /** @brief EXTI_SWIER_SWIER2 Mask @def EXTI_SWIER_SWIER2_Msk */
-#define EXTI_SWIER_SWIER2_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER2_Pos))
+#define EXTI_SWIER_SWIER2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER2_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 2 @def EXTI_SWIER_SWIER2 */
 #define EXTI_SWIER_SWIER2							EXTI_SWIER_SWIER2_Msk
 
 /** @brief EXTI_SWIER_SWIER3 Position @def EXTI_SWIER_SWIER3_Pos */
 #define EXTI_SWIER_SWIER3_Pos						(3U)
 /** @brief EXTI_SWIER_SWIER3 Mask @def EXTI_SWIER_SWIER3_Msk */
-#define EXTI_SWIER_SWIER3_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER3_Pos))
+#define EXTI_SWIER_SWIER3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER3_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 3 @def EXTI_SWIER_SWIER3 */
 #define EXTI_SWIER_SWIER3							EXTI_SWIER_SWIER3_Msk
 
 /** @brief EXTI_SWIER_SWIER4 Position @def EXTI_SWIER_SWIER4_Pos */
 #define EXTI_SWIER_SWIER4_Pos						(4U)
 /** @brief EXTI_SWIER_SWIER4 Mask @def EXTI_SWIER_SWIER4_Msk */
-#define EXTI_SWIER_SWIER4_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER4_Pos))
+#define EXTI_SWIER_SWIER4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER4_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 4 @def EXTI_SWIER_SWIER4 */
 #define EXTI_SWIER_SWIER4							EXTI_SWIER_SWIER4_Msk
 
 /** @brief EXTI_SWIER_SWIER5 Position @def EXTI_SWIER_SWIER5_Pos */
 #define EXTI_SWIER_SWIER5_Pos						(5U)
 /** @brief EXTI_SWIER_SWIER5 Mask @def EXTI_SWIER_SWIER5_Msk */
-#define EXTI_SWIER_SWIER5_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER5_Pos))
+#define EXTI_SWIER_SWIER5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER5_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 5 @def EXTI_SWIER_SWIER5 */
 #define EXTI_SWIER_SWIER5							EXTI_SWIER_SWIER5_Msk
 
 /** @brief EXTI_SWIER_SWIER6 Position @def EXTI_SWIER_SWIER6_Pos */
 #define EXTI_SWIER_SWIER6_Pos						(6U)
 /** @brief EXTI_SWIER_SWIER6 Mask @def EXTI_SWIER_SWIER6_Msk */
-#define EXTI_SWIER_SWIER6_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER6_Pos))
+#define EXTI_SWIER_SWIER6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER6_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 6 @def EXTI_SWIER_SWIER6 */
 #define EXTI_SWIER_SWIER6							EXTI_SWIER_SWIER6_Msk
 
 /** @brief EXTI_SWIER_SWIER7 Position @def EXTI_SWIER_SWIER7_Pos */
 #define EXTI_SWIER_SWIER7_Pos						(7U)
 /** @brief EXTI_SWIER_SWIER7 Mask @def EXTI_SWIER_SWIER7_Msk */
-#define EXTI_SWIER_SWIER7_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER7_Pos))
+#define EXTI_SWIER_SWIER7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER7_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 7 @def EXTI_SWIER_SWIER7 */
 #define EXTI_SWIER_SWIER7							EXTI_SWIER_SWIER7_Msk
 
 /** @brief EXTI_SWIER_SWIER8 Position @def EXTI_SWIER_SWIER8_Pos */
 #define EXTI_SWIER_SWIER8_Pos						(8U)
 /** @brief EXTI_SWIER_SWIER8 Mask @def EXTI_SWIER_SWIER8_Msk */
-#define EXTI_SWIER_SWIER8_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER8_Pos))
+#define EXTI_SWIER_SWIER8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER8_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 8 @def EXTI_SWIER_SWIER8 */
 #define EXTI_SWIER_SWIER8							EXTI_SWIER_SWIER8_Msk
 
 /** @brief EXTI_SWIER_SWIER9 Position @def EXTI_SWIER_SWIER9_Pos */
 #define EXTI_SWIER_SWIER9_Pos						(9U)
 /** @brief EXTI_SWIER_SWIER9 Mask @def EXTI_SWIER_SWIER9_Msk */
-#define EXTI_SWIER_SWIER9_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER9_Pos))
+#define EXTI_SWIER_SWIER9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER9_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 9 @def EXTI_SWIER_SWIER9 */
 #define EXTI_SWIER_SWIER9							EXTI_SWIER_SWIER9_Msk
 
 /** @brief EXTI_SWIER_SWIER10 Position @def EXTI_SWIER_SWIER10_Pos */
 #define EXTI_SWIER_SWIER10_Pos						(10U)
 /** @brief EXTI_SWIER_SWIER10 Mask @def EXTI_SWIER_SWIER10_Msk */
-#define EXTI_SWIER_SWIER10_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER10_Pos))
+#define EXTI_SWIER_SWIER10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER10_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 10 @def EXTI_SWIER_SWIER10 */
 #define EXTI_SWIER_SWIER10							EXTI_SWIER_SWIER10_Msk
 
 /** @brief EXTI_SWIER_SWIER11 Position @def EXTI_SWIER_SWIER11_Pos */
 #define EXTI_SWIER_SWIER11_Pos						(11U)
 /** @brief EXTI_SWIER_SWIER11 Mask @def EXTI_SWIER_SWIER11_Msk */
-#define EXTI_SWIER_SWIER11_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER11_Pos))
+#define EXTI_SWIER_SWIER11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER11_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 11 @def EXTI_SWIER_SWIER11 */
 #define EXTI_SWIER_SWIER11							EXTI_SWIER_SWIER11_Msk
 
 /** @brief EXTI_SWIER_SWIER12 Position @def EXTI_SWIER_SWIER12_Pos */
 #define EXTI_SWIER_SWIER12_Pos						(12U)
 /** @brief EXTI_SWIER_SWIER12 Mask @def EXTI_SWIER_SWIER12_Msk */
-#define EXTI_SWIER_SWIER12_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER12_Pos))
+#define EXTI_SWIER_SWIER12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER12_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 12 @def EXTI_SWIER_SWIER12 */
 #define EXTI_SWIER_SWIER12							EXTI_SWIER_SWIER12_Msk
 
 /** @brief EXTI_SWIER_SWIER13 Position @def EXTI_SWIER_SWIER13_Pos */
 #define EXTI_SWIER_SWIER13_Pos						(13U)
 /** @brief EXTI_SWIER_SWIER13 Mask @def EXTI_SWIER_SWIER13_Msk */
-#define EXTI_SWIER_SWIER13_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER13_Pos))
+#define EXTI_SWIER_SWIER13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER13_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 13 @def EXTI_SWIER_SWIER13 */
 #define EXTI_SWIER_SWIER13							EXTI_SWIER_SWIER13_Msk
 
 /** @brief EXTI_SWIER_SWIER14 Position @def EXTI_SWIER_SWIER14_Pos */
 #define EXTI_SWIER_SWIER14_Pos						(14U)
 /** @brief EXTI_SWIER_SWIER14 Mask @def EXTI_SWIER_SWIER14_Msk */
-#define EXTI_SWIER_SWIER14_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER14_Pos))
+#define EXTI_SWIER_SWIER14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER14_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 14 @def EXTI_SWIER_SWIER14 */
 #define EXTI_SWIER_SWIER14							EXTI_SWIER_SWIER14_Msk
 
 /** @brief EXTI_SWIER_SWIER15 Position @def EXTI_SWIER_SWIER15_Pos */
 #define EXTI_SWIER_SWIER15_Pos						(15U)
 /** @brief EXTI_SWIER_SWIER15 Mask @def EXTI_SWIER_SWIER15_Msk */
-#define EXTI_SWIER_SWIER15_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER15_Pos))
+#define EXTI_SWIER_SWIER15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER15_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 15 @def EXTI_SWIER_SWIER15 */
 #define EXTI_SWIER_SWIER15							EXTI_SWIER_SWIER15_Msk
 
 /** @brief EXTI_SWIER_SWIER16 Position @def EXTI_SWIER_SWIER16_Pos */
 #define EXTI_SWIER_SWIER16_Pos						(16U)
 /** @brief EXTI_SWIER_SWIER16 Mask @def EXTI_SWIER_SWIER16_Msk */
-#define EXTI_SWIER_SWIER16_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER16_Pos))
+#define EXTI_SWIER_SWIER16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER16_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 16 @def EXTI_SWIER_SWIER16 */
 #define EXTI_SWIER_SWIER16							EXTI_SWIER_SWIER16_Msk
 
 /** @brief EXTI_SWIER_SWIER17 Position @def EXTI_SWIER_SWIER17_Pos */
 #define EXTI_SWIER_SWIER17_Pos						(17U)
 /** @brief EXTI_SWIER_SWIER17 Mask @def EXTI_SWIER_SWIER17_Msk */
-#define EXTI_SWIER_SWIER17_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER17_Pos))
+#define EXTI_SWIER_SWIER17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER17_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 17 @def EXTI_SWIER_SWIER17 */
 #define EXTI_SWIER_SWIER17							EXTI_SWIER_SWIER17_Msk
 
 /** @brief EXTI_SWIER_SWIER18 Position @def EXTI_SWIER_SWIER18_Pos */
 #define EXTI_SWIER_SWIER18_Pos						(18U)
 /** @brief EXTI_SWIER_SWIER18 Mask @def EXTI_SWIER_SWIER18_Msk */
-#define EXTI_SWIER_SWIER18_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER18_Pos))
+#define EXTI_SWIER_SWIER18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER18_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 18 @def EXTI_SWIER_SWIER18 */
 #define EXTI_SWIER_SWIER18							EXTI_SWIER_SWIER18_Msk
 
 /** @brief EXTI_SWIER_SWIER19 Position @def EXTI_SWIER_SWIER19_Pos */
 #define EXTI_SWIER_SWIER19_Pos						(19U)
 /** @brief EXTI_SWIER_SWIER19 Mask @def EXTI_SWIER_SWIER19_Msk */
-#define EXTI_SWIER_SWIER19_Msk						(BIT_VALUE(0x1UL, EXTI_SWIER_SWIER19_Pos))
+#define EXTI_SWIER_SWIER19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_SWIER_SWIER19_Pos))
 /** @brief Software Interrupt Event bit for EXTI line 19 @def EXTI_SWIER_SWIER19 */
 #define EXTI_SWIER_SWIER19							EXTI_SWIER_SWIER19_Msk
 
@@ -941,147 +941,147 @@ extern "C" {
 /** @brief EXTI_PR_PR Position @def EXTI_PR_PR_Pos */
 #define EXTI_PR_PR_Pos						(0U)
 /** @brief EXTI_PR_PR Mask @def EXTI_PR_PR_Msk */
-#define EXTI_PR_PR_Msk						(BIT_VALUE(0x000FFFFFUL, EXTI_PR_PR_Pos))
+#define EXTI_PR_PR_Msk						(REG_FIELD_VALUE(0x000FFFFFUL, EXTI_PR_PR_Pos))
 /** @brief Pending State Bits @def EXTI_PR_PR */
 #define EXTI_PR_PR							EXTI_PR_PR_Msk
 
 /** @brief EXTI_PR_PR0 Position @def EXTI_PR_PR0_Pos */
 #define EXTI_PR_PR0_Pos						(0U)
 /** @brief EXTI_PR_PR0 Mask @def EXTI_PR_PR0_Msk */
-#define EXTI_PR_PR0_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR0_Pos))
+#define EXTI_PR_PR0_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR0_Pos))
 /** @brief Pending State bit for EXTI line 0 @def EXTI_PR_PR0 */
 #define EXTI_PR_PR0							EXTI_PR_PR0_Msk
 
 /** @brief EXTI_PR_PR1 Position @def EXTI_PR_PR1_Pos */
 #define EXTI_PR_PR1_Pos						(1U)
 /** @brief EXTI_PR_PR1 Mask @def EXTI_PR_PR1_Msk */
-#define EXTI_PR_PR1_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR1_Pos))
+#define EXTI_PR_PR1_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR1_Pos))
 /** @brief Pending State bit for EXTI line 1 @def EXTI_PR_PR1 */
 #define EXTI_PR_PR1							EXTI_PR_PR1_Msk
 
 /** @brief EXTI_PR_PR2 Position @def EXTI_PR_PR2_Pos */
 #define EXTI_PR_PR2_Pos						(2U)
 /** @brief EXTI_PR_PR2 Mask @def EXTI_PR_PR2_Msk */
-#define EXTI_PR_PR2_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR2_Pos))
+#define EXTI_PR_PR2_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR2_Pos))
 /** @brief Pending State bit for EXTI line 2 @def EXTI_PR_PR2 */
 #define EXTI_PR_PR2							EXTI_PR_PR2_Msk
 
 /** @brief EXTI_PR_PR3 Position @def EXTI_PR_PR3_Pos */
 #define EXTI_PR_PR3_Pos						(3U)
 /** @brief EXTI_PR_PR3 Mask @def EXTI_PR_PR3_Msk */
-#define EXTI_PR_PR3_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR3_Pos))
+#define EXTI_PR_PR3_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR3_Pos))
 /** @brief Pending State bit for EXTI line 3 @def EXTI_PR_PR3 */
 #define EXTI_PR_PR3							EXTI_PR_PR3_Msk
 
 /** @brief EXTI_PR_PR4 Position @def EXTI_PR_PR4_Pos */
 #define EXTI_PR_PR4_Pos						(4U)
 /** @brief EXTI_PR_PR4 Mask @def EXTI_PR_PR4_Msk */
-#define EXTI_PR_PR4_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR4_Pos))
+#define EXTI_PR_PR4_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR4_Pos))
 /** @brief Pending State bit for EXTI line 4 @def EXTI_PR_PR4 */
 #define EXTI_PR_PR4							EXTI_PR_PR4_Msk
 
 /** @brief EXTI_PR_PR5 Position @def EXTI_PR_PR5_Pos */
 #define EXTI_PR_PR5_Pos						(5U)
 /** @brief EXTI_PR_PR5 Mask @def EXTI_PR_PR5_Msk */
-#define EXTI_PR_PR5_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR5_Pos))
+#define EXTI_PR_PR5_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR5_Pos))
 /** @brief Pending State bit for EXTI line 5 @def EXTI_PR_PR5 */
 #define EXTI_PR_PR5							EXTI_PR_PR5_Msk
 
 /** @brief EXTI_PR_PR6 Position @def EXTI_PR_PR6_Pos */
 #define EXTI_PR_PR6_Pos						(6U)
 /** @brief EXTI_PR_PR6 Mask @def EXTI_PR_PR6_Msk */
-#define EXTI_PR_PR6_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR6_Pos))
+#define EXTI_PR_PR6_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR6_Pos))
 /** @brief Pending State bit for EXTI line 6 @def EXTI_PR_PR6 */
 #define EXTI_PR_PR6							EXTI_PR_PR6_Msk
 
 /** @brief EXTI_PR_PR7 Position @def EXTI_PR_PR7_Pos */
 #define EXTI_PR_PR7_Pos						(7U)
 /** @brief EXTI_PR_PR7 Mask @def EXTI_PR_PR7_Msk */
-#define EXTI_PR_PR7_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR7_Pos))
+#define EXTI_PR_PR7_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR7_Pos))
 /** @brief Pending State bit for EXTI line 7 @def EXTI_PR_PR7 */
 #define EXTI_PR_PR7							EXTI_PR_PR7_Msk
 
 /** @brief EXTI_PR_PR8 Position @def EXTI_PR_PR8_Pos */
 #define EXTI_PR_PR8_Pos						(8U)
 /** @brief EXTI_PR_PR8 Mask @def EXTI_PR_PR8_Msk */
-#define EXTI_PR_PR8_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR8_Pos))
+#define EXTI_PR_PR8_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR8_Pos))
 /** @brief Pending State bit for EXTI line 8 @def EXTI_PR_PR8 */
 #define EXTI_PR_PR8							EXTI_PR_PR8_Msk
 
 /** @brief EXTI_PR_PR9 Position @def EXTI_PR_PR9_Pos */
 #define EXTI_PR_PR9_Pos						(9U)
 /** @brief EXTI_PR_PR9 Mask @def EXTI_PR_PR9_Msk */
-#define EXTI_PR_PR9_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR9_Pos))
+#define EXTI_PR_PR9_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR9_Pos))
 /** @brief Pending State bit for EXTI line 9 @def EXTI_PR_PR9 */
 #define EXTI_PR_PR9							EXTI_PR_PR9_Msk
 
 /** @brief EXTI_PR_PR10 Position @def EXTI_PR_PR10_Pos */
 #define EXTI_PR_PR10_Pos						(10U)
 /** @brief EXTI_PR_PR10 Mask @def EXTI_PR_PR10_Msk */
-#define EXTI_PR_PR10_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR10_Pos))
+#define EXTI_PR_PR10_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR10_Pos))
 /** @brief Pending State bit for EXTI line 10 @def EXTI_PR_PR10 */
 #define EXTI_PR_PR10							EXTI_PR_PR10_Msk
 
 /** @brief EXTI_PR_PR11 Position @def EXTI_PR_PR11_Pos */
 #define EXTI_PR_PR11_Pos						(11U)
 /** @brief EXTI_PR_PR11 Mask @def EXTI_PR_PR11_Msk */
-#define EXTI_PR_PR11_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR11_Pos))
+#define EXTI_PR_PR11_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR11_Pos))
 /** @brief Pending State bit for EXTI line 11 @def EXTI_PR_PR11 */
 #define EXTI_PR_PR11							EXTI_PR_PR11_Msk
 
 /** @brief EXTI_PR_PR12 Position @def EXTI_PR_PR12_Pos */
 #define EXTI_PR_PR12_Pos						(12U)
 /** @brief EXTI_PR_PR12 Mask @def EXTI_PR_PR12_Msk */
-#define EXTI_PR_PR12_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR12_Pos))
+#define EXTI_PR_PR12_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR12_Pos))
 /** @brief Pending State bit for EXTI line 12 @def EXTI_PR_PR12 */
 #define EXTI_PR_PR12							EXTI_PR_PR12_Msk
 
 /** @brief EXTI_PR_PR13 Position @def EXTI_PR_PR13_Pos */
 #define EXTI_PR_PR13_Pos						(13U)
 /** @brief EXTI_PR_PR13 Mask @def EXTI_PR_PR13_Msk */
-#define EXTI_PR_PR13_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR13_Pos))
+#define EXTI_PR_PR13_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR13_Pos))
 /** @brief Pending State bit for EXTI line 13 @def EXTI_PR_PR13 */
 #define EXTI_PR_PR13							EXTI_PR_PR13_Msk
 
 /** @brief EXTI_PR_PR14 Position @def EXTI_PR_PR14_Pos */
 #define EXTI_PR_PR14_Pos						(14U)
 /** @brief EXTI_PR_PR14 Mask @def EXTI_PR_PR14_Msk */
-#define EXTI_PR_PR14_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR14_Pos))
+#define EXTI_PR_PR14_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR14_Pos))
 /** @brief Pending State bit for EXTI line 14 @def EXTI_PR_PR14 */
 #define EXTI_PR_PR14							EXTI_PR_PR14_Msk
 
 /** @brief EXTI_PR_PR15 Position @def EXTI_PR_PR15_Pos */
 #define EXTI_PR_PR15_Pos						(15U)
 /** @brief EXTI_PR_PR15 Mask @def EXTI_PR_PR15_Msk */
-#define EXTI_PR_PR15_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR15_Pos))
+#define EXTI_PR_PR15_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR15_Pos))
 /** @brief Pending State bit for EXTI line 15 @def EXTI_PR_PR15 */
 #define EXTI_PR_PR15							EXTI_PR_PR15_Msk
 
 /** @brief EXTI_PR_PR16 Position @def EXTI_PR_PR16_Pos */
 #define EXTI_PR_PR16_Pos						(16U)
 /** @brief EXTI_PR_PR16 Mask @def EXTI_PR_PR16_Msk */
-#define EXTI_PR_PR16_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR16_Pos))
+#define EXTI_PR_PR16_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR16_Pos))
 /** @brief Pending State bit for EXTI line 16 @def EXTI_PR_PR16 */
 #define EXTI_PR_PR16							EXTI_PR_PR16_Msk
 
 /** @brief EXTI_PR_PR17 Position @def EXTI_PR_PR17_Pos */
 #define EXTI_PR_PR17_Pos						(17U)
 /** @brief EXTI_PR_PR17 Mask @def EXTI_PR_PR17_Msk */
-#define EXTI_PR_PR17_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR17_Pos))
+#define EXTI_PR_PR17_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR17_Pos))
 /** @brief Pending State bit for EXTI line 17 @def EXTI_PR_PR17 */
 #define EXTI_PR_PR17							EXTI_PR_PR17_Msk
 
 /** @brief EXTI_PR_PR18 Position @def EXTI_PR_PR18_Pos */
 #define EXTI_PR_PR18_Pos						(18U)
 /** @brief EXTI_PR_PR18 Mask @def EXTI_PR_PR18_Msk */
-#define EXTI_PR_PR18_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR18_Pos))
+#define EXTI_PR_PR18_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR18_Pos))
 /** @brief Pending State bit for EXTI line 18 @def EXTI_PR_PR18 */
 #define EXTI_PR_PR18							EXTI_PR_PR18_Msk
 
 /** @brief EXTI_PR_PR19 Position @def EXTI_PR_PR19_Pos */
 #define EXTI_PR_PR19_Pos						(19U)
 /** @brief EXTI_PR_PR19 Mask @def EXTI_PR_PR19_Msk */
-#define EXTI_PR_PR19_Msk						(BIT_VALUE(0x1UL, EXTI_PR_PR19_Pos))
+#define EXTI_PR_PR19_Msk						(REG_FIELD_VALUE(0x1UL, EXTI_PR_PR19_Pos))
 /** @brief Pending State bit for EXTI line 19 @def EXTI_PR_PR19 */
 #define EXTI_PR_PR19							EXTI_PR_PR19_Msk
 

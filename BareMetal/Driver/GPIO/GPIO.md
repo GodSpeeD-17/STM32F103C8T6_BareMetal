@@ -15,7 +15,7 @@ implementation rules, naming policy, and alignment plan.
 | `Inc/gpio_defines.h` | GPIO Defines/Validation | Public GPIO selector macros and pure validation/policy macros |
 | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
 | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding, raw CRL/CRH field placement, and staged register-image mutation |
-| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, `gpio_config_t`, validation, sequencing, batching, status returns, and temporary board LED helpers |
+| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, `gpio_config_t`, validation, sequencing, batching, status returns, and guarded temporary board LED helpers |
 | `Inc/gpio_exti*.h`, `Src/gpio_exti*.c` | GPIO EXTI | GPIO-backed EXTI routing, trigger staging, NVIC integration |
 
 The current split is:
@@ -59,11 +59,14 @@ The current split is:
   selectors, indices, masks, and public scalar types.
 - Keep public selector translation, raw field placement, and staged image
   mutation in the codec layer.
-- Codec staging APIs must take a full register image as input and return the
-  updated register image. They should not mutate caller-owned images through
-  pointers or return user-facing status codes for already-validated selectors.
+- Codec staging APIs must take caller-owned register images as input, write
+  updated images through explicit output pointers, and return `driver_status_t`.
+  The status makes null output pointers and unexpected decode/encode failures
+  visible to the driver.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
-- Keep board-specific behavior outside the generic GPIO driver.
+- Keep board-specific behavior outside the generic GPIO driver. The current
+  Blue Pill LED helpers are guarded by `STM32F103C8T6__` and retained only for
+  existing projects until a board module is introduced.
 - Prefer `GPIO_SetPinModeConfig()` for semantic pin configuration on STM32F1.
 
 ## Codec Rationale
@@ -146,64 +149,64 @@ single point for selector encoding/decoding and register-image mutation:
 ```c
 status = Codec_GPIO_StagePinConfigMode
 (
-    crxImage,
-    odrImage,
-    pinIndex,
-    config,
-    mode,
-    &crxImage,
-    &odrImage
+	crxImage,
+	odrImage,
+	pinIndex,
+	config,
+	mode,
+	&crxImage,
+	&odrImage
 );
 status = Codec_GPIO_ExtractPinConfigMode
 (
-    crxImage,
-    odrImage,
-    pinIndex,
-    &config,
-    &mode
+	crxImage,
+	odrImage,
+	pinIndex,
+	&config,
+	&mode
 );
 status = Codec_GPIO_StagePinOutputState
 (
-    odrImage,
-    pinIndex,
-    DRIVER_STATUS_ON,
-    &odrImage
+	odrImage,
+	pinIndex,
+	DRIVER_STATUS_ON,
+	&odrImage
 );
 status = Codec_GPIO_ExtractPinOutputState
 (
-    odrImage,
-    pinIndex,
-    &pinState
+	odrImage,
+	pinIndex,
+	&pinState
 );
 status = Codec_GPIO_ExtractPinInputState
 (
-    idrImage,
-    pinIndex,
-    &pinState
+	idrImage,
+	pinIndex,
+	&pinState
 );
 status = Codec_GPIO_StagePinLockState
 (
-    lckrImage,
-    pinIndex,
-    DRIVER_STATUS_ON,
-    &lckrImage
+	lckrImage,
+	pinIndex,
+	DRIVER_STATUS_ON,
+	&lckrImage
 );
 status = Codec_GPIO_StageLockKeyState
 (
-    lckrImage,
-    DRIVER_STATUS_ON,
-    &lckrImage
+	lckrImage,
+	DRIVER_STATUS_ON,
+	&lckrImage
 );
 status = Codec_GPIO_ExtractPinLockState
 (
-    lckrImage,
-    pinIndex,
-    &lockState
+	lckrImage,
+	pinIndex,
+	&lockState
 );
 status = Codec_GPIO_ExtractLockKeyState
 (
-    lckrImage,
-    &lockKeyState
+	lckrImage,
+	&lockKeyState
 );
 ```
 
@@ -215,10 +218,10 @@ Public configuration should enter through a semantic mode/config API:
 
 ```c
 driver_status_t GPIO_SetPinModeConfig(
-    GPIO_TypeDef *GPIOx,
-    gpio_pin_t pinMask,
-    gpio_pin_mode_t mode,
-    gpio_pin_config_t config);
+	GPIO_TypeDef *GPIOx,
+	gpio_pin_t pinMask,
+	gpio_pin_mode_t mode,
+	gpio_pin_config_t config);
 ```
 
 The driver should:
@@ -227,12 +230,15 @@ The driver should:
 2. Validate the mode/config pair.
 3. Enable the GPIO port clock when the API is an initialization path.
 4. Enable AFIO only when alternate function or EXTI routing requires it.
-5. Convert each selected pin mask to a `gpio_pin_index_t` before entering
-   codec helpers.
-6. Read each touched `CRL`, `CRH`, and `ODR` image once.
-7. Stage each selected pin through codec functions.
-8. Write dirty images in the hardware-safe order.
-9. Return a user-facing `driver_status_t`.
+5. Walk selected pin masks with a `while (remainingPins != GPIO_PIN_NONE)` loop
+   that extracts and clears the lowest selected bit each iteration. Do not scan
+   all 16 possible pins when only a sparse mask was requested.
+6. Convert each extracted single-pin mask to a `gpio_pin_index_t` before
+   entering codec helpers.
+7. Read each touched `CRL`, `CRH`, and `ODR` image once.
+8. Stage each selected pin through codec functions.
+9. Write dirty images in the hardware-safe order.
+10. Return a user-facing `driver_status_t`.
 
 Driver APIs must follow a read-modify-write model for GPIO register state. Even
 single-bit operations such as public set/reset/toggle should read the relevant
@@ -240,6 +246,20 @@ register image, modify the local image, and write it back once. This keeps the
 single-pin path consistent with multi-pin configuration and prevents repeated
 writes to the same register when one staged image can represent the whole
 request.
+
+For multi-pin masks, the driver should treat the mask as a bit field:
+
+```c
+while (remainingPins != GPIO_PIN_NONE)
+{
+	selectedPin = remainingPins & -remainingPins;
+	remainingPins = remainingPins & (remainingPins - 1U);
+}
+```
+
+The actual implementation should use unsigned casts or small local helpers for
+the isolation and clear operations, but the iteration must remain proportional
+to the number of selected pins rather than the fixed port width.
 
 Codec functions that operate on one pin should take `gpio_pin_index_t`, not
 `gpio_pin_t`. Public APIs may accept pin masks because they own user-facing

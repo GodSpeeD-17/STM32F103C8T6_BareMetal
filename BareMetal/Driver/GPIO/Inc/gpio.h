@@ -2,37 +2,27 @@
  * @file	gpio.h
  * @author	Shrey Shah
  * @brief	GPIO Driver Public Interface
- * @version	v1.3
- * @date	31-03-2026
+ * @version	v1.4
+ * @date	30-05-2026
  *
  * @details
- * This header defines the GPIO driver layer built on top of `gpio_ll.h`.
- *
- * Theory:
- * - Layer 0 owns the raw STM32F1 register model.
- * - Shared GPIO typedef aliases live in `gpio_data_types.h`.
- * - Public GPIO selectors and pure validation macros live in `gpio_defines.h`.
- * - `gpio_ll.h/.c` owns dumb GPIO register read/write access.
- * - `gpio_codec.h/.c` owns translation and staged register-image mutation.
- * - `gpio.h` / `gpio.c` owns the public GPIO API, validation, orchestration,
- *   and batched register writes.
+ * This header exposes the public GPIO driver API. Public code sees GPIO
+ * selectors, validation macros, and driver entry points. Low-level register
+ * access and codec image staging remain private to `gpio.c`.
  */
 
 #ifndef GPIO_H_
 #define GPIO_H_
 
-// C++ Compatibility
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "gpio_defines.h"
+
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-// ==================================================================================================== //
-//                                               Includes                                               //
-// ==================================================================================================== //
-
-#include "gpio_defines.h"
-#include "gpio_codec.h"
-#include "gpio_ll.h"
 
 /**
  * @addtogroup GPIO_03_Driver
@@ -40,13 +30,13 @@ extern "C" {
  */
 
 // ==================================================================================================== //
-//                                      GPIO Configuration Descriptor                                   //
+//										GPIO Configuration Descriptor									//
 // ==================================================================================================== //
 
 /**
  * @brief GPIO configuration descriptor
  * @defgroup GPIO_03_Driver_02_Config Driver GPIO Configuration Descriptor
- * @ingroup  GPIO_03_Driver
+ * @ingroup GPIO_03_Driver
  * @{
  */
 typedef struct _gpio_config_t
@@ -62,7 +52,7 @@ typedef struct _gpio_config_t
 /** @} */ // GPIO_03_Driver_02_Config
 
 // ==================================================================================================== //
-//                                  Board Defaults Kept For Current Driver                              //
+//									Board Defaults Kept For Current Projects							//
 // ==================================================================================================== //
 
 #ifdef STM32F103C8T6__
@@ -70,7 +60,6 @@ typedef struct _gpio_config_t
 #define GPIO_OB_LED_PORT						GPIOC
 /** @brief On-board LED GPIO pin @def GPIO_OB_LED_PIN */
 #define GPIO_OB_LED_PIN							GPIO_PIN_13
-#endif /* STM32F103C8T6__ */
 
 /**
  * @brief Default configuration descriptor for the on-board LED
@@ -82,289 +71,89 @@ typedef struct _gpio_config_t
 	.mode = GPIO_PIN_MODE_OUTPUT_2MHZ,			\
 	.config = GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL	\
 }
-
-/**
- * @brief Sets one or more GPIO output pins
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were set.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
- * @note Uses the driver read-modify-write policy on `ODR`.
- */
-__STATIC_FORCEINLINE driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
-{
-	reg gpioOdrRegImage = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
-
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
-	{
-		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
-		{
-			if (Codec_GPIO_StagePinOutputState
-			(
-				gpioOdrRegImage,
-				pinIndex,
-				DRIVER_STATUS_ON,
-				&gpioOdrRegImage
-			) != DRIVER_STATUS_SUCCESS)
-			{
-				return DRIVER_STATUS_ERROR_STATE;
-			}
-		}
-	}
-	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Resets one or more GPIO output pins
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were reset.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
- * @note Uses the driver read-modify-write policy on `ODR`.
- */
-__STATIC_FORCEINLINE driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
-{
-	reg gpioOdrRegImage = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
-
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
-	{
-		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
-		{
-			if (Codec_GPIO_StagePinOutputState
-			(
-				gpioOdrRegImage,
-				pinIndex,
-				DRIVER_STATUS_OFF,
-				&gpioOdrRegImage
-			) != DRIVER_STATUS_SUCCESS)
-			{
-				return DRIVER_STATUS_ERROR_STATE;
-			}
-		}
-	}
-	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Toggles one or more GPIO output pins
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pin(s) were toggled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
- */
-__STATIC_FORCEINLINE driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
-{
-	reg gpioOdrRegImage = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
-	driver_status_t pinState = DRIVER_STATUS_OFF;
-
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pin) == 0x00U))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	for (pinIndex = GPIO_PIN_INDEX_FIRST; pinIndex < GPIO_PORT_PIN_COUNT; ++pinIndex)
-	{
-		if ((((reg) pin) & ((reg) GPIO_PIN_INDEX_TO_MASK(pinIndex))) != 0x00000000UL)
-		{
-			if (Codec_GPIO_ExtractPinOutputState
-			(
-				gpioOdrRegImage,
-				pinIndex,
-				&pinState
-			) != DRIVER_STATUS_SUCCESS)
-			{
-				return DRIVER_STATUS_ERROR_STATE;
-			}
-			pinState = (pinState == DRIVER_STATUS_ON) ? DRIVER_STATUS_OFF : DRIVER_STATUS_ON;
-			if (Codec_GPIO_StagePinOutputState
-			(
-				gpioOdrRegImage,
-				pinIndex,
-				pinState,
-				&gpioOdrRegImage
-			) != DRIVER_STATUS_SUCCESS)
-			{
-				return DRIVER_STATUS_ERROR_STATE;
-			}
-		}
-	}
-	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Reads the sampled logic level of a single GPIO input pin
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin @ref gpio_pin_t "GPIO Pin"
- * @returns `0x00U` when the selected pin is low, otherwise `0x01U`
- * @note This API expects a valid GPIO instance and a single-pin mask.
- * @note Returns `0x00U` for an invalid GPIO instance or pin mask.
- */
-__STATIC_FORCEINLINE uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
-{
-	reg gpioIdrRegImage = 0x00000000UL;
-	driver_status_t pinState = DRIVER_STATUS_OFF;
-	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
-
-	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (pinIndex == GPIO_PIN_INDEX_INVALID))
-	{
-		return (uint8_t) 0x00U;
-	}
-
-	gpioIdrRegImage = LL_GPIO_ReadIDR(GPIOx);
-	if (Codec_GPIO_ExtractPinInputState
-	(
-		gpioIdrRegImage,
-		pinIndex,
-		&pinState
-	) != DRIVER_STATUS_SUCCESS)
-	{
-		return (uint8_t) 0x00U;
-	}
-
-	return (pinState == DRIVER_STATUS_ON) ? (uint8_t) 0x01U : (uint8_t) 0x00U;
-}
-
-/**
- * @brief Sets the On-board (OB) LED
- * @note OB LED is active LOW
- */
-__STATIC_FORCEINLINE void OB_LED_Set(void)
-{
-	GPIO_PinReset(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
-}
-
-/**
- * @brief Resets the On-board (OB) LED
- * @note OB LED is active LOW
- */
-__STATIC_FORCEINLINE void OB_LED_Reset(void)
-{
-	GPIO_PinSet(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
-}
-
-/**
- * @brief Toggles the On-board (OB) LED
- * @note OB LED is active LOW
- */
-__STATIC_FORCEINLINE void OB_LED_Toggle(void)
-{
-	GPIO_PinToggle(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
-}
+#endif /* STM32F103C8T6__ */
 
 // ==================================================================================================== //
-//                                             GPIO Driver APIs                                          //
+//											GPIO Driver APIs											//
 // ==================================================================================================== //
 
 /**
  * @brief Configures the mode and electrical behavior of one or more GPIO pins
- * @details
- * Reads each touched GPIO register once, updates staged register images per
- * selected pin, then writes each touched register once.
- *
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in] pin GPIO pin mask
  * @param[in] mode Driver GPIO mode selector
  * @param[in] config Driver GPIO configuration selector
- * @returns - @ref driver_status_t Driver operation status
+ * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode/config pair was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, @p mode, or @p config was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  */
-driver_status_t GPIO_SetPinModeConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_pin_mode_t mode, const gpio_pin_config_t config);
+driver_status_t GPIO_SetPinModeConfig
+(
+	GPIO_TypeDef* const			GPIOx,
+	const gpio_pin_t			pin,
+	const gpio_pin_mode_t		mode,
+	const gpio_pin_config_t		config
+);
+
+/**
+ * @brief Configures the mode field of one or more GPIO pins
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO pin mask
+ * @param[in] mode Driver GPIO mode selector
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode field was applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or @p mode was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
+ * @note Use @ref `GPIO_SetPinModeConfig` when changing mode and config together.
+ */
+driver_status_t GPIO_SetPinMode
+(
+	GPIO_TypeDef* const			GPIOx,
+	const gpio_pin_t			pin,
+	const gpio_pin_mode_t		mode
+);
+
+/**
+ * @brief Configures the electrical configuration field of one or more GPIO pins
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO pin mask
+ * @param[in] config Driver GPIO configuration selector
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration field was applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or @p config was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
+ */
+driver_status_t GPIO_SetPinConfig
+(
+	GPIO_TypeDef* const			GPIOx,
+	const gpio_pin_t			pin,
+	const gpio_pin_config_t		config
+);
 
 /**
  * @brief Returns the current driver-facing mode selector for one GPIO pin
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in] pin GPIO single-pin mask
  * @returns Current mode as @ref gpio_pin_mode_t
- * @note Expects a valid @p GPIOx and a single-pin @p pin mask.
- * @note Returns @ref GPIO_PIN_MODE_INPUT if the selected pin state cannot be decoded.
+ * @note Returns @ref `GPIO_PIN_MODE_INPUT` if validation or decode fails.
  */
 gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
-
-/**
- * @brief Configures the mode field of one or more GPIO pins
- * @details
- * Updates the MODE bits in the GPIO port configuration registers (CRL/CRH)
- * for the selected pin(s). Supports configuring multiple pins simultaneously.
- *
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin GPIO pin mask
- * @param[in] mode Driver GPIO mode selector
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode field was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or @p mode was invalid.
- *
- * @note
- * - Automatically determines whether CRL or CRH needs to be updated.
- * - Existing configuration bits for unaffected pins remain unchanged.
- * - Decodes the current config field and rejects invalid final MODE/CNF pairs.
- * - Use @ref GPIO_SetPinModeConfig when changing mode and config together.
- */
-driver_status_t GPIO_SetPinMode(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_pin_mode_t mode);
 
 /**
  * @brief Returns the current driver-facing configuration selector for one GPIO pin
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in] pin GPIO single-pin mask
  * @returns Current configuration as @ref gpio_pin_config_t
- * @note Expects a valid @p GPIOx and a single-pin @p pin mask.
- * @note Returns @ref GPIO_PIN_CONFIG_INPUT_ANALOG if the selected pin state cannot be decoded.
+ * @note Returns @ref `GPIO_PIN_CONFIG_INPUT_ANALOG` if validation or decode fails.
  */
 gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
-
-/**
- * @brief Configures the electrical `CNF` field of one or more GPIO pins
- * @details
- * Updates the CNF[1:0] configuration bits in CRL/CRH for the specified pins,
- * setting input/output type and alternate-function behavior as defined
- * by the driver configuration constants.
- *
- * @param[in] GPIOx GPIO peripheral instance
- * @param[in] pin GPIO pin mask
- * @param[in] config Driver GPIO configuration selector
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration field was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pin, or @p config was invalid.
- *
- * @note
- * - Automatically determines whether CRL or CRH registers are affected.
- * - Decodes the current mode field and rejects invalid final MODE/CNF pairs.
- * - Safe for multi-pin configuration; unaffected bits are preserved.
- * - Updates staged `ODR` before `CRL/CRH` for input pull-up/down selection.
- */
-driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, const gpio_pin_config_t config);
 
 /**
  * @brief Initializes a GPIO port/pin set from a configuration descriptor
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in] pGPIOConfig Pointer to @ref gpio_config_t
- * @returns - @ref driver_status_t Driver operation status
+ * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock enable and pin configuration completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pGPIOConfig was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The descriptor fields or @p GPIOx were invalid.
@@ -373,63 +162,83 @@ driver_status_t GPIO_SetPinConfig(GPIO_TypeDef* const GPIOx, gpio_pin_t pin, con
 driver_status_t GPIO_Init(GPIO_TypeDef* const GPIOx, const gpio_config_t* const pGPIOConfig);
 
 /**
- * @brief Restores one or more GPIO pins to their reset configuration
+ * @brief Restores one or more GPIO pins to floating-input configuration
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in] pin GPIO pin mask
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pins were restored to reset state.
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pins were restored.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @note This API restores the CRL/CRH configuration and does not force ODR latch state.
  */
 driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
- * @brief Initializes the board on-board LED GPIO
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The on-board LED GPIO was initialized.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The board LED alias fields were invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @brief Sets one or more GPIO output latch bits
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO pin mask
+ * @returns Driver operation status
  */
-driver_status_t OB_LED_Init(void);
+driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
+
+/**
+ * @brief Resets one or more GPIO output latch bits
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO pin mask
+ * @returns Driver operation status
+ */
+driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
+
+/**
+ * @brief Toggles one or more GPIO output latch bits
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO pin mask
+ * @returns Driver operation status
+ */
+driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
+
+/**
+ * @brief Reads the sampled logic level of one GPIO input pin
+ * @param[in] GPIOx GPIO peripheral instance
+ * @param[in] pin GPIO single-pin mask
+ * @returns `0x00U` when low or invalid, otherwise `0x01U`
+ */
+uint8_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Fills LED-safe mode/config fields and initializes the selected GPIO
  * @param[in] GPIOx GPIO peripheral instance
  * @param[in,out] pGPIOConfig Pointer to @ref gpio_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The LED GPIO was initialized.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pGPIOConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or `pGPIOConfig->pin` was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
- * @note The caller must populate `pGPIOConfig->pin` before calling.
+ * @returns Driver operation status
  */
-__STATIC_FORCEINLINE driver_status_t GPIO_LED_Init(GPIO_TypeDef* const GPIOx, gpio_config_t* const pGPIOConfig)
-{
-	if (pGPIOConfig == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
+driver_status_t GPIO_LED_Init(GPIO_TypeDef* const GPIOx, gpio_config_t* const pGPIOConfig);
 
-	pGPIOConfig->mode = GPIO_PIN_MODE_OUTPUT_10MHZ;
-	pGPIOConfig->config = GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL;
+#ifdef STM32F103C8T6__
+/**
+ * @brief Initializes the board on-board LED GPIO
+ * @returns Driver operation status
+ */
+driver_status_t OB_LED_Init(void);
 
-	return GPIO_Init(GPIOx, pGPIOConfig);
-}
+/** @brief Sets the active-low board on-board LED */
+void OB_LED_Set(void);
+
+/** @brief Resets the active-low board on-board LED */
+void OB_LED_Reset(void);
+
+/** @brief Toggles the active-low board on-board LED */
+void OB_LED_Toggle(void);
 
 /**
  * @brief Deinitializes the board on-board LED GPIO
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The on-board LED GPIO was restored to reset state.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The board LED alias fields were invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @returns Driver operation status
  */
-__STATIC_FORCEINLINE driver_status_t OB_LED_Deinit(void)
-{
-	return GPIO_Deinit(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
-}
+driver_status_t OB_LED_Deinit(void);
+#endif /* STM32F103C8T6__ */
 
 /** @} */ // GPIO_03_Driver
 
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
