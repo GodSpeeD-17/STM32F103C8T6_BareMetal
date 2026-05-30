@@ -26,7 +26,7 @@
  * Practical Authority Rule:
  * - Layer 0 (`stm32f1xx_gpio.h`) defines raw register symbols and register map.
  * - Raw LL APIs in this file assume valid raw inputs.
- * - Helper APIs own selector translation and staged image mutation.
+ * - Codec APIs own selector translation and staged image mutation.
  * - Driver APIs (`gpio.h` / `gpio.c`) own public validation, sequencing, and
  *   user-facing status.
  */
@@ -43,7 +43,7 @@ extern "C" {
 //											   Includes													//
 // ==================================================================================================== //
 #include "stm32f1xx.h"
-#include "gpio_types.h"
+#include "gpio_defines.h"
 #include "rcc_ll.h"
 
 /**
@@ -321,6 +321,56 @@ __STATIC_FORCEINLINE driver_status_t GPIO_LL_DisableAFIOClock(void)
 #define GPIO_LL_CRX_CNF_BITS_SHIFT					((uint32_t) 0x02UL)
 /** @brief Raw right-aligned CNF field mask @def GPIO_LL_CRX_CNF_BITS_MASK */
 #define GPIO_LL_CRX_CNF_BITS_MASK					((uint32_t) 0x03UL)
+
+/**
+ * @brief Bitmask selecting every GPIO pin controlled through CRL
+ * @def LL_GPIO_PIN_MASK_CRL_RANGE
+ */
+#define LL_GPIO_PIN_MASK_CRL_RANGE					\
+(													\
+	(gpio_pin_t)									\
+	(												\
+		GPIO_PIN_0 | GPIO_PIN_1 |					\
+		GPIO_PIN_2 | GPIO_PIN_3 |					\
+		GPIO_PIN_4 | GPIO_PIN_5 |					\
+		GPIO_PIN_6 | GPIO_PIN_7						\
+	)												\
+)
+
+/**
+ * @brief Bitmask selecting every GPIO pin controlled through CRH
+ * @def LL_GPIO_PIN_MASK_CRH_RANGE
+ */
+#define LL_GPIO_PIN_MASK_CRH_RANGE					\
+(													\
+	(gpio_pin_t)									\
+	(												\
+		GPIO_PIN_8  | GPIO_PIN_9  |					\
+		GPIO_PIN_10 | GPIO_PIN_11 |					\
+		GPIO_PIN_12 | GPIO_PIN_13 |					\
+		GPIO_PIN_14 | GPIO_PIN_15					\
+	)												\
+)
+
+/**
+ * @brief Checks if any selected pin is controlled through CRL
+ * @def LL_GPIO_PIN_MASK_REQUIRES_CRL
+ */
+#define LL_GPIO_PIN_MASK_REQUIRES_CRL(pinMask)		\
+	(((((gpio_pin_t) (pinMask)) & LL_GPIO_PIN_MASK_CRL_RANGE) != GPIO_PIN_NONE))
+
+/**
+ * @brief Checks if any selected pin is controlled through CRH
+ * @def LL_GPIO_PIN_MASK_REQUIRES_CRH
+ */
+#define LL_GPIO_PIN_MASK_REQUIRES_CRH(pinMask)		\
+	(((((gpio_pin_t) (pinMask)) & LL_GPIO_PIN_MASK_CRH_RANGE) != GPIO_PIN_NONE))
+
+/* Temporary compatibility aliases for callers not yet migrated to LL_GPIO_* names. */
+#define GPIO_PIN_MASK_CRL_RANGE						LL_GPIO_PIN_MASK_CRL_RANGE
+#define GPIO_PIN_MASK_CRH_RANGE						LL_GPIO_PIN_MASK_CRH_RANGE
+#define GPIO_PIN_MASK_REQUIRES_CRL(pinMask)			LL_GPIO_PIN_MASK_REQUIRES_CRL(pinMask)
+#define GPIO_PIN_MASK_REQUIRES_CRH(pinMask)			LL_GPIO_PIN_MASK_REQUIRES_CRH(pinMask)
 
 
 /**

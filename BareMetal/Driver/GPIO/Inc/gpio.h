@@ -10,10 +10,11 @@
  *
  * Theory:
  * - Layer 0 owns the raw STM32F1 register model.
- * - Shared GPIO selector types live in `gpio_types.h`.
+ * - Shared GPIO typedef aliases live in `gpio_data_types.h`.
+ * - Public GPIO selectors and pure validation macros live in `gpio_defines.h`.
  * - `gpio_ll.h/.c` owns raw register-near access and GPIO register-layout
  *   primitives.
- * - `gpio_helper.h/.c` owns translation and staged register-image mutation.
+ * - `gpio_codec.h/.c` owns translation and staged register-image mutation.
  * - `gpio.h` / `gpio.c` owns the public GPIO API, validation, orchestration,
  *   and batched register writes.
  */
@@ -30,13 +31,57 @@ extern "C" {
 //                                               Includes                                               //
 // ==================================================================================================== //
 
-#include "gpio_types.h"
+#include "gpio_defines.h"
 #include "gpio_ll.h"
 
 /**
  * @addtogroup GPIO_03_Driver
  * @{
  */
+
+// ==================================================================================================== //
+//                                      GPIO Configuration Descriptor                                   //
+// ==================================================================================================== //
+
+/**
+ * @brief GPIO configuration descriptor
+ * @defgroup GPIO_03_Driver_02_Config Driver GPIO Configuration Descriptor
+ * @ingroup  GPIO_03_Driver
+ * @{
+ */
+typedef struct _gpio_config_t
+{
+	/** @brief Pin selection bitmask */
+	gpio_pin_t			pin;
+	/** @brief Pin operating mode and speed */
+	gpio_pin_mode_t		mode;
+	/** @brief Pin electrical configuration */
+	gpio_pin_config_t	config;
+} gpio_config_t;
+
+/** @} */ // GPIO_03_Driver_02_Config
+
+// ==================================================================================================== //
+//                                  Board Defaults Kept For Current Driver                              //
+// ==================================================================================================== //
+
+#ifdef STM32F103C8T6__
+/** @brief On-board LED GPIO port @def GPIO_OB_LED_PORT */
+#define GPIO_OB_LED_PORT						GPIOC
+/** @brief On-board LED GPIO pin @def GPIO_OB_LED_PIN */
+#define GPIO_OB_LED_PIN							GPIO_PIN_13
+#endif /* STM32F103C8T6__ */
+
+/**
+ * @brief Default configuration descriptor for the on-board LED
+ * @def GPIO_OB_LED_CONFIG
+ */
+#define GPIO_OB_LED_CONFIG()					\
+{												\
+	.pin = GPIO_OB_LED_PIN,						\
+	.mode = GPIO_PIN_MODE_OUTPUT_2MHZ,			\
+	.config = GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL	\
+}
 
 /**
  * @brief Sets one or more GPIO output pins

@@ -1,19 +1,19 @@
 /**
- * @file	gpio_helper.h
+ * @file	gpio_codec.h
  * @author	Shrey Shah
- * @brief	GPIO Internal Translation and Staging Helper Interface
+ * @brief	GPIO Selector Codec Interface
  * @version	v1.0
  * @date	24-05-2026
  *
  * @details
- * This header defines the GPIO helper layer between GPIO LL and the public
- * GPIO driver. Helper APIs translate driver-facing selectors into raw STM32F1
- * GPIO fields and mutate caller-owned register images. They do not read or
- * write peripheral hardware.
+ * This header defines the GPIO codec layer between GPIO LL and the public
+ * GPIO driver. Codec APIs encode driver-facing selectors into raw STM32F1 GPIO
+ * fields, decode raw fields back into driver-facing selectors, and mutate
+ * caller-owned register images. They do not read or write peripheral hardware.
  */
 
-#ifndef GPIO_HELPER_H_
-#define GPIO_HELPER_H_
+#ifndef GPIO_CODEC_H_
+#define GPIO_CODEC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,8 +31,8 @@ extern "C" {
  */
 
 /**
- * @brief	GPIO Helper Translation and Staging APIs
- * @defgroup GPIO_03_Driver_02_Helper GPIO Helper Translation and Staging APIs
+ * @brief	GPIO Codec Translation and Staging APIs
+ * @defgroup GPIO_03_Driver_02_Codec GPIO Codec Translation and Staging APIs
  * @ingroup	GPIO_03_Driver
  * @details
  * These APIs own selector translation and staged register-image mutation for
@@ -52,7 +52,7 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin, @p mode, or @p config is invalid
  */
-driver_status_t GPIO_Helper_StagePinModeConfigImage
+driver_status_t GPIO_Codec_StagePinModeConfigImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_mode_t	mode,
@@ -70,7 +70,7 @@ driver_status_t GPIO_Helper_StagePinModeConfigImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p mode is invalid
  */
-driver_status_t GPIO_Helper_StagePinModeImage
+driver_status_t GPIO_Codec_StagePinModeImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_mode_t	mode,
@@ -87,7 +87,7 @@ driver_status_t GPIO_Helper_StagePinModeImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config is invalid
  */
-driver_status_t GPIO_Helper_StagePinConfigImage
+driver_status_t GPIO_Codec_StagePinConfigImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_config_t	config,
@@ -103,7 +103,7 @@ driver_status_t GPIO_Helper_StagePinConfigImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is invalid
  */
-driver_status_t GPIO_Helper_StagePinResetConfigImage
+driver_status_t GPIO_Codec_StagePinResetConfigImage
 (
 	const gpio_pin_t	pin,
 	uint32_t* const		pCrxRegImage
@@ -119,7 +119,7 @@ driver_status_t GPIO_Helper_StagePinResetConfigImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOdrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p config is invalid
  */
-driver_status_t GPIO_Helper_StagePinPullImage
+driver_status_t GPIO_Codec_StagePinPullImage
 (
 	const gpio_pin_t		pin,
 	const gpio_pin_config_t	config,
@@ -138,7 +138,7 @@ driver_status_t GPIO_Helper_StagePinPullImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Both @p pMode and @p pConfig are `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p crxField is invalid
  */
-driver_status_t GPIO_Helper_DecodePinModeConfigField
+driver_status_t GPIO_Codec_DecodePinModeConfigField
 (
 	const gpio_pin_config_bits_t	crxField,
 	const uint32_t				odrRegImage,
@@ -147,11 +147,11 @@ driver_status_t GPIO_Helper_DecodePinModeConfigField
 	gpio_pin_config_t* const		pConfig
 );
 
-/** @} */ // GPIO_03_Driver_02_Helper
+/** @} */ // GPIO_03_Driver_02_Codec
 /** @} */ // GPIO_03_Driver
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* GPIO_HELPER_H_ */
+#endif /* GPIO_CODEC_H_ */

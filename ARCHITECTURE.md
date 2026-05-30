@@ -16,7 +16,7 @@ one kind of knowledge.
 - Keep public driver vocabulary separate from register access.
 - Let low-level layers expose hardware-layout primitives without absorbing
   driver policy.
-- Keep semantic translation and staged register-image mutation in helper layers.
+- Keep semantic translation and staged register-image mutation in codec layers.
 - Let public driver APIs own validation, sequencing, and batching decisions.
 - Make application code depend on stable public APIs, not driver internals.
 - Optimize repeated register access where it matters without hiding ownership.
@@ -26,9 +26,10 @@ one kind of knowledge.
 | Layer | Owns | Must Avoid |
 |-------|------|------------|
 | Core | MCU register structs, base addresses, raw peripheral constants, shared scalar aliases, generic bit/register utilities | Peripheral driver policy, public driver selectors, application behavior |
-| Driver Types | Public selector vocabulary, driver-facing scalar types, validation macros/helpers shared within one driver family | Register access, hardware writes, sequencing |
+| Driver Data Types | Driver-facing scalar typedef aliases and plain shared data aliases | Public selector macros, validation policy, register access, hardware writes, sequencing |
+| Driver Defines/Validation | Public selector macros and pure validation/policy macros shared within one driver family | Register access, hardware writes, sequencing, raw register field placement |
 | Low-Level | Direct register access, raw peripheral operations, clock-gate forwarding when needed, raw hardware-layout helpers such as field offsets and masks | Public selector translation, compatibility policy, batching policy, board behavior |
-| Helper | Translation between driver selectors and raw hardware fields, encode/decode logic, mutation of caller-owned staged register images | Hardware reads/writes, clock sequencing, public API decisions |
+| Codec | Translation between driver selectors and raw hardware fields, encode/decode logic, mutation of caller-owned staged register images | Hardware reads/writes, clock sequencing, public API decisions |
 | Driver | Public API, argument validation, selector compatibility, clock sequencing, batching, dirty-register write decisions, user-facing status | Raw register map definitions, board-specific behavior |
 | Project | Board/application behavior and examples | Driver internals |
 
@@ -48,22 +49,41 @@ Core is the hardware description base. It should define:
 Core must not know that a driver later calls a field "mode", "config", "state",
 or any other public API concept. It should stay hardware-shaped.
 
-## Driver Types Layer
+## Driver Data Types And Defines Layers
 
-Each driver may have a shared types header, for example `<driver>_types.h`.
+Each driver may split shared vocabulary across a data-types header and a
+defines/validation header.
 
-This layer owns:
+A data-types header, for example `<driver>_data_types.h`, owns only:
 
-- public selector constants
-- public data structures
 - driver-facing scalar aliases
-- validation macros/helpers that do not touch hardware
+- plain data aliases that genuinely need to be shared across layers
+
+It must avoid public selector macros, validation policy, hardware register
+types, and full MCU include coupling.
+
+A defines/validation header, for example `<driver>_defines.h`, owns:
+
+- public selector constants and selector macros
+- pure validation macros/helpers that guard the same public vocabulary
 - simple conversions that do not require register access
 
-This layer is shared by the public driver, helper layer, and any related drivers
-that need the same vocabulary.
+Use the full word `defines` in filenames, not the abbreviation `defs`. For
+example, prefer `gpio_defines.h`, `rcc_defines.h`, and
+`usart_defines.h`.
 
-This layer must stay independent of low-level register access.
+This defines layer is shared by the public driver, codec layer, and any
+related drivers that need the same vocabulary. It must stay independent of
+hardware reads/writes and sequencing.
+
+Macro syntax alone does not decide ownership. A selector macro belongs in the
+defines layer, a validation macro belongs in the defines/validation
+layer, and a raw register-layout macro belongs in the low-level or private
+hardware-near layer.
+
+Public configuration/request structures belong in the public driver layer unless
+there is a specific reason for another layer or related driver to depend on that
+structure as plain shared data.
 
 ## Low-Level Layer
 
@@ -85,33 +105,37 @@ The low-level layer must not know public semantic selectors or policy. It should
 not translate public driver states into behavior, decide batching strategy, or
 validate full public API requests.
 
+LL should be the single direct access point for a peripheral's low-level
+hardware operations. Higher layers should call LL instead of directly touching
+peripheral registers.
+
 Good low-level responsibilities:
 
 ```c
-DRIVER_LL_ReadReg(PERIPHx, reg);
-DRIVER_LL_WriteReg(PERIPHx, reg, value);
-DRIVER_LL_SetRawMask(PERIPHx, mask);
-DRIVER_LL_GetFieldShift(rawIndex);
-DRIVER_LL_GetFieldMask(fieldShift);
-DRIVER_LL_SetRawField(regImage, fieldShift, rawField);
+LL_DRIVER_ReadReg(PERIPHx, reg);
+LL_DRIVER_WriteReg(PERIPHx, reg, value);
+LL_DRIVER_SetRawMask(PERIPHx, mask);
+LL_DRIVER_GetFieldShift(rawIndex);
+LL_DRIVER_GetFieldMask(fieldShift);
+LL_DRIVER_SetRawField(regImage, fieldShift, rawField);
 ```
 
 Bad low-level responsibilities:
 
 ```c
-DRIVER_LL_ValidatePublicConfig(config);
-DRIVER_LL_TranslatePublicModeToRawMode(mode);
-DRIVER_LL_DecideWhichRegistersToRead(selectorMask);
-DRIVER_LL_EnableClockBecausePublicModeNeedsIt(mode);
+LL_DRIVER_ValidatePublicConfig(config);
+LL_DRIVER_TranslatePublicModeToRawMode(mode);
+LL_DRIVER_DecideWhichRegistersToRead(selectorMask);
+LL_DRIVER_EnableClockBecausePublicModeNeedsIt(mode);
 ```
 
 Those belong above LL.
 
-## Helper Layer
+## Codec Layer
 
-Each driver may have a helper layer, for example `<driver>_helper.h/.c`.
+Each driver may have a codec layer, for example `<driver>_codec.h/.c`.
 
-The helper layer owns translation and staged image mutation:
+The codec layer owns translation and staged image mutation:
 
 - encode public selectors into raw hardware fields
 - decode raw hardware fields into public selectors
@@ -119,28 +143,33 @@ The helper layer owns translation and staged image mutation:
 - stage reset/default register images
 - stage related side effects that are still image-based, not hardware writes
 
-Helper functions may validate translation inputs and return `driver_status_t`.
-Any helper function that performs internal validation should return
+Codec functions may validate translation inputs and return `driver_status_t`.
+Any codec function that performs internal validation should return
 `driver_status_t`.
 
-The helper layer must not touch hardware. It receives register images from the
+The codec layer must not touch hardware. It receives register images from the
 driver, mutates those images, and returns status.
 
-Good helper responsibilities:
+The codec layer is the central compatibility point between stable public driver
+selectors and raw hardware bit definitions. Public driver selectors may remain
+unchanged even if the lower hardware bit definitions change; only the codec
+mapping should need to adapt.
+
+Good codec responsibilities:
 
 ```c
-DRIVER_Helper_EncodeSelector(selector, &rawField);
-DRIVER_Helper_DecodeField(rawField, &selector);
-DRIVER_Helper_StageField(selector, &regImage);
-DRIVER_Helper_StageReset(rawIndex, &regImage);
+DRIVER_Codec_EncodeSelector(selector, &rawField);
+DRIVER_Codec_DecodeField(rawField, &selector);
+DRIVER_Codec_StageField(selector, &regImage);
+DRIVER_Codec_StageReset(rawIndex, &regImage);
 ```
 
-Bad helper responsibilities:
+Bad codec responsibilities:
 
 ```c
-DRIVER_LL_READ_REG(...);
-DRIVER_LL_WRITE_REG(...);
-DRIVER_LL_EnableClockMask(...);
+LL_DRIVER_READ_REG(...);
+LL_DRIVER_WRITE_REG(...);
+LL_DRIVER_EnableClockMask(...);
 ```
 
 ## Driver Layer
@@ -149,6 +178,7 @@ The public driver layer owns the user-facing API and the policy around it.
 
 It must own:
 
+- public configuration and request structures
 - public argument validation
 - compatibility checks between public selectors
 - clock sequencing
@@ -166,22 +196,22 @@ validate_public_request(...);
 enable_required_clocks(...);
 
 if (request touches register A) {
-    regAImage = LL_ReadRegisterA(...);
+    regAImage = LL_DRIVER_ReadRegisterA(...);
 }
 if (request touches register B) {
-    regBImage = LL_ReadRegisterB(...);
+    regBImage = LL_DRIVER_ReadRegisterB(...);
 }
 
 for each selected element {
-    Helper_StageElementConfig(..., &relevantRegImage);
+    DRIVER_Codec_StageElementConfig(..., &relevantRegImage);
     mark_relevant_register_dirty();
 }
 
 if (register A dirty) {
-    LL_WriteRegisterA(..., regAImage);
+    LL_DRIVER_WriteRegisterA(..., regAImage);
 }
 if (register B dirty) {
-    LL_WriteRegisterB(..., regBImage);
+    LL_DRIVER_WriteRegisterB(..., regBImage);
 }
 ```
 
@@ -211,7 +241,7 @@ Do not optimize by pushing policy down into LL.
 Optimize by putting batching in the driver layer:
 
 - read each touched register once
-- mutate local images through helper functions
+- mutate local images through codec functions
 - write each dirty register once
 - use atomic set/reset registers where the hardware provides them
 - avoid full read-modify-write cycles when a write-only atomic register can
@@ -230,8 +260,12 @@ Use `@retval - ...` for specific return cases.
 
 Names should reveal ownership and intent:
 
+- Low-level names should use `LL_<Module>_<Action>` so IntelliSense groups all
+  low-level operations together.
+- Avoid adding new low-level names in the legacy `<Module>_LL_<Action>` shape
+  except as temporary compatibility aliases during a rename.
 - `LL` names should sound raw and hardware-near.
-- `Helper` names should sound like translation, encoding, decoding, or staging.
+- `Codec` names should sound like translation, encoding, decoding, or staging.
 - `Driver` names should sound like public operations.
 
 Avoid names that hide policy or mix layer authority.
@@ -242,9 +276,9 @@ Normalize one layer per commit.
 
 Recommended order for a driver normalization:
 
-1. Types and validation vocabulary.
-2. LL raw access and hardware-layout primitives.
-3. Helper translation and staging.
+1. Data aliases, selector defines, and validation vocabulary.
+2. LL raw access, naming, and hardware-layout primitives.
+3. Codec translation and staging.
 4. Driver orchestration and batching.
 5. Project/application compatibility cleanup.
 

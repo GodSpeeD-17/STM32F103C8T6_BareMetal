@@ -1,24 +1,24 @@
 /**
- * @file	gpio_helper.c
+ * @file	gpio_codec.c
  * @author	Shrey Shah
- * @brief	GPIO Internal Translation and Staging Helper Implementation
+ * @brief	GPIO Selector Codec Implementation
  * @version	v1.0
  * @date	24-05-2026
  *
  * @details
- * This source file implements the GPIO helper layer. It translates
- * driver-facing GPIO selectors to raw STM32F1 GPIO fields and mutates
- * caller-owned register images. It does not read or write peripheral hardware.
+ * This source file implements the GPIO codec layer. It encodes driver-facing
+ * GPIO selectors into raw STM32F1 GPIO fields, decodes raw fields back into
+ * driver-facing selectors, and mutates caller-owned register images. It does
+ * not read or write peripheral hardware.
  */
 
 // ==================================================================================================== //
 //                                               Includes                                               //
 // ==================================================================================================== //
-
-#include "gpio_helper.h"
+#include "gpio_codec.h"
 
 // ==================================================================================================== //
-//                                           Local Helpers                                              //
+//                                          Local Codec Internals                                       //
 // ==================================================================================================== //
 
 /**
@@ -28,7 +28,7 @@
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin selects exactly one valid GPIO pin
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is invalid, empty, or selects multiple pins
  */
-__STATIC_FORCEINLINE driver_status_t GPIO_Helper_ValidateSinglePinMask(const gpio_pin_t pin)
+__STATIC_FORCEINLINE driver_status_t GPIO_Codec_ValidateSinglePinMask(const gpio_pin_t pin)
 {
 	if ((GPIO_PIN_MASK_IS_VALID(pin) == 0x00U) || (GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) == 0x00U))
 	{
@@ -48,7 +48,7 @@ __STATIC_FORCEINLINE driver_status_t GPIO_Helper_ValidateSinglePinMask(const gpi
  * @retval - `0x03U`: Output 50 MHz mode field
  * @note Caller should pass a valid @ref gpio_pin_mode_t selector.
  */
-__STATIC_FORCEINLINE gpio_mode_t GPIO_Helper_EncodeModeBits(const gpio_pin_mode_t mode)
+__STATIC_FORCEINLINE gpio_mode_t GPIO_Codec_EncodeModeBits(const gpio_pin_mode_t mode)
 {
 	gpio_mode_t modeBits = (gpio_mode_t) 0x00U;
 
@@ -94,7 +94,7 @@ __STATIC_FORCEINLINE gpio_mode_t GPIO_Helper_EncodeModeBits(const gpio_pin_mode_
  * @retval - `0x03U`: Alternate open-drain output field
  * @note Caller should pass a valid @ref gpio_pin_config_t selector.
  */
-__STATIC_FORCEINLINE gpio_cnf_t GPIO_Helper_EncodeConfigBits(const gpio_pin_config_t config)
+__STATIC_FORCEINLINE gpio_cnf_t GPIO_Codec_EncodeConfigBits(const gpio_pin_config_t config)
 {
 	gpio_cnf_t cnfBits = (gpio_cnf_t) 0x00U;
 
@@ -135,10 +135,10 @@ __STATIC_FORCEINLINE gpio_cnf_t GPIO_Helper_EncodeConfigBits(const gpio_pin_conf
 }
 
 // ==================================================================================================== //
-//                                           Helper APIs                                                //
+//                                             Codec APIs                                               //
 // ==================================================================================================== //
 
-driver_status_t GPIO_Helper_StagePinModeConfigImage
+driver_status_t GPIO_Codec_StagePinModeConfigImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_mode_t mode,
@@ -152,7 +152,7 @@ driver_status_t GPIO_Helper_StagePinModeConfigImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
+	if ((GPIO_Codec_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
 		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U) ||
 		(GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U) ||
 		(GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, config) == 0x00U))
@@ -160,13 +160,13 @@ driver_status_t GPIO_Helper_StagePinModeConfigImage
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	pinField = GPIO_LL_PackPinModeCNFField(GPIO_Helper_EncodeModeBits(mode), GPIO_Helper_EncodeConfigBits(config));
+	pinField = GPIO_LL_PackPinModeCNFField(GPIO_Codec_EncodeModeBits(mode), GPIO_Codec_EncodeConfigBits(config));
 
 	*pCrxRegImage = GPIO_LL_SetPinModeCNFFieldInCRx(*pCrxRegImage, pin, pinField);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t GPIO_Helper_StagePinModeImage
+driver_status_t GPIO_Codec_StagePinModeImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_mode_t mode,
@@ -177,16 +177,16 @@ driver_status_t GPIO_Helper_StagePinModeImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
+	if ((GPIO_Codec_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_MODE_IS_VALID(mode) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	*pCrxRegImage = GPIO_LL_SetPinModeBitsInCRx(*pCrxRegImage, pin, GPIO_Helper_EncodeModeBits(mode));
+	*pCrxRegImage = GPIO_LL_SetPinModeBitsInCRx(*pCrxRegImage, pin, GPIO_Codec_EncodeModeBits(mode));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t GPIO_Helper_StagePinConfigImage
+driver_status_t GPIO_Codec_StagePinConfigImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_config_t config,
@@ -197,22 +197,22 @@ driver_status_t GPIO_Helper_StagePinConfigImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
+	if ((GPIO_Codec_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	*pCrxRegImage = GPIO_LL_SetPinCNFBitsInCRx(*pCrxRegImage, pin, GPIO_Helper_EncodeConfigBits(config));
+	*pCrxRegImage = GPIO_LL_SetPinCNFBitsInCRx(*pCrxRegImage, pin, GPIO_Codec_EncodeConfigBits(config));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t GPIO_Helper_StagePinResetConfigImage
+driver_status_t GPIO_Codec_StagePinResetConfigImage
 (
 	const gpio_pin_t pin,
 	uint32_t* const pCrxRegImage
 )
 {
-	return GPIO_Helper_StagePinModeConfigImage
+	return GPIO_Codec_StagePinModeConfigImage
 	(
 		pin,
 		GPIO_PIN_MODE_INPUT,
@@ -221,7 +221,7 @@ driver_status_t GPIO_Helper_StagePinResetConfigImage
 	);
 }
 
-driver_status_t GPIO_Helper_StagePinPullImage
+driver_status_t GPIO_Codec_StagePinPullImage
 (
 	const gpio_pin_t pin,
 	const gpio_pin_config_t config,
@@ -234,7 +234,7 @@ driver_status_t GPIO_Helper_StagePinPullImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if ((GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
+	if ((GPIO_Codec_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS) ||
 		(
 			((gpio_pin_config_t) config != GPIO_PIN_CONFIG_INPUT_PULL_DOWN) &&
 			((gpio_pin_config_t) config != GPIO_PIN_CONFIG_INPUT_PULL_UP)
@@ -257,12 +257,12 @@ driver_status_t GPIO_Helper_StagePinPullImage
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t GPIO_Helper_DecodePinModeConfigField
+driver_status_t GPIO_Codec_DecodePinModeConfigField
 (
 	const gpio_pin_config_bits_t	crxField,
-	const uint32_t				odrRegImage,
-	const gpio_pin_t			pin,
-	gpio_pin_mode_t* const		pMode,
+	const uint32_t					odrRegImage,
+	const gpio_pin_t				pin,
+	gpio_pin_mode_t* const			pMode,
 	gpio_pin_config_t* const		pConfig
 )
 {
@@ -273,7 +273,7 @@ driver_status_t GPIO_Helper_DecodePinModeConfigField
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (GPIO_Helper_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS)
+	if (GPIO_Codec_ValidateSinglePinMask(pin) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}

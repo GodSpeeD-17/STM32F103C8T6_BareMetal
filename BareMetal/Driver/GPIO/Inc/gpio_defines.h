@@ -1,31 +1,30 @@
 /**
- * @file	gpio_types.h
+ * @file	gpio_defines.h
  * @author	Shrey Shah
- * @brief	GPIO Driver Shared Types and Selectors
+ * @brief	GPIO Driver Selector and Validation Defines
  * @version	v1.0
- * @date	24-05-2026
+ * @date	30-05-2026
  *
  * @details
- * This header owns GPIO driver-facing scalar aliases, public selector values,
- * validation helpers, and lightweight configuration descriptors.
+ * This header owns public GPIO selector macros and pure validation helpers.
+ * It does not own GPIO typedef aliases; those live in `gpio_data_types.h`.
  *
- * Keep this file independent of GPIO register access. It is shared by the
- * public driver layer, internal helper layer, and peripheral drivers that need
- * GPIO selector vocabulary.
+ * Keep this file free of direct GPIO register reads/writes. STM32F1 register
+ * layout helpers belong in the GPIO LL layer.
  */
 
-#ifndef GPIO_TYPES_H_
-#define GPIO_TYPES_H_
+#ifndef GPIO_DEFINES_H_
+#define GPIO_DEFINES_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 // ==================================================================================================== //
-//                                               Includes                                               //
+//												Includes												//
 // ==================================================================================================== //
-#include "stm32f1xx_utils.h"
 #include "stm32f1xx.h"
+#include "gpio_data_types.h"
 
 /**
  * @addtogroup GPIO_03_Driver
@@ -33,45 +32,13 @@ extern "C" {
  */
 
 // ==================================================================================================== //
-//                                         GPIO Driver Data Types                                       //
-// ==================================================================================================== //
-
-/**
- * @brief GPIO Driver Types
- * @defgroup GPIO_03_Driver_01_Types GPIO Driver Data Types
- * @ingroup GPIO_03_Driver
- * @{
- */
-
-/** @brief GPIO pin bit-mask type @typedef gpio_pin_t */
-typedef uint16_t								gpio_pin_t;
-/** @brief GPIO pin mode selector type @typedef gpio_pin_mode_t */
-typedef uint8_t									gpio_pin_mode_t;
-/** @brief GPIO pin configuration selector type @typedef gpio_pin_config_t */
-typedef uint8_t									gpio_pin_config_t;
-/** @brief Raw GPIO MODE field type @typedef gpio_mode_t */
-typedef uint8_t									gpio_mode_t;
-/** @brief Raw GPIO output speed field type @typedef gpio_speed_t */
-typedef uint8_t									gpio_speed_t;
-/** @brief Raw GPIO CNF field type @typedef gpio_cnf_t */
-typedef uint8_t									gpio_cnf_t;
-/** @brief Raw GPIO pull direction bit type @typedef gpio_pull_t */
-typedef uint8_t									gpio_pull_t;
-/** @brief Raw packed GPIO pin configuration field type @typedef gpio_pin_config_bits_t */
-typedef uint8_t									gpio_pin_config_bits_t;
-/** @brief GPIO EXTI trigger selector type @typedef gpio_exti_trigger_t */
-typedef uint8_t									gpio_exti_trigger_t;
-/** @brief GPIO EXTI port source selector type @typedef gpio_exti_port_t */
-typedef uint8_t									gpio_exti_port_t;
-
-// ==================================================================================================== //
-//                                               GPIO Pins                                              //
+//												GPIO Pins												//
 // ==================================================================================================== //
 
 /**
  * @brief GPIO shared pin bitmasks
- * @defgroup GPIO_03_Driver_01_Types_02_Pins GPIO Driver Pins
- * @ingroup GPIO_03_Driver_01_Types
+ * @defgroup GPIO_03_Driver_02_Defines_01_Pins GPIO Driver Pins
+ * @ingroup GPIO_03_Driver
  * @{
  */
 
@@ -124,50 +91,22 @@ typedef uint8_t									gpio_exti_port_t;
 #define GPIO_PIN_14								GPIO_PIN_INDEX_TO_MASK(14U)
 /** @brief Pin 15 bitmask @def GPIO_PIN_15 */
 #define GPIO_PIN_15								GPIO_PIN_INDEX_TO_MASK(15U)
-
-/**
- * @brief Bitmask selecting every GPIO pin controlled through CRL
- * @def GPIO_PIN_MASK_CRL_RANGE
- */
-#define GPIO_PIN_MASK_CRL_RANGE						\
-(													\
-	(gpio_pin_t)									\
-	(												\
-		GPIO_PIN_0 | GPIO_PIN_1 |					\
-		GPIO_PIN_2 | GPIO_PIN_3 |					\
-		GPIO_PIN_4 | GPIO_PIN_5 |					\
-		GPIO_PIN_6 | GPIO_PIN_7						\
-	)												\
-)
-
-/**
- * @brief Bitmask selecting every GPIO pin controlled through CRH
- * @def GPIO_PIN_MASK_CRH_RANGE
- */
-#define GPIO_PIN_MASK_CRH_RANGE						\
-(													\
-	(gpio_pin_t)									\
-	(												\
-		GPIO_PIN_8  | GPIO_PIN_9  |					\
-		GPIO_PIN_10 | GPIO_PIN_11 |					\
-		GPIO_PIN_12 | GPIO_PIN_13 |					\
-		GPIO_PIN_14 | GPIO_PIN_15					\
-	)												\
-)
-
 /**
  * @brief Bitmask selecting every valid GPIO pin on one GPIO port
  * @def GPIO_PIN_ALL
  */
-#define GPIO_PIN_ALL							((gpio_pin_t) (GPIO_PIN_MASK_CRL_RANGE | GPIO_PIN_MASK_CRH_RANGE))
-
+#define GPIO_PIN_ALL							((gpio_pin_t) 0xFFFFU)
 /**
  * @brief No pins bitmask
  * @def GPIO_PIN_NONE
  */
 #define GPIO_PIN_NONE							((gpio_pin_t) 0x0000U)
 
-/** @} */ // GPIO_03_Driver_01_Types_02_Pins
+/** @} */ // GPIO_03_Driver_02_Defines_01_Pins
+
+// ==================================================================================================== //
+//										GPIO Defines Validation										//
+// ==================================================================================================== //
 
 /**
  * @brief Checks whether a GPIO peripheral instance is supported by the driver
@@ -230,28 +169,6 @@ typedef uint8_t									gpio_exti_port_t;
 	((((uint32_t) (pinMask)) & (((uint32_t) (pinMask)) - 1UL)) == 0x00000000UL)
 
 /**
- * @brief Checks if any of the pins require CRL register configuration
- * @param[in]	pinMask	GPIO pin mask to check
- * @returns CRL usage status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask does not select any pins controlled by CRL
- * @retval - Non-zero: @p pinMask selects at least one pin controlled by CRL
- * @def GPIO_PIN_MASK_REQUIRES_CRL
- */
-#define GPIO_PIN_MASK_REQUIRES_CRL(pinMask)			\
-	(((((gpio_pin_t) (pinMask)) & GPIO_PIN_MASK_CRL_RANGE) != GPIO_PIN_NONE))
-
-/**
- * @brief Checks if any of the pins require CRH register configuration
- * @param[in]	pinMask	GPIO pin mask to check
- * @returns CRH usage status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask does not select any pins controlled by CRH
- * @retval - Non-zero: @p pinMask selects at least one pin controlled by CRH
- * @def GPIO_PIN_MASK_REQUIRES_CRH
- */
-#define GPIO_PIN_MASK_REQUIRES_CRH(pinMask)			\
-	(((((gpio_pin_t) (pinMask)) & GPIO_PIN_MASK_CRH_RANGE) != GPIO_PIN_NONE))
-
-/**
  * @brief Returns the pin index for a single-pin mask
  * @param[in]	pinMask	GPIO single-pin mask
  * @returns GPIO pin index decoded from @p pinMask
@@ -279,7 +196,7 @@ __STATIC_FORCEINLINE uint8_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 }
 
 // ==================================================================================================== //
-//                                           GPIO Pin Mode Types                                        //
+//											GPIO Pin Mode Types											//
 // ==================================================================================================== //
 
 /** @brief Input mode @def GPIO_PIN_MODE_INPUT */
@@ -308,9 +225,8 @@ __STATIC_FORCEINLINE uint8_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 )
 
 // ==================================================================================================== //
-//                                       GPIO Pin Configuration Types                                   //
+//										GPIO Pin Configuration Types									//
 // ==================================================================================================== //
-
 /** @brief Analog input mode @def GPIO_PIN_CONFIG_INPUT_ANALOG */
 #define GPIO_PIN_CONFIG_INPUT_ANALOG					((gpio_pin_config_t) 0x00U)
 /** @brief Floating input (no pull-up/down) @def GPIO_PIN_CONFIG_INPUT_FLOATING */
@@ -417,56 +333,10 @@ __STATIC_FORCEINLINE uint8_t GPIO_PinMaskToIndex(const gpio_pin_t pinMask)
 	)																					\
 )
 
-/** @} */ // GPIO_03_Driver_01_Types
-
-// ==================================================================================================== //
-//                                      GPIO Configuration Descriptor                                   //
-// ==================================================================================================== //
-
-/**
- * @brief GPIO configuration descriptor
- * @defgroup GPIO_03_Driver_02_Config Driver GPIO Configuration Descriptor
- * @ingroup  GPIO_03_Driver
- * @{
- */
-typedef struct _gpio_config_t
-{
-	/** @brief Pin selection bitmask */
-	gpio_pin_t			pin;
-	/** @brief Pin operating mode and speed */
-	gpio_pin_mode_t		mode;
-	/** @brief Pin electrical configuration */
-	gpio_pin_config_t	config;
-} gpio_config_t;
-
-/** @} */ // GPIO_03_Driver_02_Config
-
-// ==================================================================================================== //
-//                                  Board Defaults Kept For Current Driver                              //
-// ==================================================================================================== //
-
-#ifdef STM32F103C8T6__
-/** @brief On-board LED GPIO port @def GPIO_OB_LED_PORT */
-#define GPIO_OB_LED_PORT						GPIOC
-/** @brief On-board LED GPIO pin @def GPIO_OB_LED_PIN */
-#define GPIO_OB_LED_PIN							GPIO_PIN_13
-#endif /* STM32F103C8T6__ */
-
-/**
- * @brief Default configuration descriptor for the on-board LED
- * @def GPIO_OB_LED_CONFIG
- */
-#define GPIO_OB_LED_CONFIG()					\
-{												\
-	.pin = GPIO_OB_LED_PIN,						\
-	.mode = GPIO_PIN_MODE_OUTPUT_2MHZ,			\
-	.config = GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL	\
-}
-
 /** @} */ // GPIO_03_Driver
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* GPIO_TYPES_H_ */
+#endif /* GPIO_DEFINES_H_ */
