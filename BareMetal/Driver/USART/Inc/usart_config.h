@@ -12,6 +12,7 @@
 
 /*********************************************** Includes ***********************************************/
 #include "gpio.h"
+#include "nvic_types.h"
 
 /*********************************************** USART MACROs ***********************************************/
 #define USART_MIN						USART_1
@@ -182,8 +183,12 @@ typedef enum {
 typedef struct {
 	// GPIO Port
 	GPIO_TypeDef* GPIOx;
+	// GPIO Pin
+	gpio_pin_t pin;
+	// GPIO Pin Mode
+	gpio_pin_mode_t mode;
 	// GPIO Pin Configuration
-	gpio_config_t setup;
+	gpio_pin_config_t config;
 } usart_pin_t;
 
 /*********************************************** USART GPIO Mapping Structure ***********************************************/

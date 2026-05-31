@@ -56,13 +56,9 @@ static void APP_RunLampTest(void)
 int main()
 {
 	// Configure LEDs
-	gpio_config_t multiLedConfig =
-	{
-		.pin = (RED_LED_PIN | YELLOW_LED_PIN),
-	};
 	uint8_t pattern = 0x00U;
 
-	ASSERT_DRIVER_STATUS(GPIO_LED_Init(RED_LED_PORT, &multiLedConfig));
+	ASSERT_DRIVER_STATUS(GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)));
 	APP_RunLampTest();
 
 	// Infinite Loop

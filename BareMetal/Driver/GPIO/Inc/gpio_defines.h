@@ -123,8 +123,8 @@ extern "C" {
  * @brief Checks whether a GPIO peripheral instance is supported by the driver
  * @param[in]	GPIOx	GPIO peripheral instance
  * @returns Validity status of the input GPIO peripheral instance
- * @retval - `0U`: @p GPIOx is not a supported GPIO peripheral instance
- * @retval - Non-zero: @p GPIOx is a supported GPIO peripheral instance
+ * @retval - `0x00U`: @p GPIOx is not a supported GPIO peripheral instance
+ * @retval - `0x01U`: @p GPIOx is a supported GPIO peripheral instance
  * @def GPIO_PORT_IS_VALID
  */
 #define GPIO_PORT_IS_VALID(GPIOx)					\
@@ -139,8 +139,8 @@ extern "C" {
  * @brief Checks if a GPIO pin mask selects at least one pin
  * @param[in]	pinMask	GPIO pin mask to check
  * @returns Pin-selection presence status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask does not select any GPIO pin
- * @retval - Non-zero: @p pinMask selects at least one GPIO pin
+ * @retval - `0x00U`: @p pinMask does not select any GPIO pin
+ * @retval - `0x01U`: @p pinMask selects at least one GPIO pin
  * @def GPIO_PIN_MASK_HAS_ANY_PIN
  */
 #define GPIO_PIN_MASK_HAS_ANY_PIN(pinMask)			\
@@ -150,8 +150,8 @@ extern "C" {
  * @brief Checks if a GPIO pin mask contains only supported GPIO pin bits
  * @param[in]	pinMask	GPIO pin mask to check
  * @returns Supported-range status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask contains one or more bits outside @ref `GPIO_PIN_ALL`
- * @retval - Non-zero: @p pinMask contains only bits inside @ref `GPIO_PIN_ALL`
+ * @retval - `0x00U`: @p pinMask contains one or more bits outside @ref `GPIO_PIN_ALL`
+ * @retval - `0x01U`: @p pinMask contains only bits inside @ref `GPIO_PIN_ALL`
  * @def GPIO_PIN_MASK_HAS_ONLY_VALID_PINS
  */
 #define GPIO_PIN_MASK_HAS_ONLY_VALID_PINS(pinMask)	\
@@ -161,8 +161,8 @@ extern "C" {
  * @brief Checks if a GPIO pin mask is valid
  * @param[in]	pinMask	GPIO pin mask to check
  * @returns Validity status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask is empty or contains bits outside the supported GPIO pin range
- * @retval - Non-zero: @p pinMask selects one or more supported GPIO pins
+ * @retval - `0x00U`: @p pinMask is empty or contains bits outside the supported GPIO pin range
+ * @retval - `0x01U`: @p pinMask selects one or more supported GPIO pins
  * @def GPIO_PIN_MASK_IS_VALID
  */
 #define GPIO_PIN_MASK_IS_VALID(pinMask)				\
@@ -172,12 +172,23 @@ extern "C" {
  * @brief Checks if a GPIO pin mask has zero or one bit set
  * @param[in]	pinMask	GPIO pin mask to check
  * @returns At-most-one-bit status of the input GPIO pin mask
- * @retval - `0U`: @p pinMask contains multiple set bits
- * @retval - Non-zero: @p pinMask is zero or contains exactly one set bit
- * @def GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT
+ * @retval - `0x00U`: @p pinMask contains multiple set bits
+ * @retval - `0x01U`: @p pinMask is zero or contains exactly one set bit
+ * @def GPIO_PIN_MASK_HAS_AT_MOST_ONE_PIN
  */
-#define GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pinMask)	\
+#define GPIO_PIN_MASK_HAS_AT_MOST_ONE_PIN(pinMask)	\
 	((((uint32_t) (pinMask)) & (((uint32_t) (pinMask)) - 1UL)) == 0x00000000UL)
+
+/**
+ * @brief Checks if a GPIO pin mask contains exactly one selected pin
+ * @param[in]	pinMask	GPIO pin mask to check
+ * @returns Single-pin selection status of the input GPIO pin mask
+ * @retval - `0x00U`: @p pinMask is empty or contains multiple selected pins
+ * @retval - `0x01U`: @p pinMask contains exactly one selected pin
+ * @def GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN
+ */
+#define GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pinMask)	\
+	(GPIO_PIN_MASK_IS_VALID(pinMask) && GPIO_PIN_MASK_HAS_AT_MOST_ONE_PIN(pinMask))
 
 /**
  * @brief Returns the pin index for a single-pin mask
@@ -192,14 +203,14 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 	gpio_pin_t pinMaskImage = pinMask;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_FIRST;
 
-	//! Validate that the input pin mask is a single valid pin selection
-	if ((GPIO_PIN_MASK_IS_VALID(pinMask) == 0U) || (GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pinMask) == 0U))
+	// Validate Input
+	if (GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pinMask) == 0x00U)
 	{
 		return GPIO_PIN_INDEX_INVALID;
 	}
 
-	//! Shift the single selected bit down to bit 0 while counting the bit position
-	while (pinMaskImage > GPIO_PIN_0)
+	//! Shift the pin mask to right until single bit is set
+	while (pinMaskImage != GPIO_PIN_0)
 	{
 		pinMaskImage = (gpio_pin_t) (((uint32_t) pinMaskImage) >> 1U);
 		++pinIndex;
@@ -225,8 +236,8 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
  * @brief Checks if a GPIO pin mode is valid
  * @param[in]	mode	GPIO pin mode selector to check
  * @returns Validity status of the input GPIO pin mode selector
- * @retval - `0U`: @p mode is not a supported GPIO pin mode selector
- * @retval - Non-zero: @p mode is a supported GPIO pin mode selector
+ * @retval - `0x00U`: @p mode is not a supported GPIO pin mode selector
+ * @retval - `0x01U`: @p mode is a supported GPIO pin mode selector
  * @def GPIO_PIN_MODE_IS_VALID
  */
 #define GPIO_PIN_MODE_IS_VALID(mode)							\
@@ -281,8 +292,8 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
  * @brief Checks if a GPIO configuration uses alternate-function output mode
  * @param[in]	config	GPIO pin configuration selector to check
  * @returns Alternate-function usage status of the input GPIO pin configuration selector
- * @retval - `0U`: @p config does not select alternate-function output
- * @retval - Non-zero: @p config selects alternate-function output
+ * @retval - `0x00U`: @p config does not select alternate-function output
+ * @retval - `0x01U`: @p config selects alternate-function output
  * @def GPIO_PIN_CONFIG_IS_ALTERNATE
  */
 #define GPIO_PIN_CONFIG_IS_ALTERNATE(config)									\
@@ -296,8 +307,8 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
  * @param[in]	mode	Driver GPIO mode selector
  * @param[in]	config	Driver GPIO configuration selector
  * @returns Input pull configuration status of the input GPIO mode/config pair
- * @retval - `0U`: @p mode and @p config do not select input pull-up/down
- * @retval - Non-zero: @p mode and @p config select input pull-up/down
+ * @retval - `0x00U`: @p mode and @p config do not select input pull-up/down
+ * @retval - `0x01U`: @p mode and @p config select input pull-up/down
  * @def GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL
  */
 #define GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config)						\

@@ -16,129 +16,99 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 	[USART_1] = {
 		.TX = {
 			.GPIOx = USART1_TX_GPIO,
-			.setup = {
-				.pin = USART1_TX_PIN,
-				.mode = USART_TX_PIN_MODE,
-				.config = USART_TX_PIN_CONFIG
-			}
+			.pin = USART1_TX_PIN,
+			.mode = USART_TX_PIN_MODE,
+			.config = USART_TX_PIN_CONFIG
 		},
 		.RX = {
 			.GPIOx = USART1_RX_GPIO,
-			.setup = {
-				.pin = USART1_RX_PIN,
-				.mode = USART_RX_PIN_MODE,
-				.config = USART_RX_PIN_CONFIG
-			}
+			.pin = USART1_RX_PIN,
+			.mode = USART_RX_PIN_MODE,
+			.config = USART_RX_PIN_CONFIG
 		},
 		.RTS = {
 			.GPIOx = USART1_RTS_GPIO,
-			.setup = {
-				.pin = USART1_RTS_PIN,
-				.mode = USART_RTS_PIN_MODE,
-				.config = USART_RTS_PIN_CONFIG
-			}
+			.pin = USART1_RTS_PIN,
+			.mode = USART_RTS_PIN_MODE,
+			.config = USART_RTS_PIN_CONFIG
 		},
 		.CTS = {
 			.GPIOx = USART1_CTS_GPIO,
-			.setup = {
-				.pin = USART1_CTS_PIN,
-				.mode = USART_CTS_PIN_MODE,
-				.config = USART_CTS_PIN_CONFIG,
-			}
+			.pin = USART1_CTS_PIN,
+			.mode = USART_CTS_PIN_MODE,
+			.config = USART_CTS_PIN_CONFIG,
 		},
 		.CK = {
 			.GPIOx = USART1_CK_GPIO,
-			.setup = {
-				.pin = USART1_CK_PIN,
-				.mode = USART_CK_PIN_MODE,
-				.config = USART_CK_PIN_CONFIG,
-			}
+			.pin = USART1_CK_PIN,
+			.mode = USART_CK_PIN_MODE,
+			.config = USART_CK_PIN_CONFIG,
 		}
 	},
 	// USART2 GPIO Mapping
 	[USART_2] = {
 		.TX = {
 			.GPIOx = USART2_TX_GPIO,
-			.setup = {
-				.pin = USART2_TX_PIN,
-				.mode = USART_TX_PIN_MODE,
-				.config = USART_TX_PIN_CONFIG
-			}
+			.pin = USART2_TX_PIN,
+			.mode = USART_TX_PIN_MODE,
+			.config = USART_TX_PIN_CONFIG
 		},
 		.RX = {
 			.GPIOx = USART2_RX_GPIO,
-			.setup = {
-				.pin = USART2_RX_PIN,
-				.mode = USART_RX_PIN_MODE,
-				.config = USART_RX_PIN_CONFIG
-			}
+			.pin = USART2_RX_PIN,
+			.mode = USART_RX_PIN_MODE,
+			.config = USART_RX_PIN_CONFIG
 		},
 		.RTS = {
 			.GPIOx = USART2_RTS_GPIO,
-			.setup = {
-				.pin = USART2_RTS_PIN,
-				.mode = USART_RTS_PIN_MODE,
-				.config = USART_RTS_PIN_CONFIG
-			}
+			.pin = USART2_RTS_PIN,
+			.mode = USART_RTS_PIN_MODE,
+			.config = USART_RTS_PIN_CONFIG
 		},
 		.CTS = {
 			.GPIOx = USART2_CTS_GPIO,
-			.setup = {
-				.pin = USART2_CTS_PIN,
-				.mode = USART_CTS_PIN_MODE,
-				.config = USART_CTS_PIN_CONFIG,
-			}
+			.pin = USART2_CTS_PIN,
+			.mode = USART_CTS_PIN_MODE,
+			.config = USART_CTS_PIN_CONFIG,
 		},
 		.CK = {
 			.GPIOx = USART2_CK_GPIO,
-			.setup = {
-				.pin = USART2_CK_PIN,
-				.mode = USART_CK_PIN_MODE,
-				.config = USART_CK_PIN_CONFIG,
-			}
+			.pin = USART2_CK_PIN,
+			.mode = USART_CK_PIN_MODE,
+			.config = USART_CK_PIN_CONFIG,
 		}
 	},
 	// USART3 GPIO Mapping
 	[USART_3] = {
 		.TX = {
 			.GPIOx = USART3_TX_GPIO,
-			.setup = {
-				.pin = USART3_TX_PIN,
-				.mode = USART_TX_PIN_MODE,
-				.config = USART_TX_PIN_CONFIG
-			}
+			.pin = USART3_TX_PIN,
+			.mode = USART_TX_PIN_MODE,
+			.config = USART_TX_PIN_CONFIG
 		},
 		.RX = {
 			.GPIOx = USART3_RX_GPIO,
-			.setup = {
-				.pin = USART3_RX_PIN,
-				.mode = USART_RX_PIN_MODE,
-				.config = USART_RX_PIN_CONFIG
-			}
+			.pin = USART3_RX_PIN,
+			.mode = USART_RX_PIN_MODE,
+			.config = USART_RX_PIN_CONFIG
 		},
 		.RTS = {
 			.GPIOx = USART3_RTS_GPIO,
-			.setup = {
-				.pin = USART3_RTS_PIN,
-				.mode = USART_RTS_PIN_MODE,
-				.config = USART_RTS_PIN_CONFIG
-			}
+			.pin = USART3_RTS_PIN,
+			.mode = USART_RTS_PIN_MODE,
+			.config = USART_RTS_PIN_CONFIG
 		},
 		.CTS = {
 			.GPIOx = USART3_CTS_GPIO,
-			.setup = {
-				.pin = USART3_CTS_PIN,
-				.mode = USART_CTS_PIN_MODE,
-				.config = USART_CTS_PIN_CONFIG,
-			}
+			.pin = USART3_CTS_PIN,
+			.mode = USART_CTS_PIN_MODE,
+			.config = USART_CTS_PIN_CONFIG,
 		},
 		.CK = {
 			.GPIOx = USART3_CK_GPIO,
-			.setup = {
-				.pin = USART3_CK_PIN,
-				.mode = USART_CK_PIN_MODE,
-				.config = USART_CK_PIN_CONFIG,
-			}
+			.pin = USART3_CK_PIN,
+			.mode = USART_CK_PIN_MODE,
+			.config = USART_CK_PIN_CONFIG,
 		}
 	},
 };

@@ -176,8 +176,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
  * @brief Reads the GPIO `ODR` register image
  * @param[in]	GPIOx	GPIO peripheral instance
  * @returns Full latched `GPIOx_ODR` image.
- * @note Public set/reset/toggle APIs use this accessor as the read half of
- * their driver-owned read-modify-write policy.
+ * @note Use this accessor only when the current output latch image is required,
+ * such as pull-up/pull-down extraction or toggle read-modify-write. Simple
+ * set/reset operations should use `BSRR`/`BRR`.
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
 {
@@ -189,7 +190,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Full `GPIOx_ODR` image to write
  * @returns Void.
- * @note Caller must preserve any bits that should not change.
+ * @note Caller must preserve any bits that should not change. Prefer `BSRR`
+ * and `BRR` for set/reset operations; reserve direct ODR writes for explicit
+ * full-image updates or toggle-style read-modify-write flows.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const reg regImage)
 {

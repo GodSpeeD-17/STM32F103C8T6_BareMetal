@@ -43,19 +43,6 @@ extern "C" {
  */
 
 /**
- * @brief Checks whether a GPIO pin index maps to the CRH register image
- * @param[in] pinIndex Zero-based GPIO pin index
- * @returns CRH target state for @p pinIndex
- * @retval - @ref `DRIVER_STATUS_OFF`: @p pinIndex maps to `CRL`
- * @retval - @ref `DRIVER_STATUS_ON`: @p pinIndex maps to `CRH`
- * @note Caller owns pin-index validation before using this helper.
- */
-__STATIC_FORCEINLINE driver_status_t Codec_GPIO_PinIndexTargetsCRH(const gpio_pin_index_t pinIndex)
-{
-	return (pinIndex >= ((gpio_pin_index_t) (GPIO_PORT_PIN_COUNT / 2U))) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
-}
-
-/**
  * @brief Stages one complete GPIO config/mode selector pair into CRL/CRH and ODR images
  * @param[in] crxRegImage Caller-owned CRL/CRH image before replacement
  * @param[in] odrRegImage Caller-owned ODR image before replacement
@@ -69,9 +56,8 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_PinIndexTargetsCRH(const gpio_pi
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage or @p pOdrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The config/mode field could not be encoded
  * @note Caller owns validation of @p pinIndex, @p config, @p mode, and the
- * mode/config compatibility pair. The ODR image is changed only for
- * @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN` and @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
- * when @p mode is @ref `GPIO_PIN_MODE_INPUT`.
+ * mode/config compatibility pair. The driver layer decides whether the staged
+ * ODR delta is applied through ODR, BSRR, or BRR.
  */
 driver_status_t Codec_GPIO_StagePinConfigMode
 (
@@ -153,6 +139,9 @@ driver_status_t Codec_GPIO_ExtractPinOutputState
  * @param[in] idrRegImage Caller-owned IDR image
  * @param[in] pinIndex Zero-based GPIO pin index
  * @param[out] pPinState Destination for the extracted sampled input state
+ * Updated Values:
+ * - @ref `DRIVER_STATUS_OFF`: Pin is logic LOW
+ * - @ref `DRIVER_STATUS_ON`: Pin is logic HIGH
  * @returns Extraction status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Input state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinState is `NULL`

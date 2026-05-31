@@ -560,17 +560,15 @@ driver_status_t Codec_GPIO_StagePinConfigMode
 		fieldShift
 	);
 
-	//! Stage input pull state inside ODR only when the mode/config pair requires it
+	//! Stage input pull state inside ODR image only when the mode/config pair requires it
 	if (GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config) != 0x00U)
 	{
 		if (config == GPIO_PIN_CONFIG_INPUT_PULL_DOWN)
 		{
-			//! Stage pull-down by clearing the target ODR bit
 			updatedOdrRegImage &= ~pinBit;
 		}
 		else
 		{
-			//! Stage pull-up by setting the target ODR bit
 			updatedOdrRegImage |= pinBit;
 		}
 	}
@@ -587,7 +585,7 @@ driver_status_t Codec_GPIO_ExtractPinConfigMode
 	const reg					crxRegImage,
 	const reg					odrRegImage,
 	const gpio_pin_index_t		pinIndex,
-	gpio_pin_config_t* const		pConfig,
+	gpio_pin_config_t* const	pConfig,
 	gpio_pin_mode_t* const		pMode
 )
 {

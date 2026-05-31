@@ -17,8 +17,8 @@
 // SysTick Configuration
 #include "systick.h"
 #include "rcc.h"
-// GPIO Configuration
-#include "gpio.h"
+// Board Configuration
+#include "bsp.h"
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
 	#include "timer.h"

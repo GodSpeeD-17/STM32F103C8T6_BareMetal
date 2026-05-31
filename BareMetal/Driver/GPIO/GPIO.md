@@ -15,7 +15,7 @@ implementation rules, naming policy, and alignment plan.
 | `Inc/gpio_defines.h` | GPIO Defines/Validation | Public GPIO selector macros and pure validation/policy macros |
 | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
 | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding, raw CRL/CRH field placement, and staged register-image mutation |
-| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, `gpio_config_t`, validation, sequencing, batching, status returns, and guarded temporary board LED helpers |
+| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, validation, sequencing, batching, status returns, and generic GPIO convenience helpers |
 | `Inc/gpio_exti*.h`, `Src/gpio_exti*.c` | GPIO EXTI | GPIO-backed EXTI routing, trigger staging, NVIC integration |
 
 The current split is:
@@ -65,8 +65,8 @@ The current split is:
   visible to the driver.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
 - Keep board-specific behavior outside the generic GPIO driver. The current
-  Blue Pill LED helpers are guarded by `STM32F103C8T6__` and retained only for
-  existing projects until a board module is introduced.
+  Blue Pill LED helpers live in the BSP module, while generic GPIO pin
+  configuration remains in this driver.
 - Prefer `GPIO_SetPinModeConfig()` for semantic pin configuration on STM32F1.
 
 ## Codec Rationale
@@ -99,8 +99,8 @@ clock sequencing, batching decisions, or board-specific pin policy.
 | Defines/Validation | `Inc/gpio_defines.h` | Public GPIO selector macros and pure validation/policy macros that guard those selectors | Hardware reads/writes, clock sequencing, batching decisions, raw register field placement |
 | Low-Level | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Named static inline register read/write accessors, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, pin-index field mapping, raw CRL/CRH field placement, public compatibility policy, batching decisions, board behavior |
 | Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, pin-index to CRL/CRH image mapping, raw CRL/CRH field placement, staging CRL/CRH and ODR images, reset-image staging | Hardware reads/writes, clock sequencing, public API policy |
-| Driver | `Inc/gpio.h`, `Src/gpio.c` | Public APIs, public configuration structures such as `gpio_config_t`, validation, mode/config compatibility, clock sequencing, read/write batching, dirty tracking, status returns | Raw register map definitions, board-specific shortcuts |
-| Board/Project | Future board module and `Projects/*` | Blue Pill LED aliases, package pin availability decisions, examples | GPIO internals and raw register assumptions |
+| Driver | `Inc/gpio.h`, `Src/gpio.c` | Public APIs, explicit pin/mode/config input validation, mode/config compatibility, clock sequencing, read/write batching, dirty tracking, status returns | Raw register map definitions, board-specific shortcuts |
+| Board/Project | `BareMetal/Driver/BSP` and `Projects/*` | Blue Pill LED aliases, package pin availability decisions, examples | GPIO internals and raw register assumptions |
 
 ## Naming Convention
 
@@ -323,15 +323,18 @@ from trigger and port-source selector macros.
    - Keep CRL/CRH layout helpers in codec internals.
    - Review raw MODE/CNF aliases and keep them available only where codec or
      driver code genuinely needs the shared type.
-   - Keep `gpio_config_t` in `gpio.h`.
+   - Keep `GPIO_Init()` explicit: `GPIOx`, `pinMask`, `mode`, and `config`.
+   - Avoid descriptor-only initialization APIs in the GPIO driver.
    - Keep pointer-based port validation out of `gpio_data_types.h`; place it in
      `gpio_defines.h` initially, then move target/package restrictions to board
      policy when that layer exists.
 
 3. Move board behavior out of GPIO.
-   - Move `GPIO_OB_LED_PORT`, `GPIO_OB_LED_PIN`, `OB_LED_*`, and `GPIO_LED_Init`
-     into a Blue Pill board module or project-local board support file.
+   - Keep `GPIO_OB_LED_PORT`, `GPIO_OB_LED_PIN`, and `OB_LED_*` in the BSP
+     module.
    - Keep generic GPIO unaware of active-low LEDs.
+   - Keep `GPIO_LED_Init()` generic because it only applies a fixed GPIO mode
+     and configuration to a caller-provided port/pin mask.
 
 4. Keep semantic configuration atomic at the API level.
    - Prefer `GPIO_SetPinModeConfig()` for public pin setup.

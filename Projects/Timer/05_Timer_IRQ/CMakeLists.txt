@@ -21,6 +21,7 @@ stm32f103_configure_project(
     DRIVER_MODULES
         RCC
         GPIO
+        BSP
         NVIC
         Timer
     OPTIMIZATION_LEVEL 1

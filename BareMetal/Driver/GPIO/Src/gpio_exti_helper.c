@@ -23,7 +23,7 @@
 __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_IsSinglePinMaskValid(const gpio_pin_t pin)
 {
 	return ((GPIO_PIN_MASK_IS_VALID(pin) != 0x00U) &&
-		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_BIT(pin) != 0x00U)) ? 0x01U : 0x00U;
+		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_PIN(pin) != 0x00U)) ? 0x01U : 0x00U;
 }
 
 __STATIC_FORCEINLINE gpio_exti_port_t _GPIO_EXTI_Helper_GetPortSource(const GPIO_TypeDef* const GPIOx)

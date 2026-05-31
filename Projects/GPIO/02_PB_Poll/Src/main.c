@@ -7,17 +7,9 @@
 // Main Entry Point
 int main(){
 	// Initialisation of LEDs
-	gpio_config_t ledConfig = {
-		.pin = (RED_LED_PIN | YELLOW_LED_PIN),
-	};
-	GPIO_LED_Init(RED_LED_PORT, &ledConfig);
+	GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN));
 	// Initialization of Push Button
-	gpio_config_t pbConfig = {
-		.pin = PUSH_BUTTON_PIN,
-		.mode = GPIO_PIN_MODE_INPUT,
-		.config = GPIO_PIN_CNF_IN_FLOAT
-	};
-	GPIO_Init(PUSH_BUTTON_PORT, &pbConfig);
+	GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING);
 
 	// Infinite Loop
 	while(1){

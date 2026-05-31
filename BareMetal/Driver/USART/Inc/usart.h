@@ -291,6 +291,10 @@ void USART_RX_Buffer_Append(const char* str, uint8_t length);
 /*********************************************** Includes ***********************************************/
 // USART Configuration
 #include "usart_config.h"
+// Clocks (APB1/APB2)
+#include "rcc.h"
+// NVIC Enable
+#include "nvic.h"
 // va_list
 #include <stdarg.h>
 

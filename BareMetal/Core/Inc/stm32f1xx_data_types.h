@@ -123,9 +123,19 @@ typedef enum _driver_status_t
 
 /**
  * @brief Asserts Driver Status
- * @param[in] expr @ref driver_status_t "Expression to evaluate"
- * @returns Returns the evaluated status
- * @retval - Input Expression if not @ref `DRIVER_STATUS_SUCCESS`
+ * @param[in] expr Expression that evaluates to @ref `driver_status_t`
+ * @returns Returns the evaluated status only when @p expr is not @ref `DRIVER_STATUS_SUCCESS`
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: @p expr reported busy state
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @p expr reported invalid state
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: @p expr reported timeout
+ * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: @p expr reported generic failure
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p expr reported invalid argument
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p expr reported null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR`: @p expr reported baseline error
+ * @retval - @ref `DRIVER_STATUS_OFF`: @p expr reported off state
+ * @retval - @ref `DRIVER_STATUS_ON`: @p expr reported on state
+ * @retval - @ref `DRIVER_STATUS_READY`: @p expr reported ready state
+ * @note @ref `DRIVER_STATUS_SUCCESS` does not return from this macro; execution continues.
  */
 #define ASSERT_DRIVER_STATUS(expr)				\
 do												\
