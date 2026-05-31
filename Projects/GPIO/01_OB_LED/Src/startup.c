@@ -93,12 +93,9 @@ void Reset_Handler(void)
 	TIM_IRQ_Enable(DELAY_TIMER, TIMx_IRQ_OVF_UVF);
 #endif /* SYSTICK_DELAY__ */
 	SysTick_Enable();
-	// Step 5: Configure OB LED & Enable SysTick
-	OB_LED_Init();
-	OB_LED_Reset();
-	// Step 6: Call main()
+	// Step 5: Call main()
 	main();
-	// Step 7: Default Handler (Should never be reached)
+	// Step 6: Default Handler (Should never be reached)
 	Default_Handler();
 }
 
