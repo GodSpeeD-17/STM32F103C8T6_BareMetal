@@ -5,21 +5,28 @@
 
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
-int main(){
-	// Initialisation of LEDs
-	GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN));
-	// Initialization of Push Button
-	GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING);
+int main(void)
+{
+	//! Initialisation of LEDs
+	if (GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)) != DRIVER_STATUS_SUCCESS)
+	{
+		OB_LED_Set();
+		while(1);
+	}
+	//! Initialization of Push Button (External Pull-Up)
+	if (GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING) != DRIVER_STATUS_SUCCESS)
+	{
+		OB_LED_Set();
+		while(1);
+	}
 
 	// Infinite Loop
 	while(1)
 	{
-		// Check if Push Button is Pressed
-		if(GPIO_Get(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == DRIVER_STATUS_OFF)
+		//! Poll Push Button State (External Pull-Up)
+		if (GPIO_PinGet(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == DRIVER_STATUS_OFF)
 		{
-			// Turn ON Red LED
 			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
-			// Turn OFF Yellow LED
 			GPIO_PinToggle(YELLOW_LED_PORT, YELLOW_LED_PIN);
 		}
 		

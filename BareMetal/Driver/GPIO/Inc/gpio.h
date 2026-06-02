@@ -336,7 +336,7 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal input image extraction failed.
  * @note @p pin must contain exactly one valid GPIO pin bit.
  */
-driver_status_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
+driver_status_t GPIO_PinGet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Sets one or more GPIO output latch bits

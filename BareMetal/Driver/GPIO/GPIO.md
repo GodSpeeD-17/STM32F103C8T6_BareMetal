@@ -362,7 +362,7 @@ selector macros.
    - Document the order in the public API notes.
 
 6. Keep status-returning getters as the primary API shape.
-   - Keep `GPIO_Get(...)` returning `DRIVER_STATUS_OFF` / `DRIVER_STATUS_ON`
+   - Keep `GPIO_PinGet(...)` returning `DRIVER_STATUS_OFF` / `DRIVER_STATUS_ON`
      states plus error statuses.
    - Keep `GPIO_GetPinModeConfig(..., gpio_pin_mode_t *mode, gpio_pin_config_t *config)`
      as the primary mode/config extraction API.

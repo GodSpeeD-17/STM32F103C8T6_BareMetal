@@ -436,7 +436,7 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
 //										GPIO Driver Pin State APIs										//
 // ==================================================================================================== //
 
-driver_status_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
+driver_status_t GPIO_PinGet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 {
 	// Local Variables
 	reg gpioIdrRegImage = 0x00000000UL;
