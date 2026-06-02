@@ -31,8 +31,8 @@ extern "C" {
  *
  * This codebase documents EXTI in three software layers in execution order:
  * - Register layer: @ref `stm32f1xx_exti.h`
- * - Low-level control layer: @ref `gpio_exti_ll.h`
- * - Driver/orchestration layer: @ref `gpio_exti.h`
+ * - Low-level control layer: @ref `gpio_irq_ll.h`
+ * - Driver/orchestration layer: @ref `gpio_irq.h`
  */
 
 /**

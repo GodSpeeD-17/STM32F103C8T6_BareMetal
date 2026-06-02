@@ -46,18 +46,8 @@ typedef uint8_t									gpio_pin_index_t;
 typedef uint8_t									gpio_pin_mode_t;
 /** @brief GPIO pin configuration selector type @typedef gpio_pin_config_t */
 typedef uint8_t									gpio_pin_config_t;
-/** @brief Raw GPIO MODE field type @typedef gpio_mode_t */
-typedef uint8_t									gpio_mode_t;
-/** @brief Raw GPIO output speed field type @typedef gpio_speed_t */
-typedef uint8_t									gpio_speed_t;
-/** @brief Raw GPIO CNF field type @typedef gpio_cnf_t */
-typedef uint8_t									gpio_cnf_t;
-/** @brief Raw GPIO pull direction bit type @typedef gpio_pull_t */
-typedef uint8_t									gpio_pull_t;
-/** @brief GPIO EXTI trigger selector type @typedef gpio_exti_trigger_t */
-typedef uint8_t									gpio_exti_trigger_t;
-/** @brief GPIO EXTI port source selector type @typedef gpio_exti_port_t */
-typedef uint8_t									gpio_exti_port_t;
+/** @brief GPIO IRQ trigger selector type @typedef gpio_irq_trigger_t */
+typedef uint8_t									gpio_irq_trigger_t;
 
 /** @} */ // GPIO_03_Driver_01_Types
 

@@ -231,6 +231,41 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 }
 
 // ==================================================================================================== //
+//											 GPIO IRQ Selectors											//
+// ==================================================================================================== //
+
+/**
+ * @brief GPIO IRQ trigger selectors
+ * @defgroup GPIO_03_Driver_02_Defines_02_IRQ GPIO IRQ Selector Defines
+ * @ingroup GPIO_03_Driver_02_Defines
+ * @{
+ */
+
+/** @brief Trigger on falling edge @def GPIO_IRQ_TRIGGER_FALLING */
+#define GPIO_IRQ_TRIGGER_FALLING					((gpio_irq_trigger_t) 0x01U)
+/** @brief Trigger on rising edge @def GPIO_IRQ_TRIGGER_RISING */
+#define GPIO_IRQ_TRIGGER_RISING						((gpio_irq_trigger_t) 0x02U)
+/** @brief Trigger on both rising and falling edges @def GPIO_IRQ_TRIGGER_BOTH */
+#define GPIO_IRQ_TRIGGER_BOTH						((gpio_irq_trigger_t) (GPIO_IRQ_TRIGGER_FALLING | GPIO_IRQ_TRIGGER_RISING))
+
+/**
+ * @brief Checks whether a GPIO IRQ trigger selector is valid
+ * @param[in]	trigger	GPIO IRQ trigger selector
+ * @returns Trigger selector validity status
+ * @retval - `0x00U`: @p trigger is not a supported GPIO IRQ trigger selector
+ * @retval - `0x01U`: @p trigger is a supported GPIO IRQ trigger selector
+ * @def GPIO_IRQ_TRIGGER_IS_VALID
+ */
+#define GPIO_IRQ_TRIGGER_IS_VALID(trigger)											\
+(																					\
+	(((gpio_irq_trigger_t) (trigger)) != (gpio_irq_trigger_t) 0x00U) &&				\
+	((((gpio_irq_trigger_t) (trigger)) &												\
+	(~((gpio_irq_trigger_t) GPIO_IRQ_TRIGGER_BOTH))) == (gpio_irq_trigger_t) 0x00U)	\
+)
+
+/** @} */ // GPIO_03_Driver_02_Defines_02_IRQ
+
+// ==================================================================================================== //
 //											GPIO Pin Mode Types											//
 // ==================================================================================================== //
 

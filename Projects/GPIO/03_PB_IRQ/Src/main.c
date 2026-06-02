@@ -9,10 +9,8 @@ volatile uint32_t time_now = 0;
 int main(){
 	// LED Initialisation
 	GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN));
-	// Push Button Initialisation
-	GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING);
-	// Assign EXTI Line to Push Button Pin
-	GPIO_EXTI_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_EXTI_TRIGGER_FALLING);
+	// Push Button Interrupt Initialisation
+	GPIO_IRQ_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_CONFIG_INPUT_FLOATING, GPIO_IRQ_TRIGGER_FALLING);
 	// Infinite Loop
 	while(1){
 		// Toggle OB LED
@@ -29,7 +27,7 @@ int main(){
  */
 void EXTI1_IRQHandler(void){
 	// Check if the Interrupt is from the Push Button
-	if(GPIO_EXTI_IsTriggered(PUSH_BUTTON_PIN)){
+	if(GPIO_IRQ_IsTriggered(PUSH_BUTTON_PIN)){
 		// Eliminate Debounce Time
 		if(SysTick_Get_Ticks() - time_now > DEBOUNCE_TIME_MS){
 			time_now = SysTick_Get_Ticks();
@@ -37,7 +35,7 @@ void EXTI1_IRQHandler(void){
 			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
 		}
 		// Clear the Pending Bit
-		GPIO_EXTI_Ack(PUSH_BUTTON_PIN);
+		GPIO_IRQ_Ack(PUSH_BUTTON_PIN);
 	}
 }
 /*-------------------------------------------------------------------------------*/

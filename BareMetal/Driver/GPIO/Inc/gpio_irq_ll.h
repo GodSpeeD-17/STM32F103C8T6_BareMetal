@@ -1,13 +1,13 @@
 /**
- * @file	gpio_exti_ll.h
+ * @file	gpio_irq_ll.h
  * @author	Shrey Shah
- * @brief	GPIO EXTI Low-Level Register Access Interface
+ * @brief	GPIO IRQ Low-Level Register Access Interface
  * @version	v2.0
  * @date	31-03-2026
  *
  * @details
- * This header defines the GPIO EXTI low-level module that sits directly above
- * the raw EXTI and AFIO register-layer definitions.
+ * This header defines the GPIO IRQ low-level module that sits directly above
+ * the raw EXTI and AFIO register-layer definitions used for GPIO-backed IRQs.
  *
  * LL authority is intentionally narrow. It owns dumb EXTI/AFIO register access:
  * - static inline read/write accessors for EXTI register images
@@ -27,7 +27,7 @@
  * - Layer 0 (`stm32f1xx_exti.h` / `stm32f1xx_afio.h`) defines raw registers.
  * - LL exposes named full-register accessors and thin AFIO clock forwarding.
  * - Codec/helper APIs own selector translation and staged image mutation.
- * - Driver APIs (`gpio_exti.h` / `gpio_exti.c`) own public validation,
+ * - Driver APIs own public validation,
  *   sequencing, NVIC policy, and user-facing status.
  *
  * @note Functions in this file do not validate pointers, do not check clock
@@ -35,8 +35,8 @@
  * a pre-staged full register image.
  */
 
-#ifndef LL_GPIO_EXTI_H_
-#define LL_GPIO_EXTI_H_
+#ifndef LL_GPIO_IRQ_H_
+#define LL_GPIO_IRQ_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,18 +50,23 @@ extern "C" {
 #include "rcc_ll.h"
 
 /**
- * @addtogroup GPIO_EXTI_02_LL
+ * @defgroup GPIO_IRQ_02_LL GPIO IRQ Low-Level Control Layer
+ * @brief Dumb EXTI/AFIO register-image access used by GPIO IRQ drivers
+ */
+
+/**
+ * @addtogroup GPIO_IRQ_02_LL
  * @{
  */
 
 // ==================================================================================================== //
-//                                  GPIO EXTI LL Register Access APIs                                  //
+//                                   GPIO IRQ LL Register Access APIs                                  //
 // ==================================================================================================== //
 
 /**
- * @brief GPIO EXTI LL Register Access APIs
- * @defgroup GPIO_EXTI_02_LL_01_RegisterOps GPIO EXTI LL Register Access APIs
- * @ingroup GPIO_EXTI_02_LL
+ * @brief GPIO IRQ LL Register Access APIs
+ * @defgroup GPIO_IRQ_02_LL_01_RegisterOps GPIO IRQ LL Register Access APIs
+ * @ingroup GPIO_IRQ_02_LL
  * @details
  * These functions are intentionally dumb full-register image readers and
  * writers. They do not know GPIO pins, EXTI line ownership, AFIO EXTICR field
@@ -80,23 +85,23 @@ extern "C" {
 
 /**
  * @brief Returns pointer to an EXTI register `.REG` image
- * @def LL_GPIO_EXTI_EXTI_REG
+ * @def LL_GPIO_IRQ_EXTI_REG
  * @param[in]	_REG	Register member token inside @ref `EXTI_TypeDef`
  * @returns Pointer to the selected EXTI register `.REG` image.
  * @note This macro exists because C cannot pass a struct member name to a
  * generic static inline function without first forming the member address.
  */
-#define LL_GPIO_EXTI_EXTI_REG(_REG)						(&(EXTI->_REG.REG))
+#define LL_GPIO_IRQ_EXTI_REG(_REG)						(&(EXTI->_REG.REG))
 
 /**
  * @brief Returns pointer to an AFIO register `.REG` image
- * @def LL_GPIO_EXTI_AFIO_REG
+ * @def LL_GPIO_IRQ_AFIO_REG
  * @param[in]	_REG	Register member token inside @ref `AFIO_TypeDef`
  * @returns Pointer to the selected AFIO register `.REG` image.
  * @note This macro exists because C cannot pass a struct member name to a
  * generic static inline function without first forming the member address.
  */
-#define LL_GPIO_EXTI_AFIO_REG(_REG)						(&(AFIO->_REG.REG))
+#define LL_GPIO_IRQ_AFIO_REG(_REG)						(&(AFIO->_REG.REG))
 
 /**
  * @brief Reads one EXTI/AFIO register image by register pointer
@@ -104,7 +109,7 @@ extern "C" {
  * @returns Full 32-bit register image currently observed at @p pRegister.
  * @note Caller must pass a valid register pointer.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadRegister(const _IO* const pRegister)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadRegister(const _IO* const pRegister)
 {
 	return *pRegister;
 }
@@ -117,7 +122,7 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadRegister(const _IO* const pRegister)
  * @note Caller must pass a valid writable register pointer and a complete
  * register image appropriate for that register.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteRegister(_IO* const pRegister, const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteRegister(_IO* const pRegister, const reg regImage)
 {
 	*pRegister = regImage;
 }
@@ -127,9 +132,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteRegister(_IO* const pRegister, const
  * @returns Full `EXTI_IMR` image.
  * @note EXTI line masking policy belongs above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadIMR(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadIMR(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(IMR));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(IMR));
 }
 
 /**
@@ -138,9 +143,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadIMR(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and line-mask placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteIMR(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteIMR(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(IMR), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(IMR), regImage);
 }
 
 /**
@@ -148,9 +153,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteIMR(const reg regImage)
  * @returns Full `EXTI_EMR` image.
  * @note EXTI event masking policy belongs above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEMR(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadEMR(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(EMR));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(EMR));
 }
 
 /**
@@ -159,9 +164,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEMR(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and event-mask placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEMR(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteEMR(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(EMR), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(EMR), regImage);
 }
 
 /**
@@ -169,9 +174,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEMR(const reg regImage)
  * @returns Full `EXTI_RTSR` image.
  * @note Rising-trigger selector translation belongs above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadRTSR(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadRTSR(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(RTSR));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(RTSR));
 }
 
 /**
@@ -180,9 +185,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadRTSR(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and trigger-bit placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteRTSR(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteRTSR(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(RTSR), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(RTSR), regImage);
 }
 
 /**
@@ -190,9 +195,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteRTSR(const reg regImage)
  * @returns Full `EXTI_FTSR` image.
  * @note Falling-trigger selector translation belongs above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadFTSR(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadFTSR(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(FTSR));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(FTSR));
 }
 
 /**
@@ -201,9 +206,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadFTSR(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and trigger-bit placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteFTSR(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteFTSR(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(FTSR), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(FTSR), regImage);
 }
 
 /**
@@ -211,9 +216,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteFTSR(const reg regImage)
  * @returns Full `EXTI_SWIER` image.
  * @note Software interrupt/event policy belongs above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadSWIER(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadSWIER(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(SWIER));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(SWIER));
 }
 
 /**
@@ -222,9 +227,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadSWIER(void)
  * @returns Void.
  * @note Caller owns software interrupt/event selection.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteSWIER(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteSWIER(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(SWIER), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(SWIER), regImage);
 }
 
 /**
@@ -232,9 +237,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteSWIER(const reg regImage)
  * @returns Full `EXTI_PR` image.
  * @note Pending-line selection and acknowledgement policy belong above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadPR(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadPR(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_EXTI_REG(PR));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_EXTI_REG(PR));
 }
 
 /**
@@ -243,9 +248,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadPR(void)
  * @returns Void.
  * @note `PR` is a write-one-to-clear register. Caller owns the line mask.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WritePR(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WritePR(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_EXTI_REG(PR), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_EXTI_REG(PR), regImage);
 }
 
 /**
@@ -253,9 +258,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WritePR(const reg regImage)
  * @returns Full `AFIO_EXTICR1` image.
  * @note EXTICR field extraction and interpretation belong above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR1(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadEXTICR1(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR1));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR1));
 }
 
 /**
@@ -264,9 +269,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR1(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and field placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR1(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteEXTICR1(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR1), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR1), regImage);
 }
 
 /**
@@ -274,9 +279,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR1(const reg regImage)
  * @returns Full `AFIO_EXTICR2` image.
  * @note EXTICR field extraction and interpretation belong above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR2(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadEXTICR2(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR2));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR2));
 }
 
 /**
@@ -285,9 +290,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR2(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and field placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR2(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteEXTICR2(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR2), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR2), regImage);
 }
 
 /**
@@ -295,9 +300,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR2(const reg regImage)
  * @returns Full `AFIO_EXTICR3` image.
  * @note EXTICR field extraction and interpretation belong above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR3(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadEXTICR3(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR3));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR3));
 }
 
 /**
@@ -306,9 +311,9 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR3(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and field placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR3(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteEXTICR3(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR3), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR3), regImage);
 }
 
 /**
@@ -316,9 +321,9 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR3(const reg regImage)
  * @returns Full `AFIO_EXTICR4` image.
  * @note EXTICR field extraction and interpretation belong above LL.
  */
-__STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR4(void)
+__STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadEXTICR4(void)
 {
-	return LL_GPIO_EXTI_ReadRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR4));
+	return LL_GPIO_IRQ_ReadRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR4));
 }
 
 /**
@@ -327,21 +332,21 @@ __STATIC_FORCEINLINE reg LL_GPIO_EXTI_ReadEXTICR4(void)
  * @returns Void.
  * @note Caller owns read-modify-write staging and field placement.
  */
-__STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR4(const reg regImage)
+__STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteEXTICR4(const reg regImage)
 {
-	LL_GPIO_EXTI_WriteRegister(LL_GPIO_EXTI_AFIO_REG(EXTICR4), regImage);
+	LL_GPIO_IRQ_WriteRegister(LL_GPIO_IRQ_AFIO_REG(EXTICR4), regImage);
 }
 
-/** @} */ // GPIO_EXTI_02_LL_01_RegisterOps
+/** @} */ // GPIO_IRQ_02_LL_01_RegisterOps
 
 // ==================================================================================================== //
-//                                      GPIO EXTI LL Clock APIs                                        //
+//                                       GPIO IRQ LL Clock APIs                                        //
 // ==================================================================================================== //
 
 /**
- * @brief GPIO EXTI LL Clock APIs
- * @defgroup GPIO_EXTI_02_LL_02_Clock GPIO EXTI LL Clock APIs
- * @ingroup GPIO_EXTI_02_LL
+ * @brief GPIO IRQ LL Clock APIs
+ * @defgroup GPIO_IRQ_02_LL_02_Clock GPIO IRQ LL Clock APIs
+ * @ingroup GPIO_IRQ_02_LL
  * @details
  * These APIs forward the AFIO APB2 clock gate request to RCC LL. Driver policy
  * decides when the AFIO clock is required.
@@ -354,7 +359,7 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR4(const reg regImage)
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
-__STATIC_FORCEINLINE driver_status_t LL_GPIO_EXTI_EnableAFIOClock(void)
+__STATIC_FORCEINLINE driver_status_t LL_GPIO_IRQ_EnableAFIOClock(void)
 {
 	return RCC_LL_EnableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
@@ -365,17 +370,17 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_EXTI_EnableAFIOClock(void)
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
-__STATIC_FORCEINLINE driver_status_t LL_GPIO_EXTI_DisableAFIOClock(void)
+__STATIC_FORCEINLINE driver_status_t LL_GPIO_IRQ_DisableAFIOClock(void)
 {
 	return RCC_LL_DisableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 
-/** @} */ // GPIO_EXTI_02_LL_02_Clock
+/** @} */ // GPIO_IRQ_02_LL_02_Clock
 
-/** @} */ // GPIO_EXTI_02_LL
+/** @} */ // GPIO_IRQ_02_LL
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* LL_GPIO_EXTI_H_ */
+#endif /* LL_GPIO_IRQ_H_ */

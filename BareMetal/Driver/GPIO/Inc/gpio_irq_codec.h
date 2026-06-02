@@ -1,17 +1,17 @@
 /**
- * @file	gpio_exti_helper.h
+ * @file	gpio_irq_codec.h
  * @author	Shrey Shah
- * @brief	GPIO EXTI Internal Helper Interface
+ * @brief	GPIO IRQ Codec Interface
  * @version	v1.0
  * @date	31-03-2026
  *
  * @details
- * This header defines the internal helper utilities that bridge the GPIO EXTI
+ * This header defines the codec utilities that bridge the GPIO IRQ
  * driver layer and staged EXTI/AFIO register images.
  */
 
-#ifndef GPIO_EXTI_HELPER_H_
-#define GPIO_EXTI_HELPER_H_
+#ifndef GPIO_IRQ_CODEC_H_
+#define GPIO_IRQ_CODEC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,22 +21,22 @@ extern "C" {
 //                                               Includes                                               //
 // ==================================================================================================== //
 
-#include "gpio_exti.h"
+#include "gpio_defines.h"
 #include "nvic_types.h"
 
 /**
- * @addtogroup GPIO_EXTI_03_Driver
+ * @addtogroup GPIO_IRQ_03_Driver
  * @{
  */
 
 /**
- * @brief GPIO EXTI staged-image helper APIs
- * @defgroup GPIO_EXTI_03_Driver_02_Helper GPIO EXTI Staged-Image Helper APIs
- * @ingroup GPIO_EXTI_03_Driver
+ * @brief GPIO IRQ Codec APIs
+ * @defgroup GPIO_IRQ_03_Driver_02_Codec GPIO IRQ Codec APIs
+ * @ingroup GPIO_IRQ_03_Driver
  * @details
- * These helpers bridge public GPIO/EXTI selectors to caller-owned EXTI and AFIO
+ * These codecs bridge GPIO IRQ selectors to caller-owned EXTI and AFIO
  * register images. They do not directly access hardware registers and are
- * intended for use by `gpio_exti.c`.
+ * intended for use by `gpio_irq.c`.
  * @{
  */
 
@@ -51,7 +51,7 @@ extern "C" {
  * - @ref `GPIOE`
  * - @ref `GPIOF`
  * - @ref `GPIOG`
- * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @param[in] pin GPIO single-pin mask identifying the GPIO IRQ line
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in,out] pExticrRegImage Staged AFIO EXTICR image to update in place
@@ -62,16 +62,16 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pExticrRegImage was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
  */
-driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
+driver_status_t Codec_GPIO_IRQ_UpdatePortConfigImage
 (
 	GPIO_TypeDef* const GPIOx,
 	const gpio_pin_t pin,
-	uint32_t* const pExticrRegImage
+	reg* const pExticrRegImage
 );
 
 /**
  * @brief Restores one AFIO EXTICR line slot to reset state inside a staged register image
- * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @param[in] pin GPIO single-pin mask identifying the GPIO IRQ line
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in,out] pExticrRegImage Staged AFIO EXTICR image to update in place
@@ -82,22 +82,22 @@ driver_status_t _GPIO_EXTI_Helper_UpdatePortConfigImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pExticrRegImage was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
  */
-driver_status_t _GPIO_EXTI_Helper_ResetPortConfigImage
+driver_status_t Codec_GPIO_IRQ_ResetPortConfigImage
 (
 	const gpio_pin_t pin,
-	uint32_t* const pExticrRegImage
+	reg* const pExticrRegImage
 );
 
 /**
  * @brief Updates the staged EXTI rising and falling trigger images for one line
- * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @param[in] pin GPIO single-pin mask identifying the GPIO IRQ line
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] trigger Driver EXTI trigger selector
  * Accepted values:
- * - @ref `GPIO_EXTI_TRIGGER_FALLING`
- * - @ref `GPIO_EXTI_TRIGGER_RISING`
- * - @ref `GPIO_EXTI_TRIGGER_BOTH`
+ * - @ref `GPIO_IRQ_TRIGGER_FALLING`
+ * - @ref `GPIO_IRQ_TRIGGER_RISING`
+ * - @ref `GPIO_IRQ_TRIGGER_BOTH`
  * @param[in,out] pRtsrRegImage Staged EXTI RTSR image
  * @param[in,out] pFtsrRegImage Staged EXTI FTSR image
  * Expected values:
@@ -107,17 +107,17 @@ driver_status_t _GPIO_EXTI_Helper_ResetPortConfigImage
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p trigger was invalid.
  */
-driver_status_t _GPIO_EXTI_Helper_UpdateTriggerImages
+driver_status_t Codec_GPIO_IRQ_UpdateTriggerImages
 (
 	const gpio_pin_t pin,
-	const gpio_exti_trigger_t trigger,
-	uint32_t* const pRtsrRegImage,
-	uint32_t* const pFtsrRegImage
+	const gpio_irq_trigger_t trigger,
+	reg* const pRtsrRegImage,
+	reg* const pFtsrRegImage
 );
 
 /**
  * @brief Clears the staged EXTI rising and falling trigger images for one line
- * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @param[in] pin GPIO single-pin mask identifying the GPIO IRQ line
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in,out] pRtsrRegImage Staged EXTI RTSR image
@@ -129,16 +129,16 @@ driver_status_t _GPIO_EXTI_Helper_UpdateTriggerImages
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
  */
-driver_status_t _GPIO_EXTI_Helper_ResetTriggerImages
+driver_status_t Codec_GPIO_IRQ_ResetTriggerImages
 (
 	const gpio_pin_t pin,
-	uint32_t* const pRtsrRegImage,
-	uint32_t* const pFtsrRegImage
+	reg* const pRtsrRegImage,
+	reg* const pFtsrRegImage
 );
 
 /**
- * @brief Returns the NVIC IRQ number associated with one GPIO EXTI line
- * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @brief Returns the NVIC IRQ number associated with one GPIO IRQ line
+ * @param[in] pin GPIO single-pin mask identifying the GPIO IRQ line
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pIRQn Destination for the NVIC IRQ number
@@ -149,18 +149,18 @@ driver_status_t _GPIO_EXTI_Helper_ResetTriggerImages
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIRQn was a null pointer.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
  */
-driver_status_t _GPIO_EXTI_Helper_GetIRQn
+driver_status_t Codec_GPIO_IRQ_GetIRQn
 (
 	const gpio_pin_t pin,
 	irq_t* const pIRQn
 );
 
-/** @} */ // GPIO_EXTI_03_Driver_02_Helper
+/** @} */ // GPIO_IRQ_03_Driver_02_Codec
 
-/** @} */ // GPIO_EXTI_03_Driver
+/** @} */ // GPIO_IRQ_03_Driver
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* GPIO_EXTI_HELPER_H_ */
+#endif /* GPIO_IRQ_CODEC_H_ */

@@ -1,12 +1,12 @@
 // Header Guards
-#ifndef MAIN_H_
-#define MAIN_H_
+#ifndef MAIN
+#define MAIN
 
 /*-------------------------------------------------------------------------------*/
 // Headers
 #include "gpio.h"
 #include "bsp.h"
-#include "gpio_exti.h"
+#include "gpio_irq.h"
 #include "systick.h"
 /*-------------------------------------------------------------------------------*/
 
@@ -25,4 +25,4 @@ void EXTI1_IRQHandler(void);
 #define PUSH_BUTTON_PIN                     (GPIO_PIN_1)
 /*-------------------------------------------------------------------------------*/
 
-#endif /* MAIN_H_ */
+#endif /* MAIN */

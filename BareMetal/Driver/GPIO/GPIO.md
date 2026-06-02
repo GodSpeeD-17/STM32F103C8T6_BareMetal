@@ -15,8 +15,8 @@ implementation rules, naming policy, and alignment plan.
 | `Inc/gpio_defines.h` | GPIO Defines/Validation | Public GPIO selector macros and pure validation/policy macros |
 | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
 | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding, raw CRL/CRH field placement, and staged register-image mutation |
-| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, validation, sequencing, batching, status returns, and generic GPIO convenience helpers |
-| `Inc/gpio_exti*.h`, `Src/gpio_exti*.c` | GPIO EXTI | GPIO-backed EXTI routing, trigger staging, NVIC integration |
+| `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, validation, sequencing, batching, status returns, and generic GPIO convenience codecs |
+| `Inc/gpio_irq*.h`, `Src/gpio_irq*.c` | GPIO IRQ | GPIO-backed EXTI routing, trigger staging, NVIC integration |
 
 The current split is:
 
@@ -65,7 +65,7 @@ The current split is:
   visible to the driver.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
 - Keep board-specific behavior outside the generic GPIO driver. The current
-  Blue Pill LED helpers live in the BSP module, while generic GPIO pin
+  Blue Pill LED codecs live in the BSP module, while generic GPIO pin
   configuration remains in this driver.
 - Prefer `GPIO_SetPinModeConfig()` for semantic pin configuration on STM32F1.
 
@@ -113,7 +113,7 @@ Use full descriptive header suffixes:
 
 Use `LL_<Module>_<Action>` for new low-level APIs and macros.
 
-For GPIO, the intended namespaces are `LL_GPIO_*` and `LL_GPIO_EXTI_*`. The LL
+For GPIO, the intended namespaces are `LL_GPIO_*` and `LL_GPIO_IRQ_*`. The LL
 layer should be a dumb single point of register access: named static inline
 functions read and write full register images, while public selector
 compatibility, field placement, and orchestration stay above it.
@@ -125,8 +125,8 @@ image = LL_GPIO_ReadCRL(GPIOx);
 LL_GPIO_WriteCRL(GPIOx, image);
 image = LL_GPIO_ReadODR(GPIOx);
 LL_GPIO_WriteODR(GPIOx, image);
-image = LL_GPIO_EXTI_ReadIMR();
-LL_GPIO_EXTI_WriteIMR(image);
+image = LL_GPIO_IRQ_ReadIMR();
+LL_GPIO_IRQ_WriteIMR(image);
 ```
 
 Avoid adding new APIs with the legacy shape:
@@ -134,12 +134,12 @@ Avoid adding new APIs with the legacy shape:
 ```c
 GPIO_LL_READ_REG(...);
 GPIO_LL_SetPin(...);
-GPIO_EXTI_LL_EnableIRQ(...);
+GPIO_IRQ_LL_EnableIRQ(...);
 ```
 
-The implementation exposes only the `LL_GPIO_*` and `LL_GPIO_EXTI_*` names. Do
-not keep compatibility aliases for old `GPIO_LL_*` or `GPIO_EXTI_LL_*` shapes
-inside GPIO.
+The implementation exposes only the `LL_GPIO_*` and `LL_GPIO_IRQ_*` names. Do
+not keep compatibility aliases for old `GPIO_LL_*`, `GPIO_EXTI_LL_*`,
+`GPIO_IRQ_LL_*`, or `LL_GPIO_EXTI_*` shapes inside GPIO.
 
 Use `Codec_<Module>_<Action>` for codec APIs.
 
@@ -234,7 +234,7 @@ The driver should:
    that extracts and clears the lowest selected bit each iteration. Do not scan
    all 16 possible pins when only a sparse mask was requested.
 6. Convert each extracted single-pin mask to a `gpio_pin_index_t` before
-   entering codec helpers.
+   entering codec codecs.
 7. Read each touched `CRL`/`CRH` image once, and read `ODR` only when pull-state
    staging or extraction requires it.
 8. Stage each selected pin through codec functions.
@@ -268,7 +268,7 @@ while (remainingPins != GPIO_PIN_NONE)
 }
 ```
 
-The actual implementation should use unsigned casts or small local helpers for
+The actual implementation should use unsigned casts or small local codecs for
 the isolation and clear operations, but the iteration must remain proportional
 to the number of selected pins rather than the fixed port width.
 
@@ -300,32 +300,30 @@ decode the current counterpart field and validate the final pair before writing
 any staged image. The preferred public API should configure mode and config
 together.
 
-## GPIO EXTI Architecture
+## GPIO IRQ Architecture
 
 GPIO-backed EXTI should use the same ownership rules:
 
-- EXTI scalar aliases belong in an EXTI data-types header if they are shared.
-- EXTI public selectors and pure validation macros belong in an EXTI defines
-  header, not in the generic GPIO data-types header.
-- EXTI LL owns named full-register EXTI/AFIO accessors and AFIO clock
+- GPIO IRQ scalar aliases belong in `gpio_data_types.h`.
+- GPIO IRQ public selectors and pure validation macros belong in
+  `gpio_defines.h`, not in the public IRQ driver header.
+- GPIO IRQ LL owns named full-register EXTI/AFIO accessors and AFIO clock
   forwarding only.
-- The current EXTI helper layer owns AFIO EXTICR field placement and
-  trigger-image staging. If EXTI is normalized later, this should become an EXTI
-  codec layer with `Codec_GPIO_EXTI_*` style APIs.
-- EXTI driver owns GPIO input compatibility checks, AFIO clock sequencing,
+- The GPIO IRQ codec layer owns AFIO EXTICR field placement and trigger-image
+  staging through `Codec_GPIO_IRQ_*` APIs.
+- GPIO IRQ driver owns GPIO input compatibility checks, AFIO clock sequencing,
   EXTI register batching, NVIC enable/disable policy, and pending-bit ordering.
 
-When EXTI is normalized into a true codec layer, that codec should not include
-the public EXTI driver header. Future `gpio_exti_data_types.h` and
-`gpio_exti_defines.h` headers should split aliases from trigger and port-source
-selector macros.
+The GPIO IRQ codec must not include the public GPIO IRQ driver header. It should
+include `gpio_defines.h` and use aliases from `gpio_data_types.h` through that
+defines header.
 
 ## Alignment Plan
 
 1. Normalize naming policy.
-   - Use `LL_GPIO_*` and `LL_GPIO_EXTI_*` names.
-   - Do not keep compatibility macros for old `GPIO_LL_*` or
-     `GPIO_EXTI_LL_*` names.
+   - Use `LL_GPIO_*` and `LL_GPIO_IRQ_*` names.
+   - Do not keep compatibility macros for old `GPIO_LL_*`, `GPIO_EXTI_LL_*`,
+     `GPIO_IRQ_LL_*`, or `LL_GPIO_EXTI_*` names.
    - Update any remaining external call sites directly.
    - Remove public-policy validation from LL APIs once callers validate before
      entering the low-level layer.
@@ -334,7 +332,7 @@ selector macros.
    - Keep only pure scalar typedef aliases in `gpio_data_types.h`.
    - Keep public pin/mode/config selector macros in `gpio_defines.h`.
    - Keep pure validation/policy macros in `gpio_defines.h`.
-   - Keep CRL/CRH layout helpers in codec internals.
+   - Keep CRL/CRH layout codecs in codec internals.
    - Review raw MODE/CNF aliases and keep them available only where codec or
      driver code genuinely needs the shared type.
    - Keep `GPIO_Init()` explicit: `GPIOx`, `pinMask`, `mode`, and `config`.
@@ -374,15 +372,18 @@ selector macros.
    - Restrict Blue Pill-visible ports and pins in board or target policy.
    - Avoid accepting GPIOE/F/G for the STM32F103C8T6 LQFP48 board target.
 
-8. Normalize GPIO EXTI.
-   - Add `gpio_exti_data_types.h` for EXTI scalar aliases if needed.
-   - Add `gpio_exti_defines.h` for trigger and port-source selector macros.
-   - Treat current EXTI helper files/APIs as the temporary EXTI codec boundary.
-   - Rename EXTI helper files/APIs to codec files/APIs when normalizing EXTI.
-   - Move trigger and port-source selectors out of `gpio_exti.h`.
-   - Keep EXTI LL symbols on `LL_GPIO_EXTI_*` and restrict them to named
+8. Normalize GPIO IRQ.
+   - Keep GPIO IRQ scalar aliases in `gpio_data_types.h`.
+   - Keep only public GPIO IRQ trigger selector macros in `gpio_defines.h`.
+   - Keep AFIO EXTICR port-field encoding private to `gpio_irq_codec.*`.
+   - Keep GPIO IRQ codec files/APIs on the `gpio_irq_codec.*` and
+     `Codec_GPIO_IRQ_*` naming shape.
+   - Move trigger selectors out of `gpio_irq.h`.
+   - Keep `GPIO_IRQ_Init()` as a single public setup call over
+     `GPIOx + pinMask + inputConfig + trigger`.
+   - Keep GPIO IRQ LL symbols on `LL_GPIO_IRQ_*` and restrict them to named
      full-register accessors plus AFIO clock forwarding.
-   - Decide whether `GPIO_EXTI_Deinit()` should verify current port ownership or
+   - Decide whether `GPIO_IRQ_Deinit()` should verify current port ownership or
      drop its unused `GPIOx` argument.
 
 9. Clean project examples.
@@ -394,7 +395,7 @@ selector macros.
 
 1. Documentation and naming policy.
 2. Data aliases, selector defines, and validation split.
-3. Low-level `LL_GPIO_*` / `LL_GPIO_EXTI_*` rename.
+3. Low-level `LL_GPIO_*` / `LL_GPIO_IRQ_*` rename.
 4. Codec cleanup and pull-order staging support.
 5. Driver API behavior changes.
 6. Board module extraction.
