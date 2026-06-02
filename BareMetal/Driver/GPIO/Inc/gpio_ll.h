@@ -7,7 +7,7 @@
  *
  * @details
  * This header defines the GPIO low-level module that sits directly above the
- * register-layer definitions from @ref stm32f1xx_gpio.h.
+ * register-layer definitions from @ref `stm32f1xx_gpio.h`.
  *
  * LL authority is intentionally narrow. It owns dumb GPIO register access:
  * - static inline read/write accessors for GPIO register images
@@ -30,7 +30,7 @@
  * - Driver APIs (`gpio.h` / `gpio.c`) own public validation, sequencing, and
  *   user-facing status.
  *
- * @note Functions in this file do not validate @ref GPIO_TypeDef pointers, do
+ * @note Functions in this file do not validate @ref `GPIO_TypeDef` pointers, do
  * not check clock state, and do not preserve unrelated register bits unless the
  * caller supplies a pre-staged full register image.
  */
@@ -82,7 +82,7 @@ extern "C" {
  * @brief Returns pointer to GPIO register `.REG` image
  * @def LL_GPIO_REG
  * @param[in]	_GPIOX	Target GPIO peripheral instance expression
- * @param[in]	_REG	Register member token inside @ref GPIO_TypeDef
+ * @param[in]	_REG	Register member token inside @ref `GPIO_TypeDef`
  * @returns Pointer to the selected GPIO register `.REG` image.
  * @note This macro exists because C cannot pass a struct member name to a
  * generic static inline function without first forming the member address.
@@ -264,7 +264,7 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const reg
  * `RCC_APB2ENR` bit masks to RCC LL.
  *
  * Practical Rule:
- * - GPIO port clock APIs accept a @ref GPIO_TypeDef pointer and resolve it to
+ * - GPIO port clock APIs accept a @ref `GPIO_TypeDef` pointer and resolve it to
  *   the matching `RCC_APB2ENR_IOPxEN` bit.
  * - AFIO clock APIs use the raw `RCC_APB2ENR_AFIOEN` bit directly.
  * - This section only performs the requested clock-gate action. Driver policy
@@ -350,7 +350,7 @@ __STATIC_FORCEINLINE reg LL_GPIO_GetPortClockMask(const GPIO_TypeDef* const GPIO
 /**
  * @brief Enables the APB2 clock gate for one GPIO port
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref RCC_LL_EnableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_EnableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
  */
@@ -363,7 +363,7 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableClock(const GPIO_TypeDef* con
 /**
  * @brief Disables the APB2 clock gate for one GPIO port
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref RCC_LL_DisableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_DisableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
  */
@@ -375,7 +375,7 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_DisableClock(const GPIO_TypeDef* co
 
 /**
  * @brief Enables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref RCC_LL_EnableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_EnableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
@@ -386,7 +386,7 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableAFIOClock(void)
 
 /**
  * @brief Disables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref RCC_LL_DisableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_DisableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */

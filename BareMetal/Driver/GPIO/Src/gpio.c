@@ -43,7 +43,7 @@
  * @param[in] pinMask GPIO Pin Mask
  * @returns Single-pin mask for the lowest selected pin
  * @retval - @ref `GPIO_PIN_NONE`: @p pinMask has no selected pin
- * @retval - @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`: Lowest selected pin mask
+ * @retval - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Lowest selected pin mask
  */
 __STATIC_FORCEINLINE gpio_pin_t _GPIO_ExtractLowestPinFromPinMask(const gpio_pin_t pinMask)
 {

@@ -20,12 +20,40 @@
 //                                              Local Helpers                                           //
 // ==================================================================================================== //
 
+/**
+ * @brief Checks whether a GPIO pin mask selects exactly one valid EXTI line
+ * @param[in] pin GPIO single-pin mask candidate
+ * @returns Single-line validity status
+ * @retval - `0x00U`: @p pin is empty, invalid, or selects multiple lines
+ * @retval - `0x01U`: @p pin selects exactly one supported line
+ */
 __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_IsSinglePinMaskValid(const gpio_pin_t pin)
 {
 	return ((GPIO_PIN_MASK_IS_VALID(pin) != 0x00U) &&
 		(GPIO_PIN_MASK_HAS_AT_MOST_ONE_PIN(pin) != 0x00U)) ? 0x01U : 0x00U;
 }
 
+/**
+ * @brief Converts a GPIO peripheral instance to an AFIO EXTICR port-source selector
+ * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
+ * @returns Driver EXTI port-source selector
+ * @retval - @ref `GPIO_EXTI_PORT_A`: GPIOA selected
+ * @retval - @ref `GPIO_EXTI_PORT_B`: GPIOB selected
+ * @retval - @ref `GPIO_EXTI_PORT_C`: GPIOC selected
+ * @retval - @ref `GPIO_EXTI_PORT_D`: GPIOD selected
+ * @retval - @ref `GPIO_EXTI_PORT_E`: GPIOE selected
+ * @retval - @ref `GPIO_EXTI_PORT_F`: GPIOF selected
+ * @retval - @ref `GPIO_EXTI_PORT_G`: GPIOG selected
+ * @retval - `0xFFU`: @p GPIOx did not map to a supported port source
+ */
 __STATIC_FORCEINLINE gpio_exti_port_t _GPIO_EXTI_Helper_GetPortSource(const GPIO_TypeDef* const GPIOx)
 {
 	gpio_exti_port_t portSource = (gpio_exti_port_t) 0xFFU;
@@ -77,11 +105,28 @@ __STATIC_FORCEINLINE gpio_exti_port_t _GPIO_EXTI_Helper_GetPortSource(const GPIO
 	return portSource;
 }
 
+/**
+ * @brief Returns which AFIO EXTICR register owns one EXTI line
+ * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @returns Zero-based AFIO EXTICR index
+ * @retval - `0U`: EXTI0..EXTI3 route through `EXTICR1`
+ * @retval - `1U`: EXTI4..EXTI7 route through `EXTICR2`
+ * @retval - `2U`: EXTI8..EXTI11 route through `EXTICR3`
+ * @retval - `3U`: EXTI12..EXTI15 route through `EXTICR4`
+ * @note Caller owns validation that @p pin contains exactly one supported line.
+ */
 __STATIC_FORCEINLINE uint8_t _GPIO_EXTI_Helper_GetConfigRegisterIndex(const gpio_pin_t pin)
 {
 	return (uint8_t) (GPIO_PinMaskToIndex(pin) >> 2U);
 }
 
+/**
+ * @brief Returns the EXTICR field shift for one EXTI line inside its local EXTICR image
+ * @param[in] pin GPIO single-pin mask identifying the EXTI line
+ * @returns Bit position of the selected four-bit EXTICR field
+ * @retval - `0U, 4U, 8U, 12U`: Field shift inside the selected EXTICR image
+ * @note Caller owns validation that @p pin contains exactly one supported line.
+ */
 __STATIC_FORCEINLINE uint32_t _GPIO_EXTI_Helper_GetConfigFieldShift(const gpio_pin_t pin)
 {
 	return ((uint32_t) (GPIO_PinMaskToIndex(pin) & (gpio_pin_index_t) 0x03U) << 2U);

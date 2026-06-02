@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @brief	GPIO Codec Translation, Staging, and Extraction APIs
- * @defgroup GPIO_03_Driver_02_Codec GPIO Codec Translation, Staging, and Extraction APIs
+ * @defgroup GPIO_03_Driver_03_Codec GPIO Codec Translation, Staging, and Extraction APIs
  * @ingroup	GPIO_03_Driver
  * @details
  * These APIs own selector translation and staged register-image mutation for
@@ -236,7 +236,7 @@ driver_status_t Codec_GPIO_ExtractLockKeyState
 	driver_status_t* const		pLockKeyState
 );
 
-/** @} */ // GPIO_03_Driver_02_Codec
+/** @} */ // GPIO_03_Driver_03_Codec
 
 /** @} */ // GPIO_03_Driver
 

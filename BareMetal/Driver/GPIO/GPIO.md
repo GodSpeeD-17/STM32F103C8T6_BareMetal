@@ -98,7 +98,7 @@ clock sequencing, batching decisions, or board-specific pin policy.
 | Data Types | `Inc/gpio_data_types.h` | GPIO scalar typedef aliases such as `gpio_pin_t`, `gpio_pin_mode_t`, and `gpio_pin_config_t` | Public selector macros, validation macros, `GPIO_TypeDef`, full MCU include coupling, register layout, board behavior |
 | Defines/Validation | `Inc/gpio_defines.h` | Public GPIO selector macros and pure validation/policy macros that guard those selectors | Hardware reads/writes, clock sequencing, batching decisions, raw register field placement |
 | Low-Level | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Named static inline register read/write accessors, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, pin-index field mapping, raw CRL/CRH field placement, public compatibility policy, batching decisions, board behavior |
-| Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, pin-index to CRL/CRH image mapping, raw CRL/CRH field placement, staging CRL/CRH and ODR images, reset-image staging | Hardware reads/writes, clock sequencing, public API policy |
+| Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, pin-index to CRL/CRH image mapping, raw CRL/CRH field placement, and caller-owned register-image staging/extraction | Hardware reads/writes, clock sequencing, public API policy |
 | Driver | `Inc/gpio.h`, `Src/gpio.c` | Public APIs, explicit pin/mode/config input validation, mode/config compatibility, clock sequencing, read/write batching, dirty tracking, status returns | Raw register map definitions, board-specific shortcuts |
 | Board/Project | `BareMetal/Driver/BSP` and `Projects/*` | Blue Pill LED aliases, package pin availability decisions, examples | GPIO internals and raw register assumptions |
 
@@ -235,17 +235,28 @@ The driver should:
    all 16 possible pins when only a sparse mask was requested.
 6. Convert each extracted single-pin mask to a `gpio_pin_index_t` before
    entering codec helpers.
-7. Read each touched `CRL`, `CRH`, and `ODR` image once.
+7. Read each touched `CRL`/`CRH` image once, and read `ODR` only when pull-state
+   staging or extraction requires it.
 8. Stage each selected pin through codec functions.
 9. Write dirty images in the hardware-safe order.
 10. Return a user-facing `driver_status_t`.
 
-Driver APIs must follow a read-modify-write model for GPIO register state. Even
-single-bit operations such as public set/reset/toggle should read the relevant
-register image, modify the local image, and write it back once. This keeps the
-single-pin path consistent with multi-pin configuration and prevents repeated
-writes to the same register when one staged image can represent the whole
-request.
+Driver APIs that configure semantic GPIO state must follow a staged
+read-modify-write model: read each touched register image once, mutate the local
+image, then write each dirty image once. This applies to `CRL`, `CRH`, and ODR
+pull-state staging used by input pull-up/pull-down configuration.
+
+Public output state APIs intentionally use the hardware action registers where
+that is the safer and cheaper operation:
+
+- `GPIO_PinSet()` writes `GPIOx_BSRR`.
+- `GPIO_PinReset()` writes `GPIOx_BRR`.
+- `GPIO_PinToggle()` reads and writes `GPIOx_ODR` because toggle must observe the
+  current output latch image.
+
+Do not use direct ODR writes for simple set/reset operations. Reserve direct ODR
+access for full-image updates, pull-state extraction/staging, and toggle-style
+read-modify-write flows.
 
 For multi-pin masks, the driver should treat the mask as a bit field:
 
@@ -266,7 +277,7 @@ Codec functions that operate on one pin should take `gpio_pin_index_t`, not
 multi-pin selection; the driver is responsible for converting those masks to pin
 indices before codec staging or decoding.
 
-For input pull-up/pull-down, write the staged `ODR` pull state before exposing
+For input pull-up/pull-down, program the output-latch pull state before exposing
 the new `CNF=10` input-pull configuration in `CRL/CRH`.
 
 ## STM32F1 Mode/CNF Rule
@@ -298,13 +309,16 @@ GPIO-backed EXTI should use the same ownership rules:
   header, not in the generic GPIO data-types header.
 - EXTI LL owns named full-register EXTI/AFIO accessors and AFIO clock
   forwarding only.
-- EXTI codec owns AFIO EXTICR field placement and trigger-image staging.
+- The current EXTI helper layer owns AFIO EXTICR field placement and
+  trigger-image staging. If EXTI is normalized later, this should become an EXTI
+  codec layer with `Codec_GPIO_EXTI_*` style APIs.
 - EXTI driver owns GPIO input compatibility checks, AFIO clock sequencing,
   EXTI register batching, NVIC enable/disable policy, and pending-bit ordering.
 
-The EXTI codec should not include the public EXTI driver header. Future
-`gpio_exti_data_types.h` and `gpio_exti_defines.h` headers should split aliases
-from trigger and port-source selector macros.
+When EXTI is normalized into a true codec layer, that codec should not include
+the public EXTI driver header. Future `gpio_exti_data_types.h` and
+`gpio_exti_defines.h` headers should split aliases from trigger and port-source
+selector macros.
 
 ## Alignment Plan
 
@@ -340,17 +354,20 @@ from trigger and port-source selector macros.
    - Prefer `GPIO_SetPinModeConfig()` for public pin setup.
    - Keep `GPIO_SetPinMode()` and `GPIO_SetPinConfig()` guarded by decoding the
      current pin field and rejecting invalid final mode/config combinations.
-   - Keep public GPIO set/reset/toggle on read-modify-write `ODR` staging, not
-     one write per selected pin.
+   - Keep public GPIO set/reset on `BSRR`/`BRR`.
+   - Keep public GPIO toggle on one ODR read-modify-write path.
 
 5. Preserve input pull write ordering.
    - Stage `ODR` before `CRL/CRH` for pull-up/pull-down configuration.
    - Document the order in the public API notes.
 
-6. Add status-returning getters.
-   - Add `GPIO_ReadPin(..., uint8_t *level)`.
-   - Add `GPIO_GetPinModeConfig(..., gpio_pin_mode_t *mode, gpio_pin_config_t *config)`.
-   - Keep existing value-returning getters only as convenience wrappers.
+6. Keep status-returning getters as the primary API shape.
+   - Keep `GPIO_Get(...)` returning `DRIVER_STATUS_OFF` / `DRIVER_STATUS_ON`
+     states plus error statuses.
+   - Keep `GPIO_GetPinModeConfig(..., gpio_pin_mode_t *mode, gpio_pin_config_t *config)`
+     as the primary mode/config extraction API.
+   - Keep value-returning getters only as convenience wrappers with documented
+     fallback values.
 
 7. Make target/package pin availability explicit.
    - Keep family register maps broad enough for STM32F1.
@@ -360,6 +377,7 @@ from trigger and port-source selector macros.
 8. Normalize GPIO EXTI.
    - Add `gpio_exti_data_types.h` for EXTI scalar aliases if needed.
    - Add `gpio_exti_defines.h` for trigger and port-source selector macros.
+   - Treat current EXTI helper files/APIs as the temporary EXTI codec boundary.
    - Rename EXTI helper files/APIs to codec files/APIs when normalizing EXTI.
    - Move trigger and port-source selectors out of `gpio_exti.h`.
    - Keep EXTI LL symbols on `LL_GPIO_EXTI_*` and restrict them to named

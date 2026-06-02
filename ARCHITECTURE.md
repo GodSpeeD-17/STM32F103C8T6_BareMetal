@@ -245,9 +245,11 @@ Optimize by putting batching in the driver layer:
 - read each touched register once
 - mutate local images through codec functions
 - write each dirty register once
-- keep driver-level GPIO state changes in read-modify-write form, including
-  single-bit public operations, so single-pin and multi-pin paths share the same
-  staged-image model
+- keep semantic configuration flows in staged read-modify-write form, so
+  single-pin and multi-pin setup paths share the same local-image model
+- use hardware action registers for public output set/reset operations when the
+  peripheral provides them, and reserve output latch read-modify-write for
+  operations such as toggle that must observe the existing latch state
 
 Initialization code is usually not a hot path, but this repository intentionally
 uses it to learn where optimization belongs architecturally.

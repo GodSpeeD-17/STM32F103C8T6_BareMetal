@@ -22,14 +22,24 @@
 //                                              Local Macros                                            //
 // ==================================================================================================== //
 
+/** @brief Number of AFIO EXTICR register images used for EXTI0..EXTI15 routing @def GPIO_EXTI_AFIO_EXTICR_COUNT */
 #define GPIO_EXTI_AFIO_EXTICR_COUNT						((uint8_t) 0x04U)
+/** @brief Shared NVIC line mask for EXTI5..EXTI9 @def GPIO_EXTI_GROUP_05_09_MASK */
 #define GPIO_EXTI_GROUP_05_09_MASK						((reg) 0x000003E0UL)
+/** @brief Shared NVIC line mask for EXTI10..EXTI15 @def GPIO_EXTI_GROUP_10_15_MASK */
 #define GPIO_EXTI_GROUP_10_15_MASK						((reg) 0x0000FC00UL)
 
 // ==================================================================================================== //
 //                                              Local Helpers                                           //
 // ==================================================================================================== //
 
+/**
+ * @brief Extracts the lowest selected EXTI line from a GPIO pin mask
+ * @param[in] pinMask GPIO pin mask identifying one or more EXTI lines
+ * @returns Single-pin mask for the lowest selected EXTI line
+ * @retval - @ref `GPIO_PIN_NONE`: @p pinMask has no selected line
+ * @retval - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Lowest selected line mask
+ */
 static gpio_pin_t _GPIO_EXTI_GetLowestSelectedLine(const gpio_pin_t pinMask)
 {
 	gpio_pin_t currentPin = GPIO_PIN_0;
@@ -47,6 +57,22 @@ static gpio_pin_t _GPIO_EXTI_GetLowestSelectedLine(const gpio_pin_t pinMask)
 	return GPIO_PIN_NONE;
 }
 
+/**
+ * @brief Checks whether a GPIO input configuration is compatible with EXTI
+ * @param[in] config Driver GPIO configuration selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
+ * @returns EXTI input compatibility status
+ * @retval - `0x00U`: @p config is not accepted for EXTI input usage
+ * @retval - `0x01U`: @p config is accepted for EXTI input usage
+ */
 static uint8_t _GPIO_EXTI_IsInputConfigCompatible(const gpio_pin_config_t config)
 {
 	uint8_t isCompatible = 0x00U;
@@ -69,6 +95,22 @@ static uint8_t _GPIO_EXTI_IsInputConfigCompatible(const gpio_pin_config_t config
 	return isCompatible;
 }
 
+/**
+ * @brief Reads one AFIO EXTICR register image by EXTICR index
+ * @param[in] regIndex Zero-based EXTICR index
+ * Accepted values:
+ * - `0x00U`: Read `AFIO_EXTICR1`
+ * - `0x01U`: Read `AFIO_EXTICR2`
+ * - `0x02U`: Read `AFIO_EXTICR3`
+ * - `0x03U`: Read `AFIO_EXTICR4`
+ * @param[out] pRegImage Destination for the selected EXTICR image
+ * Expected values:
+ * - Non-`NULL`: Register image is written to @p pRegImage
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: EXTICR image was read.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p regIndex was outside `0U..3U`.
+ */
 static driver_status_t _GPIO_EXTI_ReadConfigRegisterImage(const uint8_t regIndex, reg* const pRegImage)
 {
 	if (pRegImage == NULL)
@@ -107,6 +149,19 @@ static driver_status_t _GPIO_EXTI_ReadConfigRegisterImage(const uint8_t regIndex
 	return DRIVER_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Writes one AFIO EXTICR register image by EXTICR index
+ * @param[in] regIndex Zero-based EXTICR index
+ * Accepted values:
+ * - `0x00U`: Write `AFIO_EXTICR1`
+ * - `0x01U`: Write `AFIO_EXTICR2`
+ * - `0x02U`: Write `AFIO_EXTICR3`
+ * - `0x03U`: Write `AFIO_EXTICR4`
+ * @param[in] regImage Full EXTICR register image to write
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: EXTICR image was written.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p regIndex was outside `0U..3U`.
+ */
 static driver_status_t _GPIO_EXTI_WriteConfigRegisterImage(const uint8_t regIndex, const reg regImage)
 {
 	switch (regIndex)
@@ -140,6 +195,15 @@ static driver_status_t _GPIO_EXTI_WriteConfigRegisterImage(const uint8_t regInde
 	return DRIVER_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Disables NVIC IRQ groups whose selected EXTI lines are no longer interrupt-masked
+ * @param[in] pin GPIO pin mask identifying EXTI lines being deinitialized
+ * @param[in] imrRegImage Updated EXTI IMR image after selected lines were cleared
+ * @details
+ * EXTI0..EXTI4 own dedicated NVIC IRQs. EXTI5..EXTI9 and EXTI10..EXTI15 share
+ * grouped NVIC IRQs, so those groups are disabled only when no line in the group
+ * remains enabled in @p imrRegImage.
+ */
 static void _GPIO_EXTI_DisableIRQsForMaskedLines(const gpio_pin_t pin, const reg imrRegImage)
 {
 	if (((reg) pin & (reg) GPIO_PIN_0) != 0x00000000UL)

@@ -81,7 +81,7 @@ extern "C" {
 /**
  * @brief Returns pointer to an EXTI register `.REG` image
  * @def LL_GPIO_EXTI_EXTI_REG
- * @param[in]	_REG	Register member token inside @ref EXTI_TypeDef
+ * @param[in]	_REG	Register member token inside @ref `EXTI_TypeDef`
  * @returns Pointer to the selected EXTI register `.REG` image.
  * @note This macro exists because C cannot pass a struct member name to a
  * generic static inline function without first forming the member address.
@@ -91,7 +91,7 @@ extern "C" {
 /**
  * @brief Returns pointer to an AFIO register `.REG` image
  * @def LL_GPIO_EXTI_AFIO_REG
- * @param[in]	_REG	Register member token inside @ref AFIO_TypeDef
+ * @param[in]	_REG	Register member token inside @ref `AFIO_TypeDef`
  * @returns Pointer to the selected AFIO register `.REG` image.
  * @note This macro exists because C cannot pass a struct member name to a
  * generic static inline function without first forming the member address.
@@ -350,7 +350,7 @@ __STATIC_FORCEINLINE void LL_GPIO_EXTI_WriteEXTICR4(const reg regImage)
 
 /**
  * @brief Enables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref RCC_LL_EnableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_EnableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
@@ -361,7 +361,7 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_EXTI_EnableAFIOClock(void)
 
 /**
  * @brief Disables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref RCC_LL_DisableAPB2Clock
+ * @returns Status forwarded from @ref `RCC_LL_DisableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */

@@ -46,7 +46,7 @@ extern "C" {
  * - @ref `GPIOG`
  * @param[in] pin GPIO single-pin mask
  * Accepted values:
- * - @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
+ * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pMode Destination for the current driver GPIO mode selector
  * Expected values:
  * - Non-`NULL`: Current mode is written to @p pMode
@@ -81,7 +81,7 @@ driver_status_t GPIO_GetPinModeConfig
  * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
- * - One or more OR-combined values from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] mode Driver GPIO mode selector
  * Accepted values:
  * - @ref `GPIO_PIN_MODE_INPUT`
@@ -115,36 +115,53 @@ driver_status_t GPIO_SetPinModeConfig
 /**
  * @brief Returns the current driver-facing mode selector for one GPIO pin
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pin GPIO single-pin mask
- * @returns Current mode as @ref gpio_pin_mode_t
+ * Accepted values:
+ * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * @returns Current mode as @ref `gpio_pin_mode_t`
  * @retval - @ref `GPIO_PIN_MODE_INPUT`: Pin is in input mode, or validation/decode failed
  * @retval - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`: Pin is in output mode with max speed 10 MHz
  * @retval - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`: Pin is in output mode with max speed 2 MHz
  * @retval - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`: Pin is in output mode with max speed 50 MHz
  * @note Returns @ref `GPIO_PIN_MODE_INPUT` if validation or decode fails.
  * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
- * Accepted inputs:
- * - @p GPIOx: @ref `GPIOA`..@ref `GPIOG`
- * - @p pin: one value from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
  */
 gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Configures the mode field of one or more GPIO pins
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] mode Driver GPIO mode selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_MODE_INPUT`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode field was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, or @p mode was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
  * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
  * and @ref `GPIO_SetPinModeConfig`.
- * Accepted inputs:
- * - @p GPIOx: @ref `GPIOA`..@ref `GPIOG`
- * - @p pinMask: one or more OR-combined values from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
- * - @p mode: @ref `GPIO_PIN_MODE_INPUT`, @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`,
- *   @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`, or @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
  * Existing configuration for every selected pin must remain compatible with @p mode.
  * @note Use @ref `GPIO_SetPinModeConfig` when changing mode and config together.
  */
@@ -158,8 +175,18 @@ driver_status_t GPIO_SetPinMode
 /**
  * @brief Returns the current driver-facing configuration selector for one GPIO pin
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pin GPIO single-pin mask
- * @returns Current configuration as @ref gpio_pin_config_t
+ * Accepted values:
+ * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * @returns Current configuration as @ref `gpio_pin_config_t`
  * @retval - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`: Pin is analog input, or validation/decode failed
  * @retval - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`: Pin is floating input
  * @retval - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`: Pin is input with pull-down
@@ -170,31 +197,39 @@ driver_status_t GPIO_SetPinMode
  * @retval - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`: Pin is alternate-function output open-drain
  * @note Returns @ref `GPIO_PIN_CONFIG_INPUT_ANALOG` if validation or decode fails.
  * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
- * Accepted inputs:
- * - @p GPIOx: @ref `GPIOA`..@ref `GPIOG`
- * - @p pin: one value from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
  */
 gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Configures the electrical configuration field of one or more GPIO pins
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] config Driver GPIO configuration selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration field was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, or @p config was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
  * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
  * and @ref `GPIO_SetPinModeConfig`.
- * Accepted inputs:
- * - @p GPIOx: @ref `GPIOA`..@ref `GPIOG`
- * - @p pinMask: one or more OR-combined values from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
- * - @p config: one value from @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`,
- *   @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`, @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`,
- *   @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`, @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`,
- *   @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`, @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`,
- *   or @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
  * Existing mode for every selected pin must remain compatible with @p config.
  * @note Use @ref `GPIO_SetPinModeConfig` when changing mode and config together.
  */
@@ -218,7 +253,7 @@ driver_status_t GPIO_SetPinConfig
  * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
- * - One or more OR-combined values from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] mode Driver GPIO mode selector
  * Accepted values:
  * - @ref `GPIO_PIN_MODE_INPUT`
@@ -252,7 +287,17 @@ driver_status_t GPIO_Init
 /**
  * @brief Restores one or more GPIO pins to floating-input configuration
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pins were restored.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
@@ -273,7 +318,17 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
 /**
  * @brief Reads the sampled logic level of one GPIO input pin
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver logic-level status
  * @retval - @ref `DRIVER_STATUS_OFF`: The sampled input bit was low.
  * @retval - @ref `DRIVER_STATUS_ON`: The sampled input bit was high.
@@ -286,7 +341,17 @@ driver_status_t GPIO_Get(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 /**
  * @brief Sets one or more GPIO output latch bits
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were set.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
@@ -297,7 +362,17 @@ driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
 /**
  * @brief Resets one or more GPIO output latch bits
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were reset.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
@@ -308,7 +383,17 @@ driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMas
 /**
  * @brief Toggles one or more GPIO output latch bits
  * @param[in] GPIOx GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
+ * Accepted values:
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were toggled.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
@@ -331,7 +416,7 @@ driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMa
  * - @ref `GPIOG`
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
- * - One or more OR-combined values from @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock enable and LED pin configuration completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.

@@ -12,9 +12,11 @@ int main(){
 	GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING);
 
 	// Infinite Loop
-	while(1){
+	while(1)
+	{
 		// Check if Push Button is Pressed
-		if(GPIO_Get(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == 0x01){
+		if(GPIO_Get(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == DRIVER_STATUS_OFF)
+		{
 			// Turn ON Red LED
 			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
 			// Turn OFF Yellow LED

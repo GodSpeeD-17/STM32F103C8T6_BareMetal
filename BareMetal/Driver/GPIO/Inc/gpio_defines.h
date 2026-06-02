@@ -32,6 +32,17 @@ extern "C" {
  * @{
  */
 
+/**
+ * @brief GPIO public selector and validation macros
+ * @defgroup GPIO_03_Driver_02_Defines GPIO Driver Selector and Validation Defines
+ * @ingroup GPIO_03_Driver
+ * @details
+ * This group contains public GPIO selector macros and pure validation helpers.
+ * It deliberately excludes GPIO scalar typedef aliases and direct register
+ * access helpers.
+ * @{
+ */
+
 // ==================================================================================================== //
 //												GPIO Pins												//
 // ==================================================================================================== //
@@ -39,7 +50,7 @@ extern "C" {
 /**
  * @brief GPIO shared pin bitmasks
  * @defgroup GPIO_03_Driver_02_Defines_01_Pins GPIO Driver Pins
- * @ingroup GPIO_03_Driver
+ * @ingroup GPIO_03_Driver_02_Defines
  * @{
  */
 
@@ -66,7 +77,7 @@ extern "C" {
  * @brief Converts a zero-based GPIO pin index to a single-pin mask
  * @param[in] pinIndex Zero-based GPIO pin index
  * @returns GPIO pin mask generated from @p pinIndex
- * @retval - @ref `GPIO_PIN_0`..@ref `GPIO_PIN_15`: @p pinIndex is in the valid GPIO pin-index range
+ * @retval - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: @p pinIndex is in the valid GPIO pin-index range
  * @def GPIO_PIN_INDEX_TO_MASK
  */
 #define GPIO_PIN_INDEX_TO_MASK(pinIndex)		((gpio_pin_t) REG_BIT_MASK(pinIndex))
@@ -356,6 +367,8 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 		)																				\
 	)																					\
 )
+
+/** @} */ // GPIO_03_Driver_02_Defines
 
 /** @} */ // GPIO_03_Driver
 
