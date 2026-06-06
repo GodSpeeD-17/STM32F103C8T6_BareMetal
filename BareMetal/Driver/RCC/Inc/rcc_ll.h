@@ -56,7 +56,7 @@ extern "C" {
  * @param[in] _REG	Register member name inside @ref RCC_TypeDef
  * @returns Pointer to the selected RCC register `.REG` image
  */
-#define RCC_LL_REG(_REG)								(&(RCC->_REG.REG))
+#define RCC_LL_REG(_REG)								REGOPS_REG(RCC, _REG)
 
 /**
  * @brief	Reads full RCC register image

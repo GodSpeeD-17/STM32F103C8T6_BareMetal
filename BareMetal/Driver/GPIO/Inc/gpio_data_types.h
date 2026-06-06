@@ -13,14 +13,15 @@
 #ifndef GPIO_DATA_TYPES_H_
 #define GPIO_DATA_TYPES_H_
 
+// ==================================================================================================== //
+//											Includes													//
+// ==================================================================================================== //
+#include "stm32f1xx_data_types.h"
+
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-// ==================================================================================================== //
-//                                               Includes                                               //
-// ==================================================================================================== //
-#include "stm32f1xx_data_types.h"
 
 /**
  * @addtogroup GPIO_03_Driver
@@ -53,6 +54,7 @@ typedef uint8_t									gpio_irq_trigger_t;
 
 /** @} */ // GPIO_03_Driver
 
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -49,6 +49,7 @@
 // ==================================================================================================== //
 //												Includes												//
 // ==================================================================================================== //
+#include "cmsis_gcc.h"
 #include "stm32f1xx_data_types.h"
 
 // --- C++ Safeguards ---
@@ -161,6 +162,19 @@ extern "C" {
  */
 
 /**
+ * @brief Returns pointer to a peripheral register `.REG` image
+ * @def REGOPS_REG
+ * @param[in]	_PERIPH	Peripheral instance expression
+ * @param[in]	_REG	Register member token inside the peripheral register map
+ * @returns Pointer to the selected register `.REG` image.
+ * @note This macro exists because C cannot pass a struct member token to a
+ * generic static inline function without first forming the member address.
+ * @note @p _PERIPH must point to a register map where @p _REG exposes a `.REG`
+ * member.
+ */
+#define REGOPS_REG(_PERIPH, _REG)				(&((_PERIPH)->_REG.REG))
+
+/**
  * @brief Read value from register
  * 
  * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
@@ -238,85 +252,136 @@ extern "C" {
 
 /**
  * @brief Read a 32-bit memory-mapped register.
- *
- * @param[in]	reg			Pointer to the memory-mapped register.
- * @param[out]	out_value	Pointer to variable receiving the register value.
- *
- * @retval DRIVER_STATUS_SUCCESS			Read completed successfully.
- * @retval DRIVER_STATUS_ERR_INVALID_ARG	One or more arguments are NULL.
- *
- * @note
- * This API does not validate the address range. It assumes `reg` points to valid Memory Mapped IO
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[out]	pRegImage	Pointer to variable receiving the register value
+ * @returns @ref driver_status_t "Driver Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Read completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister or @p pRegImage is `NULL`.
+ * @note This API does not validate the address range. It assumes @p pRegister
+ * points to valid memory-mapped I/O.
  */
-driver_status_t	RegOps_Read(_IO *reg, uint32_t* const out_value);
+__STATIC_FORCEINLINE driver_status_t RegOps_Read(const _IO* const pRegister, uint32_t* const pRegImage)
+{
+	if ((pRegister == NULL) || (pRegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegImage = *pRegister;
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /**
  * @brief Write a 32-bit memory-mapped register.
- *
- * @param[in]	reg		Pointer to the memory-mapped register.
- * @param[in]	value	Value to write.
- *
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[in]	regImage	Value to write
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
  */
-driver_status_t	RegOps_Write(_IO *reg, uint32_t value);
+__STATIC_FORCEINLINE driver_status_t RegOps_Write(_IO* const pRegister, const uint32_t regImage)
+{
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegister = regImage;
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /**
  * @brief Set bits in a 32-bit memory-mapped register (OR operation).
- *
- * @param[in]	reg		Pointer to the memory-mapped register.
- * @param[in]	mask	Bit mask to set.
- *
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[in]	mask		Bit mask to set
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
  */
-driver_status_t	RegOps_Set(_IO *reg, uint32_t mask);
+__STATIC_FORCEINLINE driver_status_t RegOps_Set(_IO* const pRegister, const uint32_t mask)
+{
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegister |= mask;
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /**
  * @brief Clear bits in a 32-bit memory-mapped register (AND with ~mask).
- *
- * @param[in]	reg		Pointer to the memory-mapped register.
- * @param[in]	mask	Bit mask to clear.
- *
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[in]	mask		Bit mask to clear
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
  */
-driver_status_t	RegOps_Clear(_IO *reg, uint32_t mask);
+__STATIC_FORCEINLINE driver_status_t RegOps_Clear(_IO* const pRegister, const uint32_t mask)
+{
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegister &= ~mask;
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /**
  * @brief Toggle bits in a 32-bit memory-mapped register (XOR operation).
- *
- * @param[in]	reg		Pointer to the memory-mapped register.
- * @param[in]	mask	Bit mask to toggle.
- *
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[in]	mask		Bit mask to toggle
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
  */
-driver_status_t	RegOps_Toggle(_IO *reg, uint32_t mask);
+__STATIC_FORCEINLINE driver_status_t RegOps_Toggle(_IO* const pRegister, const uint32_t mask)
+{
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegister ^= mask;
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /**
  * @brief Write a masked field inside a 32-bit register.
- *
  * @details
  * This helper performs: `reg = (reg & ~mask) | (value & mask)`.
  * Use it for writing bitfields where `value` is already aligned to the mask position.
- *
- * @param[in]	reg		Pointer to the memory-mapped register.
- * @param[in]	mask	Field mask (already shifted to position).
- * @param[in]	value	Field value (already shifted to position).
- *
+ * @param[in]	pRegister	Pointer to the memory-mapped register
+ * @param[in]	mask		Field mask (already shifted to position)
+ * @param[in]	value		Field value (already shifted to position)
  * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			Operation completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`:	@c reg is NULL.
- *
- * @warning
- * Caller must ensure `value` is correctly shifted and does not set bits outside `mask`.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @warning Caller must ensure @p value is correctly shifted and does not set
+ * bits outside @p mask.
  */
-driver_status_t	RegOps_WriteMasked(_IO *reg, uint32_t mask, uint32_t value);
+__STATIC_FORCEINLINE driver_status_t RegOps_WriteMasked
+(
+	_IO* const			pRegister,
+	const uint32_t		mask,
+	const uint32_t		value
+)
+{
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	*pRegister = (*pRegister & ~mask) | (value & mask);
+
+	return DRIVER_STATUS_SUCCESS;
+}
 
 /** @} */ // 01_STM32F1xx_Utilities_04_RegisterOps
 

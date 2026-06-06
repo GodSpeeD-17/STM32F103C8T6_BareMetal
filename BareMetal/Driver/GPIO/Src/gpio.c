@@ -35,59 +35,6 @@
 	(GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15)
 
 // ==================================================================================================== //
-//											GPIO Pin Mask Helpers										//
-// ==================================================================================================== //
-
-/**
- * @brief Extracts the lowest selected pin from a GPIO pin mask
- * @param[in] pinMask GPIO Pin Mask
- * @returns Single-pin mask for the lowest selected pin
- * @retval - @ref `GPIO_PIN_NONE`: @p pinMask has no selected pin
- * @retval - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Lowest selected pin mask
- */
-__STATIC_FORCEINLINE gpio_pin_t _GPIO_ExtractLowestPinFromPinMask(const gpio_pin_t pinMask)
-{
-	//! Any number & 2's complement isolates the lowest set bit, or returns 0 if no bits are set
-	return (gpio_pin_t) (((uint32_t) pinMask) & (0UL - ((uint32_t) pinMask)));
-}
-
-/**
- * @brief Removes the lowest selected pin from a GPIO pin mask image
- * @param[in,out] pPinMask GPIO pin mask image to update
- * @param[in] pin GPIO single-pin mask returned by @ref `_GPIO_ExtractLowestPinFromPinMask`
- * @returns Remove status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin was removed from @p pPinMask
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinMask is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not the lowest selected pin in @p pPinMask
- */
-__STATIC_FORCEINLINE driver_status_t _GPIO_RemoveLowestPinFromPinMask
-(
-	gpio_pin_t* const		pPinMask,
-	const gpio_pin_t		pin
-)
-{
-	// Validate Input
-	if (pPinMask == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	if
-	(
-		(GPIO_PIN_MASK_IS_VALID(*pPinMask) == 0U) ||
-		(GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pin) == 0U) ||
-		(pin != _GPIO_ExtractLowestPinFromPinMask(*pPinMask))
-	)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Remove the lowest selected pin from the pin mask image by clearing the corresponding bit
-	*pPinMask = (gpio_pin_t) (((uint32_t) (*pPinMask)) & ~((uint32_t) pin));
-
-	return DRIVER_STATUS_SUCCESS;
-}
-
-// ==================================================================================================== //
 //										GPIO Driver Configuration APIs									//
 // ==================================================================================================== //
 
@@ -193,7 +140,7 @@ driver_status_t GPIO_SetPinModeConfig
 	while (remainingPins != GPIO_PIN_NONE)
 	{
 		//! Extract lowest pin from pin mask
-		currentPin = _GPIO_ExtractLowestPinFromPinMask(remainingPins);
+		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
 		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
 		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
 		{
@@ -235,7 +182,7 @@ driver_status_t GPIO_SetPinModeConfig
 		dirtyImages |= crxImageMask;
 
 		//! Remove the lowest selected pin from pin mask
-		ASSERT_DRIVER_STATUS(_GPIO_RemoveLowestPinFromPinMask(&remainingPins, currentPin));
+		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
 	//! Program pull-up/pull-down latch delta before exposing the CRL/CRH input-pull fields
@@ -308,7 +255,7 @@ driver_status_t GPIO_SetPinMode
 	while (remainingPins != GPIO_PIN_NONE)
 	{
 		//! Extract lowest pin from pin mask
-		currentPin = _GPIO_ExtractLowestPinFromPinMask(remainingPins);
+		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
 		currentConfig = GPIO_GetPinConfig(GPIOx, currentPin);
 		if (GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, currentConfig) == 0x00U)
 		{
@@ -321,7 +268,7 @@ driver_status_t GPIO_SetPinMode
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		ASSERT_DRIVER_STATUS(_GPIO_RemoveLowestPinFromPinMask(&remainingPins, currentPin));
+		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -368,7 +315,7 @@ driver_status_t GPIO_SetPinConfig
 	while (remainingPins != GPIO_PIN_NONE)
 	{
 		//! Extract lowest pin from pin mask
-		currentPin = _GPIO_ExtractLowestPinFromPinMask(remainingPins);
+		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
 		currentMode = GPIO_GetPinMode(GPIOx, currentPin);
 		if (GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(currentMode, config) == 0x00U)
 		{
@@ -381,7 +328,7 @@ driver_status_t GPIO_SetPinConfig
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 
-		ASSERT_DRIVER_STATUS(_GPIO_RemoveLowestPinFromPinMask(&remainingPins, currentPin));
+		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
 	return DRIVER_STATUS_SUCCESS;

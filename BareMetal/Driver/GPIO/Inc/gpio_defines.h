@@ -133,6 +133,14 @@ extern "C" {
 /**
  * @brief Checks whether a GPIO peripheral instance is supported by the driver
  * @param[in]	GPIOx	GPIO peripheral instance
+ * Accepted values:
+ * - @ref `GPIOA`
+ * - @ref `GPIOB`
+ * - @ref `GPIOC`
+ * - @ref `GPIOD`
+ * - @ref `GPIOE`
+ * - @ref `GPIOF`
+ * - @ref `GPIOG`
  * @returns Validity status of the input GPIO peripheral instance
  * @retval - `0x00U`: @p GPIOx is not a supported GPIO peripheral instance
  * @retval - `0x01U`: @p GPIOx is a supported GPIO peripheral instance
@@ -230,8 +238,53 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 	return pinIndex;
 }
 
+/**
+ * @brief Extracts the lowest selected pin from a GPIO pin mask
+ * @param[in]	pinMask	GPIO pin mask image
+ * @returns Single-pin mask for the lowest selected pin
+ * @retval - @ref `GPIO_PIN_NONE`: @p pinMask has no selected pin
+ * @retval - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Lowest selected pin mask
+ */
+__STATIC_FORCEINLINE gpio_pin_t GPIO_PinMaskExtractLowestPin(const gpio_pin_t pinMask)
+{
+	return (gpio_pin_t) (((uint32_t) pinMask) & (0UL - ((uint32_t) pinMask)));
+}
+
+/**
+ * @brief Removes one selected pin from a GPIO pin mask image
+ * @param[in,out]	pPinMask	GPIO pin mask image to update
+ * @param[in]		pin			GPIO single-pin mask to remove
+ * @returns Remove status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin was removed from @p pPinMask
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinMask is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin selected in @p pPinMask
+ */
+__STATIC_FORCEINLINE driver_status_t GPIO_PinMaskRemovePin(gpio_pin_t* const pPinMask, const gpio_pin_t pin)
+{
+	// Validate Input
+	if (pPinMask == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	// Pin must be a single valid pin
+	if
+	(
+		(GPIO_PIN_MASK_IS_VALID(*pPinMask) == 0U) ||
+		(GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pin) == 0U) ||
+		((((uint32_t) (*pPinMask)) & ((uint32_t) pin)) == 0x00000000UL)
+	)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! Clear the input pin bit from the input pin mask image
+	*pPinMask = (gpio_pin_t) (((uint32_t) (*pPinMask)) & ~((uint32_t) pin));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
 // ==================================================================================================== //
-//											 GPIO IRQ Selectors											//
+//											GPIO IRQ Selectors											//
 // ==================================================================================================== //
 
 /**
@@ -259,7 +312,7 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 #define GPIO_IRQ_TRIGGER_IS_VALID(trigger)											\
 (																					\
 	(((gpio_irq_trigger_t) (trigger)) != (gpio_irq_trigger_t) 0x00U) &&				\
-	((((gpio_irq_trigger_t) (trigger)) &												\
+	((((gpio_irq_trigger_t) (trigger)) &											\
 	(~((gpio_irq_trigger_t) GPIO_IRQ_TRIGGER_BOTH))) == (gpio_irq_trigger_t) 0x00U)	\
 )
 
@@ -332,6 +385,21 @@ __STATIC_FORCEINLINE gpio_pin_index_t GPIO_PinMaskToIndex(const gpio_pin_t pinMa
 	(((gpio_pin_config_t) (config)) == GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN) ||	\
 	(((gpio_pin_config_t) (config)) == GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL) ||	\
 	(((gpio_pin_config_t) (config)) == GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN)	\
+)
+
+/**
+ * @brief Checks whether a GPIO configuration selector is valid for GPIO IRQ input usage
+ * @param[in]	inputConfig	GPIO input configuration selector
+ * @returns GPIO IRQ input configuration validity status
+ * @retval - `0x00U`: @p inputConfig is not accepted for GPIO IRQ input usage
+ * @retval - `0x01U`: @p inputConfig is accepted for GPIO IRQ input usage
+ * @def GPIO_IRQ_INPUT_CONFIG_IS_VALID
+ */
+#define GPIO_IRQ_INPUT_CONFIG_IS_VALID(inputConfig)									\
+(																					\
+	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_FLOATING) ||		\
+	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_PULL_DOWN) ||		\
+	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_PULL_UP)			\
 )
 
 /**

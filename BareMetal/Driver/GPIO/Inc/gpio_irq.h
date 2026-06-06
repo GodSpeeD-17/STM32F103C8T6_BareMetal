@@ -10,26 +10,28 @@
  *
  * Theory:
  * - Layer 0 owns the raw EXTI and AFIO register model and shared EXTI scalar types.
- * - Layer 1 (`gpio_irq_ll.h`) owns dumb EXTI/AFIO register access and AFIO
+ * - Layer 1 (`gpio_data_types.h` / `gpio_defines.h`) owns scalar aliases,
+ *   public IRQ selectors, and pure validation.
+ * - Layer 2 (`gpio_irq_ll.h`) owns dumb EXTI/AFIO register access and AFIO
  *   clock forwarding.
- * - Layer 2 (`gpio_irq_codec.h` / `gpio_irq_codec.c`) bridges `GPIOx + pin`
- *   selectors to staged EXTI and AFIO register images.
- * - Layer 3 (`gpio_irq.h` / `gpio_irq.c`) owns the public GPIO IRQ API, validation,
+ * - Layer 3 (`gpio_irq_codec.h` / `gpio_irq_codec.c`) bridges `GPIOx + pinIndex`
+ *   selectors to staged EXTI and AFIO EXTICR routing images.
+ * - Layer 4 (`gpio_irq.h` / `gpio_irq.c`) owns the public GPIO IRQ API, validation,
  *   GPIO integration, NVIC policy, orchestration, and batched register writes.
  */
 
 #ifndef GPIO_IRQ_H_
 #define GPIO_IRQ_H_
 
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "gpio_defines.h"
+
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-// ==================================================================================================== //
-//                                               Includes                                               //
-// ==================================================================================================== //
-
-#include "gpio.h"
 
 /**
  * @defgroup GPIO_IRQ GPIO-backed IRQ Driver
@@ -123,45 +125,48 @@ driver_status_t GPIO_IRQ_Init
  * - @ref `GPIOE`
  * - @ref `GPIOF`
  * - @ref `GPIOG`
- * @param[in] pin GPIO pin mask identifying the GPIO IRQ line(s)
+ * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line deinitialization completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  * @note This API enables AFIO long enough to restore EXTICR routing. It does
  * not disable AFIO after deinitialization.
+ * @note Each selected line must currently be routed to @p GPIOx; this prevents
+ * accidental deinitialization of another port sharing the same EXTI line number.
  */
-driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, gpio_pin_t pin);
+driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
 
 /**
  * @brief Returns whether any selected GPIO IRQ line is pending
- * @param[in] pin GPIO pin mask identifying the GPIO IRQ line(s)
+ * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Pending-line status
- * @retval - `0x00U`: @p pin is invalid or none of the selected GPIO IRQ lines are pending.
- * @retval - `0x01U`: At least one selected GPIO IRQ line is pending.
- * @note Returns `0x00U` when @p pin is invalid.
+ * @retval - @ref `DRIVER_STATUS_ON`: At least one selected GPIO IRQ line is pending.
+ * @retval - @ref `DRIVER_STATUS_OFF`: None of the selected GPIO IRQ lines are pending.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid.
  */
-uint8_t GPIO_IRQ_IsTriggered(const gpio_pin_t pin);
+driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask);
 
 /**
  * @brief Acknowledges one or more EXTI pending line bits
- * @param[in] pin GPIO pin mask identifying the GPIO IRQ line(s)
+ * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pending bit(s) were acknowledged.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid.
  * @note EXTI pending bits are write-one-to-clear bits. This API writes the
  * selected pin mask directly to `EXTI_PR`.
  */
-driver_status_t GPIO_IRQ_Ack(const gpio_pin_t pin);
+driver_status_t GPIO_IRQ_Ack(const gpio_pin_t pinMask);
 
 /** @} */ // GPIO_IRQ_03_Driver
 
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

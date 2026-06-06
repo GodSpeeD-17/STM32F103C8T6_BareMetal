@@ -84,10 +84,9 @@ extern "C" {
  * @param[in]	_GPIOX	Target GPIO peripheral instance expression
  * @param[in]	_REG	Register member token inside @ref `GPIO_TypeDef`
  * @returns Pointer to the selected GPIO register `.REG` image.
- * @note This macro exists because C cannot pass a struct member name to a
- * generic static inline function without first forming the member address.
+ * @note Thin GPIO LL alias over @ref `REGOPS_REG`.
  */
-#define LL_GPIO_REG(_GPIOX, _REG)				(&((_GPIOX)->_REG.REG))
+#define LL_GPIO_REG(_GPIOX, _REG)				REGOPS_REG((_GPIOX), _REG)
 
 /**
  * @brief Reads one GPIO register image by register pointer
@@ -97,7 +96,9 @@ extern "C" {
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadRegister(const _IO* const pRegister)
 {
-	return *pRegister;
+	reg regImage = 0x00000000UL;
+	(void) RegOps_Read(pRegister, &regImage);
+	return regImage;
 }
 
 /**
@@ -110,7 +111,7 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadRegister(const _IO* const pRegister)
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteRegister(_IO* const pRegister, const reg regImage)
 {
-	*pRegister = regImage;
+	(void) RegOps_Write(pRegister, regImage);
 }
 
 /**

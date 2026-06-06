@@ -129,7 +129,7 @@ image = LL_GPIO_IRQ_ReadIMR();
 LL_GPIO_IRQ_WriteIMR(image);
 ```
 
-Avoid adding new APIs with the legacy shape:
+Avoid adding new APIs with legacy shapes like these:
 
 ```c
 GPIO_LL_READ_REG(...);
@@ -309,8 +309,8 @@ GPIO-backed EXTI should use the same ownership rules:
   `gpio_defines.h`, not in the public IRQ driver header.
 - GPIO IRQ LL owns named full-register EXTI/AFIO accessors and AFIO clock
   forwarding only.
-- The GPIO IRQ codec layer owns AFIO EXTICR field placement and trigger-image
-  staging through `Codec_GPIO_IRQ_*` APIs.
+- The GPIO IRQ codec layer owns AFIO EXTICR routing-field placement, route
+  state extraction, and trigger-image staging through `Codec_GPIO_IRQ_*` APIs.
 - GPIO IRQ driver owns GPIO input compatibility checks, AFIO clock sequencing,
   EXTI register batching, NVIC enable/disable policy, and pending-bit ordering.
 
@@ -378,13 +378,13 @@ defines header.
    - Keep AFIO EXTICR port-field encoding private to `gpio_irq_codec.*`.
    - Keep GPIO IRQ codec files/APIs on the `gpio_irq_codec.*` and
      `Codec_GPIO_IRQ_*` naming shape.
-   - Move trigger selectors out of `gpio_irq.h`.
+   - Keep trigger selectors out of `gpio_irq.h`.
    - Keep `GPIO_IRQ_Init()` as a single public setup call over
      `GPIOx + pinMask + inputConfig + trigger`.
    - Keep GPIO IRQ LL symbols on `LL_GPIO_IRQ_*` and restrict them to named
      full-register accessors plus AFIO clock forwarding.
-   - Decide whether `GPIO_IRQ_Deinit()` should verify current port ownership or
-     drop its unused `GPIOx` argument.
+   - Keep `GPIO_IRQ_Deinit()` route-safe by verifying current AFIO EXTICR
+     ownership before clearing a selected line.
 
 9. Clean project examples.
    - Replace obsolete selector names such as `GPIO_PIN_CNF_IN_FLOAT`.

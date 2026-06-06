@@ -26,7 +26,7 @@
  * Practical Authority Rule:
  * - Layer 0 (`stm32f1xx_exti.h` / `stm32f1xx_afio.h`) defines raw registers.
  * - LL exposes named full-register accessors and thin AFIO clock forwarding.
- * - Codec/helper APIs own selector translation and staged image mutation.
+ * - Codec APIs own selector translation and staged image mutation.
  * - Driver APIs own public validation,
  *   sequencing, NVIC policy, and user-facing status.
  *
@@ -38,16 +38,16 @@
 #ifndef LL_GPIO_IRQ_H_
 #define LL_GPIO_IRQ_H_
 
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "stm32f1xx.h"
+#include "rcc_ll.h"
+
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-// ==================================================================================================== //
-//                                               Includes                                               //
-// ==================================================================================================== //
-
-#include "stm32f1xx.h"
-#include "rcc_ll.h"
 
 /**
  * @defgroup GPIO_IRQ_02_LL GPIO IRQ Low-Level Control Layer
@@ -88,20 +88,18 @@ extern "C" {
  * @def LL_GPIO_IRQ_EXTI_REG
  * @param[in]	_REG	Register member token inside @ref `EXTI_TypeDef`
  * @returns Pointer to the selected EXTI register `.REG` image.
- * @note This macro exists because C cannot pass a struct member name to a
- * generic static inline function without first forming the member address.
+ * @note Thin GPIO IRQ LL alias over @ref `REGOPS_REG`.
  */
-#define LL_GPIO_IRQ_EXTI_REG(_REG)						(&(EXTI->_REG.REG))
+#define LL_GPIO_IRQ_EXTI_REG(_REG)						REGOPS_REG(EXTI, _REG)
 
 /**
  * @brief Returns pointer to an AFIO register `.REG` image
  * @def LL_GPIO_IRQ_AFIO_REG
  * @param[in]	_REG	Register member token inside @ref `AFIO_TypeDef`
  * @returns Pointer to the selected AFIO register `.REG` image.
- * @note This macro exists because C cannot pass a struct member name to a
- * generic static inline function without first forming the member address.
+ * @note Thin GPIO IRQ LL alias over @ref `REGOPS_REG`.
  */
-#define LL_GPIO_IRQ_AFIO_REG(_REG)						(&(AFIO->_REG.REG))
+#define LL_GPIO_IRQ_AFIO_REG(_REG)						REGOPS_REG(AFIO, _REG)
 
 /**
  * @brief Reads one EXTI/AFIO register image by register pointer
@@ -111,7 +109,9 @@ extern "C" {
  */
 __STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadRegister(const _IO* const pRegister)
 {
-	return *pRegister;
+	reg regImage = 0x00000000UL;
+	(void) RegOps_Read(pRegister, &regImage);
+	return regImage;
 }
 
 /**
@@ -124,7 +124,7 @@ __STATIC_FORCEINLINE reg LL_GPIO_IRQ_ReadRegister(const _IO* const pRegister)
  */
 __STATIC_FORCEINLINE void LL_GPIO_IRQ_WriteRegister(_IO* const pRegister, const reg regImage)
 {
-	*pRegister = regImage;
+	(void) RegOps_Write(pRegister, regImage);
 }
 
 /**
@@ -379,6 +379,7 @@ __STATIC_FORCEINLINE driver_status_t LL_GPIO_IRQ_DisableAFIOClock(void)
 
 /** @} */ // GPIO_IRQ_02_LL
 
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

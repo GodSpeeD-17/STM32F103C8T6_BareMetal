@@ -6,7 +6,7 @@
 volatile uint32_t time_now = 0;
 /*-------------------------------------------------------------------------------*/
 // Main Entry Point
-int main(){
+int main(void){
 	// LED Initialisation
 	GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN));
 	// Push Button Interrupt Initialisation
@@ -27,7 +27,7 @@ int main(){
  */
 void EXTI1_IRQHandler(void){
 	// Check if the Interrupt is from the Push Button
-	if(GPIO_IRQ_IsTriggered(PUSH_BUTTON_PIN)){
+	if(GPIO_IRQ_IsTriggered(PUSH_BUTTON_PIN) == DRIVER_STATUS_ON){
 		// Eliminate Debounce Time
 		if(SysTick_Get_Ticks() - time_now > DEBOUNCE_TIME_MS){
 			time_now = SysTick_Get_Ticks();

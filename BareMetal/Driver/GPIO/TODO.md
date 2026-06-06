@@ -127,16 +127,16 @@ Files:
 
 Ownership:
 
-- Convert `GPIOx + pin` into staged AFIO EXTICR routing-field updates.
+- Convert `GPIOx + pinIndex` into staged AFIO EXTICR routing-field updates.
 - Stage EXTI trigger images.
 - Reset staged AFIO EXTICR and trigger images.
-- Resolve NVIC IRQ number from one GPIO IRQ line.
+- Extract staged AFIO EXTICR route state when the driver needs ownership checks.
 
 Rules:
 
 - Codec must not directly read/write hardware registers.
 - Codec must not include public `gpio_irq.h`.
-- Codec may include `gpio_defines.h` and `nvic_types.h`.
+- Codec may include `gpio_defines.h`.
 - Codec functions should return `driver_status_t`.
 - Validation helpers should not return `uint8_t` unless explicitly required.
 
@@ -168,7 +168,7 @@ driver_status_t GPIO_IRQ_Init
 	const gpio_irq_trigger_t		trigger
 );
 
-driver_status_t GPIO_IRQ_DeInit(GPIO_TypeDef* const GPIOx, gpio_pin_t pinMask);
+driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
 driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask);
 driver_status_t GPIO_IRQ_Ack(const gpio_pin_t pinMask);
 ```
@@ -189,251 +189,88 @@ GPIO_IRQ_Init(GPIOx, pinMask, inputConfig, trigger);
 `Projects/GPIO/03_PB_IRQ/Src/main.c` currently uses the intended single-call
 setup for the push button IRQ path.
 
-## Deviations and Mitigation
+## Current Alignment Status
 
-### 1. NVIC Enable Sequencing
+The GPIO IRQ layer has been updated to match the GPIO module architecture:
 
-Current deviation:
+- Generic pin-mask helpers now live in `gpio_defines.h`:
+  `GPIO_PinMaskExtractLowestPin()` and `GPIO_PinMaskRemovePin()`.
+- IRQ input-config validation now lives in `gpio_defines.h` as
+  `GPIO_IRQ_INPUT_CONFIG_IS_VALID(inputConfig)`.
+- IRQ codec APIs take `gpio_pin_index_t` when they operate on one EXTI line.
+- AFIO EXTICR register-index selection is owned by
+  `Codec_GPIO_IRQ_GetRoutingRegisterIndex()`.
+- AFIO EXTICR route ownership readback is owned by
+  `Codec_GPIO_IRQ_ExtractPortRoutingState()`.
+- AFIO EXTICR route staging is owned by
+  `Codec_GPIO_IRQ_StagePortRouting()` and
+  `Codec_GPIO_IRQ_StageResetPortRouting()`.
+- EXTI trigger staging is owned by
+  `Codec_GPIO_IRQ_StageTrigger()` and
+  `Codec_GPIO_IRQ_StageResetTrigger()`.
+- `gpio_irq.c` owns GPIO input setup, IMR sequencing, NVIC policy, batched
+  register writes, pending-bit acknowledgement, and deinit ownership checks.
+- `GPIO_IRQ_IsTriggered()` now returns `driver_status_t`:
+  `DRIVER_STATUS_ON`, `DRIVER_STATUS_OFF`, or
+  `DRIVER_STATUS_ERROR_INVALID_ARG`.
 
-- `GPIO_IRQ_Init()` enables NVIC inside the per-pin loop before all staged
-  `EXTICR`, `RTSR`, `FTSR`, `PR`, and `IMR` writes are complete.
-
-Why this is not ideal:
-
-- For a fresh masked line this is usually harmless.
-- For reconfiguration of an already-enabled line, IRQ delivery could happen
-  while routing/trigger state is being changed.
-
-Mitigation:
-
-1. Read `IMR`.
-2. Mask selected line(s) in hardware before changing route/trigger state.
-3. Stage and write `EXTICR`, `RTSR`, and `FTSR`.
-4. Clear stale pending bits through `PR`.
-5. Write final `IMR` with selected lines unmasked.
-6. Enable NVIC after final register writes.
-
-Preferred high-level init order:
+Current high-level init order:
 
 ```text
 validate inputs
-configure GPIO input
 enable AFIO clock
-read EXTI/AFIO images
-temporarily mask selected EXTI lines
-stage AFIO EXTICR routing
-stage EXTI trigger bits
+read current EXTI IMR
+temporarily mask selected EXTI lines if they are already unmasked
+configure selected GPIO pins as input
+read EXTI trigger images
+read touched AFIO EXTICR images
+stage AFIO EXTICR routing through codec
+stage EXTI trigger bits through codec
 write touched AFIO EXTICR images
 write EXTI RTSR/FTSR
 clear EXTI PR for selected lines
 write final EXTI IMR
-enable NVIC lines
+enable NVIC lines last
 ```
 
-### 2. Pin-Mask Iteration
+Current high-level deinit order:
 
-Current deviation:
-
-- `gpio_irq.c` has `_GPIO_IRQ_GetLowestSelectedLine()` that scans from
-  `GPIO_PIN_0` upward.
-
-Why this is not ideal:
-
-- The GPIO driver already adopted a bit-mask based iteration style.
-- GPIO IRQ should not regress to scanning every possible bit.
-
-Mitigation:
-
-- Move generic pin-mask helpers into `gpio_defines.h` as static inline helpers,
-  or reuse existing ones if already promoted:
-  - extract lowest selected pin from pin mask
-  - remove selected pin from pin mask
-- Use the same helper style in `gpio.c` and `gpio_irq.c`.
-
-Suggested API names:
-
-```c
-GPIO_PinMaskExtractLowestPin(pinMask)
-GPIO_PinMaskRemovePin(&pinMask, pin)
+```text
+validate inputs
+enable AFIO clock
+read current EXTI IMR
+mask selected EXTI lines
+read EXTI trigger images
+read touched AFIO EXTICR images
+verify each selected route belongs to GPIOx
+reset AFIO EXTICR routing slots through codec
+reset EXTI trigger bits through codec
+write touched AFIO EXTICR images
+write EXTI RTSR/FTSR
+clear EXTI PR for selected lines
+write final EXTI IMR
+disable NVIC groups only when no grouped line remains unmasked
 ```
 
-The exact names can be adjusted to match existing GPIO naming style.
+## Verification Commands
 
-### 3. IRQ Input Config Validation Ownership
-
-Current deviation:
-
-- `_GPIO_IRQ_InputConfigIsCompatible()` lives in `gpio_irq.c`.
-
-Why this is not ideal:
-
-- This is pure selector validation.
-- Pure validation belongs in `gpio_defines.h`.
-
-Mitigation:
-
-Add to `gpio_defines.h`:
-
-```c
-#define GPIO_IRQ_INPUT_CONFIG_IS_VALID(inputConfig)		\
-(														\
-	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_FLOATING)		|| \
-	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_PULL_DOWN)	|| \
-	(((gpio_pin_config_t) (inputConfig)) == GPIO_PIN_CONFIG_INPUT_PULL_UP)		\
-)
-```
-
-Then remove `_GPIO_IRQ_InputConfigIsCompatible()` from `gpio_irq.c`.
-
-### 4. Codec Validation Return Type
-
-Current deviation:
-
-- `Codec_GPIO_IRQ_IsSinglePinMaskValid()` returns `uint8_t`.
-
-Why this is not ideal:
-
-- Project policy says validation functions should return `driver_status_t`
-  unless a non-status return was explicitly requested.
-
-Mitigation options:
-
-1. Remove the helper and use existing pin-mask validation macros directly.
-2. Or convert it to:
-
-```c
-__STATIC_FORCEINLINE driver_status_t Codec_GPIO_IRQ_PinMaskIsSingleLine(const gpio_pin_t pin)
-```
-
-Use `DRIVER_STATUS_SUCCESS` and `DRIVER_STATUS_ERROR_INVALID_ARG`.
-
-### 5. Codec Doxygen Still Uses Old Wording
-
-Current deviation:
-
-- Some codec Doxygen still says "Port source image".
-
-Why this is not ideal:
-
-- The GPIO driver no longer exposes a port-source selector concept.
-- That wording should stay in core AFIO register documentation only.
-
-Mitigation:
-
-Update codec Doxygen wording:
-
-- Use "AFIO EXTICR routing field".
-- Use "AFIO EXTICR routing image".
-- Avoid "port-source selector" in GPIO driver/codec docs.
-
-### 6. LL Doxygen Mentions Helper
-
-Current deviation:
-
-- `gpio_irq_ll.h` still says `Codec/helper APIs`.
-
-Mitigation:
-
-- Replace with `Codec APIs`.
-- Keep `helper` out of file names, API names, and Doxygen architecture text.
-
-### 7. Deinit Ownership and Safety
-
-Current deviation:
-
-- `GPIO_IRQ_Deinit(GPIOx, pinMask)` accepts `GPIOx`, but current logic resets
-  selected EXTICR fields without verifying that the selected line is actually
-  routed to that `GPIOx`.
-
-Mitigation options:
-
-1. Keep `GPIOx` and add codec support to extract/verify current EXTICR routing
-   before clearing it.
-2. Drop `GPIOx` from `GPIO_IRQ_Deinit()` and document that deinit resets the
-   selected EXTI line routing to AFIO reset state regardless of current owner.
-
-Preferred conservative option:
-
-- Keep `GPIOx`.
-- Add route ownership verification before deinit clears the EXTICR field.
-
-### 8. Register Index Ownership
-
-Current deviation:
-
-- Driver computes EXTICR index directly with:
-
-```c
-GPIO_PinMaskToIndex(currentPin) >> 2U
-```
-
-- Codec also has an internal EXTICR index helper.
-
-Why this is not ideal:
-
-- Duplicates AFIO EXTICR layout knowledge across driver and codec.
-
-Mitigation options:
-
-1. Expose a codec function:
-
-```c
-driver_status_t Codec_GPIO_IRQ_GetEXTICRIndex(const gpio_pin_t pin, uint8_t* const pIndex);
-```
-
-2. Or keep index selection in the driver and remove the duplicated codec helper
-   if codec no longer needs it.
-
-Preferred option:
-
-- Let codec own AFIO EXTICR layout knowledge.
-- Expose a small status-returning codec query for EXTICR index.
-
-## Intended Implementation Plan
-
-1. Clean Doxygen wording first.
-   - Remove "helper".
-   - Replace "port source image" with "AFIO EXTICR routing image".
-
-2. Promote pure validation to `gpio_defines.h`.
-   - Add `GPIO_IRQ_INPUT_CONFIG_IS_VALID(inputConfig)`.
-   - Remove driver-local input config validation.
-
-3. Promote or reuse generic pin-mask iteration helpers.
-   - Use identical bit-mask iteration in GPIO and GPIO IRQ.
-   - Avoid scanning all pins.
-
-4. Tighten codec status behavior.
-   - Remove `uint8_t` validation helper or convert to `driver_status_t`.
-   - Keep codec functions image-based and hardware-free.
-
-5. Rework `GPIO_IRQ_Init()` sequencing.
-   - Configure GPIO input.
-   - Enable AFIO clock.
-   - Read images.
-   - Mask selected IMR lines before route/trigger updates.
-   - Stage through codec.
-   - Write touched images.
-   - Clear pending bits.
-   - Unmask IMR.
-   - Enable NVIC last.
-
-6. Decide and implement `GPIO_IRQ_Deinit()` policy.
-   - Preferred: verify route ownership with `GPIOx`.
-   - Alternative: remove `GPIOx` from deinit and document reset behavior.
-
-7. Build and verify.
-   - Build `Projects/GPIO/03_PB_IRQ/Build`.
-   - Sweep for old names:
+Build the IRQ example:
 
 ```sh
-rg -n "gpio_exti|GPIO_EXTI|gpio_irq_helper|GPIO_IRQ_HELPER|GPIO_IRQ_PORT_SOURCE|gpio_irq_port_t|LL_GPIO_EXTI" BareMetal Projects -g '*.[ch]' -g '*.md'
+cmake --build Projects/GPIO/03_PB_IRQ/Build
+```
+
+Sweep live code for old names:
+
+```sh
+rg -n "gpio_exti|GPIO_EXTI|gpio_irq_helper|GPIO_IRQ_HELPER|GPIO_IRQ_PORT_SOURCE|gpio_irq_port_t|LL_GPIO_EXTI" BareMetal Projects -g '*.[ch]'
 ```
 
 Expected result:
 
-- Old names may appear only inside documentation text that explicitly says not
-  to use compatibility aliases.
+- No old names in live code.
+- Old names may appear only inside documentation that explicitly says not to
+  reintroduce compatibility aliases.
 
 ## Do Not Reintroduce
 
@@ -458,7 +295,8 @@ GPIO_IRQ_Init(GPIOx, pinMask, inputConfig, trigger);
 2. `gpio_data_types.h` contains only used scalar aliases.
 3. `gpio_defines.h` owns public IRQ trigger selectors and pure IRQ validation.
 4. LL contains only dumb register access and AFIO clock forwarding.
-5. Codec owns AFIO EXTICR field placement and trigger image staging.
+5. Codec owns AFIO EXTICR field placement, route extraction, and trigger image
+   staging.
 6. Driver owns sequencing, GPIO input setup, batching, pending clear, IMR mask,
    and NVIC policy.
 7. NVIC is enabled only after final EXTI/AFIO register writes.
