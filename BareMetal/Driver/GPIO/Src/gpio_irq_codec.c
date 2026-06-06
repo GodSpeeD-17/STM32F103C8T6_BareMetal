@@ -375,7 +375,7 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 (
 	const reg					rtsrRegImage,
 	const reg					ftsrRegImage,
-	const gpio_pin_t			pin,
+	const gpio_pin_t			pinMask,
 	reg* const					pRtsrRegImage,
 	reg* const					pFtsrRegImage
 )
@@ -383,17 +383,18 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 	// Local Variables
 	reg updatedRtsrRegImage = rtsrRegImage;
 	reg updatedFtsrRegImage = ftsrRegImage;
-	reg lineMask = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
+	const reg lineMask = (reg) pinMask;
 
 	// Validate Input
 	if ((pRtsrRegImage == NULL) || (pFtsrRegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
+	if (GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 
-	lineMask = REG_BIT_MASK(pinIndex);
 	updatedRtsrRegImage = RegOps_StageField(updatedRtsrRegImage, lineMask, 0x00000000UL);
 	updatedFtsrRegImage = RegOps_StageField(updatedFtsrRegImage, lineMask, 0x00000000UL);
 
@@ -406,7 +407,7 @@ driver_status_t Codec_GPIO_IRQ_StageTrigger
 (
 	const reg					rtsrRegImage,
 	const reg					ftsrRegImage,
-	const gpio_pin_t			pin,
+	const gpio_pin_t			pinMask,
 	const gpio_irq_trigger_t	trigger,
 	reg* const					pRtsrRegImage,
 	reg* const					pFtsrRegImage
@@ -418,7 +419,6 @@ driver_status_t Codec_GPIO_IRQ_StageTrigger
 	reg lineMask = 0x00000000UL;
 	reg risingLineSet = 0x00000000UL;
 	reg fallingLineSet = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
 
 	// Validate Output Pointers
 	if ((pRtsrRegImage == NULL) || (pFtsrRegImage == NULL))
@@ -429,27 +429,30 @@ driver_status_t Codec_GPIO_IRQ_StageTrigger
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
+	if (GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 
-	//! Determine the line mask and set values for the selected EXTI line based on the input trigger selector
-	lineMask = REG_BIT_MASK(pinIndex);
+	//! Determine the line mask and set values for the selected EXTI line(s) based on the input trigger selector
+	lineMask = (reg) pinMask;
 	risingLineSet = ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_RISING)) != 0x00000000UL) ? lineMask : 0x00000000UL;
 	fallingLineSet = ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_FALLING)) != 0x00000000UL) ? lineMask : 0x00000000UL;
 
-	//! Clear both trigger bits for the selected EXTI line before staging the requested trigger
+	//! Clear both trigger bits for the selected EXTI line(s) before staging the requested trigger
 	ASSERT_DRIVER_STATUS
 	(
 		Codec_GPIO_IRQ_StageResetTrigger
 		(
 			updatedRtsrRegImage,
 			updatedFtsrRegImage,
-			pin,
+			pinMask,
 			&updatedRtsrRegImage,
 			&updatedFtsrRegImage
 		)
 	);
 
-	//! Stage requested trigger bits for the selected EXTI line while preserving other lines
+	//! Stage requested trigger bits for the selected EXTI line(s) while preserving other lines
 	updatedRtsrRegImage |= risingLineSet;
 	updatedFtsrRegImage |= fallingLineSet;
 

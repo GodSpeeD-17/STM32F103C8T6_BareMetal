@@ -147,12 +147,12 @@ driver_status_t Codec_GPIO_IRQ_ExtractTrigger
 );
 
 /**
- * @brief Stages reset trigger state for one GPIO IRQ line
+ * @brief Stages reset trigger state for one or more GPIO IRQ lines
  * @param[in] rtsrRegImage Caller-owned EXTI RTSR image before replacement
  * @param[in] ftsrRegImage Caller-owned EXTI FTSR image before replacement
- * @param[in] pin GPIO single-pin mask
+ * @param[in] pinMask GPIO pin mask identifying EXTI trigger line(s)
  * Accepted values:
- * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pRtsrRegImage Destination for the updated EXTI RTSR image
  * @param[out] pFtsrRegImage Destination for the updated EXTI FTSR image
  * Expected values:
@@ -160,24 +160,24 @@ driver_status_t Codec_GPIO_IRQ_ExtractTrigger
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Reset trigger images were staged successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was not a single valid pin.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid.
  */
 driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 (
 	const reg					rtsrRegImage,
 	const reg					ftsrRegImage,
-	const gpio_pin_t			pin,
+	const gpio_pin_t			pinMask,
 	reg* const					pRtsrRegImage,
 	reg* const					pFtsrRegImage
 );
 
 /**
- * @brief Stages EXTI rising and falling trigger images for one GPIO IRQ line
+ * @brief Stages EXTI rising and falling trigger images for one or more GPIO IRQ lines
  * @param[in] rtsrRegImage Caller-owned EXTI RTSR image before replacement
  * @param[in] ftsrRegImage Caller-owned EXTI FTSR image before replacement
- * @param[in] pin GPIO single-pin mask
+ * @param[in] pinMask GPIO pin mask identifying EXTI trigger line(s)
  * Accepted values:
- * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[in] trigger Driver EXTI trigger selector
  * Accepted values:
  * - @ref `GPIO_IRQ_TRIGGER_FALLING`
@@ -190,13 +190,13 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Trigger images were staged successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p trigger was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask or @p trigger was invalid.
  */
 driver_status_t Codec_GPIO_IRQ_StageTrigger
 (
 	const reg					rtsrRegImage,
 	const reg					ftsrRegImage,
-	const gpio_pin_t			pin,
+	const gpio_pin_t			pinMask,
 	const gpio_irq_trigger_t	trigger,
 	reg* const					pRtsrRegImage,
 	reg* const					pFtsrRegImage

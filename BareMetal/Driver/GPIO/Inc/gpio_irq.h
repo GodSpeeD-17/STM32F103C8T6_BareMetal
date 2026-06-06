@@ -74,8 +74,8 @@ extern "C" {
 /**
  * @brief Initializes one or more GPIO IRQ lines for the selected GPIO port
  * @details
- * Reads each touched AFIO and EXTI register once, updates staged images per
- * selected line, then writes each touched register once.
+ * Reads only the AFIO and EXTI register images needed for the selected line(s),
+ * updates staged images, then writes back only the images that changed.
  *
  * @param[in] GPIOx GPIO peripheral instance that owns the selected GPIO IRQ line(s)
  * Accepted values:
@@ -117,11 +117,12 @@ driver_status_t GPIO_IRQ_Init
 );
 
 /**
- * @brief Deinitializes one or more GPIO IRQ lines for the selected GPIO port
+ * @brief De-initializes one or more GPIO IRQ lines for the selected GPIO port
  * @details
  * Clears interrupt masking, clears rising/falling trigger selection, restores
  * the AFIO EXTI routing field(s) to reset state, and clears the selected
- * pending bit(s).
+ * pending bit(s). Register images are written back only when the staged image
+ * differs from the original image.
  *
  * @param[in] GPIOx GPIO peripheral instance that owns the selected GPIO IRQ line(s)
  * Accepted values:
