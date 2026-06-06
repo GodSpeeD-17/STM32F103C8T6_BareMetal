@@ -14,10 +14,11 @@
  *   public IRQ selectors, and pure validation.
  * - Layer 2 (`gpio_irq_ll.h`) owns dumb EXTI/AFIO register access and AFIO
  *   clock forwarding.
- * - Layer 3 (`gpio_irq_codec.h` / `gpio_irq_codec.c`) bridges `GPIOx + pinIndex`
- *   selectors to staged EXTI and AFIO EXTICR routing images.
+ * - Layer 3 (`gpio_irq_codec.h` / `gpio_irq_codec.c`) bridges GPIO pin masks
+ *   and raw route/trigger selectors to staged EXTI and AFIO EXTICR images.
  * - Layer 4 (`gpio_irq.h` / `gpio_irq.c`) owns the public GPIO IRQ API, validation,
- *   GPIO integration, NVIC policy, orchestration, and batched register writes.
+ *   GPIOx-to-route conversion, GPIO integration, NVIC policy, orchestration,
+ *   and batched register writes.
  */
 
 #ifndef GPIO_IRQ_H_
@@ -50,13 +51,19 @@ extern "C" {
  */
 
 /**
- * @defgroup GPIO_IRQ_03_Driver GPIO IRQ Driver Layer
+ * @defgroup GPIO_IRQ_03_Codec GPIO IRQ Codec Layer
+ * @ingroup GPIO_IRQ
+ * @brief Staged EXTI/AFIO route and trigger register-image translation layer
+ */
+
+/**
+ * @defgroup GPIO_IRQ_04_Driver GPIO IRQ Driver Layer
  * @ingroup GPIO_IRQ
  * @brief Validated GPIO-backed EXTI orchestration layer
  */
 
 /**
- * @addtogroup GPIO_IRQ_03_Driver
+ * @addtogroup GPIO_IRQ_04_Driver
  * @{
  */
 
@@ -164,7 +171,7 @@ driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask);
  */
 driver_status_t GPIO_IRQ_Ack(const gpio_pin_t pinMask);
 
-/** @} */ // GPIO_IRQ_03_Driver
+/** @} */ // GPIO_IRQ_04_Driver
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus

@@ -151,7 +151,7 @@ status = Codec_GPIO_StagePinConfigMode
 (
 	crxImage,
 	odrImage,
-	pinIndex,
+	pin,
 	config,
 	mode,
 	&crxImage,
@@ -161,33 +161,33 @@ status = Codec_GPIO_ExtractPinConfigMode
 (
 	crxImage,
 	odrImage,
-	pinIndex,
+	pin,
 	&config,
 	&mode
 );
 status = Codec_GPIO_StagePinOutputState
 (
 	odrImage,
-	pinIndex,
+	pin,
 	DRIVER_STATUS_ON,
 	&odrImage
 );
 status = Codec_GPIO_ExtractPinOutputState
 (
 	odrImage,
-	pinIndex,
+	pin,
 	&pinState
 );
 status = Codec_GPIO_ExtractPinInputState
 (
 	idrImage,
-	pinIndex,
+	pin,
 	&pinState
 );
 status = Codec_GPIO_StagePinLockState
 (
 	lckrImage,
-	pinIndex,
+	pin,
 	DRIVER_STATUS_ON,
 	&lckrImage
 );
@@ -200,7 +200,7 @@ status = Codec_GPIO_StageLockKeyState
 status = Codec_GPIO_ExtractPinLockState
 (
 	lckrImage,
-	pinIndex,
+	pin,
 	&lockState
 );
 status = Codec_GPIO_ExtractLockKeyState
@@ -233,8 +233,8 @@ The driver should:
 5. Walk selected pin masks with a `while (remainingPins != GPIO_PIN_NONE)` loop
    that extracts and clears the lowest selected bit each iteration. Do not scan
    all 16 possible pins when only a sparse mask was requested.
-6. Convert each extracted single-pin mask to a `gpio_pin_index_t` before
-   entering codec codecs.
+6. Pass each extracted single-pin mask into codec APIs. Codec owns conversion
+   to `gpio_pin_index_t` or register bit position internally.
 7. Read each touched `CRL`/`CRH` image once, and read `ODR` only when pull-state
    staging or extraction requires it.
 8. Stage each selected pin through codec functions.

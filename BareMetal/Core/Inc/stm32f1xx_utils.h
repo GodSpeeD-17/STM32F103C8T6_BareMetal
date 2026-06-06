@@ -69,13 +69,51 @@ extern "C" {
 /**
  * @brief Shifts a raw value into a register field position
  * @def REG_FIELD_VALUE
- * @param[in] _Val Raw value before shifting
  * @param[in] _Pos Bit position, zero-based
+ * @param[in] _Val Raw value before shifting
  * @returns Shifted 32-bit value
  * @note @p _Pos must be in the range `0U..31U`.
  * @note @p _Val must already be masked to the intended field width.
  */
-#define REG_FIELD_VALUE(_Val, _Pos)						((reg) ((uint32_t) (_Val) << (_Pos)))
+#define REG_FIELD_VALUE(_Pos, _Val)						((reg) (((uint32_t) (_Val)) << ((uint8_t) (_Pos))))
+
+/**
+ * @brief Creates a register-positioned contiguous field mask from field width and position
+ * @def REG_FIELD_MASK
+ * @param[in] _Pos Target bit position, zero-based
+ * @param[in] _FieldWidth Number of bits in the field, treated as `uint8_t`
+ * @returns Register-positioned 32-bit field mask
+ * @retval - `0x00000000UL`: @p _FieldWidth is `0U`
+ * @retval - Non-zero contiguous mask shifted to @p _Pos: @p _FieldWidth is `1U..32U`
+ * @note - For example, `_FieldWidth == 3U` and `_Pos == 4U` yields `0x00000070UL`.
+ * @note - @p `_FieldWidth` must be in the range `0U..32U`.
+ * @note - @p `_Pos` must be in the range `0U..31U`.
+ * @note - @p `_FieldWidth + _Pos` must not exceed `32U`.
+ */
+#define REG_FIELD_MASK(_Pos, _FieldWidth)											\
+	REG_FIELD_VALUE																	\
+	(																				\
+		(_Pos),																		\
+		((((uint8_t) (_FieldWidth)) >= ((uint8_t) 32U)) ? 0xFFFFFFFFUL :			\
+		(((uint32_t) 0x01UL << ((uint8_t) (_FieldWidth))) - (uint32_t) 0x01UL))		\
+	)
+
+/**
+ * @brief Packs a right-aligned field value into register position
+ * @def REG_FIELD_PACK
+ * @see `REG_FIELD_VALUE`
+ * @see `REG_FIELD_MASK`
+ * @param[in] _Pos Target bit position, zero-based
+ * @param[in] _Val Right-aligned raw field value
+ * @param[in] _FieldWidth Number of bits in the field, treated as `uint8_t`
+ * @returns Shifted 32-bit register field value
+ * @retval - @p _Val masked to @p _FieldWidth bits and shifted to @p _Pos
+ * @note @p `_FieldWidth` must be in the range `0U..32U`.
+ * @note @p `_Pos` must be in the range `0U..31U`.
+ * @note @p `_FieldWidth + _Pos` must not exceed `32U`.
+ */
+#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)									\
+	REG_FIELD_VALUE((_Pos), (((uint32_t) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth))))
 
 /**
  * @brief Creates a single-bit mask at the requested bit position
@@ -85,20 +123,7 @@ extern "C" {
  * @returns 32-bit mask with only bit @p _Pos set
  * @note @p _Pos must be in the range `0U..31U`.
  */
-#define REG_BIT_MASK(_Pos)								REG_FIELD_VALUE(0x01UL, (_Pos))
-
-/**
- * @brief Masks a right-aligned field value and shifts it into register position
- * @def REG_FIELD_ENCODE
- * @see `REG_FIELD_VALUE`
- * @param[in] _Val Right-aligned raw field value
- * @param[in] _Mask Right-aligned raw field mask
- * @param[in] _Pos Target bit position, zero-based
- * @returns Shifted 32-bit register field value
- * @note @p _Pos must be in the range `0U..31U`.
- */
-#define REG_FIELD_ENCODE(_Val, _Mask, _Pos)			\
-	REG_FIELD_VALUE((((uint32_t) (_Val)) & ((uint32_t) (_Mask))), (_Pos))
+#define REG_BIT_MASK(_Pos)								REG_FIELD_VALUE((_Pos), 0x01UL)
 
 /**
  * @brief   Compute peripheral index based on base addresses and peripheral size
@@ -164,15 +189,15 @@ extern "C" {
 /**
  * @brief Returns pointer to a peripheral register `.REG` image
  * @def REGOPS_REG
- * @param[in]	_PERIPH	Peripheral instance expression
+ * @param[in]	_PERIPHERAL	Peripheral instance expression
  * @param[in]	_REG	Register member token inside the peripheral register map
  * @returns Pointer to the selected register `.REG` image.
  * @note This macro exists because C cannot pass a struct member token to a
  * generic static inline function without first forming the member address.
- * @note @p _PERIPH must point to a register map where @p _REG exposes a `.REG`
+ * @note @p _PERIPHERAL must point to a register map where @p _REG exposes a `.REG`
  * member.
  */
-#define REGOPS_REG(_PERIPH, _REG)				(&((_PERIPH)->_REG.REG))
+#define REGOPS_REG(_PERIPHERAL, _REG)				(&((_PERIPHERAL)->_REG.REG))
 
 /**
  * @brief Read value from register
@@ -182,7 +207,7 @@ extern "C" {
  * 
  * @note `_VAR` is modified directly by this macro
  */
-#define REGOPS_READ(_REG, _VAR)					((_VAR) = *(_REG))
+#define REGOPS_READ(_REG, _VAR)						((_VAR) = *(_REG))
 
 /**
  * @brief Write value to register
@@ -192,7 +217,7 @@ extern "C" {
  * 
  * @note Entire register content is replaced
  */
-#define REGOPS_WRITE(_REG, _VAL)				(*(_REG) = (_VAL))
+#define REGOPS_WRITE(_REG, _VAL)					(*(_REG) = (_VAL))
 
 /**
  * @brief Set (OR) bits in register
@@ -202,7 +227,7 @@ extern "C" {
  * 
  * @note Only bits set in `_MASK` are affected
  */
-#define REGOPS_SET(_REG, _MASK)					(*(_REG) |= (_MASK))
+#define REGOPS_SET(_REG, _MASK)						(*(_REG) |= (_MASK))
 
 /**
  * @brief Clear (AND NOT) bits in register
@@ -212,7 +237,7 @@ extern "C" {
  * 
  * @note Only bits set in `_MASK` are cleared
  */
-#define REGOPS_CLEAR(_REG, _MASK)				(*(_REG) &= ~(_MASK))
+#define REGOPS_CLEAR(_REG, _MASK)					(*(_REG) &= ~(_MASK))
 
 /**
  * @brief Toggle (XOR) bits in register
@@ -222,7 +247,7 @@ extern "C" {
  * 
  * @note Only bits set in `_MASK` are toggled
  */
-#define REGOPS_TOGGLE(_REG, _MASK)				(*(_REG) ^= (_MASK))
+#define REGOPS_TOGGLE(_REG, _MASK)					(*(_REG) ^= (_MASK))
 
 /**
  * @brief Modify specific bits in register (masked write)
@@ -235,7 +260,7 @@ extern "C" {
  * @note - `_VAL` must be aligned to `_MASK` position (already shifted)
  * @note - Bits in `_VAL` outside `_MASK` are masked out
  */
-#define REGOPS_MODIFY(_REG, _MASK, _VAL)		(*(_REG) = (*(_REG) & ~(_MASK)) | ((_VAL) & (_MASK)))
+#define REGOPS_MODIFY(_REG, _MASK, _VAL)			(*(_REG) = (*(_REG) & ~(_MASK)) | ((_VAL) & (_MASK)))
 
 /** @} */ // 01_STM32F1xx_Utilities_02_RegOpsMacros
 
@@ -251,6 +276,57 @@ extern "C" {
  */
 
 /**
+ * @brief Clears and sets one field inside a 32-bit register image
+ * @param[in] regImage Register image before field replacement
+ * @param[in] fieldMask Register-positioned field mask to clear
+ * @param[in] fieldSet Register-positioned field value to set
+ * @returns Updated register image
+ * @note This helper performs: `regImage = (regImage & ~fieldMask) | (fieldSet & fieldMask)`.
+ * @note @p fieldSet must already be shifted into register position.
+ */
+__STATIC_FORCEINLINE reg RegOps_StageField(const reg regImage, const reg fieldMask, const reg fieldSet)
+{
+	// Local Variable
+	reg updatedRegImage = regImage;
+	//! Clear the selected field and set it to the new value
+	updatedRegImage &= ~fieldMask;
+	//! Set the new field value, ensuring only bits covered by fieldMask are affected
+	updatedRegImage |= (fieldSet & fieldMask);
+	//! Return the updated register image with the staged field value
+	return updatedRegImage;
+}
+
+/**
+ * @brief Stages a right-aligned field value into a 32-bit register image
+ * @see `REG_FIELD_MASK`
+ * @see `REG_FIELD_PACK`
+ * @see `RegOps_StageField`
+ * @param[in] regImage Register image before field replacement
+ * @param[in] pos Target bit position, zero-based
+ * @param[in] value Right-aligned raw field value to stage
+ * @param[in] fieldWidth Number of bits in the field, treated as `uint8_t`
+ * @returns Updated register image
+ * @note This helper computes the register-positioned field mask with
+ * @ref `REG_FIELD_MASK`, clears that field, and writes @p value at @p pos.
+ * @note @p fieldWidth must be in the range `0U..32U`.
+ * @note @p pos must be in the range `0U..31U`.
+ * @note @p fieldWidth + @p pos must not exceed `32U`.
+ */
+__STATIC_FORCEINLINE reg RegOps_StageFieldValue
+(
+	const reg					regImage,
+	const uint8_t				pos,
+	const reg					value,
+	const uint8_t				fieldWidth
+)
+{
+	// Local Variables
+	const reg fieldMask = REG_FIELD_MASK(pos, fieldWidth);
+	const reg fieldSet = REG_FIELD_PACK(pos, value, fieldWidth);
+	return RegOps_StageField(regImage, fieldMask, fieldSet);
+}
+
+/**
  * @brief Read a 32-bit memory-mapped register.
  * @param[in]	pRegister	Pointer to the memory-mapped register
  * @param[out]	pRegImage	Pointer to variable receiving the register value
@@ -262,11 +338,13 @@ extern "C" {
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_Read(const _IO* const pRegister, uint32_t* const pRegImage)
 {
+	//! Validate source register pointer and destination image pointer before dereferencing
 	if ((pRegister == NULL) || (pRegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Read the full 32-bit memory-mapped register image into caller-owned storage
 	*pRegImage = *pRegister;
 
 	return DRIVER_STATUS_SUCCESS;
@@ -282,11 +360,13 @@ __STATIC_FORCEINLINE driver_status_t RegOps_Read(const _IO* const pRegister, uin
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_Write(_IO* const pRegister, const uint32_t regImage)
 {
+	//! Validate writable register pointer before dereferencing
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Write the complete 32-bit register image to the memory-mapped register
 	*pRegister = regImage;
 
 	return DRIVER_STATUS_SUCCESS;
@@ -302,11 +382,13 @@ __STATIC_FORCEINLINE driver_status_t RegOps_Write(_IO* const pRegister, const ui
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_Set(_IO* const pRegister, const uint32_t mask)
 {
+	//! Validate writable register pointer before performing read-modify-write
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Set only the bits selected by mask while preserving all other register bits
 	*pRegister |= mask;
 
 	return DRIVER_STATUS_SUCCESS;
@@ -322,11 +404,13 @@ __STATIC_FORCEINLINE driver_status_t RegOps_Set(_IO* const pRegister, const uint
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_Clear(_IO* const pRegister, const uint32_t mask)
 {
+	//! Validate writable register pointer before performing read-modify-write
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Clear only the bits selected by mask while preserving all other register bits
 	*pRegister &= ~mask;
 
 	return DRIVER_STATUS_SUCCESS;
@@ -342,11 +426,13 @@ __STATIC_FORCEINLINE driver_status_t RegOps_Clear(_IO* const pRegister, const ui
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_Toggle(_IO* const pRegister, const uint32_t mask)
 {
+	//! Validate writable register pointer before performing read-modify-write
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Toggle only the bits selected by mask while preserving all other register bits
 	*pRegister ^= mask;
 
 	return DRIVER_STATUS_SUCCESS;
@@ -373,11 +459,13 @@ __STATIC_FORCEINLINE driver_status_t RegOps_WriteMasked
 	const uint32_t		value
 )
 {
+	//! Validate writable register pointer before performing masked read-modify-write
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Clear the selected field first, then write only the masked portion of the new value
 	*pRegister = (*pRegister & ~mask) | (value & mask);
 
 	return DRIVER_STATUS_SUCCESS;

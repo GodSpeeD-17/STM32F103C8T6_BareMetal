@@ -49,7 +49,6 @@ driver_status_t GPIO_GetPinModeConfig
 	// Local Variables
 	reg gpioCrxRegImage = 0x00000000UL;
 	reg gpioOdrRegImage = 0x00000000UL;
-	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
 	// Validate Input
 	if ((pMode == NULL) || (pConfig == NULL))
@@ -57,10 +56,6 @@ driver_status_t GPIO_GetPinModeConfig
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pin) == 0x00U))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-	if (pinIndex == GPIO_PIN_INDEX_INVALID)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -77,7 +72,7 @@ driver_status_t GPIO_GetPinModeConfig
 	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
 
 	//! Extract the configuration from appropriate register
-	if (Codec_GPIO_ExtractPinConfigMode(gpioCrxRegImage, gpioOdrRegImage, pinIndex, pConfig, pMode) != DRIVER_STATUS_SUCCESS)
+	if (Codec_GPIO_ExtractPinConfigMode(gpioCrxRegImage, gpioOdrRegImage, pin, pConfig, pMode) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
@@ -103,7 +98,6 @@ driver_status_t GPIO_SetPinModeConfig
 	reg* pGpioCrxRegImage = NULL;
 	gpio_pin_t remainingPins = pinMask;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
-	gpio_pin_index_t currentPinIndex = GPIO_PIN_INDEX_INVALID;
 	uint8_t crxImageMask = GPIO_IMAGE_CRL;
 	uint8_t dirtyImages = 0x00U;
 	const uint8_t pullConfigUsed = GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config);
@@ -141,11 +135,6 @@ driver_status_t GPIO_SetPinModeConfig
 	{
 		//! Extract lowest pin from pin mask
 		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
-		currentPinIndex = GPIO_PinMaskToIndex(currentPin);
-		if (currentPinIndex == GPIO_PIN_INDEX_INVALID)
-		{
-			return DRIVER_STATUS_ERROR_STATE;
-		}
 
 		//! CRH?
 		if ((currentPin & GPIO_PIN_MASK_CRH_RANGE) != GPIO_PIN_NONE)
@@ -167,7 +156,7 @@ driver_status_t GPIO_SetPinModeConfig
 			(
 				*pGpioCrxRegImage,
 				gpioOdrRegImage,
-				currentPinIndex,
+				currentPin,
 				config,
 				mode,
 				pGpioCrxRegImage,
@@ -388,21 +377,16 @@ driver_status_t GPIO_PinGet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 	// Local Variables
 	reg gpioIdrRegImage = 0x00000000UL;
 	driver_status_t pinState = DRIVER_STATUS_OFF;
-	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
 
 	// Validate Input
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_HAS_ONLY_ONE_VALID_PIN(pin) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	if (pinIndex == GPIO_PIN_INDEX_INVALID)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
 
 	//! Read the sampled input image and extract the selected pin state
 	gpioIdrRegImage = LL_GPIO_ReadIDR(GPIOx);
-	if (Codec_GPIO_ExtractPinInputState(gpioIdrRegImage, pinIndex, &pinState) != DRIVER_STATUS_SUCCESS)
+	if (Codec_GPIO_ExtractPinInputState(gpioIdrRegImage, pin, &pinState) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}

@@ -117,7 +117,7 @@ extern "C" {
 /** @brief Internal High-Speed Clock Enable Position @def RCC_CR_HSION_Pos */
 #define RCC_CR_HSION_Pos							((uint8_t) 0U)
 /** @brief Internal High-Speed Clock Enable Mask @def RCC_CR_HSION_Msk */
-#define RCC_CR_HSION_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_HSION_Pos))
+#define RCC_CR_HSION_Msk							(REG_FIELD_VALUE(RCC_CR_HSION_Pos, 0x01UL))
 /** @brief Internal High-Speed Clock Enable @def RCC_CR_HSION */
 #define RCC_CR_HSION								RCC_CR_HSION_Msk
 
@@ -125,7 +125,7 @@ extern "C" {
 /** @brief Internal High-Speed Clock Ready Flag Position @def RCC_CR_HSIRDY_Pos */
 #define RCC_CR_HSIRDY_Pos							((uint8_t) 1U)
 /** @brief Internal High-Speed Clock Ready Flag Mask @def RCC_CR_HSIRDY_Msk */
-#define RCC_CR_HSIRDY_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_HSIRDY_Pos))
+#define RCC_CR_HSIRDY_Msk							(REG_FIELD_VALUE(RCC_CR_HSIRDY_Pos, 0x01UL))
 /** @brief Internal High-Speed Clock Ready Flag @def RCC_CR_HSIRDY */
 #define RCC_CR_HSIRDY								RCC_CR_HSIRDY_Msk
 
@@ -133,7 +133,7 @@ extern "C" {
 /** @brief Internal High-Speed Clock Trimming Position (5 bits) @def RCC_CR_HSITRIM_Pos */
 #define RCC_CR_HSITRIM_Pos							((uint8_t) 3U)
 /** @brief Internal High-Speed Clock Trimming Mask (5 bits) @def RCC_CR_HSITRIM_Msk */
-#define RCC_CR_HSITRIM_Msk							(REG_FIELD_VALUE(0x1FUL, RCC_CR_HSITRIM_Pos))
+#define RCC_CR_HSITRIM_Msk							(REG_FIELD_VALUE(RCC_CR_HSITRIM_Pos, 0x1FUL))
 /** @brief Internal High-Speed Clock Trimming @def RCC_CR_HSITRIM */
 #define RCC_CR_HSITRIM								RCC_CR_HSITRIM_Msk
 
@@ -141,7 +141,7 @@ extern "C" {
 /** @brief Internal High-Speed Clock Calibration Position (8 bits) @def RCC_CR_HSICAL_Pos */
 #define RCC_CR_HSICAL_Pos							((uint8_t) 8U)
 /** @brief Internal High-Speed Clock Calibration Mask (8 bits) @def RCC_CR_HSICAL_Msk */
-#define RCC_CR_HSICAL_Msk							(REG_FIELD_VALUE(0xFFUL, RCC_CR_HSICAL_Pos))
+#define RCC_CR_HSICAL_Msk							(REG_FIELD_VALUE(RCC_CR_HSICAL_Pos, 0xFFUL))
 /** @brief Internal High-Speed Clock Calibration @def RCC_CR_HSICAL */
 #define RCC_CR_HSICAL								RCC_CR_HSICAL_Msk
 
@@ -149,7 +149,7 @@ extern "C" {
 /** @brief External High-Speed Clock Enable Position @def RCC_CR_HSEON_Pos */
 #define RCC_CR_HSEON_Pos							((uint8_t) 16U)
 /** @brief External High-Speed Clock Enable Mask @def RCC_CR_HSEON_Msk */
-#define RCC_CR_HSEON_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_HSEON_Pos))
+#define RCC_CR_HSEON_Msk							(REG_FIELD_VALUE(RCC_CR_HSEON_Pos, 0x01UL))
 /** @brief External High-Speed Clock Enable @def RCC_CR_HSEON */
 #define RCC_CR_HSEON								RCC_CR_HSEON_Msk
 
@@ -157,7 +157,7 @@ extern "C" {
 /** @brief External High-Speed Clock Ready Flag Position @def RCC_CR_HSERDY_Pos */
 #define RCC_CR_HSERDY_Pos							((uint8_t) 17U)
 /** @brief External High-Speed Clock Ready Flag Mask @def RCC_CR_HSERDY_Msk */
-#define RCC_CR_HSERDY_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_HSERDY_Pos))
+#define RCC_CR_HSERDY_Msk							(REG_FIELD_VALUE(RCC_CR_HSERDY_Pos, 0x01UL))
 /** @brief External High-Speed Clock Ready Flag @def RCC_CR_HSERDY */
 #define RCC_CR_HSERDY								RCC_CR_HSERDY_Msk
 
@@ -165,7 +165,7 @@ extern "C" {
 /** @brief External High-Speed Clock Bypass Position @def RCC_CR_HSEBYP_Pos */
 #define RCC_CR_HSEBYP_Pos							((uint8_t) 18U)
 /** @brief External High-Speed Clock Bypass Mask @def RCC_CR_HSEBYP_Msk */
-#define RCC_CR_HSEBYP_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_HSEBYP_Pos))
+#define RCC_CR_HSEBYP_Msk							(REG_FIELD_VALUE(RCC_CR_HSEBYP_Pos, 0x01UL))
 /** @brief External High-Speed Clock Bypass @def RCC_CR_HSEBYP */
 #define RCC_CR_HSEBYP								RCC_CR_HSEBYP_Msk
 
@@ -173,7 +173,7 @@ extern "C" {
 /** @brief Clock Security System Enable Position @def RCC_CR_CSSON_Pos */
 #define RCC_CR_CSSON_Pos							((uint8_t) 19U)
 /** @brief Clock Security System Enable Mask @def RCC_CR_CSSON_Msk */
-#define RCC_CR_CSSON_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_CSSON_Pos))
+#define RCC_CR_CSSON_Msk							(REG_FIELD_VALUE(RCC_CR_CSSON_Pos, 0x01UL))
 /** @brief Clock Security System Enable @def RCC_CR_CSSON */
 #define RCC_CR_CSSON								RCC_CR_CSSON_Msk
 
@@ -181,7 +181,7 @@ extern "C" {
 /** @brief PLL Enable Position @def RCC_CR_PLLON_Pos */
 #define RCC_CR_PLLON_Pos							((uint8_t) 24U)
 /** @brief PLL Enable Mask @def RCC_CR_PLLON_Msk */
-#define RCC_CR_PLLON_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_PLLON_Pos))
+#define RCC_CR_PLLON_Msk							(REG_FIELD_VALUE(RCC_CR_PLLON_Pos, 0x01UL))
 /** @brief PLL Enable @def RCC_CR_PLLON */
 #define RCC_CR_PLLON								RCC_CR_PLLON_Msk
 
@@ -189,7 +189,7 @@ extern "C" {
 /** @brief PLL Ready Flag Position @def RCC_CR_PLLRDY_Pos */
 #define RCC_CR_PLLRDY_Pos							((uint8_t) 25U)
 /** @brief PLL Ready Flag Mask @def RCC_CR_PLLRDY_Msk */
-#define RCC_CR_PLLRDY_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CR_PLLRDY_Pos))
+#define RCC_CR_PLLRDY_Msk							(REG_FIELD_VALUE(RCC_CR_PLLRDY_Pos, 0x01UL))
 /** @brief PLL Ready Flag @def RCC_CR_PLLRDY */
 #define RCC_CR_PLLRDY								RCC_CR_PLLRDY_Msk
 
@@ -223,200 +223,200 @@ extern "C" {
 /** @brief System Clock Switch Position (2 bits) @def RCC_CFGR_SW_Pos */
 #define RCC_CFGR_SW_Pos							((uint8_t) 0U)
 /** @brief System Clock Switch Mask (2 bits) @def RCC_CFGR_SW_Msk */
-#define RCC_CFGR_SW_Msk							(REG_FIELD_VALUE(0x03UL, RCC_CFGR_SW_Pos))
+#define RCC_CFGR_SW_Msk							(REG_FIELD_VALUE(RCC_CFGR_SW_Pos, 0x03UL))
 /** @brief System Clock Switch @def RCC_CFGR_SW */
 #define RCC_CFGR_SW								RCC_CFGR_SW_Msk
 /** @brief HSI selected as system clock @def RCC_CFGR_SW_HSI */
-#define RCC_CFGR_SW_HSI							(REG_FIELD_VALUE(0x00UL, RCC_CFGR_SW_Pos))
+#define RCC_CFGR_SW_HSI							(REG_FIELD_VALUE(RCC_CFGR_SW_Pos, 0x00UL))
 /** @brief HSE selected as system clock @def RCC_CFGR_SW_HSE */
-#define RCC_CFGR_SW_HSE							(REG_FIELD_VALUE(0x01UL, RCC_CFGR_SW_Pos))
+#define RCC_CFGR_SW_HSE							(REG_FIELD_VALUE(RCC_CFGR_SW_Pos, 0x01UL))
 /** @brief PLL selected as system clock @def RCC_CFGR_SW_PLL */
-#define RCC_CFGR_SW_PLL							(REG_FIELD_VALUE(0x02UL, RCC_CFGR_SW_Pos))
+#define RCC_CFGR_SW_PLL							(REG_FIELD_VALUE(RCC_CFGR_SW_Pos, 0x02UL))
 
 // ------ SWS (System Clock Switch Status) ------ //
 /** @brief System Clock Switch Status Position (2 bits) @def RCC_CFGR_SWS_Pos */
 #define RCC_CFGR_SWS_Pos						((uint8_t) 2U)
 /** @brief System Clock Switch Status Mask (2 bits) @def RCC_CFGR_SWS_Msk */
-#define RCC_CFGR_SWS_Msk						(REG_FIELD_VALUE(0x03UL, RCC_CFGR_SWS_Pos))
+#define RCC_CFGR_SWS_Msk						(REG_FIELD_VALUE(RCC_CFGR_SWS_Pos, 0x03UL))
 /** @brief System Clock Switch Status @def RCC_CFGR_SWS */
 #define RCC_CFGR_SWS							RCC_CFGR_SWS_Msk
 /** @brief HSI selected as system clock @def RCC_CFGR_SWS_HSI */
-#define RCC_CFGR_SWS_HSI						(REG_FIELD_VALUE(0x00UL, RCC_CFGR_SWS_Pos))
+#define RCC_CFGR_SWS_HSI						(REG_FIELD_VALUE(RCC_CFGR_SWS_Pos, 0x00UL))
 /** @brief HSE selected as system clock @def RCC_CFGR_SWS_HSE */
-#define RCC_CFGR_SWS_HSE						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_SWS_Pos))
+#define RCC_CFGR_SWS_HSE						(REG_FIELD_VALUE(RCC_CFGR_SWS_Pos, 0x01UL))
 /** @brief PLL selected as system clock @def RCC_CFGR_SWS_PLL */
-#define RCC_CFGR_SWS_PLL						(REG_FIELD_VALUE(0x02UL, RCC_CFGR_SWS_Pos))
+#define RCC_CFGR_SWS_PLL						(REG_FIELD_VALUE(RCC_CFGR_SWS_Pos, 0x02UL))
 
 // ------ HPRE (AHB Prescaler) ------ //
 /** @brief AHB Prescaler Position (4 bits) @def RCC_CFGR_HPRE_Pos */
 #define RCC_CFGR_HPRE_Pos						((uint8_t) 4U)
 /** @brief AHB Prescaler Mask (4 bits) @def RCC_CFGR_HPRE_Msk */
-#define RCC_CFGR_HPRE_Msk						(REG_FIELD_VALUE(0x0FUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_Msk						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0FUL))
 /** @brief AHB Prescaler @def RCC_CFGR_HPRE */
 #define RCC_CFGR_HPRE							RCC_CFGR_HPRE_Msk
 /** @brief AHB prescaler = 1 (no division) @def RCC_CFGR_HPRE_DIV1 */
-#define RCC_CFGR_HPRE_DIV1						(REG_FIELD_VALUE(0x00UL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV1						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x00UL))
 /** @brief AHB prescaler = 2 @def RCC_CFGR_HPRE_DIV2 */
-#define RCC_CFGR_HPRE_DIV2						(REG_FIELD_VALUE(0x08UL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV2						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x08UL))
 /** @brief AHB prescaler = 4 @def RCC_CFGR_HPRE_DIV4 */
-#define RCC_CFGR_HPRE_DIV4						(REG_FIELD_VALUE(0x09UL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV4						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x09UL))
 /** @brief AHB prescaler = 8 @def RCC_CFGR_HPRE_DIV8 */
-#define RCC_CFGR_HPRE_DIV8						(REG_FIELD_VALUE(0x0AUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV8						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0AUL))
 /** @brief AHB prescaler = 16 @def RCC_CFGR_HPRE_DIV16 */
-#define RCC_CFGR_HPRE_DIV16						(REG_FIELD_VALUE(0x0BUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV16						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0BUL))
 /** @brief AHB prescaler = 64 @def RCC_CFGR_HPRE_DIV64 */
-#define RCC_CFGR_HPRE_DIV64						(REG_FIELD_VALUE(0x0CUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV64						(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0CUL))
 /** @brief AHB prescaler = 128 @def RCC_CFGR_HPRE_DIV128 */
-#define RCC_CFGR_HPRE_DIV128					(REG_FIELD_VALUE(0x0DUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV128					(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0DUL))
 /** @brief AHB prescaler = 256 @def RCC_CFGR_HPRE_DIV256 */
-#define RCC_CFGR_HPRE_DIV256					(REG_FIELD_VALUE(0x0EUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV256					(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0EUL))
 /** @brief AHB prescaler = 512 @def RCC_CFGR_HPRE_DIV512 */
-#define RCC_CFGR_HPRE_DIV512					(REG_FIELD_VALUE(0x0FUL, RCC_CFGR_HPRE_Pos))
+#define RCC_CFGR_HPRE_DIV512					(REG_FIELD_VALUE(RCC_CFGR_HPRE_Pos, 0x0FUL))
 
 // ------ PPRE1 (APB Low-Speed Prescaler - APB1) ------ //
 /** @brief APB1 Prescaler Position (3 bits) @def RCC_CFGR_PPRE1_Pos */
 #define RCC_CFGR_PPRE1_Pos						((uint8_t) 8U)
 /** @brief APB1 Prescaler Mask (3 bits) @def RCC_CFGR_PPRE1_Msk */
-#define RCC_CFGR_PPRE1_Msk						(REG_FIELD_VALUE(0x07UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_Msk						(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x07UL))
 /** @brief APB1 Prescaler @def RCC_CFGR_PPRE1 */
 #define RCC_CFGR_PPRE1							RCC_CFGR_PPRE1_Msk
 /** @brief APB1 prescaler = 1 (no division) @def RCC_CFGR_PPRE1_DIV1 */
-#define RCC_CFGR_PPRE1_DIV1						(REG_FIELD_VALUE(0x00UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_DIV1						(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x00UL))
 /** @brief APB1 prescaler = 2 @def RCC_CFGR_PPRE1_DIV2 */
-#define RCC_CFGR_PPRE1_DIV2						(REG_FIELD_VALUE(0x04UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_DIV2						(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x04UL))
 /** @brief APB1 prescaler = 4 @def RCC_CFGR_PPRE1_DIV4 */
-#define RCC_CFGR_PPRE1_DIV4						(REG_FIELD_VALUE(0x05UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_DIV4						(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x05UL))
 /** @brief APB1 prescaler = 8 @def RCC_CFGR_PPRE1_DIV8 */
-#define RCC_CFGR_PPRE1_DIV8						(REG_FIELD_VALUE(0x06UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_DIV8						(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x06UL))
 /** @brief APB1 prescaler = 16 @def RCC_CFGR_PPRE1_DIV16 */
-#define RCC_CFGR_PPRE1_DIV16					(REG_FIELD_VALUE(0x07UL, RCC_CFGR_PPRE1_Pos))
+#define RCC_CFGR_PPRE1_DIV16					(REG_FIELD_VALUE(RCC_CFGR_PPRE1_Pos, 0x07UL))
 
 // ------ PPRE2 (APB High-Speed Prescaler - APB2) ------ //
 /** @brief APB2 Prescaler Position (3 bits) @def RCC_CFGR_PPRE2_Pos */
 #define RCC_CFGR_PPRE2_Pos						((uint8_t) 11U)
 /** @brief APB2 Prescaler Mask (3 bits) @def RCC_CFGR_PPRE2_Msk */
-#define RCC_CFGR_PPRE2_Msk						(REG_FIELD_VALUE(0x07UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_Msk						(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x07UL))
 /** @brief APB2 Prescaler @def RCC_CFGR_PPRE2 */
 #define RCC_CFGR_PPRE2							RCC_CFGR_PPRE2_Msk
 /** @brief APB2 prescaler = 1 (no division) @def RCC_CFGR_PPRE2_DIV1 */
-#define RCC_CFGR_PPRE2_DIV1						(REG_FIELD_VALUE(0x00UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_DIV1						(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x00UL))
 /** @brief APB2 prescaler = 2 @def RCC_CFGR_PPRE2_DIV2 */
-#define RCC_CFGR_PPRE2_DIV2						(REG_FIELD_VALUE(0x04UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_DIV2						(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x04UL))
 /** @brief APB2 prescaler = 4 @def RCC_CFGR_PPRE2_DIV4 */
-#define RCC_CFGR_PPRE2_DIV4						(REG_FIELD_VALUE(0x05UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_DIV4						(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x05UL))
 /** @brief APB2 prescaler = 8 @def RCC_CFGR_PPRE2_DIV8 */
-#define RCC_CFGR_PPRE2_DIV8						(REG_FIELD_VALUE(0x06UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_DIV8						(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x06UL))
 /** @brief APB2 prescaler = 16 @def RCC_CFGR_PPRE2_DIV16 */
-#define RCC_CFGR_PPRE2_DIV16					(REG_FIELD_VALUE(0x07UL, RCC_CFGR_PPRE2_Pos))
+#define RCC_CFGR_PPRE2_DIV16					(REG_FIELD_VALUE(RCC_CFGR_PPRE2_Pos, 0x07UL))
 
 // ------ ADCPRE (ADC Prescaler) ------ //
 /** @brief ADC Prescaler Position (2 bits) @def RCC_CFGR_ADCPRE_Pos */
 #define RCC_CFGR_ADCPRE_Pos						((uint8_t) 14U)
 /** @brief ADC Prescaler Mask (2 bits) @def RCC_CFGR_ADCPRE_Msk */
-#define RCC_CFGR_ADCPRE_Msk						(REG_FIELD_VALUE(0x03UL, RCC_CFGR_ADCPRE_Pos))
+#define RCC_CFGR_ADCPRE_Msk						(REG_FIELD_VALUE(RCC_CFGR_ADCPRE_Pos, 0x03UL))
 /** @brief ADC Prescaler @def RCC_CFGR_ADCPRE */
 #define RCC_CFGR_ADCPRE							RCC_CFGR_ADCPRE_Msk
 /** @brief ADC prescaler = 2 (PCLK2/2) @def RCC_CFGR_ADCPRE_DIV2 */
-#define RCC_CFGR_ADCPRE_DIV2					(REG_FIELD_VALUE(0x00UL, RCC_CFGR_ADCPRE_Pos))
+#define RCC_CFGR_ADCPRE_DIV2					(REG_FIELD_VALUE(RCC_CFGR_ADCPRE_Pos, 0x00UL))
 /** @brief ADC prescaler = 4 (PCLK2/4) @def RCC_CFGR_ADCPRE_DIV4 */
-#define RCC_CFGR_ADCPRE_DIV4					(REG_FIELD_VALUE(0x01UL, RCC_CFGR_ADCPRE_Pos))
+#define RCC_CFGR_ADCPRE_DIV4					(REG_FIELD_VALUE(RCC_CFGR_ADCPRE_Pos, 0x01UL))
 /** @brief ADC prescaler = 6 (PCLK2/6) @def RCC_CFGR_ADCPRE_DIV6 */
-#define RCC_CFGR_ADCPRE_DIV6					(REG_FIELD_VALUE(0x02UL, RCC_CFGR_ADCPRE_Pos))
+#define RCC_CFGR_ADCPRE_DIV6					(REG_FIELD_VALUE(RCC_CFGR_ADCPRE_Pos, 0x02UL))
 /** @brief ADC prescaler = 8 (PCLK2/8) @def RCC_CFGR_ADCPRE_DIV8 */
-#define RCC_CFGR_ADCPRE_DIV8					(REG_FIELD_VALUE(0x03UL, RCC_CFGR_ADCPRE_Pos))
+#define RCC_CFGR_ADCPRE_DIV8					(REG_FIELD_VALUE(RCC_CFGR_ADCPRE_Pos, 0x03UL))
 
 // ------ PLLSRC (PLL Entry Clock Source) ------ //
 /** @brief PLL Entry Clock Source Position @def RCC_CFGR_PLLSRC_Pos */
 #define RCC_CFGR_PLLSRC_Pos						((uint8_t) 16U)
 /** @brief PLL Entry Clock Source Mask @def RCC_CFGR_PLLSRC_Msk */
-#define RCC_CFGR_PLLSRC_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_PLLSRC_Pos))
+#define RCC_CFGR_PLLSRC_Msk						(REG_FIELD_VALUE(RCC_CFGR_PLLSRC_Pos, 0x01UL))
 /** @brief PLL Entry Clock Source @def RCC_CFGR_PLLSRC */
 #define RCC_CFGR_PLLSRC							RCC_CFGR_PLLSRC_Msk
 /** @brief HSI/2 selected as PLL input clock @def RCC_CFGR_PLLSRC_HSI_DIV2 */
-#define RCC_CFGR_PLLSRC_HSI_DIV2				(REG_FIELD_VALUE(0x00UL, RCC_CFGR_PLLSRC_Pos))
+#define RCC_CFGR_PLLSRC_HSI_DIV2				(REG_FIELD_VALUE(RCC_CFGR_PLLSRC_Pos, 0x00UL))
 /** @brief HSE selected as PLL input clock @def RCC_CFGR_PLLSRC_HSE */
-#define RCC_CFGR_PLLSRC_HSE						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_PLLSRC_Pos))
+#define RCC_CFGR_PLLSRC_HSE						(REG_FIELD_VALUE(RCC_CFGR_PLLSRC_Pos, 0x01UL))
 
 // ------ PLLXTPRE (HSE Divider for PLL Entry) ------ //
 /** @brief HSE Divider for PLL Entry Position @def RCC_CFGR_PLLXTPRE_Pos */
 #define RCC_CFGR_PLLXTPRE_Pos					((uint8_t) 17U)
 /** @brief HSE Divider for PLL Entry Mask @def RCC_CFGR_PLLXTPRE_Msk */
-#define RCC_CFGR_PLLXTPRE_Msk					(REG_FIELD_VALUE(0x01UL, RCC_CFGR_PLLXTPRE_Pos))
+#define RCC_CFGR_PLLXTPRE_Msk					(REG_FIELD_VALUE(RCC_CFGR_PLLXTPRE_Pos, 0x01UL))
 /** @brief HSE Divider for PLL Entry @def RCC_CFGR_PLLXTPRE */
 #define RCC_CFGR_PLLXTPRE						RCC_CFGR_PLLXTPRE_Msk
-#define RCC_CFGR_PLLXTPRE_HSE					(REG_FIELD_VALUE(0x00UL, RCC_CFGR_PLLXTPRE_Pos))
+#define RCC_CFGR_PLLXTPRE_HSE					(REG_FIELD_VALUE(RCC_CFGR_PLLXTPRE_Pos, 0x00UL))
 /** @brief HSE divided by 2 before PLL @def RCC_CFGR_PLLXTPRE_HSE_DIV2 */
-#define RCC_CFGR_PLLXTPRE_HSE_DIV2				(REG_FIELD_VALUE(0x01UL, RCC_CFGR_PLLXTPRE_Pos))
+#define RCC_CFGR_PLLXTPRE_HSE_DIV2				(REG_FIELD_VALUE(RCC_CFGR_PLLXTPRE_Pos, 0x01UL))
 
 // ------ PLLMUL (PLL Multiplication Factor) ------ //
 /** @brief PLL Multiplication Factor Position (4 bits) @def RCC_CFGR_PLLMUL_Pos */
 #define RCC_CFGR_PLLMUL_Pos						((uint8_t) 18U)
 /** @brief PLL Multiplication Factor Mask (4 bits) @def RCC_CFGR_PLLMUL_Msk */
-#define RCC_CFGR_PLLMUL_Msk						(REG_FIELD_VALUE(0x0FUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_Msk						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x0FUL))
 /** @brief PLL Multiplication Factor @def RCC_CFGR_PLLMUL */
 #define RCC_CFGR_PLLMUL							RCC_CFGR_PLLMUL_Msk
 /** @brief PLL input clock x 2 @def RCC_CFGR_PLLMUL_2 */
-#define RCC_CFGR_PLLMUL_2						(REG_FIELD_VALUE(0x00UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_2						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x00UL))
 /** @brief PLL input clock x 3 @def RCC_CFGR_PLLMUL_3 */
-#define RCC_CFGR_PLLMUL_3						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_3						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x01UL))
 /** @brief PLL input clock x 4 @def RCC_CFGR_PLLMUL_4 */
-#define RCC_CFGR_PLLMUL_4						(REG_FIELD_VALUE(0x02UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_4						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x02UL))
 /** @brief PLL input clock x 5 @def RCC_CFGR_PLLMUL_5 */
-#define RCC_CFGR_PLLMUL_5						(REG_FIELD_VALUE(0x03UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_5						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x03UL))
 /** @brief PLL input clock x 6 @def RCC_CFGR_PLLMUL_6 */
-#define RCC_CFGR_PLLMUL_6						(REG_FIELD_VALUE(0x04UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_6						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x04UL))
 /** @brief PLL input clock x 7 @def RCC_CFGR_PLLMUL_7 */
-#define RCC_CFGR_PLLMUL_7						(REG_FIELD_VALUE(0x05UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_7						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x05UL))
 /** @brief PLL input clock x 8 @def RCC_CFGR_PLLMUL_8 */
-#define RCC_CFGR_PLLMUL_8						(REG_FIELD_VALUE(0x06UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_8						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x06UL))
 /** @brief PLL input clock x 9 @def RCC_CFGR_PLLMUL_9 */
-#define RCC_CFGR_PLLMUL_9						(REG_FIELD_VALUE(0x07UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_9						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x07UL))
 /** @brief PLL input clock x 10 @def RCC_CFGR_PLLMUL_10 */
-#define RCC_CFGR_PLLMUL_10						(REG_FIELD_VALUE(0x08UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_10						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x08UL))
 /** @brief PLL input clock x 11 @def RCC_CFGR_PLLMUL_11 */
-#define RCC_CFGR_PLLMUL_11						(REG_FIELD_VALUE(0x9UL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_11						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0x9UL))
 /** @brief PLL input clock x 12 @def RCC_CFGR_PLLMUL_12 */
-#define RCC_CFGR_PLLMUL_12						(REG_FIELD_VALUE(0xAUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_12						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0xAUL))
 /** @brief PLL input clock x 13 @def RCC_CFGR_PLLMUL_13 */
-#define RCC_CFGR_PLLMUL_13						(REG_FIELD_VALUE(0xBUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_13						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0xBUL))
 /** @brief PLL input clock x 14 @def RCC_CFGR_PLLMUL_14 */
-#define RCC_CFGR_PLLMUL_14						(REG_FIELD_VALUE(0xCUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_14						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0xCUL))
 /** @brief PLL input clock x 15 @def RCC_CFGR_PLLMUL_15 */
-#define RCC_CFGR_PLLMUL_15						(REG_FIELD_VALUE(0xDUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_15						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0xDUL))
 /** @brief PLL input clock x 16 @def RCC_CFGR_PLLMUL_16 */
-#define RCC_CFGR_PLLMUL_16						(REG_FIELD_VALUE(0xEUL, RCC_CFGR_PLLMUL_Pos))
+#define RCC_CFGR_PLLMUL_16						(REG_FIELD_VALUE(RCC_CFGR_PLLMUL_Pos, 0xEUL))
 
 // ------ USBPRE (USB Prescaler) ------ //
 /** @brief USB Prescaler Position @def RCC_CFGR_USBPRE_Pos */
 #define RCC_CFGR_USBPRE_Pos						((uint8_t) 22U)
 /** @brief USB Prescaler Mask @def RCC_CFGR_USBPRE_Msk */
-#define RCC_CFGR_USBPRE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_USBPRE_Pos))
+#define RCC_CFGR_USBPRE_Msk						(REG_FIELD_VALUE(RCC_CFGR_USBPRE_Pos, 0x01UL))
 /** @brief USB Prescaler @def RCC_CFGR_USBPRE */
 #define RCC_CFGR_USBPRE							RCC_CFGR_USBPRE_Msk
 /** @brief PLL clock divided by 1.5 (48 MHz for USB) @def RCC_CFGR_USBPRE_DIV1_5 */
-#define RCC_CFGR_USBPRE_DIV1_5					(REG_FIELD_VALUE(0x00UL, RCC_CFGR_USBPRE_Pos))
+#define RCC_CFGR_USBPRE_DIV1_5					(REG_FIELD_VALUE(RCC_CFGR_USBPRE_Pos, 0x00UL))
 /** @brief PLL clock directly used as USB clock (must be 48 MHz) @def RCC_CFGR_USBPRE_DIRECT */
-#define RCC_CFGR_USBPRE_DIRECT					(REG_FIELD_VALUE(0x01UL, RCC_CFGR_USBPRE_Pos))
+#define RCC_CFGR_USBPRE_DIRECT					(REG_FIELD_VALUE(RCC_CFGR_USBPRE_Pos, 0x01UL))
 
 // ------ MCO (Microcontroller Clock Output) ------ //
 /** @brief Microcontroller Clock Output Position (3 bits) @def RCC_CFGR_MCO_Pos */
 #define RCC_CFGR_MCO_Pos						((uint8_t) 24U)
 /** @brief Microcontroller Clock Output Mask (3 bits) @def RCC_CFGR_MCO_Msk */
-#define RCC_CFGR_MCO_Msk						(REG_FIELD_VALUE(0x07UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_Msk						(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x07UL))
 /** @brief Microcontroller Clock Output @def RCC_CFGR_MCO */
 #define RCC_CFGR_MCO							RCC_CFGR_MCO_Msk
 /** @brief No clock output on MCO @def RCC_CFGR_MCO_NOCLOCK */
-#define RCC_CFGR_MCO_NOCLOCK					(REG_FIELD_VALUE(0x00UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_NOCLOCK					(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x00UL))
 /** @brief System clock output on MCO @def RCC_CFGR_MCO_SYSCLK */
-#define RCC_CFGR_MCO_SYSCLK						(REG_FIELD_VALUE(0x01UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_SYSCLK						(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x01UL))
 /** @brief HSI clock output on MCO @def RCC_CFGR_MCO_HSI */
-#define RCC_CFGR_MCO_HSI						(REG_FIELD_VALUE(0x02UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_HSI						(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x02UL))
 /** @brief HSE clock output on MCO @def RCC_CFGR_MCO_HSE */
-#define RCC_CFGR_MCO_HSE						(REG_FIELD_VALUE(0x03UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_HSE						(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x03UL))
 /** @brief PLL clock divided by 2 output on MCO @def RCC_CFGR_MCO_PLL_DIV2 */
-#define RCC_CFGR_MCO_PLL_DIV2					(REG_FIELD_VALUE(0x04UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_PLL_DIV2					(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x04UL))
 /** @brief PLL clock output on MCO @def RCC_CFGR_MCO_PLL */
-#define RCC_CFGR_MCO_PLL						(REG_FIELD_VALUE(0x05UL, RCC_CFGR_MCO_Pos))
+#define RCC_CFGR_MCO_PLL						(REG_FIELD_VALUE(RCC_CFGR_MCO_Pos, 0x05UL))
 
 /** @} */ // RCC_CFGR 
 
@@ -447,7 +447,7 @@ extern "C" {
 /** @brief LSI Ready Interrupt Flag Position @def RCC_CIR_LSIRDYF_Pos */
 #define RCC_CIR_LSIRDYF_Pos							((uint8_t) 0U)
 /** @brief LSI Ready Interrupt Flag Mask @def RCC_CIR_LSIRDYF_Msk */
-#define RCC_CIR_LSIRDYF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSIRDYF_Pos))
+#define RCC_CIR_LSIRDYF_Msk							(REG_FIELD_VALUE(RCC_CIR_LSIRDYF_Pos, 0x01UL))
 /** @brief LSI Ready Interrupt Flag @def RCC_CIR_LSIRDYF */
 #define RCC_CIR_LSIRDYF								RCC_CIR_LSIRDYF_Msk
 
@@ -455,7 +455,7 @@ extern "C" {
 /** @brief LSE Ready Interrupt Flag Position @def RCC_CIR_LSERDYF_Pos */
 #define RCC_CIR_LSERDYF_Pos							((uint8_t) 1U)
 /** @brief LSE Ready Interrupt Flag Mask @def RCC_CIR_LSERDYF_Msk */
-#define RCC_CIR_LSERDYF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSERDYF_Pos))
+#define RCC_CIR_LSERDYF_Msk							(REG_FIELD_VALUE(RCC_CIR_LSERDYF_Pos, 0x01UL))
 /** @brief LSE Ready Interrupt Flag @def RCC_CIR_LSERDYF */
 #define RCC_CIR_LSERDYF								RCC_CIR_LSERDYF_Msk
 
@@ -463,7 +463,7 @@ extern "C" {
 /** @brief HSI Ready Interrupt Flag Position @def RCC_CIR_HSIRDYF_Pos */
 #define RCC_CIR_HSIRDYF_Pos							((uint8_t) 2U)
 /** @brief HSI Ready Interrupt Flag Mask @def RCC_CIR_HSIRDYF_Msk */
-#define RCC_CIR_HSIRDYF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSIRDYF_Pos))
+#define RCC_CIR_HSIRDYF_Msk							(REG_FIELD_VALUE(RCC_CIR_HSIRDYF_Pos, 0x01UL))
 /** @brief HSI Ready Interrupt Flag @def RCC_CIR_HSIRDYF */
 #define RCC_CIR_HSIRDYF								RCC_CIR_HSIRDYF_Msk
 
@@ -471,7 +471,7 @@ extern "C" {
 /** @brief HSE Ready Interrupt Flag Position @def RCC_CIR_HSERDYF_Pos */
 #define RCC_CIR_HSERDYF_Pos							((uint8_t) 3U)
 /** @brief HSE Ready Interrupt Flag Mask @def RCC_CIR_HSERDYF_Msk */
-#define RCC_CIR_HSERDYF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSERDYF_Pos))
+#define RCC_CIR_HSERDYF_Msk							(REG_FIELD_VALUE(RCC_CIR_HSERDYF_Pos, 0x01UL))
 /** @brief HSE Ready Interrupt Flag @def RCC_CIR_HSERDYF */
 #define RCC_CIR_HSERDYF								RCC_CIR_HSERDYF_Msk
 
@@ -479,7 +479,7 @@ extern "C" {
 /** @brief PLL Ready Interrupt Flag Position @def RCC_CIR_PLLRDYF_Pos */
 #define RCC_CIR_PLLRDYF_Pos							((uint8_t) 4U)
 /** @brief PLL Ready Interrupt Flag Mask @def RCC_CIR_PLLRDYF_Msk */
-#define RCC_CIR_PLLRDYF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_PLLRDYF_Pos))
+#define RCC_CIR_PLLRDYF_Msk							(REG_FIELD_VALUE(RCC_CIR_PLLRDYF_Pos, 0x01UL))
 /** @brief PLL Ready Interrupt Flag @def RCC_CIR_PLLRDYF */
 #define RCC_CIR_PLLRDYF								RCC_CIR_PLLRDYF_Msk
 
@@ -487,7 +487,7 @@ extern "C" {
 /** @brief Clock Security System Interrupt Flag Position @def RCC_CIR_CSFF_Pos */
 #define RCC_CIR_CSFF_Pos							((uint8_t) 7U)
 /** @brief Clock Security System Interrupt Flag Mask @def RCC_CIR_CSFF_Msk */
-#define RCC_CIR_CSFF_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_CSFF_Pos))
+#define RCC_CIR_CSFF_Msk							(REG_FIELD_VALUE(RCC_CIR_CSFF_Pos, 0x01UL))
 /** @brief Clock Security System Interrupt Flag @def RCC_CIR_CSFF */
 #define RCC_CIR_CSFF								RCC_CIR_CSFF_Msk
 
@@ -495,7 +495,7 @@ extern "C" {
 /** @brief LSI Ready Interrupt Enable Position @def RCC_CIR_LSIRDYIE_Pos */
 #define RCC_CIR_LSIRDYIE_Pos						((uint8_t) 8U)
 /** @brief LSI Ready Interrupt Enable Mask @def RCC_CIR_LSIRDYIE_Msk */
-#define RCC_CIR_LSIRDYIE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSIRDYIE_Pos))
+#define RCC_CIR_LSIRDYIE_Msk						(REG_FIELD_VALUE(RCC_CIR_LSIRDYIE_Pos, 0x01UL))
 /** @brief LSI Ready Interrupt Enable @def RCC_CIR_LSIRDYIE */
 #define RCC_CIR_LSIRDYIE							RCC_CIR_LSIRDYIE_Msk
 
@@ -503,7 +503,7 @@ extern "C" {
 /** @brief LSE Ready Interrupt Enable Position @def RCC_CIR_LSERDYIE_Pos */
 #define RCC_CIR_LSERDYIE_Pos						((uint8_t) 9U)
 /** @brief LSE Ready Interrupt Enable Mask @def RCC_CIR_LSERDYIE_Msk */
-#define RCC_CIR_LSERDYIE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSERDYIE_Pos))
+#define RCC_CIR_LSERDYIE_Msk						(REG_FIELD_VALUE(RCC_CIR_LSERDYIE_Pos, 0x01UL))
 /** @brief LSE Ready Interrupt Enable @def RCC_CIR_LSERDYIE */
 #define RCC_CIR_LSERDYIE							RCC_CIR_LSERDYIE_Msk
 
@@ -511,7 +511,7 @@ extern "C" {
 /** @brief HSI Ready Interrupt Enable Position @def RCC_CIR_HSIRDYIE_Pos */
 #define RCC_CIR_HSIRDYIE_Pos						((uint8_t) 10U)
 /** @brief HSI Ready Interrupt Enable Mask @def RCC_CIR_HSIRDYIE_Msk */
-#define RCC_CIR_HSIRDYIE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSIRDYIE_Pos))
+#define RCC_CIR_HSIRDYIE_Msk						(REG_FIELD_VALUE(RCC_CIR_HSIRDYIE_Pos, 0x01UL))
 /** @brief HSI Ready Interrupt Enable @def RCC_CIR_HSIRDYIE */
 #define RCC_CIR_HSIRDYIE							RCC_CIR_HSIRDYIE_Msk
 
@@ -519,7 +519,7 @@ extern "C" {
 /** @brief HSE Ready Interrupt Enable Position @def RCC_CIR_HSERDYIE_Pos */
 #define RCC_CIR_HSERDYIE_Pos						((uint8_t) 11U)
 /** @brief HSE Ready Interrupt Enable Mask @def RCC_CIR_HSERDYIE_Msk */
-#define RCC_CIR_HSERDYIE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSERDYIE_Pos))
+#define RCC_CIR_HSERDYIE_Msk						(REG_FIELD_VALUE(RCC_CIR_HSERDYIE_Pos, 0x01UL))
 /** @brief HSE Ready Interrupt Enable @def RCC_CIR_HSERDYIE */
 #define RCC_CIR_HSERDYIE							RCC_CIR_HSERDYIE_Msk
 
@@ -527,7 +527,7 @@ extern "C" {
 /** @brief PLL Ready Interrupt Enable Position @def RCC_CIR_PLLRDYIE_Pos */
 #define RCC_CIR_PLLRDYIE_Pos						((uint8_t) 12U)
 /** @brief PLL Ready Interrupt Enable Mask @def RCC_CIR_PLLRDYIE_Msk */
-#define RCC_CIR_PLLRDYIE_Msk						(REG_FIELD_VALUE(0x01UL, RCC_CIR_PLLRDYIE_Pos))
+#define RCC_CIR_PLLRDYIE_Msk						(REG_FIELD_VALUE(RCC_CIR_PLLRDYIE_Pos, 0x01UL))
 /** @brief PLL Ready Interrupt Enable @def RCC_CIR_PLLRDYIE */
 #define RCC_CIR_PLLRDYIE							RCC_CIR_PLLRDYIE_Msk
 
@@ -535,7 +535,7 @@ extern "C" {
 /** @brief LSI Ready Interrupt Clear Position @def RCC_CIR_LSIRDYC_Pos */
 #define RCC_CIR_LSIRDYC_Pos							((uint8_t) 16U)
 /** @brief LSI Ready Interrupt Clear Mask @def RCC_CIR_LSIRDYC_Msk */
-#define RCC_CIR_LSIRDYC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSIRDYC_Pos))
+#define RCC_CIR_LSIRDYC_Msk							(REG_FIELD_VALUE(RCC_CIR_LSIRDYC_Pos, 0x01UL))
 /** @brief LSI Ready Interrupt Clear @def RCC_CIR_LSIRDYC */
 #define RCC_CIR_LSIRDYC								RCC_CIR_LSIRDYC_Msk
 
@@ -543,7 +543,7 @@ extern "C" {
 /** @brief LSE Ready Interrupt Clear Position @def RCC_CIR_LSERDYC_Pos */
 #define RCC_CIR_LSERDYC_Pos							((uint8_t) 17U)
 /** @brief LSE Ready Interrupt Clear Mask @def RCC_CIR_LSERDYC_Msk */
-#define RCC_CIR_LSERDYC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_LSERDYC_Pos))
+#define RCC_CIR_LSERDYC_Msk							(REG_FIELD_VALUE(RCC_CIR_LSERDYC_Pos, 0x01UL))
 /** @brief LSE Ready Interrupt Clear @def RCC_CIR_LSERDYC */
 #define RCC_CIR_LSERDYC								RCC_CIR_LSERDYC_Msk
 
@@ -551,7 +551,7 @@ extern "C" {
 /** @brief HSI Ready Interrupt Clear Position @def RCC_CIR_HSIRDYC_Pos */
 #define RCC_CIR_HSIRDYC_Pos							((uint8_t) 18U)
 /** @brief HSI Ready Interrupt Clear Mask @def RCC_CIR_HSIRDYC_Msk */
-#define RCC_CIR_HSIRDYC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSIRDYC_Pos))
+#define RCC_CIR_HSIRDYC_Msk							(REG_FIELD_VALUE(RCC_CIR_HSIRDYC_Pos, 0x01UL))
 /** @brief HSI Ready Interrupt Clear @def RCC_CIR_HSIRDYC */
 #define RCC_CIR_HSIRDYC								RCC_CIR_HSIRDYC_Msk
 
@@ -559,7 +559,7 @@ extern "C" {
 /** @brief HSE Ready Interrupt Clear Position @def RCC_CIR_HSERDYC_Pos */
 #define RCC_CIR_HSERDYC_Pos							((uint8_t) 19U)
 /** @brief HSE Ready Interrupt Clear Mask @def RCC_CIR_HSERDYC_Msk */
-#define RCC_CIR_HSERDYC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_HSERDYC_Pos))
+#define RCC_CIR_HSERDYC_Msk							(REG_FIELD_VALUE(RCC_CIR_HSERDYC_Pos, 0x01UL))
 /** @brief HSE Ready Interrupt Clear @def RCC_CIR_HSERDYC */
 #define RCC_CIR_HSERDYC								RCC_CIR_HSERDYC_Msk
 
@@ -567,7 +567,7 @@ extern "C" {
 /** @brief PLL Ready Interrupt Clear Position @def RCC_CIR_PLLRDYC_Pos */
 #define RCC_CIR_PLLRDYC_Pos							((uint8_t) 20U)
 /** @brief PLL Ready Interrupt Clear Mask @def RCC_CIR_PLLRDYC_Msk */
-#define RCC_CIR_PLLRDYC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_PLLRDYC_Pos))
+#define RCC_CIR_PLLRDYC_Msk							(REG_FIELD_VALUE(RCC_CIR_PLLRDYC_Pos, 0x01UL))
 /** @brief PLL Ready Interrupt Clear @def RCC_CIR_PLLRDYC */
 #define RCC_CIR_PLLRDYC								RCC_CIR_PLLRDYC_Msk
 
@@ -575,7 +575,7 @@ extern "C" {
 /** @brief Clock Security System Interrupt Clear Position @def RCC_CIR_CSSC_Pos */
 #define RCC_CIR_CSSC_Pos							((uint8_t) 23U)
 /** @brief Clock Security System Interrupt Clear Mask @def RCC_CIR_CSSC_Msk */
-#define RCC_CIR_CSSC_Msk							(REG_FIELD_VALUE(0x01UL, RCC_CIR_CSSC_Pos))
+#define RCC_CIR_CSSC_Msk							(REG_FIELD_VALUE(RCC_CIR_CSSC_Pos, 0x01UL))
 /** @brief Clock Security System Interrupt Clear @def RCC_CIR_CSSC */
 #define RCC_CIR_CSSC								RCC_CIR_CSSC_Msk
 
@@ -605,7 +605,7 @@ extern "C" {
 /** @brief Alternate Function I/O Reset Position @def RCC_APB2RSTR_AFIORST_Pos */
 #define RCC_APB2RSTR_AFIORST_Pos						((uint8_t) 0U)
 /** @brief Alternate Function I/O Reset Mask @def RCC_APB2RSTR_AFIORST_Msk */
-#define RCC_APB2RSTR_AFIORST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_AFIORST_Pos))
+#define RCC_APB2RSTR_AFIORST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_AFIORST_Pos, 0x01UL))
 /** @brief Alternate Function I/O Reset @def RCC_APB2RSTR_AFIORST */
 #define RCC_APB2RSTR_AFIORST							RCC_APB2RSTR_AFIORST_Msk
 
@@ -613,7 +613,7 @@ extern "C" {
 /** @brief I/O Port A Reset Position @def RCC_APB2RSTR_IOPARST_Pos */
 #define RCC_APB2RSTR_IOPARST_Pos						((uint8_t) 2U)
 /** @brief I/O Port A Reset Mask @def RCC_APB2RSTR_IOPARST_Msk */
-#define RCC_APB2RSTR_IOPARST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPARST_Pos))
+#define RCC_APB2RSTR_IOPARST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPARST_Pos, 0x01UL))
 /** @brief I/O Port A Reset @def RCC_APB2RSTR_IOPARST */
 #define RCC_APB2RSTR_IOPARST							RCC_APB2RSTR_IOPARST_Msk
 
@@ -621,7 +621,7 @@ extern "C" {
 /** @brief I/O Port B Reset Position @def RCC_APB2RSTR_IOPBRST_Pos */
 #define RCC_APB2RSTR_IOPBRST_Pos						((uint8_t) 3U)
 /** @brief I/O Port B Reset Mask @def RCC_APB2RSTR_IOPBRST_Msk */
-#define RCC_APB2RSTR_IOPBRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPBRST_Pos))
+#define RCC_APB2RSTR_IOPBRST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPBRST_Pos, 0x01UL))
 /** @brief I/O Port B Reset @def RCC_APB2RSTR_IOPBRST */
 #define RCC_APB2RSTR_IOPBRST							RCC_APB2RSTR_IOPBRST_Msk
 
@@ -629,7 +629,7 @@ extern "C" {
 /** @brief I/O Port C Reset Position @def RCC_APB2RSTR_IOPCRST_Pos */
 #define RCC_APB2RSTR_IOPCRST_Pos						((uint8_t) 4U)
 /** @brief I/O Port C Reset Mask @def RCC_APB2RSTR_IOPCRST_Msk */
-#define RCC_APB2RSTR_IOPCRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPCRST_Pos))
+#define RCC_APB2RSTR_IOPCRST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPCRST_Pos, 0x01UL))
 /** @brief I/O Port C Reset @def RCC_APB2RSTR_IOPCRST */
 #define RCC_APB2RSTR_IOPCRST							RCC_APB2RSTR_IOPCRST_Msk
 
@@ -637,7 +637,7 @@ extern "C" {
 /** @brief I/O Port D Reset Position @def RCC_APB2RSTR_IOPDRST_Pos */
 #define RCC_APB2RSTR_IOPDRST_Pos						((uint8_t) 5U)
 /** @brief I/O Port D Reset Mask @def RCC_APB2RSTR_IOPDRST_Msk */
-#define RCC_APB2RSTR_IOPDRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPDRST_Pos))
+#define RCC_APB2RSTR_IOPDRST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPDRST_Pos, 0x01UL))
 /** @brief I/O Port D Reset @def RCC_APB2RSTR_IOPDRST */
 #define RCC_APB2RSTR_IOPDRST							RCC_APB2RSTR_IOPDRST_Msk
 
@@ -645,7 +645,7 @@ extern "C" {
 /** @brief I/O Port E Reset Position @def RCC_APB2RSTR_IOPERST_Pos */
 #define RCC_APB2RSTR_IOPERST_Pos						((uint8_t) 6U)
 /** @brief I/O Port E Reset Mask @def RCC_APB2RSTR_IOPERST_Msk */
-#define RCC_APB2RSTR_IOPERST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPERST_Pos))
+#define RCC_APB2RSTR_IOPERST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPERST_Pos, 0x01UL))
 /** @brief I/O Port E Reset @def RCC_APB2RSTR_IOPERST */
 #define RCC_APB2RSTR_IOPERST							RCC_APB2RSTR_IOPERST_Msk
 
@@ -653,7 +653,7 @@ extern "C" {
 /** @brief I/O Port F Reset Position @def RCC_APB2RSTR_IOPFRST_Pos */
 #define RCC_APB2RSTR_IOPFRST_Pos						((uint8_t) 7U)
 /** @brief I/O Port F Reset Mask @def RCC_APB2RSTR_IOPFRST_Msk */
-#define RCC_APB2RSTR_IOPFRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPFRST_Pos))
+#define RCC_APB2RSTR_IOPFRST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPFRST_Pos, 0x01UL))
 /** @brief I/O Port F Reset @def RCC_APB2RSTR_IOPFRST */
 #define RCC_APB2RSTR_IOPFRST							RCC_APB2RSTR_IOPFRST_Msk
 
@@ -661,7 +661,7 @@ extern "C" {
 /** @brief I/O Port G Reset Position @def RCC_APB2RSTR_IOPGRST_Pos */
 #define RCC_APB2RSTR_IOPGRST_Pos						((uint8_t) 8U)
 /** @brief I/O Port G Reset Mask @def RCC_APB2RSTR_IOPGRST_Msk */
-#define RCC_APB2RSTR_IOPGRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_IOPGRST_Pos))
+#define RCC_APB2RSTR_IOPGRST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_IOPGRST_Pos, 0x01UL))
 /** @brief I/O Port G Reset @def RCC_APB2RSTR_IOPGRST */
 #define RCC_APB2RSTR_IOPGRST							RCC_APB2RSTR_IOPGRST_Msk
 
@@ -669,7 +669,7 @@ extern "C" {
 /** @brief ADC 1 Reset Position @def RCC_APB2RSTR_ADC1RST_Pos */
 #define RCC_APB2RSTR_ADC1RST_Pos						((uint8_t) 9U)
 /** @brief ADC 1 Reset Mask @def RCC_APB2RSTR_ADC1RST_Msk */
-#define RCC_APB2RSTR_ADC1RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_ADC1RST_Pos))
+#define RCC_APB2RSTR_ADC1RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_ADC1RST_Pos, 0x01UL))
 /** @brief ADC 1 Reset @def RCC_APB2RSTR_ADC1RST */
 #define RCC_APB2RSTR_ADC1RST							RCC_APB2RSTR_ADC1RST_Msk
 
@@ -677,7 +677,7 @@ extern "C" {
 /** @brief ADC 2 Reset Position @def RCC_APB2RSTR_ADC2RST_Pos */
 #define RCC_APB2RSTR_ADC2RST_Pos						((uint8_t) 10U)
 /** @brief ADC 2 Reset Mask @def RCC_APB2RSTR_ADC2RST_Msk */
-#define RCC_APB2RSTR_ADC2RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_ADC2RST_Pos))
+#define RCC_APB2RSTR_ADC2RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_ADC2RST_Pos, 0x01UL))
 /** @brief ADC 2 Reset @def RCC_APB2RSTR_ADC2RST */
 #define RCC_APB2RSTR_ADC2RST							RCC_APB2RSTR_ADC2RST_Msk
 
@@ -685,7 +685,7 @@ extern "C" {
 /** @brief TIM1 Timer Reset Position @def RCC_APB2RSTR_TIM1RST_Pos */
 #define RCC_APB2RSTR_TIM1RST_Pos						((uint8_t) 11U)
 /** @brief TIM1 Timer Reset Mask @def RCC_APB2RSTR_TIM1RST_Msk */
-#define RCC_APB2RSTR_TIM1RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_TIM1RST_Pos))
+#define RCC_APB2RSTR_TIM1RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_TIM1RST_Pos, 0x01UL))
 /** @brief TIM1 Timer Reset @def RCC_APB2RSTR_TIM1RST */
 #define RCC_APB2RSTR_TIM1RST							RCC_APB2RSTR_TIM1RST_Msk
 
@@ -693,7 +693,7 @@ extern "C" {
 /** @brief SPI1 Reset Position @def RCC_APB2RSTR_SPI1RST_Pos */
 #define RCC_APB2RSTR_SPI1RST_Pos						((uint8_t) 12U)
 /** @brief SPI1 Reset Mask @def RCC_APB2RSTR_SPI1RST_Msk */
-#define RCC_APB2RSTR_SPI1RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_SPI1RST_Pos))
+#define RCC_APB2RSTR_SPI1RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_SPI1RST_Pos, 0x01UL))
 /** @brief SPI1 Reset @def RCC_APB2RSTR_SPI1RST */
 #define RCC_APB2RSTR_SPI1RST							RCC_APB2RSTR_SPI1RST_Msk
 
@@ -701,7 +701,7 @@ extern "C" {
 /** @brief TIM8 Timer Reset Position @def RCC_APB2RSTR_TIM8RST_Pos */
 #define RCC_APB2RSTR_TIM8RST_Pos						((uint8_t) 13U)
 /** @brief TIM8 Timer Reset Mask @def RCC_APB2RSTR_TIM8RST_Msk */
-#define RCC_APB2RSTR_TIM8RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_TIM8RST_Pos))
+#define RCC_APB2RSTR_TIM8RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_TIM8RST_Pos, 0x01UL))
 /** @brief TIM8 Timer Reset @def RCC_APB2RSTR_TIM8RST */
 #define RCC_APB2RSTR_TIM8RST							RCC_APB2RSTR_TIM8RST_Msk
 
@@ -709,7 +709,7 @@ extern "C" {
 /** @brief USART1 Reset Position @def RCC_APB2RSTR_USART1RST_Pos */
 #define RCC_APB2RSTR_USART1RST_Pos						((uint8_t) 14U)
 /** @brief USART1 Reset Mask @def RCC_APB2RSTR_USART1RST_Msk */
-#define RCC_APB2RSTR_USART1RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_USART1RST_Pos))
+#define RCC_APB2RSTR_USART1RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_USART1RST_Pos, 0x01UL))
 /** @brief USART1 Reset @def RCC_APB2RSTR_USART1RST */
 #define RCC_APB2RSTR_USART1RST							RCC_APB2RSTR_USART1RST_Msk
 
@@ -717,7 +717,7 @@ extern "C" {
 /** @brief ADC 3 Reset Position @def RCC_APB2RSTR_ADC3RST_Pos */
 #define RCC_APB2RSTR_ADC3RST_Pos						((uint8_t) 15U)
 /** @brief ADC 3 Reset Mask @def RCC_APB2RSTR_ADC3RST_Msk */
-#define RCC_APB2RSTR_ADC3RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_ADC3RST_Pos))
+#define RCC_APB2RSTR_ADC3RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_ADC3RST_Pos, 0x01UL))
 /** @brief ADC 3 Reset @def RCC_APB2RSTR_ADC3RST */
 #define RCC_APB2RSTR_ADC3RST							RCC_APB2RSTR_ADC3RST_Msk
 
@@ -725,7 +725,7 @@ extern "C" {
 /** @brief TIM9 Timer Reset Position @def RCC_APB2RSTR_TIM9RST_Pos */
 #define RCC_APB2RSTR_TIM9RST_Pos						((uint8_t) 19U)
 /** @brief TIM9 Timer Reset Mask @def RCC_APB2RSTR_TIM9RST_Msk */
-#define RCC_APB2RSTR_TIM9RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_TIM9RST_Pos))
+#define RCC_APB2RSTR_TIM9RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_TIM9RST_Pos, 0x01UL))
 /** @brief TIM9 Timer Reset @def RCC_APB2RSTR_TIM9RST */
 #define RCC_APB2RSTR_TIM9RST							RCC_APB2RSTR_TIM9RST_Msk
 
@@ -733,7 +733,7 @@ extern "C" {
 /** @brief TIM10 Timer Reset Position @def RCC_APB2RSTR_TIM10RST_Pos */
 #define RCC_APB2RSTR_TIM10RST_Pos						((uint8_t) 20U)
 /** @brief TIM10 Timer Reset Mask @def RCC_APB2RSTR_TIM10RST_Msk */
-#define RCC_APB2RSTR_TIM10RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_TIM10RST_Pos))
+#define RCC_APB2RSTR_TIM10RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_TIM10RST_Pos, 0x01UL))
 /** @brief TIM10 Timer Reset @def RCC_APB2RSTR_TIM10RST */
 #define RCC_APB2RSTR_TIM10RST							RCC_APB2RSTR_TIM10RST_Msk
 
@@ -741,7 +741,7 @@ extern "C" {
 /** @brief TIM11 Timer Reset Position @def RCC_APB2RSTR_TIM11RST_Pos */
 #define RCC_APB2RSTR_TIM11RST_Pos						((uint8_t) 21U)
 /** @brief TIM11 Timer Reset Mask @def RCC_APB2RSTR_TIM11RST_Msk */
-#define RCC_APB2RSTR_TIM11RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2RSTR_TIM11RST_Pos))
+#define RCC_APB2RSTR_TIM11RST_Msk						(REG_FIELD_VALUE(RCC_APB2RSTR_TIM11RST_Pos, 0x01UL))
 /** @brief TIM11 Timer Reset @def RCC_APB2RSTR_TIM11RST */
 #define RCC_APB2RSTR_TIM11RST							RCC_APB2RSTR_TIM11RST_Msk
 
@@ -754,161 +754,161 @@ extern "C" {
 /** @brief TIM2 Reset Position @def RCC_APB1RSTR_TIM2RST_Pos */
 #define RCC_APB1RSTR_TIM2RST_Pos						((uint8_t) 0U)
 /** @brief TIM2 Reset Mask @def RCC_APB1RSTR_TIM2RST_Msk */
-#define RCC_APB1RSTR_TIM2RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM2RST_Pos))
+#define RCC_APB1RSTR_TIM2RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM2RST_Pos, 0x01UL))
 /** @brief TIM2 Reset @def RCC_APB1RSTR_TIM2RST */
 #define RCC_APB1RSTR_TIM2RST							RCC_APB1RSTR_TIM2RST_Msk
 
 /** @brief TIM3 Reset Position @def RCC_APB1RSTR_TIM3RST_Pos */
 #define RCC_APB1RSTR_TIM3RST_Pos						((uint8_t) 1U)
 /** @brief TIM3 Reset Mask @def RCC_APB1RSTR_TIM3RST_Msk */
-#define RCC_APB1RSTR_TIM3RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM3RST_Pos))
+#define RCC_APB1RSTR_TIM3RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM3RST_Pos, 0x01UL))
 /** @brief TIM3 Reset @def RCC_APB1RSTR_TIM3RST */
 #define RCC_APB1RSTR_TIM3RST							RCC_APB1RSTR_TIM3RST_Msk
 
 /** @brief TIM4 Reset Position @def RCC_APB1RSTR_TIM4RST_Pos */
 #define RCC_APB1RSTR_TIM4RST_Pos						((uint8_t) 2U)
 /** @brief TIM4 Reset Mask @def RCC_APB1RSTR_TIM4RST_Msk */
-#define RCC_APB1RSTR_TIM4RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM4RST_Pos))
+#define RCC_APB1RSTR_TIM4RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM4RST_Pos, 0x01UL))
 /** @brief TIM4 Reset @def RCC_APB1RSTR_TIM4RST */
 #define RCC_APB1RSTR_TIM4RST							RCC_APB1RSTR_TIM4RST_Msk
 
 /** @brief TIM5 Reset Position @def RCC_APB1RSTR_TIM5RST_Pos */
 #define RCC_APB1RSTR_TIM5RST_Pos						((uint8_t) 3U)
 /** @brief TIM5 Reset Mask @def RCC_APB1RSTR_TIM5RST_Msk */
-#define RCC_APB1RSTR_TIM5RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM5RST_Pos))
+#define RCC_APB1RSTR_TIM5RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM5RST_Pos, 0x01UL))
 /** @brief TIM5 Reset @def RCC_APB1RSTR_TIM5RST */
 #define RCC_APB1RSTR_TIM5RST							RCC_APB1RSTR_TIM5RST_Msk
 
 /** @brief TIM6 Reset Position @def RCC_APB1RSTR_TIM6RST_Pos */
 #define RCC_APB1RSTR_TIM6RST_Pos						((uint8_t) 4U)
 /** @brief TIM6 Reset Mask @def RCC_APB1RSTR_TIM6RST_Msk */
-#define RCC_APB1RSTR_TIM6RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM6RST_Pos))
+#define RCC_APB1RSTR_TIM6RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM6RST_Pos, 0x01UL))
 /** @brief TIM6 Reset @def RCC_APB1RSTR_TIM6RST */
 #define RCC_APB1RSTR_TIM6RST							RCC_APB1RSTR_TIM6RST_Msk
 
 /** @brief TIM7 Reset Position @def RCC_APB1RSTR_TIM7RST_Pos */
 #define RCC_APB1RSTR_TIM7RST_Pos						((uint8_t) 5U)
 /** @brief TIM7 Reset Mask @def RCC_APB1RSTR_TIM7RST_Msk */
-#define RCC_APB1RSTR_TIM7RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM7RST_Pos))
+#define RCC_APB1RSTR_TIM7RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM7RST_Pos, 0x01UL))
 /** @brief TIM7 Reset @def RCC_APB1RSTR_TIM7RST */
 #define RCC_APB1RSTR_TIM7RST							RCC_APB1RSTR_TIM7RST_Msk
 
 /** @brief TIM12 Reset Position @def RCC_APB1RSTR_TIM12RST_Pos */
 #define RCC_APB1RSTR_TIM12RST_Pos						((uint8_t) 6U)
 /** @brief TIM12 Reset Mask @def RCC_APB1RSTR_TIM12RST_Msk */
-#define RCC_APB1RSTR_TIM12RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM12RST_Pos))
+#define RCC_APB1RSTR_TIM12RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM12RST_Pos, 0x01UL))
 /** @brief TIM12 Reset @def RCC_APB1RSTR_TIM12RST */
 #define RCC_APB1RSTR_TIM12RST							RCC_APB1RSTR_TIM12RST_Msk
 
 /** @brief TIM13 Reset Position @def RCC_APB1RSTR_TIM13RST_Pos */
 #define RCC_APB1RSTR_TIM13RST_Pos						((uint8_t) 7U)
 /** @brief TIM13 Reset Mask @def RCC_APB1RSTR_TIM13RST_Msk */
-#define RCC_APB1RSTR_TIM13RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM13RST_Pos))
+#define RCC_APB1RSTR_TIM13RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM13RST_Pos, 0x01UL))
 /** @brief TIM13 Reset @def RCC_APB1RSTR_TIM13RST */
 #define RCC_APB1RSTR_TIM13RST							RCC_APB1RSTR_TIM13RST_Msk
 
 /** @brief TIM14 Reset Position @def RCC_APB1RSTR_TIM14RST_Pos */
 #define RCC_APB1RSTR_TIM14RST_Pos						((uint8_t) 8U)
 /** @brief TIM14 Reset Mask @def RCC_APB1RSTR_TIM14RST_Msk */
-#define RCC_APB1RSTR_TIM14RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_TIM14RST_Pos))
+#define RCC_APB1RSTR_TIM14RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_TIM14RST_Pos, 0x01UL))
 /** @brief TIM14 Reset @def RCC_APB1RSTR_TIM14RST */
 #define RCC_APB1RSTR_TIM14RST							RCC_APB1RSTR_TIM14RST_Msk
 
 /** @brief WWDG Reset Position @def RCC_APB1RSTR_WWDGRST_Pos */
 #define RCC_APB1RSTR_WWDGRST_Pos						((uint8_t) 11U)
 /** @brief WWDG Reset Mask @def RCC_APB1RSTR_WWDGRST_Msk */
-#define RCC_APB1RSTR_WWDGRST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_WWDGRST_Pos))
+#define RCC_APB1RSTR_WWDGRST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_WWDGRST_Pos, 0x01UL))
 /** @brief WWDG Reset @def RCC_APB1RSTR_WWDGRST */
 #define RCC_APB1RSTR_WWDGRST							RCC_APB1RSTR_WWDGRST_Msk
 
 /** @brief SPI2 Reset Position @def RCC_APB1RSTR_SPI2RST_Pos */
 #define RCC_APB1RSTR_SPI2RST_Pos						((uint8_t) 14U)
 /** @brief SPI2 Reset Mask @def RCC_APB1RSTR_SPI2RST_Msk */
-#define RCC_APB1RSTR_SPI2RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_SPI2RST_Pos))
+#define RCC_APB1RSTR_SPI2RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_SPI2RST_Pos, 0x01UL))
 /** @brief SPI2 Reset @def RCC_APB1RSTR_SPI2RST */
 #define RCC_APB1RSTR_SPI2RST							RCC_APB1RSTR_SPI2RST_Msk
 
 /** @brief SPI3 Reset Position @def RCC_APB1RSTR_SPI3RST_Pos */
 #define RCC_APB1RSTR_SPI3RST_Pos						((uint8_t) 15U)
 /** @brief SPI3 Reset Mask @def RCC_APB1RSTR_SPI3RST_Msk */
-#define RCC_APB1RSTR_SPI3RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_SPI3RST_Pos))
+#define RCC_APB1RSTR_SPI3RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_SPI3RST_Pos, 0x01UL))
 /** @brief SPI3 Reset @def RCC_APB1RSTR_SPI3RST */
 #define RCC_APB1RSTR_SPI3RST							RCC_APB1RSTR_SPI3RST_Msk
 
 /** @brief USART2 Reset Position @def RCC_APB1RSTR_USART2RST_Pos */
 #define RCC_APB1RSTR_USART2RST_Pos						((uint8_t) 17U)
 /** @brief USART2 Reset Mask @def RCC_APB1RSTR_USART2RST_Msk */
-#define RCC_APB1RSTR_USART2RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_USART2RST_Pos))
+#define RCC_APB1RSTR_USART2RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_USART2RST_Pos, 0x01UL))
 /** @brief USART2 Reset @def RCC_APB1RSTR_USART2RST */
 #define RCC_APB1RSTR_USART2RST							RCC_APB1RSTR_USART2RST_Msk
 
 /** @brief USART3 Reset Position @def RCC_APB1RSTR_USART3RST_Pos */
 #define RCC_APB1RSTR_USART3RST_Pos						((uint8_t) 18U)
 /** @brief USART3 Reset Mask @def RCC_APB1RSTR_USART3RST_Msk */
-#define RCC_APB1RSTR_USART3RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_USART3RST_Pos))
+#define RCC_APB1RSTR_USART3RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_USART3RST_Pos, 0x01UL))
 /** @brief USART3 Reset @def RCC_APB1RSTR_USART3RST */
 #define RCC_APB1RSTR_USART3RST							RCC_APB1RSTR_USART3RST_Msk
 
 /** @brief UART4 Reset Position @def RCC_APB1RSTR_UART4RST_Pos */
 #define RCC_APB1RSTR_UART4RST_Pos						((uint8_t) 19U)
 /** @brief UART4 Reset Mask @def RCC_APB1RSTR_UART4RST_Msk */
-#define RCC_APB1RSTR_UART4RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_UART4RST_Pos))
+#define RCC_APB1RSTR_UART4RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_UART4RST_Pos, 0x01UL))
 /** @brief UART4 Reset @def RCC_APB1RSTR_UART4RST */
 #define RCC_APB1RSTR_UART4RST							RCC_APB1RSTR_UART4RST_Msk
 
 /** @brief UART5 Reset Position @def RCC_APB1RSTR_UART5RST_Pos */
 #define RCC_APB1RSTR_UART5RST_Pos						((uint8_t) 20U)
 /** @brief UART5 Reset Mask @def RCC_APB1RSTR_UART5RST_Msk */
-#define RCC_APB1RSTR_UART5RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_UART5RST_Pos))
+#define RCC_APB1RSTR_UART5RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_UART5RST_Pos, 0x01UL))
 /** @brief UART5 Reset @def RCC_APB1RSTR_UART5RST */
 #define RCC_APB1RSTR_UART5RST							RCC_APB1RSTR_UART5RST_Msk
 
 /** @brief I2C1 Reset Position @def RCC_APB1RSTR_I2C1RST_Pos */
 #define RCC_APB1RSTR_I2C1RST_Pos						((uint8_t) 21U)
 /** @brief I2C1 Reset Mask @def RCC_APB1RSTR_I2C1RST_Msk */
-#define RCC_APB1RSTR_I2C1RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_I2C1RST_Pos))
+#define RCC_APB1RSTR_I2C1RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_I2C1RST_Pos, 0x01UL))
 /** @brief I2C1 Reset @def RCC_APB1RSTR_I2C1RST */
 #define RCC_APB1RSTR_I2C1RST							RCC_APB1RSTR_I2C1RST_Msk
 
 /** @brief I2C2 Reset Position @def RCC_APB1RSTR_I2C2RST_Pos */
 #define RCC_APB1RSTR_I2C2RST_Pos						((uint8_t) 22U)
 /** @brief I2C2 Reset Mask @def RCC_APB1RSTR_I2C2RST_Msk */
-#define RCC_APB1RSTR_I2C2RST_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_I2C2RST_Pos))
+#define RCC_APB1RSTR_I2C2RST_Msk						(REG_FIELD_VALUE(RCC_APB1RSTR_I2C2RST_Pos, 0x01UL))
 /** @brief I2C2 Reset @def RCC_APB1RSTR_I2C2RST */
 #define RCC_APB1RSTR_I2C2RST							RCC_APB1RSTR_I2C2RST_Msk
 
 /** @brief USB Reset Position @def RCC_APB1RSTR_USBRST_Pos */
 #define RCC_APB1RSTR_USBRST_Pos							((uint8_t) 23U)
 /** @brief USB Reset Mask @def RCC_APB1RSTR_USBRST_Msk */
-#define RCC_APB1RSTR_USBRST_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_USBRST_Pos))
+#define RCC_APB1RSTR_USBRST_Msk							(REG_FIELD_VALUE(RCC_APB1RSTR_USBRST_Pos, 0x01UL))
 /** @brief USB Reset @def RCC_APB1RSTR_USBRST */
 #define RCC_APB1RSTR_USBRST								RCC_APB1RSTR_USBRST_Msk
 
 /** @brief CAN Reset Position @def RCC_APB1RSTR_CANRST_Pos */
 #define RCC_APB1RSTR_CANRST_Pos							((uint8_t) 25U)
 /** @brief CAN Reset Mask @def RCC_APB1RSTR_CANRST_Msk */
-#define RCC_APB1RSTR_CANRST_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_CANRST_Pos))
+#define RCC_APB1RSTR_CANRST_Msk							(REG_FIELD_VALUE(RCC_APB1RSTR_CANRST_Pos, 0x01UL))
 /** @brief CAN Reset @def RCC_APB1RSTR_CANRST */
 #define RCC_APB1RSTR_CANRST								RCC_APB1RSTR_CANRST_Msk
 
 /** @brief BKP Reset Position @def RCC_APB1RSTR_BKPRST_Pos */
 #define RCC_APB1RSTR_BKPRST_Pos							((uint8_t) 27U)
 /** @brief BKP Reset Mask @def RCC_APB1RSTR_BKPRST_Msk */
-#define RCC_APB1RSTR_BKPRST_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_BKPRST_Pos))
+#define RCC_APB1RSTR_BKPRST_Msk							(REG_FIELD_VALUE(RCC_APB1RSTR_BKPRST_Pos, 0x01UL))
 /** @brief BKP Reset @def RCC_APB1RSTR_BKPRST */
 #define RCC_APB1RSTR_BKPRST								RCC_APB1RSTR_BKPRST_Msk
 
 /** @brief PWR Reset Position @def RCC_APB1RSTR_PWRRST_Pos */
 #define RCC_APB1RSTR_PWRRST_Pos							((uint8_t) 28U)
 /** @brief PWR Reset Mask @def RCC_APB1RSTR_PWRRST_Msk */
-#define RCC_APB1RSTR_PWRRST_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_PWRRST_Pos))
+#define RCC_APB1RSTR_PWRRST_Msk							(REG_FIELD_VALUE(RCC_APB1RSTR_PWRRST_Pos, 0x01UL))
 /** @brief PWR Reset @def RCC_APB1RSTR_PWRRST */
 #define RCC_APB1RSTR_PWRRST								RCC_APB1RSTR_PWRRST_Msk
 
 /** @brief DAC Reset Position @def RCC_APB1RSTR_DACRST_Pos */
 #define RCC_APB1RSTR_DACRST_Pos							((uint8_t) 29U)
 /** @brief DAC Reset Mask @def RCC_APB1RSTR_DACRST_Msk */
-#define RCC_APB1RSTR_DACRST_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1RSTR_DACRST_Pos))
+#define RCC_APB1RSTR_DACRST_Msk							(REG_FIELD_VALUE(RCC_APB1RSTR_DACRST_Pos, 0x01UL))
 /** @brief DAC Reset @def RCC_APB1RSTR_DACRST */
 #define RCC_APB1RSTR_DACRST								RCC_APB1RSTR_DACRST_Msk
 
@@ -941,49 +941,49 @@ extern "C" {
 /** @brief DMA1 Clock Enable Position @def RCC_AHBENR_DMA1EN_Pos */
 #define RCC_AHBENR_DMA1EN_Pos							((uint8_t) 0U)
 /** @brief DMA1 Clock Enable Mask @def RCC_AHBENR_DMA1EN_Msk */
-#define RCC_AHBENR_DMA1EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_DMA1EN_Pos))
+#define RCC_AHBENR_DMA1EN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_DMA1EN_Pos, 0x01UL))
 /** @brief DMA1 Clock Enable @def RCC_AHBENR_DMA1EN */
 #define RCC_AHBENR_DMA1EN								RCC_AHBENR_DMA1EN_Msk
 
 /** @brief DMA2 Clock Enable Position @def RCC_AHBENR_DMA2EN_Pos */
 #define RCC_AHBENR_DMA2EN_Pos							((uint8_t) 1U)
 /** @brief DMA2 Clock Enable Mask @def RCC_AHBENR_DMA2EN_Msk */
-#define RCC_AHBENR_DMA2EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_DMA2EN_Pos))
+#define RCC_AHBENR_DMA2EN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_DMA2EN_Pos, 0x01UL))
 /** @brief DMA2 Clock Enable @def RCC_AHBENR_DMA2EN */
 #define RCC_AHBENR_DMA2EN								RCC_AHBENR_DMA2EN_Msk
 
 /** @brief SRAM Clock Enable Position @def RCC_AHBENR_SRAMEN_Pos */
 #define RCC_AHBENR_SRAMEN_Pos							((uint8_t) 2U)
 /** @brief SRAM Clock Enable Mask @def RCC_AHBENR_SRAMEN_Msk */
-#define RCC_AHBENR_SRAMEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_SRAMEN_Pos))
+#define RCC_AHBENR_SRAMEN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_SRAMEN_Pos, 0x01UL))
 /** @brief SRAM Clock Enable @def RCC_AHBENR_SRAMEN */
 #define RCC_AHBENR_SRAMEN								RCC_AHBENR_SRAMEN_Msk
 
 /** @brief FLITF Clock Enable Position @def RCC_AHBENR_FLITFEN_Pos */
 #define RCC_AHBENR_FLITFEN_Pos							((uint8_t) 4U)
 /** @brief FLITF Clock Enable Mask @def RCC_AHBENR_FLITFEN_Msk */
-#define RCC_AHBENR_FLITFEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_FLITFEN_Pos))
+#define RCC_AHBENR_FLITFEN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_FLITFEN_Pos, 0x01UL))
 /** @brief FLITF Clock Enable @def RCC_AHBENR_FLITFEN */
 #define RCC_AHBENR_FLITFEN								RCC_AHBENR_FLITFEN_Msk
 
 /** @brief CRC Clock Enable Position @def RCC_AHBENR_CRCEN_Pos */
 #define RCC_AHBENR_CRCEN_Pos							((uint8_t) 6U)
 /** @brief CRC Clock Enable Mask @def RCC_AHBENR_CRCEN_Msk */
-#define RCC_AHBENR_CRCEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_CRCEN_Pos))
+#define RCC_AHBENR_CRCEN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_CRCEN_Pos, 0x01UL))
 /** @brief CRC Clock Enable @def RCC_AHBENR_CRCEN */
 #define RCC_AHBENR_CRCEN								RCC_AHBENR_CRCEN_Msk
 
 /** @brief FSMC Clock Enable Position @def RCC_AHBENR_FSMCEN_Pos */
 #define RCC_AHBENR_FSMCEN_Pos							((uint8_t) 8U)
 /** @brief FSMC Clock Enable Mask @def RCC_AHBENR_FSMCEN_Msk */
-#define RCC_AHBENR_FSMCEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_FSMCEN_Pos))
+#define RCC_AHBENR_FSMCEN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_FSMCEN_Pos, 0x01UL))
 /** @brief FSMC Clock Enable @def RCC_AHBENR_FSMCEN */
 #define RCC_AHBENR_FSMCEN								RCC_AHBENR_FSMCEN_Msk
 
 /** @brief SDIO Clock Enable Position @def RCC_AHBENR_SDIOEN_Pos */
 #define RCC_AHBENR_SDIOEN_Pos							((uint8_t) 10U)
 /** @brief SDIO Clock Enable Mask @def RCC_AHBENR_SDIOEN_Msk */
-#define RCC_AHBENR_SDIOEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_AHBENR_SDIOEN_Pos))
+#define RCC_AHBENR_SDIOEN_Msk							(REG_FIELD_VALUE(RCC_AHBENR_SDIOEN_Pos, 0x01UL))
 /** @brief SDIO Clock Enable @def RCC_AHBENR_SDIOEN */
 #define RCC_AHBENR_SDIOEN								RCC_AHBENR_SDIOEN_Msk
 
@@ -994,126 +994,126 @@ extern "C" {
 /** @brief AFIO Clock Enable Position @def RCC_APB2ENR_AFIOEN_Pos */
 #define RCC_APB2ENR_AFIOEN_Pos							((uint8_t) 0U)
 /** @brief AFIO Clock Enable Mask @def RCC_APB2ENR_AFIOEN_Msk */
-#define RCC_APB2ENR_AFIOEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_AFIOEN_Pos))
+#define RCC_APB2ENR_AFIOEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_AFIOEN_Pos, 0x01UL))
 /** @brief AFIO Clock Enable @def RCC_APB2ENR_AFIOEN */
 #define RCC_APB2ENR_AFIOEN								RCC_APB2ENR_AFIOEN_Msk
 
 /** @brief GPIOA Clock Enable Position @def RCC_APB2ENR_IOPAEN_Pos */
 #define RCC_APB2ENR_IOPAEN_Pos							((uint8_t) 2U)
 /** @brief GPIOA Clock Enable Mask @def RCC_APB2ENR_IOPAEN_Msk */
-#define RCC_APB2ENR_IOPAEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPAEN_Pos))
+#define RCC_APB2ENR_IOPAEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPAEN_Pos, 0x01UL))
 /** @brief GPIOA Clock Enable @def RCC_APB2ENR_IOPAEN */
 #define RCC_APB2ENR_IOPAEN								RCC_APB2ENR_IOPAEN_Msk
 
 /** @brief GPIOB Clock Enable Position @def RCC_APB2ENR_IOPBEN_Pos */
 #define RCC_APB2ENR_IOPBEN_Pos							((uint8_t) 3U)
 /** @brief GPIOB Clock Enable Mask @def RCC_APB2ENR_IOPBEN_Msk */
-#define RCC_APB2ENR_IOPBEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPBEN_Pos))
+#define RCC_APB2ENR_IOPBEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPBEN_Pos, 0x01UL))
 /** @brief GPIOB Clock Enable @def RCC_APB2ENR_IOPBEN */
 #define RCC_APB2ENR_IOPBEN								RCC_APB2ENR_IOPBEN_Msk
 
 /** @brief GPIOC Clock Enable Position @def RCC_APB2ENR_IOPCEN_Pos */
 #define RCC_APB2ENR_IOPCEN_Pos							((uint8_t) 4U)
 /** @brief GPIOC Clock Enable Mask @def RCC_APB2ENR_IOPCEN_Msk */
-#define RCC_APB2ENR_IOPCEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPCEN_Pos))
+#define RCC_APB2ENR_IOPCEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPCEN_Pos, 0x01UL))
 /** @brief GPIOC Clock Enable @def RCC_APB2ENR_IOPCEN */
 #define RCC_APB2ENR_IOPCEN								RCC_APB2ENR_IOPCEN_Msk
 
 /** @brief GPIOD Clock Enable Position @def RCC_APB2ENR_IOPDEN_Pos */
 #define RCC_APB2ENR_IOPDEN_Pos							((uint8_t) 5U)
 /** @brief GPIOD Clock Enable Mask @def RCC_APB2ENR_IOPDEN_Msk */
-#define RCC_APB2ENR_IOPDEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPDEN_Pos))
+#define RCC_APB2ENR_IOPDEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPDEN_Pos, 0x01UL))
 /** @brief GPIOD Clock Enable @def RCC_APB2ENR_IOPDEN */
 #define RCC_APB2ENR_IOPDEN								RCC_APB2ENR_IOPDEN_Msk
 
 /** @brief GPIOE Clock Enable Position @def RCC_APB2ENR_IOPEEN_Pos */
 #define RCC_APB2ENR_IOPEEN_Pos							((uint8_t) 6U)
 /** @brief GPIOE Clock Enable Mask @def RCC_APB2ENR_IOPEEN_Msk */
-#define RCC_APB2ENR_IOPEEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPEEN_Pos))
+#define RCC_APB2ENR_IOPEEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPEEN_Pos, 0x01UL))
 /** @brief GPIOE Clock Enable @def RCC_APB2ENR_IOPEEN */
 #define RCC_APB2ENR_IOPEEN								RCC_APB2ENR_IOPEEN_Msk
 
 /** @brief GPIOF Clock Enable Position @def RCC_APB2ENR_IOPFEN_Pos */
 #define RCC_APB2ENR_IOPFEN_Pos							((uint8_t) 7U)
 /** @brief GPIOF Clock Enable Mask @def RCC_APB2ENR_IOPFEN_Msk */
-#define RCC_APB2ENR_IOPFEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPFEN_Pos))
+#define RCC_APB2ENR_IOPFEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPFEN_Pos, 0x01UL))
 /** @brief GPIOF Clock Enable @def RCC_APB2ENR_IOPFEN */
 #define RCC_APB2ENR_IOPFEN								RCC_APB2ENR_IOPFEN_Msk
 
 /** @brief GPIOG Clock Enable Position @def RCC_APB2ENR_IOPGEN_Pos */
 #define RCC_APB2ENR_IOPGEN_Pos							((uint8_t) 8U)
 /** @brief GPIOG Clock Enable Mask @def RCC_APB2ENR_IOPGEN_Msk */
-#define RCC_APB2ENR_IOPGEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_IOPGEN_Pos))
+#define RCC_APB2ENR_IOPGEN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_IOPGEN_Pos, 0x01UL))
 /** @brief GPIOG Clock Enable @def RCC_APB2ENR_IOPGEN */
 #define RCC_APB2ENR_IOPGEN								RCC_APB2ENR_IOPGEN_Msk
 
 /** @brief ADC1 Clock Enable Position @def RCC_APB2ENR_ADC1EN_Pos */
 #define RCC_APB2ENR_ADC1EN_Pos							((uint8_t) 9U)
 /** @brief ADC1 Clock Enable Mask @def RCC_APB2ENR_ADC1EN_Msk */
-#define RCC_APB2ENR_ADC1EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_ADC1EN_Pos))
+#define RCC_APB2ENR_ADC1EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_ADC1EN_Pos, 0x01UL))
 /** @brief ADC1 Clock Enable @def RCC_APB2ENR_ADC1EN */
 #define RCC_APB2ENR_ADC1EN								RCC_APB2ENR_ADC1EN_Msk
 
 /** @brief ADC2 Clock Enable Position @def RCC_APB2ENR_ADC2EN_Pos */
 #define RCC_APB2ENR_ADC2EN_Pos							((uint8_t) 10U)
 /** @brief ADC2 Clock Enable Mask @def RCC_APB2ENR_ADC2EN_Msk */
-#define RCC_APB2ENR_ADC2EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_ADC2EN_Pos))
+#define RCC_APB2ENR_ADC2EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_ADC2EN_Pos, 0x01UL))
 /** @brief ADC2 Clock Enable @def RCC_APB2ENR_ADC2EN */
 #define RCC_APB2ENR_ADC2EN								RCC_APB2ENR_ADC2EN_Msk
 
 /** @brief TIM1 Clock Enable Position @def RCC_APB2ENR_TIM1EN_Pos */
 #define RCC_APB2ENR_TIM1EN_Pos							((uint8_t) 11U)
 /** @brief TIM1 Clock Enable Mask @def RCC_APB2ENR_TIM1EN_Msk */
-#define RCC_APB2ENR_TIM1EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_TIM1EN_Pos))
+#define RCC_APB2ENR_TIM1EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_TIM1EN_Pos, 0x01UL))
 /** @brief TIM1 Clock Enable @def RCC_APB2ENR_TIM1EN */
 #define RCC_APB2ENR_TIM1EN								RCC_APB2ENR_TIM1EN_Msk
 
 /** @brief SPI1 Clock Enable Position @def RCC_APB2ENR_SPI1EN_Pos */
 #define RCC_APB2ENR_SPI1EN_Pos							((uint8_t) 12U)
 /** @brief SPI1 Clock Enable Mask @def RCC_APB2ENR_SPI1EN_Msk */
-#define RCC_APB2ENR_SPI1EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_SPI1EN_Pos))
+#define RCC_APB2ENR_SPI1EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_SPI1EN_Pos, 0x01UL))
 /** @brief SPI1 Clock Enable @def RCC_APB2ENR_SPI1EN */
 #define RCC_APB2ENR_SPI1EN								RCC_APB2ENR_SPI1EN_Msk
 
 /** @brief TIM8 Clock Enable Position @def RCC_APB2ENR_TIM8EN_Pos */
 #define RCC_APB2ENR_TIM8EN_Pos							((uint8_t) 13U)
 /** @brief TIM8 Clock Enable Mask @def RCC_APB2ENR_TIM8EN_Msk */
-#define RCC_APB2ENR_TIM8EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_TIM8EN_Pos))
+#define RCC_APB2ENR_TIM8EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_TIM8EN_Pos, 0x01UL))
 /** @brief TIM8 Clock Enable @def RCC_APB2ENR_TIM8EN */
 #define RCC_APB2ENR_TIM8EN								RCC_APB2ENR_TIM8EN_Msk
 
 /** @brief USART1 Clock Enable Position @def RCC_APB2ENR_USART1EN_Pos */
 #define RCC_APB2ENR_USART1EN_Pos						((uint8_t) 14U)
 /** @brief USART1 Clock Enable Mask @def RCC_APB2ENR_USART1EN_Msk */
-#define RCC_APB2ENR_USART1EN_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_USART1EN_Pos))
+#define RCC_APB2ENR_USART1EN_Msk						(REG_FIELD_VALUE(RCC_APB2ENR_USART1EN_Pos, 0x01UL))
 /** @brief USART1 Clock Enable @def RCC_APB2ENR_USART1EN */
 #define RCC_APB2ENR_USART1EN							RCC_APB2ENR_USART1EN_Msk
 
 /** @brief ADC3 Clock Enable Position @def RCC_APB2ENR_ADC3EN_Pos */
 #define RCC_APB2ENR_ADC3EN_Pos							((uint8_t) 15U)
 /** @brief ADC3 Clock Enable Mask @def RCC_APB2ENR_ADC3EN_Msk */
-#define RCC_APB2ENR_ADC3EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_ADC3EN_Pos))
+#define RCC_APB2ENR_ADC3EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_ADC3EN_Pos, 0x01UL))
 /** @brief ADC3 Clock Enable @def RCC_APB2ENR_ADC3EN */
 #define RCC_APB2ENR_ADC3EN								RCC_APB2ENR_ADC3EN_Msk
 
 /** @brief TIM9 Clock Enable Position @def RCC_APB2ENR_TIM9EN_Pos */
 #define RCC_APB2ENR_TIM9EN_Pos							((uint8_t) 19U)
 /** @brief TIM9 Clock Enable Mask @def RCC_APB2ENR_TIM9EN_Msk */
-#define RCC_APB2ENR_TIM9EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_TIM9EN_Pos))
+#define RCC_APB2ENR_TIM9EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_TIM9EN_Pos, 0x01UL))
 /** @brief TIM9 Clock Enable @def RCC_APB2ENR_TIM9EN */
 #define RCC_APB2ENR_TIM9EN								RCC_APB2ENR_TIM9EN_Msk
 
 /** @brief TIM10 Clock Enable Position @def RCC_APB2ENR_TIM10EN_Pos */
 #define RCC_APB2ENR_TIM10EN_Pos							((uint8_t) 20U)
 /** @brief TIM10 Clock Enable Mask @def RCC_APB2ENR_TIM10EN_Msk */
-#define RCC_APB2ENR_TIM10EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_TIM10EN_Pos))
+#define RCC_APB2ENR_TIM10EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_TIM10EN_Pos, 0x01UL))
 /** @brief TIM10 Clock Enable @def RCC_APB2ENR_TIM10EN */
 #define RCC_APB2ENR_TIM10EN								RCC_APB2ENR_TIM10EN_Msk
 
 /** @brief TIM11 Clock Enable Position @def RCC_APB2ENR_TIM11EN_Pos */
 #define RCC_APB2ENR_TIM11EN_Pos							((uint8_t) 21U)
 /** @brief TIM11 Clock Enable Mask @def RCC_APB2ENR_TIM11EN_Msk */
-#define RCC_APB2ENR_TIM11EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB2ENR_TIM11EN_Pos))
+#define RCC_APB2ENR_TIM11EN_Msk							(REG_FIELD_VALUE(RCC_APB2ENR_TIM11EN_Pos, 0x01UL))
 /** @brief TIM11 Clock Enable @def RCC_APB2ENR_TIM11EN */
 #define RCC_APB2ENR_TIM11EN								RCC_APB2ENR_TIM11EN_Msk
 
@@ -1124,161 +1124,161 @@ extern "C" {
 /** @brief TIM2 Clock Enable Position @def RCC_APB1ENR_TIM2EN_Pos */
 #define RCC_APB1ENR_TIM2EN_Pos							((uint8_t) 0U)
 /** @brief TIM2 Clock Enable Mask @def RCC_APB1ENR_TIM2EN_Msk */
-#define RCC_APB1ENR_TIM2EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM2EN_Pos))
+#define RCC_APB1ENR_TIM2EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM2EN_Pos, 0x01UL))
 /** @brief TIM2 Clock Enable @def RCC_APB1ENR_TIM2EN */
 #define RCC_APB1ENR_TIM2EN								RCC_APB1ENR_TIM2EN_Msk
 
 /** @brief TIM3 Clock Enable Position @def RCC_APB1ENR_TIM3EN_Pos */
 #define RCC_APB1ENR_TIM3EN_Pos							((uint8_t) 1U)
 /** @brief TIM3 Clock Enable Mask @def RCC_APB1ENR_TIM3EN_Msk */
-#define RCC_APB1ENR_TIM3EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM3EN_Pos))
+#define RCC_APB1ENR_TIM3EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM3EN_Pos, 0x01UL))
 /** @brief TIM3 Clock Enable @def RCC_APB1ENR_TIM3EN */
 #define RCC_APB1ENR_TIM3EN								RCC_APB1ENR_TIM3EN_Msk
 
 /** @brief TIM4 Clock Enable Position @def RCC_APB1ENR_TIM4EN_Pos */
 #define RCC_APB1ENR_TIM4EN_Pos							((uint8_t) 2U)
 /** @brief TIM4 Clock Enable Mask @def RCC_APB1ENR_TIM4EN_Msk */
-#define RCC_APB1ENR_TIM4EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM4EN_Pos))
+#define RCC_APB1ENR_TIM4EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM4EN_Pos, 0x01UL))
 /** @brief TIM4 Clock Enable @def RCC_APB1ENR_TIM4EN */
 #define RCC_APB1ENR_TIM4EN								RCC_APB1ENR_TIM4EN_Msk
 
 /** @brief TIM5 Clock Enable Position @def RCC_APB1ENR_TIM5EN_Pos */
 #define RCC_APB1ENR_TIM5EN_Pos							((uint8_t) 3U)
 /** @brief TIM5 Clock Enable Mask @def RCC_APB1ENR_TIM5EN_Msk */
-#define RCC_APB1ENR_TIM5EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM5EN_Pos))
+#define RCC_APB1ENR_TIM5EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM5EN_Pos, 0x01UL))
 /** @brief TIM5 Clock Enable @def RCC_APB1ENR_TIM5EN */
 #define RCC_APB1ENR_TIM5EN								RCC_APB1ENR_TIM5EN_Msk
 
 /** @brief TIM6 Clock Enable Position @def RCC_APB1ENR_TIM6EN_Pos */
 #define RCC_APB1ENR_TIM6EN_Pos							((uint8_t) 4U)
 /** @brief TIM6 Clock Enable Mask @def RCC_APB1ENR_TIM6EN_Msk */
-#define RCC_APB1ENR_TIM6EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM6EN_Pos))
+#define RCC_APB1ENR_TIM6EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM6EN_Pos, 0x01UL))
 /** @brief TIM6 Clock Enable @def RCC_APB1ENR_TIM6EN */
 #define RCC_APB1ENR_TIM6EN								RCC_APB1ENR_TIM6EN_Msk
 
 /** @brief TIM7 Clock Enable Position @def RCC_APB1ENR_TIM7EN_Pos */
 #define RCC_APB1ENR_TIM7EN_Pos							((uint8_t) 5U)
 /** @brief TIM7 Clock Enable Mask @def RCC_APB1ENR_TIM7EN_Msk */
-#define RCC_APB1ENR_TIM7EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM7EN_Pos))
+#define RCC_APB1ENR_TIM7EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM7EN_Pos, 0x01UL))
 /** @brief TIM7 Clock Enable @def RCC_APB1ENR_TIM7EN */
 #define RCC_APB1ENR_TIM7EN								RCC_APB1ENR_TIM7EN_Msk
 
 /** @brief TIM12 Clock Enable Position @def RCC_APB1ENR_TIM12EN_Pos */
 #define RCC_APB1ENR_TIM12EN_Pos							((uint8_t) 6U)
 /** @brief TIM12 Clock Enable Mask @def RCC_APB1ENR_TIM12EN_Msk */
-#define RCC_APB1ENR_TIM12EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM12EN_Pos))
+#define RCC_APB1ENR_TIM12EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM12EN_Pos, 0x01UL))
 /** @brief TIM12 Clock Enable @def RCC_APB1ENR_TIM12EN */
 #define RCC_APB1ENR_TIM12EN								RCC_APB1ENR_TIM12EN_Msk
 
 /** @brief TIM13 Clock Enable Position @def RCC_APB1ENR_TIM13EN_Pos */
 #define RCC_APB1ENR_TIM13EN_Pos							((uint8_t) 7U)
 /** @brief TIM13 Clock Enable Mask @def RCC_APB1ENR_TIM13EN_Msk */
-#define RCC_APB1ENR_TIM13EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM13EN_Pos))
+#define RCC_APB1ENR_TIM13EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM13EN_Pos, 0x01UL))
 /** @brief TIM13 Clock Enable @def RCC_APB1ENR_TIM13EN */
 #define RCC_APB1ENR_TIM13EN								RCC_APB1ENR_TIM13EN_Msk
 
 /** @brief TIM14 Clock Enable Position @def RCC_APB1ENR_TIM14EN_Pos */
 #define RCC_APB1ENR_TIM14EN_Pos							((uint8_t) 8U)
 /** @brief TIM14 Clock Enable Mask @def RCC_APB1ENR_TIM14EN_Msk */
-#define RCC_APB1ENR_TIM14EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_TIM14EN_Pos))
+#define RCC_APB1ENR_TIM14EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_TIM14EN_Pos, 0x01UL))
 /** @brief TIM14 Clock Enable @def RCC_APB1ENR_TIM14EN */
 #define RCC_APB1ENR_TIM14EN								RCC_APB1ENR_TIM14EN_Msk
 
 /** @brief WWDG Clock Enable Position @def RCC_APB1ENR_WWDGEN_Pos */
 #define RCC_APB1ENR_WWDGEN_Pos							((uint8_t) 11U)
 /** @brief WWDG Clock Enable Mask @def RCC_APB1ENR_WWDGEN_Msk */
-#define RCC_APB1ENR_WWDGEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_WWDGEN_Pos))
+#define RCC_APB1ENR_WWDGEN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_WWDGEN_Pos, 0x01UL))
 /** @brief WWDG Clock Enable @def RCC_APB1ENR_WWDGEN */
 #define RCC_APB1ENR_WWDGEN								RCC_APB1ENR_WWDGEN_Msk
 
 /** @brief SPI2 Clock Enable Position @def RCC_APB1ENR_SPI2EN_Pos */
 #define RCC_APB1ENR_SPI2EN_Pos							((uint8_t) 14U)
 /** @brief SPI2 Clock Enable Mask @def RCC_APB1ENR_SPI2EN_Msk */
-#define RCC_APB1ENR_SPI2EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_SPI2EN_Pos))
+#define RCC_APB1ENR_SPI2EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_SPI2EN_Pos, 0x01UL))
 /** @brief SPI2 Clock Enable @def RCC_APB1ENR_SPI2EN */
 #define RCC_APB1ENR_SPI2EN								RCC_APB1ENR_SPI2EN_Msk
 
 /** @brief SPI3 Clock Enable Position @def RCC_APB1ENR_SPI3EN_Pos */
 #define RCC_APB1ENR_SPI3EN_Pos							((uint8_t) 15U)
 /** @brief SPI3 Clock Enable Mask @def RCC_APB1ENR_SPI3EN_Msk */
-#define RCC_APB1ENR_SPI3EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_SPI3EN_Pos))
+#define RCC_APB1ENR_SPI3EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_SPI3EN_Pos, 0x01UL))
 /** @brief SPI3 Clock Enable @def RCC_APB1ENR_SPI3EN */
 #define RCC_APB1ENR_SPI3EN								RCC_APB1ENR_SPI3EN_Msk
 
 /** @brief USART2 Clock Enable Position @def RCC_APB1ENR_USART2EN_Pos */
 #define RCC_APB1ENR_USART2EN_Pos						((uint8_t) 17U)
 /** @brief USART2 Clock Enable Mask @def RCC_APB1ENR_USART2EN_Msk */
-#define RCC_APB1ENR_USART2EN_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_USART2EN_Pos))
+#define RCC_APB1ENR_USART2EN_Msk						(REG_FIELD_VALUE(RCC_APB1ENR_USART2EN_Pos, 0x01UL))
 /** @brief USART2 Clock Enable @def RCC_APB1ENR_USART2EN */
 #define RCC_APB1ENR_USART2EN							RCC_APB1ENR_USART2EN_Msk
 
 /** @brief USART3 Clock Enable Position @def RCC_APB1ENR_USART3EN_Pos */
 #define RCC_APB1ENR_USART3EN_Pos						((uint8_t) 18U)
 /** @brief USART3 Clock Enable Mask @def RCC_APB1ENR_USART3EN_Msk */
-#define RCC_APB1ENR_USART3EN_Msk						(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_USART3EN_Pos))
+#define RCC_APB1ENR_USART3EN_Msk						(REG_FIELD_VALUE(RCC_APB1ENR_USART3EN_Pos, 0x01UL))
 /** @brief USART3 Clock Enable @def RCC_APB1ENR_USART3EN */
 #define RCC_APB1ENR_USART3EN							RCC_APB1ENR_USART3EN_Msk
 
 /** @brief UART4 Clock Enable Position @def RCC_APB1ENR_UART4EN_Pos */
 #define RCC_APB1ENR_UART4EN_Pos							((uint8_t) 19U)
 /** @brief UART4 Clock Enable Mask @def RCC_APB1ENR_UART4EN_Msk */
-#define RCC_APB1ENR_UART4EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_UART4EN_Pos))
+#define RCC_APB1ENR_UART4EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_UART4EN_Pos, 0x01UL))
 /** @brief UART4 Clock Enable @def RCC_APB1ENR_UART4EN */
 #define RCC_APB1ENR_UART4EN								RCC_APB1ENR_UART4EN_Msk
 
 /** @brief UART5 Clock Enable Position @def RCC_APB1ENR_UART5EN_Pos */
 #define RCC_APB1ENR_UART5EN_Pos							((uint8_t) 20U)
 /** @brief UART5 Clock Enable Mask @def RCC_APB1ENR_UART5EN_Msk */
-#define RCC_APB1ENR_UART5EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_UART5EN_Pos))
+#define RCC_APB1ENR_UART5EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_UART5EN_Pos, 0x01UL))
 /** @brief UART5 Clock Enable @def RCC_APB1ENR_UART5EN */
 #define RCC_APB1ENR_UART5EN								RCC_APB1ENR_UART5EN_Msk
 
 /** @brief I2C1 Clock Enable Position @def RCC_APB1ENR_I2C1EN_Pos */
 #define RCC_APB1ENR_I2C1EN_Pos							((uint8_t) 21U)
 /** @brief I2C1 Clock Enable Mask @def RCC_APB1ENR_I2C1EN_Msk */
-#define RCC_APB1ENR_I2C1EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_I2C1EN_Pos))
+#define RCC_APB1ENR_I2C1EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_I2C1EN_Pos, 0x01UL))
 /** @brief I2C1 Clock Enable @def RCC_APB1ENR_I2C1EN */
 #define RCC_APB1ENR_I2C1EN								RCC_APB1ENR_I2C1EN_Msk
 
 /** @brief I2C2 Clock Enable Position @def RCC_APB1ENR_I2C2EN_Pos */
 #define RCC_APB1ENR_I2C2EN_Pos							((uint8_t) 22U)
 /** @brief I2C2 Clock Enable Mask @def RCC_APB1ENR_I2C2EN_Msk */
-#define RCC_APB1ENR_I2C2EN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_I2C2EN_Pos))
+#define RCC_APB1ENR_I2C2EN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_I2C2EN_Pos, 0x01UL))
 /** @brief I2C2 Clock Enable @def RCC_APB1ENR_I2C2EN */
 #define RCC_APB1ENR_I2C2EN								RCC_APB1ENR_I2C2EN_Msk
 
 /** @brief USB Clock Enable Position @def RCC_APB1ENR_USBEN_Pos */
 #define RCC_APB1ENR_USBEN_Pos							((uint8_t) 23U)
 /** @brief USB Clock Enable Mask @def RCC_APB1ENR_USBEN_Msk */
-#define RCC_APB1ENR_USBEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_USBEN_Pos))
+#define RCC_APB1ENR_USBEN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_USBEN_Pos, 0x01UL))
 /** @brief USB Clock Enable @def RCC_APB1ENR_USBEN */
 #define RCC_APB1ENR_USBEN								RCC_APB1ENR_USBEN_Msk
 
 /** @brief CAN Clock Enable Position @def RCC_APB1ENR_CANEN_Pos */
 #define RCC_APB1ENR_CANEN_Pos							((uint8_t) 25U)
 /** @brief CAN Clock Enable Mask @def RCC_APB1ENR_CANEN_Msk */
-#define RCC_APB1ENR_CANEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_CANEN_Pos))
+#define RCC_APB1ENR_CANEN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_CANEN_Pos, 0x01UL))
 /** @brief CAN Clock Enable @def RCC_APB1ENR_CANEN */
 #define RCC_APB1ENR_CANEN								RCC_APB1ENR_CANEN_Msk
 
 /** @brief BKP Clock Enable Position @def RCC_APB1ENR_BKPEN_Pos */
 #define RCC_APB1ENR_BKPEN_Pos							((uint8_t) 27U)
 /** @brief BKP Clock Enable Mask @def RCC_APB1ENR_BKPEN_Msk */
-#define RCC_APB1ENR_BKPEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_BKPEN_Pos))
+#define RCC_APB1ENR_BKPEN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_BKPEN_Pos, 0x01UL))
 /** @brief BKP Clock Enable @def RCC_APB1ENR_BKPEN */
 #define RCC_APB1ENR_BKPEN								RCC_APB1ENR_BKPEN_Msk
 
 /** @brief PWR Clock Enable Position @def RCC_APB1ENR_PWREN_Pos */
 #define RCC_APB1ENR_PWREN_Pos							((uint8_t) 28U)
 /** @brief PWR Clock Enable Mask @def RCC_APB1ENR_PWREN_Msk */
-#define RCC_APB1ENR_PWREN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_PWREN_Pos))
+#define RCC_APB1ENR_PWREN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_PWREN_Pos, 0x01UL))
 /** @brief PWR Clock Enable @def RCC_APB1ENR_PWREN */
 #define RCC_APB1ENR_PWREN								RCC_APB1ENR_PWREN_Msk
 
 /** @brief DAC Clock Enable Position @def RCC_APB1ENR_DACEN_Pos */
 #define RCC_APB1ENR_DACEN_Pos							((uint8_t) 29U)
 /** @brief DAC Clock Enable Mask @def RCC_APB1ENR_DACEN_Msk */
-#define RCC_APB1ENR_DACEN_Msk							(REG_FIELD_VALUE(0x01UL, RCC_APB1ENR_DACEN_Pos))
+#define RCC_APB1ENR_DACEN_Msk							(REG_FIELD_VALUE(RCC_APB1ENR_DACEN_Pos, 0x01UL))
 /** @brief DAC Clock Enable @def RCC_APB1ENR_DACEN */
 #define RCC_APB1ENR_DACEN								RCC_APB1ENR_DACEN_Msk
 
