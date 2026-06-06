@@ -42,6 +42,32 @@ extern "C" {
  * @{
  */
 
+// ==================================================================================================== //
+//										GPIO Pin Config/Mode Codecs										//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts one complete GPIO config/mode selector pair from CRL/CRH and ODR images
+ * @param[in] crxRegImage Caller-owned CRL/CRH image containing the target pin field
+ * @param[in] odrRegImage Caller-owned ODR image used to resolve input pull-up/pull-down
+ * @param[in] pin GPIO single-pin mask
+ * @param[out] pConfig Optional destination for decoded GPIO configuration selector
+ * @param[out] pMode Optional destination for decoded GPIO mode selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin config/mode selectors were extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig and @p pMode are both `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or extracted raw MODE/CNF field is not decodable
+ * @note Codec owns conversion of @p pin to the target register field position.
+ */
+driver_status_t Codec_GPIO_ExtractPinConfigMode
+(
+	const reg					crxRegImage,
+	const reg					odrRegImage,
+	const gpio_pin_t			pin,
+	gpio_pin_config_t* const		pConfig,
+	gpio_pin_mode_t* const		pMode
+);
+
 /**
  * @brief Stages one complete GPIO config/mode selector pair into CRL/CRH and ODR images
  * @param[in] crxRegImage Caller-owned CRL/CRH image before replacement
@@ -71,26 +97,28 @@ driver_status_t Codec_GPIO_StagePinConfigMode
 	reg* const					pOdrRegImage
 );
 
+// ==================================================================================================== //
+//										GPIO Pin Output State Codecs									//
+// ==================================================================================================== //
+
 /**
- * @brief Extracts one complete GPIO config/mode selector pair from CRL/CRH and ODR images
- * @param[in] crxRegImage Caller-owned CRL/CRH image containing the target pin field
- * @param[in] odrRegImage Caller-owned ODR image used to resolve input pull-up/pull-down
+ * @brief Extracts one GPIO output latch state from an ODR image
+ * @param[in] odrRegImage Caller-owned ODR image
  * @param[in] pin GPIO single-pin mask
- * @param[out] pConfig Optional destination for decoded GPIO configuration selector
- * @param[out] pMode Optional destination for decoded GPIO mode selector
+ * @param[out] pPinState Destination for the extracted output latch state
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin config/mode selectors were extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig and @p pMode are both `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or extracted raw MODE/CNF field is not decodable
- * @note Codec owns conversion of @p pin to the target register field position.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output state was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinState is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
+ * @note Writes @ref `DRIVER_STATUS_OFF` when the selected ODR bit is clear and
+ * @ref `DRIVER_STATUS_ON` when it is set. Codec owns conversion of @p pin to
+ * the target register bit.
  */
-driver_status_t Codec_GPIO_ExtractPinConfigMode
+driver_status_t Codec_GPIO_ExtractPinOutputState
 (
-	const reg					crxRegImage,
 	const reg					odrRegImage,
 	const gpio_pin_t			pin,
-	gpio_pin_config_t* const	pConfig,
-	gpio_pin_mode_t* const		pMode
+	driver_status_t* const		pPinState
 );
 
 /**
@@ -116,25 +144,9 @@ driver_status_t Codec_GPIO_StagePinOutputState
 	reg* const					pOdrRegImage
 );
 
-/**
- * @brief Extracts one GPIO output latch state from an ODR image
- * @param[in] odrRegImage Caller-owned ODR image
- * @param[in] pin GPIO single-pin mask
- * @param[out] pPinState Destination for the extracted output latch state
- * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output state was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinState is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
- * @note Writes @ref `DRIVER_STATUS_OFF` when the selected ODR bit is clear and
- * @ref `DRIVER_STATUS_ON` when it is set. Codec owns conversion of @p pin to
- * the target register bit.
- */
-driver_status_t Codec_GPIO_ExtractPinOutputState
-(
-	const reg					odrRegImage,
-	const gpio_pin_t			pin,
-	driver_status_t* const		pPinState
-);
+// ==================================================================================================== //
+//										GPIO Pin Input State Codecs										//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts one GPIO sampled input state from an IDR image
@@ -157,6 +169,30 @@ driver_status_t Codec_GPIO_ExtractPinInputState
 	const reg					idrRegImage,
 	const gpio_pin_t			pin,
 	driver_status_t* const		pPinState
+);
+
+// ==================================================================================================== //
+//										GPIO Lock State Codecs											//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts one GPIO configuration lock bit from an LCKR image
+ * @param[in] lckrRegImage Caller-owned LCKR image
+ * @param[in] pin GPIO single-pin mask
+ * @param[out] pLockState Destination for the extracted per-pin lock bit state
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Per-pin lock state was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockState is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
+ * @note Writes @ref `DRIVER_STATUS_OFF` when the selected LCK bit is clear and
+ * @ref `DRIVER_STATUS_ON` when it is set. Codec owns conversion of @p pin to
+ * the target register bit.
+ */
+driver_status_t Codec_GPIO_ExtractPinLockState
+(
+	const reg					lckrRegImage,
+	const gpio_pin_t			pin,
+	driver_status_t* const		pLockState
 );
 
 /**
@@ -183,23 +219,19 @@ driver_status_t Codec_GPIO_StagePinLockState
 );
 
 /**
- * @brief Extracts one GPIO configuration lock bit from an LCKR image
+ * @brief Extracts the GPIO lock-key bit from an LCKR image
  * @param[in] lckrRegImage Caller-owned LCKR image
- * @param[in] pin GPIO single-pin mask
- * @param[out] pLockState Destination for the extracted per-pin lock bit state
+ * @param[out] pLockKeyState Destination for the extracted lock-key bit state
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Per-pin lock state was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockState is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
- * @note Writes @ref `DRIVER_STATUS_OFF` when the selected LCK bit is clear and
- * @ref `DRIVER_STATUS_ON` when it is set. Codec owns conversion of @p pin to
- * the target register bit.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Lock-key state was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockKeyState is `NULL`
+ * @note Writes @ref `DRIVER_STATUS_OFF` when `LCKK` is clear and
+ * @ref `DRIVER_STATUS_ON` when it is set.
  */
-driver_status_t Codec_GPIO_ExtractPinLockState
+driver_status_t Codec_GPIO_ExtractLockKeyState
 (
 	const reg					lckrRegImage,
-	const gpio_pin_t			pin,
-	driver_status_t* const		pLockState
+	driver_status_t* const		pLockKeyState
 );
 
 /**
@@ -222,22 +254,6 @@ driver_status_t Codec_GPIO_StageLockKeyState
 	const reg					lckrRegImage,
 	const driver_status_t		lockKeyState,
 	reg* const					pLckrRegImage
-);
-
-/**
- * @brief Extracts the GPIO lock-key bit from an LCKR image
- * @param[in] lckrRegImage Caller-owned LCKR image
- * @param[out] pLockKeyState Destination for the extracted lock-key bit state
- * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Lock-key state was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockKeyState is `NULL`
- * @note Writes @ref `DRIVER_STATUS_OFF` when `LCKK` is clear and
- * @ref `DRIVER_STATUS_ON` when it is set.
- */
-driver_status_t Codec_GPIO_ExtractLockKeyState
-(
-	const reg					lckrRegImage,
-	driver_status_t* const		pLockKeyState
 );
 
 /** @} */ // GPIO_03_Driver_03_Codec

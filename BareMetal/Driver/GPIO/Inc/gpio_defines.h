@@ -294,6 +294,8 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinMaskRemovePin(gpio_pin_t* const pPi
  * @{
  */
 
+/** @brief No Trigger @def GPIO_IRQ_TRIGGER_NONE */
+#define GPIO_IRQ_TRIGGER_NONE						((gpio_irq_trigger_t) 0x00U)
 /** @brief Trigger on falling edge @def GPIO_IRQ_TRIGGER_FALLING */
 #define GPIO_IRQ_TRIGGER_FALLING					((gpio_irq_trigger_t) 0x01U)
 /** @brief Trigger on rising edge @def GPIO_IRQ_TRIGGER_RISING */

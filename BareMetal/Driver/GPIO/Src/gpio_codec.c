@@ -94,58 +94,6 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_GetPinIndexFromPinMask
 }
 
 /**
- * @brief Stages one ON/OFF bit state inside a register image
- * @param[in] regImage Caller-owned register image before replacement
- * @param[in] bitMask Single-bit mask selecting the target field
- * @param[in] bitState Requested bit state
- * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Clear the selected bit
- * - @ref `DRIVER_STATUS_ON`: Set the selected bit
- * @param[out] pRegImage Destination for the updated register image
- * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bitState is not an accepted state
- */
-__STATIC_FORCEINLINE driver_status_t Codec_GPIO_StageBitStateInImage
-(
-	const reg					regImage,
-	const reg					bitMask,
-	const driver_status_t		bitState,
-	reg* const					pRegImage
-)
-{
-	// Local Variable
-	reg updatedRegImage = regImage;
-
-	// Validate output pointer
-	if (pRegImage == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	if ((bitState != DRIVER_STATUS_OFF) && (bitState != DRIVER_STATUS_ON))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Clear the selected bit when the requested state is OFF
-	if (bitState == DRIVER_STATUS_OFF)
-	{
-		updatedRegImage &= ~bitMask;
-	}
-	//! Set the selected bit when the requested state is ON
-	else
-	{
-		updatedRegImage |= bitMask;
-	}
-
-	//! Store the updated register image
-	*pRegImage = updatedRegImage;
-
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
  * @brief Extracts one ON/OFF bit state from a register image
  * @param[in] regImage Caller-owned register image
  * @param[in] bitMask Single-bit mask selecting the target field
@@ -170,6 +118,52 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_ExtractBitStateFromImage
 	}
 	//! Decode the selected bit into the driver ON/OFF state
 	*pBitState = ((regImage & bitMask) != 0x00000000UL) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+/**
+ * @brief Stages one ON/OFF bit state inside a register image
+ * @param[in] regImage Caller-owned register image before replacement
+ * @param[in] bitMask Single-bit mask selecting the target field
+ * @param[in] bitState Requested bit state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Clear the selected bit
+ * - @ref `DRIVER_STATUS_ON`: Set the selected bit
+ * @param[out] pRegImage Destination for the updated register image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bitState is not an accepted state
+ */
+__STATIC_FORCEINLINE driver_status_t Codec_GPIO_StageBitStateInImage
+(
+	const reg					regImage,
+	const reg					bitMask,
+	const driver_status_t		bitState,
+	reg* const					pRegImage
+)
+{
+	// Local Variable
+	reg updatedRegImage = regImage;
+	reg bitSet = 0x00000000UL;
+
+	// Validate output pointer
+	if (pRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if ((bitState != DRIVER_STATUS_OFF) && (bitState != DRIVER_STATUS_ON))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! Stage only the selected bit while preserving the rest of the register image
+	bitSet = (bitState == DRIVER_STATUS_ON) ? bitMask : 0x00000000UL;
+	updatedRegImage = RegOps_StageField(updatedRegImage, bitMask, bitSet);
+
+	//! Store the updated register image
+	*pRegImage = updatedRegImage;
+
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -253,147 +247,23 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_BuildPinConfigModeField(const reg_fi
 
 	configModeField |= (reg_field_t) REG_FIELD_PACK
 	(
+		GPIO_CODEC_CRX_MODE_BITS_SHIFT,
 		modeBits,
-		GPIO_CODEC_CRX_MODE_BITS_FIELD_WIDTH,
-		GPIO_CODEC_CRX_MODE_BITS_SHIFT
+		GPIO_CODEC_CRX_MODE_BITS_FIELD_WIDTH
 	);
 	configModeField |= (reg_field_t) REG_FIELD_PACK
 	(
+		GPIO_CODEC_CRX_CNF_BITS_SHIFT,
 		cnfBits,
-		GPIO_CODEC_CRX_CNF_BITS_FIELD_WIDTH,
-		GPIO_CODEC_CRX_CNF_BITS_SHIFT
+		GPIO_CODEC_CRX_CNF_BITS_FIELD_WIDTH
 	);
 
 	return configModeField;
 }
 
 // ==================================================================================================== //
-//										Local CRx Encode/Decode Helpers									//
+//										Local CRx Decode/Encode Helpers									//
 // ==================================================================================================== //
-
-/**
- * @brief Encodes driver mode/config selectors into one raw MODE/CNF field
- * @param[in] config Driver-facing GPIO configuration selector
- * Accepted values:
- * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
- * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
- * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
- * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
- * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
- * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
- * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
- * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
- * @param[in] mode Driver-facing GPIO mode selector
- * Accepted values:
- * - @ref `GPIO_PIN_MODE_INPUT`
- * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
- * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
- * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
- * @param[out] pConfigModeField Destination for right-aligned raw
- * `CNF[1:0] | MODE[1:0]` CRL/CRH field value
- * Expected values:
- * - Non-`NULL`: Encoded field is written to @p pConfigModeField
- * @returns Encoding status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: MODE/CNF field was encoded
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfigModeField is `NULL`
- * @details This helper is pure translation. It does not read or update a
- * register image.
- * @note Caller owns validation of @p config, @p mode, and the mode/config pair.
- */
-__STATIC driver_status_t Codec_GPIO_EncodePinConfigModeField
-(
-	const gpio_pin_config_t	config,
-	const gpio_pin_mode_t	mode,
-	reg_field_t* const		pConfigModeField
-)
-{
-	// Local Variable
-	reg_field_t configModeField = (reg_field_t) 0x00U;
-	reg_field_t modeBits = (reg_field_t) 0x00U;
-	reg_field_t cnfBits = (reg_field_t) 0x00U;
-
-	// Validate Input
-	if (pConfigModeField == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	//! Mode Field Encoding
-	switch(mode)
-	{
-		case GPIO_PIN_MODE_OUTPUT_10MHZ:
-		{
-			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_10MHZ;
-			break;
-		}
-		case GPIO_PIN_MODE_OUTPUT_2MHZ:
-		{
-			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_2MHZ;
-			break;
-		}
-		case GPIO_PIN_MODE_OUTPUT_50MHZ:
-		{
-			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_50MHZ;
-			break;
-		}
-		case GPIO_PIN_MODE_INPUT:
-		default:
-		{
-			modeBits = (reg_field_t) GPIO_CRX_MODE_INPUT;
-			break;
-		}
-	}
-
-	//! Config Field Encoding
-	switch(config)
-	{
-		case GPIO_PIN_CONFIG_INPUT_FLOATING:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_FLOATING;
-			break;
-		}
-		case GPIO_PIN_CONFIG_INPUT_PULL_DOWN:
-		case GPIO_PIN_CONFIG_INPUT_PULL_UP:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_PULL;
-			break;
-		}
-		case GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_OUTPUT_OPEN_DRAIN;
-			break;
-		}
-		case GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_ALTERNATE_PUSH_PULL;
-			break;
-		}
-		case GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_ALTERNATE_OPEN_DRAIN;
-			break;
-		}
-		case GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_OUTPUT_PUSH_PULL;
-			break;
-		}
-		case GPIO_PIN_CONFIG_INPUT_ANALOG:
-		default:
-		{
-			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_ANALOG;
-			break;
-		}
-	}
-
-	//! Create the actual field
-	configModeField = Codec_GPIO_BuildPinConfigModeField(modeBits, cnfBits);
-
-	//! Store the value
-	*pConfigModeField = configModeField;
-
-	return DRIVER_STATUS_SUCCESS;
-}
 
 /**
  * @brief Decodes one raw MODE/CNF field into driver-facing config and mode selectors
@@ -546,73 +416,133 @@ __STATIC driver_status_t Codec_GPIO_DecodePinConfigModeField
 	return DRIVER_STATUS_SUCCESS;
 }
 
-// ==================================================================================================== //
-//										GPIO Register Image Helpers									//
-// ==================================================================================================== //
-
-driver_status_t Codec_GPIO_StagePinConfigMode
+/**
+ * @brief Encodes driver mode/config selectors into one raw MODE/CNF field
+ * @param[in] config Driver-facing GPIO configuration selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
+ * @param[in] mode Driver-facing GPIO mode selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_MODE_INPUT`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
+ * @param[out] pConfigModeField Destination for right-aligned raw
+ * `CNF[1:0] | MODE[1:0]` CRL/CRH field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is written to @p pConfigModeField
+ * @returns Encoding status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: MODE/CNF field was encoded
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfigModeField is `NULL`
+ * @details This helper is pure translation. It does not read or update a
+ * register image.
+ * @note Caller owns validation of @p config, @p mode, and the mode/config pair.
+ */
+__STATIC driver_status_t Codec_GPIO_EncodePinConfigModeField
 (
-	const reg					crxRegImage,
-	const reg					odrRegImage,
-	const gpio_pin_t			pin,
-	const gpio_pin_config_t		config,
-	const gpio_pin_mode_t		mode,
-	reg* const					pCrxRegImage,
-	reg* const					pOdrRegImage
+	const gpio_pin_config_t	config,
+	const gpio_pin_mode_t	mode,
+	reg_field_t* const		pConfigModeField
 )
 {
-	// Local Variables
-	reg updatedCrxRegImage = crxRegImage;
-	reg updatedOdrRegImage = odrRegImage;
-	reg_field_t fieldShift = (reg_field_t) 0x00U;
-	reg pinBit = 0x00000000UL;
+	// Local Variable
 	reg_field_t configModeField = (reg_field_t) 0x00U;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
+	reg_field_t modeBits = (reg_field_t) 0x00U;
+	reg_field_t cnfBits = (reg_field_t) 0x00U;
 
-	// Validate output pointers
-	if ((pCrxRegImage == NULL) || (pOdrRegImage == NULL))
+	// Validate Input
+	if (pConfigModeField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(Codec_GPIO_GetPinIndexFromPinMask(pin, &pinIndex));
 
-	fieldShift = Codec_GPIO_GetPinConfigModeFieldBitPos(pinIndex);
-	pinBit = REG_BIT_MASK(pinIndex);
-
-	//! Encode the MODE/CNF field
-	if (Codec_GPIO_EncodePinConfigModeField(config, mode, &configModeField) != DRIVER_STATUS_SUCCESS)
+	//! Mode Field Encoding
+	switch(mode)
 	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Replace the target pin's MODE/CNF field
-	updatedCrxRegImage = RegOps_StageFieldValue
-	(
-		updatedCrxRegImage,
-		fieldShift,
-		configModeField,
-		GPIO_CODEC_CRX_PIN_MODE_CNF_FIELD_WIDTH
-	);
-
-	//! Stage input pull state inside ODR image only when the mode/config pair requires it
-	if (GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config) != 0x00U)
-	{
-		if (config == GPIO_PIN_CONFIG_INPUT_PULL_DOWN)
+		case GPIO_PIN_MODE_OUTPUT_10MHZ:
 		{
-			updatedOdrRegImage &= ~pinBit;
+			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_10MHZ;
+			break;
 		}
-		else
+		case GPIO_PIN_MODE_OUTPUT_2MHZ:
 		{
-			updatedOdrRegImage |= pinBit;
+			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_2MHZ;
+			break;
+		}
+		case GPIO_PIN_MODE_OUTPUT_50MHZ:
+		{
+			modeBits = (reg_field_t) GPIO_CRX_MODE_OUTPUT_50MHZ;
+			break;
+		}
+		case GPIO_PIN_MODE_INPUT:
+		default:
+		{
+			modeBits = (reg_field_t) GPIO_CRX_MODE_INPUT;
+			break;
 		}
 	}
 
-	//! Store the updated register images
-	*pCrxRegImage = updatedCrxRegImage;
-	*pOdrRegImage = updatedOdrRegImage;
+	//! Config Field Encoding
+	switch(config)
+	{
+		case GPIO_PIN_CONFIG_INPUT_FLOATING:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_FLOATING;
+			break;
+		}
+		case GPIO_PIN_CONFIG_INPUT_PULL_DOWN:
+		case GPIO_PIN_CONFIG_INPUT_PULL_UP:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_PULL;
+			break;
+		}
+		case GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_OUTPUT_OPEN_DRAIN;
+			break;
+		}
+		case GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_ALTERNATE_PUSH_PULL;
+			break;
+		}
+		case GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_ALTERNATE_OPEN_DRAIN;
+			break;
+		}
+		case GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_OUTPUT_PUSH_PULL;
+			break;
+		}
+		case GPIO_PIN_CONFIG_INPUT_ANALOG:
+		default:
+		{
+			cnfBits = (reg_field_t) GPIO_CRX_CNF_INPUT_ANALOG;
+			break;
+		}
+	}
+
+	//! Create the actual field
+	configModeField = Codec_GPIO_BuildPinConfigModeField(modeBits, cnfBits);
+
+	//! Store the value
+	*pConfigModeField = configModeField;
 
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										GPIO Pin Config/Mode Codecs										//
+// ==================================================================================================== //
 
 driver_status_t Codec_GPIO_ExtractPinConfigMode
 (
@@ -669,27 +599,71 @@ driver_status_t Codec_GPIO_ExtractPinConfigMode
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_GPIO_StagePinOutputState
+driver_status_t Codec_GPIO_StagePinConfigMode
 (
+	const reg					crxRegImage,
 	const reg					odrRegImage,
 	const gpio_pin_t			pin,
-	const driver_status_t		pinState,
+	const gpio_pin_config_t		config,
+	const gpio_pin_mode_t		mode,
+	reg* const					pCrxRegImage,
 	reg* const					pOdrRegImage
 )
 {
-	// Local Variable
-	reg pinBitMask = 0x00000000UL;
+	// Local Variables
+	reg updatedCrxRegImage = crxRegImage;
+	reg updatedOdrRegImage = odrRegImage;
+	reg_field_t fieldShift = (reg_field_t) 0x00U;
+	reg pinBit = 0x00000000UL;
+	reg_field_t configModeField = (reg_field_t) 0x00U;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
 
-	if (pOdrRegImage == NULL)
+	// Validate output pointers
+	if ((pCrxRegImage == NULL) || (pOdrRegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 	ASSERT_DRIVER_STATUS(Codec_GPIO_GetPinIndexFromPinMask(pin, &pinIndex));
-	pinBitMask = REG_BIT_MASK(pinIndex);
-	//! Stage the selected ODR bit state inside the register image
-	return Codec_GPIO_StageBitStateInImage(odrRegImage, pinBitMask, pinState, pOdrRegImage);
+
+	fieldShift = Codec_GPIO_GetPinConfigModeFieldBitPos(pinIndex);
+	pinBit = REG_BIT_MASK(pinIndex);
+
+	//! Encode the MODE/CNF field
+	if (Codec_GPIO_EncodePinConfigModeField(config, mode, &configModeField) != DRIVER_STATUS_SUCCESS)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! Replace the target pin's MODE/CNF field
+	updatedCrxRegImage = RegOps_StageFieldValue
+	(
+		updatedCrxRegImage,
+		fieldShift,
+		configModeField,
+		GPIO_CODEC_CRX_PIN_MODE_CNF_FIELD_WIDTH
+	);
+
+	//! Stage input pull state inside ODR image only when the mode/config pair requires it
+	if (GPIO_PIN_MODE_CONFIG_IS_INPUT_PULL(mode, config) != 0x00U)
+	{
+		updatedOdrRegImage = RegOps_StageField
+		(
+			updatedOdrRegImage,
+			pinBit,
+			(config == GPIO_PIN_CONFIG_INPUT_PULL_UP) ? pinBit : 0x00000000UL
+		);
+	}
+
+	//! Store the updated register images
+	*pCrxRegImage = updatedCrxRegImage;
+	*pOdrRegImage = updatedOdrRegImage;
+
+	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										GPIO Pin Output State Codecs									//
+// ==================================================================================================== //
 
 driver_status_t Codec_GPIO_ExtractPinOutputState
 (
@@ -712,6 +686,32 @@ driver_status_t Codec_GPIO_ExtractPinOutputState
 	return Codec_GPIO_ExtractBitStateFromImage(odrRegImage, pinBitMask, pPinState);
 }
 
+driver_status_t Codec_GPIO_StagePinOutputState
+(
+	const reg					odrRegImage,
+	const gpio_pin_t			pin,
+	const driver_status_t		pinState,
+	reg* const					pOdrRegImage
+)
+{
+	// Local Variable
+	reg pinBitMask = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
+
+	if (pOdrRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(Codec_GPIO_GetPinIndexFromPinMask(pin, &pinIndex));
+	pinBitMask = REG_BIT_MASK(pinIndex);
+	//! Stage the selected ODR bit state inside the register image
+	return Codec_GPIO_StageBitStateInImage(odrRegImage, pinBitMask, pinState, pOdrRegImage);
+}
+
+// ==================================================================================================== //
+//										GPIO Pin Input State Codecs										//
+// ==================================================================================================== //
+
 driver_status_t Codec_GPIO_ExtractPinInputState
 (
 	const reg					idrRegImage,
@@ -731,6 +731,31 @@ driver_status_t Codec_GPIO_ExtractPinInputState
 	pinBitMask = REG_BIT_MASK(pinIndex);
 	//! Extract the selected IDR bit state from the register image
 	return Codec_GPIO_ExtractBitStateFromImage(idrRegImage, pinBitMask, pPinState);
+}
+
+// ==================================================================================================== //
+//										GPIO Lock State Codecs											//
+// ==================================================================================================== //
+
+driver_status_t Codec_GPIO_ExtractPinLockState
+(
+	const reg					lckrRegImage,
+	const gpio_pin_t			pin,
+	driver_status_t* const		pLockState
+)
+{
+	// Local Variable
+	reg pinBitMask = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
+
+	if (pLockState == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(Codec_GPIO_GetPinIndexFromPinMask(pin, &pinIndex));
+	pinBitMask = REG_BIT_MASK(pinIndex);
+	//! Extract the selected LCKR pin-lock bit state from the register image
+	return Codec_GPIO_ExtractBitStateFromImage(lckrRegImage, pinBitMask, pLockState);
 }
 
 driver_status_t Codec_GPIO_StagePinLockState
@@ -755,25 +780,13 @@ driver_status_t Codec_GPIO_StagePinLockState
 	return Codec_GPIO_StageBitStateInImage(lckrRegImage, pinBitMask, lockState, pLckrRegImage);
 }
 
-driver_status_t Codec_GPIO_ExtractPinLockState
+driver_status_t Codec_GPIO_ExtractLockKeyState
 (
 	const reg					lckrRegImage,
-	const gpio_pin_t			pin,
-	driver_status_t* const		pLockState
+	driver_status_t* const		pLockKeyState
 )
 {
-	// Local Variable
-	reg pinBitMask = 0x00000000UL;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
-
-	if (pLockState == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	ASSERT_DRIVER_STATUS(Codec_GPIO_GetPinIndexFromPinMask(pin, &pinIndex));
-	pinBitMask = REG_BIT_MASK(pinIndex);
-	//! Extract the selected LCKR pin-lock bit state from the register image
-	return Codec_GPIO_ExtractBitStateFromImage(lckrRegImage, pinBitMask, pLockState);
+	return Codec_GPIO_ExtractBitStateFromImage(lckrRegImage, GPIO_LCKR_LCKK, pLockKeyState);
 }
 
 driver_status_t Codec_GPIO_StageLockKeyState
@@ -784,13 +797,4 @@ driver_status_t Codec_GPIO_StageLockKeyState
 )
 {
 	return Codec_GPIO_StageBitStateInImage(lckrRegImage, GPIO_LCKR_LCKK, lockKeyState, pLckrRegImage);
-}
-
-driver_status_t Codec_GPIO_ExtractLockKeyState
-(
-	const reg					lckrRegImage,
-	driver_status_t* const		pLockKeyState
-)
-{
-	return Codec_GPIO_ExtractBitStateFromImage(lckrRegImage, GPIO_LCKR_LCKK, pLockKeyState);
 }

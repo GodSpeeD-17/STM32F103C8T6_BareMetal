@@ -149,6 +149,13 @@ Codec functions may validate translation inputs and return `driver_status_t`.
 Any codec function that performs internal validation should return
 `driver_status_t`.
 
+Codec APIs must be designed as conjugate symmetric pairs where the underlying
+hardware image is mutable. Every `Stage*()` API that writes a driver-facing
+value into a caller-owned register image should have a matching `Extract*()`
+API that recovers the same driver-facing value from a caller-owned register
+image. Extraction-only APIs are valid when the target register is naturally
+read-only or not meaningful to stage, such as sampled input-state registers.
+
 The codec layer must not touch hardware. It receives register images from the
 driver, mutates those images, and returns status.
 
@@ -164,6 +171,7 @@ DRIVER_Codec_EncodeSelector(selector, &rawField);
 DRIVER_Codec_DecodeField(rawField, &selector);
 DRIVER_Codec_GetFieldShift(rawIndex);
 DRIVER_Codec_StageField(selector, &regImage);
+DRIVER_Codec_ExtractField(regImage, &selector);
 DRIVER_Codec_StageReset(rawIndex, &regImage);
 ```
 
@@ -190,6 +198,13 @@ It must own:
 - dirty-register tracking
 - writing each dirty register at the correct time
 - returning user-facing `driver_status_t`
+
+Driver APIs should also preserve conjugate intent. Prefer status-returning
+`Get*()` APIs as the primary extraction path and `Set*()` APIs as the primary
+mutation path. Value-returning getters may exist as convenience wrappers, but
+driver code that needs to preserve existing state before a mutation should call
+the status-returning getter so decode or validation failures are not hidden by
+fallback values.
 
 The intended optimized pattern for multi-field configuration is:
 

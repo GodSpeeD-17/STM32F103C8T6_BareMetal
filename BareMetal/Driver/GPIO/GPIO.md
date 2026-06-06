@@ -63,6 +63,12 @@ The current split is:
   updated images through explicit output pointers, and return `driver_status_t`.
   The status makes null output pointers and unexpected decode/encode failures
   visible to the driver.
+- Codec image-mutating APIs must be designed as conjugate pairs. Every
+  `Codec_<Module>_Stage*()` API that writes a value into a caller-owned image
+  needs the matching `Codec_<Module>_Extract*()` API that recovers the same
+  driver-facing value from a caller-owned image. Read-only hardware images such
+  as `IDR` may expose extraction-only APIs because there is no valid staged
+  write operation for that register.
 - Keep validation, clock sequencing, batching, and write ordering in the driver.
 - Keep board-specific behavior outside the generic GPIO driver. The current
   Blue Pill LED codecs live in the BSP module, while generic GPIO pin
@@ -86,6 +92,7 @@ Use the codec layer for:
 - bitfield-to-selector decoding
 - staged mutation of caller-owned register images
 - image-only side effects such as input pull-up/pull-down ODR staging
+- conjugate `Stage*()` / `Extract*()` pairs for every mutable image concept
 
 Do not use the codec layer for direct hardware access, public input validation,
 clock sequencing, batching decisions, or board-specific pin policy.
@@ -212,6 +219,27 @@ status = Codec_GPIO_ExtractLockKeyState
 
 Avoid adding new codec APIs with the legacy module-before-layer shape.
 
+Codec APIs that operate on caller-selected pins should accept the driver-facing
+`gpio_pin_t` single-pin mask. Codec owns the conversion from that mask to
+`gpio_pin_index_t`, register bit position, or field position internally. Static
+private helpers inside the codec may use `gpio_pin_index_t` after the public
+codec entry point has decoded the mask.
+
+Keep these conjugate pairs complete:
+
+| Stage API | Extract API | Notes |
+|-----------|-------------|-------|
+| `Codec_GPIO_StagePinConfigMode()` | `Codec_GPIO_ExtractPinConfigMode()` | `ODR` participates only to resolve input pull-up/down |
+| `Codec_GPIO_StagePinOutputState()` | `Codec_GPIO_ExtractPinOutputState()` | Operates on ODR images |
+| `Codec_GPIO_StagePinLockState()` | `Codec_GPIO_ExtractPinLockState()` | Operates on LCKR pin bits |
+| `Codec_GPIO_StageLockKeyState()` | `Codec_GPIO_ExtractLockKeyState()` | Operates on LCKR `LCKK` |
+| `Codec_GPIO_IRQ_StagePortRouting()` | `Codec_GPIO_IRQ_ExtractPortRouting()` | Operates on AFIO EXTICR images |
+| `Codec_GPIO_IRQ_StageTrigger()` | Driver-owned extraction or future codec extraction | Current public driver does not expose trigger get yet |
+
+Extraction-only APIs are allowed only when the target hardware register is
+naturally read-only for driver purposes, such as `Codec_GPIO_ExtractPinInputState()`
+for `GPIOx_IDR`.
+
 ## Intended Configuration Flow
 
 Public configuration should enter through a semantic mode/config API:
@@ -234,7 +262,7 @@ The driver should:
    that extracts and clears the lowest selected bit each iteration. Do not scan
    all 16 possible pins when only a sparse mask was requested.
 6. Pass each extracted single-pin mask into codec APIs. Codec owns conversion
-   to `gpio_pin_index_t` or register bit position internally.
+   from `gpio_pin_t` to `gpio_pin_index_t` or register bit position internally.
 7. Read each touched `CRL`/`CRH` image once, and read `ODR` only when pull-state
    staging or extraction requires it.
 8. Stage each selected pin through codec functions.
@@ -272,10 +300,10 @@ The actual implementation should use unsigned casts or small local codecs for
 the isolation and clear operations, but the iteration must remain proportional
 to the number of selected pins rather than the fixed port width.
 
-Codec functions that operate on one pin should take `gpio_pin_index_t`, not
-`gpio_pin_t`. Public APIs may accept pin masks because they own user-facing
-multi-pin selection; the driver is responsible for converting those masks to pin
-indices before codec staging or decoding.
+Codec functions that operate on one public pin should take a single-pin
+`gpio_pin_t` mask. Public driver APIs may accept multi-pin masks; the driver
+extracts one selected pin at a time, and codec converts that single-pin mask to
+the target raw bit or field position.
 
 For input pull-up/pull-down, program the output-latch pull state before exposing
 the new `CNF=10` input-pull configuration in `CRL/CRH`.
@@ -313,6 +341,9 @@ GPIO-backed EXTI should use the same ownership rules:
   state extraction, and trigger-image staging through `Codec_GPIO_IRQ_*` APIs.
 - GPIO IRQ driver owns GPIO input compatibility checks, AFIO clock sequencing,
   EXTI register batching, NVIC enable/disable policy, and pending-bit ordering.
+- GPIO IRQ follows the same conjugate-pair policy: route staging is paired with
+  route extraction, and trigger staging should gain trigger extraction before a
+  public trigger-get API is introduced.
 
 The GPIO IRQ codec must not include the public GPIO IRQ driver header. It should
 include `gpio_defines.h` and use aliases from `gpio_data_types.h` through that

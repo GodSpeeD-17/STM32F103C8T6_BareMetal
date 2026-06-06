@@ -25,13 +25,11 @@
 #define GPIO_IRQ_EXTICR_PORT_ROUTE_FIELD_MASK				((reg_field_t) 0x0FU)
 /** @brief Pin-index mask selecting local EXTICR field index @def GPIO_IRQ_EXTICR_LOCAL_PIN_INDEX_MASK */
 #define GPIO_IRQ_EXTICR_LOCAL_PIN_INDEX_MASK				((gpio_pin_index_t) 0x03U)
-/** @brief Pin-index shift used to select EXTICR register index @def GPIO_IRQ_EXTICR_REG_INDEX_SHIFT */
-#define GPIO_IRQ_EXTICR_REG_INDEX_SHIFT						((uint8_t) 0x02U)
 /** @brief Width of one AFIO EXTICR route field @def GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH */
 #define GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH					((reg_field_t) 0x04U)
 
 // ==================================================================================================== //
-//												Local Codecs											//
+//											Local Common Helpers										//
 // ==================================================================================================== //
 
 /**
@@ -45,11 +43,7 @@
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinIndex is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
  */
-__STATIC_FORCEINLINE driver_status_t Codec_GPIO_IRQ_GetPinIndexFromPinMask
-(
-	const gpio_pin_t			pin,
-	gpio_pin_index_t* const		pPinIndex
-)
+__STATIC driver_status_t Codec_GPIO_IRQ_GetPinIndexFromPinMask(const gpio_pin_t pin, gpio_pin_index_t* const pPinIndex)
 {
 	// Validate Input
 	if (pPinIndex == NULL)
@@ -78,6 +72,80 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_IRQ_GetRoutingFieldBitPos(const gpio
 	// Local Variable
 	const gpio_pin_index_t localPinIndex = (gpio_pin_index_t) (pinIndex & GPIO_IRQ_EXTICR_LOCAL_PIN_INDEX_MASK);
 	return (reg_field_t) (localPinIndex * GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH);
+}
+
+// ==================================================================================================== //
+//									Local Port Routing Decode/Encode Helpers								//
+// ==================================================================================================== //
+
+/**
+ * @brief Decodes one raw AFIO EXTICR route field into a GPIO peripheral instance
+ * @param[in] portRoute Right-aligned raw AFIO EXTICR route field
+ * Accepted values:
+ * - @ref `AFIO_EXTICR_PORT_SOURCE_GPIOA` through @ref `AFIO_EXTICR_PORT_SOURCE_GPIOG`
+ * @param[out] pGPIOx Destination for decoded GPIO peripheral instance
+ * @returns Decode status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p portRoute was decoded into @p pGPIOx
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pGPIOx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p portRoute is not supported
+ */
+__STATIC driver_status_t Codec_GPIO_IRQ_DecodePortRoute
+(
+	const reg_field_t			portRoute,
+	GPIO_TypeDef** const		pGPIOx
+)
+{
+	// Validate Input
+	if (pGPIOx == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Convert the raw AFIO EXTICR port-source field value to a GPIO instance
+	switch(portRoute)
+	{
+		case AFIO_EXTICR_PORT_SOURCE_GPIOA:
+		{
+			*pGPIOx = GPIOA;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOB:
+		{
+			*pGPIOx = GPIOB;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOC:
+		{
+			*pGPIOx = GPIOC;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOD:
+		{
+			*pGPIOx = GPIOD;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOE:
+		{
+			*pGPIOx = GPIOE;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOF:
+		{
+			*pGPIOx = GPIOF;
+			break;
+		}
+		case AFIO_EXTICR_PORT_SOURCE_GPIOG:
+		{
+			*pGPIOx = GPIOG;
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+	}
+
+	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
@@ -161,115 +229,33 @@ __STATIC driver_status_t Codec_GPIO_IRQ_EncodePortRoute
 }
 
 // ==================================================================================================== //
-//												Public Codecs											//
+//										GPIO IRQ Port Routing Codecs									//
 // ==================================================================================================== //
-
-_IO* Codec_GPIO_IRQ_GetRoutingRegisterAddress(const gpio_pin_t pin)
-{
-	// Local Variable
-	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
-	uint8_t exticrIndex = 0x00U;
-
-	// Validate Input
-	if (pinIndex == GPIO_PIN_INDEX_INVALID)
-	{
-		return NULL;
-	}
-
-	//! EXTICR register group is selected by pinIndex / 4, i.e. pinIndex >> 2U
-	exticrIndex = (uint8_t) (pinIndex >> GPIO_IRQ_EXTICR_REG_INDEX_SHIFT);
-	//! Determine EXTI_CR Index
-	switch(exticrIndex)
-	{
-		case 0x00U:
-		{
-			return REGOPS_REG(AFIO, EXTICR1);
-		}
-		case 0x01U:
-		{
-			return REGOPS_REG(AFIO, EXTICR2);
-		}
-		case 0x02U:
-		{
-			return REGOPS_REG(AFIO, EXTICR3);
-		}
-		case 0x03U:
-		{
-			return REGOPS_REG(AFIO, EXTICR4);
-		}
-		default:
-		{
-			return NULL;
-		}
-	}
-}
-
-driver_status_t Codec_GPIO_IRQ_StagePortRouting
-(
-	const reg					exticrRegImage,
-	const gpio_pin_t			pin,
-	GPIO_TypeDef* const			GPIOx,
-	reg* const					pExticrRegImage
-)
-{
-	// Local Variables
-	reg updatedRegImage = exticrRegImage;
-	reg_field_t fieldShift = (reg_field_t) 0x00U;
-	reg_field_t portRoute = (reg_field_t) 0x00U;
-	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
-
-	// Validate Input
-	if (pExticrRegImage == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	//! Get the pin index and encoded port route for the selected GPIO pin and peripheral
-	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
-	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_EncodePortRoute(GPIOx, &portRoute));
-
-	//! Replace only the selected EXTI line route field inside the EXTICR image
-	fieldShift = Codec_GPIO_IRQ_GetRoutingFieldBitPos(pinIndex);
-	updatedRegImage = RegOps_StageFieldValue
-	(
-		updatedRegImage,
-		fieldShift,
-		portRoute,
-		GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH
-	);
-
-	*pExticrRegImage = updatedRegImage;
-	return DRIVER_STATUS_SUCCESS;
-}
 
 driver_status_t Codec_GPIO_IRQ_ExtractPortRouting
 (
 	const reg					exticrRegImage,
-	GPIO_TypeDef* const			GPIOx,
 	const gpio_pin_t			pin,
-	driver_status_t* const		pRouteState
+	GPIO_TypeDef** const		pGPIOx
 )
 {
 	// Local Variables
 	reg_field_t fieldShift = (reg_field_t) 0x00U;
 	reg_field_t routeField = (reg_field_t) 0x00U;
-	reg_field_t expectedRouteField = (reg_field_t) 0x00U;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
 
-	// Validate Input
-	if (pRouteState == NULL)
+	// Validate Output Pointer
+	if (pGPIOx == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_EncodePortRoute(GPIOx, &expectedRouteField));
 	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
 
-	//! Extract the right-aligned raw AFIO route field and compare it against the encoded GPIOx route
+	//! Extract the right-aligned raw AFIO route field and decode it into a GPIO instance
 	fieldShift = Codec_GPIO_IRQ_GetRoutingFieldBitPos(pinIndex);
 	routeField = (reg_field_t) ((exticrRegImage >> fieldShift) & GPIO_IRQ_EXTICR_PORT_ROUTE_FIELD_MASK);
-	*pRouteState = (routeField == expectedRouteField) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
 
-	return DRIVER_STATUS_SUCCESS;
+	return Codec_GPIO_IRQ_DecodePortRoute(routeField, pGPIOx);
 }
 
 driver_status_t Codec_GPIO_IRQ_StageResetPortRouting
@@ -295,65 +281,57 @@ driver_status_t Codec_GPIO_IRQ_StageResetPortRouting
 	//! Clear only the selected EXTI line route field inside the EXTICR image
 	fieldShift = Codec_GPIO_IRQ_GetRoutingFieldBitPos(pinIndex);
 	fieldMask = REG_FIELD_VALUE(fieldShift, GPIO_IRQ_EXTICR_PORT_ROUTE_FIELD_MASK);
-	updatedRegImage &= ~fieldMask;
+	updatedRegImage = RegOps_StageField(updatedRegImage, fieldMask, 0x00000000UL);
 
 	*pExticrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_GPIO_IRQ_StageTrigger
+driver_status_t Codec_GPIO_IRQ_StagePortRouting
 (
-	const reg					rtsrRegImage,
-	const reg					ftsrRegImage,
+	const reg					exticrRegImage,
 	const gpio_pin_t			pin,
-	const gpio_irq_trigger_t	trigger,
-	reg* const					pRtsrRegImage,
-	reg* const					pFtsrRegImage
+	GPIO_TypeDef* const			GPIOx,
+	reg* const					pExticrRegImage
 )
 {
 	// Local Variables
-	reg updatedRtsrRegImage = rtsrRegImage;
-	reg updatedFtsrRegImage = ftsrRegImage;
-	reg lineMask = 0x00000000UL;
+	reg updatedRegImage = exticrRegImage;
+	reg_field_t fieldShift = (reg_field_t) 0x00U;
+	reg fieldSet = 0x00000000UL;
+	reg_field_t portRoute = (reg_field_t) 0x00U;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
 
-	// Validate Input
-	if ((pRtsrRegImage == NULL) || (pFtsrRegImage == NULL))
+	// Validate Output Pointer
+	if (pExticrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (GPIO_IRQ_TRIGGER_IS_VALID(trigger) == 0x00U)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
+
+	//! Get the pin index and encoded port route for the selected GPIO pin and peripheral
 	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
+	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_EncodePortRoute(GPIOx, &portRoute));
 
-	lineMask = REG_BIT_MASK(pinIndex);
+	//! Clear only the selected EXTI line route field before staging the new route
+	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_StageResetPortRouting(updatedRegImage, pin, &updatedRegImage));
 
-	//! Stage rising trigger bit for the selected EXTI line
-	if ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_RISING)) != 0x00000000UL)
-	{
-		updatedRtsrRegImage |= lineMask;
-	}
-	else
-	{
-		updatedRtsrRegImage &= ~lineMask;
-	}
+	//! Pack and set only the selected EXTI line route field inside the EXTICR image
+	fieldShift = Codec_GPIO_IRQ_GetRoutingFieldBitPos(pinIndex);
+	fieldSet = REG_FIELD_PACK
+	(
+		fieldShift,
+		portRoute,
+		GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH
+	);
+	updatedRegImage |= fieldSet;
 
-	//! Stage falling trigger bit for the selected EXTI line
-	if ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_FALLING)) != 0x00000000UL)
-	{
-		updatedFtsrRegImage |= lineMask;
-	}
-	else
-	{
-		updatedFtsrRegImage &= ~lineMask;
-	}
-
-	*pRtsrRegImage = updatedRtsrRegImage;
-	*pFtsrRegImage = updatedFtsrRegImage;
+	*pExticrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										GPIO IRQ Trigger Codecs											//
+// ==================================================================================================== //
 
 driver_status_t Codec_GPIO_IRQ_ExtractTrigger
 (
@@ -365,10 +343,10 @@ driver_status_t Codec_GPIO_IRQ_ExtractTrigger
 {
 	// Local Variables
 	reg lineMask = 0x00000000UL;
-	gpio_irq_trigger_t trigger = (gpio_irq_trigger_t) 0x00U;
+	gpio_irq_trigger_t trigger = GPIO_IRQ_TRIGGER_NONE;
 	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
 
-	// Validate Input
+	// Validate Output Pointer
 	if (pTrigger == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -416,9 +394,66 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
 
 	lineMask = REG_BIT_MASK(pinIndex);
-	updatedRtsrRegImage &= ~lineMask;
-	updatedFtsrRegImage &= ~lineMask;
+	updatedRtsrRegImage = RegOps_StageField(updatedRtsrRegImage, lineMask, 0x00000000UL);
+	updatedFtsrRegImage = RegOps_StageField(updatedFtsrRegImage, lineMask, 0x00000000UL);
 
+	*pRtsrRegImage = updatedRtsrRegImage;
+	*pFtsrRegImage = updatedFtsrRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_GPIO_IRQ_StageTrigger
+(
+	const reg					rtsrRegImage,
+	const reg					ftsrRegImage,
+	const gpio_pin_t			pin,
+	const gpio_irq_trigger_t	trigger,
+	reg* const					pRtsrRegImage,
+	reg* const					pFtsrRegImage
+)
+{
+	// Local Variables
+	reg updatedRtsrRegImage = rtsrRegImage;
+	reg updatedFtsrRegImage = ftsrRegImage;
+	reg lineMask = 0x00000000UL;
+	reg risingLineSet = 0x00000000UL;
+	reg fallingLineSet = 0x00000000UL;
+	gpio_pin_index_t pinIndex = GPIO_PIN_INDEX_INVALID;
+
+	// Validate Output Pointers
+	if ((pRtsrRegImage == NULL) || (pFtsrRegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (GPIO_IRQ_TRIGGER_IS_VALID(trigger) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_GetPinIndexFromPinMask(pin, &pinIndex));
+
+	//! Determine the line mask and set values for the selected EXTI line based on the input trigger selector
+	lineMask = REG_BIT_MASK(pinIndex);
+	risingLineSet = ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_RISING)) != 0x00000000UL) ? lineMask : 0x00000000UL;
+	fallingLineSet = ((((reg) trigger) & ((reg) GPIO_IRQ_TRIGGER_FALLING)) != 0x00000000UL) ? lineMask : 0x00000000UL;
+
+	//! Clear both trigger bits for the selected EXTI line before staging the requested trigger
+	ASSERT_DRIVER_STATUS
+	(
+		Codec_GPIO_IRQ_StageResetTrigger
+		(
+			updatedRtsrRegImage,
+			updatedFtsrRegImage,
+			pin,
+			&updatedRtsrRegImage,
+			&updatedFtsrRegImage
+		)
+	);
+
+	//! Stage requested trigger bits for the selected EXTI line while preserving other lines
+	updatedRtsrRegImage |= risingLineSet;
+	updatedFtsrRegImage |= fallingLineSet;
+
+	//! Update the caller-owned EXTI trigger images
 	*pRtsrRegImage = updatedRtsrRegImage;
 	*pFtsrRegImage = updatedFtsrRegImage;
 	return DRIVER_STATUS_SUCCESS;

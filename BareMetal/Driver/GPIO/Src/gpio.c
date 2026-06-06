@@ -227,6 +227,7 @@ driver_status_t GPIO_SetPinMode
 	// Local Variables
 	gpio_pin_t remainingPins = pinMask;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
+	gpio_pin_mode_t currentMode = GPIO_PIN_MODE_INPUT;
 	gpio_pin_config_t currentConfig = GPIO_PIN_CONFIG_INPUT_ANALOG;
 
 	// Validate Input
@@ -245,7 +246,10 @@ driver_status_t GPIO_SetPinMode
 	{
 		//! Extract lowest pin from pin mask
 		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
-		currentConfig = GPIO_GetPinConfig(GPIOx, currentPin);
+		if (GPIO_GetPinModeConfig(GPIOx, currentPin, &currentMode, &currentConfig) != DRIVER_STATUS_SUCCESS)
+		{
+			return DRIVER_STATUS_ERROR_STATE;
+		}
 		if (GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, currentConfig) == 0x00U)
 		{
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -288,6 +292,7 @@ driver_status_t GPIO_SetPinConfig
 	gpio_pin_t remainingPins = pinMask;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
 	gpio_pin_mode_t currentMode = GPIO_PIN_MODE_INPUT;
+	gpio_pin_config_t currentConfig = GPIO_PIN_CONFIG_INPUT_ANALOG;
 
 	// Validate Input
 	if
@@ -305,7 +310,10 @@ driver_status_t GPIO_SetPinConfig
 	{
 		//! Extract lowest pin from pin mask
 		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
-		currentMode = GPIO_GetPinMode(GPIOx, currentPin);
+		if (GPIO_GetPinModeConfig(GPIOx, currentPin, &currentMode, &currentConfig) != DRIVER_STATUS_SUCCESS)
+		{
+			return DRIVER_STATUS_ERROR_STATE;
+		}
 		if (GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(currentMode, config) == 0x00U)
 		{
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -424,9 +432,6 @@ driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMas
 
 driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
 {
-	// Local Variables
-	reg gpioOdrRegImage = 0x00000000UL;
-
 	// Validate Input
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U))
 	{
@@ -434,9 +439,7 @@ driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMa
 	}
 
 	//! Toggle requires the current latch state, so this API owns the ODR read-modify-write path
-	gpioOdrRegImage = LL_GPIO_ReadODR(GPIOx);
-	gpioOdrRegImage ^= (reg) pinMask;
-	LL_GPIO_WriteODR(GPIOx, gpioOdrRegImage);
+	ASSERT_DRIVER_STATUS(RegOps_Toggle(LL_GPIO_REG(GPIOx, ODR), (reg) pinMask));
 
 	return DRIVER_STATUS_SUCCESS;
 }

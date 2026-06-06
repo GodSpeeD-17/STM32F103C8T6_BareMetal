@@ -131,8 +131,8 @@ Ownership:
   routing-field updates.
 - Stage EXTI trigger images.
 - Reset staged AFIO EXTICR and trigger images.
-- Extract staged AFIO EXTICR route state for a requested `GPIOx` when the
-  driver needs ownership checks.
+- Extract staged AFIO EXTICR route fields back into driver-facing `GPIOx`
+  pointers. Driver layer owns ownership comparison policy.
 
 Rules:
 
@@ -201,11 +201,13 @@ The GPIO IRQ layer has been updated to match the GPIO module architecture:
   `GPIO_IRQ_INPUT_CONFIG_IS_VALID(inputConfig)`.
 - IRQ codec APIs take `gpio_pin_t` single-pin masks when they operate on one
   EXTI line. Codec owns conversion to the EXTI line index internally.
-- AFIO EXTICR register-address selection is owned by
-  `Codec_GPIO_IRQ_GetRoutingRegisterAddress()`.
+- AFIO EXTICR register-address selection is owned by the GPIO IRQ driver layer
+  as a private helper because it selects which hardware register image to read
+  and write.
 - AFIO EXTICR route ownership extraction is owned by
-  `Codec_GPIO_IRQ_ExtractPortRouting()`. Codec owns comparing the extracted
-  raw route with the requested `GPIOx` route.
+  `Codec_GPIO_IRQ_ExtractPortRouting()`. Codec owns decoding the extracted raw
+  route into a driver-facing `GPIOx` pointer, and the driver owns comparing it
+  with the expected port.
 - AFIO EXTICR route staging is owned by
   `Codec_GPIO_IRQ_StagePortRouting()` and
   `Codec_GPIO_IRQ_StageResetPortRouting()`.

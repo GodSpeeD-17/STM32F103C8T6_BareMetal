@@ -44,22 +44,54 @@ extern "C" {
  * @{
  */
 
+// ==================================================================================================== //
+//										GPIO IRQ Port Routing Codecs									//
+// ==================================================================================================== //
+
 /**
- * @brief Returns the AFIO EXTICR routing-register address for one GPIO IRQ line
+ * @brief Extracts one GPIO port route from an AFIO EXTICR image
+ * @param[in] exticrRegImage Caller-owned AFIO EXTICR image containing the selected line route
  * @param[in] pin GPIO single-pin mask
  * Accepted values:
  * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns AFIO EXTICR `.REG` address selected by @p pin
- * @retval - Non-`NULL`: Address of `AFIO->EXTICR1.REG` through `AFIO->EXTICR4.REG`
- * @retval - `NULL`: @p pin was not a single valid pin
- * @note This API returns a register address so the driver can use generic
- * LL register read/write helpers instead of index-specific switch wrappers.
- * @note Routing register selection is derived as:
- * `GPIO_PinMaskToIndex(pin) >> 2U`, so pins `0..3` map to `EXTICR1`,
- * `4..7` map to `EXTICR2`, `8..11` map to `EXTICR3`, and `12..15`
- * map to `EXTICR4`.
+ * @param[out] pGPIOx Destination for the routed GPIO peripheral instance
+ * Expected values:
+ * - Non-`NULL`: Extracted route is written to @p pGPIOx
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO EXTICR route was extracted successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pGPIOx was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was invalid or the raw route was unsupported.
+ * @details This is the extraction counterpart of
+ * @ref `Codec_GPIO_IRQ_StagePortRouting`. It decodes the selected EXTICR field
+ * back into the driver-facing `GPIOx` pointer.
  */
-_IO* Codec_GPIO_IRQ_GetRoutingRegisterAddress(const gpio_pin_t pin);
+driver_status_t Codec_GPIO_IRQ_ExtractPortRouting
+(
+	const reg					exticrRegImage,
+	const gpio_pin_t			pin,
+	GPIO_TypeDef** const		pGPIOx
+);
+
+/**
+ * @brief Stages reset routing for one AFIO EXTICR route inside a register image
+ * @param[in] exticrRegImage Caller-owned AFIO EXTICR image before replacement
+ * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * @param[out] pExticrRegImage Destination for the updated AFIO EXTICR image
+ * Expected values:
+ * - Non-`NULL`: Updated image is written to @p pExticrRegImage
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO EXTICR reset routing image was staged successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pExticrRegImage was a null pointer.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was not a single valid pin.
+ */
+driver_status_t Codec_GPIO_IRQ_StageResetPortRouting
+(
+	const reg					exticrRegImage,
+	const gpio_pin_t			pin,
+	reg* const					pExticrRegImage
+);
 
 /**
  * @brief Stages one GPIO port route inside an AFIO EXTICR image
@@ -86,83 +118,9 @@ driver_status_t Codec_GPIO_IRQ_StagePortRouting
 	reg* const					pExticrRegImage
 );
 
-/**
- * @brief Extracts whether one AFIO EXTICR route matches the requested GPIO port
- * @param[in] exticrRegImage Caller-owned AFIO EXTICR image containing the selected line route
- * @param[in] GPIOx GPIO peripheral instance expected to own the selected EXTI line
- * Accepted values:
- * - @ref `GPIOA` through @ref `GPIOG`
- * @param[in] pin GPIO single-pin mask
- * Accepted values:
- * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @param[out] pRouteState Destination for route-match state
- * Expected values:
- * - Non-`NULL`: @ref `DRIVER_STATUS_ON` is written when the route matches @p GPIOx;
- *   @ref `DRIVER_STATUS_OFF` is written otherwise
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO EXTICR route state was extracted successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRouteState was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- */
-driver_status_t Codec_GPIO_IRQ_ExtractPortRouting
-(
-	const reg					exticrRegImage,
-	GPIO_TypeDef* const			GPIOx,
-	const gpio_pin_t			pin,
-	driver_status_t* const		pRouteState
-);
-
-/**
- * @brief Stages reset routing for one AFIO EXTICR route inside a register image
- * @param[in] exticrRegImage Caller-owned AFIO EXTICR image before replacement
- * @param[in] pin GPIO single-pin mask
- * Accepted values:
- * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @param[out] pExticrRegImage Destination for the updated AFIO EXTICR image
- * Expected values:
- * - Non-`NULL`: Updated image is written to @p pExticrRegImage
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO EXTICR reset routing image was staged successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pExticrRegImage was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin was not a single valid pin.
- */
-driver_status_t Codec_GPIO_IRQ_StageResetPortRouting
-(
-	const reg					exticrRegImage,
-	const gpio_pin_t			pin,
-	reg* const					pExticrRegImage
-);
-
-/**
- * @brief Stages EXTI rising and falling trigger images for one GPIO IRQ line
- * @param[in] rtsrRegImage Caller-owned EXTI RTSR image before replacement
- * @param[in] ftsrRegImage Caller-owned EXTI FTSR image before replacement
- * @param[in] pin GPIO single-pin mask
- * Accepted values:
- * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @param[in] trigger Driver EXTI trigger selector
- * Accepted values:
- * - @ref `GPIO_IRQ_TRIGGER_FALLING`
- * - @ref `GPIO_IRQ_TRIGGER_RISING`
- * - @ref `GPIO_IRQ_TRIGGER_BOTH`
- * @param[out] pRtsrRegImage Destination for the updated EXTI RTSR image
- * @param[out] pFtsrRegImage Destination for the updated EXTI FTSR image
- * Expected values:
- * - Non-`NULL`: Updated images are written to @p pRtsrRegImage and @p pFtsrRegImage
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Trigger images were staged successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p trigger was invalid.
- */
-driver_status_t Codec_GPIO_IRQ_StageTrigger
-(
-	const reg					rtsrRegImage,
-	const reg					ftsrRegImage,
-	const gpio_pin_t			pin,
-	const gpio_irq_trigger_t		trigger,
-	reg* const					pRtsrRegImage,
-	reg* const					pFtsrRegImage
-);
+// ==================================================================================================== //
+//										GPIO IRQ Trigger Codecs											//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts one GPIO IRQ trigger selector from EXTI trigger images
@@ -209,6 +167,37 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 	const reg					rtsrRegImage,
 	const reg					ftsrRegImage,
 	const gpio_pin_t			pin,
+	reg* const					pRtsrRegImage,
+	reg* const					pFtsrRegImage
+);
+
+/**
+ * @brief Stages EXTI rising and falling trigger images for one GPIO IRQ line
+ * @param[in] rtsrRegImage Caller-owned EXTI RTSR image before replacement
+ * @param[in] ftsrRegImage Caller-owned EXTI FTSR image before replacement
+ * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * @param[in] trigger Driver EXTI trigger selector
+ * Accepted values:
+ * - @ref `GPIO_IRQ_TRIGGER_FALLING`
+ * - @ref `GPIO_IRQ_TRIGGER_RISING`
+ * - @ref `GPIO_IRQ_TRIGGER_BOTH`
+ * @param[out] pRtsrRegImage Destination for the updated EXTI RTSR image
+ * @param[out] pFtsrRegImage Destination for the updated EXTI FTSR image
+ * Expected values:
+ * - Non-`NULL`: Updated images are written to @p pRtsrRegImage and @p pFtsrRegImage
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Trigger images were staged successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more staged-image pointers were null.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin or @p trigger was invalid.
+ */
+driver_status_t Codec_GPIO_IRQ_StageTrigger
+(
+	const reg					rtsrRegImage,
+	const reg					ftsrRegImage,
+	const gpio_pin_t			pin,
+	const gpio_irq_trigger_t	trigger,
 	reg* const					pRtsrRegImage,
 	reg* const					pFtsrRegImage
 );

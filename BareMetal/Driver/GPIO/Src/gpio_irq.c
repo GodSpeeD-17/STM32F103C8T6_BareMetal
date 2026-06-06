@@ -24,6 +24,8 @@
 
 /** @brief Number of AFIO EXTICR register images used for EXTI0..EXTI15 routing @def GPIO_IRQ_AFIO_EXTICR_COUNT */
 #define GPIO_IRQ_AFIO_EXTICR_COUNT						((uint8_t) 0x04U)
+/** @brief Pin-index shift used to select EXTICR register index @def GPIO_IRQ_EXTICR_REG_INDEX_SHIFT */
+#define GPIO_IRQ_EXTICR_REG_INDEX_SHIFT					((uint8_t) 0x02U)
 /** @brief Shared NVIC line mask for EXTI5..EXTI9 @def GPIO_IRQ_GROUP_05_09_MASK */
 #define GPIO_IRQ_GROUP_05_09_MASK						((reg) 0x000003E0UL)
 /** @brief Shared NVIC line mask for EXTI10..EXTI15 @def GPIO_IRQ_GROUP_10_15_MASK */
@@ -34,8 +36,60 @@
 // ==================================================================================================== //
 
 /**
+ * @brief Returns the AFIO EXTICR routing-register address for one GPIO IRQ line
+ * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
+ * @returns AFIO EXTICR `.REG` address selected by @p pin
+ * @retval - Non-`NULL`: Address of `AFIO->EXTICR1.REG` through `AFIO->EXTICR4.REG`
+ * @retval - `NULL`: @p pin was not a single valid pin
+ * @note Routing register selection is derived as:
+ * `GPIO_PinMaskToIndex(pin) >> 2U`, so pins `0..3` map to `EXTICR1`,
+ * `4..7` map to `EXTICR2`, `8..11` map to `EXTICR3`, and `12..15`
+ * map to `EXTICR4`.
+ */
+static _IO* _GPIO_IRQ_GetRoutingRegisterAddress(const gpio_pin_t pin)
+{
+	// Local Variables
+	const gpio_pin_index_t pinIndex = GPIO_PinMaskToIndex(pin);
+	uint8_t exticrIndex = 0x00U;
+
+	// Validate Input
+	if (pinIndex == GPIO_PIN_INDEX_INVALID)
+	{
+		return NULL;
+	}
+
+	//! EXTICR register group is selected by pinIndex / 4, i.e. pinIndex >> 2U
+	exticrIndex = (uint8_t) (pinIndex >> GPIO_IRQ_EXTICR_REG_INDEX_SHIFT);
+	switch(exticrIndex)
+	{
+		case 0x00U:
+		{
+			return LL_GPIO_IRQ_AFIO_REG(EXTICR1);
+		}
+		case 0x01U:
+		{
+			return LL_GPIO_IRQ_AFIO_REG(EXTICR2);
+		}
+		case 0x02U:
+		{
+			return LL_GPIO_IRQ_AFIO_REG(EXTICR3);
+		}
+		case 0x03U:
+		{
+			return LL_GPIO_IRQ_AFIO_REG(EXTICR4);
+		}
+		default:
+		{
+			return NULL;
+		}
+	}
+}
+
+/**
  * @brief Resolves the local EXTICR image slot for one AFIO EXTICR register address
- * @param[in] pExticrRegister AFIO EXTICR `.REG` address returned by GPIO IRQ Codec
+ * @param[in] pExticrRegister AFIO EXTICR `.REG` address returned by the local routing-register helper
  * @param[in] pExticrRegisterTable Local table of AFIO EXTICR register addresses
  * @param[out] pRegIndex Destination for the local EXTICR image slot index
  * @returns Driver operation status
@@ -203,6 +257,7 @@ driver_status_t GPIO_IRQ_Init
 	_IO* pExticrRegister = NULL;
 	uint8_t exticrReadStatus = 0x00U;
 	uint8_t exticrUpdateStatus = 0x00U;
+	uint8_t exticrStatusMask = 0x00U;
 	uint8_t regIndex = 0x00U;
 
 	if
@@ -222,7 +277,8 @@ driver_status_t GPIO_IRQ_Init
 	extiImrRegImage = originalExtiImrRegImage;
 	if ((originalExtiImrRegImage & ((reg) pinMask)) != 0x00000000UL)
 	{
-		LL_GPIO_IRQ_WriteIMR(originalExtiImrRegImage & ~((reg) pinMask));
+		extiImrRegImage = RegOps_StageField(originalExtiImrRegImage, (reg) pinMask, 0x00000000UL);
+		LL_GPIO_IRQ_WriteIMR(extiImrRegImage);
 	}
 
 	status = GPIO_SetPinModeConfig(GPIOx, pinMask, GPIO_PIN_MODE_INPUT, inputConfig);
@@ -238,16 +294,17 @@ driver_status_t GPIO_IRQ_Init
 	{
 		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
 
-		pExticrRegister = Codec_GPIO_IRQ_GetRoutingRegisterAddress(currentPin);
+		pExticrRegister = _GPIO_IRQ_GetRoutingRegisterAddress(currentPin);
 		if (pExticrRegister == NULL)
 		{
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 		ASSERT_DRIVER_STATUS(_GPIO_IRQ_GetRoutingRegisterImageIndex(pExticrRegister, pAfioExticrRegister, &regIndex));
-		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
+		exticrStatusMask = (uint8_t) REG_BIT_MASK(regIndex);
+		if ((exticrReadStatus & exticrStatusMask) == 0x00U)
 		{
 			afioExticrRegImage[regIndex] = LL_GPIO_IRQ_ReadRegister(pExticrRegister);
-			exticrReadStatus |= (uint8_t) (0x01U << regIndex);
+			exticrReadStatus |= exticrStatusMask;
 		}
 
 		ASSERT_DRIVER_STATUS
@@ -273,14 +330,14 @@ driver_status_t GPIO_IRQ_Init
 			)
 		);
 
-		exticrUpdateStatus |= (uint8_t) (0x01U << regIndex);
-		extiImrRegImage |= (reg) currentPin;
+		exticrUpdateStatus |= exticrStatusMask;
+		extiImrRegImage = RegOps_StageField(extiImrRegImage, (reg) currentPin, (reg) currentPin);
 		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
 	for (regIndex = 0x00U; regIndex < GPIO_IRQ_AFIO_EXTICR_COUNT; ++regIndex)
 	{
-		if ((exticrUpdateStatus & (uint8_t) (0x01U << regIndex)) != 0x00U)
+		if ((exticrUpdateStatus & (uint8_t) REG_BIT_MASK(regIndex)) != 0x00U)
 		{
 			LL_GPIO_IRQ_WriteRegister(pAfioExticrRegister[regIndex], afioExticrRegImage[regIndex]);
 		}
@@ -312,9 +369,10 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 	gpio_pin_t remainingPins = pinMask;
 	gpio_pin_t currentPin = GPIO_PIN_NONE;
 	_IO* pExticrRegister = NULL;
-	driver_status_t routeState = DRIVER_STATUS_OFF;
+	GPIO_TypeDef* routedGPIOx = NULL;
 	uint8_t exticrReadStatus = 0x00U;
 	uint8_t exticrUpdateStatus = 0x00U;
+	uint8_t exticrStatusMask = 0x00U;
 	uint8_t regIndex = 0x00U;
 
 	if ((GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U))
@@ -324,7 +382,7 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 
 	ASSERT_DRIVER_STATUS(LL_GPIO_IRQ_EnableAFIOClock());
 	originalExtiImrRegImage = LL_GPIO_IRQ_ReadIMR();
-	extiImrRegImage = originalExtiImrRegImage & ~((reg) pinMask);
+	extiImrRegImage = RegOps_StageField(originalExtiImrRegImage, (reg) pinMask, 0x00000000UL);
 	LL_GPIO_IRQ_WriteIMR(extiImrRegImage);
 	extiRtsrRegImage = LL_GPIO_IRQ_ReadRTSR();
 	extiFtsrRegImage = LL_GPIO_IRQ_ReadFTSR();
@@ -333,20 +391,21 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 	{
 		currentPin = GPIO_PinMaskExtractLowestPin(remainingPins);
 
-		pExticrRegister = Codec_GPIO_IRQ_GetRoutingRegisterAddress(currentPin);
+		pExticrRegister = _GPIO_IRQ_GetRoutingRegisterAddress(currentPin);
 		if (pExticrRegister == NULL)
 		{
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 		ASSERT_DRIVER_STATUS(_GPIO_IRQ_GetRoutingRegisterImageIndex(pExticrRegister, pAfioExticrRegister, &regIndex));
-		if ((exticrReadStatus & (uint8_t) (0x01U << regIndex)) == 0x00U)
+		exticrStatusMask = (uint8_t) REG_BIT_MASK(regIndex);
+		if ((exticrReadStatus & exticrStatusMask) == 0x00U)
 		{
 			afioExticrRegImage[regIndex] = LL_GPIO_IRQ_ReadRegister(pExticrRegister);
-			exticrReadStatus |= (uint8_t) (0x01U << regIndex);
+			exticrReadStatus |= exticrStatusMask;
 		}
 
-		ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_ExtractPortRouting(afioExticrRegImage[regIndex], GPIOx, currentPin, &routeState));
-		if (routeState != DRIVER_STATUS_ON)
+		ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_ExtractPortRouting(afioExticrRegImage[regIndex], currentPin, &routedGPIOx));
+		if (routedGPIOx != GPIOx)
 		{
 			LL_GPIO_IRQ_WriteIMR(originalExtiImrRegImage);
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -373,13 +432,13 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 			)
 		);
 
-		exticrUpdateStatus |= (uint8_t) (0x01U << regIndex);
+		exticrUpdateStatus |= exticrStatusMask;
 		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
 	for (regIndex = 0x00U; regIndex < GPIO_IRQ_AFIO_EXTICR_COUNT; ++regIndex)
 	{
-		if ((exticrUpdateStatus & (uint8_t) (0x01U << regIndex)) != 0x00U)
+		if ((exticrUpdateStatus & (uint8_t) REG_BIT_MASK(regIndex)) != 0x00U)
 		{
 			LL_GPIO_IRQ_WriteRegister(pAfioExticrRegister[regIndex], afioExticrRegImage[regIndex]);
 		}
