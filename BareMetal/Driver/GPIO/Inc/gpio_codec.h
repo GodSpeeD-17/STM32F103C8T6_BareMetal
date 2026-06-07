@@ -64,7 +64,7 @@ driver_status_t Codec_GPIO_ExtractPinConfigMode
 	const reg					crxRegImage,
 	const reg					odrRegImage,
 	const gpio_pin_t			pin,
-	gpio_pin_config_t* const		pConfig,
+	gpio_pin_config_t* const	pConfig,
 	gpio_pin_mode_t* const		pMode
 );
 

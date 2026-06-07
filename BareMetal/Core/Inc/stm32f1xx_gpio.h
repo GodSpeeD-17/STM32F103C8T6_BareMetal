@@ -8,15 +8,15 @@
 #ifndef STM32F1XX_GPIO_H_
 #define STM32F1XX_GPIO_H_
 
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "stm32f1xx_utils.h"
+
 // --- C++ Safeguards ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-// ------------------------------------------------------------------------------------------
-// Includes
-// ------------------------------------------------------------------------------------------
-#include "stm32f1xx_utils.h"
 
 /**
  * @defgroup GPIO General Purpose Input/Output (GPIO)
@@ -1418,23 +1418,23 @@ typedef volatile struct _GPIO_TypeDef
 		const _IO REG;
 		struct
 		{
-			volatile const uint32_t IDR0 : 1;
-			volatile const uint32_t IDR1 : 1;
-			volatile const uint32_t IDR2 : 1;
-			volatile const uint32_t IDR3 : 1;
-			volatile const uint32_t IDR4 : 1;
-			volatile const uint32_t IDR5 : 1;
-			volatile const uint32_t IDR6 : 1;
-			volatile const uint32_t IDR7 : 1;
-			volatile const uint32_t IDR8 : 1;
-			volatile const uint32_t IDR9 : 1;
-			volatile const uint32_t IDR10 : 1;
-			volatile const uint32_t IDR11 : 1;
-			volatile const uint32_t IDR12 : 1;
-			volatile const uint32_t IDR13 : 1;
-			volatile const uint32_t IDR14 : 1;
-			volatile const uint32_t IDR15 : 1;
-			volatile const uint32_t RESERVED_IDR : 16;
+			_I IDR0 : 1;
+			_I IDR1 : 1;
+			_I IDR2 : 1;
+			_I IDR3 : 1;
+			_I IDR4 : 1;
+			_I IDR5 : 1;
+			_I IDR6 : 1;
+			_I IDR7 : 1;
+			_I IDR8 : 1;
+			_I IDR9 : 1;
+			_I IDR10 : 1;
+			_I IDR11 : 1;
+			_I IDR12 : 1;
+			_I IDR13 : 1;
+			_I IDR14 : 1;
+			_I IDR15 : 1;
+			_I RESERVED_IDR : 16;
 		} BIT;
 	} IDR;
 
