@@ -1,197 +1,307 @@
-/***************************************************************************************
- *  File: nvic.h
- *  Modified on:04-10-2025
- * 	Created on: 17/11/2024
- *  Author: Shrey Shah
- *  Version: v1.1
- *  Logs: Added Priority Configuration Functions
- * 
- * PREREQUISITES:
- * 1. Understanding of ARM Cortex-M Exception Model:
- *    - Exceptions: System exceptions (internal) + Interrupts (external)  
- *    - Exception Numbers: 1-15 (system), 16+ (external IRQs)
- *    - Priority: Lower number = Higher priority (0 = highest, 255 = lowest)
+/**
+ * @file	nvic.h
+ * @author	Shrey Shah
+ * @brief	NVIC Driver Interface
+ * @version	v2.0
+ * @date	06-06-2026
  *
- * 2. Priority Grouping Concept:
- *    - 8-bit priority field split into Preemption Priority + Sub-priority
- *    - Preemption: Higher priority can interrupt lower priority
- *    - Sub-priority: Used when same preemption level, no interruption
- *    
- * 3. Priority Group Configuration (`AIRCR.PRIGROUP`):
- * 		┌─────────────────┬──────────────┬──────────────┬─────────────────────┐
- * 		│ Group      	  │ Preempt Bits │ Sub Bits     │ Total Levels        │
- * 		├─────────────────┼──────────────┼──────────────┼─────────────────────┤
- * 		│ NVIC_GROUP_0    │ 0 (1 level)  │ 4 (16 levels)│ Cooperative         │
- * 		│ NVIC_GROUP_1    │ 1 (2 levels) │ 3 (8 levels) │ Basic 2-tier        │
- * 		│ NVIC_GROUP_2    │ 2 (4 levels) │ 2 (4 levels) │ Balanced (DEFAULT)  │
- * 		│ NVIC_GROUP_3    │ 3 (8 levels) │ 1 (2 levels) │ Complex RTOS        │
- * 		│ NVIC_GROUP_4    │ 4 (16 levels)│ 0 (1 level)  │ Hard Real-time      │
- * 		└─────────────────┴──────────────┴──────────────┴─────────────────────┘
+ * @details
+ * This header implements the Cortex-M3 NVIC driver as static inline functions.
+ * It owns direct NVIC and SCB register access for external IRQ enable/disable,
+ * software pending, priority field staging, and AIRCR priority grouping.
  *
- * 4. Priority Register Layout:
- *    - IPR0-IPR59: Each holds 4 interrupt priorities (8 bits each)
- *	  - MEMORY LAYOUT OF IPR REGISTERS:
- *	     IPR[0] = | PRI_3[31:24] | PRI_2[23:16] | PRI_1[15:8] | PRI_0[7:0] |
- *	     IPR[1] = | PRI_7[31:24] | PRI_6[23:16] | PRI_5[15:8] | PRI_4[7:0] |
- *	     Each IPR register contains 4 priority fields of 8 bits each
- *    - IPR index calculation: IRQn / 4 :: IRQn >> 2
- *    - Byte offset: (IRQn % 4) * 8 :: ((IRQn >> 2) << 3)
+ * Practical model:
+ * - Lower numerical priority values have higher interrupt priority.
+ * - STM32F1 implements four priority bits inside each 8-bit IPR field.
+ * - @ref `NVIC_SetPriority` writes a raw 8-bit IPR field image.
+ * - @ref `NVIC_ConfigPriority` accepts logical preemption/sub-priority values
+ *   and packs them according to the current priority grouping.
  *
- * 5. AIRCR Register Key Protection:
- *    - VECTKEY (0x05FA) must be written to bits 31:16 for any write to succeed
- *    - Prevents accidental modification of critical system settings
- *
- * 6. Endianness Control:
- *    - Bit 15 of AIRCR controls data endianness
- *    - 0 = Little-endian (default), 1 = Big-endian
- *    - Most Cortex-M implementations are little-endian only
- *
- * EXAMPLE SCENARIOS:
- * 
- * Scenario 1: Group 2 Configuration (2+2 bits)
- *   Priority Value: 0b10100101 = 0xA5
- *   Preemption: 0b10 (2), Sub-priority: 0b01 (1)
- *   Interrupts with same preemption won't interrupt each other
- *   Higher preemption (0,1) can interrupt preemption level 2
- *
- * Scenario 2: Nested Interrupt Behavior
- *	|- IRQ A: Preempt=1, Sub=0 (running)
- *	|- IRQ B: Preempt=0, Sub=3 (arrives) → INTERRUPTS (higher preempt)
- *	|- IRQ C: Preempt=1, Sub=1 (arrives) → WAITS (same preempt level)
- *
- * IMPORTANT NOTES:
- * - Reset default: Priority Group 0 (all bits as sub-priority)
- * - System exceptions (SysTick, PendSV) use separate priority registers (SHPRx)
- * - Some implementations may not support all 8 priority bits (check device manual)
- * - Priority 0 is typically reserved for critical system functions
- * - When to Use Which Group:
- *	|- Group 0: Simple applications, no critical timing
- *	|- Group 2: Most common - balanced preemption control
- *	|- Group 4: Hard real-time, medical devices, aviation
- * - Key Takeaways:
- *	|- Priority Group = "How many levels of each do I have?"
- *	|- Preemption Priority = "Can this interrupt stop others?"
- *	|- Sub-priority = "Who goes first when equal preemption?"
- * In practice, 95% of embedded systems use Group 2 because it provides 
- * the right balance of responsiveness and simplicity
- ***************************************************************************************/
+ * Authority:
+ * - `nvic_data_types.h` owns NVIC scalar aliases.
+ * - `nvic_defines.h` owns IRQ numbers, priority selectors, and helper macros.
+ * - `nvic.h` owns direct NVIC/SCB register operations.
+ */
 
-// ---- Header Guards ---- // 
 #ifndef NVIC_H_
 #define NVIC_H_
 
-// ---- Main Library ---- //
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
 #include "stm32f1xx.h"
-#include "nvic_types.h"
+#include "nvic_defines.h"
 
-
-
-
-
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
- * @brief Set the priority grouping using bit manipulation only
- * @param PriorityGroup Priority grouping field (0-4)
+ * @addtogroup NVIC_Driver
+ * @{
  */
-__STATIC_FORCEINLINE void NVIC_SetPriorityGrouping(priority_group_t priorityGroup)
+
+// ==================================================================================================== //
+//											Local NVIC Helpers											//
+// ==================================================================================================== //
+
+/**
+ * @brief Builds the NVIC register bit mask for one external IRQ number
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns Register-local IRQ bit mask
+ * @retval - `0x00000001UL..0x80000000UL`: Mask for @p IRQn inside its NVIC register
+ * @note Caller owns IRQ number validation.
+ */
+__STATIC_FORCEINLINE uint32_t _NVIC_GetIRQBitMask(const irq_t IRQn)
 {
-	uint32_t reg = SCB->AIRCR;
-	// Writing to this register requires 0x5FA in the VECTKEY field
-	// Otherwise the write value is ignored
-	reg &= ~(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk);
-	reg |= ((SCB_AICR_WRITE_VALUE << SCB_AIRCR_VECTKEY_Pos) | (priorityGroup & 0x07) << SCB_AIRCR_PRIGROUP_Pos);
-	SCB->AIRCR = reg;
+	//! Convert IRQn to a local bit position inside the selected 32-bit NVIC register
+	return REG_BIT_MASK(NVIC_IRQ_GET_LOCAL_BIT_POS(IRQn));
 }
 
 /**
- * @brief Get the current priority grouping
- * @return Current priority grouping (0-4)
+ * @brief Packs logical preemption/sub-priority values into one raw NVIC priority field
+ * @param[in] preemptPriority Logical preemption priority selector
+ * @param[in] subPriority Logical sub-priority selector
+ * @param[in] priorityGroup Logical priority group selector
+ * @returns Raw 8-bit NVIC IPR priority field image
+ * @retval - `0x00U..0xF0U`: Priority value aligned to implemented STM32F1 priority bits
+ * @note Only the upper four bits of the returned 8-bit field are implemented
+ * by STM32F1 Cortex-M3 hardware.
  */
-__STATIC_FORCEINLINE priority_group_t NVIC_GetPriorityGrouping(void)
+__STATIC_FORCEINLINE nvic_priority_t _NVIC_BuildPriorityField
+(
+	const nvic_priority_t			preemptPriority,
+	const nvic_sub_priority_t		subPriority,
+	const nvic_priority_group_t		priorityGroup
+)
 {
-	uint32_t reg = SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk;
-	reg >>= SCB_AIRCR_PRIGROUP_Pos;
-	return ((priority_group_t) reg);
+	// Local Variables
+	const uint8_t preemptBits = (uint8_t) priorityGroup;
+	const uint8_t subBits = (uint8_t) (NVIC_PRIORITY_IMPLEMENTED_BITS - preemptBits);
+	const uint8_t preemptMask = (preemptBits == 0x00U) ? 0x00U : (uint8_t) ((0x01U << preemptBits) - 0x01U);
+	const uint8_t subMask = (subBits == 0x00U) ? 0x00U : (uint8_t) ((0x01U << subBits) - 0x01U);
+	uint8_t priorityNibble = 0x00U;
+
+	//! Pack preemption priority into the upper part of the implemented four-bit priority field
+	priorityNibble = (uint8_t) ((((uint8_t) preemptPriority) & preemptMask) << subBits);
+	//! Pack sub-priority into the lower part of the implemented four-bit priority field
+	priorityNibble |= (uint8_t) (((uint8_t) subPriority) & subMask);
+
+	//! Align implemented STM32F1 priority bits to the upper nibble of the 8-bit IPR field
+	return (nvic_priority_t) (priorityNibble << NVIC_PRIORITY_UNIMPLEMENTED_BITS);
+}
+
+// ==================================================================================================== //
+//										SCB Priority Group APIs											//
+// ==================================================================================================== //
+
+/**
+ * @brief Sets the NVIC priority grouping in `SCB->AIRCR`
+ * @param[in] priorityGroup Logical priority group selector
+ * Accepted values:
+ * - @ref `NVIC_PRIO_GROUP_0`
+ * - @ref `NVIC_PRIO_GROUP_1`
+ * - @ref `NVIC_PRIO_GROUP_2`
+ * - @ref `NVIC_PRIO_GROUP_3`
+ * - @ref `NVIC_PRIO_GROUP_4`
+ * @returns Void.
+ * @note `AIRCR` writes require @ref `SCB_AIRCR_WRITE_KEY` in `VECTKEY`.
+ * @note This function preserves all `AIRCR` bits except `VECTKEY` and `PRIGROUP`.
+ */
+__STATIC_FORCEINLINE void NVIC_SetPriorityGrouping(const nvic_priority_group_t priorityGroup)
+{
+	// Local Variables
+	uint32_t aircrRegImage = SCB->AIRCR;
+	const nvic_priority_group_t aircrPriorityGroup = NVIC_PRIO_GROUP_TO_AIRCR(priorityGroup);
+
+	//! Clear the read-only VECTKEYSTAT image and the existing priority-group field
+	aircrRegImage &= ~(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk);
+	//! Write the required AIRCR key and the raw PRIGROUP field
+	aircrRegImage |= REG_FIELD_VALUE(SCB_AIRCR_VECTKEY_Pos, SCB_AIRCR_WRITE_KEY);
+	aircrRegImage |= REG_FIELD_VALUE(SCB_AIRCR_PRIGROUP_Pos, aircrPriorityGroup);
+
+	SCB->AIRCR = aircrRegImage;
 }
 
 /**
- * @brief Quick enable for common system exceptions
- * @param Exception: System exception number
+ * @brief Gets the current logical NVIC priority grouping
+ * @returns Logical priority group selector
+ * @retval - @ref `NVIC_PRIO_GROUP_0`
+ * @retval - @ref `NVIC_PRIO_GROUP_1`
+ * @retval - @ref `NVIC_PRIO_GROUP_2`
+ * @retval - @ref `NVIC_PRIO_GROUP_3`
+ * @retval - @ref `NVIC_PRIO_GROUP_4`
  */
-__STATIC_FORCEINLINE void SCB_EnableException(scb_exception_t exception)
+__STATIC_FORCEINLINE nvic_priority_group_t NVIC_GetPriorityGrouping(void)
 {
-	// Enable system exceptions via SHCSR
+	// Local Variable
+	nvic_priority_group_t aircrPriorityGroup = (nvic_priority_group_t) 0x00U;
+	//! Extract the raw AIRCR PRIGROUP field and convert it to the logical driver selector
+	aircrPriorityGroup = (nvic_priority_group_t) ((SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos);
+	return NVIC_AIRCR_TO_PRIO_GROUP(aircrPriorityGroup);
+}
+
+/**
+ * @brief Enables one configurable SCB system exception
+ * @param[in] exception SCB `SHCSR` exception enable bit mask
+ * Accepted values:
+ * - @ref `SCB_SHCSR_MEMFAULTENA_Msk`
+ * - @ref `SCB_SHCSR_BUSFAULTENA_Msk`
+ * - @ref `SCB_SHCSR_USGFAULTENA_Msk`
+ * @returns Void.
+ * @note This function only sets bits in `SCB->SHCSR`; it does not configure
+ * exception priority.
+ */
+__STATIC_FORCEINLINE void SCB_EnableException(const scb_exception_t exception)
+{
+	//! Enable the requested configurable system exception bit(s)
 	SCB->SHCSR |= exception;
 }
 
+// ==================================================================================================== //
+//										NVIC Priority APIs												//
+// ==================================================================================================== //
+
 /**
- * @brief Get the current priority of an interrupt
- * @param IRQn Interrupt number
- * @return Current priority value (0-255)
+ * @brief Gets the raw 8-bit priority field for one external IRQ
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns Raw NVIC IPR priority field image
+ * @retval - `0x00U..0xFFU`: Right-aligned 8-bit priority field
+ * @note On STM32F1 only the upper four bits of this field are implemented.
  */
-__STATIC_FORCEINLINE priority_t NVIC_GetPriority(const irq_t IRQn)
+__STATIC_FORCEINLINE nvic_priority_t NVIC_GetPriority(const irq_t IRQn)
 {
-	uint32_t reg = NVIC->IPR[_IRQn_GET_IPR_REG(IRQn)];
-	reg >>= _IRQn_GET_IPR_REG_INDEX(IRQn);
-	reg &= 0xFF;
-	return ((priority_t) reg);
+	// Local Variables
+	uint32_t iprRegImage = NVIC->IPR[_NVIC_IRQn_GET_IPR_REG(IRQn)];
+
+	//! Shift the selected 8-bit priority field down to bit 0 and mask unrelated fields
+	iprRegImage >>= _NVIC_IRQn_GET_IPR_REG_INDEX(IRQn);
+	iprRegImage &= NVIC_PRIORITY_FIELD_MASK;
+
+	return (nvic_priority_t) iprRegImage;
 }
 
 /**
- * @brief Set the priority for an interrupt
- * @param IRQn Interrupt number
- * @param priority Priority value 
- * @note - `priority` permissible Values: 0 - 255 
- * @note - Lower Value implies higher priority
+ * @brief Sets the raw 8-bit priority field for one external IRQ
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @param[in] priority Raw NVIC IPR priority field image
+ * Accepted values:
+ * - `0x00U..0xFFU`
+ * @returns Void.
+ * @note Lower numerical priority values have higher effective priority.
+ * @note On STM32F1 only the upper four bits of @p priority are implemented.
  */
-__STATIC_FORCEINLINE void NVIC_SetPriority(const irq_t IRQn, const priority_t priority)
+__STATIC_FORCEINLINE void NVIC_SetPriority(const irq_t IRQn, const nvic_priority_t priority)
 {
-	uint32_t reg = NVIC->IPR[_IRQn_GET_IPR_REG(IRQn)];
-	reg &= ~(0xFF << _IRQn_GET_IPR_REG_INDEX(IRQn));
-	reg |= (priority & 0xFF) << _IRQn_GET_IPR_REG_INDEX(IRQn);
-	NVIC->IPR[_IRQn_GET_IPR_REG(IRQn)] = reg;
+	// Local Variables
+	const uint8_t iprRegIndex = _NVIC_IRQn_GET_IPR_REG(IRQn);
+	const uint8_t priorityFieldPos = _NVIC_IRQn_GET_IPR_REG_INDEX(IRQn);
+	uint32_t iprRegImage = NVIC->IPR[iprRegIndex];
+
+	//! Replace only the selected IRQ priority field inside the IPR register image
+	iprRegImage = RegOps_StageFieldValue
+	(
+		iprRegImage,
+		priorityFieldPos,
+		priority,
+		NVIC_PRIORITY_FIELD_WIDTH
+	);
+
+	NVIC->IPR[iprRegIndex] = iprRegImage;
 }
 
 /**
- * @brief Set priority with preemption and sub-priority
- * @param IRQn Interrupt number
- * @param PreemptPriority Preemption priority (0-15)
- * @param SubPriority Sub-priority (0-15) 
- * @param PriorityGroup Priority grouping (0-4)
+ * @brief Configures one IRQ priority from logical preemption and sub-priority selectors
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @param[in] priority Logical preemption priority selector
+ * Accepted values:
+ * - `0U..15U`; effective range depends on current priority grouping
+ * @param[in] subPriority Logical sub-priority selector
+ * Accepted values:
+ * - @ref `NVIC_SUB_PRIO_0` through @ref `NVIC_SUB_PRIO_15`; effective range
+ * depends on current priority grouping
+ * @returns Void.
+ * @details
+ * The current priority group decides how the four implemented STM32F1 priority
+ * bits split between preemption priority and sub-priority. Values outside the
+ * effective bit width are masked.
  */
-__STATIC_FORCEINLINE void NVIC_ConfigPriority(irq_t IRQn, priority_t priority, sub_priority_t subPriority)
+__STATIC_FORCEINLINE void NVIC_ConfigPriority
+(
+	const irq_t					IRQn,
+	const nvic_priority_t		priority,
+	const nvic_sub_priority_t	subPriority
+)
 {
-	priority_t priorityGroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(IRQn, (uint8_t) ((priority << (4 + priorityGroup)) | (subPriority << (4 - priorityGroup))));
+	// Local Variables
+	const nvic_priority_group_t priorityGroup = NVIC_GetPriorityGrouping();
+	const nvic_priority_t priorityField = _NVIC_BuildPriorityField(priority, subPriority, priorityGroup);
+	NVIC_SetPriority(IRQn, priorityField);
+}
+
+// ==================================================================================================== //
+//										NVIC IRQ State APIs												//
+// ==================================================================================================== //
+
+/**
+ * @brief Enables one external IRQ in NVIC
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns Void.
+ * @note This writes the corresponding `ISER` bit. It does not configure
+ * peripheral-side interrupt masks or pending flags.
+ */
+__STATIC_FORCEINLINE void NVIC_IRQ_Enable(const irq_t IRQn)
+{
+	//! Write-one-to-set the selected interrupt enable bit
+	NVIC->ISER[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
 }
 
 /**
- * @brief Enables the NVIC Interrupt for the input IRQn
- * @param IRQn The Interrupt Number
- * @note Global Interrupt Configuration
+ * @brief Disables one external IRQ in NVIC
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns Void.
+ * @note This writes the corresponding `ICER` bit. It does not change
+ * peripheral-side interrupt masks or pending flags.
  */
-__STATIC_FORCEINLINE void NVIC_IRQEnable(uint8_t IRQn){
-	// Enable the IRQn
-	NVIC->ISER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
+__STATIC_FORCEINLINE void NVIC_IRQ_Disable(const irq_t IRQn)
+{
+	//! Write-one-to-clear the selected interrupt enable bit
+	NVIC->ICER[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
 }
 
 /**
- * @brief Disables the NVIC Interrupt for the input IRQn
- * @param IRQn The Interrupt Number
- * @note Global Interrupt Configuration
+ * @brief Triggers one external IRQ from software
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns Void.
+ * @note This writes `NVIC->STIR`, which sets the selected interrupt pending
+ * from software when privileged access permits it.
  */
-__STATIC_FORCEINLINE void NVIC_IRQDisable(uint8_t IRQn){
-	// Disable the IRQn
-	NVIC->ICER[(IRQn) >> 5] |=  (uint32_t) (1 << (IRQn & 0x1F));
+__STATIC_FORCEINLINE void NVIC_IRQ_SoftwareTrigger(const irq_t IRQn)
+{
+	//! Request a software-generated interrupt through STIR
+	NVIC->STIR = (uint32_t) IRQn;
 }
 
-/**
- * @brief Software IRQ Trigger
- * @param IRQn The Interrupt Number
- */
-__STATIC_FORCEINLINE void NVIC_IRQ_SoftwareTrigger(uint8_t IRQn){
-	// Set Pending Register
-	NVIC->ISPR[(IRQn >> 5)] |= (uint32_t) (1 << (IRQn & 0x1F));
+/** @} */ // NVIC_Driver
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
 #endif /* NVIC_H_ */

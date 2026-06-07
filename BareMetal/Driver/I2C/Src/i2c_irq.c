@@ -25,10 +25,10 @@
 // 	// Error Interrupt Enable
 // 	if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
 // 		reg |= I2C_CR2_ITERREN;
-// 		NVIC_IRQEnable(I2C_Get_ER_IRQn(I2Cx));
+// 		NVIC_IRQ_Enable(I2C_Get_ER_IRQn(I2Cx));
 // 	}
 // 	// NVIC Event Interrupt Enable
-// 	NVIC_IRQEnable(I2C_Get_EV_IRQn(I2Cx));
+// 	NVIC_IRQ_Enable(I2C_Get_EV_IRQn(I2Cx));
 // 	// Write to CR2
 // 	I2Cx->CR2.REG = reg;
 // }
@@ -54,10 +54,10 @@
 // 	// Error Interrupt Enable
 // 	if(I2C_IRQ_status & I2Cx_IRQ_ERROR){
 // 		reg &= ~I2C_CR2_ITERREN;
-// 		NVIC_IRQDisable(I2C_Get_ER_IRQn(I2Cx));
+// 		NVIC_IRQ_Disable(I2C_Get_ER_IRQn(I2Cx));
 // 	}
 // 	// NVIC Event Interrupt Enable
-// 	NVIC_IRQDisable(I2C_Get_EV_IRQn(I2Cx));
+// 	NVIC_IRQ_Disable(I2C_Get_EV_IRQn(I2Cx));
 // 	// Write to CR2
 // 	I2Cx->CR2.REG = reg;
 // }

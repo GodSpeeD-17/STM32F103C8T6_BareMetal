@@ -76,7 +76,7 @@ void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_end
  * @param priority Channel Priority. Refer `DMA_CHANNEL_PRIORITY_*` 
  * @param reg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelPriority(const dma_channel_priority_t priority, uint32_t* reg)
+void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* reg)
 {
 	*reg &= ~(uint32_t)(DMA_CCR_PL_Msk);
 	*reg |= (uint32_t)((priority & 0x03) << DMA_CCR_PL_Pos);
@@ -171,7 +171,7 @@ void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 	reg |= (uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
 	// Global Level
-	NVIC_IRQEnable(_driverDMAIRQMapping[dmaChannel]);
+	NVIC_IRQ_Enable(_driverDMAIRQMapping[dmaChannel]);
 }
 
 /**
@@ -189,6 +189,6 @@ void _DMA_disableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 	reg &= ~(uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
 	// Global Level
-	NVIC_IRQDisable(_driverDMAIRQMapping[dmaChannel]);
+	NVIC_IRQ_Disable(_driverDMAIRQMapping[dmaChannel]);
 }
 

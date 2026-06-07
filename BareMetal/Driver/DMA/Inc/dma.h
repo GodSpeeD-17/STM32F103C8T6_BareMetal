@@ -56,7 +56,7 @@ __STATIC_FORCEINLINE void DMA_ConfigureChannelEndPoint
 __STATIC_FORCEINLINE void DMA_ConfigureChannelProperties
 (
 	dma_channel_properties_t* const channelPropertiesConfig,
-	const dma_channel_priority_t priority,
+	const dma_channel_nvic_priority_t priority,
 	const dma_transfer_dir_t direction,
 	const dma_circular_mode_t circular,
 	const dma_mem2mem_mode_t mem2mem

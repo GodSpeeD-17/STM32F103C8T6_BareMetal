@@ -139,9 +139,9 @@ __STATIC_FORCEINLINE uint32_t _DMA_getChannelConfiguration(const dma_channel_t c
  * @returns - `DMA_CHANNEL_PRIORITY_HIGH`
  * @returns - `DMA_CHANNEL_PRIORITY_VERY_HIGH`
  */
-__STATIC_FORCEINLINE dma_channel_priority_t _DMA_getChannelPriority(const dma_channel_t channel)
+__STATIC_FORCEINLINE dma_channel_nvic_priority_t _DMA_getChannelPriority(const dma_channel_t channel)
 {
-	return (dma_channel_priority_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_PL_Msk) >> DMA_CCR_PL_Pos);
+	return (dma_channel_nvic_priority_t) ((__DMA_getChannelCCR(_DMA_getChannel(channel)) & DMA_CCR_PL_Msk) >> DMA_CCR_PL_Pos);
 }
 
 /**
@@ -239,7 +239,7 @@ void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_end
  * @param priority Channel Priority. Refer `DMA_CHANNEL_PRIORITY_*` 
  * @param reg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelPriority(const dma_channel_priority_t priority, uint32_t* reg);
+void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* reg);
 
 /**
  * @brief DMA Channel Direction Configuration

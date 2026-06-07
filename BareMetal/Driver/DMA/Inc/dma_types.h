@@ -112,7 +112,7 @@ extern "C" {
 #include "nvic.h"
 
 /*********************************************** Data Type Definitions ***********************************************/
-typedef uint8_t dma_channel_priority_t;
+typedef uint8_t dma_channel_nvic_priority_t;
 typedef uint8_t dma_transfer_dir_t;
 typedef uint8_t dma_endpoint_data_size_t;
 typedef uint8_t dma_endpoint_memory_increment_t;
@@ -195,10 +195,10 @@ typedef uint8_t dma_channel_number_t;
 #define DMA_CHANNEL_DIR_MEMORY_TO_PERIPHERAL		((dma_transfer_dir_t) 0x01)
 
 /*********************************************** DMA Priority levels ***********************************************/
-#define DMA_CHANNEL_PRIORITY_LOW					((dma_channel_priority_t) 0x00)
-#define DMA_CHANNEL_PRIORITY_MEDIUM					((dma_channel_priority_t) 0x01)
-#define DMA_CHANNEL_PRIORITY_HIGH					((dma_channel_priority_t) 0x02)
-#define DMA_CHANNEL_PRIORITY_VERY_HIGH				((dma_channel_priority_t) 0x03)
+#define DMA_CHANNEL_PRIORITY_LOW					((dma_channel_nvic_priority_t) 0x00)
+#define DMA_CHANNEL_PRIORITY_MEDIUM					((dma_channel_nvic_priority_t) 0x01)
+#define DMA_CHANNEL_PRIORITY_HIGH					((dma_channel_nvic_priority_t) 0x02)
+#define DMA_CHANNEL_PRIORITY_VERY_HIGH				((dma_channel_nvic_priority_t) 0x03)
 
 /*********************************************** DMA Circular Mode ***********************************************/
 #define DMA_CHANNEL_CIRCULAR_MODE_DISABLE			((dma_circular_mode_t) 0x00)
@@ -259,7 +259,7 @@ typedef struct {
 	// - `DMA_CHANNEL_PRIORITY_MEDIUM`: Normal communication  
 	// - `DMA_CHANNEL_PRIORITY_HIGH`: Time-sensitive data
 	// - `DMA_CHANNEL_PRIORITY_VERY_HIGH`: Critical system functions
-	dma_channel_priority_t priority: 2;
+	dma_channel_nvic_priority_t priority: 2;
 	
 	// Transfer direction
 	// - `DMA_CHANNEL_DIR_PERIPHERAL_TO_MEMORY`: Read from peripheral, write to memory (Default)
