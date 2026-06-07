@@ -2,7 +2,7 @@
 
 This document captures the intended Timer driver architecture before code
 movement begins. It is scoped to the current general-purpose Timer driver
-surface for `TIM2`, `TIM3`, and `TIM4`.
+surface for `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
 
 The first refactor pass should preserve the current public Timer vocabulary
 where practical, including existing `TIMx_*` selector names, so each change can
@@ -16,7 +16,7 @@ layer boundaries are correct.
 | Core register layer | `BareMetal/Core/Inc/stm32f1xx_timer.h`, raw Timer section in `stm32f1xx_defines.h` | Raw STM32F1 register structs, raw bit positions, masks, reset values, and base mappings | Driver selectors, validation policy, public config structs, orchestration |
 | Timer data types | `BareMetal/Driver/Timer/Inc/timer_data_types.h` | Timer scalar aliases and plain shared data aliases | Public selector macros, validation, register access, hardware writes |
 | Timer defines | `BareMetal/Driver/Timer/Inc/timer_defines.h` | Public Timer selectors, defaults, pure validation helpers, simple selector utilities | Hardware reads/writes, sequencing, raw field placement |
-| Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers, minimal register address macros, thin RCC clock/reset forwarding | Validation, encoding, mode decisions, batching, NVIC policy |
+| Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers and minimal register address macros | Validation, encoding, mode decisions, batching, clock/reset sequencing, NVIC policy |
 | Timer codec | `BareMetal/Driver/Timer/Inc/timer_codec.h`, `BareMetal/Driver/Timer/Src/timer_codec.c` | Private Encode/Decode helpers and public Extract/Stage functions over caller-owned register images | Hardware reads/writes, clock sequencing, public API decisions |
 | Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, optional public config header, `BareMetal/Driver/Timer/Src/timer.c` | Public API, public configuration structures, validation, orchestration, clock enable/reset, batching, dirty-register writes, status handling, NVIC policy | Raw register map definitions, direct register field placement when codec can own it |
 | Project/application | `Projects/*` and shared startup code | Board/application behavior and examples | Driver internals and raw register writes unless intentionally teaching raw access |
@@ -65,7 +65,7 @@ configuration structures remain a Timer driver-layer API concern.
 
 Expected groups:
 
-- Timer instance validation for `TIM2`, `TIM3`, and `TIM4`.
+- Timer instance validation for `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
 - Timer channel selectors and channel-mask validation.
 - Counter mode, direction, preload, one-pulse, and update-source selectors.
 - Channel output/input selectors and validation.
@@ -88,8 +88,6 @@ Expected accessors:
 - Named register readers/writers for `CR1`, `CR2`, `SMCR`, `DIER`, `SR`,
   `EGR`, `CCMR1`, `CCMR2`, `CCER`, `CNT`, `PSC`, `ARR`, `CCR1` through `CCR4`,
   `DCR`, and `DMAR` as needed.
-- Thin clock enable/disable/reset forwarding through RCC LL or equivalent RCC
-  helpers.
 
 LL must not:
 
@@ -98,6 +96,7 @@ LL must not:
 - Decide which registers must be read.
 - Encode CCMR/CCER/CR1/DIER/SR fields.
 - Enable or disable NVIC IRQs.
+- Enable, disable, or reset Timer clocks.
 - Poll, delay, or make mode decisions.
 
 ## Timer Codec Layer

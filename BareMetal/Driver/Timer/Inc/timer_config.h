@@ -4,6 +4,7 @@
 
 // Register Mapping
 #include "stm32f1xx.h"
+#include "timer_defines.h"
 // APB1 Clock Frequency
 #include "rcc.h"
 // IRQ Enable/Disable
@@ -310,30 +311,30 @@ __STATIC_FORCEINLINE void TIM_UEV_Disable(TIM_TypeDef *TIMx)
 __STATIC_FORCEINLINE void TIM_Polarity_Config(timer_config_t *TIMx_CONFIG, tim_channel_polarity_t polarity)
 {
 	// Get the current CCER register value
-	uint32_t reg = TIMx_CONFIG->instance->CCER.REG;
+	uint32_t regImage = TIMx_CONFIG->instance->CCER.REG;
 	// Clear the polarity bits for the channel
 	if (TIMx_CONFIG->channel.instance & TIMx_CHANNEL_1)
 	{
-		reg &= ~TIM_CCER_CC1P;
-		reg |= (polarity << TIM_CCER_CC1P_Pos);
+		regImage &= ~TIM_CCER_CC1P;
+		regImage |= (polarity << TIM_CCER_CC1P_Pos);
 	}
 	if (TIMx_CONFIG->channel.instance & TIMx_CHANNEL_2)
 	{
-		reg &= ~TIM_CCER_CC2P;
-		reg |= (polarity << TIM_CCER_CC2P_Pos);
+		regImage &= ~TIM_CCER_CC2P;
+		regImage |= (polarity << TIM_CCER_CC2P_Pos);
 	}
 	if (TIMx_CONFIG->channel.instance & TIMx_CHANNEL_3)
 	{
-		reg &= ~TIM_CCER_CC3P;
-		reg |= (polarity << TIM_CCER_CC3P_Pos);
+		regImage &= ~TIM_CCER_CC3P;
+		regImage |= (polarity << TIM_CCER_CC3P_Pos);
 	}
 	if (TIMx_CONFIG->channel.instance & TIMx_CHANNEL_4)
 	{
-		reg &= ~TIM_CCER_CC4P;
-		reg |= (polarity << TIM_CCER_CC4P_Pos);
+		regImage &= ~TIM_CCER_CC4P;
+		regImage |= (polarity << TIM_CCER_CC4P_Pos);
 	}
 	// Configure Timer Channel Polarity
-	TIMx_CONFIG->instance->CCER.REG = reg;
+	TIMx_CONFIG->instance->CCER.REG = regImage;
 }
 
 #endif /* __TIMER_CONFIG_H__ */

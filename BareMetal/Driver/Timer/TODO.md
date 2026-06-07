@@ -5,7 +5,7 @@ item, verify it, commit it, then move to the next item.
 
 ## Scope
 
-- [ ] Limit the first pass to general-purpose timers `TIM2`, `TIM3`, and `TIM4`.
+- [x] Limit the first pass to general-purpose timers `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
 - [ ] Preserve existing public `TIM_*` API names where practical during the layer split.
 - [ ] Preserve existing public `TIMx_*` selector names initially to reduce churn.
 - [ ] Keep public Timer configuration structures as the primary modular configuration API.
@@ -16,8 +16,8 @@ item, verify it, commit it, then move to the next item.
 - [x] Document intended Timer architecture and pending deviations in this directory.
 - [x] Introduce `Inc/timer_data_types.h` for Timer scalar aliases and shared plain data aliases.
 - [x] Introduce `Inc/timer_defines.h` for public selectors, defaults, validation helpers, and pure utilities.
-- [ ] Move Timer public selectors/defaults out of `stm32f1xx.h` while keeping Core raw-only.
-- [ ] Add `Inc/timer_ll.h` with dumb register read/write helpers and thin RCC clock/reset forwarding.
+- [x] Move Timer public selectors/defaults out of `stm32f1xx.h` while keeping Core raw-only.
+- [x] Add `Inc/timer_ll.h` with dumb register read/write helpers only.
 - [ ] Add `Inc/timer_codec.h` and `Src/timer_codec.c` with private encode/decode helpers and public extract/stage image APIs.
 - [ ] Refactor `Inc/timer.h` into public API only with `driver_status_t` contracts and no inline hardware access.
 - [ ] Refactor `Src/timer.c` orchestration to use validation, LL, codec staging, dirty writes, and status returns.
@@ -32,8 +32,8 @@ item, verify it, commit it, then move to the next item.
 - [ ] Public Timer configuration structures need a clean driver-layer home, either in `timer.h` or a dedicated public config header with no register access.
 - [ ] `timer.h` contains inline direct hardware access and duplicate declarations.
 - [ ] `timer.c` directly accesses Timer and RCC registers instead of going through LL.
-- [ ] Public Timer selector enums and defaults live in `stm32f1xx.h`.
-- [ ] No Timer LL layer exists.
+- [x] Public Timer selector enums and defaults live in `stm32f1xx.h`.
+- [x] No Timer LL layer exists.
 - [ ] No Timer codec layer exists.
 - [ ] CR1, CCMR, CCER, DIER, and SR field placement is not centralized in codec.
 - [ ] Public APIs do not consistently return `driver_status_t`.
