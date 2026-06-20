@@ -77,10 +77,9 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_ExtractBitStateFromImage(const re
 
 /**
  * @brief Stages one positive-polarity bit state inside a register image
- * @param[in] regImage Caller-owned register image before replacement
+ * @param[in,out] pRegImage Caller-owned register image to update in place
  * @param[in] bitMask Register-positioned bit mask
  * @param[in] state Requested ON/OFF state
- * @param[out] pRegImage Destination for updated register image
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: State was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
@@ -88,13 +87,13 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_ExtractBitStateFromImage(const re
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageBitStateInImage
 (
-	const reg					regImage,
+	reg* const					pRegImage,
 	const reg					bitMask,
-	const driver_status_t		state,
-	reg* const					pRegImage
+	const driver_status_t		state
 )
 {
 	// Local Variable
+	reg updatedRegImage = 0x00000000UL;
 	reg bitSet = 0x00000000UL;
 
 	// Validate Input
@@ -102,12 +101,15 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageBitStateInImage
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pRegImage;
+
 	ASSERT_DRIVER_STATUS(Codec_TIM_ValidateState(state));
 
 	//! Convert the driver ON/OFF state into the raw bit value and stage only that bit.
 	bitSet = (state == DRIVER_STATUS_ON) ? bitMask : 0x00000000UL;
-	*pRegImage = RegOps_StageField(regImage, bitMask, bitSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, bitMask, bitSet);
 
+	*pRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -135,31 +137,34 @@ __STATIC_FORCEINLINE reg Codec_TIM_ExtractScalarField
 
 /**
  * @brief Stages one right-aligned scalar field inside a register image
- * @param[in] regImage Caller-owned register image before replacement
+ * @param[in,out] pRegImage Caller-owned register image to update in place
  * @param[in] fieldMask Register-positioned field mask
  * @param[in] fieldPos Zero-based field bit position
  * @param[in] value Right-aligned scalar value
- * @param[out] pRegImage Destination for updated register image
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Scalar field was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageScalarField
 (
-	const reg					regImage,
+	reg* const					pRegImage,
 	const reg					fieldMask,
 	const reg_bit_pos_t			fieldPos,
-	const reg					value,
-	reg* const					pRegImage
+	const reg					value
 )
 {
+	reg updatedRegImage = 0x00000000UL;
+
 	if (pRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pRegImage;
 
 	//! Pack the right-aligned value into its hardware field position, then replace only that field.
-	*pRegImage = RegOps_StageField(regImage, fieldMask, REG_FIELD_VALUE(fieldPos, value));
+	updatedRegImage = RegOps_StageField(updatedRegImage, fieldMask, REG_FIELD_VALUE(fieldPos, value));
+
+	*pRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -204,33 +209,33 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_GetChannelIndexFromMask
 /**
  * @brief Returns the hardware `CCxS` field position for one channel index
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `CCxS` bit position as @ref `reg`
+ * @returns Register-positioned `CCxS` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCCMRCcsPos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCMRCcsPos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCMR1_CC1S_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCMR1_CC1S_Pos;
 
 	//! Map public channel indexes to concrete CCMR field positions owned by the Timer register layer.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCMR1_CC1S_Pos;
+			fieldPos = TIM_CCMR1_CC1S_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCMR1_CC2S_Pos;
+			fieldPos = TIM_CCMR1_CC2S_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCMR2_CC3S_Pos;
+			fieldPos = TIM_CCMR2_CC3S_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCMR2_CC4S_Pos;
+			fieldPos = TIM_CCMR2_CC4S_Pos;
 			break;
 		}
 		default:
@@ -245,33 +250,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMRCcsPos(const timer_channel_index_t cha
 /**
  * @brief Returns the hardware `OCxFE` field position for one channel index
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `OCxFE` bit position as @ref `reg`
+ * @returns Register-positioned `OCxFE` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcFastPos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCMROcFastPos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCMR1_OC1FE_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCMR1_OC1FE_Pos;
 
 	//! Map public channel indexes to concrete CCMR output-compare fast-enable positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC1FE_Pos;
+			fieldPos = TIM_CCMR1_OC1FE_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC2FE_Pos;
+			fieldPos = TIM_CCMR1_OC2FE_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC3FE_Pos;
+			fieldPos = TIM_CCMR2_OC3FE_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC4FE_Pos;
+			fieldPos = TIM_CCMR2_OC4FE_Pos;
 			break;
 		}
 		default:
@@ -286,33 +291,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcFastPos(const timer_channel_index_t 
 /**
  * @brief Returns the hardware `OCxPE` field position for one channel index
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `OCxPE` bit position as @ref `reg`
+ * @returns Register-positioned `OCxPE` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcPreloadPos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCMROcPreloadPos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCMR1_OC1PE_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCMR1_OC1PE_Pos;
 
 	//! Map public channel indexes to concrete CCMR output-compare preload-enable positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC1PE_Pos;
+			fieldPos = TIM_CCMR1_OC1PE_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC2PE_Pos;
+			fieldPos = TIM_CCMR1_OC2PE_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC3PE_Pos;
+			fieldPos = TIM_CCMR2_OC3PE_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC4PE_Pos;
+			fieldPos = TIM_CCMR2_OC4PE_Pos;
 			break;
 		}
 		default:
@@ -327,33 +332,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcPreloadPos(const timer_channel_index
 /**
  * @brief Returns the hardware `OCxM` field position for one channel index
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `OCxM` bit position as @ref `reg`
+ * @returns Register-positioned `OCxM` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcModePos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCMROcModePos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCMR1_OC1M_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCMR1_OC1M_Pos;
 
 	//! Map public channel indexes to concrete CCMR output-compare mode positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC1M_Pos;
+			fieldPos = TIM_CCMR1_OC1M_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC2M_Pos;
+			fieldPos = TIM_CCMR1_OC2M_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC3M_Pos;
+			fieldPos = TIM_CCMR2_OC3M_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC4M_Pos;
+			fieldPos = TIM_CCMR2_OC4M_Pos;
 			break;
 		}
 		default:
@@ -368,33 +373,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcModePos(const timer_channel_index_t 
 /**
  * @brief Returns the hardware `OCxCE` field position for one channel index
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `OCxCE` bit position as @ref `reg`
+ * @returns Register-positioned `OCxCE` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcClearPos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCMROcClearPos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCMR1_OC1CE_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCMR1_OC1CE_Pos;
 
 	//! Map public channel indexes to concrete CCMR output-compare clear-enable positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC1CE_Pos;
+			fieldPos = TIM_CCMR1_OC1CE_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCMR1_OC2CE_Pos;
+			fieldPos = TIM_CCMR1_OC2CE_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC3CE_Pos;
+			fieldPos = TIM_CCMR2_OC3CE_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCMR2_OC4CE_Pos;
+			fieldPos = TIM_CCMR2_OC4CE_Pos;
 			break;
 		}
 		default:
@@ -413,33 +418,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcClearPos(const timer_channel_index_t
 /**
  * @brief Returns the hardware `CCxE` field position for one channel index inside `CCER`
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `CCxE` bit position as @ref `reg`
+ * @returns Register-positioned `CCxE` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCcerEnablePos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCEREnablePos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCER_CC1E_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCER_CC1E_Pos;
 
 	//! Map public channel indexes to concrete CCER enable-bit positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCER_CC1E_Pos;
+			fieldPos = TIM_CCER_CC1E_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCER_CC2E_Pos;
+			fieldPos = TIM_CCER_CC2E_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCER_CC3E_Pos;
+			fieldPos = TIM_CCER_CC3E_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCER_CC4E_Pos;
+			fieldPos = TIM_CCER_CC4E_Pos;
 			break;
 		}
 		default:
@@ -454,33 +459,33 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCcerEnablePos(const timer_channel_index_t 
 /**
  * @brief Returns the hardware `CCxP` field position for one channel index inside `CCER`
  * @param[in] channelIndex Zero-based channel index
- * @returns Register-positioned `CCxP` bit position as @ref `reg`
+ * @returns Register-positioned `CCxP` bit position as @ref `reg_bit_pos_t`
  */
-__STATIC_FORCEINLINE reg Codec_TIM_GetCcerPolarityPos(const timer_channel_index_t channelIndex)
+__STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCERPolarityPos(const timer_channel_index_t channelIndex)
 {
-	reg fieldPos = (reg) TIM_CCER_CC1P_Pos;
+	reg_bit_pos_t fieldPos = TIM_CCER_CC1P_Pos;
 
 	//! Map public channel indexes to concrete CCER polarity-bit positions.
 	switch (channelIndex)
 	{
 		case 0U:
 		{
-			fieldPos = (reg) TIM_CCER_CC1P_Pos;
+			fieldPos = TIM_CCER_CC1P_Pos;
 			break;
 		}
 		case 1U:
 		{
-			fieldPos = (reg) TIM_CCER_CC2P_Pos;
+			fieldPos = TIM_CCER_CC2P_Pos;
 			break;
 		}
 		case 2U:
 		{
-			fieldPos = (reg) TIM_CCER_CC3P_Pos;
+			fieldPos = TIM_CCER_CC3P_Pos;
 			break;
 		}
 		case 3U:
 		{
-			fieldPos = (reg) TIM_CCER_CC4P_Pos;
+			fieldPos = TIM_CCER_CC4P_Pos;
 			break;
 		}
 		default:
@@ -493,68 +498,8 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCcerPolarityPos(const timer_channel_index_
 }
 
 // ==================================================================================================== //
-//										Local Selector Encode Helpers									//
+//										Local Selector Translation Helpers								//
 // ==================================================================================================== //
-
-// ==================================================================================================== //
-//										Local Generic Selector Translation Helpers						//
-// ==================================================================================================== //
-
-/**
- * @brief Encodes a valid selector into a right-aligned raw field value
- * @param[in] isValid Selector validity flag
- * @param[in] selector Selector value
- * @param[out] pRawField Destination for right-aligned raw field value
- * @returns Encode status
- */
-__STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSelector
-(
-	const uint8_t				isValid,
-	const uint32_t				selector,
-	reg_field_t* const			pRawField
-)
-{
-	if (pRawField == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	if (isValid == 0x00U)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Selector values intentionally mirror the raw right-aligned STM32 field values.
-	*pRawField = (reg_field_t) selector;
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Decodes a right-aligned raw field into a selector when valid
- * @param[in] isValid Raw field validity flag
- * @param[in] rawField Right-aligned raw field value
- * @param[out] pSelector Destination for decoded selector
- * @returns Decode status
- */
-__STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSelector
-(
-	const uint8_t				isValid,
-	const reg_field_t			rawField,
-	uint8_t* const				pSelector
-)
-{
-	if (pSelector == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	if (isValid == 0x00U)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Decode is symmetric with encode: raw field values are valid public selectors.
-	*pSelector = (uint8_t) rawField;
-	return DRIVER_STATUS_SUCCESS;
-}
 
 // ==================================================================================================== //
 //										Local CR1 Selector Translation Helpers							//
@@ -571,7 +516,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSelector
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeCountModeToCR1
 (
-	const timer_count_mode_t		mode,
+	const timer_count_mode_t	mode,
 	reg* const					pFieldSet
 )
 {
@@ -623,7 +568,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeCountModeToCR1
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToCountMode
 (
 	const reg					fieldSet,
-	timer_count_mode_t* const		pMode
+	timer_count_mode_t* const	pMode
 )
 {
 	if (pMode == NULL)
@@ -674,7 +619,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToCountMode
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeClockDivisionToCR1
 (
 	const timer_clock_division_t	clockDivision,
-	reg* const					pFieldSet
+	reg* const						pFieldSet
 )
 {
 	if (pFieldSet == NULL)
@@ -720,7 +665,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeClockDivisionToCR1
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToClockDivision
 (
 	const reg							fieldSet,
-	timer_clock_division_t* const			pClockDivision
+	timer_clock_division_t* const		pClockDivision
 )
 {
 	if (pClockDivision == NULL)
@@ -769,7 +714,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToClockDivision
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeMasterModeToCR2
 (
-	const timer_master_mode_t		masterMode,
+	const timer_master_mode_t	masterMode,
 	reg* const					pFieldSet
 )
 {
@@ -911,7 +856,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR2ToMasterMode
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSlaveModeToSMCR
 (
-	const timer_slave_mode_t		slaveMode,
+	const timer_slave_mode_t	slaveMode,
 	reg* const					pFieldSet
 )
 {
@@ -963,7 +908,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSlaveModeToSMCR
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
 (
 	const reg							fieldSet,
-	timer_slave_mode_t* const				pSlaveMode
+	timer_slave_mode_t* const			pSlaveMode
 )
 {
 	if (pSlaveMode == NULL)
@@ -1017,7 +962,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeChannelSelectionToCCMR
 (
-	const timer_channel_ccs_t		captureCompareSelection,
+	const timer_channel_ccs_t	captureCompareSelection,
 	reg_field_t* const			pRawField
 )
 {
@@ -1119,7 +1064,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToChannelSelection
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeOutputCompareModeToCCMR
 (
-	const timer_channel_mode_t				outputCompareMode,
+	const timer_channel_mode_t			outputCompareMode,
 	reg_field_t* const					pRawField
 )
 {
@@ -1469,7 +1414,7 @@ __STATIC_FORCEINLINE reg Codec_TIM_DecodeDIERRawToDMAMask(const reg dierRegImage
 driver_status_t Codec_TIM_ExtractPrescaler
 (
 	const reg							pscRegImage,
-	timer_prescaler_t* const				pPrescaler
+	timer_prescaler_t* const			pPrescaler
 )
 {
 	if (pPrescaler == NULL)
@@ -1484,13 +1429,12 @@ driver_status_t Codec_TIM_ExtractPrescaler
 
 driver_status_t Codec_TIM_StagePrescaler
 (
-	const reg							pscRegImage,
-	const timer_prescaler_t				prescaler,
-	reg* const							pPscRegImage
+	reg* const							pPscRegImage,
+	const timer_prescaler_t				prescaler
 )
 {
 	//! Preserve any non-PSC bits in the caller-owned image while replacing PSC[15:0].
-	return Codec_TIM_StageScalarField(pscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos, (reg) prescaler, pPscRegImage);
+	return Codec_TIM_StageScalarField(pPscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos, (reg) prescaler);
 }
 
 driver_status_t Codec_TIM_ExtractAutoReload
@@ -1511,19 +1455,18 @@ driver_status_t Codec_TIM_ExtractAutoReload
 
 driver_status_t Codec_TIM_StageAutoReload
 (
-	const reg							arrRegImage,
-	const timer_auto_reload_t			autoReload,
-	reg* const							pArrRegImage
+	reg* const							pArrRegImage,
+	const timer_auto_reload_t			autoReload
 )
 {
 	//! Stage the register-backed ARR value directly; timing policy remains in the driver layer.
-	return Codec_TIM_StageScalarField(arrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos, (reg) autoReload, pArrRegImage);
+	return Codec_TIM_StageScalarField(pArrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos, (reg) autoReload);
 }
 
 driver_status_t Codec_TIM_ExtractCounterValue
 (
 	const reg							cntRegImage,
-	timer_counter_value_t* const			pCounterValue
+	timer_counter_value_t* const		pCounterValue
 )
 {
 	if (pCounterValue == NULL)
@@ -1538,13 +1481,12 @@ driver_status_t Codec_TIM_ExtractCounterValue
 
 driver_status_t Codec_TIM_StageCounterValue
 (
-	const reg							cntRegImage,
-	const timer_counter_value_t			counterValue,
-	reg* const							pCntRegImage
+	reg* const							pCntRegImage,
+	const timer_counter_value_t			counterValue
 )
 {
 	//! Stage the raw CNT value without deciding whether the counter should be stopped first.
-	return Codec_TIM_StageScalarField(cntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos, (reg) counterValue, pCntRegImage);
+	return Codec_TIM_StageScalarField(pCntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos, (reg) counterValue);
 }
 
 // ==================================================================================================== //
@@ -1574,25 +1516,32 @@ driver_status_t Codec_TIM_ExtractTimeBaseConfig
 
 driver_status_t Codec_TIM_StageTimeBaseConfig
 (
-	const reg								pscRegImage,
-	const reg								arrRegImage,
-	const reg								cntRegImage,
-	const timer_config_timebase_t* const	pTimebase,
 	reg* const								pPscRegImage,
 	reg* const								pArrRegImage,
-	reg* const								pCntRegImage
+	reg* const								pCntRegImage,
+	const timer_config_timebase_t* const	pTimebase
 )
 {
+	reg updatedPscRegImage = 0x00000000UL;
+	reg updatedArrRegImage = 0x00000000UL;
+	reg updatedCntRegImage = 0x00000000UL;
+
 	if ((pTimebase == NULL) || (pPscRegImage == NULL) || (pArrRegImage == NULL) || (pCntRegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedPscRegImage = *pPscRegImage;
+	updatedArrRegImage = *pArrRegImage;
+	updatedCntRegImage = *pCntRegImage;
 
 	//! Stage every timebase register image independently so the driver can later dirty-write each one.
-	ASSERT_DRIVER_STATUS(Codec_TIM_StagePrescaler(pscRegImage, pTimebase->prescaler, pPscRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReload(arrRegImage, pTimebase->auto_reload, pArrRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterValue(cntRegImage, pTimebase->initial_count, pCntRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StagePrescaler(&updatedPscRegImage, pTimebase->prescaler));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReload(&updatedArrRegImage, pTimebase->auto_reload));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterValue(&updatedCntRegImage, pTimebase->initial_count));
 
+	*pPscRegImage = updatedPscRegImage;
+	*pArrRegImage = updatedArrRegImage;
+	*pCntRegImage = updatedCntRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1607,7 +1556,7 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
 driver_status_t Codec_TIM_ExtractCounterDirection
 (
 	const reg							cr1RegImage,
-	timer_direction_t* const				pDirection
+	timer_direction_t* const			pDirection
 )
 {
 	reg_field_t rawField = (reg_field_t) 0x00U;
@@ -1619,27 +1568,39 @@ driver_status_t Codec_TIM_ExtractCounterDirection
 
 	//! `DIR` is the raw direction field and maps directly to the public direction selector.
 	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_DIR, TIM_CR1_DIR_Pos);
-	return Codec_TIM_DecodeSelector(TIM_DIRECTION_IS_VALID(rawField), rawField, pDirection);
+	if (TIM_DIRECTION_IS_VALID(rawField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	*pDirection = (timer_direction_t) rawField;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageCounterDirection
 (
-	const reg							cr1RegImage,
-	const timer_direction_t				direction,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_direction_t				direction
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Stage only DIR, preserving all other CR1 bits in the caller-owned image.
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_DIRECTION_IS_VALID(direction), direction, &rawField));
-	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_DIR_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	if (TIM_DIRECTION_IS_VALID(direction) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) direction;
+	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_DIR_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1660,22 +1621,24 @@ driver_status_t Codec_TIM_ExtractCounterAlignment
 
 driver_status_t Codec_TIM_StageCounterAlignment
 (
-	const reg							cr1RegImage,
-	const timer_count_mode_t				alignment,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_count_mode_t			alignment
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg fieldSet = 0x00000000UL;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Convert the public alignment selector into the register-positioned CMS field.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeCountModeToCR1(alignment, &fieldSet));
-	*pCr1RegImage = RegOps_StageField(cr1RegImage, TIM_CR1_CMS, fieldSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR1_CMS, fieldSet);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1694,27 +1657,39 @@ driver_status_t Codec_TIM_ExtractOnePulse
 
 	//! `OPM` is a one-bit selector: continuous counting versus one-pulse mode.
 	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_OPM, TIM_CR1_OPM_Pos);
-	return Codec_TIM_DecodeSelector(TIM_OPM_IS_VALID(rawField), rawField, pOnePulse);
+	if (TIM_OPM_IS_VALID(rawField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	*pOnePulse = (timer_opm_t) rawField;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageOnePulse
 (
-	const reg							cr1RegImage,
-	const timer_opm_t					onePulse,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_opm_t					onePulse
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Stage only OPM, preserving all unrelated CR1 fields.
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_OPM_IS_VALID(onePulse), onePulse, &rawField));
-	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_OPM_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	if (TIM_OPM_IS_VALID(onePulse) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) onePulse;
+	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_OPM_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1733,27 +1708,39 @@ driver_status_t Codec_TIM_ExtractAutoReloadPreload
 
 	//! `ARPE` controls whether ARR updates are buffered until update events.
 	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_ARPE, TIM_CR1_ARPE_Pos);
-	return Codec_TIM_DecodeSelector(TIM_ARPE_IS_VALID(rawField), rawField, pAutoReloadPreload);
+	if (TIM_ARPE_IS_VALID(rawField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	*pAutoReloadPreload = (timer_arpe_t) rawField;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageAutoReloadPreload
 (
-	const reg							cr1RegImage,
-	const timer_arpe_t					autoReloadPreload,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_arpe_t					autoReloadPreload
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Stage only ARPE, preserving all unrelated CR1 fields.
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_ARPE_IS_VALID(autoReloadPreload), autoReloadPreload, &rawField));
-	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_ARPE_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	if (TIM_ARPE_IS_VALID(autoReloadPreload) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) autoReloadPreload;
+	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_ARPE_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1772,27 +1759,39 @@ driver_status_t Codec_TIM_ExtractUpdateSource
 
 	//! `URS` selects whether any update source or only overflow/DMA sources generate update requests.
 	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_URS, TIM_CR1_URS_Pos);
-	return Codec_TIM_DecodeSelector(TIM_UPDATE_SOURCE_IS_VALID(rawField), rawField, pUpdateSource);
+	if (TIM_UPDATE_SOURCE_IS_VALID(rawField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	*pUpdateSource = (timer_update_source_t) rawField;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageUpdateSource
 (
-	const reg							cr1RegImage,
-	const timer_update_source_t			updateSource,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_update_source_t			updateSource
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Stage only URS; update-event enable state is still owned by UDIS helpers.
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_UPDATE_SOURCE_IS_VALID(updateSource), updateSource, &rawField));
-	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_URS_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	if (TIM_UPDATE_SOURCE_IS_VALID(updateSource) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) updateSource;
+	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_URS_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1813,22 +1812,24 @@ driver_status_t Codec_TIM_ExtractClockDivision
 
 driver_status_t Codec_TIM_StageClockDivision
 (
-	const reg							cr1RegImage,
-	const timer_clock_division_t			clockDivision,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_clock_division_t			clockDivision
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg fieldSet = 0x00000000UL;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Convert the public CKD selector into the register-positioned CKD field.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeClockDivisionToCR1(clockDivision, &fieldSet));
-	*pCr1RegImage = RegOps_StageField(cr1RegImage, TIM_CR1_CKD, fieldSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR1_CKD, fieldSet);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1860,25 +1861,25 @@ driver_status_t Codec_TIM_ExtractCounterConfig
 
 driver_status_t Codec_TIM_StageCounterConfig
 (
-	const reg							cr1RegImage,
-	const timer_config_counter_t* const	pCounter,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const timer_config_counter_t* const	pCounter
 )
 {
-	reg updatedRegImage = cr1RegImage;
+	reg updatedRegImage = 0x00000000UL;
 
 	if ((pCounter == NULL) || (pCr1RegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
 
 	//! Group staging composes individual CR1 field stages so each field API has one implementation path.
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterDirection(updatedRegImage, pCounter->direction, &updatedRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterAlignment(updatedRegImage, pCounter->alignment, &updatedRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageOnePulse(updatedRegImage, pCounter->one_pulse, &updatedRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReloadPreload(updatedRegImage, pCounter->auto_reload_preload, &updatedRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateSource(updatedRegImage, pCounter->update_source, &updatedRegImage));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageClockDivision(updatedRegImage, pCounter->clock_division, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterDirection(&updatedRegImage, pCounter->direction));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterAlignment(&updatedRegImage, pCounter->alignment));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageOnePulse(&updatedRegImage, pCounter->one_pulse));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReloadPreload(&updatedRegImage, pCounter->auto_reload_preload));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateSource(&updatedRegImage, pCounter->update_source));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageClockDivision(&updatedRegImage, pCounter->clock_division));
 
 	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
@@ -1905,12 +1906,11 @@ driver_status_t Codec_TIM_ExtractCounterEnableState
 
 driver_status_t Codec_TIM_StageCounterEnableState
 (
-	const reg							cr1RegImage,
-	const driver_status_t				counterState,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const driver_status_t				counterState
 )
 {
-	return Codec_TIM_StageBitStateInImage(cr1RegImage, TIM_CR1_CEN, counterState, pCr1RegImage);
+	return Codec_TIM_StageBitStateInImage(pCr1RegImage, TIM_CR1_CEN, counterState);
 }
 
 driver_status_t Codec_TIM_ExtractUpdateEventState
@@ -1931,23 +1931,26 @@ driver_status_t Codec_TIM_ExtractUpdateEventState
 
 driver_status_t Codec_TIM_StageUpdateEventState
 (
-	const reg							cr1RegImage,
-	const driver_status_t				updateEventState,
-	reg* const							pCr1RegImage
+	reg* const							pCr1RegImage,
+	const driver_status_t				updateEventState
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg bitSet = 0x00000000UL;
 
 	if (pCr1RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr1RegImage;
+
 	ASSERT_DRIVER_STATUS(Codec_TIM_ValidateState(updateEventState));
 
 	//! Convert driver-facing ON/OFF into inverse raw UDIS semantics.
 	bitSet = (updateEventState == DRIVER_STATUS_OFF) ? TIM_CR1_UDIS : 0x00000000UL;
-	*pCr1RegImage = RegOps_StageField(cr1RegImage, TIM_CR1_UDIS, bitSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR1_UDIS, bitSet);
 
+	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1971,21 +1974,23 @@ driver_status_t Codec_TIM_ExtractMasterMode
 
 driver_status_t Codec_TIM_StageMasterMode
 (
-	const reg							cr2RegImage,
-	const timer_master_mode_t				masterMode,
-	reg* const							pCr2RegImage
+	reg* const							pCr2RegImage,
+	const timer_master_mode_t			masterMode
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg fieldSet = 0x00000000UL;
 
 	if (pCr2RegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCr2RegImage;
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeMasterModeToCR2(masterMode, &fieldSet));
-	*pCr2RegImage = RegOps_StageField(cr2RegImage, TIM_CR2_MMS, fieldSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR2_MMS, fieldSet);
 
+	*pCr2RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1996,7 +2001,7 @@ driver_status_t Codec_TIM_StageMasterMode
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
 	const reg							smcrRegImage,
-	timer_slave_mode_t* const				pSlaveMode
+	timer_slave_mode_t* const			pSlaveMode
 )
 {
 	//! Decode the register-positioned SMS image through the explicit SMCR mapping table.
@@ -2005,21 +2010,23 @@ driver_status_t Codec_TIM_ExtractSlaveMode
 
 driver_status_t Codec_TIM_StageSlaveMode
 (
-	const reg							smcrRegImage,
-	const timer_slave_mode_t				slaveMode,
-	reg* const							pSmcrRegImage
+	reg* const							pSmcrRegImage,
+	const timer_slave_mode_t			slaveMode
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg fieldSet = 0x00000000UL;
 
 	if (pSmcrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pSmcrRegImage;
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSlaveModeToSMCR(slaveMode, &fieldSet));
-	*pSmcrRegImage = RegOps_StageField(smcrRegImage, TIM_SMCR_SMS, fieldSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_SMCR_SMS, fieldSet);
 
+	*pSmcrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2034,7 +2041,7 @@ driver_status_t Codec_TIM_StageSlaveMode
 driver_status_t Codec_TIM_ExtractChannelSelection
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	timer_channel_ccs_t* const			pCaptureCompareSelection
 )
 {
@@ -2061,32 +2068,34 @@ driver_status_t Codec_TIM_ExtractChannelSelection
 
 driver_status_t Codec_TIM_StageChannelSelection
 (
-	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
-	const timer_channel_ccs_t				captureCompareSelection,
-	reg* const							pCCMRRegImage
+	reg* const							pCcmrRegImage,
+	const timer_channel_t				channel,
+	const timer_channel_ccs_t			captureCompareSelection
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
-	if (pCCMRRegImage == NULL)
+	if (pCcmrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCcmrRegImage;
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_GetChannelIndexFromMask(channel, &channelIndex));
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeChannelSelectionToCCMR(captureCompareSelection, &rawField));
 
 	//! Stage only CCxS; output-compare and input-capture mode fields are handled by dedicated codecs.
-	*pCCMRRegImage = RegOps_StageFieldValue
+	updatedRegImage = RegOps_StageFieldValue
 	(
-		ccmrRegImage,
+		updatedRegImage,
 		Codec_TIM_GetCCMRCcsPos(channelIndex),
 		rawField,
 		TIM_CODEC_FIELD_WIDTH_2BIT
 	);
 
+	*pCcmrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2097,11 +2106,11 @@ driver_status_t Codec_TIM_StageChannelSelection
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	timer_channel_oc_clear_t* const		pOutputCompareClear,
 	timer_channel_mode_t* const			pOutputCompareMode,
-	timer_channel_oc_preload_t* const		pOutputComparePreload,
-	timer_channel_oc_fast_t* const			pOutputCompareFast
+	timer_channel_oc_preload_t* const	pOutputComparePreload,
+	timer_channel_oc_fast_t* const		pOutputCompareFast
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
@@ -2136,7 +2145,11 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 			REG_FIELD_MASK(Codec_TIM_GetCCMROcClearPos(channelIndex), TIM_CODEC_FIELD_WIDTH_1BIT),
 			Codec_TIM_GetCCMROcClearPos(channelIndex)
 		);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_CHANNEL_OC_CLEAR_IS_VALID(rawField), rawField, pOutputCompareClear));
+		if (TIM_CHANNEL_OC_CLEAR_IS_VALID(rawField) == 0x00U)
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+		*pOutputCompareClear = (timer_channel_oc_clear_t) rawField;
 	}
 	if (pOutputCompareMode != NULL)
 	{
@@ -2158,7 +2171,11 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 			REG_FIELD_MASK(Codec_TIM_GetCCMROcPreloadPos(channelIndex), TIM_CODEC_FIELD_WIDTH_1BIT),
 			Codec_TIM_GetCCMROcPreloadPos(channelIndex)
 		);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_CHANNEL_OC_PRELOAD_IS_VALID(rawField), rawField, pOutputComparePreload));
+		if (TIM_CHANNEL_OC_PRELOAD_IS_VALID(rawField) == 0x00U)
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+		*pOutputComparePreload = (timer_channel_oc_preload_t) rawField;
 	}
 	if (pOutputCompareFast != NULL)
 	{
@@ -2169,7 +2186,11 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 			REG_FIELD_MASK(Codec_TIM_GetCCMROcFastPos(channelIndex), TIM_CODEC_FIELD_WIDTH_1BIT),
 			Codec_TIM_GetCCMROcFastPos(channelIndex)
 		);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_CHANNEL_OC_FAST_IS_VALID(rawField), rawField, pOutputCompareFast));
+		if (TIM_CHANNEL_OC_FAST_IS_VALID(rawField) == 0x00U)
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+		*pOutputCompareFast = (timer_channel_oc_fast_t) rawField;
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -2177,23 +2198,23 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 
 driver_status_t Codec_TIM_StageOutputCompareConfig
 (
-	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
+	reg* const							pCcmrRegImage,
+	const timer_channel_t				channel,
 	const timer_channel_oc_clear_t		outputCompareClear,
 	const timer_channel_mode_t			outputCompareMode,
-	const timer_channel_oc_preload_t		outputComparePreload,
-	const timer_channel_oc_fast_t			outputCompareFast,
-	reg* const							pCCMRRegImage
+	const timer_channel_oc_preload_t	outputComparePreload,
+	const timer_channel_oc_fast_t		outputCompareFast
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
-	reg updatedRegImage = ccmrRegImage;
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
-	if (pCCMRRegImage == NULL)
+	if (pCcmrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCcmrRegImage;
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_GetChannelIndexFromMask(channel, &channelIndex));
 
@@ -2201,19 +2222,31 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeChannelSelectionToCCMR(TIMx_CHANNEL_CCS_OUTPUT, &rawField));
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMRCcsPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_2BIT);
 
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_CHANNEL_OC_CLEAR_IS_VALID(outputCompareClear), outputCompareClear, &rawField));
+	if (TIM_CHANNEL_OC_CLEAR_IS_VALID(outputCompareClear) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) outputCompareClear;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcClearPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeOutputCompareModeToCCMR(outputCompareMode, &rawField));
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcModePos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_3BIT);
 
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_CHANNEL_OC_PRELOAD_IS_VALID(outputComparePreload), outputComparePreload, &rawField));
+	if (TIM_CHANNEL_OC_PRELOAD_IS_VALID(outputComparePreload) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) outputComparePreload;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcPreloadPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_CHANNEL_OC_FAST_IS_VALID(outputCompareFast), outputCompareFast, &rawField));
+	if (TIM_CHANNEL_OC_FAST_IS_VALID(outputCompareFast) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) outputCompareFast;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcFastPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
-	*pCCMRRegImage = updatedRegImage;
+	*pCcmrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2228,7 +2261,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	driver_status_t* const				pChannelState
 )
 {
@@ -2244,22 +2277,21 @@ driver_status_t Codec_TIM_ExtractChannelEnableState
 	*pChannelState = Codec_TIM_ExtractBitStateFromImage
 	(
 		ccerRegImage,
-		REG_BIT_MASK(Codec_TIM_GetCcerEnablePos(channelIndex))
+		REG_BIT_MASK(Codec_TIM_GetCCEREnablePos(channelIndex))
 	);
 	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageChannelEnableState
 (
-	const reg							ccerRegImage,
-	const timer_channel_t					channel,
-	const driver_status_t				channelState,
-	reg* const							pCcerRegImage
+	reg* const							pCCERRegImage,
+	const timer_channel_t				channel,
+	const driver_status_t				channelState
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
 
-	if (pCcerRegImage == NULL)
+	if (pCCERRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
@@ -2268,10 +2300,9 @@ driver_status_t Codec_TIM_StageChannelEnableState
 	ASSERT_DRIVER_STATUS(Codec_TIM_GetChannelIndexFromMask(channel, &channelIndex));
 	return Codec_TIM_StageBitStateInImage
 	(
-		ccerRegImage,
-		REG_BIT_MASK(Codec_TIM_GetCcerEnablePos(channelIndex)),
-		channelState,
-		pCcerRegImage
+		pCCERRegImage,
+		REG_BIT_MASK(Codec_TIM_GetCCEREnablePos(channelIndex)),
+		channelState
 	);
 }
 
@@ -2282,7 +2313,7 @@ driver_status_t Codec_TIM_StageChannelEnableState
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	timer_channel_polarity_t* const		pPolarity
 )
 {
@@ -2299,41 +2330,53 @@ driver_status_t Codec_TIM_ExtractChannelPolarity
 	rawField = RegOps_ExtractFieldValue
 	(
 		ccerRegImage,
-		REG_BIT_MASK(Codec_TIM_GetCcerPolarityPos(channelIndex)),
-		Codec_TIM_GetCcerPolarityPos(channelIndex)
+		REG_BIT_MASK(Codec_TIM_GetCCERPolarityPos(channelIndex)),
+		Codec_TIM_GetCCERPolarityPos(channelIndex)
 	);
 
-	return Codec_TIM_DecodeSelector(TIM_CHANNEL_POLARITY_IS_VALID(rawField), rawField, pPolarity);
+	if (TIM_CHANNEL_POLARITY_IS_VALID(rawField) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	*pPolarity = (timer_channel_polarity_t) rawField;
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageChannelPolarity
 (
-	const reg							ccerRegImage,
-	const timer_channel_t					channel,
-	const timer_channel_polarity_t			polarity,
-	reg* const							pCcerRegImage
+	reg* const							pCCERRegImage,
+	const timer_channel_t				channel,
+	const timer_channel_polarity_t		polarity
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
+	reg updatedRegImage = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
-	if (pCcerRegImage == NULL)
+	if (pCCERRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pCCERRegImage;
 
 	ASSERT_DRIVER_STATUS(Codec_TIM_GetChannelIndexFromMask(channel, &channelIndex));
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_CHANNEL_POLARITY_IS_VALID(polarity), polarity, &rawField));
+	if (TIM_CHANNEL_POLARITY_IS_VALID(polarity) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	rawField = (reg_field_t) polarity;
 
 	//! Stage only CCxP so channel enable state and reserved lane bits remain unchanged.
-	*pCcerRegImage = RegOps_StageFieldValue
+	updatedRegImage = RegOps_StageFieldValue
 	(
-		ccerRegImage,
-		Codec_TIM_GetCcerPolarityPos(channelIndex),
+		updatedRegImage,
+		Codec_TIM_GetCCERPolarityPos(channelIndex),
 		rawField,
 		TIM_CODEC_FIELD_WIDTH_1BIT
 	);
 
+	*pCCERRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2363,12 +2406,12 @@ driver_status_t Codec_TIM_ExtractIRQEnableMask
 
 driver_status_t Codec_TIM_StageIRQEnableMask
 (
-	const reg							dierRegImage,
-	const timer_irq_t						irqMask,
-	const timer_irq_enable_t				irqEnable,
-	reg* const							pDierRegImage
+	reg* const							pDierRegImage,
+	const timer_irq_t					irqMask,
+	const timer_irq_enable_t			irqEnable
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg rawMask = 0x00000000UL;
 	reg rawSet = 0x00000000UL;
 
@@ -2376,6 +2419,8 @@ driver_status_t Codec_TIM_StageIRQEnableMask
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pDierRegImage;
+
 	if ((TIM_IRQ_MASK_IS_VALID(irqMask) == 0x00U) || (TIM_IRQ_ENABLE_IS_VALID(irqEnable) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -2384,8 +2429,9 @@ driver_status_t Codec_TIM_StageIRQEnableMask
 	//! Build the raw DIER mask once, then either set or clear the selected enable bits.
 	rawMask = Codec_TIM_EncodeIRQMaskToDIERRaw(irqMask);
 	rawSet = (irqEnable == TIMx_IRQ_ENABLE) ? rawMask : 0x00000000UL;
-	*pDierRegImage = RegOps_StageField(dierRegImage, rawMask, rawSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, rawMask, rawSet);
 
+	*pDierRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2411,12 +2457,12 @@ driver_status_t Codec_TIM_ExtractDMAEnableMask
 
 driver_status_t Codec_TIM_StageDMAEnableMask
 (
-	const reg							dierRegImage,
-	const timer_dma_t						dmaMask,
-	const driver_status_t				dmaState,
-	reg* const							pDierRegImage
+	reg* const							pDierRegImage,
+	const timer_dma_t					dmaMask,
+	const driver_status_t				dmaState
 )
 {
+	reg updatedRegImage = 0x00000000UL;
 	reg rawMask = 0x00000000UL;
 	reg rawSet = 0x00000000UL;
 
@@ -2424,6 +2470,8 @@ driver_status_t Codec_TIM_StageDMAEnableMask
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pDierRegImage;
+
 	if (TIM_DMA_MASK_IS_VALID(dmaMask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -2433,8 +2481,9 @@ driver_status_t Codec_TIM_StageDMAEnableMask
 	//! DMA uses driver OFF/ON state while IRQ uses the legacy TIMx_IRQ_DISABLE/ENABLE selector.
 	rawMask = Codec_TIM_EncodeDMAMaskToDIERRaw(dmaMask);
 	rawSet = (dmaState == DRIVER_STATUS_ON) ? rawMask : 0x00000000UL;
-	*pDierRegImage = RegOps_StageField(dierRegImage, rawMask, rawSet);
+	updatedRegImage = RegOps_StageField(updatedRegImage, rawMask, rawSet);
 
+	*pDierRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2464,25 +2513,27 @@ driver_status_t Codec_TIM_ExtractIRQFlagMask
 
 driver_status_t Codec_TIM_StageIRQAckMask
 (
-	const reg							srRegImage,
-	const timer_irq_t						irqMask,
-	reg* const							pSrRegImage
+	reg* const							pSrRegImage,
+	const timer_irq_t					irqMask
 )
 {
-	const reg rawMask = Codec_TIM_EncodeIRQMaskToSRRaw(irqMask);
-	reg updatedRegImage = srRegImage;
+	reg rawMask = 0x00000000UL;
+	reg updatedRegImage = 0x00000000UL;
 
 	if (pSrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	updatedRegImage = *pSrRegImage;
+
 	if (TIM_IRQ_MASK_IS_VALID(irqMask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
+	rawMask = Codec_TIM_EncodeIRQMaskToSRRaw(irqMask);
 
 	//! Timer SR flags are write-0-to-clear; write 1 to unacknowledged supported flags to preserve them.
-	if ((srRegImage & rawMask) != 0x00000000UL)
+	if ((updatedRegImage & rawMask) != 0x00000000UL)
 	{
 		updatedRegImage |= (TIM_CODEC_SR_GENERAL_PURPOSE_FLAG_MASK & ~rawMask);
 		updatedRegImage &= ~rawMask;
