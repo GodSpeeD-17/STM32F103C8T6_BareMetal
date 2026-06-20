@@ -21,7 +21,7 @@
 // ==================================================================================================== //
 //												Includes												//
 // ==================================================================================================== //
-#include "timer_defines.h"
+#include "timer_config.h"
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus
@@ -46,62 +46,390 @@ extern "C" {
  */
 
 // ==================================================================================================== //
+//										Timer Timebase Codecs											//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer Timebase Scalar Codecs									//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts a Timer prescaler value from a `PSC` image
+ * @param[in] pscRegImage Caller-owned `PSC` image
+ * @param[out] pPrescaler Destination for decoded prescaler value
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is `NULL`
+ */
+driver_status_t Codec_TIM_ExtractPrescaler
+(
+	const reg							pscRegImage,
+	timer_prescaler_t* const			pPrescaler
+);
+
+/**
+ * @brief Stages a Timer prescaler value into a `PSC` image
+ * @param[in] pscRegImage Caller-owned `PSC` image before replacement
+ * @param[in] prescaler Prescaler value to stage into `PSC[15:0]`
+ * @param[out] pPscRegImage Destination for the updated `PSC` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPscRegImage is `NULL`
+ */
+driver_status_t Codec_TIM_StagePrescaler
+(
+	const reg							pscRegImage,
+	const timer_prescaler_t				prescaler,
+	reg* const							pPscRegImage
+);
+
+/**
+ * @brief Extracts a Timer auto-reload value from an `ARR` image
+ * @param[in] arrRegImage Caller-owned `ARR` image
+ * @param[out] pAutoReload Destination for decoded auto-reload value
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReload is `NULL`
+ */
+driver_status_t Codec_TIM_ExtractAutoReload
+(
+	const reg							arrRegImage,
+	timer_auto_reload_t* const			pAutoReload
+);
+
+/**
+ * @brief Stages a Timer auto-reload value into an `ARR` image
+ * @param[in] arrRegImage Caller-owned `ARR` image before replacement
+ * @param[in] autoReload Auto-reload value to stage into `ARR[15:0]`
+ * @param[out] pArrRegImage Destination for the updated `ARR` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pArrRegImage is `NULL`
+ */
+driver_status_t Codec_TIM_StageAutoReload
+(
+	const reg							arrRegImage,
+	const timer_auto_reload_t			autoReload,
+	reg* const							pArrRegImage
+);
+
+/**
+ * @brief Extracts a Timer counter value from a `CNT` image
+ * @param[in] cntRegImage Caller-owned `CNT` image
+ * @param[out] pCounterValue Destination for decoded counter value
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounterValue is `NULL`
+ */
+driver_status_t Codec_TIM_ExtractCounterValue
+(
+	const reg							cntRegImage,
+	timer_counter_value_t* const		pCounterValue
+);
+
+/**
+ * @brief Stages a Timer counter value into a `CNT` image
+ * @param[in] cntRegImage Caller-owned `CNT` image before replacement
+ * @param[in] counterValue Counter value to stage into `CNT[15:0]`
+ * @param[out] pCntRegImage Destination for the updated `CNT` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCntRegImage is `NULL`
+ */
+driver_status_t Codec_TIM_StageCounterValue
+(
+	const reg							cntRegImage,
+	const timer_counter_value_t			counterValue,
+	reg* const							pCntRegImage
+);
+
+// ==================================================================================================== //
+//										Timer Timebase Config Codecs									//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts Timer timebase configuration from `PSC`, `ARR`, and `CNT` images
+ * @param[in] pscRegImage Caller-owned `PSC` image
+ * @param[in] arrRegImage Caller-owned `ARR` image
+ * @param[in] cntRegImage Caller-owned `CNT` image
+ * @param[out] pTimebase Destination for decoded timebase configuration
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimebase is `NULL`
+ */
+driver_status_t Codec_TIM_ExtractTimeBaseConfig
+(
+	const reg							pscRegImage,
+	const reg							arrRegImage,
+	const reg							cntRegImage,
+	timer_config_timebase_t* const		pTimebase
+);
+
+/**
+ * @brief Stages Timer timebase configuration into `PSC`, `ARR`, and `CNT` images
+ * @param[in] pscRegImage Caller-owned `PSC` image before replacement
+ * @param[in] arrRegImage Caller-owned `ARR` image before replacement
+ * @param[in] cntRegImage Caller-owned `CNT` image before replacement
+ * @param[in] pTimebase Timebase configuration to stage
+ * @param[out] pPscRegImage Destination for the updated `PSC` image
+ * @param[out] pArrRegImage Destination for the updated `ARR` image
+ * @param[out] pCntRegImage Destination for the updated `CNT` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more required pointers are `NULL`
+ */
+driver_status_t Codec_TIM_StageTimeBaseConfig
+(
+	const reg								pscRegImage,
+	const reg								arrRegImage,
+	const reg								cntRegImage,
+	const timer_config_timebase_t* const	pTimebase,
+	reg* const								pPscRegImage,
+	reg* const								pArrRegImage,
+	reg* const								pCntRegImage
+);
+
+// ==================================================================================================== //
 //										Timer CR1 Counter Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer CR1 Counter Selector Codecs								//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts the Timer counter direction selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pDirection Destination for decoded direction selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDirection is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `DIR` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractCounterDirection
+(
+	const reg							cr1RegImage,
+	timer_direction_t* const			pDirection
+);
+
+/**
+ * @brief Stages the Timer counter direction selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] direction Timer counter direction selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p direction cannot be encoded
+ */
+driver_status_t Codec_TIM_StageCounterDirection
+(
+	const reg							cr1RegImage,
+	const timer_direction_t				direction,
+	reg* const							pCr1RegImage
+);
+
+/**
+ * @brief Extracts the Timer counter alignment selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pAlignment Destination for decoded edge/center-aligned selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAlignment is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `CMS` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractCounterAlignment
+(
+	const reg							cr1RegImage,
+	timer_count_mode_t* const			pAlignment
+);
+
+/**
+ * @brief Stages the Timer counter alignment selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] alignment Timer edge/center-aligned selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p alignment cannot be encoded
+ */
+driver_status_t Codec_TIM_StageCounterAlignment
+(
+	const reg							cr1RegImage,
+	const timer_count_mode_t			alignment,
+	reg* const							pCr1RegImage
+);
+
+/**
+ * @brief Extracts the Timer one-pulse selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pOnePulse Destination for decoded one-pulse selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOnePulse is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `OPM` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractOnePulse
+(
+	const reg							cr1RegImage,
+	timer_opm_t* const					pOnePulse
+);
+
+/**
+ * @brief Stages the Timer one-pulse selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] onePulse Timer one-pulse selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p onePulse cannot be encoded
+ */
+driver_status_t Codec_TIM_StageOnePulse
+(
+	const reg							cr1RegImage,
+	const timer_opm_t					onePulse,
+	reg* const							pCr1RegImage
+);
+
+/**
+ * @brief Extracts the Timer auto-reload preload selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pAutoReloadPreload Destination for decoded auto-reload preload selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReloadPreload is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `ARPE` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractAutoReloadPreload
+(
+	const reg							cr1RegImage,
+	timer_arpe_t* const					pAutoReloadPreload
+);
+
+/**
+ * @brief Stages the Timer auto-reload preload selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] autoReloadPreload Timer auto-reload preload selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReloadPreload cannot be encoded
+ */
+driver_status_t Codec_TIM_StageAutoReloadPreload
+(
+	const reg							cr1RegImage,
+	const timer_arpe_t					autoReloadPreload,
+	reg* const							pCr1RegImage
+);
+
+/**
+ * @brief Extracts the Timer update request source selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pUpdateSource Destination for decoded update-source selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update-source selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pUpdateSource is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `URS` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractUpdateSource
+(
+	const reg							cr1RegImage,
+	timer_update_source_t* const			pUpdateSource
+);
+
+/**
+ * @brief Stages the Timer update request source selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] updateSource Timer update-source selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update-source selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p updateSource cannot be encoded
+ */
+driver_status_t Codec_TIM_StageUpdateSource
+(
+	const reg							cr1RegImage,
+	const timer_update_source_t			updateSource,
+	reg* const							pCr1RegImage
+);
+
+/**
+ * @brief Extracts the Timer clock division selector from a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image
+ * @param[out] pClockDivision Destination for decoded clock-division selector
+ * @returns Extraction status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-division selector was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockDivision is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `CKD` field is not decodable
+ */
+driver_status_t Codec_TIM_ExtractClockDivision
+(
+	const reg							cr1RegImage,
+	timer_clock_division_t* const		pClockDivision
+);
+
+/**
+ * @brief Stages the Timer clock division selector into a `CR1` image
+ * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
+ * @param[in] clockDivision Timer clock-division selector
+ * @param[out] pCr1RegImage Destination for the updated `CR1` image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-division selector was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockDivision cannot be encoded
+ */
+driver_status_t Codec_TIM_StageClockDivision
+(
+	const reg							cr1RegImage,
+	const timer_clock_division_t			clockDivision,
+	reg* const							pCr1RegImage
+);
+
+// ==================================================================================================== //
+//										Timer CR1 Counter Config Codecs								//
 // ==================================================================================================== //
 
 /**
  * @brief Extracts Timer counter configuration selectors from a `CR1` image
  * @param[in] cr1RegImage Caller-owned `CR1` image
- * @param[out] pDirection Optional destination for decoded direction selector
- * @param[out] pMode Optional destination for decoded count-mode selector
- * @param[out] pOnePulse Optional destination for decoded one-pulse selector
- * @param[out] pAutoReloadPreload Optional destination for decoded auto-reload preload selector
- * @param[out] pUpdateSource Optional destination for decoded update-source selector
- * @param[out] pClockDivision Optional destination for decoded clock-division selector
+ * @param[out] pCounter Destination for decoded counter configuration
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter selectors were extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: All output pointers are `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A raw `CR1` field is not decodable by the current public Timer vocabulary
- * @note Codec reads only @p cr1RegImage and writes only non-`NULL` output pointers.
+ * @note This API preserves no hardware state because it reads only @p cr1RegImage.
  */
 driver_status_t Codec_TIM_ExtractCounterConfig
 (
 	const reg							cr1RegImage,
-	timer_direction_t* const				pDirection,
-	timer_count_mode_t* const				pMode,
-	timer_opm_t* const					pOnePulse,
-	timer_arpe_t* const					pAutoReloadPreload,
-	timer_update_source_t* const			pUpdateSource,
-	timer_clock_division_t* const			pClockDivision
+	timer_config_counter_t* const		pCounter
 );
 
 /**
  * @brief Stages Timer counter configuration selectors into a `CR1` image
  * @param[in] cr1RegImage Caller-owned `CR1` image before replacement
- * @param[in] direction Timer direction selector
- * @param[in] mode Timer count-mode selector
- * @param[in] onePulse Timer one-pulse selector
- * @param[in] autoReloadPreload Timer auto-reload preload selector
- * @param[in] updateSource Timer update-source selector
- * @param[in] clockDivision Timer clock-division selector
+ * @param[in] pCounter Counter configuration to stage
  * @param[out] pCr1RegImage Destination for the updated `CR1` image
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `CR1` image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter or @p pCr1RegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more selectors cannot be encoded
  * @note This API preserves `CEN` and `UDIS`; use the dedicated state codecs for those fields.
  */
 driver_status_t Codec_TIM_StageCounterConfig
 (
 	const reg							cr1RegImage,
-	const timer_direction_t				direction,
-	const timer_count_mode_t				mode,
-	const timer_opm_t						onePulse,
-	const timer_arpe_t					autoReloadPreload,
-	const timer_update_source_t			updateSource,
-	const timer_clock_division_t			clockDivision,
+	const timer_config_counter_t* const	pCounter,
 	reg* const							pCr1RegImage
 );
+
+// ==================================================================================================== //
+//										Timer CR1 Runtime State Codecs									//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts the Timer counter enable state from a `CR1` image
@@ -183,6 +511,10 @@ driver_status_t Codec_TIM_StageUpdateEventState
 //										Timer Trigger Codecs											//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Timer Master Mode Codecs										//
+// ==================================================================================================== //
+
 /**
  * @brief Extracts the Timer master-mode selector from a `CR2` image
  * @param[in] cr2RegImage Caller-owned `CR2` image
@@ -211,9 +543,13 @@ driver_status_t Codec_TIM_ExtractMasterMode
 driver_status_t Codec_TIM_StageMasterMode
 (
 	const reg							cr2RegImage,
-	const timer_master_mode_t				masterMode,
+	const timer_master_mode_t			masterMode,
 	reg* const							pCr2RegImage
 );
+
+// ==================================================================================================== //
+//										Timer Slave Mode Codecs										//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts the Timer slave-mode selector from an `SMCR` image
@@ -227,7 +563,7 @@ driver_status_t Codec_TIM_StageMasterMode
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
 	const reg							smcrRegImage,
-	timer_slave_mode_t* const				pSlaveMode
+	timer_slave_mode_t* const			pSlaveMode
 );
 
 /**
@@ -243,12 +579,16 @@ driver_status_t Codec_TIM_ExtractSlaveMode
 driver_status_t Codec_TIM_StageSlaveMode
 (
 	const reg							smcrRegImage,
-	const timer_slave_mode_t				slaveMode,
+	const timer_slave_mode_t			slaveMode,
 	reg* const							pSmcrRegImage
 );
 
 // ==================================================================================================== //
 //										Timer CCMR Channel Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer CCMR Channel Selection Codecs							//
 // ==================================================================================================== //
 
 /**
@@ -284,10 +624,14 @@ driver_status_t Codec_TIM_ExtractChannelSelection
 driver_status_t Codec_TIM_StageChannelSelection
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
-	const timer_channel_ccs_t				captureCompareSelection,
+	const timer_channel_t				channel,
+	const timer_channel_ccs_t			captureCompareSelection,
 	reg* const							pCcmrRegImage
 );
+
+// ==================================================================================================== //
+//										Timer CCMR Output Compare Codecs								//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts one output-compare channel configuration from a `CCMR1` or `CCMR2` image
@@ -307,10 +651,10 @@ driver_status_t Codec_TIM_StageChannelSelection
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	timer_channel_oc_clear_t* const		pOutputCompareClear,
 	timer_channel_mode_t* const			pOutputCompareMode,
-	timer_channel_oc_preload_t* const		pOutputComparePreload,
+	timer_channel_oc_preload_t* const	pOutputComparePreload,
 	timer_channel_oc_fast_t* const		pOutputCompareFast
 );
 
@@ -332,16 +676,20 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 driver_status_t Codec_TIM_StageOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	const timer_channel_oc_clear_t		outputCompareClear,
 	const timer_channel_mode_t			outputCompareMode,
-	const timer_channel_oc_preload_t		outputComparePreload,
-	const timer_channel_oc_fast_t			outputCompareFast,
+	const timer_channel_oc_preload_t	outputComparePreload,
+	const timer_channel_oc_fast_t		outputCompareFast,
 	reg* const							pCcmrRegImage
 );
 
 // ==================================================================================================== //
 //										Timer CCER Channel Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer CCER Channel Enable Codecs								//
 // ==================================================================================================== //
 
 /**
@@ -360,7 +708,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	driver_status_t* const				pChannelState
 );
 
@@ -381,10 +729,14 @@ driver_status_t Codec_TIM_ExtractChannelEnableState
 driver_status_t Codec_TIM_StageChannelEnableState
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	const driver_status_t				channelState,
 	reg* const							pCcerRegImage
 );
+
+// ==================================================================================================== //
+//										Timer CCER Channel Polarity Codecs								//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts one channel polarity selector from a `CCER` image
@@ -399,7 +751,7 @@ driver_status_t Codec_TIM_StageChannelEnableState
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	timer_channel_polarity_t* const		pPolarity
 );
 
@@ -417,13 +769,17 @@ driver_status_t Codec_TIM_ExtractChannelPolarity
 driver_status_t Codec_TIM_StageChannelPolarity
 (
 	const reg							ccerRegImage,
-	const timer_channel_t					channel,
+	const timer_channel_t				channel,
 	const timer_channel_polarity_t		polarity,
 	reg* const							pCcerRegImage
 );
 
 // ==================================================================================================== //
 //										Timer DIER Request Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer DIER IRQ Request Codecs									//
 // ==================================================================================================== //
 
 /**
@@ -458,10 +814,14 @@ driver_status_t Codec_TIM_ExtractIRQEnableMask
 driver_status_t Codec_TIM_StageIRQEnableMask
 (
 	const reg							dierRegImage,
-	const timer_irq_t						irqMask,
-	const timer_irq_enable_t				irqEnable,
+	const timer_irq_t					irqMask,
+	const timer_irq_enable_t			irqEnable,
 	reg* const							pDierRegImage
 );
+
+// ==================================================================================================== //
+//										Timer DIER DMA Request Codecs									//
+// ==================================================================================================== //
 
 /**
  * @brief Extracts enabled Timer DMA source selectors from a `DIER` image
@@ -494,13 +854,17 @@ driver_status_t Codec_TIM_ExtractDMAEnableMask
 driver_status_t Codec_TIM_StageDMAEnableMask
 (
 	const reg							dierRegImage,
-	const timer_dma_t						dmaMask,
+	const timer_dma_t					dmaMask,
 	const driver_status_t				dmaState,
 	reg* const							pDierRegImage
 );
 
 // ==================================================================================================== //
 //										Timer SR Flag Codecs											//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer SR IRQ Flag Codecs										//
 // ==================================================================================================== //
 
 /**
@@ -533,7 +897,7 @@ driver_status_t Codec_TIM_ExtractIRQFlagMask
 driver_status_t Codec_TIM_StageIRQAckMask
 (
 	const reg							srRegImage,
-	const timer_irq_t						irqMask,
+	const timer_irq_t					irqMask,
 	reg* const							pSrRegImage
 );
 

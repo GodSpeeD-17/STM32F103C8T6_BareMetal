@@ -39,6 +39,10 @@
 //										Local Register Image Helpers									//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Local Binary State Image Helpers								//
+// ==================================================================================================== //
+
 /**
  * @brief Validates whether a state selector is an accepted ON/OFF state
  * @param[in] state Driver state selector
@@ -107,6 +111,62 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageBitStateInImage
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ==================================================================================================== //
+//										Local Scalar Field Image Helpers								//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts one right-aligned scalar field from a register image
+ * @param[in] regImage Caller-owned register image
+ * @param[in] fieldMask Register-positioned field mask
+ * @param[in] fieldPos Zero-based field bit position
+ * @returns Right-aligned scalar value as @ref `reg`
+ */
+__STATIC_FORCEINLINE reg Codec_TIM_ExtractScalarField
+(
+	const reg					regImage,
+	const reg					fieldMask,
+	const reg_bit_pos_t			fieldPos
+)
+{
+	//! PSC/ARR/CNT are register-backed scalar fields; extract them through the Core field helper.
+	return RegOps_ExtractFieldValue(regImage, fieldMask, fieldPos);
+}
+
+/**
+ * @brief Stages one right-aligned scalar field inside a register image
+ * @param[in] regImage Caller-owned register image before replacement
+ * @param[in] fieldMask Register-positioned field mask
+ * @param[in] fieldPos Zero-based field bit position
+ * @param[in] value Right-aligned scalar value
+ * @param[out] pRegImage Destination for updated register image
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Scalar field was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
+ */
+__STATIC_FORCEINLINE driver_status_t Codec_TIM_StageScalarField
+(
+	const reg					regImage,
+	const reg					fieldMask,
+	const reg_bit_pos_t			fieldPos,
+	const reg					value,
+	reg* const					pRegImage
+)
+{
+	if (pRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Pack the right-aligned value into its hardware field position, then replace only that field.
+	*pRegImage = RegOps_StageField(regImage, fieldMask, REG_FIELD_VALUE(fieldPos, value));
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										Local Channel Index Helpers									//
+// ==================================================================================================== //
+
 /**
  * @brief Decodes a Timer single-channel mask into a zero-based channel index
  * @param[in] channel Timer single-channel mask
@@ -136,6 +196,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_GetChannelIndexFromMask
 	//! From this point onward the codec works with indexes because register fields are index-positioned.
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Local CCMR Field Position Helpers								//
+// ==================================================================================================== //
 
 /**
  * @brief Returns the hardware `CCxS` field position for one channel index
@@ -342,6 +406,10 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCCMROcClearPos(const timer_channel_index_t
 	return fieldPos;
 }
 
+// ==================================================================================================== //
+//										Local CCER Field Position Helpers								//
+// ==================================================================================================== //
+
 /**
  * @brief Returns the hardware `CCxE` field position for one channel index inside `CCER`
  * @param[in] channelIndex Zero-based channel index
@@ -428,6 +496,10 @@ __STATIC_FORCEINLINE reg Codec_TIM_GetCcerPolarityPos(const timer_channel_index_
 //										Local Selector Encode Helpers									//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Local Generic Selector Translation Helpers						//
+// ==================================================================================================== //
+
 /**
  * @brief Encodes a valid selector into a right-aligned raw field value
  * @param[in] isValid Selector validity flag
@@ -483,6 +555,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSelector
 	*pSelector = (uint8_t) rawField;
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Local CR1 Selector Translation Helpers							//
+// ==================================================================================================== //
 
 /**
  * @brief Encodes a count-mode selector into a register-positioned `CR1.CMS` value
@@ -677,6 +753,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToClockDivision
 
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Local Trigger Selector Translation Helpers						//
+// ==================================================================================================== //
 
 /**
  * @brief Encodes a master-mode selector into a register-positioned `CR2.MMS` value
@@ -922,6 +1002,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ==================================================================================================== //
+//										Local CCMR Selector Translation Helpers						//
+// ==================================================================================================== //
+
 /**
  * @brief Encodes a channel capture/compare selector into a CCMR-local `CCxS` value
  * @param[in] captureCompareSelection Timer capture/compare selector
@@ -1166,6 +1250,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToOutputCompareMode
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ==================================================================================================== //
+//										Local DIER/SR Mask Translation Helpers							//
+// ==================================================================================================== //
+
 /**
  * @brief Encodes a Timer IRQ selector mask into raw `DIER` interrupt bits
  * @param[in] irqMask Timer IRQ selector mask
@@ -1371,88 +1459,176 @@ __STATIC_FORCEINLINE reg Codec_TIM_DecodeDIERRawToDMAMask(const reg dierRegImage
 }
 
 // ==================================================================================================== //
-//										Timer CR1 Counter Codecs										//
+//										Timer Timebase Codecs											//
 // ==================================================================================================== //
 
-driver_status_t Codec_TIM_ExtractCounterConfig
+// ==================================================================================================== //
+//										Timer Timebase Scalar Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractPrescaler
 (
-	const reg							cr1RegImage,
-	timer_direction_t* const				pDirection,
-	timer_count_mode_t* const				pMode,
-	timer_opm_t* const					pOnePulse,
-	timer_arpe_t* const					pAutoReloadPreload,
-	timer_update_source_t* const			pUpdateSource,
-	timer_clock_division_t* const			pClockDivision
+	const reg							pscRegImage,
+	timer_prescaler_t* const				pPrescaler
 )
 {
-	reg_field_t rawField = (reg_field_t) 0x00U;
-
-	//! At least one output is required; each non-NULL pointer is decoded independently.
-	if
-	(
-		(pDirection == NULL) &&
-		(pMode == NULL) &&
-		(pOnePulse == NULL) &&
-		(pAutoReloadPreload == NULL) &&
-		(pUpdateSource == NULL) &&
-		(pClockDivision == NULL)
-	)
+	if (pPrescaler == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	if (pDirection != NULL)
+	//! PSC is a 16-bit scalar field; the codec only extracts the caller-owned image.
+	*pPrescaler = (timer_prescaler_t) Codec_TIM_ExtractScalarField(pscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_StagePrescaler
+(
+	const reg							pscRegImage,
+	const timer_prescaler_t				prescaler,
+	reg* const							pPscRegImage
+)
+{
+	//! Preserve any non-PSC bits in the caller-owned image while replacing PSC[15:0].
+	return Codec_TIM_StageScalarField(pscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos, (reg) prescaler, pPscRegImage);
+}
+
+driver_status_t Codec_TIM_ExtractAutoReload
+(
+	const reg							arrRegImage,
+	timer_auto_reload_t* const			pAutoReload
+)
+{
+	if (pAutoReload == NULL)
 	{
-		//! `DIR` is the raw direction field and maps directly to the public direction selector.
-		rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_DIR, TIM_CR1_DIR_Pos);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_DIRECTION_IS_VALID(rawField), rawField, pDirection));
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (pMode != NULL)
+
+	//! ARR is a 16-bit scalar field; the codec does not infer update period or frequency.
+	*pAutoReload = (timer_auto_reload_t) Codec_TIM_ExtractScalarField(arrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_StageAutoReload
+(
+	const reg							arrRegImage,
+	const timer_auto_reload_t			autoReload,
+	reg* const							pArrRegImage
+)
+{
+	//! Stage the register-backed ARR value directly; timing policy remains in the driver layer.
+	return Codec_TIM_StageScalarField(arrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos, (reg) autoReload, pArrRegImage);
+}
+
+driver_status_t Codec_TIM_ExtractCounterValue
+(
+	const reg							cntRegImage,
+	timer_counter_value_t* const			pCounterValue
+)
+{
+	if (pCounterValue == NULL)
 	{
-		//! `CMS` uses register-positioned semantic values from the Timer register layer.
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeCR1ToCountMode((cr1RegImage & TIM_CR1_CMS), pMode));
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (pOnePulse != NULL)
+
+	//! CNT is a 16-bit scalar field; extract only the hardware image value.
+	*pCounterValue = (timer_counter_value_t) Codec_TIM_ExtractScalarField(cntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_StageCounterValue
+(
+	const reg							cntRegImage,
+	const timer_counter_value_t			counterValue,
+	reg* const							pCntRegImage
+)
+{
+	//! Stage the raw CNT value without deciding whether the counter should be stopped first.
+	return Codec_TIM_StageScalarField(cntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos, (reg) counterValue, pCntRegImage);
+}
+
+// ==================================================================================================== //
+//										Timer Timebase Config Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractTimeBaseConfig
+(
+	const reg							pscRegImage,
+	const reg							arrRegImage,
+	const reg							cntRegImage,
+	timer_config_timebase_t* const		pTimebase
+)
+{
+	if (pTimebase == NULL)
 	{
-		//! `OPM` is a one-bit selector: continuous counting versus one-pulse mode.
-		rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_OPM, TIM_CR1_OPM_Pos);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_OPM_IS_VALID(rawField), rawField, pOnePulse));
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (pAutoReloadPreload != NULL)
-	{
-		//! `ARPE` controls whether ARR updates are buffered until update events.
-		rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_ARPE, TIM_CR1_ARPE_Pos);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_ARPE_IS_VALID(rawField), rawField, pAutoReloadPreload));
-	}
-	if (pUpdateSource != NULL)
-	{
-		//! `URS` selects whether any update source or only overflow/DMA sources generate update requests.
-		rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_URS, TIM_CR1_URS_Pos);
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeSelector(TIM_UPDATE_SOURCE_IS_VALID(rawField), rawField, pUpdateSource));
-	}
-	if (pClockDivision != NULL)
-	{
-		//! `CKD` divides the digital filter/dead-time sampling clock, not the counter clock.
-		ASSERT_DRIVER_STATUS(Codec_TIM_DecodeCR1ToClockDivision((cr1RegImage & TIM_CR1_CKD), pClockDivision));
-	}
+
+	//! Group extraction is just the three scalar extractions collected into the timebase structure.
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractPrescaler(pscRegImage, &(pTimebase->prescaler)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractAutoReload(arrRegImage, &(pTimebase->auto_reload)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractCounterValue(cntRegImage, &(pTimebase->initial_count)));
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_TIM_StageCounterConfig
+driver_status_t Codec_TIM_StageTimeBaseConfig
+(
+	const reg								pscRegImage,
+	const reg								arrRegImage,
+	const reg								cntRegImage,
+	const timer_config_timebase_t* const	pTimebase,
+	reg* const								pPscRegImage,
+	reg* const								pArrRegImage,
+	reg* const								pCntRegImage
+)
+{
+	if ((pTimebase == NULL) || (pPscRegImage == NULL) || (pArrRegImage == NULL) || (pCntRegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Stage every timebase register image independently so the driver can later dirty-write each one.
+	ASSERT_DRIVER_STATUS(Codec_TIM_StagePrescaler(pscRegImage, pTimebase->prescaler, pPscRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReload(arrRegImage, pTimebase->auto_reload, pArrRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterValue(cntRegImage, pTimebase->initial_count, pCntRegImage));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										Timer CR1 Counter Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer CR1 Counter Selector Codecs								//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractCounterDirection
+(
+	const reg							cr1RegImage,
+	timer_direction_t* const				pDirection
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pDirection == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `DIR` is the raw direction field and maps directly to the public direction selector.
+	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_DIR, TIM_CR1_DIR_Pos);
+	return Codec_TIM_DecodeSelector(TIM_DIRECTION_IS_VALID(rawField), rawField, pDirection);
+}
+
+driver_status_t Codec_TIM_StageCounterDirection
 (
 	const reg							cr1RegImage,
 	const timer_direction_t				direction,
-	const timer_count_mode_t				mode,
-	const timer_opm_t						onePulse,
-	const timer_arpe_t					autoReloadPreload,
-	const timer_update_source_t			updateSource,
-	const timer_clock_division_t			clockDivision,
 	reg* const							pCr1RegImage
 )
 {
-	reg updatedRegImage = cr1RegImage;
-	reg fieldSet = 0x00000000UL;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 
 	if (pCr1RegImage == NULL)
@@ -1460,28 +1636,257 @@ driver_status_t Codec_TIM_StageCounterConfig
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Stage into a working image so unrelated CR1 bits such as CEN and UDIS are preserved.
+	//! Stage only DIR, preserving all other CR1 bits in the caller-owned image.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_DIRECTION_IS_VALID(direction), direction, &rawField));
-	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_DIR_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_DIR_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
-	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeCountModeToCR1(mode, &fieldSet));
-	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR1_CMS, fieldSet);
+	return DRIVER_STATUS_SUCCESS;
+}
 
+driver_status_t Codec_TIM_ExtractCounterAlignment
+(
+	const reg							cr1RegImage,
+	timer_count_mode_t* const			pAlignment
+)
+{
+	if (pAlignment == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `CMS` uses register-positioned semantic values from the Timer register layer.
+	return Codec_TIM_DecodeCR1ToCountMode((cr1RegImage & TIM_CR1_CMS), pAlignment);
+}
+
+driver_status_t Codec_TIM_StageCounterAlignment
+(
+	const reg							cr1RegImage,
+	const timer_count_mode_t				alignment,
+	reg* const							pCr1RegImage
+)
+{
+	reg fieldSet = 0x00000000UL;
+
+	if (pCr1RegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Convert the public alignment selector into the register-positioned CMS field.
+	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeCountModeToCR1(alignment, &fieldSet));
+	*pCr1RegImage = RegOps_StageField(cr1RegImage, TIM_CR1_CMS, fieldSet);
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_ExtractOnePulse
+(
+	const reg							cr1RegImage,
+	timer_opm_t* const					pOnePulse
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pOnePulse == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `OPM` is a one-bit selector: continuous counting versus one-pulse mode.
+	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_OPM, TIM_CR1_OPM_Pos);
+	return Codec_TIM_DecodeSelector(TIM_OPM_IS_VALID(rawField), rawField, pOnePulse);
+}
+
+driver_status_t Codec_TIM_StageOnePulse
+(
+	const reg							cr1RegImage,
+	const timer_opm_t					onePulse,
+	reg* const							pCr1RegImage
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pCr1RegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Stage only OPM, preserving all unrelated CR1 fields.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_OPM_IS_VALID(onePulse), onePulse, &rawField));
-	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_OPM_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_OPM_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_ExtractAutoReloadPreload
+(
+	const reg							cr1RegImage,
+	timer_arpe_t* const					pAutoReloadPreload
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pAutoReloadPreload == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `ARPE` controls whether ARR updates are buffered until update events.
+	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_ARPE, TIM_CR1_ARPE_Pos);
+	return Codec_TIM_DecodeSelector(TIM_ARPE_IS_VALID(rawField), rawField, pAutoReloadPreload);
+}
+
+driver_status_t Codec_TIM_StageAutoReloadPreload
+(
+	const reg							cr1RegImage,
+	const timer_arpe_t					autoReloadPreload,
+	reg* const							pCr1RegImage
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pCr1RegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Stage only ARPE, preserving all unrelated CR1 fields.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_ARPE_IS_VALID(autoReloadPreload), autoReloadPreload, &rawField));
-	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_ARPE_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_ARPE_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_ExtractUpdateSource
+(
+	const reg							cr1RegImage,
+	timer_update_source_t* const			pUpdateSource
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pUpdateSource == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `URS` selects whether any update source or only overflow/DMA sources generate update requests.
+	rawField = RegOps_ExtractFieldValue(cr1RegImage, TIM_CR1_URS, TIM_CR1_URS_Pos);
+	return Codec_TIM_DecodeSelector(TIM_UPDATE_SOURCE_IS_VALID(rawField), rawField, pUpdateSource);
+}
+
+driver_status_t Codec_TIM_StageUpdateSource
+(
+	const reg							cr1RegImage,
+	const timer_update_source_t			updateSource,
+	reg* const							pCr1RegImage
+)
+{
+	reg_field_t rawField = (reg_field_t) 0x00U;
+
+	if (pCr1RegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Stage only URS; update-event enable state is still owned by UDIS helpers.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSelector(TIM_UPDATE_SOURCE_IS_VALID(updateSource), updateSource, &rawField));
-	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, TIM_CR1_URS_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
+	*pCr1RegImage = RegOps_StageFieldValue(cr1RegImage, TIM_CR1_URS_Pos, rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_ExtractClockDivision
+(
+	const reg							cr1RegImage,
+	timer_clock_division_t* const		pClockDivision
+)
+{
+	if (pClockDivision == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `CKD` divides the digital filter/dead-time sampling clock, not the counter clock.
+	return Codec_TIM_DecodeCR1ToClockDivision((cr1RegImage & TIM_CR1_CKD), pClockDivision);
+}
+
+driver_status_t Codec_TIM_StageClockDivision
+(
+	const reg							cr1RegImage,
+	const timer_clock_division_t			clockDivision,
+	reg* const							pCr1RegImage
+)
+{
+	reg fieldSet = 0x00000000UL;
+
+	if (pCr1RegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Convert the public CKD selector into the register-positioned CKD field.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeClockDivisionToCR1(clockDivision, &fieldSet));
-	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR1_CKD, fieldSet);
+	*pCr1RegImage = RegOps_StageField(cr1RegImage, TIM_CR1_CKD, fieldSet);
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										Timer CR1 Counter Config Codecs								//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractCounterConfig
+(
+	const reg							cr1RegImage,
+	timer_config_counter_t* const		pCounter
+)
+{
+	if (pCounter == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Group extraction composes the individual CR1 field codecs into the counter structure.
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractCounterDirection(cr1RegImage, &(pCounter->direction)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractCounterAlignment(cr1RegImage, &(pCounter->alignment)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractOnePulse(cr1RegImage, &(pCounter->one_pulse)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractAutoReloadPreload(cr1RegImage, &(pCounter->auto_reload_preload)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractUpdateSource(cr1RegImage, &(pCounter->update_source)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_ExtractClockDivision(cr1RegImage, &(pCounter->clock_division)));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_StageCounterConfig
+(
+	const reg							cr1RegImage,
+	const timer_config_counter_t* const	pCounter,
+	reg* const							pCr1RegImage
+)
+{
+	reg updatedRegImage = cr1RegImage;
+
+	if ((pCounter == NULL) || (pCr1RegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Group staging composes individual CR1 field stages so each field API has one implementation path.
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterDirection(updatedRegImage, pCounter->direction, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterAlignment(updatedRegImage, pCounter->alignment, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageOnePulse(updatedRegImage, pCounter->one_pulse, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReloadPreload(updatedRegImage, pCounter->auto_reload_preload, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateSource(updatedRegImage, pCounter->update_source, &updatedRegImage));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageClockDivision(updatedRegImage, pCounter->clock_division, &updatedRegImage));
 
 	*pCr1RegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Timer CR1 Runtime State Codecs									//
+// ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractCounterEnableState
 (
@@ -1550,6 +1955,10 @@ driver_status_t Codec_TIM_StageUpdateEventState
 //										Timer Trigger Codecs											//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Timer Master Mode Codecs										//
+// ==================================================================================================== //
+
 driver_status_t Codec_TIM_ExtractMasterMode
 (
 	const reg							cr2RegImage,
@@ -1579,6 +1988,10 @@ driver_status_t Codec_TIM_StageMasterMode
 
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Timer Slave Mode Codecs										//
+// ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
@@ -1612,6 +2025,10 @@ driver_status_t Codec_TIM_StageSlaveMode
 
 // ==================================================================================================== //
 //										Timer CCMR Channel Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer CCMR Channel Selection Codecs							//
 // ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractChannelSelection
@@ -1672,6 +2089,10 @@ driver_status_t Codec_TIM_StageChannelSelection
 
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Timer CCMR Output Compare Codecs								//
+// ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
@@ -1800,6 +2221,10 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 //										Timer CCER Channel Codecs										//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Timer CCER Channel Enable Codecs								//
+// ==================================================================================================== //
+
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
@@ -1849,6 +2274,10 @@ driver_status_t Codec_TIM_StageChannelEnableState
 		pCcerRegImage
 	);
 }
+
+// ==================================================================================================== //
+//										Timer CCER Channel Polarity Codecs								//
+// ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
@@ -1912,6 +2341,10 @@ driver_status_t Codec_TIM_StageChannelPolarity
 //										Timer DIER Request Codecs										//
 // ==================================================================================================== //
 
+// ==================================================================================================== //
+//										Timer DIER IRQ Request Codecs									//
+// ==================================================================================================== //
+
 driver_status_t Codec_TIM_ExtractIRQEnableMask
 (
 	const reg							dierRegImage,
@@ -1955,6 +2388,10 @@ driver_status_t Codec_TIM_StageIRQEnableMask
 
 	return DRIVER_STATUS_SUCCESS;
 }
+
+// ==================================================================================================== //
+//										Timer DIER DMA Request Codecs									//
+// ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractDMAEnableMask
 (
@@ -2003,6 +2440,10 @@ driver_status_t Codec_TIM_StageDMAEnableMask
 
 // ==================================================================================================== //
 //										Timer SR Flag Codecs											//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer SR IRQ Flag Codecs										//
 // ==================================================================================================== //
 
 driver_status_t Codec_TIM_ExtractIRQFlagMask

@@ -60,28 +60,29 @@ extern "C" {
  * @brief Timer timebase configuration
  * @typedef timer_config_timebase_t
  * @details
- * Groups the Timer values that define the counter tick and counting window.
- * The driver converts @ref `tick_frequency` into the raw `PSC` value,
- * then stages @ref `auto_reload` into `ARR` and @ref `initial_count` into `CNT`.
+ * Groups the Timer register-backed values that define the counter clock
+ * division and counting window. The driver stages @ref `prescaler` into `PSC`,
+ * @ref `auto_reload` into `ARR`, and @ref `initial_count` into `CNT`.
  *
- * @note @ref `tick_frequency` represents the counter tick frequency,
- * not the update-event frequency and not PWM frequency.
+ * @note The counter tick frequency is derived from @ref `prescaler` as
+ * `timer_input_clock / (prescaler + 1U)`.
  */
 typedef struct _timer_config_timebase_t
 {
 	/**
-	 * @brief Requested counter tick frequency in hertz
+	 * @brief Prescaler value staged into `TIMx_PSC`
 	 * @details
-	 * The driver computes `PSC = (timer_input_clock / tick_frequency) - 1U`.
+	 * Divides the Timer input clock before it reaches the counter.
+	 * `CK_CNT = timer_input_clock / (prescaler + 1U)`.
 	 * @memberof timer_config_timebase_t
 	 */
-	timer_frequency_t			tick_frequency;
+	timer_prescaler_t			prescaler;
 
 	/**
 	 * @brief Auto-reload value staged into `TIMx_ARR`
 	 * @details
 	 * Defines the counter reload boundary. The effective update period depends
-	 * on both @ref `tick_frequency` and @ref `auto_reload`.
+	 * on both @ref `prescaler` and @ref `auto_reload`.
 	 * @memberof timer_config_timebase_t
 	 */
 	timer_auto_reload_t			auto_reload;
