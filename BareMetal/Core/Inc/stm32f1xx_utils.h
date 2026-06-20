@@ -69,19 +69,19 @@ extern "C" {
 /**
  * @brief Shifts a raw value into a register field position
  * @def REG_FIELD_VALUE
- * @param[in] _Pos Bit position, zero-based
+ * @param[in] _Pos Bit position, zero-based; treated as @ref `reg_bit_pos_t`
  * @param[in] _Val Raw value before shifting
  * @returns Shifted 32-bit value
  * @note @p _Pos must be in the range `0U..31U`.
  * @note @p _Val must already be masked to the intended field width.
  */
-#define REG_FIELD_VALUE(_Pos, _Val)						((reg) (((uint32_t) (_Val)) << ((uint8_t) (_Pos))))
+#define REG_FIELD_VALUE(_Pos, _Val)						((reg) (((uint32_t) (_Val)) << ((reg_bit_pos_t) (_Pos))))
 
 /**
  * @brief Creates a register-positioned contiguous field mask from field width and position
  * @def REG_FIELD_MASK
- * @param[in] _Pos Target bit position, zero-based
- * @param[in] _FieldWidth Number of bits in the field, treated as `uint8_t`
+ * @param[in] _Pos Target bit position, zero-based; treated as @ref `reg_bit_pos_t`
+ * @param[in] _FieldWidth Number of bits in the field, treated as @ref `reg_field_width_t`
  * @returns Register-positioned 32-bit field mask
  * @retval - `0x00000000UL`: @p _FieldWidth is `0U`
  * @retval - Non-zero contiguous mask shifted to @p _Pos: @p _FieldWidth is `1U..32U`
@@ -93,9 +93,11 @@ extern "C" {
 #define REG_FIELD_MASK(_Pos, _FieldWidth)											\
 	REG_FIELD_VALUE																	\
 	(																				\
-		(_Pos),																		\
-		((((uint8_t) (_FieldWidth)) >= ((uint8_t) 32U)) ? 0xFFFFFFFFUL :			\
-		(((uint32_t) 0x01UL << ((uint8_t) (_FieldWidth))) - (uint32_t) 0x01UL))		\
+		((reg_bit_pos_t) (_Pos)),													\
+		((((reg_field_width_t) (_FieldWidth)) >= ((reg_field_width_t) 32U)) ?		\
+			0xFFFFFFFFUL :															\
+			(((uint32_t) 0x01UL << ((reg_field_width_t) (_FieldWidth))) -			\
+				(uint32_t) 0x01UL))													\
 	)
 
 /**
@@ -103,27 +105,31 @@ extern "C" {
  * @def REG_FIELD_PACK
  * @see `REG_FIELD_VALUE`
  * @see `REG_FIELD_MASK`
- * @param[in] _Pos Target bit position, zero-based
+ * @param[in] _Pos Target bit position, zero-based; treated as @ref `reg_bit_pos_t`
  * @param[in] _Val Right-aligned raw field value
- * @param[in] _FieldWidth Number of bits in the field, treated as `uint8_t`
+ * @param[in] _FieldWidth Number of bits in the field, treated as @ref `reg_field_width_t`
  * @returns Shifted 32-bit register field value
  * @retval - @p _Val masked to @p _FieldWidth bits and shifted to @p _Pos
  * @note @p `_FieldWidth` must be in the range `0U..32U`.
  * @note @p `_Pos` must be in the range `0U..31U`.
  * @note @p `_FieldWidth + _Pos` must not exceed `32U`.
  */
-#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)									\
-	REG_FIELD_VALUE((_Pos), (((uint32_t) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth))))
+#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)										\
+	REG_FIELD_VALUE																	\
+	(																				\
+		((reg_bit_pos_t) (_Pos)),													\
+		(((uint32_t) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth)))					\
+	)
 
 /**
  * @brief Creates a single-bit mask at the requested bit position
  * @def REG_BIT_MASK
  * @see `REG_FIELD_VALUE`
- * @param[in] _Pos Bit position, zero-based
+ * @param[in] _Pos Bit position, zero-based; treated as @ref `reg_bit_pos_t`
  * @returns 32-bit mask with only bit @p _Pos set
  * @note @p _Pos must be in the range `0U..31U`.
  */
-#define REG_BIT_MASK(_Pos)								REG_FIELD_VALUE((_Pos), 0x01UL)
+#define REG_BIT_MASK(_Pos)								REG_FIELD_VALUE(((reg_bit_pos_t) (_Pos)), 0x01UL)
 
 /**
  * @brief   Compute peripheral index based on base addresses and peripheral size
@@ -297,14 +303,35 @@ __STATIC_FORCEINLINE reg RegOps_StageField(const reg regImage, const reg fieldMa
 }
 
 /**
+ * @brief Extracts a right-aligned field value from a 32-bit register image
+ * @param[in] regImage Register image to inspect
+ * @param[in] fieldMask Register-positioned field mask
+ * @param[in] pos Target bit position, zero-based, typed as @ref `reg_bit_pos_t`
+ * @returns Right-aligned raw field value as @ref `reg`.
+ * @note This helper performs: `(regImage & fieldMask) >> pos`.
+ * @note @p fieldMask must already be shifted into register position.
+ * @note @p pos must match the least-significant bit position of @p fieldMask.
+ */
+__STATIC_FORCEINLINE reg RegOps_ExtractFieldValue
+(
+	const reg						regImage,
+	const reg						fieldMask,
+	const reg_bit_pos_t				pos
+)
+{
+	//! Mask first, then shift down so callers receive a right-aligned raw field value.
+	return ((regImage & fieldMask) >> pos);
+}
+
+/**
  * @brief Stages a right-aligned field value into a 32-bit register image
  * @see `REG_FIELD_MASK`
  * @see `REG_FIELD_PACK`
  * @see `RegOps_StageField`
  * @param[in] regImage Register image before field replacement
- * @param[in] pos Target bit position, zero-based
+ * @param[in] pos Target bit position, zero-based, typed as @ref `reg_bit_pos_t`
  * @param[in] value Right-aligned raw field value to stage
- * @param[in] fieldWidth Number of bits in the field, treated as `uint8_t`
+ * @param[in] fieldWidth Number of bits in the field, typed as @ref `reg_field_width_t`
  * @returns Updated register image
  * @note This helper computes the register-positioned field mask with
  * @ref `REG_FIELD_MASK`, clears that field, and writes @p value at @p pos.
@@ -315,9 +342,9 @@ __STATIC_FORCEINLINE reg RegOps_StageField(const reg regImage, const reg fieldMa
 __STATIC_FORCEINLINE reg RegOps_StageFieldValue
 (
 	const reg					regImage,
-	const uint8_t				pos,
+	const reg_bit_pos_t			pos,
 	const reg					value,
-	const uint8_t				fieldWidth
+	const reg_field_width_t		fieldWidth
 )
 {
 	// Local Variables

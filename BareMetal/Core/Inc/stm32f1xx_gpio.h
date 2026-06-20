@@ -168,14 +168,14 @@ extern "C" {
 
 // ------ MODE (Port Mode Bits for Pins 0-7) ------ // 
 /** @brief GPIO_CRL_MODE Position @def GPIO_CRL_MODE_Pos */
-#define GPIO_CRL_MODE_Pos			(0U)
+#define GPIO_CRL_MODE_Pos			((reg_bit_pos_t) 0U)
 /** @brief GPIO_CRL_MODE Mask @def GPIO_CRL_MODE_Msk */
 #define GPIO_CRL_MODE_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE_Pos, 0x33333333UL))
 /** @brief Port Mode Bits @def GPIO_CRL_MODE */
 #define GPIO_CRL_MODE				GPIO_CRL_MODE_Msk
 
 /** @brief GPIO_CRL_MODE0 Position @def GPIO_CRL_MODE0_Pos */
-#define GPIO_CRL_MODE0_Pos			(0U)
+#define GPIO_CRL_MODE0_Pos			((reg_bit_pos_t) 0U)
 /** @brief GPIO_CRL_MODE0 Mask @def GPIO_CRL_MODE0_Msk */
 #define GPIO_CRL_MODE0_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE0_Pos, 0x3UL))
 /** @brief MODE0 @def GPIO_CRL_MODE0 */
@@ -186,7 +186,7 @@ extern "C" {
 #define GPIO_CRL_MODE0_1			(REG_FIELD_VALUE(GPIO_CRL_MODE0_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE1 Position @def GPIO_CRL_MODE1_Pos */
-#define GPIO_CRL_MODE1_Pos			(4U)
+#define GPIO_CRL_MODE1_Pos			((reg_bit_pos_t) 4U)
 /** @brief GPIO_CRL_MODE1 Mask @def GPIO_CRL_MODE1_Msk */
 #define GPIO_CRL_MODE1_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE1_Pos, 0x3UL))
 /** @brief MODE1 @def GPIO_CRL_MODE1 */
@@ -197,7 +197,7 @@ extern "C" {
 #define GPIO_CRL_MODE1_1			(REG_FIELD_VALUE(GPIO_CRL_MODE1_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE2 Position @def GPIO_CRL_MODE2_Pos */
-#define GPIO_CRL_MODE2_Pos			(8U)
+#define GPIO_CRL_MODE2_Pos			((reg_bit_pos_t) 8U)
 /** @brief GPIO_CRL_MODE2 Mask @def GPIO_CRL_MODE2_Msk */
 #define GPIO_CRL_MODE2_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE2_Pos, 0x3UL))
 /** @brief MODE2 @def GPIO_CRL_MODE2 */
@@ -208,7 +208,7 @@ extern "C" {
 #define GPIO_CRL_MODE2_1			(REG_FIELD_VALUE(GPIO_CRL_MODE2_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE3 Position @def GPIO_CRL_MODE3_Pos */
-#define GPIO_CRL_MODE3_Pos			(12U)
+#define GPIO_CRL_MODE3_Pos			((reg_bit_pos_t) 12U)
 /** @brief GPIO_CRL_MODE3 Mask @def GPIO_CRL_MODE3_Msk */
 #define GPIO_CRL_MODE3_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE3_Pos, 0x3UL))
 /** @brief MODE3 @def GPIO_CRL_MODE3 */
@@ -219,7 +219,7 @@ extern "C" {
 #define GPIO_CRL_MODE3_1			(REG_FIELD_VALUE(GPIO_CRL_MODE3_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE4 Position @def GPIO_CRL_MODE4_Pos */
-#define GPIO_CRL_MODE4_Pos			(16U)
+#define GPIO_CRL_MODE4_Pos			((reg_bit_pos_t) 16U)
 /** @brief GPIO_CRL_MODE4 Mask @def GPIO_CRL_MODE4_Msk */
 #define GPIO_CRL_MODE4_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE4_Pos, 0x3UL))
 /** @brief MODE4 @def GPIO_CRL_MODE4 */
@@ -230,7 +230,7 @@ extern "C" {
 #define GPIO_CRL_MODE4_1			(REG_FIELD_VALUE(GPIO_CRL_MODE4_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE5 Position @def GPIO_CRL_MODE5_Pos */
-#define GPIO_CRL_MODE5_Pos			(20U)
+#define GPIO_CRL_MODE5_Pos			((reg_bit_pos_t) 20U)
 /** @brief GPIO_CRL_MODE5 Mask @def GPIO_CRL_MODE5_Msk */
 #define GPIO_CRL_MODE5_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE5_Pos, 0x3UL))
 /** @brief MODE5 @def GPIO_CRL_MODE5 */
@@ -241,7 +241,7 @@ extern "C" {
 #define GPIO_CRL_MODE5_1			(REG_FIELD_VALUE(GPIO_CRL_MODE5_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE6 Position @def GPIO_CRL_MODE6_Pos */
-#define GPIO_CRL_MODE6_Pos			(24U)
+#define GPIO_CRL_MODE6_Pos			((reg_bit_pos_t) 24U)
 /** @brief GPIO_CRL_MODE6 Mask @def GPIO_CRL_MODE6_Msk */
 #define GPIO_CRL_MODE6_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE6_Pos, 0x3UL))
 /** @brief MODE6 @def GPIO_CRL_MODE6 */
@@ -252,7 +252,7 @@ extern "C" {
 #define GPIO_CRL_MODE6_1			(REG_FIELD_VALUE(GPIO_CRL_MODE6_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_MODE7 Position @def GPIO_CRL_MODE7_Pos */
-#define GPIO_CRL_MODE7_Pos			(28U)
+#define GPIO_CRL_MODE7_Pos			((reg_bit_pos_t) 28U)
 /** @brief GPIO_CRL_MODE7 Mask @def GPIO_CRL_MODE7_Msk */
 #define GPIO_CRL_MODE7_Msk			(REG_FIELD_VALUE(GPIO_CRL_MODE7_Pos, 0x3UL))
 /** @brief MODE7 @def GPIO_CRL_MODE7 */
@@ -264,14 +264,14 @@ extern "C" {
 
 // ------ CNF (Port Configuration Bits for Pins 0-7) ------ // 
 /** @brief GPIO_CRL_CNF Position @def GPIO_CRL_CNF_Pos */
-#define GPIO_CRL_CNF_Pos			(2U)
+#define GPIO_CRL_CNF_Pos			((reg_bit_pos_t) 2U)
 /** @brief GPIO_CRL_CNF Mask @def GPIO_CRL_CNF_Msk */
 #define GPIO_CRL_CNF_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF_Pos, 0x33333333UL))
 /** @brief Port Configuration Bits @def GPIO_CRL_CNF */
 #define GPIO_CRL_CNF				GPIO_CRL_CNF_Msk
 
 /** @brief GPIO_CRL_CNF0 Position @def GPIO_CRL_CNF0_Pos */
-#define GPIO_CRL_CNF0_Pos			(2U)
+#define GPIO_CRL_CNF0_Pos			((reg_bit_pos_t) 2U)
 /** @brief GPIO_CRL_CNF0 Mask @def GPIO_CRL_CNF0_Msk */
 #define GPIO_CRL_CNF0_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF0_Pos, 0x3UL))
 /** @brief CNF0 @def GPIO_CRL_CNF0 */
@@ -282,7 +282,7 @@ extern "C" {
 #define GPIO_CRL_CNF0_1				(REG_FIELD_VALUE(GPIO_CRL_CNF0_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF1 Position @def GPIO_CRL_CNF1_Pos */
-#define GPIO_CRL_CNF1_Pos			(6U)
+#define GPIO_CRL_CNF1_Pos			((reg_bit_pos_t) 6U)
 /** @brief GPIO_CRL_CNF1 Mask @def GPIO_CRL_CNF1_Msk */
 #define GPIO_CRL_CNF1_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF1_Pos, 0x3UL))
 /** @brief CNF1 @def GPIO_CRL_CNF1 */
@@ -293,7 +293,7 @@ extern "C" {
 #define GPIO_CRL_CNF1_1				(REG_FIELD_VALUE(GPIO_CRL_CNF1_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF2 Position @def GPIO_CRL_CNF2_Pos */
-#define GPIO_CRL_CNF2_Pos			(10U)
+#define GPIO_CRL_CNF2_Pos			((reg_bit_pos_t) 10U)
 /** @brief GPIO_CRL_CNF2 Mask @def GPIO_CRL_CNF2_Msk */
 #define GPIO_CRL_CNF2_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF2_Pos, 0x3UL))
 /** @brief CNF2 @def GPIO_CRL_CNF2 */
@@ -304,7 +304,7 @@ extern "C" {
 #define GPIO_CRL_CNF2_1				(REG_FIELD_VALUE(GPIO_CRL_CNF2_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF3 Position @def GPIO_CRL_CNF3_Pos */
-#define GPIO_CRL_CNF3_Pos			(14U)
+#define GPIO_CRL_CNF3_Pos			((reg_bit_pos_t) 14U)
 /** @brief GPIO_CRL_CNF3 Mask @def GPIO_CRL_CNF3_Msk */
 #define GPIO_CRL_CNF3_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF3_Pos, 0x3UL))
 /** @brief CNF3 @def GPIO_CRL_CNF3 */
@@ -315,7 +315,7 @@ extern "C" {
 #define GPIO_CRL_CNF3_1				(REG_FIELD_VALUE(GPIO_CRL_CNF3_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF4 Position @def GPIO_CRL_CNF4_Pos */
-#define GPIO_CRL_CNF4_Pos			(18U)
+#define GPIO_CRL_CNF4_Pos			((reg_bit_pos_t) 18U)
 /** @brief GPIO_CRL_CNF4 Mask @def GPIO_CRL_CNF4_Msk */
 #define GPIO_CRL_CNF4_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF4_Pos, 0x3UL))
 /** @brief CNF4 @def GPIO_CRL_CNF4 */
@@ -326,7 +326,7 @@ extern "C" {
 #define GPIO_CRL_CNF4_1				(REG_FIELD_VALUE(GPIO_CRL_CNF4_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF5 Position @def GPIO_CRL_CNF5_Pos */
-#define GPIO_CRL_CNF5_Pos			(22U)
+#define GPIO_CRL_CNF5_Pos			((reg_bit_pos_t) 22U)
 /** @brief GPIO_CRL_CNF5 Mask @def GPIO_CRL_CNF5_Msk */
 #define GPIO_CRL_CNF5_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF5_Pos, 0x3UL))
 /** @brief CNF5 @def GPIO_CRL_CNF5 */
@@ -337,7 +337,7 @@ extern "C" {
 #define GPIO_CRL_CNF5_1				(REG_FIELD_VALUE(GPIO_CRL_CNF5_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF6 Position @def GPIO_CRL_CNF6_Pos */
-#define GPIO_CRL_CNF6_Pos			(26U)
+#define GPIO_CRL_CNF6_Pos			((reg_bit_pos_t) 26U)
 /** @brief GPIO_CRL_CNF6 Mask @def GPIO_CRL_CNF6_Msk */
 #define GPIO_CRL_CNF6_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF6_Pos, 0x3UL))
 /** @brief CNF6 @def GPIO_CRL_CNF6 */
@@ -348,7 +348,7 @@ extern "C" {
 #define GPIO_CRL_CNF6_1				(REG_FIELD_VALUE(GPIO_CRL_CNF6_Pos, 0x2UL))
 
 /** @brief GPIO_CRL_CNF7 Position @def GPIO_CRL_CNF7_Pos */
-#define GPIO_CRL_CNF7_Pos			(30U)
+#define GPIO_CRL_CNF7_Pos			((reg_bit_pos_t) 30U)
 /** @brief GPIO_CRL_CNF7 Mask @def GPIO_CRL_CNF7_Msk */
 #define GPIO_CRL_CNF7_Msk			(REG_FIELD_VALUE(GPIO_CRL_CNF7_Pos, 0x3UL))
 /** @brief CNF7 @def GPIO_CRL_CNF7 */
@@ -388,14 +388,14 @@ extern "C" {
 
 // ------ MODE (Port Mode Bits for Pins 8-15) ------ // 
 /** @brief GPIO_CRH_MODE Position @def GPIO_CRH_MODE_Pos */
-#define GPIO_CRH_MODE_Pos			(0U)
+#define GPIO_CRH_MODE_Pos			((reg_bit_pos_t) 0U)
 /** @brief GPIO_CRH_MODE Mask @def GPIO_CRH_MODE_Msk */
 #define GPIO_CRH_MODE_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE_Pos, 0x33333333UL))
 /** @brief Port Mode Bits @def GPIO_CRH_MODE */
 #define GPIO_CRH_MODE				GPIO_CRH_MODE_Msk
 
 /** @brief GPIO_CRH_MODE8 Position @def GPIO_CRH_MODE8_Pos */
-#define GPIO_CRH_MODE8_Pos			(0U)
+#define GPIO_CRH_MODE8_Pos			((reg_bit_pos_t) 0U)
 /** @brief GPIO_CRH_MODE8 Mask @def GPIO_CRH_MODE8_Msk */
 #define GPIO_CRH_MODE8_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE8_Pos, 0x3UL))
 /** @brief MODE8 @def GPIO_CRH_MODE8 */
@@ -406,7 +406,7 @@ extern "C" {
 #define GPIO_CRH_MODE8_1			(REG_FIELD_VALUE(GPIO_CRH_MODE8_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE9 Position @def GPIO_CRH_MODE9_Pos */
-#define GPIO_CRH_MODE9_Pos			(4U)
+#define GPIO_CRH_MODE9_Pos			((reg_bit_pos_t) 4U)
 /** @brief GPIO_CRH_MODE9 Mask @def GPIO_CRH_MODE9_Msk */
 #define GPIO_CRH_MODE9_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE9_Pos, 0x3UL))
 /** @brief MODE9 @def GPIO_CRH_MODE9 */
@@ -417,7 +417,7 @@ extern "C" {
 #define GPIO_CRH_MODE9_1			(REG_FIELD_VALUE(GPIO_CRH_MODE9_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE10 Position @def GPIO_CRH_MODE10_Pos */
-#define GPIO_CRH_MODE10_Pos			(8U)
+#define GPIO_CRH_MODE10_Pos			((reg_bit_pos_t) 8U)
 /** @brief GPIO_CRH_MODE10 Mask @def GPIO_CRH_MODE10_Msk */
 #define GPIO_CRH_MODE10_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE10_Pos, 0x3UL))
 /** @brief MODE10 @def GPIO_CRH_MODE10 */
@@ -428,7 +428,7 @@ extern "C" {
 #define GPIO_CRH_MODE10_1			(REG_FIELD_VALUE(GPIO_CRH_MODE10_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE11 Position @def GPIO_CRH_MODE11_Pos */
-#define GPIO_CRH_MODE11_Pos			(12U)
+#define GPIO_CRH_MODE11_Pos			((reg_bit_pos_t) 12U)
 /** @brief GPIO_CRH_MODE11 Mask @def GPIO_CRH_MODE11_Msk */
 #define GPIO_CRH_MODE11_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE11_Pos, 0x3UL))
 /** @brief MODE11 @def GPIO_CRH_MODE11 */
@@ -439,7 +439,7 @@ extern "C" {
 #define GPIO_CRH_MODE11_1			(REG_FIELD_VALUE(GPIO_CRH_MODE11_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE12 Position @def GPIO_CRH_MODE12_Pos */
-#define GPIO_CRH_MODE12_Pos			(16U)
+#define GPIO_CRH_MODE12_Pos			((reg_bit_pos_t) 16U)
 /** @brief GPIO_CRH_MODE12 Mask @def GPIO_CRH_MODE12_Msk */
 #define GPIO_CRH_MODE12_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE12_Pos, 0x3UL))
 /** @brief MODE12 @def GPIO_CRH_MODE12 */
@@ -450,7 +450,7 @@ extern "C" {
 #define GPIO_CRH_MODE12_1			(REG_FIELD_VALUE(GPIO_CRH_MODE12_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE13 Position @def GPIO_CRH_MODE13_Pos */
-#define GPIO_CRH_MODE13_Pos			(20U)
+#define GPIO_CRH_MODE13_Pos			((reg_bit_pos_t) 20U)
 /** @brief GPIO_CRH_MODE13 Mask @def GPIO_CRH_MODE13_Msk */
 #define GPIO_CRH_MODE13_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE13_Pos, 0x3UL))
 /** @brief MODE13 @def GPIO_CRH_MODE13 */
@@ -461,7 +461,7 @@ extern "C" {
 #define GPIO_CRH_MODE13_1			(REG_FIELD_VALUE(GPIO_CRH_MODE13_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE14 Position @def GPIO_CRH_MODE14_Pos */
-#define GPIO_CRH_MODE14_Pos			(24U)
+#define GPIO_CRH_MODE14_Pos			((reg_bit_pos_t) 24U)
 /** @brief GPIO_CRH_MODE14 Mask @def GPIO_CRH_MODE14_Msk */
 #define GPIO_CRH_MODE14_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE14_Pos, 0x3UL))
 /** @brief MODE14 @def GPIO_CRH_MODE14 */
@@ -472,7 +472,7 @@ extern "C" {
 #define GPIO_CRH_MODE14_1			(REG_FIELD_VALUE(GPIO_CRH_MODE14_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_MODE15 Position @def GPIO_CRH_MODE15_Pos */
-#define GPIO_CRH_MODE15_Pos			(28U)
+#define GPIO_CRH_MODE15_Pos			((reg_bit_pos_t) 28U)
 /** @brief GPIO_CRH_MODE15 Mask @def GPIO_CRH_MODE15_Msk */
 #define GPIO_CRH_MODE15_Msk			(REG_FIELD_VALUE(GPIO_CRH_MODE15_Pos, 0x3UL))
 /** @brief MODE15 @def GPIO_CRH_MODE15 */
@@ -484,14 +484,14 @@ extern "C" {
 
 // ------ CNF (Port Configuration Bits for Pins 8-15) ------ // 
 /** @brief GPIO_CRH_CNF Position @def GPIO_CRH_CNF_Pos */
-#define GPIO_CRH_CNF_Pos			(2U)
+#define GPIO_CRH_CNF_Pos			((reg_bit_pos_t) 2U)
 /** @brief GPIO_CRH_CNF Mask @def GPIO_CRH_CNF_Msk */
 #define GPIO_CRH_CNF_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF_Pos, 0x33333333UL))
 /** @brief Port Configuration Bits @def GPIO_CRH_CNF */
 #define GPIO_CRH_CNF				GPIO_CRH_CNF_Msk
 
 /** @brief GPIO_CRH_CNF8 Position @def GPIO_CRH_CNF8_Pos */
-#define GPIO_CRH_CNF8_Pos			(2U)
+#define GPIO_CRH_CNF8_Pos			((reg_bit_pos_t) 2U)
 /** @brief GPIO_CRH_CNF8 Mask @def GPIO_CRH_CNF8_Msk */
 #define GPIO_CRH_CNF8_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF8_Pos, 0x3UL))
 /** @brief CNF8 @def GPIO_CRH_CNF8 */
@@ -502,7 +502,7 @@ extern "C" {
 #define GPIO_CRH_CNF8_1				(REG_FIELD_VALUE(GPIO_CRH_CNF8_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF9 Position @def GPIO_CRH_CNF9_Pos */
-#define GPIO_CRH_CNF9_Pos			(6U)
+#define GPIO_CRH_CNF9_Pos			((reg_bit_pos_t) 6U)
 /** @brief GPIO_CRH_CNF9 Mask @def GPIO_CRH_CNF9_Msk */
 #define GPIO_CRH_CNF9_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF9_Pos, 0x3UL))
 /** @brief CNF9 @def GPIO_CRH_CNF9 */
@@ -513,7 +513,7 @@ extern "C" {
 #define GPIO_CRH_CNF9_1				(REG_FIELD_VALUE(GPIO_CRH_CNF9_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF10 Position @def GPIO_CRH_CNF10_Pos */
-#define GPIO_CRH_CNF10_Pos			(10U)
+#define GPIO_CRH_CNF10_Pos			((reg_bit_pos_t) 10U)
 /** @brief GPIO_CRH_CNF10 Mask @def GPIO_CRH_CNF10_Msk */
 #define GPIO_CRH_CNF10_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF10_Pos, 0x3UL))
 /** @brief CNF10 @def GPIO_CRH_CNF10 */
@@ -524,7 +524,7 @@ extern "C" {
 #define GPIO_CRH_CNF10_1			(REG_FIELD_VALUE(GPIO_CRH_CNF10_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF11 Position @def GPIO_CRH_CNF11_Pos */
-#define GPIO_CRH_CNF11_Pos			(14U)
+#define GPIO_CRH_CNF11_Pos			((reg_bit_pos_t) 14U)
 /** @brief GPIO_CRH_CNF11 Mask @def GPIO_CRH_CNF11_Msk */
 #define GPIO_CRH_CNF11_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF11_Pos, 0x3UL))
 /** @brief CNF11 @def GPIO_CRH_CNF11 */
@@ -535,7 +535,7 @@ extern "C" {
 #define GPIO_CRH_CNF11_1			(REG_FIELD_VALUE(GPIO_CRH_CNF11_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF12 Position @def GPIO_CRH_CNF12_Pos */
-#define GPIO_CRH_CNF12_Pos			(18U)
+#define GPIO_CRH_CNF12_Pos			((reg_bit_pos_t) 18U)
 /** @brief GPIO_CRH_CNF12 Mask @def GPIO_CRH_CNF12_Msk */
 #define GPIO_CRH_CNF12_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF12_Pos, 0x3UL))
 /** @brief CNF12 @def GPIO_CRH_CNF12 */
@@ -546,7 +546,7 @@ extern "C" {
 #define GPIO_CRH_CNF12_1			(REG_FIELD_VALUE(GPIO_CRH_CNF12_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF13 Position @def GPIO_CRH_CNF13_Pos */
-#define GPIO_CRH_CNF13_Pos			(22U)
+#define GPIO_CRH_CNF13_Pos			((reg_bit_pos_t) 22U)
 /** @brief GPIO_CRH_CNF13 Mask @def GPIO_CRH_CNF13_Msk */
 #define GPIO_CRH_CNF13_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF13_Pos, 0x3UL))
 /** @brief CNF13 @def GPIO_CRH_CNF13 */
@@ -557,7 +557,7 @@ extern "C" {
 #define GPIO_CRH_CNF13_1			(REG_FIELD_VALUE(GPIO_CRH_CNF13_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF14 Position @def GPIO_CRH_CNF14_Pos */
-#define GPIO_CRH_CNF14_Pos			(26U)
+#define GPIO_CRH_CNF14_Pos			((reg_bit_pos_t) 26U)
 /** @brief GPIO_CRH_CNF14 Mask @def GPIO_CRH_CNF14_Msk */
 #define GPIO_CRH_CNF14_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF14_Pos, 0x3UL))
 /** @brief CNF14 @def GPIO_CRH_CNF14 */
@@ -568,7 +568,7 @@ extern "C" {
 #define GPIO_CRH_CNF14_1			(REG_FIELD_VALUE(GPIO_CRH_CNF14_Pos, 0x2UL))
 
 /** @brief GPIO_CRH_CNF15 Position @def GPIO_CRH_CNF15_Pos */
-#define GPIO_CRH_CNF15_Pos			(30U)
+#define GPIO_CRH_CNF15_Pos			((reg_bit_pos_t) 30U)
 /** @brief GPIO_CRH_CNF15 Mask @def GPIO_CRH_CNF15_Msk */
 #define GPIO_CRH_CNF15_Msk			(REG_FIELD_VALUE(GPIO_CRH_CNF15_Pos, 0x3UL))
 /** @brief CNF15 @def GPIO_CRH_CNF15 */
@@ -606,37 +606,37 @@ extern "C" {
 
 // ------ IDR[15:0] (Port Input Data Bits) ------ // 
 /** @brief GPIO_IDR_IDR0 Position @def GPIO_IDR_IDR0_Pos */
-#define GPIO_IDR_IDR0_Pos			(0U)
+#define GPIO_IDR_IDR0_Pos			((reg_bit_pos_t) 0U)
 /** @brief GPIO_IDR_IDR0 Mask @def GPIO_IDR_IDR0_Msk */
 #define GPIO_IDR_IDR0_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR0_Pos, 0x1UL))
 /** @brief Port Input Data Bit 0 @def GPIO_IDR_IDR0 */
 #define GPIO_IDR_IDR0				GPIO_IDR_IDR0_Msk
 /** @brief GPIO_IDR_IDR1 Position @def GPIO_IDR_IDR1_Pos */
-#define GPIO_IDR_IDR1_Pos			(1U)
+#define GPIO_IDR_IDR1_Pos			((reg_bit_pos_t) 1U)
 /** @brief GPIO_IDR_IDR1 Mask @def GPIO_IDR_IDR1_Msk */
 #define GPIO_IDR_IDR1_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR1_Pos, 0x1UL))
 /** @brief Port Input Data Bit 1 @def GPIO_IDR_IDR1 */
 #define GPIO_IDR_IDR1				GPIO_IDR_IDR1_Msk
 /** @brief GPIO_IDR_IDR2 Position @def GPIO_IDR_IDR2_Pos */
-#define GPIO_IDR_IDR2_Pos			(2U)
+#define GPIO_IDR_IDR2_Pos			((reg_bit_pos_t) 2U)
 /** @brief GPIO_IDR_IDR2 Mask @def GPIO_IDR_IDR2_Msk */
 #define GPIO_IDR_IDR2_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR2_Pos, 0x1UL))
 /** @brief Port Input Data Bit 2 @def GPIO_IDR_IDR2 */
 #define GPIO_IDR_IDR2				GPIO_IDR_IDR2_Msk
 /** @brief GPIO_IDR_IDR3 Position @def GPIO_IDR_IDR3_Pos */
-#define GPIO_IDR_IDR3_Pos			(3U)
+#define GPIO_IDR_IDR3_Pos			((reg_bit_pos_t) 3U)
 /** @brief GPIO_IDR_IDR3 Mask @def GPIO_IDR_IDR3_Msk */
 #define GPIO_IDR_IDR3_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR3_Pos, 0x1UL))
 /** @brief Port Input Data Bit 3 @def GPIO_IDR_IDR3 */
 #define GPIO_IDR_IDR3				GPIO_IDR_IDR3_Msk
 /** @brief GPIO_IDR_IDR4 Position @def GPIO_IDR_IDR4_Pos */
-#define GPIO_IDR_IDR4_Pos			(4U)
+#define GPIO_IDR_IDR4_Pos			((reg_bit_pos_t) 4U)
 /** @brief GPIO_IDR_IDR4 Mask @def GPIO_IDR_IDR4_Msk */
 #define GPIO_IDR_IDR4_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR4_Pos, 0x1UL))
 /** @brief Port Input Data Bit 4 @def GPIO_IDR_IDR4 */
 #define GPIO_IDR_IDR4				GPIO_IDR_IDR4_Msk
 /** @brief GPIO_IDR_IDR5 Position @def GPIO_IDR_IDR5_Pos */
-#define GPIO_IDR_IDR5_Pos			(5U)
+#define GPIO_IDR_IDR5_Pos			((reg_bit_pos_t) 5U)
 /** @brief GPIO_IDR_IDR5 Mask @def GPIO_IDR_IDR5_Msk */
 #define GPIO_IDR_IDR5_Msk			(REG_FIELD_VALUE(GPIO_IDR_IDR5_Pos, 0x1UL))
 /** @brief Port Input Data Bit 5 @def GPIO_IDR_IDR5 */

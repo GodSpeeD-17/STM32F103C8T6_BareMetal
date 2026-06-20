@@ -73,6 +73,18 @@ typedef uint32_t								reg;
  */
 typedef uint8_t									reg_field_t;
 
+/**
+ * @brief Raw register bit position type
+ * @typedef reg_bit_pos_t
+ */
+typedef uint8_t									reg_bit_pos_t;
+
+/**
+ * @brief Raw register field width type
+ * @typedef reg_field_width_t
+ */
+typedef uint8_t									reg_field_width_t;
+
 // ==================================================================================================== //
 //										Driver Operation Status Type									//
 // ==================================================================================================== //

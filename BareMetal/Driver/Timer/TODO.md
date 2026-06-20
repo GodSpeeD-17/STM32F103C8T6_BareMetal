@@ -18,7 +18,7 @@ item, verify it, commit it, then move to the next item.
 - [x] Introduce `Inc/timer_defines.h` for public selectors, defaults, validation helpers, and pure utilities.
 - [x] Move Timer public selectors/defaults out of `stm32f1xx.h` while keeping Core raw-only.
 - [x] Add `Inc/timer_ll.h` with dumb register read/write helpers only.
-- [ ] Add `Inc/timer_codec.h` and `Src/timer_codec.c` with private encode/decode helpers and public extract/stage image APIs.
+- [x] Add `Inc/timer_codec.h` and `Src/timer_codec.c` with private encode/decode helpers and public extract/stage image APIs.
 - [ ] Refactor `Inc/timer.h` into public API only with `driver_status_t` contracts and no inline hardware access.
 - [ ] Refactor `Src/timer.c` orchestration to use validation, LL, codec staging, dirty writes, and status returns.
 - [ ] Rework Timer IRQ APIs so codec owns DIER/SR mapping and driver owns NVIC policy.
@@ -34,8 +34,8 @@ item, verify it, commit it, then move to the next item.
 - [ ] `timer.c` directly accesses Timer and RCC registers instead of going through LL.
 - [x] Public Timer selector enums and defaults live in `stm32f1xx.h`.
 - [x] No Timer LL layer exists.
-- [ ] No Timer codec layer exists.
-- [ ] CR1, CCMR, CCER, DIER, and SR field placement is not centralized in codec.
+- [x] No Timer codec layer exists.
+- [x] CR1, CCMR, CCER, DIER, and SR field placement is not centralized in codec.
 - [ ] Public APIs do not consistently return `driver_status_t`.
 - [ ] Driver does not validate Timer instance, channel mask, IRQ mask, or config selector compatibility.
 - [ ] Driver does not consistently read only required registers.
