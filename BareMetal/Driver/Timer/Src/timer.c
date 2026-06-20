@@ -142,7 +142,7 @@ void TIM_1MHz_Load_Default(timer_config_t *TIMx_CONFIG)
  * @param config Channel Configuration Structure
  * @param ccmr_reg Pointer to CCMR register value
  */
-void TIM_Channel_CCMRx_Config(tim_channel_t channel, tim_channel_config_t config, uint16_t *ccmr_reg)
+void TIM_Channel_CCMRx_Config(timer_channel_t channel, timer_channel_config_t config, uint16_t *ccmr_reg)
 {
 	uint8_t index = (uint8_t)(((channel & TIMx_CHANNEL_2) || (channel & TIMx_CHANNEL_4)) ? TIM_CCMR1_CC2S_Pos : TIM_CCMR1_CC1S_Pos);
 	*ccmr_reg &= ~(0xFF << index);
@@ -166,7 +166,7 @@ void TIM_Channel_Config(timer_config_t *TIMx_CONFIG)
 	uint16_t ccmr1_reg = TIMx_CONFIG->instance->CCMR1.REG;
 	uint16_t ccmr2_reg = TIMx_CONFIG->instance->CCMR2.REG;
 	uint8_t ccmr_status = 0x00;
-	tim_channel_t current_channel = 0x00;
+	timer_channel_t current_channel = 0x00;
 	// Iterate through all timer channels
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -285,7 +285,7 @@ void TIM_delay_ms(TIM_TypeDef *TIMx, uint32_t delayMs)
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
+void TIM_IRQ_Enable(TIM_TypeDef *TIMx, timer_irq_t IRQ)
 {
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;
@@ -317,7 +317,7 @@ void TIM_IRQ_Enable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_TypeDef *TIMx, tim_irq_t IRQ)
+void TIM_IRQ_Disable(TIM_TypeDef *TIMx, timer_irq_t IRQ)
 {
 	// Get the DMA/Interrupt Enable Register Status
 	uint16_t reg = TIMx->DIER.REG;

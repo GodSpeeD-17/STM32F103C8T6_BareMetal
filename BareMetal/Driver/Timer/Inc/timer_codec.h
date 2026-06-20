@@ -67,12 +67,12 @@ extern "C" {
 driver_status_t Codec_TIM_ExtractCounterConfig
 (
 	const reg							cr1RegImage,
-	tim_direction_t* const				pDirection,
-	tim_count_mode_t* const				pMode,
-	tim_opm_t* const					pOnePulse,
-	tim_arpe_t* const					pAutoReloadPreload,
-	tim_update_source_t* const			pUpdateSource,
-	tim_clock_division_t* const			pClockDivision
+	timer_direction_t* const				pDirection,
+	timer_count_mode_t* const				pMode,
+	timer_opm_t* const					pOnePulse,
+	timer_arpe_t* const					pAutoReloadPreload,
+	timer_update_source_t* const			pUpdateSource,
+	timer_clock_division_t* const			pClockDivision
 );
 
 /**
@@ -94,12 +94,12 @@ driver_status_t Codec_TIM_ExtractCounterConfig
 driver_status_t Codec_TIM_StageCounterConfig
 (
 	const reg							cr1RegImage,
-	const tim_direction_t				direction,
-	const tim_count_mode_t				mode,
-	const tim_opm_t						onePulse,
-	const tim_arpe_t					autoReloadPreload,
-	const tim_update_source_t			updateSource,
-	const tim_clock_division_t			clockDivision,
+	const timer_direction_t				direction,
+	const timer_count_mode_t				mode,
+	const timer_opm_t						onePulse,
+	const timer_arpe_t					autoReloadPreload,
+	const timer_update_source_t			updateSource,
+	const timer_clock_division_t			clockDivision,
 	reg* const							pCr1RegImage
 );
 
@@ -195,7 +195,7 @@ driver_status_t Codec_TIM_StageUpdateEventState
 driver_status_t Codec_TIM_ExtractMasterMode
 (
 	const reg							cr2RegImage,
-	tim_master_mode_t* const			pMasterMode
+	timer_master_mode_t* const			pMasterMode
 );
 
 /**
@@ -211,7 +211,7 @@ driver_status_t Codec_TIM_ExtractMasterMode
 driver_status_t Codec_TIM_StageMasterMode
 (
 	const reg							cr2RegImage,
-	const tim_master_mode_t				masterMode,
+	const timer_master_mode_t				masterMode,
 	reg* const							pCr2RegImage
 );
 
@@ -227,7 +227,7 @@ driver_status_t Codec_TIM_StageMasterMode
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
 	const reg							smcrRegImage,
-	tim_slave_mode_t* const				pSlaveMode
+	timer_slave_mode_t* const				pSlaveMode
 );
 
 /**
@@ -243,7 +243,7 @@ driver_status_t Codec_TIM_ExtractSlaveMode
 driver_status_t Codec_TIM_StageSlaveMode
 (
 	const reg							smcrRegImage,
-	const tim_slave_mode_t				slaveMode,
+	const timer_slave_mode_t				slaveMode,
 	reg* const							pSmcrRegImage
 );
 
@@ -265,8 +265,8 @@ driver_status_t Codec_TIM_StageSlaveMode
 driver_status_t Codec_TIM_ExtractChannelSelection
 (
 	const reg							ccmrRegImage,
-	const tim_channel_t					channel,
-	tim_channel_ccs_t* const			pCaptureCompareSelection
+	const timer_channel_t					channel,
+	timer_channel_ccs_t* const			pCaptureCompareSelection
 );
 
 /**
@@ -284,8 +284,8 @@ driver_status_t Codec_TIM_ExtractChannelSelection
 driver_status_t Codec_TIM_StageChannelSelection
 (
 	const reg							ccmrRegImage,
-	const tim_channel_t					channel,
-	const tim_channel_ccs_t				captureCompareSelection,
+	const timer_channel_t					channel,
+	const timer_channel_ccs_t				captureCompareSelection,
 	reg* const							pCcmrRegImage
 );
 
@@ -307,11 +307,11 @@ driver_status_t Codec_TIM_StageChannelSelection
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const tim_channel_t					channel,
-	tim_channel_oc_clear_t* const		pOutputCompareClear,
-	tim_channel_mode_t* const			pOutputCompareMode,
-	tim_channel_oc_preload_t* const		pOutputComparePreload,
-	tim_channel_oc_fast_t* const		pOutputCompareFast
+	const timer_channel_t					channel,
+	timer_channel_oc_clear_t* const		pOutputCompareClear,
+	timer_channel_mode_t* const			pOutputCompareMode,
+	timer_channel_oc_preload_t* const		pOutputComparePreload,
+	timer_channel_oc_fast_t* const		pOutputCompareFast
 );
 
 /**
@@ -332,11 +332,11 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 driver_status_t Codec_TIM_StageOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const tim_channel_t					channel,
-	const tim_channel_oc_clear_t		outputCompareClear,
-	const tim_channel_mode_t			outputCompareMode,
-	const tim_channel_oc_preload_t		outputComparePreload,
-	const tim_channel_oc_fast_t			outputCompareFast,
+	const timer_channel_t					channel,
+	const timer_channel_oc_clear_t		outputCompareClear,
+	const timer_channel_mode_t			outputCompareMode,
+	const timer_channel_oc_preload_t		outputComparePreload,
+	const timer_channel_oc_fast_t			outputCompareFast,
 	reg* const							pCcmrRegImage
 );
 
@@ -360,7 +360,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
-	const tim_channel_t					channel,
+	const timer_channel_t					channel,
 	driver_status_t* const				pChannelState
 );
 
@@ -381,7 +381,7 @@ driver_status_t Codec_TIM_ExtractChannelEnableState
 driver_status_t Codec_TIM_StageChannelEnableState
 (
 	const reg							ccerRegImage,
-	const tim_channel_t					channel,
+	const timer_channel_t					channel,
 	const driver_status_t				channelState,
 	reg* const							pCcerRegImage
 );
@@ -399,8 +399,8 @@ driver_status_t Codec_TIM_StageChannelEnableState
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
 	const reg							ccerRegImage,
-	const tim_channel_t					channel,
-	tim_channel_polarity_t* const		pPolarity
+	const timer_channel_t					channel,
+	timer_channel_polarity_t* const		pPolarity
 );
 
 /**
@@ -417,8 +417,8 @@ driver_status_t Codec_TIM_ExtractChannelPolarity
 driver_status_t Codec_TIM_StageChannelPolarity
 (
 	const reg							ccerRegImage,
-	const tim_channel_t					channel,
-	const tim_channel_polarity_t		polarity,
+	const timer_channel_t					channel,
+	const timer_channel_polarity_t		polarity,
 	reg* const							pCcerRegImage
 );
 
@@ -437,7 +437,7 @@ driver_status_t Codec_TIM_StageChannelPolarity
 driver_status_t Codec_TIM_ExtractIRQEnableMask
 (
 	const reg							dierRegImage,
-	tim_irq_t* const					pIrqMask
+	timer_irq_t* const					pIrqMask
 );
 
 /**
@@ -458,8 +458,8 @@ driver_status_t Codec_TIM_ExtractIRQEnableMask
 driver_status_t Codec_TIM_StageIRQEnableMask
 (
 	const reg							dierRegImage,
-	const tim_irq_t						irqMask,
-	const tim_irq_enable_t				irqEnable,
+	const timer_irq_t						irqMask,
+	const timer_irq_enable_t				irqEnable,
 	reg* const							pDierRegImage
 );
 
@@ -474,7 +474,7 @@ driver_status_t Codec_TIM_StageIRQEnableMask
 driver_status_t Codec_TIM_ExtractDMAEnableMask
 (
 	const reg							dierRegImage,
-	tim_dma_t* const					pDmaMask
+	timer_dma_t* const					pDmaMask
 );
 
 /**
@@ -494,7 +494,7 @@ driver_status_t Codec_TIM_ExtractDMAEnableMask
 driver_status_t Codec_TIM_StageDMAEnableMask
 (
 	const reg							dierRegImage,
-	const tim_dma_t						dmaMask,
+	const timer_dma_t						dmaMask,
 	const driver_status_t				dmaState,
 	reg* const							pDierRegImage
 );
@@ -514,7 +514,7 @@ driver_status_t Codec_TIM_StageDMAEnableMask
 driver_status_t Codec_TIM_ExtractIRQFlagMask
 (
 	const reg							srRegImage,
-	tim_irq_t* const					pIrqMask
+	timer_irq_t* const					pIrqMask
 );
 
 /**
@@ -533,7 +533,7 @@ driver_status_t Codec_TIM_ExtractIRQFlagMask
 driver_status_t Codec_TIM_StageIRQAckMask
 (
 	const reg							srRegImage,
-	const tim_irq_t						irqMask,
+	const timer_irq_t						irqMask,
 	reg* const							pSrRegImage
 );
 

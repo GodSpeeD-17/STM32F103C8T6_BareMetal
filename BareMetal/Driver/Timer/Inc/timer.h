@@ -47,7 +47,7 @@ void TIM_1MHz_Load_Default(timer_config_t* TIMx_CONFIG);
  * @param config Channel Configuration Structure
  * @param ccmr_reg Pointer to CCMR register value
  */
-void TIM_Channel_CCMRx_Config(tim_channel_t channel, tim_channel_config_t config, uint16_t* ccmr_reg);
+void TIM_Channel_CCMRx_Config(timer_channel_t channel, timer_channel_config_t config, uint16_t* ccmr_reg);
 
 /**
  * @brief Configures the Timer Channel as per configuration structure
@@ -68,7 +68,7 @@ void TIM_Config(timer_config_t* TIMx_CONFIG);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-__STATIC_FORCEINLINE uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ){
+__STATIC_FORCEINLINE uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, timer_irq_t IRQ){
 	// Capture the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -107,7 +107,7 @@ __STATIC_FORCEINLINE uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* TIMx){
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-__STATIC_FORCEINLINE void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ){
+__STATIC_FORCEINLINE void TIM_IRQ_Ack(TIM_TypeDef* TIMx, timer_irq_t IRQ){
 	// Get the Status Register
 	uint16_t status = TIMx->SR.REG;
 	// Acknowledge Interrupt Flag
@@ -165,21 +165,21 @@ void TIM_delay_ms(TIM_TypeDef* TIMx, uint32_t delayMs);
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Enable(TIM_TypeDef* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Enable(TIM_TypeDef* TIMx, timer_irq_t IRQ);
 
 /**
  * @brief Disables Timer Interrupt for mentioned Interrupt
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Disable(TIM_TypeDef* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Disable(TIM_TypeDef* TIMx, timer_irq_t IRQ);
 
 /**
  * @brief Timer Interrupt Flag Acknowledge
  * @param TIMx `TIM2`, `TIM3`, `TIM4`
  * @param IRQ `TIMx_IRQ_OVF_UVF`, `TIMx_IRQ_OUT_CMP_CHx`, `TIMx_IRQ_IN_CAP_CHx`
  */
-void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ);
+void TIM_IRQ_Ack(TIM_TypeDef* TIMx, timer_irq_t IRQ);
 
 /**
  * @brief Retrieves the Interrupt Status
@@ -188,7 +188,7 @@ void TIM_IRQ_Ack(TIM_TypeDef* TIMx, tim_irq_t IRQ);
  * @return - 0: Interrupt was not triggered 
  * @return - 1: Interrupt was triggered 
  */
-uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, tim_irq_t IRQ);
+uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* TIMx, timer_irq_t IRQ);
 
 /**
  * @brief Resets the General Purpose TIMx
