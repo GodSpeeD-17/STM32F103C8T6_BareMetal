@@ -602,73 +602,73 @@ extern "C" {
 // ---------------------------------------------------------------------------------------------------- //
 
 // ------ CCMRx Shared Raw Field Values ------ //
-/** @brief Capture/compare selection raw value: channel configured as output @def TIM_CCMR_CCXS_OUTPUT */
-#define TIM_CCMR_CCXS_OUTPUT				((reg_field_t) 0x00U)
-/** @brief Capture/compare selection raw value: channel configured as input mapped to direct timer input @def TIM_CCMR_CCXS_INPUT_DIRECT_TI */
-#define TIM_CCMR_CCXS_INPUT_DIRECT_TI		((reg_field_t) 0x01U)
-/** @brief Capture/compare selection raw value: channel configured as input mapped to indirect timer input @def TIM_CCMR_CCXS_INPUT_INDIRECT_TI */
-#define TIM_CCMR_CCXS_INPUT_INDIRECT_TI		((reg_field_t) 0x02U)
-/** @brief Capture/compare selection raw value: channel configured as input mapped to `TRC` @def TIM_CCMR_CCXS_INPUT_TRC */
-#define TIM_CCMR_CCXS_INPUT_TRC				((reg_field_t) 0x03U)
+/** @brief Capture/compare selection raw value: channel configured as output @def TIM_CCMR_CCxS_OUTPUT */
+#define TIM_CCMR_CCxS_OUTPUT				((reg_field_t) 0x00U)
+/** @brief Capture/compare selection raw value: channel configured as input mapped to direct timer input @def TIM_CCMR_CCxS_INPUT_DIRECT_TI */
+#define TIM_CCMR_CCxS_INPUT_DIRECT_TI		((reg_field_t) 0x01U)
+/** @brief Capture/compare selection raw value: channel configured as input mapped to indirect timer input @def TIM_CCMR_CCxS_INPUT_INDIRECT_TI */
+#define TIM_CCMR_CCxS_INPUT_INDIRECT_TI		((reg_field_t) 0x02U)
+/** @brief Capture/compare selection raw value: channel configured as input mapped to `TRC` @def TIM_CCMR_CCxS_INPUT_TRC */
+#define TIM_CCMR_CCxS_INPUT_TRC				((reg_field_t) 0x03U)
 
-/** @brief Output compare mode raw value: frozen output reference @def TIM_CCMR_OCXM_FROZEN */
-#define TIM_CCMR_OCXM_FROZEN				((reg_field_t) 0x00U)
-/** @brief Output compare mode raw value: force active level on compare match @def TIM_CCMR_OCXM_ACTIVE_ON_MATCH */
-#define TIM_CCMR_OCXM_ACTIVE_ON_MATCH		((reg_field_t) 0x01U)
-/** @brief Output compare mode raw value: force inactive level on compare match @def TIM_CCMR_OCXM_INACTIVE_ON_MATCH */
-#define TIM_CCMR_OCXM_INACTIVE_ON_MATCH		((reg_field_t) 0x02U)
-/** @brief Output compare mode raw value: toggle output reference on compare match @def TIM_CCMR_OCXM_TOGGLE_ON_MATCH */
-#define TIM_CCMR_OCXM_TOGGLE_ON_MATCH		((reg_field_t) 0x03U)
-/** @brief Output compare mode raw value: force inactive level @def TIM_CCMR_OCXM_FORCE_INACTIVE */
-#define TIM_CCMR_OCXM_FORCE_INACTIVE		((reg_field_t) 0x04U)
-/** @brief Output compare mode raw value: force active level @def TIM_CCMR_OCXM_FORCE_ACTIVE */
-#define TIM_CCMR_OCXM_FORCE_ACTIVE			((reg_field_t) 0x05U)
-/** @brief Output compare mode raw value: PWM mode 1 @def TIM_CCMR_OCXM_PWM_MODE_1 */
-#define TIM_CCMR_OCXM_PWM_MODE_1			((reg_field_t) 0x06U)
-/** @brief Output compare mode raw value: PWM mode 2 @def TIM_CCMR_OCXM_PWM_MODE_2 */
-#define TIM_CCMR_OCXM_PWM_MODE_2			((reg_field_t) 0x07U)
+/** @brief Output compare mode raw value: frozen output reference @def TIM_CCMR_OCxM_FROZEN */
+#define TIM_CCMR_OCxM_FROZEN				((reg_field_t) 0x00U)
+/** @brief Output compare mode raw value: force active level on compare match @def TIM_CCMR_OCxM_ACTIVE_ON_MATCH */
+#define TIM_CCMR_OCxM_ACTIVE_ON_MATCH		((reg_field_t) 0x01U)
+/** @brief Output compare mode raw value: force inactive level on compare match @def TIM_CCMR_OCxM_INACTIVE_ON_MATCH */
+#define TIM_CCMR_OCxM_INACTIVE_ON_MATCH		((reg_field_t) 0x02U)
+/** @brief Output compare mode raw value: toggle output reference on compare match @def TIM_CCMR_OCxM_TOGGLE_ON_MATCH */
+#define TIM_CCMR_OCxM_TOGGLE_ON_MATCH		((reg_field_t) 0x03U)
+/** @brief Output compare mode raw value: force inactive level @def TIM_CCMR_OCxM_FORCE_INACTIVE */
+#define TIM_CCMR_OCxM_FORCE_INACTIVE		((reg_field_t) 0x04U)
+/** @brief Output compare mode raw value: force active level @def TIM_CCMR_OCxM_FORCE_ACTIVE */
+#define TIM_CCMR_OCxM_FORCE_ACTIVE			((reg_field_t) 0x05U)
+/** @brief Output compare mode raw value: PWM mode 1 @def TIM_CCMR_OCxM_PWM_MODE_1 */
+#define TIM_CCMR_OCxM_PWM_MODE_1			((reg_field_t) 0x06U)
+/** @brief Output compare mode raw value: PWM mode 2 @def TIM_CCMR_OCxM_PWM_MODE_2 */
+#define TIM_CCMR_OCxM_PWM_MODE_2			((reg_field_t) 0x07U)
 
-/** @brief Input capture prescaler raw value: capture each valid edge @def TIM_CCMR_ICXPSC_EACH_EDGE */
-#define TIM_CCMR_ICXPSC_EACH_EDGE			((reg_field_t) 0x00U)
-/** @brief Input capture prescaler raw value: capture once every 2 events @def TIM_CCMR_ICXPSC_DIV2 */
-#define TIM_CCMR_ICXPSC_DIV2				((reg_field_t) 0x01U)
-/** @brief Input capture prescaler raw value: capture once every 4 events @def TIM_CCMR_ICXPSC_DIV4 */
-#define TIM_CCMR_ICXPSC_DIV4				((reg_field_t) 0x02U)
-/** @brief Input capture prescaler raw value: capture once every 8 events @def TIM_CCMR_ICXPSC_DIV8 */
-#define TIM_CCMR_ICXPSC_DIV8				((reg_field_t) 0x03U)
+/** @brief Input capture prescaler raw value: capture each valid edge @def TIM_CCMR_ICxPSC_EACH_EDGE */
+#define TIM_CCMR_ICxPSC_EACH_EDGE			((reg_field_t) 0x00U)
+/** @brief Input capture prescaler raw value: capture once every 2 events @def TIM_CCMR_ICxPSC_DIV2 */
+#define TIM_CCMR_ICxPSC_DIV2				((reg_field_t) 0x01U)
+/** @brief Input capture prescaler raw value: capture once every 4 events @def TIM_CCMR_ICxPSC_DIV4 */
+#define TIM_CCMR_ICxPSC_DIV4				((reg_field_t) 0x02U)
+/** @brief Input capture prescaler raw value: capture once every 8 events @def TIM_CCMR_ICxPSC_DIV8 */
+#define TIM_CCMR_ICxPSC_DIV8				((reg_field_t) 0x03U)
 
-/** @brief Input capture filter raw value: no filter, sampled at fDTS @def TIM_CCMR_ICXF_NO_FILTER */
-#define TIM_CCMR_ICXF_NO_FILTER				((reg_field_t) 0x00U)
-/** @brief Input capture filter raw value: fCK_INT sampling, N=2 @def TIM_CCMR_ICXF_FCK_INT_N2 */
-#define TIM_CCMR_ICXF_FCK_INT_N2			((reg_field_t) 0x01U)
-/** @brief Input capture filter raw value: fCK_INT sampling, N=4 @def TIM_CCMR_ICXF_FCK_INT_N4 */
-#define TIM_CCMR_ICXF_FCK_INT_N4			((reg_field_t) 0x02U)
-/** @brief Input capture filter raw value: fCK_INT sampling, N=8 @def TIM_CCMR_ICXF_FCK_INT_N8 */
-#define TIM_CCMR_ICXF_FCK_INT_N8			((reg_field_t) 0x03U)
-/** @brief Input capture filter raw value: fDTS/2 sampling, N=6 @def TIM_CCMR_ICXF_FDTS_DIV2_N6 */
-#define TIM_CCMR_ICXF_FDTS_DIV2_N6			((reg_field_t) 0x04U)
-/** @brief Input capture filter raw value: fDTS/2 sampling, N=8 @def TIM_CCMR_ICXF_FDTS_DIV2_N8 */
-#define TIM_CCMR_ICXF_FDTS_DIV2_N8			((reg_field_t) 0x05U)
-/** @brief Input capture filter raw value: fDTS/4 sampling, N=6 @def TIM_CCMR_ICXF_FDTS_DIV4_N6 */
-#define TIM_CCMR_ICXF_FDTS_DIV4_N6			((reg_field_t) 0x06U)
-/** @brief Input capture filter raw value: fDTS/4 sampling, N=8 @def TIM_CCMR_ICXF_FDTS_DIV4_N8 */
-#define TIM_CCMR_ICXF_FDTS_DIV4_N8			((reg_field_t) 0x07U)
-/** @brief Input capture filter raw value: fDTS/8 sampling, N=6 @def TIM_CCMR_ICXF_FDTS_DIV8_N6 */
-#define TIM_CCMR_ICXF_FDTS_DIV8_N6			((reg_field_t) 0x08U)
-/** @brief Input capture filter raw value: fDTS/8 sampling, N=8 @def TIM_CCMR_ICXF_FDTS_DIV8_N8 */
-#define TIM_CCMR_ICXF_FDTS_DIV8_N8			((reg_field_t) 0x09U)
-/** @brief Input capture filter raw value: fDTS/16 sampling, N=5 @def TIM_CCMR_ICXF_FDTS_DIV16_N5 */
-#define TIM_CCMR_ICXF_FDTS_DIV16_N5			((reg_field_t) 0x0AU)
-/** @brief Input capture filter raw value: fDTS/16 sampling, N=6 @def TIM_CCMR_ICXF_FDTS_DIV16_N6 */
-#define TIM_CCMR_ICXF_FDTS_DIV16_N6			((reg_field_t) 0x0BU)
-/** @brief Input capture filter raw value: fDTS/16 sampling, N=8 @def TIM_CCMR_ICXF_FDTS_DIV16_N8 */
-#define TIM_CCMR_ICXF_FDTS_DIV16_N8			((reg_field_t) 0x0CU)
-/** @brief Input capture filter raw value: fDTS/32 sampling, N=5 @def TIM_CCMR_ICXF_FDTS_DIV32_N5 */
-#define TIM_CCMR_ICXF_FDTS_DIV32_N5			((reg_field_t) 0x0DU)
-/** @brief Input capture filter raw value: fDTS/32 sampling, N=6 @def TIM_CCMR_ICXF_FDTS_DIV32_N6 */
-#define TIM_CCMR_ICXF_FDTS_DIV32_N6			((reg_field_t) 0x0EU)
-/** @brief Input capture filter raw value: fDTS/32 sampling, N=8 @def TIM_CCMR_ICXF_FDTS_DIV32_N8 */
-#define TIM_CCMR_ICXF_FDTS_DIV32_N8			((reg_field_t) 0x0FU)
+/** @brief Input capture filter raw value: no filter, sampled at fDTS @def TIM_CCMR_ICxF_NO_FILTER */
+#define TIM_CCMR_ICxF_NO_FILTER				((reg_field_t) 0x00U)
+/** @brief Input capture filter raw value: fCK_INT sampling, N=2 @def TIM_CCMR_ICxF_FCK_INT_N2 */
+#define TIM_CCMR_ICxF_FCK_INT_N2			((reg_field_t) 0x01U)
+/** @brief Input capture filter raw value: fCK_INT sampling, N=4 @def TIM_CCMR_ICxF_FCK_INT_N4 */
+#define TIM_CCMR_ICxF_FCK_INT_N4			((reg_field_t) 0x02U)
+/** @brief Input capture filter raw value: fCK_INT sampling, N=8 @def TIM_CCMR_ICxF_FCK_INT_N8 */
+#define TIM_CCMR_ICxF_FCK_INT_N8			((reg_field_t) 0x03U)
+/** @brief Input capture filter raw value: fDTS/2 sampling, N=6 @def TIM_CCMR_ICxF_FDTS_DIV2_N6 */
+#define TIM_CCMR_ICxF_FDTS_DIV2_N6			((reg_field_t) 0x04U)
+/** @brief Input capture filter raw value: fDTS/2 sampling, N=8 @def TIM_CCMR_ICxF_FDTS_DIV2_N8 */
+#define TIM_CCMR_ICxF_FDTS_DIV2_N8			((reg_field_t) 0x05U)
+/** @brief Input capture filter raw value: fDTS/4 sampling, N=6 @def TIM_CCMR_ICxF_FDTS_DIV4_N6 */
+#define TIM_CCMR_ICxF_FDTS_DIV4_N6			((reg_field_t) 0x06U)
+/** @brief Input capture filter raw value: fDTS/4 sampling, N=8 @def TIM_CCMR_ICxF_FDTS_DIV4_N8 */
+#define TIM_CCMR_ICxF_FDTS_DIV4_N8			((reg_field_t) 0x07U)
+/** @brief Input capture filter raw value: fDTS/8 sampling, N=6 @def TIM_CCMR_ICxF_FDTS_DIV8_N6 */
+#define TIM_CCMR_ICxF_FDTS_DIV8_N6			((reg_field_t) 0x08U)
+/** @brief Input capture filter raw value: fDTS/8 sampling, N=8 @def TIM_CCMR_ICxF_FDTS_DIV8_N8 */
+#define TIM_CCMR_ICxF_FDTS_DIV8_N8			((reg_field_t) 0x09U)
+/** @brief Input capture filter raw value: fDTS/16 sampling, N=5 @def TIM_CCMR_ICxF_FDTS_DIV16_N5 */
+#define TIM_CCMR_ICxF_FDTS_DIV16_N5			((reg_field_t) 0x0AU)
+/** @brief Input capture filter raw value: fDTS/16 sampling, N=6 @def TIM_CCMR_ICxF_FDTS_DIV16_N6 */
+#define TIM_CCMR_ICxF_FDTS_DIV16_N6			((reg_field_t) 0x0BU)
+/** @brief Input capture filter raw value: fDTS/16 sampling, N=8 @def TIM_CCMR_ICxF_FDTS_DIV16_N8 */
+#define TIM_CCMR_ICxF_FDTS_DIV16_N8			((reg_field_t) 0x0CU)
+/** @brief Input capture filter raw value: fDTS/32 sampling, N=5 @def TIM_CCMR_ICxF_FDTS_DIV32_N5 */
+#define TIM_CCMR_ICxF_FDTS_DIV32_N5			((reg_field_t) 0x0DU)
+/** @brief Input capture filter raw value: fDTS/32 sampling, N=6 @def TIM_CCMR_ICxF_FDTS_DIV32_N6 */
+#define TIM_CCMR_ICxF_FDTS_DIV32_N6			((reg_field_t) 0x0EU)
+/** @brief Input capture filter raw value: fDTS/32 sampling, N=8 @def TIM_CCMR_ICxF_FDTS_DIV32_N8 */
+#define TIM_CCMR_ICxF_FDTS_DIV32_N8			((reg_field_t) 0x0FU)
 
 /** @brief Capture/compare channel 1 direction and input selection (`TIMx_CCMR1.CC1S[1:0]`) field position @def TIM_CCMR1_CC1S_Pos */
 #define TIM_CCMR1_CC1S_Pos					((reg_bit_pos_t) 0U)

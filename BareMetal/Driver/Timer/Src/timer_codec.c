@@ -46,6 +46,9 @@
 /**
  * @brief Validates whether a state selector is an accepted ON/OFF state
  * @param[in] state Driver state selector
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disabled/cleared state
+ * - @ref `DRIVER_STATUS_ON`: Enabled/set state
  * @returns Validation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is accepted
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
@@ -80,6 +83,9 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_ExtractBitStateFromImage(const re
  * @param[in,out] pRegImage Caller-owned register image to update in place
  * @param[in] bitMask Register-positioned bit mask
  * @param[in] state Requested ON/OFF state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Clear @p bitMask
+ * - @ref `DRIVER_STATUS_ON`: Set @p bitMask
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: State was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
@@ -116,24 +122,6 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageBitStateInImage
 // ==================================================================================================== //
 //										Local Scalar Field Image Helpers								//
 // ==================================================================================================== //
-
-/**
- * @brief Extracts one right-aligned scalar field from a register image
- * @param[in] regImage Caller-owned register image
- * @param[in] fieldMask Register-positioned field mask
- * @param[in] fieldPos Zero-based field bit position
- * @returns Right-aligned scalar value as @ref `reg`
- */
-__STATIC_FORCEINLINE reg Codec_TIM_ExtractScalarField
-(
-	const reg					regImage,
-	const reg					fieldMask,
-	const reg_bit_pos_t			fieldPos
-)
-{
-	//! PSC/ARR/CNT are register-backed scalar fields; extract them through the Core field helper.
-	return RegOps_ExtractFieldValue(regImage, fieldMask, fieldPos);
-}
 
 /**
  * @brief Stages one right-aligned scalar field inside a register image
@@ -175,6 +163,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageScalarField
 /**
  * @brief Decodes a Timer single-channel mask into a zero-based channel index
  * @param[in] channel Timer single-channel mask
+ * Accepted values:
+ * - @ref `TIMx_CHANNEL_1`: Decode channel 1 index
+ * - @ref `TIMx_CHANNEL_2`: Decode channel 2 index
+ * - @ref `TIMx_CHANNEL_3`: Decode channel 3 index
+ * - @ref `TIMx_CHANNEL_4`: Decode channel 4 index
  * @param[out] pChannelIndex Destination for decoded channel index
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Channel index was decoded
@@ -508,6 +501,11 @@ __STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCERPolarityPos(const timer_chan
 /**
  * @brief Encodes a count-mode selector into a register-positioned `CR1.CMS` value
  * @param[in] mode Timer count-mode selector
+ * Accepted values:
+ * - @ref `TIMx_MODE_NORMAL`: Edge-aligned counter mode
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`: Center-aligned mode 1
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`: Center-aligned mode 2
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`: Center-aligned mode 3
  * @param[out] pFieldSet Destination for register-positioned `CR1.CMS` value
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Count mode was encoded
@@ -525,6 +523,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeCountModeToCR1
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Public count-mode names describe behavior; CR1.CMS stores the corresponding hardware encoding.
 	switch (mode)
 	{
 		case TIMx_MODE_NORMAL:
@@ -559,6 +558,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeCountModeToCR1
 /**
  * @brief Decodes a register-positioned `CR1.CMS` value into a count-mode selector
  * @param[in] fieldSet Register-positioned `CR1.CMS` value
+ * Accepted values:
+ * - @ref `TIM_CR1_CMS_EDGE_ALIGNED`: Edge-aligned hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_1`: Center-aligned mode 1 hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_2`: Center-aligned mode 2 hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_3`: Center-aligned mode 3 hardware encoding
  * @param[out] pMode Destination for decoded count-mode selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Count mode was decoded
@@ -576,6 +580,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToCountMode
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Mask first so reserved or unrelated CR1 bits cannot influence the decode table.
 	switch (fieldSet & TIM_CR1_CMS)
 	{
 		case TIM_CR1_CMS_EDGE_ALIGNED:
@@ -610,6 +615,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToCountMode
 /**
  * @brief Encodes a clock-division selector into a register-positioned `CR1.CKD` value
  * @param[in] clockDivision Timer clock-division selector
+ * Accepted values:
+ * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
+ * - @ref `TIMx_CKD_CLK_2_FREQ`: `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIMx_CKD_CLK_4_FREQ`: `t_DTS = 4 * t_CK_INT`
  * @param[out] pFieldSet Destination for register-positioned `CR1.CKD` value
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock division was encoded
@@ -627,6 +636,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeClockDivisionToCR1
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Public CKD selectors are translated to the register-positioned TDTS sampling-clock encodings.
 	switch (clockDivision)
 	{
 		case TIMx_CKD_CLK_FREQ:
@@ -656,6 +666,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeClockDivisionToCR1
 /**
  * @brief Decodes a register-positioned `CR1.CKD` value into a clock-division selector
  * @param[in] fieldSet Register-positioned `CR1.CKD` value
+ * Accepted values:
+ * - @ref `TIM_CR1_CKD_TDTS_TCK_INT`: `t_DTS = t_CK_INT`
+ * - @ref `TIM_CR1_CKD_TDTS_2_TCK_INT`: `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIM_CR1_CKD_TDTS_4_TCK_INT`: `t_DTS = 4 * t_CK_INT`
  * @param[out] pClockDivision Destination for decoded clock-division selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock division was decoded
@@ -673,6 +687,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToClockDivision
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Mask CKD before decoding so only the two clock-division bits reach the switch table.
 	switch (fieldSet & TIM_CR1_CKD)
 	{
 		case TIM_CR1_CKD_TDTS_TCK_INT:
@@ -706,6 +721,15 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToClockDivision
 /**
  * @brief Encodes a master-mode selector into a register-positioned `CR2.MMS` value
  * @param[in] masterMode Timer master-mode selector
+ * Accepted values:
+ * - @ref `TIMx_MMS_RESET`: Reset trigger output
+ * - @ref `TIMx_MMS_ENABLE`: Counter-enable trigger output
+ * - @ref `TIMx_MMS_UPDATE`: Update-event trigger output
+ * - @ref `TIMx_MMS_CMP_PULSE`: Compare-pulse trigger output
+ * - @ref `TIMx_MMS_CMP_OC1REF`: Output compare 1 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC2REF`: Output compare 2 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC3REF`: Output compare 3 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC4REF`: Output compare 4 reference trigger output
  * @param[out] pFieldSet Destination for register-positioned `CR2.MMS` value
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master mode was encoded
@@ -723,6 +747,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeMasterModeToCR2
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Master-mode selectors are policy names; CR2.MMS needs the raw trigger-output encoding.
 	switch (masterMode)
 	{
 		case TIMx_MMS_RESET:
@@ -777,6 +802,15 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeMasterModeToCR2
 /**
  * @brief Decodes a register-positioned `CR2.MMS` value into a master-mode selector
  * @param[in] fieldSet Register-positioned `CR2.MMS` value
+ * Accepted values:
+ * - @ref `TIM_CR2_MMS_RESET`: Reset trigger-output encoding
+ * - @ref `TIM_CR2_MMS_ENABLE`: Counter-enable trigger-output encoding
+ * - @ref `TIM_CR2_MMS_UPDATE`: Update trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_PULSE`: Compare-pulse trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC1REF`: Output compare 1 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC2REF`: Output compare 2 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC3REF`: Output compare 3 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC4REF`: Output compare 4 reference trigger-output encoding
  * @param[out] pMasterMode Destination for decoded master-mode selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master mode was decoded
@@ -794,6 +828,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR2ToMasterMode
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Decode only CR2.MMS and reject raw values outside the public master-mode vocabulary.
 	switch (fieldSet & TIM_CR2_MMS)
 	{
 		case TIM_CR2_MMS_RESET:
@@ -848,6 +883,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR2ToMasterMode
 /**
  * @brief Encodes a slave-mode selector into a register-positioned `SMCR.SMS` value
  * @param[in] slaveMode Timer slave-mode selector
+ * Accepted values:
+ * - @ref `TIMx_SMS_DISABLE`: Slave mode disabled
+ * - @ref `TIMx_SMS_ENC_MODE1`: Encoder mode 1
+ * - @ref `TIMx_SMS_ENC_MODE2`: Encoder mode 2
+ * - @ref `TIMx_SMS_ENC_MODE3`: Encoder mode 3
  * @param[out] pFieldSet Destination for register-positioned `SMCR.SMS` value
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave mode was encoded
@@ -865,6 +905,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSlaveModeToSMCR
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Current public slave-mode support is intentionally limited to disabled and encoder modes.
 	switch (slaveMode)
 	{
 		case TIMx_SMS_DISABLE:
@@ -899,6 +940,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSlaveModeToSMCR
 /**
  * @brief Decodes a register-positioned `SMCR.SMS` value into a slave-mode selector
  * @param[in] fieldSet Register-positioned `SMCR.SMS` value
+ * Accepted values:
+ * - @ref `TIM_SMCR_SMS_DISABLED`: Slave mode disabled hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_1`: Encoder mode 1 hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_2`: Encoder mode 2 hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_3`: Encoder mode 3 hardware encoding
  * @param[out] pSlaveMode Destination for decoded slave-mode selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave mode was decoded
@@ -916,6 +962,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Mask SMS first so trigger-selection and other SMCR bits cannot affect slave-mode decode.
 	switch (fieldSet & TIM_SMCR_SMS)
 	{
 		case TIM_SMCR_SMS_DISABLED:
@@ -954,6 +1001,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
 /**
  * @brief Encodes a channel capture/compare selector into a CCMR-local `CCxS` value
  * @param[in] captureCompareSelection Timer capture/compare selector
+ * Accepted values:
+ * - @ref `TIMx_CHANNEL_CCS_OUTPUT`: Channel configured as output compare
+ * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx`: Input capture mapped to direct TI input
+ * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx_1`: Input capture mapped to indirect TI input
+ * - @ref `TIMx_CHANNEL_CCS_INPUT_TRC`: Input capture mapped to TRC
  * @param[out] pRawField Destination for right-aligned CCMR shared encoding
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Capture/compare selector was encoded
@@ -971,26 +1023,27 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeChannelSelectionToCCMR
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! CCxS has one shared two-bit encoding per channel slot; the position is handled separately.
 	switch (captureCompareSelection)
 	{
 		case TIMx_CHANNEL_CCS_OUTPUT:
 		{
-			*pRawField = TIM_CCMR_CCXS_OUTPUT;
+			*pRawField = TIM_CCMR_CCxS_OUTPUT;
 			break;
 		}
 		case TIMx_CHANNEL_CCS_INPUT_TIx:
 		{
-			*pRawField = TIM_CCMR_CCXS_INPUT_DIRECT_TI;
+			*pRawField = TIM_CCMR_CCxS_INPUT_DIRECT_TI;
 			break;
 		}
 		case TIMx_CHANNEL_CCS_INPUT_TIx_1:
 		{
-			*pRawField = TIM_CCMR_CCXS_INPUT_INDIRECT_TI;
+			*pRawField = TIM_CCMR_CCxS_INPUT_INDIRECT_TI;
 			break;
 		}
 		case TIMx_CHANNEL_CCS_INPUT_TRC:
 		{
-			*pRawField = TIM_CCMR_CCXS_INPUT_TRC;
+			*pRawField = TIM_CCMR_CCxS_INPUT_TRC;
 			break;
 		}
 		default:
@@ -1005,6 +1058,11 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeChannelSelectionToCCMR
 /**
  * @brief Decodes a CCMR-local `CCxS` value into a channel capture/compare selector
  * @param[in] rawField Right-aligned CCMR shared encoding
+ * Accepted values:
+ * - @ref `TIM_CCMR_CCxS_OUTPUT`: Output compare hardware encoding
+ * - @ref `TIM_CCMR_CCxS_INPUT_DIRECT_TI`: Direct TI input-capture hardware encoding
+ * - @ref `TIM_CCMR_CCxS_INPUT_INDIRECT_TI`: Indirect TI input-capture hardware encoding
+ * - @ref `TIM_CCMR_CCxS_INPUT_TRC`: TRC input-capture hardware encoding
  * @param[out] pCaptureCompareSelection Destination for decoded capture/compare selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Capture/compare selector was decoded
@@ -1022,24 +1080,25 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToChannelSelection
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! rawField is already right-aligned, so decode directly through the shared CCxS table.
 	switch (rawField)
 	{
-		case TIM_CCMR_CCXS_OUTPUT:
+		case TIM_CCMR_CCxS_OUTPUT:
 		{
 			*pCaptureCompareSelection = TIMx_CHANNEL_CCS_OUTPUT;
 			break;
 		}
-		case TIM_CCMR_CCXS_INPUT_DIRECT_TI:
+		case TIM_CCMR_CCxS_INPUT_DIRECT_TI:
 		{
 			*pCaptureCompareSelection = TIMx_CHANNEL_CCS_INPUT_TIx;
 			break;
 		}
-		case TIM_CCMR_CCXS_INPUT_INDIRECT_TI:
+		case TIM_CCMR_CCxS_INPUT_INDIRECT_TI:
 		{
 			*pCaptureCompareSelection = TIMx_CHANNEL_CCS_INPUT_TIx_1;
 			break;
 		}
-		case TIM_CCMR_CCXS_INPUT_TRC:
+		case TIM_CCMR_CCxS_INPUT_TRC:
 		{
 			*pCaptureCompareSelection = TIMx_CHANNEL_CCS_INPUT_TRC;
 			break;
@@ -1056,6 +1115,15 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToChannelSelection
 /**
  * @brief Encodes an output-compare mode selector into a CCMR-local `OCxM` value
  * @param[in] outputCompareMode Timer output-compare mode selector
+ * Accepted values:
+ * - @ref `TIMx_CHANNEL_MODE_FREEZE`: Freeze output compare output
+ * - @ref `TIMx_CHANNEL_MODE_SET_CH`: Set output active on match
+ * - @ref `TIMx_CHANNEL_MODE_RESET_CH`: Reset output inactive on match
+ * - @ref `TIMx_CHANNEL_MODE_TOGGLE`: Toggle output on match
+ * - @ref `TIMx_CHANNEL_MODE_FORCE_RESET`: Force output inactive
+ * - @ref `TIMx_CHANNEL_MODE_FORCE_SET`: Force output active
+ * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
+ * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
  * @param[out] pRawField Destination for right-aligned CCMR shared encoding
  * @returns Encode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output-compare mode was encoded
@@ -1073,46 +1141,47 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeOutputCompareModeToCCMR
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! OCxM is a three-bit shared encoding; the channel-specific bit position is handled by callers.
 	switch (outputCompareMode)
 	{
 		case TIMx_CHANNEL_MODE_FREEZE:
 		{
-			*pRawField = TIM_CCMR_OCXM_FROZEN;
+			*pRawField = TIM_CCMR_OCxM_FROZEN;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_SET_CH:
 		{
-			*pRawField = TIM_CCMR_OCXM_ACTIVE_ON_MATCH;
+			*pRawField = TIM_CCMR_OCxM_ACTIVE_ON_MATCH;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_RESET_CH:
 		{
-			*pRawField = TIM_CCMR_OCXM_INACTIVE_ON_MATCH;
+			*pRawField = TIM_CCMR_OCxM_INACTIVE_ON_MATCH;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_TOGGLE:
 		{
-			*pRawField = TIM_CCMR_OCXM_TOGGLE_ON_MATCH;
+			*pRawField = TIM_CCMR_OCxM_TOGGLE_ON_MATCH;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_FORCE_RESET:
 		{
-			*pRawField = TIM_CCMR_OCXM_FORCE_INACTIVE;
+			*pRawField = TIM_CCMR_OCxM_FORCE_INACTIVE;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_FORCE_SET:
 		{
-			*pRawField = TIM_CCMR_OCXM_FORCE_ACTIVE;
+			*pRawField = TIM_CCMR_OCxM_FORCE_ACTIVE;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_PWM1:
 		{
-			*pRawField = TIM_CCMR_OCXM_PWM_MODE_1;
+			*pRawField = TIM_CCMR_OCxM_PWM_MODE_1;
 			break;
 		}
 		case TIMx_CHANNEL_MODE_PWM2:
 		{
-			*pRawField = TIM_CCMR_OCXM_PWM_MODE_2;
+			*pRawField = TIM_CCMR_OCxM_PWM_MODE_2;
 			break;
 		}
 		default:
@@ -1127,6 +1196,15 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeOutputCompareModeToCCMR
 /**
  * @brief Decodes a CCMR-local `OCxM` value into an output-compare mode selector
  * @param[in] rawField Right-aligned CCMR shared encoding
+ * Accepted values:
+ * - @ref `TIM_CCMR_OCxM_FROZEN`: Frozen output-compare hardware encoding
+ * - @ref `TIM_CCMR_OCxM_ACTIVE_ON_MATCH`: Active-on-match hardware encoding
+ * - @ref `TIM_CCMR_OCxM_INACTIVE_ON_MATCH`: Inactive-on-match hardware encoding
+ * - @ref `TIM_CCMR_OCxM_TOGGLE_ON_MATCH`: Toggle-on-match hardware encoding
+ * - @ref `TIM_CCMR_OCxM_FORCE_INACTIVE`: Force-inactive hardware encoding
+ * - @ref `TIM_CCMR_OCxM_FORCE_ACTIVE`: Force-active hardware encoding
+ * - @ref `TIM_CCMR_OCxM_PWM_MODE_1`: PWM mode 1 hardware encoding
+ * - @ref `TIM_CCMR_OCxM_PWM_MODE_2`: PWM mode 2 hardware encoding
  * @param[out] pOutputCompareMode Destination for decoded output-compare mode selector
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output-compare mode was decoded
@@ -1144,44 +1222,45 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToOutputCompareMode
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! rawField is right-aligned before decode, so the table stays independent of CCMR1/CCMR2 position.
 	switch (rawField)
 	{
-		case TIM_CCMR_OCXM_FROZEN:
+		case TIM_CCMR_OCxM_FROZEN:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_FREEZE;
 			break;
 		}
-		case TIM_CCMR_OCXM_ACTIVE_ON_MATCH:
+		case TIM_CCMR_OCxM_ACTIVE_ON_MATCH:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_SET_CH;
 			break;
 		}
-		case TIM_CCMR_OCXM_INACTIVE_ON_MATCH:
+		case TIM_CCMR_OCxM_INACTIVE_ON_MATCH:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_RESET_CH;
 			break;
 		}
-		case TIM_CCMR_OCXM_TOGGLE_ON_MATCH:
+		case TIM_CCMR_OCxM_TOGGLE_ON_MATCH:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_TOGGLE;
 			break;
 		}
-		case TIM_CCMR_OCXM_FORCE_INACTIVE:
+		case TIM_CCMR_OCxM_FORCE_INACTIVE:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_FORCE_RESET;
 			break;
 		}
-		case TIM_CCMR_OCXM_FORCE_ACTIVE:
+		case TIM_CCMR_OCxM_FORCE_ACTIVE:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_FORCE_SET;
 			break;
 		}
-		case TIM_CCMR_OCXM_PWM_MODE_1:
+		case TIM_CCMR_OCxM_PWM_MODE_1:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_PWM1;
 			break;
 		}
-		case TIM_CCMR_OCXM_PWM_MODE_2:
+		case TIM_CCMR_OCxM_PWM_MODE_2:
 		{
 			*pOutputCompareMode = TIMx_CHANNEL_MODE_PWM2;
 			break;
@@ -1202,6 +1281,13 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToOutputCompareMode
 /**
  * @brief Encodes a Timer IRQ selector mask into raw `DIER` interrupt bits
  * @param[in] irqMask Timer IRQ selector mask
+ * Accepted values:
+ * - @ref `TIMx_IRQ_OVF_UVF`: Update overflow/underflow IRQ source
+ * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Channel 1 output-compare/input-capture IRQ source
+ * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Channel 2 output-compare/input-capture IRQ source
+ * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Channel 3 output-compare/input-capture IRQ source
+ * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Channel 4 output-compare/input-capture IRQ source
+ * - @ref `TIMx_IRQ_ALL`: All supported IRQ sources
  * @returns Raw `DIER` interrupt bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQMaskToDIERRaw(const timer_irq_t irqMask)
@@ -1270,6 +1356,13 @@ __STATIC_FORCEINLINE reg Codec_TIM_DecodeDIERRawToIRQMask(const reg dierRegImage
 /**
  * @brief Encodes a Timer IRQ selector mask into raw `SR` flag bits
  * @param[in] irqMask Timer IRQ selector mask
+ * Accepted values:
+ * - @ref `TIMx_IRQ_OVF_UVF`: Update overflow/underflow IRQ flag
+ * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Channel 1 output-compare/input-capture IRQ flag
+ * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Channel 2 output-compare/input-capture IRQ flag
+ * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Channel 3 output-compare/input-capture IRQ flag
+ * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Channel 4 output-compare/input-capture IRQ flag
+ * - @ref `TIMx_IRQ_ALL`: All supported IRQ flags
  * @returns Raw `SR` flag bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQMaskToSRRaw(const timer_irq_t irqMask)
@@ -1338,6 +1431,13 @@ __STATIC_FORCEINLINE reg Codec_TIM_DecodeSRRawToIRQMask(const reg srRegImage)
 /**
  * @brief Encodes a Timer DMA selector mask into raw `DIER` DMA bits
  * @param[in] dmaMask Timer DMA selector mask
+ * Accepted values:
+ * - @ref `TIMx_DMA_UPDATE`: Update DMA source
+ * - @ref `TIMx_DMA_CC1DE`: Channel 1 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC2DE`: Channel 2 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC3DE`: Channel 3 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC4DE`: Channel 4 capture/compare DMA source
+ * - @ref `TIMx_DMA_ALL`: All supported DMA sources
  * @returns Raw `DIER` DMA bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeDMAMaskToDIERRaw(const timer_dma_t dmaMask)
@@ -1423,7 +1523,7 @@ driver_status_t Codec_TIM_ExtractPrescaler
 	}
 
 	//! PSC is a 16-bit scalar field; the codec only extracts the caller-owned image.
-	*pPrescaler = (timer_prescaler_t) Codec_TIM_ExtractScalarField(pscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos);
+	*pPrescaler = (timer_prescaler_t) RegOps_ExtractFieldValue(pscRegImage, TIM_PSC_PSC, TIM_PSC_PSC_Pos);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1449,7 +1549,7 @@ driver_status_t Codec_TIM_ExtractAutoReload
 	}
 
 	//! ARR is a 16-bit scalar field; the codec does not infer update period or frequency.
-	*pAutoReload = (timer_auto_reload_t) Codec_TIM_ExtractScalarField(arrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos);
+	*pAutoReload = (timer_auto_reload_t) RegOps_ExtractFieldValue(arrRegImage, TIM_ARR_ARR, TIM_ARR_ARR_Pos);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1475,7 +1575,7 @@ driver_status_t Codec_TIM_ExtractCounterValue
 	}
 
 	//! CNT is a 16-bit scalar field; extract only the hardware image value.
-	*pCounterValue = (timer_counter_value_t) Codec_TIM_ExtractScalarField(cntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos);
+	*pCounterValue = (timer_counter_value_t) RegOps_ExtractFieldValue(cntRegImage, TIM_CNT_CNT, TIM_CNT_CNT_Pos);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1530,6 +1630,8 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	
+	//! Operate on these registers
 	updatedPscRegImage = *pPscRegImage;
 	updatedArrRegImage = *pArrRegImage;
 	updatedCntRegImage = *pCntRegImage;
@@ -1539,9 +1641,11 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReload(&updatedArrRegImage, pTimebase->auto_reload));
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterValue(&updatedCntRegImage, pTimebase->initial_count));
 
+	//! Update the pointed register images with the staged values
 	*pPscRegImage = updatedPscRegImage;
 	*pArrRegImage = updatedArrRegImage;
 	*pCntRegImage = updatedCntRegImage;
+	
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1889,19 +1993,10 @@ driver_status_t Codec_TIM_StageCounterConfig
 //										Timer CR1 Runtime State Codecs									//
 // ==================================================================================================== //
 
-driver_status_t Codec_TIM_ExtractCounterEnableState
-(
-	const reg							cr1RegImage,
-	driver_status_t* const				pCounterState
-)
+driver_status_t Codec_TIM_ExtractCounterEnableState(const reg cr1RegImage)
 {
-	if (pCounterState == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	*pCounterState = Codec_TIM_ExtractBitStateFromImage(cr1RegImage, TIM_CR1_CEN);
-	return DRIVER_STATUS_SUCCESS;
+	//! CEN uses normal positive polarity: clear means the counter is stopped, set means it runs.
+	return Codec_TIM_ExtractBitStateFromImage(cr1RegImage, TIM_CR1_CEN);
 }
 
 driver_status_t Codec_TIM_StageCounterEnableState
@@ -1910,23 +2005,14 @@ driver_status_t Codec_TIM_StageCounterEnableState
 	const driver_status_t				counterState
 )
 {
+	//! CEN follows the generic ON/OFF bit-state convention, so no Timer-specific inversion is needed.
 	return Codec_TIM_StageBitStateInImage(pCr1RegImage, TIM_CR1_CEN, counterState);
 }
 
-driver_status_t Codec_TIM_ExtractUpdateEventState
-(
-	const reg							cr1RegImage,
-	driver_status_t* const				pUpdateEventState
-)
+driver_status_t Codec_TIM_ExtractUpdateEventState(const reg cr1RegImage)
 {
-	if (pUpdateEventState == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
 	//! CR1.UDIS uses inverse polarity: bit set means update events are disabled.
-	*pUpdateEventState = ((cr1RegImage & TIM_CR1_UDIS) != 0x00000000UL) ? DRIVER_STATUS_OFF : DRIVER_STATUS_ON;
-	return DRIVER_STATUS_SUCCESS;
+	return ((cr1RegImage & TIM_CR1_UDIS) != 0x00000000UL) ? DRIVER_STATUS_OFF : DRIVER_STATUS_ON;
 }
 
 driver_status_t Codec_TIM_StageUpdateEventState
@@ -1987,6 +2073,7 @@ driver_status_t Codec_TIM_StageMasterMode
 	}
 	updatedRegImage = *pCr2RegImage;
 
+	//! Translate the public master-mode selector before replacing only CR2.MMS.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeMasterModeToCR2(masterMode, &fieldSet));
 	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_CR2_MMS, fieldSet);
 
@@ -2023,6 +2110,7 @@ driver_status_t Codec_TIM_StageSlaveMode
 	}
 	updatedRegImage = *pSmcrRegImage;
 
+	//! Translate the public slave-mode selector before replacing only SMCR.SMS.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeSlaveModeToSMCR(slaveMode, &fieldSet));
 	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_SMCR_SMS, fieldSet);
 
@@ -2222,6 +2310,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeChannelSelectionToCCMR(TIMx_CHANNEL_CCS_OUTPUT, &rawField));
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMRCcsPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_2BIT);
 
+	//! OCxCE is a direct one-bit selector; validate before staging the clear-enable bit.
 	if (TIM_CHANNEL_OC_CLEAR_IS_VALID(outputCompareClear) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -2229,9 +2318,11 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 	rawField = (reg_field_t) outputCompareClear;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcClearPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	//! OCxM has a three-bit hardware encoding, so stage it through the explicit mode map.
 	ASSERT_DRIVER_STATUS(Codec_TIM_EncodeOutputCompareModeToCCMR(outputCompareMode, &rawField));
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcModePos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_3BIT);
 
+	//! OCxPE controls CCR buffering and is independent from the selected compare/PWM mode.
 	if (TIM_CHANNEL_OC_PRELOAD_IS_VALID(outputComparePreload) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -2239,6 +2330,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 	rawField = (reg_field_t) outputComparePreload;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcPreloadPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	//! OCxFE controls fast compare response and remains a separate one-bit field.
 	if (TIM_CHANNEL_OC_FAST_IS_VALID(outputCompareFast) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -2246,6 +2338,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 	rawField = (reg_field_t) outputCompareFast;
 	updatedRegImage = RegOps_StageFieldValue(updatedRegImage, Codec_TIM_GetCCMROcFastPos(channelIndex), rawField, TIM_CODEC_FIELD_WIDTH_1BIT);
 
+	//! Publish the staged CCMR image only after all output-compare fields validate successfully.
 	*pCcmrRegImage = updatedRegImage;
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -2261,25 +2354,18 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
-	const timer_channel_t				channel,
-	driver_status_t* const				pChannelState
+	const timer_channel_t				channel
 )
 {
 	timer_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
 
-	if (pChannelState == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
 	//! CCER channel enable bits sit in four-bit lanes selected from the channel index.
 	ASSERT_DRIVER_STATUS(Codec_TIM_GetChannelIndexFromMask(channel, &channelIndex));
-	*pChannelState = Codec_TIM_ExtractBitStateFromImage
+	return Codec_TIM_ExtractBitStateFromImage
 	(
 		ccerRegImage,
 		REG_BIT_MASK(Codec_TIM_GetCCEREnablePos(channelIndex))
 	);
-	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t Codec_TIM_StageChannelEnableState

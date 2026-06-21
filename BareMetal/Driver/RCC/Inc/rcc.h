@@ -533,6 +533,27 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockM
 }
 
 /**
+ * @brief	Gets APB1 peripheral clock gate state
+ * @param[in] clockMask	APB1 clock enable mask from RCC register definitions
+ * @returns APB1 clock gate state or driver error status
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB1 clock gates are disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested APB1 clock gates are enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockGetState(const uint32_t clockMask)
+{
+	reg regImage = 0x00000000UL;
+
+	if (RCC_LL_IS_MASK_VALID(clockMask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	RCC_LL_READ_REG(APB1ENR, regImage);
+	return ((regImage & clockMask) == clockMask) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
+}
+
+/**
  * @brief	Pulses APB2 peripheral reset bits
  * @param[in] resetMask	APB2 reset mask from RCC register definitions
  * @returns - @ref driver_status_t Driver operation status

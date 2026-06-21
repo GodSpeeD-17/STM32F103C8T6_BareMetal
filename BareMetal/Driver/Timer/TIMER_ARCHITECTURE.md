@@ -33,7 +33,9 @@ Core must stay hardware-shaped. Timer Core content should include only:
 
 Public Timer selectors and defaults have been moved out of Core during this
 refactor. Core raw Timer macros now provide hardware-shaped positions, masks,
-and register-positioned raw values for codec use.
+and register-positioned raw values for codec use. Shared channel-field values
+use the STM32 field notation directly, for example `CCxS`, `OCxM`,
+`ICxPSC`, and `ICxF`.
 
 ## Timer Data Types
 
@@ -173,7 +175,10 @@ configuration APIs include:
 
 Channel/PWM and IRQ codec surfaces can build on the same rules:
 
+- `Codec_TIM_ExtractCounterEnableState(...)` / `Codec_TIM_StageCounterEnableState(...)`
+- `Codec_TIM_ExtractUpdateEventState(...)` / `Codec_TIM_StageUpdateEventState(...)`
 - `Codec_TIM_ExtractChannelConfig(...)` / `Codec_TIM_StageChannelConfig(...)`
+- `Codec_TIM_ExtractChannelEnableState(...)` / `Codec_TIM_StageChannelEnableState(...)`
 - `Codec_TIM_ExtractChannelPolarity(...)` / `Codec_TIM_StageChannelPolarity(...)`
 - `Codec_TIM_ExtractIRQStatus(...)`
 - `Codec_TIM_StageIRQAck(...)`
@@ -183,7 +188,10 @@ Every meaningful Stage API should have a conjugate Extract API. Extraction-only
 APIs are acceptable for naturally read-only or action-style register behavior.
 
 Codec APIs may validate inputs and should return `driver_status_t` whenever
-validation can fail.
+validation can fail. For binary state extraction APIs, the returned
+`driver_status_t` is the decoded state itself, either `DRIVER_STATUS_OFF` or
+`DRIVER_STATUS_ON`, with error statuses used only when validation can fail.
+Non-state extraction APIs use output pointers and return operation status.
 
 ## Timer Driver Layer
 
@@ -208,6 +216,9 @@ primary public path should be status-returning.
 
 Current first-pass public API scope:
 
+- RCC clock-gate state APIs `TIM_GetClockState()` / `TIM_SetClockState()`
+- counter operation state APIs `TIM_GetOperationState()` /
+  `TIM_SetOperationState()`
 - `TIM_Config()` and `TIM_DeConfig()`
 - grouped `TIM_GetTimebaseConfig()` / `TIM_SetTimebaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
@@ -216,10 +227,37 @@ Current first-pass public API scope:
   `update_source`, and `clock_division`
 - derived convenience getter `TIM_GetFrequency()`
 
-`TIM_Config()` reads only `CR1`, `PSC`, `ARR`, and `CNT`, stages through the
-codec, and writes only changed staged images. `TIM_DeConfig()` restores only
-the fields represented by `timer_config_t`; it preserves unrelated CR1 runtime
-bits such as `CEN` and `UDIS`.
+`TIM_GetClockState()` and `TIM_SetClockState()` own only the RCC APB1 clock
+gate for one supported Timer instance. They do not start/stop the counter and
+do not reset or rewrite Timer registers.
+
+`TIM_GetOperationState()` and `TIM_SetOperationState()` own only
+`TIMx_CR1.CEN`. They do not enable or disable the RCC APB1 clock gate. Public
+users must enable the Timer clock gate before calling the operation-state APIs
+directly.
+
+`TIM_Config()` validates the full public configuration, enables the Timer clock
+gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter
+through `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, reads the
+configuration-owned registers, stages through the codec, and writes only
+changed staged images. The current implementation leaves the counter disabled
+after configuration; users explicitly start the counter with
+`TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
+
+The final update-event/latch policy is still pending. The likely safe sequence
+is to stop the counter, stage/write `CR1`, `PSC`, and `ARR`, generate
+`EGR.UG` so buffered period/prescaler values become active, write `CNT` after
+that update event, clear any generated update flag if required, and still leave
+the counter disabled until `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)` is
+called.
+
+`TIM_DeConfig()` enables the Timer clock gate through
+`TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter through
+`TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, restores only the fields
+represented by `timer_config_t`, and then disables the Timer clock gate through
+`TIM_SetClockState(TIMx, DRIVER_STATUS_OFF)`. It does not issue an RCC
+peripheral reset and does not touch channel, IRQ, PWM, DMA, master/slave, or
+delay-helper state.
 
 Unlike GPIO, Timer should keep a structured configuration API. GPIO can remain
 ergonomic with a small fixed argument list because its basic configuration is
@@ -229,6 +267,29 @@ preload/fast/clear behavior, polarity, and IRQ concerns. A configuration
 structure keeps that API modular and extensible. The refactor should therefore
 fix ownership and staging of `timer_config_t`, not remove the structured
 configuration model.
+
+## Coding Style
+
+Timer files follow the established banner style:
+
+```c
+// ==================================================================================================== //
+```
+
+Use tabs for indentation.
+
+When a function declaration, function definition, or function-like macro call
+has exactly one argument, keep the argument on the same line as the function
+name:
+
+```c
+driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
+ASSERT_DRIVER_STATUS(TIM_ValidateInstance(TIMx));
+```
+
+Reserve the multiline parenthesized layout for functions or function-like
+macro calls with multiple arguments, or for expressions that cannot stay
+readable in a single line.
 
 ## Current Checkpoint
 
@@ -240,12 +301,22 @@ Completed:
 - Public Timer configuration structures live in `timer_config.h`.
 - Timer LL exists and exposes dumb full-register read/write helpers.
 - Timer codec exists and operates on caller-owned register images.
+- Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or
+  `DRIVER_STATUS_ON` directly.
 - `timer.h` is public API only for the first-pass config-owned Timer fields.
+- RCC clock-gate state APIs `TIM_GetClockState()` and `TIM_SetClockState()`
+  are exposed before configuration APIs.
+- Counter operation state APIs `TIM_GetOperationState()` and
+  `TIM_SetOperationState()` are exposed.
+- `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
+  ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
   codec staging, dirty writes, and `driver_status_t` status handling.
 
 Remaining:
 
+- `TIM_Config()` still needs final update-event/latch sequencing around
+  `EGR.UG`, `CNT`, and any generated `SR.UIF` flag.
 - Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
   boundaries.
 - Timer IRQ public APIs are deferred and must be rebuilt so codec owns DIER/SR

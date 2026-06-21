@@ -22,6 +22,7 @@ item, verify it, commit it, then move to the next item.
 - [x] Refactor `Inc/timer_config.h` into clean timer-independent configuration structures.
 - [x] Refactor `Inc/timer.h` into public API only with `driver_status_t` contracts and no inline hardware access.
 - [x] Refactor `Src/timer.c` orchestration for config-owned fields to use validation, LL, codec staging, dirty writes, and status returns.
+- [ ] Finalize Timer config update-event sequencing around `EGR.UG`, `CNT`, and generated `SR.UIF`.
 - [ ] Rework Timer IRQ APIs so codec owns DIER/SR mapping and driver owns NVIC policy.
 - [ ] Update Timer examples and shared startup delay users to the new public API shape.
 - [ ] Apply Timer Doxygen/style pass using GPIO banner style and `@ref` backtick convention.
@@ -41,15 +42,22 @@ item, verify it, commit it, then move to the next item.
 - [x] First-pass driver validates Timer instances and config-owned selector compatibility.
 - [x] First-pass driver reads only required registers for config-owned fields.
 - [x] First-pass driver writes only changed staged images for config-owned fields.
+- [x] RCC clock-gate state APIs `TIM_GetClockState()` and `TIM_SetClockState()` were exposed before configuration APIs.
+- [x] Counter operation state APIs `TIM_GetOperationState()` and `TIM_SetOperationState()` were exposed.
+- [x] Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or `DRIVER_STATUS_ON` directly.
+- [x] Core shared CCMR raw-value macros were normalized to STM32-style `CCxS`, `OCxM`, `ICxPSC`, and `ICxF` notation.
+- [x] `TIM_DeConfig()` uses `TIM_SetClockState()`, `TIM_SetOperationState()`, config-owned reset staging, and clock-gate disable without issuing RCC peripheral reset.
 
 ## Remaining Deviations To Remove
 
+- [ ] `TIM_Config()` currently disables the counter and stages config-owned fields, but final update-event/latch behavior using `EGR.UG` is still pending.
+- [ ] `TIM_Config()` public Doxygen should be finalized once the update-event/latch behavior is implemented.
 - [ ] Channel/PWM public APIs are currently deferred and must be rebuilt on top of the existing channel codec surface.
 - [ ] Timer IRQ public APIs are currently deferred and must be rebuilt with codec-owned DIER/SR mapping and driver-owned NVIC policy.
 - [ ] Driver must validate channel masks and IRQ masks when those public APIs are reintroduced.
 - [ ] IRQ disable policy can disable NVIC while other Timer IRQ sources remain enabled.
-- [ ] Doxygen does not consistently use accepted values, `@retval`, or `@ref` with backticks.
-- [ ] Style does not consistently use tabs and the established banner style.
+- [ ] A full Timer-wide Doxygen pass is still required for accepted values, `@retval`, and `@ref` with backticks.
+- [ ] A full Timer-wide style pass is still required for tabs, banners, and single-argument function layout.
 - [ ] Timer example projects still use the legacy Timer config shape and removed legacy helper APIs.
 
 ## Verification Targets
@@ -64,7 +72,7 @@ item, verify it, commit it, then move to the next item.
 - [x] `BareMetal/Driver/Timer/Src/timer_codec.c` passes `arm-none-eabi-gcc -fsyntax-only -Wall -Wextra -Werror`.
 - [x] `git diff --check` passes.
 - [ ] `Projects/Timer/04_Timer_Poll` build fails because `main.c` still uses `.instance`, `.channel`, `TIM_1MHz_Load_Default()`, and old one-argument `TIM_Config()`.
-- [ ] `Projects/Timer/05_Timer_IRQ` build fails because `main.c` still uses the old config shape plus deferred IRQ/runtime APIs such as `TIM_IRQ_Enable()`, `TIM_Enable()`, `TIM_IRQ_Get_Status()`, and `TIM_IRQ_Ack()`.
+- [ ] `Projects/Timer/05_Timer_IRQ` build fails because `main.c` still uses the old config shape plus deferred IRQ APIs such as `TIM_IRQ_Enable()`, `TIM_IRQ_Get_Status()`, and `TIM_IRQ_Ack()`.
 
 ## Notes
 

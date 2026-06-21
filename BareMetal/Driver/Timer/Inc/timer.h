@@ -41,16 +41,141 @@ extern "C" {
  */
 
 // ==================================================================================================== //
+//										Timer Clock State APIs											//
+// ==================================================================================================== //
+
+/**
+ * @brief Gets the APB1 clock-gate state for one supported Timer instance
+ * @details
+ * Reads only the RCC APB1 clock-enable bit for @p TIMx. This API does not read
+ * or write Timer registers, does not modify `TIMx_CR1.CEN`, and does not reset
+ * the Timer peripheral.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @returns Timer clock-gate state or driver error status
+ * @retval - @ref `DRIVER_STATUS_OFF`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: Timer APB1 clock gate is enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
+ */
+driver_status_t TIM_GetClockState(TIM_TypeDef* const TIMx);
+
+/**
+ * @brief Sets the APB1 clock-gate state for one supported Timer instance
+ * @details
+ * Sets or clears only the RCC APB1 clock-enable bit for @p TIMx. This API
+ * makes Timer registers accessible when @p clockState is @ref `DRIVER_STATUS_ON`,
+ * but it does not start or stop the Timer counter and does not modify Timer
+ * configuration registers.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] clockState Requested Timer clock-gate state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable the APB1 Timer clock gate.
+ * - @ref `DRIVER_STATUS_ON`: Enable the APB1 Timer clock gate.
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer APB1 clock gate was updated.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p clockState was invalid.
+ */
+driver_status_t TIM_SetClockState(TIM_TypeDef* const TIMx, const driver_status_t clockState);
+
+// ==================================================================================================== //
+//										Timer Operation State APIs										//
+// ==================================================================================================== //
+
+/**
+ * @brief Gets the counter operation state for one supported Timer instance
+ * @details
+ * Reads only `TIMx_CR1.CEN` through the codec layer. This API does not enable
+ * or disable the APB1 Timer clock gate and does not modify Timer configuration
+ * registers.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @returns Timer counter operation state or driver error status
+ * @retval - @ref `DRIVER_STATUS_OFF`: Timer counter operation is disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: Timer counter operation is enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @pre @ref `TIM_SetClockState` has enabled the APB1 clock gate for @p TIMx.
+ */
+driver_status_t TIM_GetOperationState(TIM_TypeDef* const TIMx);
+
+/**
+ * @brief Sets the counter operation state for one supported Timer instance
+ * @details
+ * Sets or clears only `TIMx_CR1.CEN` through the codec layer while preserving
+ * all other `TIMx_CR1` fields. This API does not enable or disable the APB1
+ * Timer clock gate.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] operationState Requested Timer counter operation state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable Timer counter operation.
+ * - @ref `DRIVER_STATUS_ON`: Enable Timer counter operation.
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer counter operation state was updated.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p operationState was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @pre @ref `TIM_SetClockState` has enabled the APB1 clock gate for @p TIMx.
+ */
+driver_status_t TIM_SetOperationState(TIM_TypeDef* const TIMx, const driver_status_t operationState);
+
+// ==================================================================================================== //
 //										Timer Root Configuration APIs									//
 // ==================================================================================================== //
 
 /**
+ * @brief Restores the Timer configuration fields owned by this API pass
+ * @details
+ * Restores the register fields represented by @ref `timer_config_t` back to
+ * their reset/default raw values. The driver validates @p TIMx, enables the
+ * APB1 Timer clock gate with @ref `TIM_SetClockState`, disables the counter
+ * with @ref `TIM_SetOperationState`, stages reset images, writes only changed
+ * register images, and disables the Timer clock gate with
+ * @ref `TIM_SetClockState` when de-configuration completes.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer configuration fields were restored.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
+ * @note This API is limited to the fields represented by @ref `timer_config_t`.
+ * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay-helper state are not part
+ * of this de-configuration scope.
+ * @note This API does not issue an RCC peripheral reset.
+ */
+driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
+
+/**
  * @brief Configures one supported general-purpose Timer instance
  * @details
- * Applies every field contained in @ref `timer_config_t`. The driver layer
- * owns validation, Timer clock enable, register-image reads, codec staging,
- * and dirty writes. Registers are written only when the staged image differs
- * from the current hardware image.
+ * Applies every field contained in @ref `timer_config_t`. The driver validates
+ * @p TIMx, enables the APB1 Timer clock gate with @ref `TIM_SetClockState`,
+ * disables the counter with @ref `TIM_SetOperationState`, stages register
+ * images through the codec layer, and writes only changed register images.
  *
  * This API stages:
  * - `TIMx_CR1` fields represented by @ref `timer_config_counter_t`
@@ -71,35 +196,13 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer configuration was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more configuration fields were invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staging failed unexpectedly.
  * @note This API does not configure channel/PWM, IRQ/NVIC, DMA, master/slave,
  * or delay-helper state.
+ * @note This API leaves the Timer counter disabled. Use
+ * @ref `TIM_SetOperationState` with @ref `DRIVER_STATUS_ON` to start the
+ * counter after configuration.
  */
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const timer_config_t* const pConfig);
-
-/**
- * @brief Restores the Timer configuration fields owned by this API pass
- * @details
- * Restores the register fields represented by @ref `timer_config_t` back to
- * their reset/default raw values. The driver layer validates @p TIMx, enables
- * the Timer clock when required, stages reset images, and writes only changed
- * register images.
- *
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer configuration fields were restored.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staging failed unexpectedly.
- * @note This API is limited to the fields represented by @ref `timer_config_t`.
- * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay-helper state are not part
- * of this deconfiguration scope.
- */
-driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
 
 // ==================================================================================================== //
 //										Timer Group Configuration APIs									//
@@ -119,48 +222,18 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * - @ref `TIM3`
  * - @ref `TIM4`
  * - @ref `TIM5`
- * @param[out] pTimebase Destination for the current Timer timebase configuration
+ * @param[out] pTimeBase Destination for the current Timer timebase configuration
  * Expected values:
- * - Non-`NULL`: Timebase configuration is written to @p pTimebase
+ * - Non-`NULL`: TimeBase configuration is written to @p pTimeBase
  * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimebase was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: TimeBase configuration was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimeBase was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
  */
-driver_status_t TIM_GetTimebaseConfig
+driver_status_t TIM_GetTimeBaseConfig
 (
 	TIM_TypeDef* const					TIMx,
-	timer_config_timebase_t* const		pTimebase
-);
-
-/**
- * @brief Configures the Timer timebase fields
- * @details
- * Applies @ref `timer_config_timebase_t::prescaler` to `TIMx_PSC`,
- * @ref `timer_config_timebase_t::auto_reload` to `TIMx_ARR`, and
- * @ref `timer_config_timebase_t::initial_count` to `TIMx_CNT`. Each register is
- * written only when the staged value differs from the current hardware image.
- *
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[in] pTimebase Timer timebase configuration
- * Expected values:
- * - Non-`NULL`: Timebase configuration to apply
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimebase was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more timebase fields were invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staging failed unexpectedly.
- * @note This API does not modify `TIMx_CR1` counter behavior fields.
- */
-driver_status_t TIM_SetTimebaseConfig
-(
-	TIM_TypeDef* const						TIMx,
-	const timer_config_timebase_t* const	pTimebase
+	timer_config_timebase_t* const		pTimeBase
 );
 
 /**
@@ -181,8 +254,7 @@ driver_status_t TIM_SetTimebaseConfig
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was extracted.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1` contained a field value outside the public Timer vocabulary.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1` contained a field value outside the public Timer vocabulary.
  * @note Counter enable state and update-event enable state are not part of
  * @ref `timer_config_counter_t`.
  */
@@ -190,6 +262,35 @@ driver_status_t TIM_GetCounterConfig
 (
 	TIM_TypeDef* const					TIMx,
 	timer_config_counter_t* const		pCounter
+);
+
+/**
+ * @brief Configures the Timer timebase fields
+ * @details
+ * Applies @ref `timer_config_timebase_t::prescaler` to `TIMx_PSC`,
+ * @ref `timer_config_timebase_t::auto_reload` to `TIMx_ARR`, and
+ * @ref `timer_config_timebase_t::initial_count` to `TIMx_CNT`. Each register is
+ * written only when the staged value differs from the current hardware image.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] pTimeBase Timer timebase configuration
+ * Expected values:
+ * - Non-`NULL`: TimeBase configuration to apply
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: TimeBase configuration was applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimeBase was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more timebase fields were invalid.
+ * @note This API does not modify `TIMx_CR1` counter behavior fields.
+ */
+driver_status_t TIM_SetTimeBaseConfig
+(
+	TIM_TypeDef* const						TIMx,
+	const timer_config_timebase_t* const	pTimeBase
 );
 
 /**
@@ -212,7 +313,6 @@ driver_status_t TIM_GetCounterConfig
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more counter fields were invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
  */
 driver_status_t TIM_SetCounterConfig
 (
@@ -221,7 +321,7 @@ driver_status_t TIM_SetCounterConfig
 );
 
 // ==================================================================================================== //
-//										Timer Timebase Field APIs										//
+//										Timer TimeBase Field APIs										//
 // ==================================================================================================== //
 
 /**
@@ -248,31 +348,6 @@ driver_status_t TIM_GetPrescaler
 (
 	TIM_TypeDef* const				TIMx,
 	timer_prescaler_t* const		pPrescaler
-);
-
-/**
- * @brief Configures the Timer prescaler value
- * @details
- * Writes only `TIMx_PSC` if @p prescaler differs from the current hardware
- * image.
- *
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[in] prescaler Prescaler value staged into `TIMx_PSC`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p prescaler was invalid.
- * @note This API updates only `TIMx_PSC`; it does not modify `TIMx_ARR`,
- * `TIMx_CNT`, or `TIMx_CR1`.
- */
-driver_status_t TIM_SetPrescaler
-(
-	TIM_TypeDef* const					TIMx,
-	const timer_prescaler_t				prescaler
 );
 
 /**
@@ -327,6 +402,53 @@ driver_status_t TIM_GetAutoReload
 );
 
 /**
+ * @brief Returns the current Timer counter value
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pCounterValue Destination for the current `TIMx_CNT` value
+ * Expected values:
+ * - Non-`NULL`: Counter value is written to @p pCounterValue
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounterValue was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
+ */
+driver_status_t TIM_GetCounterValue
+(
+	TIM_TypeDef* const					TIMx,
+	timer_counter_value_t* const			pCounterValue
+);
+
+/**
+ * @brief Configures the Timer prescaler value
+ * @details
+ * Writes only `TIMx_PSC` if @p prescaler differs from the current hardware
+ * image.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] prescaler Prescaler value staged into `TIMx_PSC`
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was applied.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p prescaler was invalid.
+ * @note This API updates only `TIMx_PSC`; it does not modify `TIMx_ARR`,
+ * `TIMx_CNT`, or `TIMx_CR1`.
+ */
+driver_status_t TIM_SetPrescaler
+(
+	TIM_TypeDef* const					TIMx,
+	const timer_prescaler_t				prescaler
+);
+
+/**
  * @brief Configures the Timer auto-reload value
  * @details
  * Writes only `TIMx_ARR` if @p autoReload differs from the current hardware
@@ -349,28 +471,6 @@ driver_status_t TIM_SetAutoReload
 (
 	TIM_TypeDef* const						TIMx,
 	const timer_auto_reload_t				autoReload
-);
-
-/**
- * @brief Returns the current Timer counter value
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pCounterValue Destination for the current `TIMx_CNT` value
- * Expected values:
- * - Non-`NULL`: Counter value is written to @p pCounterValue
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounterValue was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- */
-driver_status_t TIM_GetCounterValue
-(
-	TIM_TypeDef* const					TIMx,
-	timer_counter_value_t* const			pCounterValue
 );
 
 /**
@@ -416,13 +516,122 @@ driver_status_t TIM_SetCounterValue
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was extracted.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDirection was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1` could not be decoded.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1` could not be decoded.
  */
 driver_status_t TIM_GetDirection
 (
 	TIM_TypeDef* const				TIMx,
 	timer_direction_t* const		pDirection
+);
+
+/**
+ * @brief Returns the current Timer counter alignment selector
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pAlignment Destination for the current edge/center-aligned selector
+ * Expected values:
+ * - Non-`NULL`: Alignment selector is written to @p pAlignment
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAlignment was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1.CMS` could not be decoded.
+ */
+driver_status_t TIM_GetAlignment
+(
+	TIM_TypeDef* const				TIMx,
+	timer_count_mode_t* const		pAlignment
+);
+
+/**
+ * @brief Returns the current Timer one-pulse mode selector
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pOnePulse Destination for the current one-pulse selector
+ * Expected values:
+ * - Non-`NULL`: One-pulse selector is written to @p pOnePulse
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOnePulse was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1.OPM` could not be decoded.
+ */
+driver_status_t TIM_GetOnePulse
+(
+	TIM_TypeDef* const			TIMx,
+	timer_opm_t* const			pOnePulse
+);
+
+/**
+ * @brief Returns the current Timer auto-reload preload selector
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pAutoReloadPreload Destination for the current auto-reload preload selector
+ * Expected values:
+ * - Non-`NULL`: Auto-reload preload selector is written to @p pAutoReloadPreload
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReloadPreload was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1.ARPE` could not be decoded.
+ */
+driver_status_t TIM_GetAutoReloadPreload
+(
+	TIM_TypeDef* const			TIMx,
+	timer_arpe_t* const			pAutoReloadPreload
+);
+
+/**
+ * @brief Returns the current Timer update request source selector
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pUpdateSource Destination for the current update request source selector
+ * Expected values:
+ * - Non-`NULL`: Update request source selector is written to @p pUpdateSource
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update request source selector was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pUpdateSource was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1.URS` could not be decoded.
+ */
+driver_status_t TIM_GetUpdateSource
+(
+	TIM_TypeDef* const				TIMx,
+	timer_update_source_t* const	pUpdateSource
+);
+
+/**
+ * @brief Returns the current Timer clock division selector
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[out] pClockDivision Destination for the current clock division selector
+ * Expected values:
+ * - Non-`NULL`: Clock division selector is written to @p pClockDivision
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock division selector was extracted.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockDivision was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid, or `TIMx_CR1.CKD` could not be decoded.
+ */
+driver_status_t TIM_GetClockDivision
+(
+	TIM_TypeDef* const					TIMx,
+	timer_clock_division_t* const		pClockDivision
 );
 
 /**
@@ -444,35 +653,11 @@ driver_status_t TIM_GetDirection
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p direction was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  */
 driver_status_t TIM_SetDirection
 (
 	TIM_TypeDef* const				TIMx,
 	const timer_direction_t			direction
-);
-
-/**
- * @brief Returns the current Timer counter alignment selector
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pAlignment Destination for the current edge/center-aligned selector
- * Expected values:
- * - Non-`NULL`: Alignment selector is written to @p pAlignment
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAlignment was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1.CMS` could not be decoded.
- */
-driver_status_t TIM_GetAlignment
-(
-	TIM_TypeDef* const				TIMx,
-	timer_count_mode_t* const		pAlignment
 );
 
 /**
@@ -496,7 +681,6 @@ driver_status_t TIM_GetAlignment
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p alignment was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  * @warning STM32F1 does not allow switching from edge-aligned to center-aligned
  * mode while the counter is enabled.
  */
@@ -504,29 +688,6 @@ driver_status_t TIM_SetAlignment
 (
 	TIM_TypeDef* const					TIMx,
 	const timer_count_mode_t				alignment
-);
-
-/**
- * @brief Returns the current Timer one-pulse mode selector
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pOnePulse Destination for the current one-pulse selector
- * Expected values:
- * - Non-`NULL`: One-pulse selector is written to @p pOnePulse
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOnePulse was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1.OPM` could not be decoded.
- */
-driver_status_t TIM_GetOnePulse
-(
-	TIM_TypeDef* const			TIMx,
-	timer_opm_t* const			pOnePulse
 );
 
 /**
@@ -548,35 +709,11 @@ driver_status_t TIM_GetOnePulse
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p onePulse was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  */
 driver_status_t TIM_SetOnePulse
 (
 	TIM_TypeDef* const			TIMx,
 	const timer_opm_t			onePulse
-);
-
-/**
- * @brief Returns the current Timer auto-reload preload selector
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pAutoReloadPreload Destination for the current auto-reload preload selector
- * Expected values:
- * - Non-`NULL`: Auto-reload preload selector is written to @p pAutoReloadPreload
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReloadPreload was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1.ARPE` could not be decoded.
- */
-driver_status_t TIM_GetAutoReloadPreload
-(
-	TIM_TypeDef* const			TIMx,
-	timer_arpe_t* const			pAutoReloadPreload
 );
 
 /**
@@ -598,35 +735,11 @@ driver_status_t TIM_GetAutoReloadPreload
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p autoReloadPreload was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  */
 driver_status_t TIM_SetAutoReloadPreload
 (
 	TIM_TypeDef* const			TIMx,
 	const timer_arpe_t			autoReloadPreload
-);
-
-/**
- * @brief Returns the current Timer update request source selector
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pUpdateSource Destination for the current update request source selector
- * Expected values:
- * - Non-`NULL`: Update request source selector is written to @p pUpdateSource
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update request source selector was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pUpdateSource was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1.URS` could not be decoded.
- */
-driver_status_t TIM_GetUpdateSource
-(
-	TIM_TypeDef* const				TIMx,
-	timer_update_source_t* const	pUpdateSource
 );
 
 /**
@@ -648,35 +761,11 @@ driver_status_t TIM_GetUpdateSource
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update request source selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p updateSource was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  */
 driver_status_t TIM_SetUpdateSource
 (
 	TIM_TypeDef* const					TIMx,
 	const timer_update_source_t			updateSource
-);
-
-/**
- * @brief Returns the current Timer clock division selector
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
- * - @ref `TIM5`
- * @param[out] pClockDivision Destination for the current clock division selector
- * Expected values:
- * - Non-`NULL`: Clock division selector is written to @p pClockDivision
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock division selector was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockDivision was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: `TIMx_CR1.CKD` could not be decoded.
- */
-driver_status_t TIM_GetClockDivision
-(
-	TIM_TypeDef* const					TIMx,
-	timer_clock_division_t* const		pClockDivision
 );
 
 /**
@@ -699,7 +788,6 @@ driver_status_t TIM_GetClockDivision
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock division selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p clockDivision was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing counter configuration could not be decoded or staged.
  */
 driver_status_t TIM_SetClockDivision
 (
