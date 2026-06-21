@@ -17,9 +17,9 @@ boundaries are correct.
 | Timer data types | `BareMetal/Driver/Timer/Inc/timer_data_types.h` | Timer scalar aliases and plain shared data aliases | Public selector macros, validation, register access, hardware writes |
 | Timer defines | `BareMetal/Driver/Timer/Inc/timer_defines.h` | Public Timer selectors, defaults, pure validation helpers, simple selector utilities | Hardware reads/writes, sequencing, raw field placement |
 | Timer config | `BareMetal/Driver/Timer/Inc/timer_config.h` | Timer-independent public configuration structures, including `timer_config_t` as a structure of structures | Timer instance pointers, register access, RCC/NVIC access, driver orchestration |
-| Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers and minimal register address macros | Validation, encoding, mode decisions, batching, clock/reset sequencing, NVIC policy |
-| Timer codec | `BareMetal/Driver/Timer/Inc/timer_codec.h`, `BareMetal/Driver/Timer/Src/timer_codec.c` | Private Encode/Decode helpers and public Extract/Stage functions over caller-owned register images | Hardware reads/writes, clock sequencing, public API decisions |
-| Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, `BareMetal/Driver/Timer/Src/timer.c` | Public API, validation, orchestration, clock enable/reset, batching, dirty-register writes, status handling, NVIC policy | Raw register map definitions, direct register field placement when codec can own it |
+| Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers and minimal register address macros | Validation, encoding, mode decisions, batching, clock-state sequencing, NVIC policy |
+| Timer codec | `BareMetal/Driver/Timer/Inc/timer_codec.h`, `BareMetal/Driver/Timer/Src/timer_codec.c` | Private Encode/Decode helpers and public Extract/Stage functions over caller-owned register images | Hardware reads/writes, clock-state sequencing, public API decisions |
+| Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, `BareMetal/Driver/Timer/Src/timer.c` | Public API, validation, orchestration, clock-state handling, batching, dirty-register writes, status handling, NVIC policy | Raw register map definitions, direct register field placement when codec can own it |
 | Project/application | `Projects/*` and shared startup code | Board/application behavior and examples | Driver internals and raw register writes unless intentionally teaching raw access |
 
 ## Core Register Layer
@@ -91,8 +91,8 @@ Current first-pass structure shape:
   - `timebase`
   - `counter`
 
-`timer_config.h` must not own register access helpers, clock enable/reset
-helpers, NVIC helpers, public driver API declarations, or codec staging.
+`timer_config.h` must not own register access helpers, clock-state helpers,
+NVIC helpers, public driver API declarations, or codec staging.
 
 ## Timer Defines
 
@@ -193,6 +193,16 @@ validation can fail. For binary state extraction APIs, the returned
 `DRIVER_STATUS_ON`, with error statuses used only when validation can fail.
 Non-state extraction APIs use output pointers and return operation status.
 
+Timer public and codec-visible Doxygen should make value scope visible at the
+call site:
+
+- Use `Accepted values` for caller-provided input parameters.
+- Use `Expected values` for values written through output parameters.
+- Use `Accepted member values` or `Expected member values` when the parameter
+  is a structure and the relevant scope is member-level.
+- Prefer concrete `@ref` entries over wildcard text so users can jump directly
+  to selector definitions.
+
 ## Timer Driver Layer
 
 The driver layer owns public behavior.
@@ -202,7 +212,8 @@ It must:
 - Expose public status-returning APIs in `timer.h`.
 - Consume public Timer configuration structures from `timer_config.h`.
 - Validate public arguments before touching hardware.
-- Enable required clocks before register access.
+- Own or verify required clocks before register access, according to each API
+  ownership boundary.
 - Own reset/update-event sequencing.
 - Decide which registers must be read.
 - Read each required register once.
@@ -236,6 +247,37 @@ do not reset or rewrite Timer registers.
 users must enable the Timer clock gate before calling the operation-state APIs
 directly.
 
+### Clock Ownership Policy
+
+Timer public APIs must not hide broad side effects behind narrow names. The
+Timer layer therefore separates:
+
+- clock-gate state: RCC APB1 enable bit, owned only by
+  `TIM_GetClockState()` and `TIM_SetClockState()`.
+- operation state: `TIMx_CR1.CEN`, owned only by `TIM_GetOperationState()` and
+  `TIM_SetOperationState()`.
+- configuration orchestration: `TIM_Config()` and `TIM_DeConfig()` may use the
+  clock-state and operation-state APIs internally because their names describe
+  a full Timer lifecycle operation.
+
+Grouped and scalar `Get`/`Set` APIs such as `TIM_GetPrescaler()`,
+`TIM_SetAutoReload()`, and `TIM_SetDirection()` do not silently enable the RCC
+clock gate. Their narrower contract is to read or modify one Timer-owned
+configuration field. Those APIs verify that `TIM_GetClockState(TIMx)` returns
+`DRIVER_STATUS_ON`, and return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when
+the clock gate is disabled. The current implementation centralizes that
+precondition in the private `TIM_RequireClockGateEnabled()` helper.
+
+This keeps call-site behavior explicit:
+
+```c
+ASSERT_DRIVER_STATUS(TIM_SetClockState(TIM2, DRIVER_STATUS_ON));
+ASSERT_DRIVER_STATUS(TIM_SetPrescaler(TIM2, prescaler));
+```
+
+Instead of allowing `TIM_SetPrescaler()` to change RCC state as a hidden side
+effect.
+
 `TIM_Config()` validates the full public configuration, enables the Timer clock
 gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter
 through `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, reads the
@@ -244,12 +286,33 @@ changed staged images. The current implementation leaves the counter disabled
 after configuration; users explicitly start the counter with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
-The final update-event/latch policy is still pending. The likely safe sequence
-is to stop the counter, stage/write `CR1`, `PSC`, and `ARR`, generate
-`EGR.UG` so buffered period/prescaler values become active, write `CNT` after
-that update event, clear any generated update flag if required, and still leave
-the counter disabled until `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)` is
-called.
+### Configuration Latch Policy
+
+Timer configuration is not just "write the register and forget it." Some Timer
+register writes feed shadow/preload logic:
+
+- `TIMx_PSC` is loaded into the active prescaler on an update event.
+- `TIMx_ARR` may be immediate or preloaded depending on `TIMx_CR1.ARPE`.
+- `TIMx_EGR.UG` forces an update event so staged timebase values become active.
+- Forcing `EGR.UG` can set `TIMx_SR.UIF`, so the driver may need to clear that
+  generated flag before returning.
+
+The pending safe `TIM_Config()` sequence is:
+
+1. Validate `TIMx` and @p pConfig.
+2. Enable the RCC APB1 clock gate with
+   `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`.
+3. Disable counter operation with
+   `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`.
+4. Read required configuration registers into caller-owned local images.
+5. Stage `CR1`, `PSC`, and `ARR` through codec APIs.
+6. Write only changed staged images.
+7. Generate `TIMx_EGR.UG` so `PSC` and any preloaded `ARR` value are latched.
+8. Clear the generated `TIMx_SR.UIF` flag if the update event set it.
+9. Write or restore `TIMx_CNT` after the update event when the requested
+   initial counter value must not be overwritten by the update event.
+10. Leave operation disabled until the user calls
+    `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 `TIM_DeConfig()` enables the Timer clock gate through
 `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter through
@@ -308,13 +371,21 @@ Completed:
   are exposed before configuration APIs.
 - Counter operation state APIs `TIM_GetOperationState()` and
   `TIM_SetOperationState()` are exposed.
+- Shared `driver_status_t` includes
+  `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` for disabled peripheral clock-gate
+  preconditions.
+- Grouped and scalar `Get`/`Set` APIs verify that the RCC APB1 clock gate is
+  already enabled and return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when it
+  is not.
+- `timer.h`, `timer_config.h`, and `timer_codec.h` now document input
+  `Accepted values` and output `Expected values` for the current public and
+  codec-visible Timer scope.
 - `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
   ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
   codec staging, dirty writes, and `driver_status_t` status handling.
 
 Remaining:
-
 - `TIM_Config()` still needs final update-event/latch sequencing around
   `EGR.UG`, `CNT`, and any generated `SR.UIF` flag.
 - Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
@@ -323,7 +394,9 @@ Remaining:
   mapping and the driver owns NVIC policy.
 - Project examples still use legacy Timer APIs and old configuration field
   names.
-- Doxygen/style still needs a full pass across all Timer files.
+- Remaining Timer Doxygen/style work is limited to files not covered by the
+  latest header pass, especially source-local helper documentation, defines,
+  and final `TIM_Config()` latch/update-event wording.
 
 ## Compatibility Boundary
 

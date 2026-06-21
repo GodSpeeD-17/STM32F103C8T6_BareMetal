@@ -20,6 +20,8 @@ one kind of knowledge.
 - Let public driver APIs own validation, sequencing, and batching decisions.
 - Make application code depend on stable public APIs, not driver internals.
 - Optimize repeated register access where it matters without hiding ownership.
+- Keep public API names precise enough that users know which hardware state is
+  being changed.
 
 ## Repository Layers
 
@@ -28,7 +30,7 @@ one kind of knowledge.
 | Core | MCU register structs, base addresses, raw peripheral constants, shared scalar aliases, generic bit/register utilities | Peripheral driver policy, public driver selectors, application behavior |
 | Driver Data Types | Driver-facing scalar typedef aliases and plain shared data aliases | Public selector macros, validation policy, register access, hardware writes, sequencing |
 | Driver Defines/Validation | Public selector macros and pure validation/policy macros shared within one driver family | Register access, hardware writes, sequencing, raw register field placement |
-| Low-Level | Named static inline register read/write accessors, minimal register-address macros, clock-gate forwarding when needed | Public selector translation, raw field placement, compatibility policy, batching policy, board behavior |
+| Low-Level | Named static inline register read/write accessors and minimal register-address macros | Public selector translation, raw field placement, compatibility policy, batching policy, clock policy, board behavior |
 | Codec | Translation between driver selectors and raw hardware fields, raw field placement, encode/decode logic, mutation of caller-owned staged register images | Hardware reads/writes, clock sequencing, public API decisions |
 | Driver | Public API, argument validation, selector compatibility, clock sequencing, batching, dirty-register write decisions, user-facing status | Raw register map definitions, board-specific behavior |
 | Project | Board/application behavior and examples | Driver internals |
@@ -48,6 +50,11 @@ Core is the hardware description base. It should define:
 
 Core must not know that a driver later calls a field "mode", "config", "state",
 or any other public API concept. It should stay hardware-shaped.
+
+Raw bit-position and field-width values should use the shared scalar aliases
+when available, for example `reg_bit_pos_t` and `reg_field_width_t`. Raw field
+values and masks should use `reg` or `reg_field_t` consistently with the
+existing Core helpers.
 
 ## Driver Data Types And Defines Layers
 
@@ -85,6 +92,13 @@ Public configuration/request structures belong in the public driver layer unless
 there is a specific reason for another layer or related driver to depend on that
 structure as plain shared data.
 
+For complex peripherals, prefer public configuration structures over long
+argument lists. The root configuration structure should group related
+substructures, for example `driver_config_t` containing
+`driver_config_<group>_t` members. Keep peripheral instance pointers out of
+reusable configuration objects so the same configuration can be applied to more
+than one instance.
+
 ## Low-Level Layer
 
 Each driver may have a low-level layer, for example `<driver>_ll.h/.c`.
@@ -94,7 +108,6 @@ The low-level layer owns hardware-near register access:
 - named static inline readers for full peripheral register images
 - named static inline writers for full peripheral register images
 - minimal register-address macros when C token selection requires them
-- raw clock-gate forwarding when the peripheral driver needs it
 
 The low-level layer should stay intentionally dumb. It should not know how a
 pin index maps to a field shift, which register image a public request touches,
@@ -102,7 +115,8 @@ or how a public selector maps to raw hardware bits.
 
 The low-level layer must not know public semantic selectors or policy. It should
 not translate public driver states into behavior, decide batching strategy, or
-validate full public API requests.
+validate full public API requests. It should not enable, disable, or verify
+clocks unless the module itself is the clock controller driver.
 
 LL should be the single direct access point for peripheral register reads and
 writes. Higher layers should call LL accessors instead of directly touching
@@ -113,7 +127,6 @@ Good low-level responsibilities:
 ```c
 LL_DRIVER_ReadRegisterA(PERIPHx);
 LL_DRIVER_WriteRegisterA(PERIPHx, regImage);
-LL_DRIVER_EnableClock(PERIPHx);
 ```
 
 Bad low-level responsibilities:
@@ -125,6 +138,7 @@ LL_DRIVER_GetFieldShift(rawIndex);
 LL_DRIVER_SetRawField(regImage, fieldShift, rawField);
 LL_DRIVER_DecideWhichRegistersToRead(selectorMask);
 LL_DRIVER_EnableClockBecausePublicModeNeedsIt(mode);
+LL_DRIVER_SetClockState(PERIPHx, state);
 ```
 
 Those belong above LL.
@@ -145,9 +159,21 @@ The codec layer owns translation and staged image mutation:
 - stage reset/default register images
 - stage related side effects that are still image-based, not hardware writes
 
-Codec functions may validate translation inputs and return `driver_status_t`.
-Any codec function that performs internal validation should return
-`driver_status_t`.
+Private codec helpers should use Encode/Decode naming for translation and raw
+field mapping. Public codec APIs should use Extract/Stage naming:
+
+- `Extract*()` reads a caller-owned register image and returns a driver-facing
+  value.
+- `Stage*()` mutates a caller-owned register image and prepares it for a later
+  driver-layer write.
+
+Declare and implement Extract APIs before their conjugate Stage APIs inside
+each logical group.
+
+Codec functions may validate translation inputs. Functions that can fail should
+return `driver_status_t`. Functions that only compute a raw register value,
+position, mask, or field may return `reg`, `reg_field_t`, or another shared
+Core scalar alias such as `reg_bit_pos_t`.
 
 Codec APIs must be designed as conjugate symmetric pairs where the underlying
 hardware image is mutable. Every `Stage*()` API that writes a driver-facing
@@ -158,6 +184,23 @@ read-only or not meaningful to stage, such as sampled input-state registers.
 
 The codec layer must not touch hardware. It receives register images from the
 driver, mutates those images, and returns status.
+
+Stage APIs should take a pointer to the caller-owned register image. The
+function should copy that image into a local variable, perform all validation
+and staging on the local variable, and update the caller-owned image only after
+the operation is valid. This avoids partially mutated images on validation
+failure.
+
+State extraction is a special case. When the only decoded value is an ON/OFF
+state and no output pointer is otherwise needed, the Extract API may return
+`driver_status_t` directly as the decoded state:
+
+- `DRIVER_STATUS_OFF`
+- `DRIVER_STATUS_ON`
+- an error status only when validation can fail
+
+Non-state extraction APIs should return operation status and write the decoded
+value through an output pointer.
 
 The codec layer is the central compatibility point between stable public driver
 selectors and raw hardware bit definitions. Public driver selectors may remain
@@ -170,8 +213,8 @@ Good codec responsibilities:
 DRIVER_Codec_EncodeSelector(selector, &rawField);
 DRIVER_Codec_DecodeField(rawField, &selector);
 DRIVER_Codec_GetFieldShift(rawIndex);
-DRIVER_Codec_StageField(selector, &regImage);
 DRIVER_Codec_ExtractField(regImage, &selector);
+DRIVER_Codec_StageField(selector, &regImage);
 DRIVER_Codec_StageReset(rawIndex, &regImage);
 ```
 
@@ -192,12 +235,31 @@ It must own:
 - public configuration and request structures
 - public argument validation
 - compatibility checks between public selectors
-- clock sequencing
+- clock sequencing or clock-state verification according to API ownership
 - deciding which registers must be read
 - batching selected fields or pins
 - dirty-register tracking
 - writing each dirty register at the correct time
 - returning user-facing `driver_status_t`
+
+Public functions should do what their names say and no more. A narrow API such
+as `GetPrescaler()`, `SetMode()`, or `SetDirection()` should not silently enable
+an unrelated clock gate or start a peripheral. If a register cannot be accessed
+until a clock is enabled, the narrow API should verify the required state and
+return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when a required peripheral
+clock gate is disabled. Use this specific status instead of the broader
+`DRIVER_STATUS_ERROR_STATE` for disabled RCC/bus clock-gate preconditions.
+
+Clock and operation state should be explicit public concepts when both exist:
+
+- `GetClockState()` / `SetClockState()` owns peripheral clock-gate state.
+- `GetOperationState()` / `SetOperationState()` owns peripheral runtime enable
+  state such as a counter-enable, transmitter-enable, or receiver-enable bit.
+
+Full lifecycle APIs such as `Config()` and `DeConfig()` may orchestrate clock
+state and operation state internally because their names describe a broader
+operation. Even then, they should only touch the state needed for their stated
+scope.
 
 Driver APIs should also preserve conjugate intent. Prefer status-returning
 `Get*()` APIs as the primary extraction path and `Set*()` APIs as the primary
@@ -210,7 +272,7 @@ The intended optimized pattern for multi-field configuration is:
 
 ```c
 validate_public_request(...);
-enable_required_clocks(...);
+verify_or_enable_required_clocks_for_this_api(...);
 
 if (request touches register A) {
     regAImage = LL_DRIVER_ReadRegisterA(...);
@@ -269,13 +331,104 @@ Optimize by putting batching in the driver layer:
 Initialization code is usually not a hot path, but this repository intentionally
 uses it to learn where optimization belongs architecturally.
 
+## Coding Style Policy
+
+Use tabs for indentation in C source and header files.
+
+Use include guards in the established uppercase file-name style:
+
+```c
+#ifndef DRIVER_CONFIG_H_
+#define DRIVER_CONFIG_H_
+...
+#endif /* DRIVER_CONFIG_H_ */
+```
+
+Use the established banner style for major sections:
+
+```c
+// ==================================================================================================== //
+```
+
+Keep one-argument function declarations, function definitions, and function-like
+macro calls on one line:
+
+```c
+driver_status_t DRIVER_DeConfig(DRIVER_TypeDef* const DRIVERx);
+ASSERT_DRIVER_STATUS(DRIVER_ValidateInstance(DRIVERx));
+```
+
+Use the multiline parenthesized layout for functions or function-like macro
+calls with multiple arguments, or when a single line would become hard to read:
+
+```c
+driver_status_t DRIVER_SetField
+(
+	DRIVER_TypeDef* const		DRIVERx,
+	const driver_field_t			field
+);
+```
+
+Order public APIs so read/reset style operations appear before write/apply
+operations inside the same logical group:
+
+- `DeConfig()` before `Config()`
+- `Get*()` before `Set*()`
+- `Extract*()` before `Stage*()`
+
+Local helper functions should earn their existence. Do not add a wrapper that
+only renames another helper without adding validation, ownership isolation,
+shared policy, or readability around a genuinely repeated operation.
+
 ## Doxygen and Naming Policy
 
 Documentation should describe authority and return meaning clearly.
 
+Every public header and source file should have a file-level Doxygen block.
+Every public API, codec-visible API, non-trivial local helper, public typedef,
+configuration member, and public macro should have Doxygen.
+
+Use `@brief` for the short behavior or hardware meaning. Use `@details` when
+the function has sequencing, ownership, side effects, or non-obvious hardware
+behavior.
+
 Use `@returns` for what the return value represents.
 
 Use `@retval - ...` for specific return cases.
+
+Use `@ref` with backticks for project symbols:
+
+```c
+@retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+```
+
+Document accepted input values for public and codec-visible parameters in the
+same style as return values:
+
+```c
+ * @param[in] state Requested state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable the state.
+ * - @ref `DRIVER_STATUS_ON`: Enable the state.
+```
+
+Document expected output values for public and codec-visible output parameters
+using the same style. Use `Accepted values` for caller-provided inputs and
+`Expected values` for values the function writes back to the caller:
+
+```c
+ * @param[out] pState Destination for decoded state
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: Decoded state is disabled.
+ * - @ref `DRIVER_STATUS_ON`: Decoded state is enabled.
+```
+
+For output configuration structures, document expected member values with
+`Expected member values`. For input configuration structures, document accepted
+member values with `Accepted values`.
+
+For bit and field macro Doxygen, the `@brief` should explain what the hardware
+bit or field means, not only repeat the register and bit name.
 
 Names should reveal ownership and intent:
 
@@ -288,6 +441,10 @@ Names should reveal ownership and intent:
 - `Driver` names should sound like public operations.
 
 Avoid names that hide policy or mix layer authority.
+
+Use names that preserve important hardware notation. For STM32-style channel
+fields, keep the lowercase `x` in names such as `CCxS`, `OCxM`, `ICxPSC`, and
+`ICxF`.
 
 ## Commit Discipline
 

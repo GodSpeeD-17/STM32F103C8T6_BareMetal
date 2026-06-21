@@ -74,6 +74,8 @@ typedef struct _timer_config_timebase_t
 	 * @details
 	 * Divides the Timer input clock before it reaches the counter.
 	 * `CK_CNT = timer_input_clock / (prescaler + 1U)`.
+	 * Accepted values:
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_prescaler_t`
 	 * @memberof timer_config_timebase_t
 	 */
 	timer_prescaler_t			prescaler;
@@ -83,6 +85,8 @@ typedef struct _timer_config_timebase_t
 	 * @details
 	 * Defines the counter reload boundary. The effective update period depends
 	 * on both @ref `prescaler` and @ref `auto_reload`.
+	 * Accepted values:
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_auto_reload_t`
 	 * @memberof timer_config_timebase_t
 	 */
 	timer_auto_reload_t			auto_reload;
@@ -91,6 +95,8 @@ typedef struct _timer_config_timebase_t
 	 * @brief Initial counter value staged into `TIMx_CNT`
 	 * @details
 	 * Defines the counter value used after configuration staging.
+	 * Accepted values:
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_counter_value_t`
 	 * @memberof timer_config_timebase_t
 	 */
 	timer_counter_value_t		initial_count;
@@ -114,7 +120,9 @@ typedef struct _timer_config_counter_t
 	/**
 	 * @brief Counter direction selector
 	 * @details
-	 * Accepted values are defined by @ref `TIMx_DIR_COUNT_UP` and @ref `TIMx_DIR_COUNT_DOWN`.
+	 * Accepted values:
+	 * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
+	 * - @ref `TIMx_DIR_COUNT_DOWN`: Counter counts down
 	 * @memberof timer_config_counter_t
 	 */
 	timer_direction_t			direction;
@@ -123,10 +131,11 @@ typedef struct _timer_config_counter_t
 	 * @brief Counter alignment mode selector
 	 * @details
 	 * Selects edge-aligned counting or one of the center-aligned counting modes.
-	 * Accepted values are defined by @ref `TIMx_MODE_NORMAL`,
-	 * @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`,
-	 * @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`, and
-	 * @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`.
+	 * Accepted values:
+	 * - @ref `TIMx_MODE_NORMAL`: Edge-aligned mode
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`: Center-aligned mode 1
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`: Center-aligned mode 2
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`: Center-aligned mode 3
 	 * @memberof timer_config_counter_t
 	 */
 	timer_count_mode_t			alignment;
@@ -134,7 +143,9 @@ typedef struct _timer_config_counter_t
 	/**
 	 * @brief One-pulse mode selector
 	 * @details
-	 * Accepted values are defined by @ref `TIMx_OPM_DISABLE` and @ref `TIMx_OPM_ENABLE`.
+	 * Accepted values:
+	 * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at the next update event
+	 * - @ref `TIMx_OPM_ENABLE`: Counter stops at the next update event
 	 * @memberof timer_config_counter_t
 	 */
 	timer_opm_t					one_pulse;
@@ -142,8 +153,9 @@ typedef struct _timer_config_counter_t
 	/**
 	 * @brief Auto-reload preload selector
 	 * @details
-	 * Accepted values are defined by @ref `TIMx_ARPE_DISABLE` and
-	 * @ref `TIMx_ARPE_ENABLE`.
+	 * Accepted values:
+	 * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload is disabled
+	 * - @ref `TIMx_ARPE_ENABLE`: Auto-reload preload is enabled
 	 * @memberof timer_config_counter_t
 	 */
 	timer_arpe_t				auto_reload_preload;
@@ -151,8 +163,9 @@ typedef struct _timer_config_counter_t
 	/**
 	 * @brief Update request source selector
 	 * @details
-	 * Accepted values are defined by @ref `TIMx_UPDATE_SOURCE_ANY` and
-	 * @ref `TIMx_UPDATE_SOURCE_OVF_DMA`.
+	 * Accepted values:
+	 * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate an update request
+	 * - @ref `TIMx_UPDATE_SOURCE_OVF_DMA`: Only overflow/underflow or DMA source generates an update request
 	 * @memberof timer_config_counter_t
 	 */
 	timer_update_source_t		update_source;
@@ -160,8 +173,10 @@ typedef struct _timer_config_counter_t
 	/**
 	 * @brief Digital filter and dead-time sampling clock division selector
 	 * @details
-	 * Accepted values are defined by @ref `TIMx_CKD_CLK_FREQ`,
-	 * @ref `TIMx_CKD_CLK_2_FREQ`, and @ref `TIMx_CKD_CLK_4_FREQ`.
+	 * Accepted values:
+	 * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
+	 * - @ref `TIMx_CKD_CLK_2_FREQ`: `t_DTS = 2 * t_CK_INT`
+	 * - @ref `TIMx_CKD_CLK_4_FREQ`: `t_DTS = 4 * t_CK_INT`
 	 * @memberof timer_config_counter_t
 	 */
 	timer_clock_division_t		clock_division;

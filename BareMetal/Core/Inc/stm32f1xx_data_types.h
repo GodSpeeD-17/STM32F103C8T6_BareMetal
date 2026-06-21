@@ -109,28 +109,30 @@ typedef uint8_t									reg_field_width_t;
  */
 typedef enum _driver_status_t
 {
+	/** @brief Required peripheral clock gate is disabled. */
+	DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED	=	-7,
 	/** @brief Peripheral or driver is currently executing an operation. */
-	DRIVER_STATUS_ERROR_BUSY		=	-6,
+	DRIVER_STATUS_ERROR_BUSY				=	-6,
 	/** @brief Operation requested in an invalid driver or peripheral state. */
-	DRIVER_STATUS_ERROR_STATE		=	-5,
+	DRIVER_STATUS_ERROR_STATE				=	-5,
 	/** @brief Operation timed out waiting for hardware or condition. */
-	DRIVER_STATUS_ERROR_TIMEOUT		=	-4,
+	DRIVER_STATUS_ERROR_TIMEOUT				=	-4,
 	/** @brief Operation failed due to a non-specific error. */
-	DRIVER_STATUS_ERROR_FAIL		=	-3,
+	DRIVER_STATUS_ERROR_FAIL				=	-3,
 	/** @brief An input parameter was invalid or out of range. */
-	DRIVER_STATUS_ERROR_INVALID_ARG	=	-2,
+	DRIVER_STATUS_ERROR_INVALID_ARG			=	-2,
 	/** @brief Operation failed due to a null pointer. */
-	DRIVER_STATUS_ERROR_NULL_PTR	=	-1,
+	DRIVER_STATUS_ERROR_NULL_PTR			=	-1,
 	/** @brief Generic error (baseline error code). */
-	DRIVER_STATUS_ERROR				=	 0,
+	DRIVER_STATUS_ERROR						=	 0,
 	/** @brief Operation completed successfully. */
-	DRIVER_STATUS_SUCCESS			=	 1,
+	DRIVER_STATUS_SUCCESS					=	 1,
 	/** @brief Target state: Disabled or turned OFF. */
-	DRIVER_STATUS_OFF				=	 2,
+	DRIVER_STATUS_OFF						=	 2,
 	/** @brief Target state: Enabled or turned ON. */
-	DRIVER_STATUS_ON				=	 3,
+	DRIVER_STATUS_ON						=	 3,
 	/** @brief Peripheral or driver is configured and ready for an operation. */
-	DRIVER_STATUS_READY				=	 4
+	DRIVER_STATUS_READY						=	 4
 } driver_status_t;
 
 /**
@@ -138,6 +140,7 @@ typedef enum _driver_status_t
  * @param[in] expr Expression that evaluates to @ref `driver_status_t`
  * @returns Returns the evaluated status only when @p expr is not @ref `DRIVER_STATUS_SUCCESS`
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: @p expr reported busy state
+ * @retval - @ref `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED`: @p expr reported disabled peripheral clock gate
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @p expr reported invalid state
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: @p expr reported timeout
  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: @p expr reported generic failure
