@@ -547,6 +547,50 @@ driver_status_t Codec_TIM_StageUpdateEventState
 );
 
 // ==================================================================================================== //
+//										Timer Update Event Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer EGR Update Event Codecs									//
+// ==================================================================================================== //
+
+/**
+ * @brief Stages a software update event generation request into an `EGR` image
+ * @param[in,out] pEgrRegImage Caller-owned `EGR` image to update in place
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update event generation request was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pEgrRegImage is `NULL`
+ * @note This API stages `TIMx_EGR.UG`. `EGR` is an action register, so a
+ * conjugate Extract API is not meaningful.
+ */
+driver_status_t Codec_TIM_StageUpdateEventGeneration(reg* const pEgrRegImage);
+
+// ==================================================================================================== //
+//										Timer SR Update Flag Codecs									//
+// ==================================================================================================== //
+
+/**
+ * @brief Extracts the update interrupt flag state from an `SR` image
+ * @param[in] srRegImage Caller-owned `SR` image
+ * @returns Decoded update flag state
+ * @retval - @ref `DRIVER_STATUS_OFF`: `TIMx_SR.UIF` is not pending
+ * @retval - @ref `DRIVER_STATUS_ON`: `TIMx_SR.UIF` is pending
+ */
+driver_status_t Codec_TIM_ExtractUpdateFlagState(const reg srRegImage);
+
+/**
+ * @brief Stages a write-0-to-clear image for the update interrupt flag
+ * @param[in,out] pSrRegImage Caller-owned `SR` image to update in place
+ * @returns Staging status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update flag clear image was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSrRegImage is `NULL`
+ * @note STM32F1 Timer status flags use write-`0`-to-clear semantics. This API
+ * clears only `TIMx_SR.UIF` and writes `1` to other supported status flags to
+ * preserve them.
+ */
+driver_status_t Codec_TIM_StageUpdateFlagClear(reg* const pSrRegImage);
+
+// ==================================================================================================== //
 //										Timer Trigger Codecs											//
 // ==================================================================================================== //
 

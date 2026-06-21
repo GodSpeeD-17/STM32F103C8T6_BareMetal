@@ -246,9 +246,8 @@ Public functions should do what their names say and no more. A narrow API such
 as `GetPrescaler()`, `SetMode()`, or `SetDirection()` should not silently enable
 an unrelated clock gate or start a peripheral. If a register cannot be accessed
 until a clock is enabled, the narrow API should verify the required state and
-return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when a required peripheral
-clock gate is disabled. Use this specific status instead of the broader
-`DRIVER_STATUS_ERROR_STATE` for disabled RCC/bus clock-gate preconditions.
+return `DRIVER_STATUS_ERROR_STATE` when a required peripheral
+clock gate is disabled.
 
 Clock and operation state should be explicit public concepts when both exist:
 

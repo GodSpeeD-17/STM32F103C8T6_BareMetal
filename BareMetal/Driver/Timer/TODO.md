@@ -24,10 +24,10 @@ item, verify it, commit it, then move to the next item.
 - [x] Refactor `Src/timer.c` orchestration for config-owned fields to use validation, LL, codec staging, dirty writes, and status returns.
 - [x] Remove implicit RCC clock-gate enable side effects from grouped and scalar Timer `Get`/`Set` APIs.
 - [x] Add `Accepted values` and `Expected values` Doxygen scope details to `timer.h`, `timer_config.h`, and `timer_codec.h`.
-- [ ] Finalize Timer config update-event sequencing around `EGR.UG`, `CNT`, and generated `SR.UIF`.
+- [x] Finalize Timer config update-event sequencing around `EGR.UG`, `CNT`, and generated `SR.UIF`.
 - [ ] Rework Timer IRQ APIs so codec owns DIER/SR mapping and driver owns NVIC policy.
 - [ ] Update Timer examples and shared startup delay users to the new public API shape.
-- [ ] Finish remaining Timer Doxygen/style pass for source-local helpers, defines, final config sequencing docs, and deferred public APIs.
+- [ ] Finish remaining Timer Doxygen/style pass for source-local helpers, defines, and deferred public APIs.
 - [ ] Build affected projects and fix integration issues.
 
 ## Completed Deviations
@@ -46,22 +46,20 @@ item, verify it, commit it, then move to the next item.
 - [x] First-pass driver writes only changed staged images for config-owned fields.
 - [x] RCC clock-gate state APIs `TIM_GetClockState()` and `TIM_SetClockState()` were exposed before configuration APIs.
 - [x] Counter operation state APIs `TIM_GetOperationState()` and `TIM_SetOperationState()` were exposed.
-- [x] Shared `driver_status_t` now includes `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` for disabled peripheral clock-gate preconditions.
 - [x] Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or `DRIVER_STATUS_ON` directly.
 - [x] Core shared CCMR raw-value macros were normalized to STM32-style `CCxS`, `OCxM`, `ICxPSC`, and `ICxF` notation.
 - [x] `TIM_DeConfig()` uses `TIM_SetClockState()`, `TIM_SetOperationState()`, config-owned reset staging, and clock-gate disable without issuing RCC peripheral reset.
-- [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when it is disabled.
+- [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
+- [x] `TIM_Config()` now stages `CR1`, `PSC`, and `ARR`, generates `EGR.UG`, preserves pre-existing `SR.UIF`, clears only a newly generated update flag, and applies `CNT` after the update event.
 
 ## Remaining Deviations To Remove
 
-- [ ] `TIM_Config()` currently disables the counter and stages config-owned fields, but final update-event/latch behavior using `EGR.UG` is still pending.
-- [ ] `TIM_Config()` public Doxygen should be finalized once the update-event/latch behavior is implemented.
 - [ ] Channel/PWM public APIs are currently deferred and must be rebuilt on top of the existing channel codec surface.
 - [ ] Timer IRQ public APIs are currently deferred and must be rebuilt with codec-owned DIER/SR mapping and driver-owned NVIC policy.
 - [ ] Driver must validate channel masks and IRQ masks when those public APIs are reintroduced.
 - [ ] IRQ disable policy can disable NVIC while other Timer IRQ sources remain enabled.
-- [ ] Remaining Doxygen/style pass is still required for source-local helpers, `timer_defines.h`, final `TIM_Config()` latch/update-event wording, and deferred public APIs.
+- [ ] Remaining Doxygen/style pass is still required for source-local helpers, `timer_defines.h`, and deferred public APIs.
 - [ ] A final Timer-wide style audit is still required for tabs, banners, and single-argument function layout.
 - [ ] Timer example projects still use the legacy Timer config shape and removed legacy helper APIs.
 
@@ -88,4 +86,4 @@ item, verify it, commit it, then move to the next item.
 - Driver functions should own validation, sequencing, batching, dirty writes, and public status handling.
 - Only `TIM_SetClockState()` owns RCC APB1 clock-gate mutation as a direct public state API.
 - `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally because they are full lifecycle orchestration APIs.
-- Narrow grouped/scalar `Get` and `Set` APIs verify clock availability through the private `TIM_RequireClockGateEnabled()` helper and do not change clock state.
+- Narrow grouped/scalar `Get` and `Set` APIs verify clock availability through the private `_TIM_ClockEnabled()` helper and do not change clock state.

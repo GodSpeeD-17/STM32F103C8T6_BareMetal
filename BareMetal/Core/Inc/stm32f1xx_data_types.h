@@ -109,8 +109,6 @@ typedef uint8_t									reg_field_width_t;
  */
 typedef enum _driver_status_t
 {
-	/** @brief Required peripheral clock gate is disabled. */
-	DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED	=	-7,
 	/** @brief Peripheral or driver is currently executing an operation. */
 	DRIVER_STATUS_ERROR_BUSY				=	-6,
 	/** @brief Operation requested in an invalid driver or peripheral state. */
@@ -140,7 +138,6 @@ typedef enum _driver_status_t
  * @param[in] expr Expression that evaluates to @ref `driver_status_t`
  * @returns Returns the evaluated status only when @p expr is not @ref `DRIVER_STATUS_SUCCESS`
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: @p expr reported busy state
- * @retval - @ref `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED`: @p expr reported disabled peripheral clock gate
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @p expr reported invalid state
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: @p expr reported timeout
  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: @p expr reported generic failure

@@ -2041,6 +2041,59 @@ driver_status_t Codec_TIM_StageUpdateEventState
 }
 
 // ==================================================================================================== //
+//										Timer Update Event Codecs										//
+// ==================================================================================================== //
+
+// ==================================================================================================== //
+//										Timer EGR Update Event Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_StageUpdateEventGeneration(reg* const pEgrRegImage)
+{
+	reg updatedRegImage = 0x00000000UL;
+
+	if (pEgrRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	updatedRegImage = *pEgrRegImage;
+
+	//! EGR is an action register; staging UG prepares the exact write image that generates one update event.
+	updatedRegImage = RegOps_StageField(updatedRegImage, TIM_EGR_UG, TIM_EGR_UG);
+
+	*pEgrRegImage = updatedRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										Timer SR Update Flag Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractUpdateFlagState(const reg srRegImage)
+{
+	//! UIF uses normal positive polarity: clear means no update flag, set means update flag pending.
+	return Codec_TIM_ExtractBitStateFromImage(srRegImage, TIM_SR_UIF);
+}
+
+driver_status_t Codec_TIM_StageUpdateFlagClear(reg* const pSrRegImage)
+{
+	reg updatedRegImage = 0x00000000UL;
+
+	if (pSrRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	updatedRegImage = *pSrRegImage;
+
+	//! SR flags are write-0-to-clear; write 1 to all other supported flags so only UIF is acknowledged.
+	updatedRegImage |= (TIM_CODEC_SR_GENERAL_PURPOSE_FLAG_MASK & ~TIM_SR_UIF);
+	updatedRegImage &= ~TIM_SR_UIF;
+
+	*pSrRegImage = updatedRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
 //										Timer Trigger Codecs											//
 // ==================================================================================================== //
 

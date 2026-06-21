@@ -264,9 +264,9 @@ Grouped and scalar `Get`/`Set` APIs such as `TIM_GetPrescaler()`,
 `TIM_SetAutoReload()`, and `TIM_SetDirection()` do not silently enable the RCC
 clock gate. Their narrower contract is to read or modify one Timer-owned
 configuration field. Those APIs verify that `TIM_GetClockState(TIMx)` returns
-`DRIVER_STATUS_ON`, and return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when
+`DRIVER_STATUS_ON`, and return `DRIVER_STATUS_ERROR_STATE` when
 the clock gate is disabled. The current implementation centralizes that
-precondition in the private `TIM_RequireClockGateEnabled()` helper.
+precondition in the private `_TIM_ClockEnabled()` helper.
 
 This keeps call-site behavior explicit:
 
@@ -281,9 +281,12 @@ effect.
 `TIM_Config()` validates the full public configuration, enables the Timer clock
 gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter
 through `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, reads the
-configuration-owned registers, stages through the codec, and writes only
-changed staged images. The current implementation leaves the counter disabled
-after configuration; users explicitly start the counter with
+configuration-owned registers, stages through the codec, writes only changed
+`CR1`, `PSC`, and `ARR` images, generates `TIMx_EGR.UG`, conditionally clears a
+generated `TIMx_SR.UIF`, and writes `TIMx_CNT` after the update event only when
+the requested initial count differs from the post-update counter image. The
+current implementation leaves the counter disabled after configuration; users
+explicitly start the counter with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 ### Configuration Latch Policy
@@ -297,20 +300,23 @@ register writes feed shadow/preload logic:
 - Forcing `EGR.UG` can set `TIMx_SR.UIF`, so the driver may need to clear that
   generated flag before returning.
 
-The pending safe `TIM_Config()` sequence is:
+The implemented `TIM_Config()` sequence is:
 
 1. Validate `TIMx` and @p pConfig.
 2. Enable the RCC APB1 clock gate with
    `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`.
 3. Disable counter operation with
    `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`.
-4. Read required configuration registers into caller-owned local images.
-5. Stage `CR1`, `PSC`, and `ARR` through codec APIs.
-6. Write only changed staged images.
-7. Generate `TIMx_EGR.UG` so `PSC` and any preloaded `ARR` value are latched.
-8. Clear the generated `TIMx_SR.UIF` flag if the update event set it.
-9. Write or restore `TIMx_CNT` after the update event when the requested
-   initial counter value must not be overwritten by the update event.
+4. Read `CR1`, `PSC`, `ARR`, and pre-update `SR` into local images.
+5. Stage `CR1`, `PSC`, `ARR`, and requested `CNT` through codec APIs.
+6. Write only changed `CR1`, `PSC`, and `ARR` staged images.
+7. Generate `TIMx_EGR.UG` through the codec-staged update event image so `PSC`
+   and any preloaded `ARR` value are latched.
+8. If `TIMx_SR.UIF` was clear before `UG`, clear `UIF` after `UG` only if that
+   generated update event made it pending. A pre-existing pending `UIF` is
+   preserved.
+9. Read `CNT` after `UG`, then write the requested initial counter value only
+   when it differs from the post-update counter image.
 10. Leave operation disabled until the user calls
     `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
@@ -371,23 +377,21 @@ Completed:
   are exposed before configuration APIs.
 - Counter operation state APIs `TIM_GetOperationState()` and
   `TIM_SetOperationState()` are exposed.
-- Shared `driver_status_t` includes
-  `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` for disabled peripheral clock-gate
-  preconditions.
 - Grouped and scalar `Get`/`Set` APIs verify that the RCC APB1 clock gate is
-  already enabled and return `DRIVER_STATUS_ERROR_CLOCK_GATE_DISABLED` when it
+  already enabled and return `DRIVER_STATUS_ERROR_STATE` when it
   is not.
 - `timer.h`, `timer_config.h`, and `timer_codec.h` now document input
   `Accepted values` and output `Expected values` for the current public and
   codec-visible Timer scope.
+- `TIM_Config()` now generates `TIMx_EGR.UG`, preserves pre-existing
+  `TIMx_SR.UIF`, clears only a newly generated update flag, and applies
+  `TIMx_CNT` after the update event.
 - `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
   ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
   codec staging, dirty writes, and `driver_status_t` status handling.
 
 Remaining:
-- `TIM_Config()` still needs final update-event/latch sequencing around
-  `EGR.UG`, `CNT`, and any generated `SR.UIF` flag.
 - Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
   boundaries.
 - Timer IRQ public APIs are deferred and must be rebuilt so codec owns DIER/SR
@@ -396,7 +400,7 @@ Remaining:
   names.
 - Remaining Timer Doxygen/style work is limited to files not covered by the
   latest header pass, especially source-local helper documentation, defines,
-  and final `TIM_Config()` latch/update-event wording.
+  and deferred public APIs.
 
 ## Compatibility Boundary
 
