@@ -18,8 +18,10 @@
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
- * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay helper APIs are outside
- * this public header scope for this pass.
+ * Channel/PWM, IRQ/NVIC, DMA, master/slave, and broad delay-service APIs are
+ * outside this public header scope for this pass. The delay helpers in this
+ * pass are the blocking @ref `TIM_DelayUs` and @ref `TIM_DelayMs` convenience
+ * APIs for a Timer already configured with @ref `TIM_Config1MHz`.
  */
 
 #ifndef TIMER_H_
@@ -241,6 +243,69 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * counter after configuration.
  */
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
+
+// --------------------------------- Timer 1 MHz Configuration Preset --------------------------------- //
+
+/**
+ * @brief Configures one Timer instance for a 1 MHz counter tick
+ * @details
+ * Builds a local @ref `tim_config_t` preset and applies it through
+ * @ref `TIM_Config`. The wrapper uses the existing default 1 MHz preset
+ * values:
+ * - @ref `TIMx_DEFAULT_1MHz_PSC`
+ * - @ref `TIMx_DEFAULT_1MHz_ARR`
+ * - @ref `TIMx_DEFAULT_CNT`
+ *
+ * The counter behavior preset is edge-aligned up-counting, one-pulse disabled,
+ * auto-reload preload enabled, update source set to any update event, and
+ * clock division set to `t_DTS = t_CK_INT`.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @returns @ref driver_status_t "1 MHz Configuration - Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer was configured for a 1 MHz counter tick.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate could not be verified during the configuration sequence.
+ * @note - This is a header-local static inline wrapper around @ref `TIM_Config`.
+ * @note - This wrapper leaves the Timer counter disabled, matching @ref `TIM_Config`.
+ * @note - Assumptions and constraints:
+ * @note - @p `TIMx` is one of the supported APB1 general-purpose Timers.
+ * @note - @ref `TIMx_DEFAULT_1MHz_PSC` assumes the Timer kernel clock is
+ *   72 MHz. If the current clock tree uses a different Timer kernel clock,
+ *   this wrapper still applies the preset but the resulting counter tick will
+ *   not be exactly 1 MHz.
+ * @note - The counting window uses @ref `TIMx_DEFAULT_1MHz_ARR`, so this preset
+ *   configures a 1 MHz counter tick with the default 1 MHz count window.
+ */
+__STATIC_INLINE driver_status_t TIM_Config1MHz(TIM_TypeDef* const TIMx)
+{
+	// Local Variables
+	tim_config_t config =
+	{
+		.timebase =
+		{
+			.prescaler		= TIMx_DEFAULT_1MHz_PSC,
+			.auto_reload	= TIMx_DEFAULT_1MHz_ARR,
+			.initial_count	= TIMx_DEFAULT_CNT
+		},
+		.counter =
+		{
+			.direction				= TIMx_DIR_COUNT_UP,
+			.alignment				= TIMx_MODE_NORMAL,
+			.one_pulse				= TIMx_OPM_DISABLE,
+			.auto_reload_preload	= TIMx_ARPE_ENABLE,
+			.update_source			= TIMx_UPDATE_SOURCE_ANY,
+			.clock_division			= TIMx_CKD_CLK_FREQ
+		}
+	};
+
+	return TIM_Config(TIMx, &config);
+}
 
 // ==================================================================================================== //
 //										Timer Group Configuration APIs									//
@@ -921,6 +986,84 @@ driver_status_t TIM_SetClockDivision
 	TIM_TypeDef* const			TIMx,
 	const tim_clock_division_t	clockDivision
 );
+
+// ==================================================================================================== //
+//										Timer Blocking Delay APIs										//
+// ==================================================================================================== //
+
+// ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
+
+/**
+ * @brief Provides a minimum blocking delay in microseconds using a 1 MHz Timer
+ * @details
+ * Uses a Timer previously configured by @ref `TIM_Config1MHz` as a dedicated
+ * polling delay source. The helper verifies that the APB1 Timer clock gate is
+ * enabled, stops the counter, disables auto-reload preload so the delay window
+ * uses the new `TIMx_ARR` immediately, writes `TIMx_ARR = delayUs - 1`,
+ * restarts `TIMx_CNT` from @ref `TIMx_DEFAULT_CNT`, clears `TIMx_SR.UIF`, then
+ * starts the counter with one-pulse mode enabled and update events temporarily
+ * enabled so `TIMx_SR.UIF` can terminate polling. It stops the counter,
+ * restores the original update-event enable state, and clears the update flag
+ * before returning.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] delayUs Delay duration in microseconds
+ * Accepted values:
+ * - `1U..0xFFFFU`: Blocking delay duration in microseconds.
+ * @returns @ref driver_status_t "Microsecond Delay - Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `delayUs` was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @note Assumptions and constraints:
+ * - @p `TIMx` was configured by @ref `TIM_Config1MHz`.
+ * - The Timer counter tick is exactly 1 MHz, so one counter tick equals 1 us.
+ * - The requested delay is a minimum delay; software setup, polling, and
+ *   cleanup can add a small positive overhead.
+ * - The Timer is treated as a dedicated delay source; this helper controls
+ *   `TIMx_CR1.CEN`, `TIMx_CR1.OPM`, `TIMx_CR1.ARPE`, `TIMx_ARR`, `TIMx_CNT`,
+ *   `TIMx_CR1.UDIS` during the delay window, and `TIMx_SR.UIF`, and leaves the
+ *   counter disabled before returning.
+ * - The delay is type-bounded to 16 bits, so the maximum delay is `65535 us`.
+ * - This is a polling delay and does not use Timer IRQ/NVIC state.
+ */
+driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
+
+// ---------------------------------- Timer Millisecond Delay Helper ---------------------------------- //
+
+/**
+ * @brief Provides a minimum blocking delay in milliseconds using a 1 MHz Timer
+ * @details
+ * Uses @ref `TIM_DelayUs` as the primitive delay operation and performs one
+ * `1000 us` delay chunk for each requested millisecond. Because each
+ * millisecond is composed from the microsecond helper, the final delay is a
+ * minimum delay and includes the accumulated software overhead of each chunk.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - @ref `TIM2`
+ * - @ref `TIM3`
+ * - @ref `TIM4`
+ * - @ref `TIM5`
+ * @param[in] delayMs Delay duration in milliseconds
+ * Accepted values:
+ * - `1U..0xFFFFFFFFU`: Blocking delay duration in milliseconds.
+ * @returns @ref driver_status_t "Millisecond Delay - Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `delayMs` was invalid.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @note Assumptions and constraints:
+ * - @p `TIMx` was configured by @ref `TIM_Config1MHz`.
+ * - @p `delayMs` must not be `0U`.
+ * - This is a polling delay and does not use Timer IRQ/NVIC state.
+ */
+driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 
 /** @} */ // TIM_03_Driver
 

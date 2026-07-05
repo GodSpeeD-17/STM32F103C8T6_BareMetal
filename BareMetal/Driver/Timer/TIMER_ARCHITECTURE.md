@@ -231,7 +231,9 @@ Current first-pass public API scope:
 - counter operation state APIs `TIM_GetOperationState()` /
   `TIM_SetOperationState()`
 - `TIM_Config()` and `TIM_DeConfig()`
-- grouped `TIM_GetTimebaseConfig()` / `TIM_SetTimebaseConfig()`
+- header-local static inline preset root wrapper `TIM_Config1MHz()`
+- blocking polling delay helpers `TIM_DelayUs()` / `TIM_DelayMs()`
+- grouped `TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
 - scalar `Get`/`Set` APIs for `prescaler`, `auto_reload`, `counter_value`,
   `direction`, `alignment`, `one_pulse`, `auto_reload_preload`,
@@ -240,7 +242,9 @@ Current first-pass public API scope:
 
 `TIM_GetClockState()` and `TIM_SetClockState()` own only the RCC APB1 clock
 gate for one supported Timer instance. They do not start/stop the counter and
-do not reset or rewrite Timer registers.
+do not reset or rewrite Timer registers. These two APIs validate the Timer
+instance and requested state, then directly read or mutate the RCC APB1 clock
+enable bit; they must not require the Timer clock gate to already be enabled.
 
 `TIM_GetOperationState()` and `TIM_SetOperationState()` own only
 `TIMx_CR1.CEN`. They do not enable or disable the RCC APB1 clock gate. Public
@@ -263,10 +267,10 @@ Timer layer therefore separates:
 Grouped and scalar `Get`/`Set` APIs such as `TIM_GetPrescaler()`,
 `TIM_SetAutoReload()`, and `TIM_SetDirection()` do not silently enable the RCC
 clock gate. Their narrower contract is to read or modify one Timer-owned
-configuration field. Those APIs verify that `TIM_GetClockState(TIMx)` returns
-`DRIVER_STATUS_ON`, and return `DRIVER_STATUS_ERROR_STATE` when
-the clock gate is disabled. The current implementation centralizes that
-precondition in the private `_TIM_ClockEnabled()` helper.
+configuration field. Those APIs verify that the RCC APB1 clock gate is already
+enabled and return `DRIVER_STATUS_ERROR_STATE` when the clock gate is disabled.
+The current implementation centralizes that precondition in the private
+`_TIM_ValidateClockEnabled()` helper.
 
 This keeps call-site behavior explicit:
 
@@ -289,6 +293,31 @@ requested initial count differs from the post-update counter image. The current
 implementation leaves the counter disabled after configuration; users explicitly
 start the counter with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
+
+`TIM_Config1MHz()` is a narrow header-local static inline preset wrapper over
+`TIM_Config()`. It takes only `TIMx`, fills a local `tim_config_t` with the
+fixed 1 MHz default preset values, and then delegates to the normal root
+configuration path. The preset uses @ref `TIMx_DEFAULT_1MHz_PSC`, which assumes
+a 72 MHz Timer kernel clock. It must not duplicate register writes or bypass
+the update-event latch sequence owned by `TIM_Config()`.
+
+`TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that has
+already been configured with `TIM_Config1MHz()`. It does not create a general
+delay service and does not use IRQ/NVIC state. The helper verifies only that
+the Timer clock gate is enabled, stops the counter, disables `CR1.ARPE` so the
+new `ARR` value is immediate, writes `ARR = delayUs - 1`, resets `CNT`, clears
+`SR.UIF`, and then starts the counter with `CR1.OPM` set and `CR1.UDIS`
+temporarily clear so `SR.UIF` can be observed. It polls `SR.UIF` until the
+one-pulse update event completes, then stops the counter, restores the original
+update-event enable state, and clears `SR.UIF`. The delay is a minimum blocking
+delay because software setup, polling, and cleanup can add a small positive
+overhead. The public `uint16_t` input bounds the accepted range to
+`1U..0xFFFFU`, so the maximum requested delay is `65535 us`.
+
+`TIM_DelayMs()` is a thin blocking wrapper over `TIM_DelayUs()`. It rejects
+`0U`, then performs one `TIM_DelayUs(TIMx, 1000U)` chunk for each requested
+millisecond. Because the wrapper composes repeated microsecond-delay calls, its
+delay is also a minimum delay and accumulates the per-chunk software overhead.
 
 ### Configuration Latch Policy
 
@@ -354,6 +383,34 @@ Timer files follow the established banner style:
 // ==================================================================================================== //
 ```
 
+Public implementation sections in `timer.c` mirror the public declaration order
+in `timer.h`. Each public API section uses the same main banner text as the
+header, and conjugate getter/setter APIs are grouped under the same sub-banner:
+
+```c
+// ==================================================================================================== //
+//										Timer Clock State APIs											//
+// ==================================================================================================== //
+
+// -------------------------------------- Timer Clock State Pair -------------------------------------- //
+```
+
+For public Timer Doxygen, `@returns` should be function-specific and status
+oriented, for example:
+
+```c
+@returns @ref driver_status_t "Clock State - Operation Status"
+```
+
+Use explicit `@retval` entries that name the relevant parameter with backticks:
+
+```c
+@retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `clockState` was invalid.
+```
+
+Source-file overview Doxygen may use `@section` blocks for scope, field
+ownership, and source layout when a file has enough architecture to justify it.
+
 Use tabs for indentation.
 
 When a function declaration, function definition, or function-like macro call
@@ -392,14 +449,24 @@ Completed:
 - `timer.h`, `timer_config.h`, and `timer_codec.h` now document input
   `Accepted values` and output `Expected values` for the current public and
   codec-visible Timer scope.
+- `timer.h` public API return documentation now uses function-specific
+  `@returns @ref driver_status_t "... - Operation Status"` labels and
+  parameter-specific `@retval` wording.
 - `TIM_Config()` now temporarily clears `CR1.UDIS`, generates `TIMx_EGR.UG`,
   restores the final `CR1` image, preserves pre-existing `TIMx_SR.UIF`, clears
   only a newly generated update flag, and applies `TIMx_CNT` after the update
   event.
 - `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
   ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
+- `TIM_Config1MHz()` exists as a header-local static inline preset wrapper that
+  shapes a local `tim_config_t` and delegates to `TIM_Config()`.
+- `TIM_DelayUs()` and `TIM_DelayMs()` exist as blocking polling helpers for
+  Timers already configured by `TIM_Config1MHz()`.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
   codec staging, dirty writes, and `driver_status_t` status handling.
+- `timer.c` public implementation sections now mirror `timer.h` banner and
+  sub-banner order, and the file overview uses Doxygen `@section` blocks for
+  scope, field ownership, and source layout.
 
 Remaining:
 - Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
@@ -409,8 +476,8 @@ Remaining:
 - Project examples still use legacy Timer APIs and old configuration field
   names.
 - Remaining Timer Doxygen/style work is limited to files not covered by the
-  latest header pass, especially source-local helper documentation, defines,
-  and deferred public APIs.
+  latest public header/source pass, especially source-local helper return
+  wording, defines, and deferred public APIs.
 
 ## Compatibility Boundary
 

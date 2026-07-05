@@ -19,15 +19,18 @@
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
- * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay helper behavior are not
- * part of this implementation pass.
+ * Channel/PWM, IRQ/NVIC, DMA, master/slave, and broad delay-service behavior
+ * are not part of this implementation pass. The delay helpers in this pass are
+ * the blocking @ref `TIM_DelayUs` and @ref `TIM_DelayMs` convenience APIs for
+ * a Timer already configured with @ref `TIM_Config1MHz`.
  *
  * @section TIM_DRIVER_IMPL_LAYOUT Source Layout
  * The public implementation follows the same banner and sub-banner order as
  * @ref `timer.h`: clock state, operation state, root configuration, grouped
- * configuration, timebase fields, and counter fields. Local helpers are kept
- * ahead of the public API sections so public functions read as orchestration
- * over validation, codec staging, and dirty-write primitives.
+ * configuration, timebase fields, counter fields, and blocking delay helpers
+ * at the end. Local helpers are kept ahead of the public API sections so public
+ * functions read as orchestration over validation, codec staging, and
+ * dirty-write primitives.
  */
 
 // ==================================================================================================== //
@@ -48,6 +51,8 @@
 #define TIM_DRIVER_RESET_ARR						((tim_auto_reload_t) 0xFFFFU)
 /** @brief Reset-equivalent Timer counter value @def TIM_DRIVER_RESET_CNT */
 #define TIM_DRIVER_RESET_CNT						((tim_counter_value_t) 0U)
+/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_DELAY_MS_CHUNK_US */
+#define TIM_DRIVER_DELAY_MS_CHUNK_US				((uint16_t) 1000U)
 
 /**
  * @brief Reset Timer configuration
@@ -696,7 +701,7 @@ driver_status_t TIM_GetClockState(TIM_TypeDef* const TIMx)
 	// Local Variable
 	reg clockMask = 0x00000000UL;
 	// Validate Input
-	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	//! Clock state is the RCC APB1 gate bit for this Timer instance.
 	ASSERT_DRIVER_STATUS(_TIM_GetAPB1ClockMask(TIMx, &clockMask));
 	return RCC_APB1_ClockGetState(clockMask);
@@ -707,7 +712,7 @@ driver_status_t TIM_SetClockState(TIM_TypeDef* const TIMx, const driver_status_t
 	// Local Variable
 	reg clockMask = 0x00000000UL;
 	// Validate Input
-	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_ValidateState(clockState));
 	//! Clock state owns only the RCC APB1 gate; Timer counter start remains a separate operation state.
 	ASSERT_DRIVER_STATUS(_TIM_GetAPB1ClockMask(TIMx, &clockMask));
@@ -791,6 +796,7 @@ driver_status_t TIM_GetTimeBaseConfig
 	tim_config_timebase_t* const	pTimeBase
 )
 {
+	// Local Variables
 	reg pscRegImage = 0x00000000UL;
 	reg arrRegImage = 0x00000000UL;
 	reg cntRegImage = 0x00000000UL;
@@ -1298,6 +1304,83 @@ driver_status_t TIM_SetClockDivision
 	//! Stage the clock-division selector and preserve unrelated CR1 fields through dirty-write commit.
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageClockDivision(&cr1RegImage, clockDivision));
 	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentCr1RegImage, cr1RegImage));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										Timer Blocking Delay APIs										//
+// ==================================================================================================== //
+
+// ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
+
+driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs)
+{
+	// Local Variables
+	tim_auto_reload_t delayReload = 0U;
+	driver_status_t updateEventState = DRIVER_STATUS_ERROR;
+	reg cr1RegImage = 0x00000000UL;
+
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	if (delayUs == 0U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	delayReload = (tim_auto_reload_t) (delayUs - 1U);
+
+	//! Disable ARPE and stop the counter before preparing the delay window.
+	cr1RegImage = LL_TIM_ReadCR1(TIMx);
+	updateEventState = Codec_TIM_ExtractUpdateEventState(cr1RegImage);
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&cr1RegImage, DRIVER_STATUS_OFF));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReloadPreload(&cr1RegImage, TIMx_ARPE_DISABLE));
+	LL_TIM_WriteCR1(TIMx, cr1RegImage);
+
+	//! Configure ARR and CNT for this delay window, then clear any stale update flag.
+	LL_TIM_WriteARR(TIMx, (reg) delayReload);
+	LL_TIM_WriteCNT(TIMx, (reg) TIMx_DEFAULT_CNT);
+	ASSERT_DRIVER_STATUS(_TIM_ClearUpdateFlagIfPending(TIMx));
+
+	//! Enable OPM and CEN together so counting starts only after ARR/CNT/UIF are prepared.
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageOnePulse(&cr1RegImage, TIMx_OPM_ENABLE));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&cr1RegImage, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&cr1RegImage, DRIVER_STATUS_ON));
+	LL_TIM_WriteCR1(TIMx, cr1RegImage);
+
+	while (Codec_TIM_ExtractUpdateFlagState(LL_TIM_ReadSR(TIMx)) == DRIVER_STATUS_OFF)
+	{
+		//! Blocking polling delay
+	}
+
+	//! OPM should clear CEN after UIF, but stop explicitly and restore the caller's update-event state.
+	cr1RegImage = LL_TIM_ReadCR1(TIMx);
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&cr1RegImage, DRIVER_STATUS_OFF));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&cr1RegImage, updateEventState));
+	LL_TIM_WriteCR1(TIMx, cr1RegImage);
+	ASSERT_DRIVER_STATUS(_TIM_ClearUpdateFlagIfPending(TIMx));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ---------------------------------- Timer Millisecond Delay Helper ---------------------------------- //
+
+driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs)
+{
+	// Local Variables
+	uint32_t elapsedMs = 0UL;
+
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	if (delayMs == 0UL)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	for (elapsedMs = 0UL; elapsedMs < delayMs; elapsedMs++)
+	{
+		ASSERT_DRIVER_STATUS(TIM_DelayUs(TIMx, TIM_DRIVER_DELAY_MS_CHUNK_US));
+	}
 
 	return DRIVER_STATUS_SUCCESS;
 }
