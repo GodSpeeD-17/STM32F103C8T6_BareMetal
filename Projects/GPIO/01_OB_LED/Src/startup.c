@@ -4,7 +4,7 @@
 // Timer Delay Configuration
 #ifndef SYSTICK_DELAY__
 // Timer Configuration Structure
-timer_config_t _TIM_Configuration = {
+tim_config_t _TIM_Configuration = {
 #ifdef __OLD_TIMER_METHOD__
 	// Timer
 	.TIM = DELAY_TIMER,

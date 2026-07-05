@@ -71,7 +71,7 @@ extern "C" {
 driver_status_t Codec_TIM_ExtractPrescaler
 (
 	const reg							pscRegImage,
-	timer_prescaler_t* const			pPrescaler
+	tim_prescaler_t* const			pPrescaler
 );
 
 /**
@@ -79,7 +79,7 @@ driver_status_t Codec_TIM_ExtractPrescaler
  * @param[in,out] pPscRegImage Caller-owned `PSC` image to update in place
  * @param[in] prescaler Prescaler value to stage into `PSC[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_prescaler_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_prescaler_t`
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPscRegImage is `NULL`
@@ -87,7 +87,7 @@ driver_status_t Codec_TIM_ExtractPrescaler
 driver_status_t Codec_TIM_StagePrescaler
 (
 	reg* const							pPscRegImage,
-	const timer_prescaler_t				prescaler
+	const tim_prescaler_t				prescaler
 );
 
 /**
@@ -103,7 +103,7 @@ driver_status_t Codec_TIM_StagePrescaler
 driver_status_t Codec_TIM_ExtractAutoReload
 (
 	const reg							arrRegImage,
-	timer_auto_reload_t* const			pAutoReload
+	tim_auto_reload_t* const			pAutoReload
 );
 
 /**
@@ -111,7 +111,7 @@ driver_status_t Codec_TIM_ExtractAutoReload
  * @param[in,out] pArrRegImage Caller-owned `ARR` image to update in place
  * @param[in] autoReload Auto-reload value to stage into `ARR[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_auto_reload_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_auto_reload_t`
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pArrRegImage is `NULL`
@@ -119,7 +119,7 @@ driver_status_t Codec_TIM_ExtractAutoReload
 driver_status_t Codec_TIM_StageAutoReload
 (
 	reg* const							pArrRegImage,
-	const timer_auto_reload_t			autoReload
+	const tim_auto_reload_t			autoReload
 );
 
 /**
@@ -135,7 +135,7 @@ driver_status_t Codec_TIM_StageAutoReload
 driver_status_t Codec_TIM_ExtractCounterValue
 (
 	const reg							cntRegImage,
-	timer_counter_value_t* const		pCounterValue
+	tim_counter_value_t* const		pCounterValue
 );
 
 /**
@@ -143,7 +143,7 @@ driver_status_t Codec_TIM_ExtractCounterValue
  * @param[in,out] pCntRegImage Caller-owned `CNT` image to update in place
  * @param[in] counterValue Counter value to stage into `CNT[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_counter_value_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_counter_value_t`
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCntRegImage is `NULL`
@@ -151,7 +151,7 @@ driver_status_t Codec_TIM_ExtractCounterValue
 driver_status_t Codec_TIM_StageCounterValue
 (
 	reg* const							pCntRegImage,
-	const timer_counter_value_t			counterValue
+	const tim_counter_value_t			counterValue
 );
 
 // ==================================================================================================== //
@@ -165,9 +165,9 @@ driver_status_t Codec_TIM_StageCounterValue
  * @param[in] cntRegImage Caller-owned `CNT` image
  * @param[out] pTimebase Destination for decoded timebase configuration
  * Expected member values:
- * - @ref `timer_config_timebase_t::prescaler`: Extracted `PSC[15:0]` value
- * - @ref `timer_config_timebase_t::auto_reload`: Extracted `ARR[15:0]` value
- * - @ref `timer_config_timebase_t::initial_count`: Extracted `CNT[15:0]` value
+ * - @ref `tim_config_timebase_t::prescaler`: Extracted `PSC[15:0]` value
+ * - @ref `tim_config_timebase_t::auto_reload`: Extracted `ARR[15:0]` value
+ * - @ref `tim_config_timebase_t::initial_count`: Extracted `CNT[15:0]` value
  * @returns Extraction status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimebase is `NULL`
@@ -177,7 +177,7 @@ driver_status_t Codec_TIM_ExtractTimeBaseConfig
 	const reg							pscRegImage,
 	const reg							arrRegImage,
 	const reg							cntRegImage,
-	timer_config_timebase_t* const		pTimebase
+	tim_config_timebase_t* const		pTimebase
 );
 
 /**
@@ -187,9 +187,9 @@ driver_status_t Codec_TIM_ExtractTimeBaseConfig
  * @param[in,out] pCntRegImage Caller-owned `CNT` image to update in place
  * @param[in] pTimebase Timebase configuration to stage
  * Accepted member values:
- * - @ref `timer_config_timebase_t::prescaler`: Any value accepted by @ref `Codec_TIM_StagePrescaler`
- * - @ref `timer_config_timebase_t::auto_reload`: Any value accepted by @ref `Codec_TIM_StageAutoReload`
- * - @ref `timer_config_timebase_t::initial_count`: Any value accepted by @ref `Codec_TIM_StageCounterValue`
+ * - @ref `tim_config_timebase_t::prescaler`: Any value accepted by @ref `Codec_TIM_StagePrescaler`
+ * - @ref `tim_config_timebase_t::auto_reload`: Any value accepted by @ref `Codec_TIM_StageAutoReload`
+ * - @ref `tim_config_timebase_t::initial_count`: Any value accepted by @ref `Codec_TIM_StageCounterValue`
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more required pointers are `NULL`
@@ -199,7 +199,7 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
 	reg* const								pPscRegImage,
 	reg* const								pArrRegImage,
 	reg* const								pCntRegImage,
-	const timer_config_timebase_t* const	pTimebase
+	const tim_config_timebase_t* const	pTimebase
 );
 
 // ==================================================================================================== //
@@ -225,7 +225,7 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
 driver_status_t Codec_TIM_ExtractCounterDirection
 (
 	const reg							cr1RegImage,
-	timer_direction_t* const			pDirection
+	tim_direction_t* const			pDirection
 );
 
 /**
@@ -243,7 +243,7 @@ driver_status_t Codec_TIM_ExtractCounterDirection
 driver_status_t Codec_TIM_StageCounterDirection
 (
 	reg* const							pCr1RegImage,
-	const timer_direction_t				direction
+	const tim_direction_t				direction
 );
 
 /**
@@ -263,7 +263,7 @@ driver_status_t Codec_TIM_StageCounterDirection
 driver_status_t Codec_TIM_ExtractCounterAlignment
 (
 	const reg							cr1RegImage,
-	timer_count_mode_t* const			pAlignment
+	tim_count_mode_t* const			pAlignment
 );
 
 /**
@@ -283,7 +283,7 @@ driver_status_t Codec_TIM_ExtractCounterAlignment
 driver_status_t Codec_TIM_StageCounterAlignment
 (
 	reg* const							pCr1RegImage,
-	const timer_count_mode_t			alignment
+	const tim_count_mode_t			alignment
 );
 
 /**
@@ -301,7 +301,7 @@ driver_status_t Codec_TIM_StageCounterAlignment
 driver_status_t Codec_TIM_ExtractOnePulse
 (
 	const reg							cr1RegImage,
-	timer_opm_t* const					pOnePulse
+	tim_opm_t* const					pOnePulse
 );
 
 /**
@@ -319,7 +319,7 @@ driver_status_t Codec_TIM_ExtractOnePulse
 driver_status_t Codec_TIM_StageOnePulse
 (
 	reg* const							pCr1RegImage,
-	const timer_opm_t					onePulse
+	const tim_opm_t					onePulse
 );
 
 /**
@@ -337,7 +337,7 @@ driver_status_t Codec_TIM_StageOnePulse
 driver_status_t Codec_TIM_ExtractAutoReloadPreload
 (
 	const reg							cr1RegImage,
-	timer_arpe_t* const					pAutoReloadPreload
+	tim_arpe_t* const					pAutoReloadPreload
 );
 
 /**
@@ -355,7 +355,7 @@ driver_status_t Codec_TIM_ExtractAutoReloadPreload
 driver_status_t Codec_TIM_StageAutoReloadPreload
 (
 	reg* const							pCr1RegImage,
-	const timer_arpe_t					autoReloadPreload
+	const tim_arpe_t					autoReloadPreload
 );
 
 /**
@@ -373,7 +373,7 @@ driver_status_t Codec_TIM_StageAutoReloadPreload
 driver_status_t Codec_TIM_ExtractUpdateSource
 (
 	const reg							cr1RegImage,
-	timer_update_source_t* const		pUpdateSource
+	tim_update_source_t* const		pUpdateSource
 );
 
 /**
@@ -391,7 +391,7 @@ driver_status_t Codec_TIM_ExtractUpdateSource
 driver_status_t Codec_TIM_StageUpdateSource
 (
 	reg* const							pCr1RegImage,
-	const timer_update_source_t			updateSource
+	const tim_update_source_t			updateSource
 );
 
 /**
@@ -410,7 +410,7 @@ driver_status_t Codec_TIM_StageUpdateSource
 driver_status_t Codec_TIM_ExtractClockDivision
 (
 	const reg							cr1RegImage,
-	timer_clock_division_t* const		pClockDivision
+	tim_clock_division_t* const		pClockDivision
 );
 
 /**
@@ -429,7 +429,7 @@ driver_status_t Codec_TIM_ExtractClockDivision
 driver_status_t Codec_TIM_StageClockDivision
 (
 	reg* const							pCr1RegImage,
-	const timer_clock_division_t		clockDivision
+	const tim_clock_division_t		clockDivision
 );
 
 // ==================================================================================================== //
@@ -441,15 +441,15 @@ driver_status_t Codec_TIM_StageClockDivision
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pCounter Destination for decoded counter configuration
  * Expected member values:
- * - @ref `timer_config_counter_t::direction`: @ref `TIMx_DIR_COUNT_UP` or @ref `TIMx_DIR_COUNT_DOWN`
- * - @ref `timer_config_counter_t::alignment`: @ref `TIMx_MODE_NORMAL`,
+ * - @ref `tim_config_counter_t::direction`: @ref `TIMx_DIR_COUNT_UP` or @ref `TIMx_DIR_COUNT_DOWN`
+ * - @ref `tim_config_counter_t::alignment`: @ref `TIMx_MODE_NORMAL`,
  *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`,
  *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`, or
  *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`
- * - @ref `timer_config_counter_t::one_pulse`: @ref `TIMx_OPM_DISABLE` or @ref `TIMx_OPM_ENABLE`
- * - @ref `timer_config_counter_t::auto_reload_preload`: @ref `TIMx_ARPE_DISABLE` or @ref `TIMx_ARPE_ENABLE`
- * - @ref `timer_config_counter_t::update_source`: @ref `TIMx_UPDATE_SOURCE_ANY` or @ref `TIMx_UPDATE_SOURCE_OVF_DMA`
- * - @ref `timer_config_counter_t::clock_division`: @ref `TIMx_CKD_CLK_FREQ`,
+ * - @ref `tim_config_counter_t::one_pulse`: @ref `TIMx_OPM_DISABLE` or @ref `TIMx_OPM_ENABLE`
+ * - @ref `tim_config_counter_t::auto_reload_preload`: @ref `TIMx_ARPE_DISABLE` or @ref `TIMx_ARPE_ENABLE`
+ * - @ref `tim_config_counter_t::update_source`: @ref `TIMx_UPDATE_SOURCE_ANY` or @ref `TIMx_UPDATE_SOURCE_OVF_DMA`
+ * - @ref `tim_config_counter_t::clock_division`: @ref `TIMx_CKD_CLK_FREQ`,
  *   @ref `TIMx_CKD_CLK_2_FREQ`, or @ref `TIMx_CKD_CLK_4_FREQ`
  * @returns Extraction status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was extracted
@@ -460,7 +460,7 @@ driver_status_t Codec_TIM_StageClockDivision
 driver_status_t Codec_TIM_ExtractCounterConfig
 (
 	const reg							cr1RegImage,
-	timer_config_counter_t* const		pCounter
+	tim_config_counter_t* const		pCounter
 );
 
 /**
@@ -468,12 +468,12 @@ driver_status_t Codec_TIM_ExtractCounterConfig
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] pCounter Counter configuration to stage
  * Accepted member values:
- * - @ref `timer_config_counter_t::direction`: Any value accepted by @ref `Codec_TIM_StageCounterDirection`
- * - @ref `timer_config_counter_t::alignment`: Any value accepted by @ref `Codec_TIM_StageCounterAlignment`
- * - @ref `timer_config_counter_t::one_pulse`: Any value accepted by @ref `Codec_TIM_StageOnePulse`
- * - @ref `timer_config_counter_t::auto_reload_preload`: Any value accepted by @ref `Codec_TIM_StageAutoReloadPreload`
- * - @ref `timer_config_counter_t::update_source`: Any value accepted by @ref `Codec_TIM_StageUpdateSource`
- * - @ref `timer_config_counter_t::clock_division`: Any value accepted by @ref `Codec_TIM_StageClockDivision`
+ * - @ref `tim_config_counter_t::direction`: Any value accepted by @ref `Codec_TIM_StageCounterDirection`
+ * - @ref `tim_config_counter_t::alignment`: Any value accepted by @ref `Codec_TIM_StageCounterAlignment`
+ * - @ref `tim_config_counter_t::one_pulse`: Any value accepted by @ref `Codec_TIM_StageOnePulse`
+ * - @ref `tim_config_counter_t::auto_reload_preload`: Any value accepted by @ref `Codec_TIM_StageAutoReloadPreload`
+ * - @ref `tim_config_counter_t::update_source`: Any value accepted by @ref `Codec_TIM_StageUpdateSource`
+ * - @ref `tim_config_counter_t::clock_division`: Any value accepted by @ref `Codec_TIM_StageClockDivision`
  * @returns Staging status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `CR1` image was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter or @p pCr1RegImage is `NULL`
@@ -483,7 +483,7 @@ driver_status_t Codec_TIM_ExtractCounterConfig
 driver_status_t Codec_TIM_StageCounterConfig
 (
 	reg* const							pCr1RegImage,
-	const timer_config_counter_t* const	pCounter
+	const tim_config_counter_t* const	pCounter
 );
 
 // ==================================================================================================== //
@@ -619,7 +619,7 @@ driver_status_t Codec_TIM_StageUpdateFlagClear(reg* const pSrRegImage);
 driver_status_t Codec_TIM_ExtractMasterMode
 (
 	const reg							cr2RegImage,
-	timer_master_mode_t* const			pMasterMode
+	tim_master_mode_t* const			pMasterMode
 );
 
 /**
@@ -643,7 +643,7 @@ driver_status_t Codec_TIM_ExtractMasterMode
 driver_status_t Codec_TIM_StageMasterMode
 (
 	reg* const							pCr2RegImage,
-	const timer_master_mode_t			masterMode
+	const tim_master_mode_t			masterMode
 );
 
 // ==================================================================================================== //
@@ -667,7 +667,7 @@ driver_status_t Codec_TIM_StageMasterMode
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
 	const reg							smcrRegImage,
-	timer_slave_mode_t* const			pSlaveMode
+	tim_slave_mode_t* const			pSlaveMode
 );
 
 /**
@@ -687,7 +687,7 @@ driver_status_t Codec_TIM_ExtractSlaveMode
 driver_status_t Codec_TIM_StageSlaveMode
 (
 	reg* const							pSmcrRegImage,
-	const timer_slave_mode_t			slaveMode
+	const tim_slave_mode_t			slaveMode
 );
 
 // ==================================================================================================== //
@@ -722,8 +722,8 @@ driver_status_t Codec_TIM_StageSlaveMode
 driver_status_t Codec_TIM_ExtractChannelSelection
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t				channel,
-	timer_channel_ccs_t* const			pCaptureCompareSelection
+	const tim_channel_t				channel,
+	tim_channel_ccs_t* const			pCaptureCompareSelection
 );
 
 /**
@@ -750,8 +750,8 @@ driver_status_t Codec_TIM_ExtractChannelSelection
 driver_status_t Codec_TIM_StageChannelSelection
 (
 	reg* const							pCcmrRegImage,
-	const timer_channel_t				channel,
-	const timer_channel_ccs_t			captureCompareSelection
+	const tim_channel_t				channel,
+	const tim_channel_ccs_t			captureCompareSelection
 );
 
 // ==================================================================================================== //
@@ -799,11 +799,11 @@ driver_status_t Codec_TIM_StageChannelSelection
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const timer_channel_t				channel,
-	timer_channel_oc_clear_t* const		pOutputCompareClear,
-	timer_channel_mode_t* const			pOutputCompareMode,
-	timer_channel_oc_preload_t* const	pOutputComparePreload,
-	timer_channel_oc_fast_t* const		pOutputCompareFast
+	const tim_channel_t				channel,
+	tim_channel_oc_clear_t* const		pOutputCompareClear,
+	tim_channel_mode_t* const			pOutputCompareMode,
+	tim_channel_oc_preload_t* const	pOutputComparePreload,
+	tim_channel_oc_fast_t* const		pOutputCompareFast
 );
 
 /**
@@ -846,11 +846,11 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
 driver_status_t Codec_TIM_StageOutputCompareConfig
 (
 	reg* const							pCcmrRegImage,
-	const timer_channel_t				channel,
-	const timer_channel_oc_clear_t		outputCompareClear,
-	const timer_channel_mode_t			outputCompareMode,
-	const timer_channel_oc_preload_t	outputComparePreload,
-	const timer_channel_oc_fast_t		outputCompareFast
+	const tim_channel_t				channel,
+	const tim_channel_oc_clear_t		outputCompareClear,
+	const tim_channel_mode_t			outputCompareMode,
+	const tim_channel_oc_preload_t	outputComparePreload,
+	const tim_channel_oc_fast_t		outputCompareFast
 );
 
 // ==================================================================================================== //
@@ -878,7 +878,7 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
 	const reg							ccerRegImage,
-	const timer_channel_t				channel
+	const tim_channel_t				channel
 );
 
 /**
@@ -902,7 +902,7 @@ driver_status_t Codec_TIM_ExtractChannelEnableState
 driver_status_t Codec_TIM_StageChannelEnableState
 (
 	reg* const							pCcerRegImage,
-	const timer_channel_t				channel,
+	const tim_channel_t				channel,
 	const driver_status_t				channelState
 );
 
@@ -931,8 +931,8 @@ driver_status_t Codec_TIM_StageChannelEnableState
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
 	const reg							ccerRegImage,
-	const timer_channel_t				channel,
-	timer_channel_polarity_t* const		pPolarity
+	const tim_channel_t				channel,
+	tim_channel_polarity_t* const		pPolarity
 );
 
 /**
@@ -956,8 +956,8 @@ driver_status_t Codec_TIM_ExtractChannelPolarity
 driver_status_t Codec_TIM_StageChannelPolarity
 (
 	reg* const						pCcerRegImage,
-	const timer_channel_t			channel,
-	const timer_channel_polarity_t	polarity
+	const tim_channel_t			channel,
+	const tim_channel_polarity_t	polarity
 );
 
 // ==================================================================================================== //
@@ -987,7 +987,7 @@ driver_status_t Codec_TIM_StageChannelPolarity
 driver_status_t Codec_TIM_ExtractIRQEnableMask
 (
 	const reg					dierRegImage,
-	timer_irq_t* const			pIrqMask
+	tim_irq_t* const			pIrqMask
 );
 
 /**
@@ -1014,8 +1014,8 @@ driver_status_t Codec_TIM_ExtractIRQEnableMask
 driver_status_t Codec_TIM_StageIRQEnableMask
 (
 	reg* const					pDierRegImage,
-	const timer_irq_t			irqMask,
-	const timer_irq_enable_t	irqEnable
+	const tim_irq_t			irqMask,
+	const tim_irq_enable_t	irqEnable
 );
 
 // ==================================================================================================== //
@@ -1041,7 +1041,7 @@ driver_status_t Codec_TIM_StageIRQEnableMask
 driver_status_t Codec_TIM_ExtractDMAEnableMask
 (
 	const reg					dierRegImage,
-	timer_dma_t* const			pDmaMask
+	tim_dma_t* const			pDmaMask
 );
 
 /**
@@ -1067,7 +1067,7 @@ driver_status_t Codec_TIM_ExtractDMAEnableMask
 driver_status_t Codec_TIM_StageDMAEnableMask
 (
 	reg* const					pDierRegImage,
-	const timer_dma_t			dmaMask,
+	const tim_dma_t			dmaMask,
 	const driver_status_t		dmaState
 );
 
@@ -1098,7 +1098,7 @@ driver_status_t Codec_TIM_StageDMAEnableMask
 driver_status_t Codec_TIM_ExtractIRQFlagMask
 (
 	const reg					srRegImage,
-	timer_irq_t* const			pIrqMask
+	tim_irq_t* const			pIrqMask
 );
 
 /**
@@ -1123,7 +1123,7 @@ driver_status_t Codec_TIM_ExtractIRQFlagMask
 driver_status_t Codec_TIM_StageIRQAckMask
 (
 	reg* const					pSrRegImage,
-	const timer_irq_t			irqMask
+	const tim_irq_t			irqMask
 );
 
 /** @} */ // TIM_03_Driver_03_Codec

@@ -36,7 +36,7 @@ struct pwm_handle {
 	// PWM Configuration Structure
 	pwm_config_t PWM_CONFIG;
 	// Timer Configuration Structure
-	timer_config_t TIMx_CONFIG;
+	tim_config_t TIMx_CONFIG;
 };
 
 /**

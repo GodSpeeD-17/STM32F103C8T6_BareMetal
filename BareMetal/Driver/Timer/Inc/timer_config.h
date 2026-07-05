@@ -8,7 +8,7 @@
  * @details
  * This header owns Timer driver configuration structures only. These
  * structures are intentionally timer-instance independent so one
- * @ref `timer_config_t` object can be reused with any supported Timer instance
+ * @ref `tim_config_t` object can be reused with any supported Timer instance
  * passed separately to the public driver API.
  *
  * This header does not own:
@@ -58,7 +58,7 @@ extern "C" {
 
 /**
  * @brief Timer timebase configuration
- * @typedef timer_config_timebase_t
+ * @typedef tim_config_timebase_t
  * @details
  * Groups the Timer register-backed values that define the counter clock
  * division and counting window. The driver stages @ref `prescaler` into `PSC`,
@@ -67,7 +67,7 @@ extern "C" {
  * @note The counter tick frequency is derived from @ref `prescaler` as
  * `timer_input_clock / (prescaler + 1U)`.
  */
-typedef struct _timer_config_timebase_t
+typedef struct _tim_config_timebase_t
 {
 	/**
 	 * @brief Prescaler value staged into `TIMx_PSC`
@@ -75,10 +75,10 @@ typedef struct _timer_config_timebase_t
 	 * Divides the Timer input clock before it reaches the counter.
 	 * `CK_CNT = timer_input_clock / (prescaler + 1U)`.
 	 * Accepted values:
-	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_prescaler_t`
-	 * @memberof timer_config_timebase_t
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_prescaler_t`
+	 * @memberof tim_config_timebase_t
 	 */
-	timer_prescaler_t			prescaler;
+	tim_prescaler_t			prescaler;
 
 	/**
 	 * @brief Auto-reload value staged into `TIMx_ARR`
@@ -86,22 +86,22 @@ typedef struct _timer_config_timebase_t
 	 * Defines the counter reload boundary. The effective update period depends
 	 * on both @ref `prescaler` and @ref `auto_reload`.
 	 * Accepted values:
-	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_auto_reload_t`
-	 * @memberof timer_config_timebase_t
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_auto_reload_t`
+	 * @memberof tim_config_timebase_t
 	 */
-	timer_auto_reload_t			auto_reload;
+	tim_auto_reload_t			auto_reload;
 
 	/**
 	 * @brief Initial counter value staged into `TIMx_CNT`
 	 * @details
 	 * Defines the counter value used after configuration staging.
 	 * Accepted values:
-	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `timer_counter_value_t`
-	 * @memberof timer_config_timebase_t
+	 * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_counter_value_t`
+	 * @memberof tim_config_timebase_t
 	 */
-	timer_counter_value_t		initial_count;
+	tim_counter_value_t		initial_count;
 
-} timer_config_timebase_t;
+} tim_config_timebase_t;
 
 // ==================================================================================================== //
 //										Timer Counter Configuration									//
@@ -109,13 +109,13 @@ typedef struct _timer_config_timebase_t
 
 /**
  * @brief Timer counter behavior configuration
- * @typedef timer_config_counter_t
+ * @typedef tim_config_counter_t
  * @details
  * Groups the driver-facing selectors that map to `TIMx_CR1` counter behavior.
  * The Timer codec converts these selectors into the caller-owned `CR1` image;
  * the driver layer decides when to read, stage, and write that image.
  */
-typedef struct _timer_config_counter_t
+typedef struct _tim_config_counter_t
 {
 	/**
 	 * @brief Counter direction selector
@@ -123,9 +123,9 @@ typedef struct _timer_config_counter_t
 	 * Accepted values:
 	 * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
 	 * - @ref `TIMx_DIR_COUNT_DOWN`: Counter counts down
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_direction_t			direction;
+	tim_direction_t			direction;
 
 	/**
 	 * @brief Counter alignment mode selector
@@ -136,9 +136,9 @@ typedef struct _timer_config_counter_t
 	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`: Center-aligned mode 1
 	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`: Center-aligned mode 2
 	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`: Center-aligned mode 3
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_count_mode_t			alignment;
+	tim_count_mode_t			alignment;
 
 	/**
 	 * @brief One-pulse mode selector
@@ -146,9 +146,9 @@ typedef struct _timer_config_counter_t
 	 * Accepted values:
 	 * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at the next update event
 	 * - @ref `TIMx_OPM_ENABLE`: Counter stops at the next update event
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_opm_t					one_pulse;
+	tim_opm_t					one_pulse;
 
 	/**
 	 * @brief Auto-reload preload selector
@@ -156,9 +156,9 @@ typedef struct _timer_config_counter_t
 	 * Accepted values:
 	 * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload is disabled
 	 * - @ref `TIMx_ARPE_ENABLE`: Auto-reload preload is enabled
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_arpe_t				auto_reload_preload;
+	tim_arpe_t				auto_reload_preload;
 
 	/**
 	 * @brief Update request source selector
@@ -166,9 +166,9 @@ typedef struct _timer_config_counter_t
 	 * Accepted values:
 	 * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate an update request
 	 * - @ref `TIMx_UPDATE_SOURCE_OVF_DMA`: Only overflow/underflow or DMA source generates an update request
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_update_source_t		update_source;
+	tim_update_source_t		update_source;
 
 	/**
 	 * @brief Digital filter and dead-time sampling clock division selector
@@ -177,11 +177,11 @@ typedef struct _timer_config_counter_t
 	 * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
 	 * - @ref `TIMx_CKD_CLK_2_FREQ`: `t_DTS = 2 * t_CK_INT`
 	 * - @ref `TIMx_CKD_CLK_4_FREQ`: `t_DTS = 4 * t_CK_INT`
-	 * @memberof timer_config_counter_t
+	 * @memberof tim_config_counter_t
 	 */
-	timer_clock_division_t		clock_division;
+	tim_clock_division_t		clock_division;
 
-} timer_config_counter_t;
+} tim_config_counter_t;
 
 // ==================================================================================================== //
 //										Timer Driver Root Configuration									//
@@ -189,27 +189,27 @@ typedef struct _timer_config_counter_t
 
 /**
  * @brief Timer root configuration
- * @typedef timer_config_t
+ * @typedef tim_config_t
  * @details
  * Root configuration object consumed by the Timer driver. It deliberately does
  * not contain a Timer peripheral pointer; the public driver API should receive
  * `TIMx` separately so this structure remains reusable across Timer instances.
  */
-typedef struct _timer_config_t
+typedef struct _tim_config_t
 {
 	/**
 	 * @brief Timer counter tick, reload, and initial count configuration
-	 * @memberof timer_config_t
+	 * @memberof tim_config_t
 	 */
-	timer_config_timebase_t	timebase;
+	tim_config_timebase_t	timebase;
 
 	/**
 	 * @brief Timer counter behavior configuration
-	 * @memberof timer_config_t
+	 * @memberof tim_config_t
 	 */
-	timer_config_counter_t	counter;
+	tim_config_counter_t	counter;
 
-} timer_config_t;
+} tim_config_t;
 
 /** @} */ // TIM_03_Driver_04_Config
 

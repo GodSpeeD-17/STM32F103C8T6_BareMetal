@@ -6,19 +6,28 @@
  * @date	20-06-2026
  *
  * @details
+ * @section TIM_DRIVER_IMPL_SCOPE Scope
  * This source file implements the public Timer driver API declared in
  * @ref `timer.h`. The driver layer owns public validation, Timer clock-state
  * orchestration, register-image reads, codec staging/extraction orchestration,
  * dirty writes, and public @ref `driver_status_t` handling.
  *
+ * @section TIM_DRIVER_IMPL_FIELD_OWNERSHIP Field Ownership
  * This first Timer refactor pass is intentionally limited to:
- * - `TIMx_CR1` counter behavior fields represented by @ref `timer_config_counter_t`
+ * - `TIMx_CR1` counter behavior fields represented by @ref `tim_config_counter_t`
  * - `TIMx_PSC` prescaler
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
  * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay helper behavior are not
  * part of this implementation pass.
+ *
+ * @section TIM_DRIVER_IMPL_LAYOUT Source Layout
+ * The public implementation follows the same banner and sub-banner order as
+ * @ref `timer.h`: clock state, operation state, root configuration, grouped
+ * configuration, timebase fields, and counter fields. Local helpers are kept
+ * ahead of the public API sections so public functions read as orchestration
+ * over validation, codec staging, and dirty-write primitives.
  */
 
 // ==================================================================================================== //
@@ -34,16 +43,16 @@
 // ==================================================================================================== //
 
 /** @brief Reset-equivalent Timer prescaler value @def TIM_DRIVER_RESET_PSC */
-#define TIM_DRIVER_RESET_PSC						((timer_prescaler_t) 0U)
+#define TIM_DRIVER_RESET_PSC						((tim_prescaler_t) 0U)
 /** @brief Reset-equivalent Timer auto-reload value @def TIM_DRIVER_RESET_ARR */
-#define TIM_DRIVER_RESET_ARR						((timer_auto_reload_t) 0xFFFFU)
+#define TIM_DRIVER_RESET_ARR						((tim_auto_reload_t) 0xFFFFU)
 /** @brief Reset-equivalent Timer counter value @def TIM_DRIVER_RESET_CNT */
-#define TIM_DRIVER_RESET_CNT						((timer_counter_value_t) 0U)
+#define TIM_DRIVER_RESET_CNT						((tim_counter_value_t) 0U)
 
 /**
  * @brief Reset Timer configuration
  */
-static const timer_config_t _TIM_ResetConfig =
+static const tim_config_t _TIM_ResetConfig =
 {
 	.timebase	=
 	{
@@ -71,10 +80,15 @@ static const timer_config_t _TIM_ResetConfig =
  * @param[in] TIMx Timer peripheral instance
  * @returns Validation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p TIMx is a supported general-purpose Timer instance
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ValidateInstance(const TIM_TypeDef* const TIMx)
 {
+	if (TIMx == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
 	return (TIM_INSTANCE_IS_VALID(TIMx) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
 
@@ -85,7 +99,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateInstance(const TIM_TypeDef* co
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p direction is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p direction is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateDirection(const timer_direction_t direction)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateDirection(const tim_direction_t direction)
 {
 	return (TIM_DIRECTION_IS_VALID(direction) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -97,7 +111,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateDirection(const timer_directio
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p alignment is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p alignment is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateAlignment(const timer_count_mode_t alignment)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateAlignment(const tim_count_mode_t alignment)
 {
 	return (TIM_COUNT_MODE_IS_VALID(alignment) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -109,7 +123,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateAlignment(const timer_count_mo
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p onePulse is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p onePulse is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateOnePulse(const timer_opm_t onePulse)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateOnePulse(const tim_opm_t onePulse)
 {
 	return (TIM_OPM_IS_VALID(onePulse) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -121,7 +135,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateOnePulse(const timer_opm_t one
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p autoReloadPreload is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReloadPreload is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateAutoReloadPreload(const timer_arpe_t autoReloadPreload)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateAutoReloadPreload(const tim_arpe_t autoReloadPreload)
 {
 	return (TIM_ARPE_IS_VALID(autoReloadPreload) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -133,7 +147,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateAutoReloadPreload(const timer_
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p updateSource is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p updateSource is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateUpdateSource(const timer_update_source_t updateSource)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateUpdateSource(const tim_update_source_t updateSource)
 {
 	return (TIM_UPDATE_SOURCE_IS_VALID(updateSource) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -145,7 +159,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateUpdateSource(const timer_updat
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p clockDivision is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockDivision is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockDivision(const timer_clock_division_t clockDivision)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockDivision(const tim_clock_division_t clockDivision)
 {
 	return (TIM_CLOCK_DIVISION_IS_VALID(clockDivision) != 0x00U) ? DRIVER_STATUS_SUCCESS : DRIVER_STATUS_ERROR_INVALID_ARG;
 }
@@ -158,7 +172,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockDivision(const timer_cloc
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more selectors are invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateCounterConfig(const timer_config_counter_t* const pCounter)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateCounterConfig(const tim_config_counter_t* const pCounter)
 {
 	//! Validate the container before reading any grouped selector fields.
 	if (pCounter == NULL)
@@ -199,7 +213,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateState(const driver_status_t st
  * @param[out] pClockMask Destination for APB1 clock enable mask
  * @returns Decode status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock mask was decoded
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockMask is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` OR @p `pClockMask` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_GetAPB1ClockMask
@@ -208,11 +222,12 @@ __STATIC_FORCEINLINE driver_status_t _TIM_GetAPB1ClockMask
 	reg* const					pClockMask
 )
 {
-	//! Decode into a caller-owned mask so the RCC helper remains independent of Timer instances.
+	// Validate Input
 	if (pClockMask == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Match by peripheral base address because instance macros are raw memory-mapped pointers.
 	switch ((uint32_t) TIMx)
@@ -255,20 +270,17 @@ __STATIC_FORCEINLINE driver_status_t _TIM_GetAPB1ClockMask
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_ClockEnabled(TIM_TypeDef* const TIMx)
+__STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockEnabled(TIM_TypeDef* const TIMx)
 {
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+
 	// Local Variables
 	reg clockMask = 0x00000000UL;
 	driver_status_t clockState = DRIVER_STATUS_ERROR;
-
-	// Validate Input
-	if (TIMx == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_GetAPB1ClockMask(TIMx, &clockMask));
 
+	//! Read the RCC APB1 clock-enable bit for the requested Timer
 	clockState = RCC_APB1_ClockGetState(clockMask);
 	if (clockState != DRIVER_STATUS_ERROR_INVALID_ARG)
 	{
@@ -291,7 +303,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ClockEnabled(TIM_TypeDef* const TIMx)
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `CR1` write was skipped or performed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_WriteCR1IfChanged
 (
@@ -300,7 +312,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteCR1IfChanged
 	const reg			stagedRegImage
 )
 {
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Dirty-write policy avoids touching CR1 when codec staging produced the existing image.
 	if (currentRegImage != stagedRegImage)
@@ -320,7 +333,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteCR1IfChanged
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `PSC` write was skipped or performed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_WritePSCIfChanged
 (
@@ -329,7 +342,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WritePSCIfChanged
 	const reg			stagedRegImage
 )
 {
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Dirty-write policy avoids forcing a prescaler preload update when the value is unchanged.
 	if (currentRegImage != stagedRegImage)
@@ -349,7 +363,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WritePSCIfChanged
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `ARR` write was skipped or performed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_WriteARRIfChanged
 (
@@ -358,7 +372,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteARRIfChanged
 	const reg			stagedRegImage
 )
 {
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Dirty-write policy keeps ARR untouched unless the staged image differs from hardware.
 	if (currentRegImage != stagedRegImage)
@@ -378,7 +393,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteARRIfChanged
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `CNT` write was skipped or performed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_WriteCNTIfChanged
 (
@@ -387,7 +402,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteCNTIfChanged
 	const reg			stagedRegImage
 )
 {
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Dirty-write policy avoids resetting the counter when the requested count already matches.
 	if (currentRegImage != stagedRegImage)
@@ -409,15 +425,16 @@ __STATIC_FORCEINLINE driver_status_t _TIM_WriteCNTIfChanged
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update event generation was requested
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_GenerateUpdateEvent(TIM_TypeDef* const TIMx)
 {
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+
+	// Local Variables
 	reg egrRegImage = 0x00000000UL;
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! EGR is an action register, so the driver writes a codec-staged UG image instead of read-modify-write.
+	//! EGR is write-only register
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventGeneration(&egrRegImage));
 	LL_TIM_WriteEGR(TIMx, egrRegImage);
 
@@ -431,14 +448,15 @@ __STATIC_FORCEINLINE driver_status_t _TIM_GenerateUpdateEvent(TIM_TypeDef* const
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update flag was clear or was acknowledged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ClearUpdateFlagIfPending(TIM_TypeDef* const TIMx)
 {
-	reg srRegImage = 0x00000000UL;
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
+	// Local Variable
+	reg srRegImage = 0x00UL;
 	srRegImage = LL_TIM_ReadSR(TIMx);
 
 	//! The update flag may or may not be set by UG depending on Timer state; avoid writing SR unless needed.
@@ -464,19 +482,20 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ClearUpdateFlagIfPending(TIM_TypeDef* 
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: TimeBase fields were applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx or @p pTimeBase is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ApplyTimeBaseConfig
 (
 	TIM_TypeDef* const						TIMx,
-	const timer_config_timebase_t* const	pTimeBase
+	const tim_config_timebase_t* const	pTimeBase
 )
 {
+	// Validate Input
 	if (pTimeBase == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 
 	//! Read each timebase register once, then stage all caller-requested values into local images.
 	reg pscRegImage = LL_TIM_ReadPSC(TIMx);
@@ -506,19 +525,21 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ApplyTimeBaseConfig
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter fields were applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx or @p pCounter is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more counter fields are invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterConfig
 (
 	TIM_TypeDef* const						TIMx,
-	const timer_config_counter_t* const		pCounter
+	const tim_config_counter_t* const		pCounter
 )
 {
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_ValidateCounterConfig(pCounter));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
 
 	//! Read CR1 once because all counter-behavior fields staged here live in the same register.
-	reg cr1RegImage = LL_TIM_ReadCR1(TIMx);
+	reg cr1RegImage = 0x00UL;
+	cr1RegImage = LL_TIM_ReadCR1(TIMx);
 	//! Preserve the original CR1 image for dirty-write comparison after codec staging.
 	const reg currentCr1RegImage = cr1RegImage;
 
@@ -530,6 +551,107 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterConfig
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ==================================================================================================== //
+//										Local Root Configuration Orchestration							//
+// ==================================================================================================== //
+
+/**
+ * @brief Applies a complete Timer root configuration using the update-event latch sequence
+ * @param[in] TIMx Timer peripheral instance
+ * @param[in] pConfig Complete Timer root configuration to apply
+ * @returns @ref driver_status_t "Driver Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Root configuration was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx or @p pConfig is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or one or more counter selectors are invalid
+ * @details
+ * This helper owns the register ordering needed by both @ref `TIM_Config` and
+ * @ref `TIM_DeConfig`. The caller must stop the counter before entering this
+ * sequence and must keep the Timer clock gate enabled throughout it.
+ *
+ * The Timer prescaler and preloaded auto-reload value become active only after
+ * an update event. Because @ref `tim_config_t` does not own `CR1.UDIS`, this
+ * helper preserves the caller's final update-event enable state while
+ * temporarily forcing update events enabled for the software-generated `UG`.
+ *
+ * Register order:
+ * - Read `CR1`, `PSC`, `ARR`, `CNT`, and the current `SR.UIF` state.
+ * - Stage final `CR1`, `PSC`, `ARR`, and target `CNT` images locally before any hardware write.
+ * - Build a pre-update `CR1` image from the final `CR1` image with `UDIS` cleared.
+ * - Write pre-update `CR1`, `PSC`, and `ARR`.
+ * - Generate one software update event with `EGR.UG`.
+ * - Clear `SR.UIF` only if the generated update event created a new pending flag.
+ * - Restore the final `CR1` image, including the original `UDIS` state.
+ * - Write `CNT` last because the generated update event can change the counter value.
+ */
+__STATIC_FORCEINLINE driver_status_t _TIM_ApplyRootConfig
+(
+	TIM_TypeDef* const				TIMx,
+	const tim_config_t* const		pConfig
+)
+{
+	// Validate Input
+	if (pConfig == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateCounterConfig(&(pConfig->counter)));
+
+	// Local Variables
+	reg cr1RegImage = 0x00000000UL;
+	reg pscRegImage = 0x00000000UL;
+	reg arrRegImage = 0x00000000UL;
+	reg cntRegImage = 0x00000000UL;
+	reg currentCr1RegImage = 0x00000000UL;
+	reg currentPscRegImage = 0x00000000UL;
+	reg currentArrRegImage = 0x00000000UL;
+	reg finalCr1RegImage = 0x00000000UL;
+	reg preUpdateCr1RegImage = 0x00000000UL;
+	reg postUpdateCntRegImage = 0x00000000UL;
+	driver_status_t updateFlagStateBeforeUpdate = DRIVER_STATUS_ERROR;
+
+	//! Snapshot the register images
+	cr1RegImage = LL_TIM_ReadCR1(TIMx);
+	pscRegImage = LL_TIM_ReadPSC(TIMx);
+	arrRegImage = LL_TIM_ReadARR(TIMx);
+	cntRegImage = LL_TIM_ReadCNT(TIMx);
+	currentCr1RegImage = cr1RegImage;
+	currentPscRegImage = pscRegImage;
+	currentArrRegImage = arrRegImage;
+	updateFlagStateBeforeUpdate = Codec_TIM_ExtractUpdateFlagState(LL_TIM_ReadSR(TIMx));
+
+	//! Stage the final requested state first; no hardware register is written until all codec work succeeds.
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterConfig(&cr1RegImage, &(pConfig->counter)));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageTimeBaseConfig(&pscRegImage, &arrRegImage, &cntRegImage, &(pConfig->timebase)));
+
+	//! Preserve the final CR1 image, then clear UDIS only in the image used for the forced update event.
+	finalCr1RegImage = cr1RegImage;
+	preUpdateCr1RegImage = finalCr1RegImage;
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&preUpdateCr1RegImage, DRIVER_STATUS_ON));
+
+	//! Apply CR1, PSC, and ARR before UG so the generated update event can latch the preloaded values.
+	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentCr1RegImage, preUpdateCr1RegImage));
+	ASSERT_DRIVER_STATUS(_TIM_WritePSCIfChanged(TIMx, currentPscRegImage, pscRegImage));
+	ASSERT_DRIVER_STATUS(_TIM_WriteARRIfChanged(TIMx, currentArrRegImage, arrRegImage));
+
+	//! Generate one update event while UDIS is known clear.
+	ASSERT_DRIVER_STATUS(_TIM_GenerateUpdateEvent(TIMx));
+	if (updateFlagStateBeforeUpdate == DRIVER_STATUS_OFF)
+	{
+		//! Do not erase a flag that was already pending before this configuration sequence.
+		ASSERT_DRIVER_STATUS(_TIM_ClearUpdateFlagIfPending(TIMx));
+	}
+
+	//! Restore the final CR1 image, including the update-event enable state that this API does not own.
+	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, preUpdateCr1RegImage, finalCr1RegImage));
+
+	//! Write the requested initial counter value last because UG can reinitialize CNT.
+	postUpdateCntRegImage = LL_TIM_ReadCNT(TIMx);
+	ASSERT_DRIVER_STATUS(_TIM_WriteCNTIfChanged(TIMx, postUpdateCntRegImage, cntRegImage));
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
 /**
  * @brief Applies a staged counter enable state to one Timer instance
  * @param[in] TIMx Timer peripheral instance
@@ -538,7 +660,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterConfig
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter runtime state was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p counterState is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @note Caller owns Timer clock-gate availability before invoking this helper.
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterEnableState
 (
@@ -546,8 +668,9 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterEnableState
 	const driver_status_t		counterState
 )
 {
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_ValidateState(counterState));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
 
 	//! Read CR1 once because counter enable state is represented by the runtime CEN bit.
 	reg cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -566,23 +689,27 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ApplyCounterEnableState
 //										Timer Clock State APIs											//
 // ==================================================================================================== //
 
+// -------------------------------------- Timer Clock State Pair -------------------------------------- //
+
 driver_status_t TIM_GetClockState(TIM_TypeDef* const TIMx)
 {
+	// Local Variable
 	reg clockMask = 0x00000000UL;
-
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 	//! Clock state is the RCC APB1 gate bit for this Timer instance.
-	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_GetAPB1ClockMask(TIMx, &clockMask));
 	return RCC_APB1_ClockGetState(clockMask);
 }
 
 driver_status_t TIM_SetClockState(TIM_TypeDef* const TIMx, const driver_status_t clockState)
 {
+	// Local Variable
 	reg clockMask = 0x00000000UL;
-
-	//! Clock state owns only the RCC APB1 gate; Timer counter start remains a separate operation state.
-	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+	// Validate Input
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_ValidateState(clockState));
+	//! Clock state owns only the RCC APB1 gate; Timer counter start remains a separate operation state.
 	ASSERT_DRIVER_STATUS(_TIM_GetAPB1ClockMask(TIMx, &clockMask));
 	return (clockState == DRIVER_STATUS_ON) ? RCC_APB1_ClockEnable(clockMask) : RCC_APB1_ClockDisable(clockMask);
 }
@@ -591,24 +718,28 @@ driver_status_t TIM_SetClockState(TIM_TypeDef* const TIMx, const driver_status_t
 //										Timer Operation State APIs										//
 // ==================================================================================================== //
 
+// ------------------------------------ Timer Operation State Pair ------------------------------------ //
+
 driver_status_t TIM_GetOperationState(TIM_TypeDef* const TIMx)
 {
 	//! Operation state is CR1.CEN; the Timer clock gate must be enabled before CR1 can be read.
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 	return Codec_TIM_ExtractCounterEnableState(LL_TIM_ReadCR1(TIMx));
 }
 
 driver_status_t TIM_SetOperationState(TIM_TypeDef* const TIMx, const driver_status_t operationState)
 {
 	//! Operation state owns only CR1.CEN; it refuses to touch CR1 while the Timer clock gate is off.
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_ValidateState(operationState));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
 	return _TIM_ApplyCounterEnableState(TIMx, operationState);
 }
 
 // ==================================================================================================== //
 //										Timer Root Configuration APIs									//
 // ==================================================================================================== //
+
+// ---------------------------------- Timer Root Configuration Pair ----------------------------------- //
 
 driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx)
 {
@@ -617,60 +748,33 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx)
 	ASSERT_DRIVER_STATUS(TIM_SetClockState(TIMx, DRIVER_STATUS_ON));
 	//! Stop the counter before restoring timing fields so deconfig does not rewrite a running timer.
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF));
-	//! Restore only the fields owned by timer_config_t; channel, IRQ, PWM, DMA, and reset state are untouched.
-	ASSERT_DRIVER_STATUS(_TIM_ApplyCounterConfig(TIMx, &(_TIM_ResetConfig.counter)));
-	ASSERT_DRIVER_STATUS(_TIM_ApplyTimeBaseConfig(TIMx, &(_TIM_ResetConfig.timebase)));
+	//! Restore only the fields owned by tim_config_t, using UG so reset PSC/ARR values become active.
+	ASSERT_DRIVER_STATUS(_TIM_ApplyRootConfig(TIMx, &_TIM_ResetConfig));
 	//! End de-configuration at the Timer clock gate boundary; do not issue an RCC peripheral reset.
 	ASSERT_DRIVER_STATUS(TIM_SetClockState(TIMx, DRIVER_STATUS_OFF));
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const timer_config_t* const pConfig)
+driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig)
 {
 	// Validate Input Configurations
 	if (pConfig == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_ValidateCounterConfig(&(pConfig->counter)));
+
+	// Validate the Timer instance and counter configuration before touching any hardware.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateCounterConfig(&(pConfig->counter)));
 
 	//! Enable Clock for Timer
 	ASSERT_DRIVER_STATUS(TIM_SetClockState(TIMx, DRIVER_STATUS_ON));
 	//! Disable Timer counter before applying configuration
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF));
 
-	//! After the counter is stopped, read configuration registers that must be staged before UG.
-	reg cr1RegImage = LL_TIM_ReadCR1(TIMx);
-	reg pscRegImage = LL_TIM_ReadPSC(TIMx);
-	reg arrRegImage = LL_TIM_ReadARR(TIMx);
-	reg cntRegImage = 0x00000000UL;
-	const reg currentCr1RegImage = cr1RegImage;
-	const reg currentPscRegImage = pscRegImage;
-	const reg currentArrRegImage = arrRegImage;
-	const driver_status_t updateFlagStateBeforeUpdate = Codec_TIM_ExtractUpdateFlagState(LL_TIM_ReadSR(TIMx));
-
-	//! Stage the full configuration first so partial hardware updates are avoided on codec failure.
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterConfig(&cr1RegImage, &(pConfig->counter)));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageTimeBaseConfig(&pscRegImage, &arrRegImage, &cntRegImage, &(pConfig->timebase)));
-
-	//! Apply CR1, PSC, and ARR before UG so prescaler and any preloaded ARR value can be latched together.
-	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentCr1RegImage, cr1RegImage));
-	ASSERT_DRIVER_STATUS(_TIM_WritePSCIfChanged(TIMx, currentPscRegImage, pscRegImage));
-	ASSERT_DRIVER_STATUS(_TIM_WriteARRIfChanged(TIMx, currentArrRegImage, arrRegImage));
-
-	//! Generate one update event to transfer PSC and any preloaded ARR value into the active timer logic.
-	ASSERT_DRIVER_STATUS(_TIM_GenerateUpdateEvent(TIMx));
-	//! Clear UIF only when this configuration-generated UG transitioned the flag from clear to pending.
-	if (updateFlagStateBeforeUpdate == DRIVER_STATUS_OFF)
-	{
-		ASSERT_DRIVER_STATUS(_TIM_ClearUpdateFlagIfPending(TIMx));
-	}
-
-	//! Write the requested initial counter value after UG because the update event can affect CNT.
-	const reg currentCntRegImage = LL_TIM_ReadCNT(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_WriteCNTIfChanged(TIMx, currentCntRegImage, cntRegImage));
+	//! Apply the full root configuration with the forced-update latch sequence.
+	ASSERT_DRIVER_STATUS(_TIM_ApplyRootConfig(TIMx, pConfig));
 
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -679,10 +783,12 @@ driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const timer_config_t* const 
 //										Timer Group Configuration APIs									//
 // ==================================================================================================== //
 
+// -------------------------------- Timer TimeBase Configuration Pair --------------------------------- //
+
 driver_status_t TIM_GetTimeBaseConfig
 (
-	TIM_TypeDef* const					TIMx,
-	timer_config_timebase_t* const		pTimeBase
+	TIM_TypeDef* const				TIMx,
+	tim_config_timebase_t* const	pTimeBase
 )
 {
 	reg pscRegImage = 0x00000000UL;
@@ -695,7 +801,7 @@ driver_status_t TIM_GetTimeBaseConfig
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot only the registers needed to extract the timebase group.
 	pscRegImage = LL_TIM_ReadPSC(TIMx);
@@ -706,31 +812,10 @@ driver_status_t TIM_GetTimeBaseConfig
 	return Codec_TIM_ExtractTimeBaseConfig(pscRegImage, arrRegImage, cntRegImage, pTimeBase);
 }
 
-driver_status_t TIM_GetCounterConfig
-(
-	TIM_TypeDef* const					TIMx,
-	timer_config_counter_t* const		pCounter
-)
-{
-	reg cr1RegImage = 0x00000000UL;
-
-	//! Validate the output pointer before reading CR1.
-	if (pCounter == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! Counter configuration is fully represented by the current CR1 image.
-	cr1RegImage = LL_TIM_ReadCR1(TIMx);
-	//! Return the codec extraction status directly.
-	return Codec_TIM_ExtractCounterConfig(cr1RegImage, pCounter);
-}
-
 driver_status_t TIM_SetTimeBaseConfig
 (
-	TIM_TypeDef* const						TIMx,
-	const timer_config_timebase_t* const	pTimeBase
+	TIM_TypeDef* const					TIMx,
+	const tim_config_timebase_t* const	pTimeBase
 )
 {
 	//! TimeBase scalars have no selector constraints, so only the user-supplied pointer is checked here.
@@ -740,20 +825,43 @@ driver_status_t TIM_SetTimeBaseConfig
 	}
 
 	//! Reuse the shared apply path to keep batching and dirty writes consistent.
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	return _TIM_ApplyTimeBaseConfig(TIMx, pTimeBase);
 }
 
+// --------------------------------- Timer Counter Configuration Pair --------------------------------- //
+
+driver_status_t TIM_GetCounterConfig
+(
+	TIM_TypeDef* const				TIMx,
+	tim_config_counter_t* const		pCounter
+)
+{
+	reg cr1RegImage = 0x00000000UL;
+
+	//! Validate the output pointer before reading CR1.
+	if (pCounter == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! Counter configuration is fully represented by the current CR1 image.
+	cr1RegImage = LL_TIM_ReadCR1(TIMx);
+	//! Return the codec extraction status directly.
+	return Codec_TIM_ExtractCounterConfig(cr1RegImage, pCounter);
+}
+
 driver_status_t TIM_SetCounterConfig
 (
-	TIM_TypeDef* const						TIMx,
-	const timer_config_counter_t* const		pCounter
+	TIM_TypeDef* const					TIMx,
+	const tim_config_counter_t* const	pCounter
 )
 {
 	//! Validate first, then reuse the shared CR1 apply path for staging and dirty-write behavior.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateCounterConfig(pCounter));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	return _TIM_ApplyCounterConfig(TIMx, pCounter);
 }
@@ -762,32 +870,14 @@ driver_status_t TIM_SetCounterConfig
 //										Timer TimeBase Field APIs										//
 // ==================================================================================================== //
 
-driver_status_t TIM_GetPrescaler
-(
-	TIM_TypeDef* const				TIMx,
-	timer_prescaler_t* const		pPrescaler
-)
-{
-	//! Validate the destination before touching the peripheral.
-	if (pPrescaler == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! PSC is a scalar register, so extraction only needs the current PSC image.
-	return Codec_TIM_ExtractPrescaler(LL_TIM_ReadPSC(TIMx), pPrescaler);
-}
-
 driver_status_t TIM_GetFrequency
 (
-	TIM_TypeDef* const				TIMx,
-	timer_frequency_t* const		pFrequency
+	TIM_TypeDef* const			TIMx,
+	tim_frequency_t* const		pFrequency
 )
 {
-	timer_prescaler_t prescaler = 0U;
-	timer_frequency_t timerInputClock = 0UL;
+	tim_prescaler_t prescaler = 0U;
+	tim_frequency_t timerInputClock = 0UL;
 
 	//! Validate the output pointer before any derived-frequency calculation.
 	if (pFrequency == NULL)
@@ -799,7 +889,7 @@ driver_status_t TIM_GetFrequency
 	ASSERT_DRIVER_STATUS(TIM_GetPrescaler(TIMx, &prescaler));
 
 	//! General-purpose Timers are on APB1, so derive the Timer input clock from the APB1 bus state.
-	timerInputClock = (timer_frequency_t) RCC_GetBusFreq(RCC_APB1_BUS);
+	timerInputClock = (tim_frequency_t) RCC_GetBusFreq(RCC_APB1_BUS);
 	if (timerInputClock == 0UL)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
@@ -811,57 +901,41 @@ driver_status_t TIM_GetFrequency
 	}
 
 	//! Hardware divides the Timer input clock by PSC + 1 to produce the counter tick frequency.
-	*pFrequency = (timer_frequency_t) (timerInputClock / (((timer_frequency_t) prescaler) + 1UL));
+	*pFrequency = (tim_frequency_t) (timerInputClock / (((tim_frequency_t) prescaler) + 1UL));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_GetAutoReload
+// --------------------------------------- Timer Prescaler Pair --------------------------------------- //
+
+driver_status_t TIM_GetPrescaler
 (
-	TIM_TypeDef* const			TIMx,
-	timer_auto_reload_t* const	pAutoReload
+	TIM_TypeDef* const		TIMx,
+	tim_prescaler_t* const	pPrescaler
 )
 {
 	//! Validate the destination before touching the peripheral.
-	if (pAutoReload == NULL)
+	if (pPrescaler == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
-	//! ARR is a scalar register, so extraction only needs the current ARR image.
-	return Codec_TIM_ExtractAutoReload(LL_TIM_ReadARR(TIMx), pAutoReload);
-}
-
-driver_status_t TIM_GetCounterValue
-(
-	TIM_TypeDef* const					TIMx,
-	timer_counter_value_t* const			pCounterValue
-)
-{
-	//! Validate the destination before touching the peripheral.
-	if (pCounterValue == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! CNT is a scalar register, so extraction only needs the current CNT image.
-	return Codec_TIM_ExtractCounterValue(LL_TIM_ReadCNT(TIMx), pCounterValue);
+	//! PSC is a scalar register, so extraction only needs the current PSC image.
+	return Codec_TIM_ExtractPrescaler(LL_TIM_ReadPSC(TIMx), pPrescaler);
 }
 
 driver_status_t TIM_SetPrescaler
 (
-	TIM_TypeDef* const					TIMx,
-	const timer_prescaler_t				prescaler
+	TIM_TypeDef* const		TIMx,
+	const tim_prescaler_t	prescaler
 )
 {
 	reg pscRegImage = 0x00000000UL;
 	reg currentPscRegImage = 0x00000000UL;
 
 	//! Verify the Timer clock gate before reading or staging the PSC register image.
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot PSC so the codec can mutate a local image and the driver can dirty-write afterward.
 	pscRegImage = LL_TIM_ReadPSC(TIMx);
@@ -874,17 +948,37 @@ driver_status_t TIM_SetPrescaler
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// -------------------------------------- Timer Auto-Reload Pair -------------------------------------- //
+
+driver_status_t TIM_GetAutoReload
+(
+	TIM_TypeDef* const			TIMx,
+	tim_auto_reload_t* const	pAutoReload
+)
+{
+	//! Validate the destination before touching the peripheral.
+	if (pAutoReload == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! ARR is a scalar register, so extraction only needs the current ARR image.
+	return Codec_TIM_ExtractAutoReload(LL_TIM_ReadARR(TIMx), pAutoReload);
+}
+
 driver_status_t TIM_SetAutoReload
 (
-	TIM_TypeDef* const						TIMx,
-	const timer_auto_reload_t				autoReload
+	TIM_TypeDef* const			TIMx,
+	const tim_auto_reload_t		autoReload
 )
 {
 	reg arrRegImage = 0x00000000UL;
 	reg currentArrRegImage = 0x00000000UL;
 
 	//! Verify the Timer clock gate before reading or staging the ARR register image.
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot ARR so the codec can mutate a local image and the driver can dirty-write afterward.
 	arrRegImage = LL_TIM_ReadARR(TIMx);
@@ -897,17 +991,37 @@ driver_status_t TIM_SetAutoReload
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ------------------------------------- Timer Counter Value Pair ------------------------------------- //
+
+driver_status_t TIM_GetCounterValue
+(
+	TIM_TypeDef* const			TIMx,
+	tim_counter_value_t* const	pCounterValue
+)
+{
+	//! Validate the destination before touching the peripheral.
+	if (pCounterValue == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! CNT is a scalar register, so extraction only needs the current CNT image.
+	return Codec_TIM_ExtractCounterValue(LL_TIM_ReadCNT(TIMx), pCounterValue);
+}
+
 driver_status_t TIM_SetCounterValue
 (
-	TIM_TypeDef* const				TIMx,
-	const timer_counter_value_t		counterValue
+	TIM_TypeDef* const			TIMx,
+	const tim_counter_value_t	counterValue
 )
 {
 	reg cntRegImage = 0x00000000UL;
 	reg currentCntRegImage = 0x00000000UL;
 
 	//! Verify the Timer clock gate before reading or staging the CNT register image.
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CNT so the codec can mutate a local image and the driver can dirty-write afterward.
 	cntRegImage = LL_TIM_ReadCNT(TIMx);
@@ -924,10 +1038,12 @@ driver_status_t TIM_SetCounterValue
 //										Timer Counter Field APIs										//
 // ==================================================================================================== //
 
+// --------------------------------------- Timer Direction Pair --------------------------------------- //
+
 driver_status_t TIM_GetDirection
 (
-	TIM_TypeDef* const				TIMx,
-	timer_direction_t* const		pDirection
+	TIM_TypeDef* const			TIMx,
+	tim_direction_t* const		pDirection
 )
 {
 	//! Validate the destination before reading CR1.
@@ -936,106 +1052,16 @@ driver_status_t TIM_GetDirection
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Direction is encoded in CR1, so extract it from the current CR1 image.
 	return Codec_TIM_ExtractCounterDirection(LL_TIM_ReadCR1(TIMx), pDirection);
 }
 
-driver_status_t TIM_GetAlignment
-(
-	TIM_TypeDef* const				TIMx,
-	timer_count_mode_t* const		pAlignment
-)
-{
-	//! Validate the destination before reading CR1.
-	if (pAlignment == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! Alignment is encoded in CR1.CMS, so extract it from the current CR1 image.
-	return Codec_TIM_ExtractCounterAlignment(LL_TIM_ReadCR1(TIMx), pAlignment);
-}
-
-driver_status_t TIM_GetOnePulse
-(
-	TIM_TypeDef* const			TIMx,
-	timer_opm_t* const			pOnePulse
-)
-{
-	//! Validate the destination before reading CR1.
-	if (pOnePulse == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! One-pulse mode is encoded in CR1.OPM, so extract it from the current CR1 image.
-	return Codec_TIM_ExtractOnePulse(LL_TIM_ReadCR1(TIMx), pOnePulse);
-}
-
-driver_status_t TIM_GetAutoReloadPreload
-(
-	TIM_TypeDef* const			TIMx,
-	timer_arpe_t* const			pAutoReloadPreload
-)
-{
-	//! Validate the destination before reading CR1.
-	if (pAutoReloadPreload == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! Auto-reload preload is encoded in CR1.ARPE, so extract it from the current CR1 image.
-	return Codec_TIM_ExtractAutoReloadPreload(LL_TIM_ReadCR1(TIMx), pAutoReloadPreload);
-}
-
-driver_status_t TIM_GetUpdateSource
-(
-	TIM_TypeDef* const				TIMx,
-	timer_update_source_t* const	pUpdateSource
-)
-{
-	//! Validate the destination before reading CR1.
-	if (pUpdateSource == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! Update source is encoded in CR1.URS, so extract it from the current CR1 image.
-	return Codec_TIM_ExtractUpdateSource(LL_TIM_ReadCR1(TIMx), pUpdateSource);
-}
-
-driver_status_t TIM_GetClockDivision
-(
-	TIM_TypeDef* const				TIMx,
-	timer_clock_division_t* const	pClockDivision
-)
-{
-	//! Validate the destination before reading CR1.
-	if (pClockDivision == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
-
-	//! Clock division is encoded in CR1.CKD, so extract it from the current CR1 image.
-	return Codec_TIM_ExtractClockDivision(LL_TIM_ReadCR1(TIMx), pClockDivision);
-}
-
 driver_status_t TIM_SetDirection
 (
 	TIM_TypeDef* const		TIMx,
-	const timer_direction_t	direction
+	const tim_direction_t	direction
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1043,7 +1069,7 @@ driver_status_t TIM_SetDirection
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateDirection(direction));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the direction field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -1056,10 +1082,30 @@ driver_status_t TIM_SetDirection
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// --------------------------------------- Timer Alignment Pair --------------------------------------- //
+
+driver_status_t TIM_GetAlignment
+(
+	TIM_TypeDef* const		TIMx,
+	tim_count_mode_t* const	pAlignment
+)
+{
+	//! Validate the destination before reading CR1.
+	if (pAlignment == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! Alignment is encoded in CR1.CMS, so extract it from the current CR1 image.
+	return Codec_TIM_ExtractCounterAlignment(LL_TIM_ReadCR1(TIMx), pAlignment);
+}
+
 driver_status_t TIM_SetAlignment
 (
-	TIM_TypeDef* const			TIMx,
-	const timer_count_mode_t	alignment
+	TIM_TypeDef* const		TIMx,
+	const tim_count_mode_t	alignment
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1067,7 +1113,7 @@ driver_status_t TIM_SetAlignment
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateAlignment(alignment));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the alignment field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -1080,10 +1126,30 @@ driver_status_t TIM_SetAlignment
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// --------------------------------------- Timer One-Pulse Pair --------------------------------------- //
+
+driver_status_t TIM_GetOnePulse
+(
+	TIM_TypeDef* const	TIMx,
+	tim_opm_t* const	pOnePulse
+)
+{
+	//! Validate the destination before reading CR1.
+	if (pOnePulse == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! One-pulse mode is encoded in CR1.OPM, so extract it from the current CR1 image.
+	return Codec_TIM_ExtractOnePulse(LL_TIM_ReadCR1(TIMx), pOnePulse);
+}
+
 driver_status_t TIM_SetOnePulse
 (
 	TIM_TypeDef* const	TIMx,
-	const timer_opm_t	onePulse
+	const tim_opm_t		onePulse
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1091,7 +1157,7 @@ driver_status_t TIM_SetOnePulse
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateOnePulse(onePulse));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the one-pulse field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -1104,10 +1170,30 @@ driver_status_t TIM_SetOnePulse
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ---------------------------------- Timer Auto-Reload Preload Pair ---------------------------------- //
+
+driver_status_t TIM_GetAutoReloadPreload
+(
+	TIM_TypeDef* const	TIMx,
+	tim_arpe_t* const	pAutoReloadPreload
+)
+{
+	//! Validate the destination before reading CR1.
+	if (pAutoReloadPreload == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! Auto-reload preload is encoded in CR1.ARPE, so extract it from the current CR1 image.
+	return Codec_TIM_ExtractAutoReloadPreload(LL_TIM_ReadCR1(TIMx), pAutoReloadPreload);
+}
+
 driver_status_t TIM_SetAutoReloadPreload
 (
 	TIM_TypeDef* const	TIMx,
-	const timer_arpe_t	autoReloadPreload
+	const tim_arpe_t	autoReloadPreload
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1115,7 +1201,7 @@ driver_status_t TIM_SetAutoReloadPreload
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateAutoReloadPreload(autoReloadPreload));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the auto-reload preload field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -1128,10 +1214,30 @@ driver_status_t TIM_SetAutoReloadPreload
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ------------------------------------- Timer Update Source Pair ------------------------------------- //
+
+driver_status_t TIM_GetUpdateSource
+(
+	TIM_TypeDef* const			TIMx,
+	tim_update_source_t* const	pUpdateSource
+)
+{
+	//! Validate the destination before reading CR1.
+	if (pUpdateSource == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! Update source is encoded in CR1.URS, so extract it from the current CR1 image.
+	return Codec_TIM_ExtractUpdateSource(LL_TIM_ReadCR1(TIMx), pUpdateSource);
+}
+
 driver_status_t TIM_SetUpdateSource
 (
 	TIM_TypeDef* const			TIMx,
-	const timer_update_source_t	updateSource
+	const tim_update_source_t	updateSource
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1139,7 +1245,7 @@ driver_status_t TIM_SetUpdateSource
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateUpdateSource(updateSource));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the update-source field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -1152,10 +1258,30 @@ driver_status_t TIM_SetUpdateSource
 	return DRIVER_STATUS_SUCCESS;
 }
 
+// ------------------------------------ Timer Clock Division Pair ------------------------------------- //
+
+driver_status_t TIM_GetClockDivision
+(
+	TIM_TypeDef* const			TIMx,
+	tim_clock_division_t* const	pClockDivision
+)
+{
+	//! Validate the destination before reading CR1.
+	if (pClockDivision == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+
+	//! Clock division is encoded in CR1.CKD, so extract it from the current CR1 image.
+	return Codec_TIM_ExtractClockDivision(LL_TIM_ReadCR1(TIMx), pClockDivision);
+}
+
 driver_status_t TIM_SetClockDivision
 (
-	TIM_TypeDef* const				TIMx,
-	const timer_clock_division_t	clockDivision
+	TIM_TypeDef* const			TIMx,
+	const tim_clock_division_t	clockDivision
 )
 {
 	reg cr1RegImage = 0x00000000UL;
@@ -1163,7 +1289,7 @@ driver_status_t TIM_SetClockDivision
 
 	//! Validate the public selector and verify the Timer clock gate before staging CR1.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateClockDivision(clockDivision));
-	ASSERT_DRIVER_STATUS(_TIM_ClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	//! Snapshot CR1 so only the clock-division field is changed in a local image.
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);

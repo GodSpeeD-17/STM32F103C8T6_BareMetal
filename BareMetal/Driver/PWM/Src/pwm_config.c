@@ -19,10 +19,10 @@ typedef struct {
 	// ....
 	// - `GPIO_PIN_15`
 	uint8_t PIN;
-} timer_gpio_mapping_t;
+} tim_gpio_mapping_t;
 
 // Common Timer GPIO Mapping Lookup Table
-static const timer_gpio_mapping_t tim_gpio_map[3][4] = {
+static const tim_gpio_mapping_t tim_gpio_map[3][4] = {
 	// TIM2
 	{
 		// TIM2_CH1: PA0
@@ -59,7 +59,7 @@ static const timer_gpio_mapping_t tim_gpio_map[3][4] = {
 };
 
 // TIMx Channel 1 lookup table -> GPIO Mapping
-static const timer_gpio_mapping_t tim_ch1_lookup[3] = {
+static const tim_gpio_mapping_t tim_ch1_lookup[3] = {
 	// TIM2_CH1: PA0
 	{GPIOA, GPIOx_PIN_0},
 	// TIM3_CH1: PA6
@@ -69,7 +69,7 @@ static const timer_gpio_mapping_t tim_ch1_lookup[3] = {
 };
 
 // TIMx Channel 2 lookup table -> GPIO Mapping
-static const timer_gpio_mapping_t tim_ch2_lookup[3] = {
+static const tim_gpio_mapping_t tim_ch2_lookup[3] = {
 	// TIM2_CH2: PA1
 	{GPIOA, GPIOx_PIN_1},
 	// TIM3_CH2: PA7
@@ -79,7 +79,7 @@ static const timer_gpio_mapping_t tim_ch2_lookup[3] = {
 };
 
 // TIMx Channel 3 lookup table -> GPIO Mapping
-static const timer_gpio_mapping_t tim_ch3_lookup[3] = {
+static const tim_gpio_mapping_t tim_ch3_lookup[3] = {
 	// TIM2_CH3: PA2
 	{GPIOA, GPIOx_PIN_2},
 	// TIM3_CH3: PB0
@@ -89,7 +89,7 @@ static const timer_gpio_mapping_t tim_ch3_lookup[3] = {
 };
 
 // TIMx Channel 4 lookup table -> GPIO Mapping
-static const timer_gpio_mapping_t tim_ch4_lookup[3] = {
+static const tim_gpio_mapping_t tim_ch4_lookup[3] = {
 	// TIM2_CH4: PA3
 	{GPIOA, GPIOx_PIN_3},
 	// TIM3_CH4: PB1
@@ -103,7 +103,7 @@ static const timer_gpio_mapping_t tim_ch4_lookup[3] = {
  * @param TIMx_CONFIG General Purpose Timer Configuration Structure
  * @param GPIOx_CONFIG GPIO Configuration Structure 
  */
-void PWM_Get_GPIO_Mapping(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG){
+void PWM_Get_GPIO_Mapping(const tim_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG){
 	// Get the row tim_index of the timer
 	uint8_t tim_index = ((((uint32_t)(TIMx_CONFIG->TIM)) - ((uint32_t)(TIM2))) >> 10);
 	// Count Trailing Zeros to get the channel_index tim_index
@@ -121,7 +121,7 @@ void PWM_Get_GPIO_Mapping(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIO
  * @returns - 0: Failure
  * @returns - 1: Success 
  */
-uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GPIOx_CONFIG){
+uint8_t PWM_Get_TIM_Mapping(tim_config_t* TIMx_CONFIG, const gpio_config_t* GPIOx_CONFIG){
 	// Local Variables
 	uint8_t tim_index = 0, channel_index = 0;
 	//  Traverse through the Timers in Lookup Table
@@ -158,10 +158,10 @@ typedef struct {
 	// - `TIMx_CHANNEL_3`
 	// - `TIMx_CHANNEL_4`
 	uint8_t channel;
-} gpio_timer_mapping_t;
+} gpio_tim_mapping_t;
 
 // GPIOA based Timer Mapping Lookup Table
-static const gpio_timer_mapping_t gpioa_pin_map[] = {
+static const gpio_tim_mapping_t gpioa_pin_map[] = {
 	[0]  = {TIM2, TIMx_CHANNEL_1},  // PA0
 	[1]  = {TIM2, TIMx_CHANNEL_2},  // PA1
 	[2]  = {TIM2, TIMx_CHANNEL_3},  // PA2
@@ -175,7 +175,7 @@ static const gpio_timer_mapping_t gpioa_pin_map[] = {
 };
 
 // GPIOB based Timer Mapping Lookup Table
-static const gpio_timer_mapping_t gpiob_pin_map[] = {
+static const gpio_tim_mapping_t gpiob_pin_map[] = {
 	[0] = {TIM3, TIMx_CHANNEL_3},   // PB0
 	[1] = {TIM3, TIMx_CHANNEL_4},   // PB1
 	[6] = {TIM4, TIMx_CHANNEL_1},   // PB6
@@ -192,9 +192,9 @@ static const gpio_timer_mapping_t gpiob_pin_map[] = {
  * @return - 1: Success
  * @note This function retrieves the Timer Mapping for a given GPIO configuration 
  */
-uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_cfg){
+uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, tim_config_t* timer_cfg){
 	// Local Variables
-	const gpio_timer_mapping_t* map = NULL;
+	const gpio_tim_mapping_t* map = NULL;
 	uint8_t map_size = 0;
 	// GPIO Port
 	if(gpio->GPIO == GPIOA){

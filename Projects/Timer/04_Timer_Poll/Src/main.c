@@ -4,13 +4,13 @@
 /*-------------------------------------------------------------------------------*/
 #ifdef __OLD_TIMER_METHOD__
 // Timer 2 Configuration
-timer_config_t TIM_Configuration = {
+tim_config_t TIM_Configuration = {
 	.TIM = TIM2,
 	.channel = TIMx_CHANNEL_ALL,
 };
 #else
 // Timer 2 Configuration
-timer_config_t TIM_Configuration = {
+tim_config_t TIM_Configuration = {
 	.instance = TIM2,
 	.channel.instance = TIMx_CHANNEL_ALL,
 };

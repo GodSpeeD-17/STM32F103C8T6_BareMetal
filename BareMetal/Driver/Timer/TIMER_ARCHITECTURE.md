@@ -16,7 +16,7 @@ boundaries are correct.
 | Core register layer | `BareMetal/Core/Inc/stm32f1xx_timer.h`, raw Timer section in `stm32f1xx_defines.h` | Raw STM32F1 register structs, raw bit positions, masks, reset values, and base mappings | Driver selectors, validation policy, public config structs, orchestration |
 | Timer data types | `BareMetal/Driver/Timer/Inc/timer_data_types.h` | Timer scalar aliases and plain shared data aliases | Public selector macros, validation, register access, hardware writes |
 | Timer defines | `BareMetal/Driver/Timer/Inc/timer_defines.h` | Public Timer selectors, defaults, pure validation helpers, simple selector utilities | Hardware reads/writes, sequencing, raw field placement |
-| Timer config | `BareMetal/Driver/Timer/Inc/timer_config.h` | Timer-independent public configuration structures, including `timer_config_t` as a structure of structures | Timer instance pointers, register access, RCC/NVIC access, driver orchestration |
+| Timer config | `BareMetal/Driver/Timer/Inc/timer_config.h` | Timer-independent public configuration structures, including `tim_config_t` as a structure of structures | Timer instance pointers, register access, RCC/NVIC access, driver orchestration |
 | Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers and minimal register address macros | Validation, encoding, mode decisions, batching, clock-state sequencing, NVIC policy |
 | Timer codec | `BareMetal/Driver/Timer/Inc/timer_codec.h`, `BareMetal/Driver/Timer/Src/timer_codec.c` | Private Encode/Decode helpers and public Extract/Stage functions over caller-owned register images | Hardware reads/writes, clock-state sequencing, public API decisions |
 | Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, `BareMetal/Driver/Timer/Src/timer.c` | Public API, validation, orchestration, clock-state handling, batching, dirty-register writes, status handling, NVIC policy | Raw register map definitions, direct register field placement when codec can own it |
@@ -41,24 +41,24 @@ use the STM32 field notation directly, for example `CCxS`, `OCxM`,
 
 `timer_data_types.h` defines Timer scalar aliases such as:
 
-- `timer_channel_t`
-- `timer_channel_index_t`
-- `timer_count_mode_t`
-- `timer_direction_t`
-- `timer_arpe_t`
-- `timer_opm_t`
-- `timer_update_source_t`
-- `timer_irq_t`
-- `timer_channel_mode_t`
-- `timer_channel_ccs_t`
-- `timer_channel_oc_preload_t`
-- `timer_channel_oc_fast_t`
-- `timer_channel_oc_clear_t`
-- `timer_channel_polarity_t`
-- `timer_prescaler_t`
-- `timer_auto_reload_t`
-- `timer_counter_value_t`
-- `timer_frequency_t`
+- `tim_channel_t`
+- `tim_channel_index_t`
+- `tim_count_mode_t`
+- `tim_direction_t`
+- `tim_arpe_t`
+- `tim_opm_t`
+- `tim_update_source_t`
+- `tim_irq_t`
+- `tim_channel_mode_t`
+- `tim_channel_ccs_t`
+- `tim_channel_oc_preload_t`
+- `tim_channel_oc_fast_t`
+- `tim_channel_oc_clear_t`
+- `tim_channel_polarity_t`
+- `tim_prescaler_t`
+- `tim_auto_reload_t`
+- `tim_counter_value_t`
+- `tim_frequency_t`
 
 The file should include `stm32f1xx_data_types.h`, not the full `stm32f1xx.h`
 unless a later step proves that unavoidable.
@@ -76,18 +76,18 @@ driver API.
 
 Current first-pass structure shape:
 
-- `timer_config_timebase_t`
+- `tim_config_timebase_t`
   - `prescaler`
   - `auto_reload`
   - `initial_count`
-- `timer_config_counter_t`
+- `tim_config_counter_t`
   - `direction`
   - `alignment`
   - `one_pulse`
   - `auto_reload_preload`
   - `update_source`
   - `clock_division`
-- `timer_config_t`
+- `tim_config_t`
   - `timebase`
   - `counter`
 
@@ -282,11 +282,12 @@ effect.
 gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter
 through `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, reads the
 configuration-owned registers, stages through the codec, writes only changed
-`CR1`, `PSC`, and `ARR` images, generates `TIMx_EGR.UG`, conditionally clears a
-generated `TIMx_SR.UIF`, and writes `TIMx_CNT` after the update event only when
-the requested initial count differs from the post-update counter image. The
-current implementation leaves the counter disabled after configuration; users
-explicitly start the counter with
+`CR1`, `PSC`, and `ARR` images, temporarily clears `CR1.UDIS` for the forced
+`TIMx_EGR.UG`, restores the final `CR1` image, conditionally clears a generated
+`TIMx_SR.UIF`, and writes `TIMx_CNT` after the update event only when the
+requested initial count differs from the post-update counter image. The current
+implementation leaves the counter disabled after configuration; users explicitly
+start the counter with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 ### Configuration Latch Policy
@@ -297,6 +298,9 @@ register writes feed shadow/preload logic:
 - `TIMx_PSC` is loaded into the active prescaler on an update event.
 - `TIMx_ARR` may be immediate or preloaded depending on `TIMx_CR1.ARPE`.
 - `TIMx_EGR.UG` forces an update event so staged timebase values become active.
+- `TIMx_CR1.UDIS` can block that update event, so root configuration temporarily
+  clears `UDIS` around the generated `UG` and restores the final `CR1` image
+  afterward.
 - Forcing `EGR.UG` can set `TIMx_SR.UIF`, so the driver may need to clear that
   generated flag before returning.
 
@@ -309,24 +313,29 @@ The implemented `TIM_Config()` sequence is:
    `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`.
 4. Read `CR1`, `PSC`, `ARR`, and pre-update `SR` into local images.
 5. Stage `CR1`, `PSC`, `ARR`, and requested `CNT` through codec APIs.
-6. Write only changed `CR1`, `PSC`, and `ARR` staged images.
-7. Generate `TIMx_EGR.UG` through the codec-staged update event image so `PSC`
+6. Build a pre-update `CR1` image from the final staged `CR1` image with
+   `UDIS` cleared.
+7. Write only changed pre-update `CR1`, `PSC`, and `ARR` staged images.
+8. Generate `TIMx_EGR.UG` through the codec-staged update event image so `PSC`
    and any preloaded `ARR` value are latched.
-8. If `TIMx_SR.UIF` was clear before `UG`, clear `UIF` after `UG` only if that
+9. If `TIMx_SR.UIF` was clear before `UG`, clear `UIF` after `UG` only if that
    generated update event made it pending. A pre-existing pending `UIF` is
    preserved.
-9. Read `CNT` after `UG`, then write the requested initial counter value only
+10. Restore the final `CR1` image, including the `UDIS` state that
+    `tim_config_t` does not own.
+11. Read `CNT` after `UG`, then write the requested initial counter value only
    when it differs from the post-update counter image.
-10. Leave operation disabled until the user calls
+12. Leave operation disabled until the user calls
     `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 `TIM_DeConfig()` enables the Timer clock gate through
 `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter through
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, restores only the fields
-represented by `timer_config_t`, and then disables the Timer clock gate through
-`TIM_SetClockState(TIMx, DRIVER_STATUS_OFF)`. It does not issue an RCC
-peripheral reset and does not touch channel, IRQ, PWM, DMA, master/slave, or
-delay-helper state.
+represented by `tim_config_t` through the same forced-update latch sequence,
+restores the original `UDIS` state, writes reset `CNT` after `UG`, and then
+disables the Timer clock gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_OFF)`.
+It does not issue an RCC peripheral reset and does not touch channel, IRQ, PWM,
+DMA, master/slave, or delay-helper state.
 
 Unlike GPIO, Timer should keep a structured configuration API. GPIO can remain
 ergonomic with a small fixed argument list because its basic configuration is
@@ -334,7 +343,7 @@ only port, pin mask, mode, and config. Timer configuration spans clock period,
 counter behavior, update-event behavior, channel selection, channel mode,
 preload/fast/clear behavior, polarity, and IRQ concerns. A configuration
 structure keeps that API modular and extensible. The refactor should therefore
-fix ownership and staging of `timer_config_t`, not remove the structured
+fix ownership and staging of `tim_config_t`, not remove the structured
 configuration model.
 
 ## Coding Style
@@ -383,9 +392,10 @@ Completed:
 - `timer.h`, `timer_config.h`, and `timer_codec.h` now document input
   `Accepted values` and output `Expected values` for the current public and
   codec-visible Timer scope.
-- `TIM_Config()` now generates `TIMx_EGR.UG`, preserves pre-existing
-  `TIMx_SR.UIF`, clears only a newly generated update flag, and applies
-  `TIMx_CNT` after the update event.
+- `TIM_Config()` now temporarily clears `CR1.UDIS`, generates `TIMx_EGR.UG`,
+  restores the final `CR1` image, preserves pre-existing `TIMx_SR.UIF`, clears
+  only a newly generated update flag, and applies `TIMx_CNT` after the update
+  event.
 - `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
   ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
@@ -408,7 +418,7 @@ Initial refactor steps should prefer compatibility over unnecessary renaming:
 
 - Preserve existing public `TIM_*` function names where possible.
 - Preserve existing `TIMx_*` selector names initially.
-- Keep `timer_config_t` and related public configuration structures as the
+- Keep `tim_config_t` and related public configuration structures as the
   Timer configuration API. `TIMx` stays a function argument, not a config
   member, so one configuration can be reused across Timer instances.
 - Update examples only after the public header/API contract changes.

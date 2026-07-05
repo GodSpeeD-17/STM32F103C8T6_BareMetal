@@ -3,7 +3,7 @@
 #include "main.h"
 /*-------------------------------------------------------------------------------*/
 // Timer 4 Configuration
-timer_config_t TIM4_Config = {
+tim_config_t TIM4_Config = {
 	.TIM = TIM4,
 	.channel = TIMx_CHANNEL_ALL
 };

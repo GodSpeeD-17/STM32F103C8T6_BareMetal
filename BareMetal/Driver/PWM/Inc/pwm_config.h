@@ -47,7 +47,7 @@ typedef struct pwm_handle* pwm_handle_t;
  * @param TIMx_CONFIG General Purpose Timer Configuration Structure
  * @param GPIOx_CONFIG GPIO Configuration Structure 
  */
-void PWM_Get_GPIO_Mapping(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG);
+void PWM_Get_GPIO_Mapping(const tim_config_t* TIMx_CONFIG, gpio_config_t* GPIOx_CONFIG);
 
 /**
  * @brief Retrieve the Timer Mapping for a given GPIO Configuration Structure
@@ -56,7 +56,7 @@ void PWM_Get_GPIO_Mapping(const timer_config_t* TIMx_CONFIG, gpio_config_t* GPIO
  * @returns - 0: Failure
  * @returns - 1: Success 
  */
-uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GPIOx_CONFIG);
+uint8_t PWM_Get_TIM_Mapping(tim_config_t* TIMx_CONFIG, const gpio_config_t* GPIOx_CONFIG);
 
 /**
  * @brief Timer Mapping based on GPIO Configuration
@@ -66,7 +66,7 @@ uint8_t PWM_Get_TIM_Mapping(timer_config_t* TIMx_CONFIG, const gpio_config_t* GP
  * @return - 1: Success
  * @note This function retrieves the Timer Mapping for a given GPIO configuration 
  */
-uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, timer_config_t* timer_cfg);
+uint8_t PWM_Get_TIM_From_GPIO(const gpio_config_t* gpio, tim_config_t* timer_cfg);
 
 /**
  * @brief Default PWM Configuration

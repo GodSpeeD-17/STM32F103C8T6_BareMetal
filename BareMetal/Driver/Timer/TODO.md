@@ -51,7 +51,7 @@ item, verify it, commit it, then move to the next item.
 - [x] `TIM_DeConfig()` uses `TIM_SetClockState()`, `TIM_SetOperationState()`, config-owned reset staging, and clock-gate disable without issuing RCC peripheral reset.
 - [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
-- [x] `TIM_Config()` now stages `CR1`, `PSC`, and `ARR`, generates `EGR.UG`, preserves pre-existing `SR.UIF`, clears only a newly generated update flag, and applies `CNT` after the update event.
+- [x] `TIM_Config()` now stages `CR1`, `PSC`, and `ARR`, temporarily clears `CR1.UDIS` for `EGR.UG`, restores final `CR1`, preserves pre-existing `SR.UIF`, clears only a newly generated update flag, and applies `CNT` after the update event.
 
 ## Remaining Deviations To Remove
 
