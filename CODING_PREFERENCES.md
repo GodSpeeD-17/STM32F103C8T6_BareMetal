@@ -62,13 +62,13 @@ Document every public and private function in this order:
 Use this status-returning function format:
 
 ```c
- * @param[in] clockState Requested Timer clock-gate state
+ * @param[in] operationState Requested Timer operation state
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF : Disable the APB1 Timer clock gate.
- * - @ref DRIVER_STATUS_ON : Enable the APB1 Timer clock gate.
- * @returns @ref driver_status_t "Clock-state operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer APB1 clock gate was updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `clockState` was invalid
+ * - @ref DRIVER_STATUS_OFF : Stop Timer counter operation.
+ * - @ref DRIVER_STATUS_ON : Start Timer counter operation.
+ * @returns @ref driver_status_t "Operation-state operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer counter operation state was updated
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `operationState` was invalid
 ```
 
 Validation helpers use an action-oriented `@brief` beginning with
@@ -186,7 +186,7 @@ returns on separate lines:
 
 ```c
 //! Match by peripheral base address because instance macros are raw memory-mapped pointers.
-switch ((uint32_t) TIMx)
+switch ((uintptr_t) TIMx)
 {
 	case TIM2_BASE_ADDRESS:
 	{
@@ -298,6 +298,7 @@ delivery.
 Use this generic sequence:
 
 ```c
+ASSERT_DRIVER_STATUS(RCC_EnablePeripheralClock(PERIPH1_CLOCK_MASK));
 ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
 ASSERT_DRIVER_STATUS
 (
@@ -310,11 +311,38 @@ ASSERT_DRIVER_STATUS
 );
 NVIC_IRQ_ClearPending(PERIPH1_IRQn);
 NVIC_IRQ_Enable(PERIPH1_IRQn);
+ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
+```
+
+Clock-gate ownership remains explicit and outside the peripheral Driver. The
+application uses the RCC Driver to enable the required peripheral gate before
+configuration. A peripheral Driver may query RCC to validate that precondition,
+but it must not expose duplicate peripheral-prefixed clock APIs or enable,
+disable, restore, or otherwise mutate the gate inside `Config()`, `DeConfig()`,
+grouped configuration, operation-state, IRQ, or action APIs.
+
+`DeConfig()` restores the peripheral register bank through the peer RCC reset
+service when that is the hardware-defined reset mechanism, but it leaves the
+application-owned clock gate and NVIC delivery state unchanged. The application
+explicitly decides when either external resource is disabled. This keeps the
+full lifecycle visible at the call site:
+
+```text
+RCC clock enable
+  -> peripheral base configuration
+  -> peripheral IRQ-source configuration
+  -> NVIC pending-state cleanup and delivery enablement
+  -> peripheral operation enablement
 ```
 
 Omitting `PERIPH_SetIRQSources()` means the root configuration leaves existing
 peripheral IRQ-source state unchanged. Disabling sources is equally explicit;
 the application passes the owned source mask with `DRIVER_STATUS_OFF`.
+
+Root peripheral configuration must not read, validate, clear, disable, or
+enable NVIC delivery state. The application owns the explicit ordering between
+base configuration, peripheral IRQ-source enablement, pending-line cleanup,
+NVIC delivery enablement, and the final transition to active peripheral state.
 
 The corresponding staging helpers each accept only one configuration domain
 and the caller-owned register images that domain can modify:
@@ -348,13 +376,12 @@ A staging helper must:
   every fallible transformation succeeds; and
 - preserve every register field outside its declared domain.
 
-Do not add a private Driver forwarding wrapper when an existing grouped Codec
-function already expresses the complete reusable structure-to-image
-transformation. In that case, the Codec function is the canonical staging path
-and both public Driver transactions call it directly. Add a static Driver
-staging helper only when it composes additional Driver-owned policy or staged
-transaction images that do not belong in Codec. The architecture requires one
-reusable staging path, not an extra call layer.
+Every structure contained by a public root configuration object has one
+corresponding private Driver `_PERIPH_Stage<Domain>Config()` helper. That helper
+owns the atomic local-copy/publication boundary for its structure and invokes
+the grouped Codec transformation for field placement. It must not stage policy
+or register images outside the fields represented by that structure. The
+architecture requires one reusable staging path per configuration member.
 
 Public configuration APIs own the Read/Modify/Write transaction. Their generic
 flow is:
@@ -389,12 +416,12 @@ helpers, stages the whole root request before the first write, and then owns one
 ordered commit. Conversely, a grouped public setter reads and commits only the
 registers required by its own domain.
 
-A separate private commit helper is appropriate only when it names and owns a
-real reusable or hazardous hardware sequence, such as loading buffered values
-through an update event. It must not perform unrelated staging or silently
-acquire broader lifecycle authority. Driver commit helpers return
-`driver_status_t`; only deliberately mechanical LL write primitives remain
-`void`.
+Private helpers stage cached values but do not commit configuration MMIO. The
+public configuration API directly compares and writes its cached images in the
+required hardware order, including any temporary policy, action-register, or
+restoration sequence. This keeps the public function's maximum authority and
+actual hardware cost visible. Only deliberately mechanical LL register-write
+primitives remain `void`.
 
 For Timer, this means `TIM_Config()` visibly composes the staging paths for
 `tim_config_counter_t` and `tim_config_timebase_t` while preserving
@@ -407,6 +434,113 @@ shadows all of `TIM_Config()`, and no configuration path calls
 `TIM_DeConfig()`.
 Applications configure Timer interrupt generation separately through
 `TIM_SetIRQSources()`.
+
+## MMIO Access Minimization and Modular Transactions
+
+Modularity must not multiply volatile register accesses. Helper boundaries
+separate validation, staging, and commit responsibilities; they do not grant
+each helper permission to reread or rewrite the same hardware register.
+
+For each coherent Driver transaction:
+
+1. validate the complete request and every live precondition that can fail;
+2. snapshot each required volatile register exactly once;
+3. pass caller-owned `reg` images through narrow, MMIO-free staging helpers;
+4. coalesce every compatible domain or field change into the final register
+   image;
+5. dirty-write each changed register exactly once when hardware semantics
+   permit; and
+6. perform additional reads or writes only when a named hardware requirement
+   makes them necessary, such as an unlock sequence, mode transition,
+   write-zero-to-clear or write-one-to-clear behavior, read-to-clear behavior,
+   or a preload/update-event commit.
+
+Hold the declared exclusive application ownership or transaction guard across
+the complete snapshot/stage/commit interval. Do not reread a cached
+configuration register solely to repeat a precondition check immediately
+before commit; if concurrency must be supported, define and acquire an explicit
+guard rather than weakening the cached-image transaction model.
+
+Do not reread a register merely because multiple staging helpers consume its
+fields. Do not let separate helpers commit partial images when the public API
+owns one coherent transaction. Every additional MMIO access must be justified
+by the peripheral contract and documented beside the sequence that requires
+it. Correct hardware ordering takes precedence over forcing an unsafe
+single-write implementation.
+
+Do not introduce a transaction structure merely to shorten a helper signature
+or hide several temporal images of the same register. Pass independently
+required `reg` images explicitly so the helper's inputs, outputs, and authority
+remain visible. A structure is appropriate only when the grouped data forms a
+stable reusable domain with its own invariant—not when it is only an argument
+container.
+
+When hardware makes a requested field read-only or otherwise non-writable in
+the current mode, return the appropriate `driver_status_t` error before the
+first write. Do not hide a multi-step mode transition inside one configuration
+call merely to make the request succeed. The application must explicitly call
+the public APIs that leave the restrictive mode, apply the requested field,
+and restore the desired mode. This keeps lifecycle and mode-transition intent
+visible while each admitted transaction retains one coherent final image and
+the minimum register-access count.
+
+Use this generic rejection shape before staging the final image:
+
+```c
+periph_domain_config_t currentConfig;
+
+ASSERT_DRIVER_STATUS
+(
+	Codec_PERIPH_ExtractDomainConfig(currentRegisterImage, &currentConfig)
+);
+
+//! Reject a field transition that hardware cannot accept in the current mode.
+if ((currentConfig.mode == PERIPH_MODE_RESTRICTIVE) &&
+	(currentConfig.field != pConfig->field))
+{
+	return DRIVER_STATUS_ERROR_STATE;
+}
+```
+
+The application then performs the required mode changes as separate public
+transactions; the Driver does not synthesize those calls or intermediate MMIO
+writes internally.
+
+Use this generic transaction shape:
+
+```c
+driver_status_t PERIPH_SetDomainConfig
+(
+	PERIPH_TypeDef* const				pPeripheral,
+	const periph_domain_config_t* const	pConfig
+)
+{
+	// Local Variables
+	reg currentRegisterImage = 0x00000000UL;
+	reg targetRegisterImage = 0x00000000UL;
+
+	// Validate Input and State
+	ASSERT_DRIVER_STATUS(_PERIPH_ValidateDomainTransaction(pPeripheral, pConfig));
+
+	//! Snapshot once, then let modular helpers transform only local images.
+	currentRegisterImage = LL_PERIPH_ReadControl(pPeripheral);
+	targetRegisterImage = currentRegisterImage;
+	ASSERT_DRIVER_STATUS(_PERIPH_StageDomainConfig(pConfig, &targetRegisterImage));
+
+	//! Coalesce compatible changes into one dirty write.
+	if (currentRegisterImage != targetRegisterImage)
+	{
+		LL_PERIPH_WriteControl(pPeripheral, targetRegisterImage);
+	}
+
+	return DRIVER_STATUS_SUCCESS;
+}
+```
+
+If hardware requires an intermediate image, the public transaction performs
+the minimum ordered multi-write sequence directly. Its Doxygen and `//!` logic
+comments must name the hardware rule that makes each additional access
+mandatory.
 
 ## Conjugate API Naming and Scope
 
@@ -441,6 +575,28 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-15: Assigned peripheral clock-gate query/mutation to RCC/application,
+  prohibited peripheral Drivers from hiding gate transitions inside lifecycle
+  or narrow APIs, and required `DeConfig()` to leave application-owned RCC and
+  NVIC state unchanged.
+- 2026-08-15: Required coherent Driver transactions to snapshot each required
+  register once, stage modularly in local images, coalesce compatible changes,
+  dirty-write each register once where legal, and document every additional
+  hardware-mandated MMIO access.
+- 2026-08-15: Required one MMIO-free `_PERIPH_Stage<Domain>Config()` helper per
+  root-configuration structure member and required the public configuration API
+  to commit all staged register images directly; private configuration commit
+  helpers may not hide the public transaction's hardware writes.
+- 2026-08-15: Required requests for fields that are not writable in the current
+  hardware mode to fail before MMIO; applications explicitly own the public
+  calls needed to leave and later restore that mode instead of one Driver call
+  hiding intermediate mode writes.
+- 2026-08-15: Prohibited private transaction structures that exist only to
+  shorten signatures; independently required temporal register images remain
+  explicit unless they form a stable reusable domain with their own invariant.
+- 2026-08-15: Prohibited root configuration from reading or mutating NVIC
+  delivery state; applications explicitly sequence IRQ sources and NVIC before
+  transitioning the peripheral to its active operation state.
 - 2026-08-15: Excluded IRQ-source enables from root configuration structures;
   applications must configure peripheral interrupt generation explicitly
   before independently enabling NVIC delivery.

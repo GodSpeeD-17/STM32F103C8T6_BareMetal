@@ -305,6 +305,10 @@ For the current Timer driver refactor, the preferred Timer delay backend is:
 ```c
 driver_status_t Project_DelayInit(void)
 {
+	ASSERT_DRIVER_STATUS
+	(
+		RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK)
+	);
 	return TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
 }
 
@@ -394,6 +398,7 @@ Current preferred Timer delay flow:
 Project_Init()
   -> RCC_Config_72MHz()
   -> Project_DelayInit()
+       -> RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK)
        -> TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER)
   -> OB_LED_Init()
   -> OB_LED_Reset()
@@ -418,8 +423,9 @@ Projects/Template/Inc/project_config.h
 Move constants such as loop delay and delay Timer selection into this file:
 
 ```c
-#define PROJECT_LOOP_DELAY_MS		(1000UL)
-#define PROJECT_DELAY_TIMER			TIM4
+#define PROJECT_LOOP_DELAY_MS				(1000UL)
+#define PROJECT_DELAY_TIMER					TIM4
+#define PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK	RCC_APB1ENR_TIM4EN
 ```
 
 Keep old macros temporarily if other files still depend on them.
@@ -436,6 +442,7 @@ Projects/Template/Src/project_delay.c
 Implement the Timer backend using the current Timer driver APIs:
 
 ```c
+RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK);
 TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
 TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
 TIM_DelayMs(PROJECT_DELAY_TIMER, delayMs);
@@ -527,6 +534,7 @@ needed by the modular project delay facade:
 
 ```c
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
+driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx);
 driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
 driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 ```
@@ -534,30 +542,20 @@ driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 Important constraints:
 
 - Projects own explicit prescaler/timebase data; no frequency-targeting Timer configuration function exists.
+- Applications explicitly enable the selected Timer clock through the RCC
+  driver before Timer configuration; Timer APIs validate but never change the
+  clock gate.
 - `TIM_DelayUs()` accepts `1U..0xFFFFU`.
 - `TIM_DelayUs()` is a minimum blocking delay, not a cycle-exact delay.
 - `TIM_DelayMs()` composes repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
 - Delay helpers assume the Timer clock gate is enabled and the Timer was
   configured through `TIM_Config()` with a 1 MHz programmed counter tick.
 
-## Known Current Deviation In Examples
+## Current Example State
 
-Some projects still use old Timer APIs and old config shape. For example,
-`Projects/Timer/04_Timer_Poll/Src/main.c` still uses old-style configuration
-paths such as:
-
-```c
-TIM_1MHz_Load_Default(&TIM_Configuration);
-TIM_Config(&TIM_Configuration);
-```
-
-The current Timer driver API expects an explicit project-owned root configuration:
-
-```c
-TIM_Config(TIMx, &config);
-```
-
-Do not build new template structure around old Timer APIs. Migrate project code
+The Timer polling and IRQ examples now use the current public API and explicitly
+enable their Timer clocks through RCC before configuration. Do not build new
+template structure around old Timer APIs. Migrate any remaining project code
 to the new Timer API as part of the modularization.
 
 ## Anti-Patterns To Remove

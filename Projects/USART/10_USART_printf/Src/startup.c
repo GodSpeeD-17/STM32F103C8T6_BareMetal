@@ -58,7 +58,10 @@ void Reset_Handler(void)
 	// Memory barrier to prevent reordering
 	__asm__ volatile ("" ::: "memory");		
 	// Step 3: Configure SysClock at 72MHz
-	RCC_Config_72MHz();
+	if (RCC_Config_72MHz() != DRIVER_STATUS_SUCCESS)
+	{
+		Default_Handler();
+	}
 // Step 4: Configure SysTick & Timer
 #ifdef SYSTICK_DELAY__
 	// SysTick: Resolution 1us
@@ -66,7 +69,11 @@ void Reset_Handler(void)
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	// Configure a dedicated polling Timer with an exact 1 MHz counter tick.
+	//! Enable the dedicated delay Timer clock, then configure its exact 1 MHz counter tick.
+	if (RCC_APB1_ClockEnable(DELAY_TIMER_CLOCK_ENABLE_MASK) != DRIVER_STATUS_SUCCESS)
+	{
+		Default_Handler();
+	}
 	if (TIM_ConfigDelay1MHz(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
 	{
 		Default_Handler();

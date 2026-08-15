@@ -40,13 +40,15 @@ static void App_ErrorHandler(void)
  * @returns @ref driver_status_t "Polling-Timer initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM2 was configured with a 1 MHz counter tick
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: TIM2 or the canonical delay configuration was invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 kernel clock was unavailable or was not 72 MHz
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The TIM2 counter was running or its NVIC line was enabled
- * @note The root configuration owns the Timer clock gate and leaves counter
- * operation disabled for @ref TIM_DelayMs
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 clock gate or kernel clock was unavailable, or the kernel clock was not 72 MHz
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The TIM2 counter was running
+ * @note The application explicitly enables the TIM2 clock gate before Timer
+ * configuration, which leaves counter operation disabled for @ref TIM_DelayMs
  */
 static driver_status_t App_Init(void)
 {
+	//! Explicitly enable the application-owned TIM2 clock before configuring the delay service.
+	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM2EN));
 	//! Apply the canonical dedicated-delay configuration for the established 72 MHz clock tree.
 	return TIM_ConfigDelay1MHz(TIM2);
 }

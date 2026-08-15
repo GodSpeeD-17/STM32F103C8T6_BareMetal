@@ -38,14 +38,14 @@ static void APP_ErrorHandler(void)
 /**
  * @brief Initializes TIM3 for a one-second update interrupt
  * @details
- * The sequence first establishes the tick and auto-reload period while TIM3
- * is stopped, then enables the Timer update source, prepares the dedicated
- * NVIC line, and starts counter operation.
+ * The sequence explicitly enables the TIM3 clock gate, establishes the tick
+ * and auto-reload period while TIM3 is stopped, enables the Timer update
+ * source, prepares the dedicated NVIC line, and starts counter operation.
  * @returns @ref driver_status_t "IRQ-Timer initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM3 update interrupts were started
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A Timer configuration selector was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A required Timer clock or IRQ state was unavailable
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: TIM3 was running or its NVIC line was enabled during configuration
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: TIM3 was running during configuration
  */
 static driver_status_t APP_Init(void)
 {
@@ -68,6 +68,8 @@ static driver_status_t APP_Init(void)
 		}
 	};
 
+	//! Explicitly enable the application-owned TIM3 clock before Timer configuration.
+	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM3EN));
 	//! Apply only TIM3 base configuration; IRQ-source intent remains a separate application decision.
 	ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
 	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.

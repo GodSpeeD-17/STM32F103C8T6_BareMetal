@@ -57,11 +57,14 @@ not override safety gaps reopened by the top-down audit.
 - [x] First-pass driver validates Timer instances and config-owned selector compatibility.
 - [x] First-pass driver reads only required registers for config-owned fields.
 - [x] First-pass driver writes only changed staged images for config-owned fields.
-- [x] RCC clock-gate state APIs `TIM_GetClockState()` and `TIM_SetClockState()` were exposed before configuration APIs.
+- [x] Remove Timer-owned RCC clock-gate query/mutation APIs; applications use
+  the RCC driver explicitly before invoking Timer APIs.
 - [x] Counter operation state APIs `TIM_GetOperationState()` and `TIM_SetOperationState()` were exposed.
 - [x] Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or `DRIVER_STATUS_ON` directly.
 - [x] Core shared CCMR raw-value macros were normalized to STM32-style `CCxS`, `OCxM`, `ICxPSC`, and `ICxF` notation.
-- [x] `TIM_DeConfig()` disables/clears NVIC state, pulses the matching RCC peripheral reset, and leaves the clock gate disabled.
+- [x] `TIM_DeConfig()` requires an enabled application-owned clock gate, pulses
+  the matching RCC peripheral reset, and leaves both RCC gate and NVIC state
+  unchanged.
 - [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
 - [x] `timer.h` public APIs now use function-specific `@returns @ref driver_status_t "... - Operation Status"` labels and parameter-specific `@retval` wording.
@@ -70,8 +73,8 @@ not override safety gaps reopened by the top-down audit.
   ordering.
 - [x] `TIM_Config()` directly delegates every admitted `tim_config_t` domain to its narrow transaction helper without a root-shadow wrapper.
 - [x] Remove Timer IRQ sources from `tim_config_t`; `TIM_Config()` preserves
-  DIER and applications express interrupt-generation intent explicitly through
-  `TIM_SetIRQSources()`.
+  DIER without reading or modifying NVIC delivery, and applications explicitly
+  sequence `TIM_SetIRQSources()`, NVIC delivery, and the active-state transition.
 - [x] Stage all timebase/commit images and validate the stopped-counter precondition before the first MMIO write.
 - [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
 - [x] `TIM_DelayUs()` verifies an exact 1 MHz tick and uses bounded polling with cleanup on timeout.
@@ -80,7 +83,8 @@ not override safety gaps reopened by the top-down audit.
 - [x] `timer.c` public implementation order now mirrors `timer.h`, including conjugate getter/setter sub-banners and final blocking-delay helpers.
 - [x] `timer.c` file overview now uses Doxygen `@section` blocks for scope, field ownership, and source layout.
 - [x] `_TIM_ClockEnabled()` was replaced by `_TIM_ValidateClockEnabled()` for narrow API clock-gate precondition checks.
-- [x] `TIM_GetClockState()` and `TIM_SetClockState()` validate the Timer instance directly and do not require the Timer clock gate to already be enabled.
+- [x] `TIM_Config()` and `TIM_DeConfig()` validate the application-owned Timer
+  clock-gate precondition without changing the gate.
 - [x] A first-pass stopped guard exists for timebase and DIR/CMS setters; atomic ordering and complete mode validation remain reopened.
 - [x] First-pass Timer IRQ source state, pending flags, and acknowledgements use codec-owned DIER/SR mapping and instance NVIC coordination; the target source/event/delivery split remains reopened.
 - [x] Replace the first-pass IRQ surface with `TIM_GetIRQSources()`,
@@ -98,8 +102,8 @@ These items must close before channel/PWM implementation begins:
 
 - [x] Split `_TIM_ApplyCounterConfig()` and `_TIM_ApplyTimeBaseConfig()` so
   grouped and root transactions reuse the existing grouped Codec staging paths
-  directly; add static Driver staging only for additional transaction images
-  and commit helpers only where real hardware ordering requires them.
+  through one `_TIM_Stage<Domain>Config()` helper per configuration structure;
+  public APIs directly own the required MMIO ordering.
 - [x] Make `TIM_Config()` visibly compose all `tim_config_t` domain-staging
   helpers before its first write; make `TIM_SetCounterConfig()` and
   `TIM_SetTimeBaseConfig()` reuse the same staging helpers while retaining
@@ -107,6 +111,17 @@ These items must close before channel/PWM implementation begins:
 - [x] Make `TIM_Config()` and both grouped base-configuration setters complete
   validation and Codec staging before their first Timer-register write; a
   precommit BUSY/error result leaves Timer register state unchanged.
+- [x] Treat MMIO access count as a transaction constraint: snapshot each
+  required Timer register once, coalesce compatible staged changes, and retain
+  additional writes only for documented hardware-mandated transitions or
+  commit semantics.
+- [x] Reject a counter-direction change while the current mode makes `CR1.DIR`
+  read-only; each admitted counter-configuration call stages one final `CR1`
+  image and dirty-writes it at most once, while the application owns any
+  explicit edge-aligned/direction/center-aligned call sequence.
+- [x] Remove scalar-setter public-to-public delegation that repeated Timer
+  snapshots; keep temporal register images explicit and reuse only the narrow
+  counter-transition and timebase-update staging/commit sequences.
 - [ ] Extend the same no-write-on-error and single-cleanup proof to the remaining
   Timer lifecycle and action transactions.
 - [ ] Restrict the first safe root-config contract to exclusive application ownership, preserve deferred feature state, and trace the complete URS/UDIS/UG behavior.
@@ -114,8 +129,8 @@ These items must close before channel/PWM implementation begins:
 - [ ] Finish the deferred DMA-source vocabulary independently from the completed
   Timer IRQ-source/event/NVIC split, including `DIER.TDE` when DMA admission opens.
 - [ ] Correct write-only EGR, mode-dependent CCR, SR W0C, DMAR portal, and generic LL/RegOps access semantics.
-- [ ] Validate current DIR/CMS transitions against the complete live mode context.
-- [ ] Define `TIM_SetClockState(..., DRIVER_STATUS_OFF)` as a stopped/quiescent transition or an accurately named intentional pause action.
+- [ ] Extend current DIR/CMS validation to the complete live mode context,
+  including the deferred encoder-mode state represented outside `CR1`.
 - [ ] Freeze per-instance single-owner/transaction-guard and single-cleanup failure contracts with retained MMIO/peer trace evidence.
 - [ ] Obtain and review the silicon errata matching the deployed STM32F103C8T6 revision.
 - [ ] Reconcile this TODO and `TIMER_ARCHITECTURE.md` with every completed source wave.
@@ -150,9 +165,15 @@ These items must close before channel/PWM implementation begins:
 - Driver functions should own validation, sequencing, batching,
   register-specific dirty-write decisions, and public status handling;
   peripheral-independent compare/write mechanics belong to RegOps.
-- Current compatibility API `TIM_SetClockState()` owns direct RCC APB1 clock-gate mutation; its OFF transition remains reopened for stopped/quiescent policy.
-- `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally as root lifecycle orchestration, but neither may call its conjugate; narrow field APIs retain explicit clock ownership.
+- RCC/application owns Timer APB1 clock-gate query and mutation. Timer public
+  APIs validate that the required gate is enabled and never change it.
+- `TIM_Config()` and `TIM_DeConfig()` are independent root lifecycle operations;
+  neither calls its conjugate, changes the RCC gate, or changes NVIC delivery.
+  The application explicitly orders clock enable, Timer configuration, Timer
+  IRQ-source configuration, NVIC delivery, and Timer operation enablement.
 - `TIM_Config()` preserves every `TIMx_DIER` source; applications explicitly
-  call `TIM_SetIRQSources()` before enabling the independently owned NVIC line.
-- Clock-state APIs validate Timer instance/state and do not require the gate to already be enabled; that fact does not authorize gating an active Timer.
-- Narrow grouped/scalar `Get` and `Set` APIs verify clock availability through the private `_TIM_ValidateClockEnabled()` helper and do not change clock state.
+  call `TIM_SetIRQSources()` before enabling the independently owned NVIC line
+  and starting the counter. Root configuration does not inspect NVIC state.
+- Every Timer API that accesses the peripheral verifies clock availability
+  through the private `_TIM_ValidateClockEnabled()` helper and does not change
+  clock state.

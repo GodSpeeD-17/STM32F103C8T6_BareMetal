@@ -244,13 +244,14 @@ questions inside the declared scope.
 
 | ID | State | Decision or evidence | Consequence |
 | --- | --- | --- | --- |
-| A-001 | `[Implemented]` | The Timer root configuration contains only timebase and counter domains. | Timer IRQ sources are configured explicitly through `TIM_SetIRQSources`; channel, capture, synchronization, DMA, and NVIC delivery remain outside root configuration. |
+| A-001 | `[Implemented]` | The Timer root configuration contains only timebase and counter domains. | `TIM_Config` neither reads nor mutates IRQ-source or NVIC delivery state; applications explicitly configure both before starting the counter. |
 | A-002 | `[Observed]` | Timer Codec already contains master/slave, output-compare, channel-state/polarity, IRQ, and DMA transformations beyond the current public Driver surface. | Existing lower-layer breadth must be classified as planned foundation or excess; it cannot create public scope by itself. |
 | A-003 | `[Observed]` | Timer LL provides named accessors for the complete TIM2-TIM4 register map. | Required access and raw foundation must be distinguished in the LL matrix. |
 | D-001 | `[Decision]` | Timer public APIs will represent Timer primitives; PWM frequency/duty and GPIO-route composition remain above Timer. | PWM mode is a valid output-compare selector, but percentage duty-cycle policy does not belong in Timer. |
 | D-002 | `[Decision]` | Persistent readable state should normally have paired `Get` and `Set` APIs; actions and acknowledge operations use explicit verbs instead. | Avoid fake getters for action registers and avoid fake setters for pending flags. |
-| D-003 | `[Decision]` | Group setters are the canonical transaction paths; scalar setters delegate to them when fields share constraints or latch behavior. | Validation, stopped-state policy, staging, dirty writes, and update-event sequencing stay centralized. |
+| D-003 | `[Decision]` | Group and scalar setters reuse the same narrow staging and hazardous commit primitives when fields share constraints or latch behavior. | Each public API owns one visible Read/Modify/Write transaction without calling another setter and repeating its hardware snapshot. |
 | D-004 | `[Decision]` | Every hertz-valued quantity uses the Core-owned `frequency_t` alias. | RCC, Timer, and peer consumers must not introduce duplicate peripheral-specific frequency aliases. |
+| D-005 | `[Decision]` | A coherent Driver transaction snapshots each required register once, stages modular changes in local images, and commits the minimum hardware-legal MMIO sequence. | Helper boundaries never justify redundant accesses. When a field is not writable in the current hardware mode, reject the transaction and require explicit application-owned mode transitions instead of hiding intermediate mode writes. Every remaining additional access must trace to a documented indivisible hardware commit requirement. |
 | C-001 | `[Decision]` | Codec transformations operate on `reg` images and domain types only. | Peripheral pointers, RCC/NVIC access, and volatile reads/writes are forbidden in Codec. |
 | L-001 | `[Decision]` | LL is mechanically complete only when access semantics are correct, not merely when every register has a read/write wrapper. | `SR` acknowledge and `EGR` action writes require semantic scrutiny even if generic accessors exist. |
 | X-001 | `[Decision]` | Safety Waves 1-3 precede every new Timer feature; the narrow PWM-output foundation is the first expansion after the P0 gates. | Current defects are mitigated before channel code reuses the same transaction, LL, and IRQ patterns. |
@@ -396,11 +397,16 @@ ASSERT_DRIVER_STATUS
 );
 NVIC_IRQ_ClearPending(PERIPH1_IRQn);
 NVIC_IRQ_Enable(PERIPH1_IRQn);
+ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
 ```
 
 This sequence makes interrupt intent visible at the call site. Omitting the
 source setter preserves existing source state; disabling sources likewise
 requires an explicit `DRIVER_STATUS_OFF` request.
+
+Root configuration does not query NVIC delivery as a hidden precondition.
+The application owns the sequence from peripheral configuration through IRQ
+source enablement and NVIC delivery to the final active-state transition.
 
 The staging helpers operate only on non-volatile caller-owned images, use
 Codec transformations for field placement, preserve unrelated fields, return
@@ -409,12 +415,24 @@ step succeeds. They do not receive a peripheral pointer merely to read or
 write MMIO, and they do not own clock, reset, NVIC, operation-state, or cleanup
 policy.
 
-When a grouped Codec function already performs the complete pure
-structure-to-image transformation, that Codec function is the shared staging
-path. Do not create a private Driver helper that only forwards to it. A static
-Driver staging helper is justified only when it composes additional
-Driver-owned policy or staged transaction images; one canonical staging path
-must serve both public transaction scopes.
+MMIO access count is part of the transaction contract. The public Driver API
+snapshots each required volatile register once, passes those images through
+modular staging helpers, coalesces compatible changes, and dirty-writes each
+changed register once when hardware semantics permit. Helper boundaries do not
+justify repeated reads or partial writes. Every additional access must trace to
+a named hardware rule, such as an unlock sequence, mandatory mode transition,
+special flag-clear semantic, read-clear behavior, or preload/update commit;
+correct hardware ordering remains authoritative when one write is not legal.
+Do not replace explicit temporal `reg` images with a private structure that
+exists only to shorten a signature. Such a structure is admitted only when its
+members form a stable reusable domain with an independently documented
+invariant.
+
+Each structure contained by a root configuration object has one matching
+private Driver `_PERIPH_Stage<Domain>Config()` helper. It owns atomic local-copy
+publication for exactly that structure and delegates field placement to the
+grouped Codec transformation. Policy or action images outside that structure
+must be staged separately.
 
 The public grouped function owns its narrow Read/Modify/Write transaction:
 
@@ -447,9 +465,9 @@ PERIPH_Config()
 
 The root function must not call public grouped setters when that would split
 one root request into partially committed sub-transactions. It reuses their
-private staging logic instead. A separate commit helper is admitted only for a
-real named hardware sequence, such as a buffered update-event commit; it must
-not become a differently named copy of the public root function.
+private staging logic instead, then directly performs every required register
+write. A private configuration commit helper must not hide the public API's
+MMIO sequence or maximum authority.
 
 ### Public API Admission Test
 
@@ -478,7 +496,7 @@ function must also declare one audience:
 
 ### Current Timer Public Inventory
 
-The application header `timer.h` exposes 36 callable symbols, all through the
+The application header `timer.h` exposes 34 callable symbols, all through the
 primary public surface; the six legacy IRQ compatibility wrappers are removed.
 `timer_defines.h` additionally exposes four pure callable utilities:
 `TIM_InstanceToIndex`, `TIM_ChannelMaskToIndex`,
@@ -486,9 +504,9 @@ primary public surface; the six legacy IRQ compatibility wrappers are removed.
 
 | Family | Current surface | Current verdict |
 | --- | --- | --- |
-| Clock gate | `TIM_GetClockState`, `TIM_SetClockState` | Instance mapping is coherent for TIM2-TIM4, but OFF currently lacks a counter/request/trigger quiescence or intentional pause/resume contract. |
+| Clock gate | none | RCC/application owns Timer APB1 clock-gate query and mutation; Timer APIs only validate that the required gate is already enabled. |
 | Operation state | `TIM_GetOperationState`, `TIM_SetOperationState` | Coherent ownership of `CR1.CEN`. |
-| Lifecycle | `TIM_Config`, `TIM_DeConfig` | Independent lifecycle entry points; configuration covers the timebase and counter domains represented by `tim_config_t`, preserves IRQ and deferred state, never invokes deconfiguration, and visibly stages both domains before one root-owned ordered commit. |
+| Lifecycle | `TIM_Config`, `TIM_DeConfig` | Independent lifecycle entry points requiring an enabled application-owned gate. Configuration covers the timebase and counter domains represented by `tim_config_t`; both APIs leave RCC gate and NVIC state unchanged. |
 | General frequency-setting presets | none | General frequency-targeting configuration functions were removed; applications provide explicit prescaler/configuration data. |
 | Delay-service configuration | `TIM_ConfigDelay1MHz` | Narrow fixed service bootstrap; validates a 72 MHz Timer kernel clock and delegates the canonical root configuration. |
 | Grouped base configuration | timebase and counter `Get`/`Set` pairs | Domain structures, grouped staging, and shared apply paths; timebase validation/staging now precedes the MMIO-only commit phase. |
@@ -511,7 +529,7 @@ Driver API candidates.
 | Existing public family | Lifecycle state | Disposition |
 | --- | --- | --- |
 | Base clock, operation, timebase, counter functions | Implemented; not fully verified | Retain while closing atomicity, transition, concurrency, and documentation gates. |
-| `TIM_Config` | Implemented; retained trace evidence open | Independent conjugate of `TIM_DeConfig`; it applies timebase/counter state, preserves IRQ and deferred state, never invokes deconfiguration, and reuses both grouped staging paths before one root-owned ordered commit. |
+| `TIM_Config` | Implemented; retained trace evidence open | Independent conjugate of `TIM_DeConfig`; it applies timebase/counter state, leaves IRQ-source and NVIC delivery state unobserved and unchanged, never invokes deconfiguration, and reuses both grouped staging paths before one root-owned ordered commit. |
 | Former frequency-setting configuration functions | Removed | `TIM_ConfigTickFrequency`, `TIM_Config1MHz`, `TIM_ConfigBaseTickFrequency`, and `TIM_ConfigBase1MHz` have no canonical replacement; use explicit `tim_config_t` data. |
 | `TIM_ConfigDelay1MHz` | Dedicated service bootstrap | Retain only for the admitted polling-delay service; it validates the fixed 72 MHz kernel-clock contract before delegating `TIM_Config`. |
 | Timer IRQ source/event functions | Implemented; evidence open | Retain the four canonical functions and separate source/event types; add retained Codec/MMIO traces before closing the evidence gate. |
@@ -527,16 +545,16 @@ Driver API candidates.
 
 ### Current Private Helper Inventory
 
-The current 28 private functions already form useful categories.
+The current private functions form useful categories.
 
 | Category | Existing examples | Assessment |
 | --- | --- | --- |
 | Topology and peer integration | `_TIM_GetClockBus`, `_TIM_DecodeAPB1ClockEnableMask`, `_TIM_DecodeAPB1PeripheralResetMask`, `_TIM_DecodeIRQ`, `_TIM_GetInputClockFrequency` | Correct ownership; the current TIM2-TIM4 mappings are explicit and use instance-safe address decoding. |
 | Validation and preconditions | instance, selector, state, clock-enabled, counter-stopped, IRQ-source/event, and channel-event acknowledge validators | Correct category; broader grouped compatibility, capability, channel, and transaction-wide validation remain incomplete. |
 | Register-bound dirty write | `_TIM_WriteCR1IfChanged`, `_TIM_WriteCNTIfChanged` | Correctly delegates comparison/write mechanics to `RegOps_WriteIfChanged` for independent scalar transactions; the ordered base commits compare their already validated images directly. |
-| Base-domain staging | `_TIM_StageCounterConfig`, `_TIM_StageTimeBaseConfig` | Both are MMIO-free, reuse grouped Codec stages, compose only additional Driver-owned transition/commit images, and publish outputs only after every fallible stage succeeds. |
-| Ordered base commit | `_TIM_CommitCounterConfig`, `_TIM_CommitTimeBase` | Necessary hardware-sequence isolation; both consume fully staged images and perform no fallible work after the first write. |
-| Runtime state apply | `_TIM_ApplyCounterEnableState` | Narrow CEN transaction retained independently from persistent base configuration. |
+| Base-domain staging | `_TIM_StageCounterConfig`, `_TIM_StageTimeBaseConfig`, `_TIM_StageTimeBaseUpdate` | All are MMIO-free, reuse Codec stages, keep independently required images explicit, and publish outputs only after every fallible stage succeeds. Counter staging produces one final CR1 image and rejects direction changes that hardware cannot accept in the current center-aligned mode. |
+| Ordered base commit | Public `TIM_Config` and timebase setters | Each public API directly owns the temporary update policy, `EGR.UG`, final CR1 application, and CNT restoration. Grouped/scalar counter setters dirty-write one final CR1 image; root configuration coalesces its counter image into the mandatory timebase sequence and performs no redundant standalone counter write. |
+| Runtime state apply | `TIM_SetOperationState` | The public API visibly owns the narrow CR1.CEN Read/Modify/Write transaction; the former one-call private forwarding helper is removed. |
 
 Large transaction helpers should ordinarily be `static` functions. Reserve
 `__STATIC_FORCEINLINE` for small leaf helpers where forced inlining has a
@@ -550,12 +568,14 @@ These corrections precede feature expansion.
 #### 1. Enforce failure atomicity
 
 `TIM_SetTimeBaseConfig()` now validates clock availability and stopped-counter
-state, stages every timebase/CR1/EGR image locally, revalidates the live guard,
-and only then enters its MMIO-only commit. `TIM_SetCounterConfig()` follows the
-same boundary for its complete DIR/CMS transition sequence. `TIM_Config()`
-reuses both staging paths and completes every fallible domain transformation
-before its first Timer-register write. Retained MMIO trace evidence remains
-required to close the verification gate.
+state from its cached CR1 image, stages every timebase/CR1/EGR image locally,
+and only then enters its public MMIO commit. `TIM_SetCounterConfig()` follows the
+same boundary for its single final CR1 image. It rejects a direction change
+that is read-only in the current center-aligned mode and leaves the explicit
+mode-transition sequence to the application. `TIM_Config()` reuses both
+staging paths and completes every fallible domain transformation before its
+first Timer-register write. Retained MMIO trace evidence remains required to
+close the verification gate.
 
 Binding rule:
 
@@ -563,8 +583,9 @@ Binding rule:
    and required stopped/disabled state.
 2. Capture every required image.
 3. Perform every fallible Codec stage operation on local images.
-4. Revalidate any live state that can change between snapshot and commit, or
-   hold the declared transaction guard.
+4. Hold the declared exclusive application ownership or transaction guard from
+   snapshot through commit; do not reread cached configuration registers merely
+   to repeat validation.
 5. Begin MMIO commit only when no ordinary validation failure remains.
 6. After the first write, use a single cleanup path for every possible failure.
 
@@ -666,14 +687,13 @@ Preserve `TIM_DelayUs()` and `TIM_DelayMs()` until consumers migrate, but plan a
 core Timer API must not imply that a blocking delay preserves an arbitrary
 caller's channel, trigger, DMA, or synchronization configuration.
 
-#### 7. Define clock-gate transitions
+#### 7. Keep clock-gate transitions outside Timer ownership
 
-Disabling the RCC gate while `CR1.CEN` or a request/trigger path remains active
-pauses the Timer kernel without clearing configuration. Re-enabling can resume
-after an undocumented time discontinuity. `TIM_SetClockState(..., OFF)` must
-therefore either require a stopped, request-quiescent, exclusively owned Timer
-or be renamed/documented as an intentional pause/resume action. The canonical
-base lifecycle path owns stop-before-gate sequencing.
+RCC/application owns every Timer APB1 clock-gate query and mutation. Timer
+configuration, deconfiguration, operation, IRQ, and delay APIs validate that
+the required gate is already enabled and return `DRIVER_STATUS_ERROR_STATE`
+without Timer MMIO when it is not. The application explicitly owns the safe
+stop, IRQ/NVIC quiescence, deconfiguration, and final clock-disable sequence.
 
 ### Accepted and Candidate Public Families
 
@@ -685,10 +705,12 @@ function signatures require per-function contract rows before code is written.
 
 #### Base Timer primitives — retain and correct
 
-- Clock gate, operation state, lifecycle, grouped timebase, grouped counter,
-  scalar base access, and programmed tick-frequency query/set.
-- Group configuration remains canonical; scalar setters reuse the group or a
-  common transaction whenever constraints or latch behavior are shared.
+- Operation state, lifecycle, grouped timebase, grouped counter, scalar base
+  access, and programmed tick-frequency query. Clock-gate control remains an
+  RCC/application operation outside the Timer public surface.
+- Group configuration remains canonical; scalar setters reuse the same narrow
+  staging and hazardous commit primitives without calling a public grouped
+  setter and repeating its register snapshots.
 - Update-event policy should be a coherent update configuration rather than a
   public function for every CR1 bit. Existing scalar functions may remain as
   documented conveniences.
@@ -897,7 +919,7 @@ validate output -> validate instance/capability -> validate clock
 
 ```text
 validate all public values -> validate live preconditions -> acquire guard
--> snapshot -> stage every local image -> revalidate mutable precondition
+-> snapshot -> stage every local image
 -> dirty-write ordinary state in documented order -> commit preload if needed
 -> cleanup/restore -> release guard -> return final status
 ```
@@ -1484,8 +1506,8 @@ each accepted family into one row per public function before code is written.
 
 | Driver family / intent | Private Driver path | Codec dependency | LL / peer dependency | Current disposition |
 | --- | --- | --- | --- | --- |
-| Clock gate state | instance/bus/gate mapping, stopped/quiescent transition guard | None; exact peer service operation | RCC gate APIs | Present; OFF transition contract and topology generalization remain open |
-| Base lifecycle configure/deconfigure | validate, independent application-ordered lifecycle, clock ownership, stop, reusable grouped staging, ordered commit, local cleanup | timebase/counter and update action | CR1, PSC, ARR, CNT, EGR; RCC and read-only NVIC state | `TIM_Config` stages all admitted base domains before its first write, never invokes `TIM_DeConfig`, and preserves DIER; retained atomicity/failure traces remain open |
+| Clock-gate precondition | instance-to-gate mapping and enabled-state validation only | None; exact peer-service observation | RCC gate-state query | Present; public mutation/query remain outside Timer and under RCC/application ownership |
+| Base lifecycle configure/deconfigure | validate, independent application-ordered lifecycle, stopped-state guard, reusable grouped staging, ordered commit/reset | timebase/counter and update action | CR1, PSC, ARR, CNT, EGR, and RCC reset pulse | Both APIs require an enabled application-owned gate, leave gate/NVIC state unchanged, and never invoke each other; retained atomicity/failure traces remain open |
 | Counter operation state | clock guard, apply state | CEN Extract/Stage | CR1 | Present |
 | Timebase grouped/scalar | stopped/ownership guard, snapshot, stage, preload commit | PSC/ARR/CNT grouped/scalar | CR1, PSC, ARR, CNT, EGR, SR | Present; source ordering mitigates partial-write failure, while whole-update-domain scope and retained trace evidence remain open |
 | Counter behavior grouped/scalar | whole-mode compatibility and stopped guard | CR1 grouped/scalar | CR1 and SMCR observation where mode-dependent | Present surface; cross-field validation incomplete |
@@ -1529,7 +1551,7 @@ behavior that later work must not regress.
 | H-012 | Scope `[Observed]` | Current topology intentionally assumes TIM2-4, four 16-bit channels, APB1, and dedicated vectors, matching the declared target. | Preserve this boundary; require capability data before any future variant is admitted. |
 | H-013 | Good `[Observed]` | Current W0C Codec writes ones to unselected writable flags. | Retain this preservation rule; separately document the selected-source arrival race. |
 | H-014 | Deferred `[Deferred]` | If channel/capture/PWM/sync families are admitted, SMS, CCxS, CCxE, input-prescaler reset, and preload rules impose additional cross-field/live-state constraints. | Make each constraint an admission and transaction gate; do not count absent future validation as a current bug. |
-| H-015 | High `[Gap]` | `TIM_SetClockState(..., OFF)` can gate a Timer whose CEN/request/trigger state remains active, creating an undocumented pause and later resume discontinuity. | Require stopped/quiescent exclusive ownership or define and name intentional pause/resume semantics. |
+| H-015 | High `[Mitigated]` | Timer previously exposed clock-gate mutation that could pause an active request/trigger path. | Public Timer clock APIs are removed; RCC/application explicitly owns safe clock-gate sequencing. |
 | H-016 | Accepted-next `[Gap]` | The admitted PWM path needs a coherent PSC/ARR/CCR preload commit, but no public/peer transaction currently provides it without abusing a base setter. | Freeze a whole-domain preload commit or coherent feature transaction before PWM implementation. |
 | H-017 | Medium `[Gap]` | Core DMA-channel comments conflict with RM0008 Table 78 for Timer assignments, so repository metadata is not uniformly trustworthy. | Correct and test the Core route metadata against the authoritative table before admitting Timer-DMA integration. |
 
@@ -1791,8 +1813,8 @@ because the already-frozen Driver transaction demanded it.
   for clock, CEN, NVIC, CNT, flags, and configuration.
 - Validate current DIR/CMS transitions against the complete live CR1/SMCR mode
   context before writing.
-- Define `TIM_SetClockState(..., OFF)` as stopped/request-quiescent exclusive
-  transition or replace it with accurately named intentional pause semantics.
+- Retain RCC/application ownership of every Timer clock-gate transition; do not
+  reintroduce Timer-owned clock mutation.
 - After validated instance-to-index conversion, replace the dense TIM2/3/4
   clock-mask, reset-mask, and IRQ-line switches with separate typed LUTs;
   retain fully braced switches only for genuinely sparse mappings.
