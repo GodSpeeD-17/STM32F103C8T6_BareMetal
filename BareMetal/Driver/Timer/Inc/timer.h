@@ -18,8 +18,8 @@
  * - `TIMx_CNT` counter value
  *
  * Channel/PWM, DMA, and master/slave APIs remain outside this public header
- * scope. Timer IRQ source/event APIs, the fixed @ref TIM_ConfigDelay1MHz
- * service bootstrap, and the blocking @ref TIM_DelayUs and @ref TIM_DelayMs
+ * scope. Timer IRQ source/event APIs, the fixed @ref TIM_ConfigForBlockingDelay
+ * service bootstrap, and the blocking @ref TIM_DelayUs and @ref TIM_BlockingDelayMs
  * APIs are provided. RCC clock-gate control and NVIC delivery remain explicit
  * application responsibilities.
  */
@@ -185,7 +185,7 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * it differs. A validation or staging failure leaves Timer register state
  * unchanged; this function never mutates the Timer clock gate
  * @note To change direction from a center-aligned mode, the application must
- * first call @ref TIM_SetAlignment with @ref TIMx_MODE_NORMAL, then call
+ * first call @ref TIM_SetAlignment with @ref `TIMx_MODE_NORMAL`, then call
  * @ref TIM_SetDirection, and finally restore the requested center-aligned mode
  * explicitly
  */
@@ -272,16 +272,16 @@ driver_status_t TIM_SetTimeBaseConfig(TIM_TypeDef* const TIMx, const tim_config_
  * @param[out] pCounter Destination for the current Timer counter configuration
  * Expected values:
  * - Non-`NULL`: Counter configuration is written to @p pCounter
- * - @ref tim_config_counter_t::direction : @ref TIMx_DIR_COUNT_UP or @ref TIMx_DIR_COUNT_DOWN
- * - @ref tim_config_counter_t::alignment : @ref TIMx_MODE_NORMAL,
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING,
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING, or
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING
- * - @ref tim_config_counter_t::one_pulse : @ref TIMx_OPM_DISABLE or @ref TIMx_OPM_ENABLE
- * - @ref tim_config_counter_t::auto_reload_preload : @ref TIMx_ARPE_DISABLE or @ref TIMx_ARPE_ENABLE
- * - @ref tim_config_counter_t::update_source : @ref TIMx_UPDATE_SOURCE_ANY or @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY
- * - @ref tim_config_counter_t::digital_filter_clock_division : @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
- *   @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2, or @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4
+ * - @ref tim_config_counter_t::direction : @ref `TIMx_DIR_COUNT_UP` or @ref `TIMx_DIR_COUNT_DOWN`
+ * - @ref tim_config_counter_t::alignment : @ref `TIMx_MODE_NORMAL`,
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`,
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`, or
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`
+ * - @ref tim_config_counter_t::one_pulse : @ref `TIMx_OPM_DISABLE` or @ref `TIMx_OPM_ENABLE`
+ * - @ref tim_config_counter_t::auto_reload_preload : @ref `TIMx_ARPE_DISABLE` or @ref `TIMx_ARPE_ENABLE`
+ * - @ref tim_config_counter_t::update_source : @ref `TIMx_UPDATE_SOURCE_ANY` or @ref `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY`
+ * - @ref tim_config_counter_t::digital_filter_clock_division : @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1`,
+ *   @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2`, or @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4`
  * @returns @ref driver_status_t "Counter Configuration - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pCounter` was `NULL`
@@ -309,16 +309,16 @@ driver_status_t TIM_GetCounterConfig(TIM_TypeDef* const TIMx, tim_config_counter
  * @param[in] pCounter Timer counter configuration
  * Accepted values:
  * - Non-`NULL`: Counter configuration to apply
- * - @ref tim_config_counter_t::direction : @ref TIMx_DIR_COUNT_UP or @ref TIMx_DIR_COUNT_DOWN
- * - @ref tim_config_counter_t::alignment : @ref TIMx_MODE_NORMAL,
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING,
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING, or
- *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING
- * - @ref tim_config_counter_t::one_pulse : @ref TIMx_OPM_DISABLE or @ref TIMx_OPM_ENABLE
- * - @ref tim_config_counter_t::auto_reload_preload : @ref TIMx_ARPE_DISABLE or @ref TIMx_ARPE_ENABLE
- * - @ref tim_config_counter_t::update_source : @ref TIMx_UPDATE_SOURCE_ANY or @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY
- * - @ref tim_config_counter_t::digital_filter_clock_division : @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
- *   @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2, or @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4
+ * - @ref tim_config_counter_t::direction : @ref `TIMx_DIR_COUNT_UP` or @ref `TIMx_DIR_COUNT_DOWN`
+ * - @ref tim_config_counter_t::alignment : @ref `TIMx_MODE_NORMAL`,
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`,
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`, or
+ *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`
+ * - @ref tim_config_counter_t::one_pulse : @ref `TIMx_OPM_DISABLE` or @ref `TIMx_OPM_ENABLE`
+ * - @ref tim_config_counter_t::auto_reload_preload : @ref `TIMx_ARPE_DISABLE` or @ref `TIMx_ARPE_ENABLE`
+ * - @ref tim_config_counter_t::update_source : @ref `TIMx_UPDATE_SOURCE_ANY` or @ref `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY`
+ * - @ref tim_config_counter_t::digital_filter_clock_division : @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1`,
+ *   @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2`, or @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4`
  * @returns @ref driver_status_t "Counter Configuration - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pCounter` was `NULL`
@@ -521,8 +521,8 @@ driver_status_t TIM_SetCounterValue(TIM_TypeDef* const TIMx, const tim_counter_v
  * - `TIM4`
  * @param[out] pDirection Destination for the current direction selector
  * Expected values:
- * - @ref TIMx_DIR_COUNT_UP : Counter counts up
- * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
+ * - @ref `TIMx_DIR_COUNT_UP` : Counter counts up
+ * - @ref `TIMx_DIR_COUNT_DOWN` : Counter counts down
  * @returns @ref driver_status_t "Direction - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pDirection` was `NULL`
@@ -546,8 +546,8 @@ driver_status_t TIM_GetDirection(TIM_TypeDef* const TIMx, tim_direction_t* const
  * - `TIM4`
  * @param[in] direction Timer counter direction selector
  * Accepted values:
- * - @ref TIMx_DIR_COUNT_UP : Counter counts up
- * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
+ * - @ref `TIMx_DIR_COUNT_UP` : Counter counts up
+ * - @ref `TIMx_DIR_COUNT_DOWN` : Counter counts down
  * @returns @ref driver_status_t "Direction - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
@@ -571,10 +571,10 @@ driver_status_t TIM_SetDirection(TIM_TypeDef* const TIMx, const tim_direction_t	
  * - `TIM4`
  * @param[out] pAlignment Destination for the current edge/center-aligned selector
  * Expected values:
- * - @ref TIMx_MODE_NORMAL : Edge-aligned mode
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
+ * - @ref `TIMx_MODE_NORMAL` : Edge-aligned mode
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING` : Center-aligned mode 1
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING` : Center-aligned mode 2
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING` : Center-aligned mode 3
  * @returns @ref driver_status_t "Alignment - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pAlignment` was `NULL`
@@ -596,10 +596,10 @@ driver_status_t TIM_GetAlignment(TIM_TypeDef* const TIMx, tim_count_mode_t* cons
  * - `TIM4`
  * @param[in] alignment Timer edge/center-aligned selector
  * Accepted values:
- * - @ref TIMx_MODE_NORMAL : Edge-aligned mode
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
+ * - @ref `TIMx_MODE_NORMAL` : Edge-aligned mode
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING` : Center-aligned mode 1
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING` : Center-aligned mode 2
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING` : Center-aligned mode 3
  * @returns @ref driver_status_t "Alignment - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
@@ -643,8 +643,8 @@ driver_status_t TIM_GetOnePulse(TIM_TypeDef* const TIMx, tim_opm_t* const pOnePu
  * - `TIM4`
  * @param[in] onePulse Timer one-pulse selector
  * Accepted values:
- * - @ref TIMx_OPM_DISABLE : Counter is not stopped at the next update event
- * - @ref TIMx_OPM_ENABLE : Counter stops at the next update event
+ * - @ref `TIMx_OPM_DISABLE` : Counter is not stopped at the next update event
+ * - @ref `TIMx_OPM_ENABLE` : Counter stops at the next update event
  * @returns @ref driver_status_t "One-Pulse - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
@@ -664,8 +664,8 @@ driver_status_t TIM_SetOnePulse(TIM_TypeDef* const TIMx, const tim_opm_t onePuls
  * - `TIM4`
  * @param[out] pAutoReloadPreload Destination for the current auto-reload preload selector
  * Expected values:
- * - @ref TIMx_ARPE_DISABLE : Auto-reload preload is disabled
- * - @ref TIMx_ARPE_ENABLE : Auto-reload preload is enabled
+ * - @ref `TIMx_ARPE_DISABLE` : Auto-reload preload is disabled
+ * - @ref `TIMx_ARPE_ENABLE` : Auto-reload preload is enabled
  * @returns @ref driver_status_t "Auto-Reload Preload - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pAutoReloadPreload` was `NULL`
@@ -687,8 +687,8 @@ driver_status_t TIM_GetAutoReloadPreload(TIM_TypeDef* const	TIMx, tim_arpe_t* co
  * - `TIM4`
  * @param[in] autoReloadPreload Timer auto-reload preload selector
  * Accepted values:
- * - @ref TIMx_ARPE_DISABLE : Auto-reload preload is disabled
- * - @ref TIMx_ARPE_ENABLE : Auto-reload preload is enabled
+ * - @ref `TIMx_ARPE_DISABLE` : Auto-reload preload is disabled
+ * - @ref `TIMx_ARPE_ENABLE` : Auto-reload preload is enabled
  * @returns @ref driver_status_t "Auto-Reload Preload - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
@@ -708,8 +708,8 @@ driver_status_t TIM_SetAutoReloadPreload(TIM_TypeDef* const	TIMx, const tim_arpe
  * - `TIM4`
  * @param[out] pUpdateSource Destination for the current update request source selector
  * Expected values:
- * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate an update request
- * - @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY : Only counter overflow or underflow generates an update request
+ * - @ref `TIMx_UPDATE_SOURCE_ANY` : Any update source may generate an update request
+ * - @ref `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY` : Only counter overflow or underflow generates an update request
  * @returns @ref driver_status_t "Update Source - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update request source selector was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pUpdateSource` was `NULL`
@@ -731,8 +731,8 @@ driver_status_t TIM_GetUpdateSource(TIM_TypeDef* const TIMx, tim_update_source_t
  * - `TIM4`
  * @param[in] updateSource Timer update request source selector
  * Accepted values:
- * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate an update request
- * - @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY : Only counter overflow or underflow generates an update request
+ * - @ref `TIMx_UPDATE_SOURCE_ANY` : Any update source may generate an update request
+ * - @ref `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY` : Only counter overflow or underflow generates an update request
  * @returns @ref driver_status_t "Update Source - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update request source selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
@@ -752,9 +752,9 @@ driver_status_t TIM_SetUpdateSource(TIM_TypeDef* const TIMx, const tim_update_so
  * - `TIM4`
  * @param[out] pDigitalFilterClockDivision Destination for the current digital-filter clock-division selector
  * Expected values:
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1 : `t_DTS = t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2 : `t_DTS = 2 * t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4 : `t_DTS = 4 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1` : `t_DTS = t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2` : `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4` : `t_DTS = 4 * t_CK_INT`
  * @returns @ref driver_status_t "Digital-filter clock-division extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Digital-filter clock-division selector was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pDigitalFilterClockDivision` is `NULL`
@@ -780,9 +780,9 @@ driver_status_t TIM_GetDigitalFilterClockDivision
  * - `TIM4`
  * @param[in] digitalFilterClockDivision Digital-filter clock-division selector
  * Accepted values:
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1 : `t_DTS = t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2 : `t_DTS = 2 * t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4 : `t_DTS = 4 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1` : `t_DTS = t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2` : `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4` : `t_DTS = 4 * t_CK_INT`
  * @returns @ref driver_status_t "Digital-filter clock-division operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Digital-filter clock-division selector was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` is `NULL`
@@ -813,7 +813,7 @@ driver_status_t TIM_SetDigitalFilterClockDivision
  * @param[out] pIrqSources Destination for the enabled interrupt-request source mask
  * Expected values:
  * - Non-`NULL`: Enabled sources are written to @p pIrqSources
- * - @ref TIMx_IRQ_SOURCE_NONE through @ref TIMx_IRQ_SOURCE_ALL
+ * - @ref `TIMx_IRQ_SOURCE_NONE` through @ref `TIMx_IRQ_SOURCE_ALL`
  * @returns @ref driver_status_t "IRQ-source operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Enabled interrupt-request sources were returned
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pIrqSources` is `NULL`
@@ -873,7 +873,7 @@ driver_status_t TIM_SetIRQSources
  * @param[out] pIrqEvents Destination for the latched Timer event mask
  * Expected values:
  * - Non-`NULL`: Latched event flags are written to @p pIrqEvents
- * - @ref TIMx_IRQ_EVENT_NONE through @ref TIMx_IRQ_EVENT_ALL
+ * - @ref `TIMx_IRQ_EVENT_NONE` through @ref `TIMx_IRQ_EVENT_ALL`
  * @returns @ref driver_status_t "IRQ-event operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Latched Timer events were returned
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pIrqEvents` is `NULL`
@@ -900,17 +900,17 @@ driver_status_t TIM_GetIRQEvents(TIM_TypeDef* const TIMx, tim_event_flag_t* cons
  * - `TIM4`
  * @param[in] irqEvents Non-empty Timer event mask to acknowledge
  * Accepted values:
- * - @ref TIMx_IRQ_EVENT_UPDATE
- * - @ref TIMx_IRQ_EVENT_CC1
- * - @ref TIMx_IRQ_EVENT_CC2
- * - @ref TIMx_IRQ_EVENT_CC3
- * - @ref TIMx_IRQ_EVENT_CC4
- * - @ref TIMx_IRQ_EVENT_TRIGGER
- * - @ref TIMx_IRQ_EVENT_CC1_OVERCAPTURE
- * - @ref TIMx_IRQ_EVENT_CC2_OVERCAPTURE
- * - @ref TIMx_IRQ_EVENT_CC3_OVERCAPTURE
- * - @ref TIMx_IRQ_EVENT_CC4_OVERCAPTURE
- * - Any non-empty combination contained by @ref TIMx_IRQ_EVENT_ALL
+ * - @ref `TIMx_IRQ_EVENT_UPDATE`
+ * - @ref `TIMx_IRQ_EVENT_CC1`
+ * - @ref `TIMx_IRQ_EVENT_CC2`
+ * - @ref `TIMx_IRQ_EVENT_CC3`
+ * - @ref `TIMx_IRQ_EVENT_CC4`
+ * - @ref `TIMx_IRQ_EVENT_TRIGGER`
+ * - @ref `TIMx_IRQ_EVENT_CC1_OVERCAPTURE`
+ * - @ref `TIMx_IRQ_EVENT_CC2_OVERCAPTURE`
+ * - @ref `TIMx_IRQ_EVENT_CC3_OVERCAPTURE`
+ * - @ref `TIMx_IRQ_EVENT_CC4_OVERCAPTURE`
+ * - Any non-empty combination contained by @ref `TIMx_IRQ_EVENT_ALL`
  * @returns @ref driver_status_t "IRQ-event acknowledgement status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected Timer events were acknowledged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` is `NULL`
@@ -926,14 +926,14 @@ driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t
 //										Timer Blocking Delay APIs										//
 // ==================================================================================================== //
 
-// ------------------------------- Timer 1 MHz Delay Configuration Helper ----------------------------- //
+// ---------------------------- Timer Blocking Delay Configuration Helper --------------------------- //
 
 /**
- * @brief Configures a dedicated polling-delay Timer for a 1 MHz counter tick
+ * @brief Allocates and configures a dedicated blocking polling-delay Timer for a 1 MHz counter tick
  * @details
  * Requires the matching APB1 clock gate to already be enabled, validates that
  * @p TIMx receives a 72 MHz Timer kernel clock, builds the canonical
- * polling-delay @ref tim_config_t, and delegates the complete admitted
+ * blocking polling-delay @ref tim_config_t, and delegates the complete admitted
  * configuration to @ref TIM_Config. The fixed prescaler value is `71`,
  * producing a 1 MHz counter tick from the validated 72 MHz input clock.
  *
@@ -946,33 +946,38 @@ driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t
  * - `TIM2`
  * - `TIM3`
  * - `TIM4`
- * @returns @ref driver_status_t "Delay-Timer configuration status"
+ * @returns @ref driver_status_t "Blocking-delay Timer configuration status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The Timer was configured with a 1 MHz counter tick
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is unsupported or the canonical configuration is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is unsupported, the canonical configuration is invalid, or the update-flag state could not be decoded
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The Timer APB1 clock gate is disabled, or the Timer kernel clock is unavailable or is not 72 MHz
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The Timer counter is running
  * @pre The application enabled the matching APB1 clock gate through the RCC driver
  * @pre The RCC clock tree provides a 72 MHz kernel clock to @p TIMx
- * @note This helper leaves the application-owned Timer clock gate unchanged and the counter disabled without changing Timer IRQ-source or NVIC state
+ * @note A successful call allocates @p TIMx to the application as a dedicated
+ * blocking-delay Timer until the application explicitly reconfigures or
+ * deconfigures it
+ * @note This helper leaves the application-owned Timer clock gate unchanged,
+ * enables one-pulse mode and update events, disables auto-reload preload,
+ * clears `TIMx_SR.UIF`, and leaves the counter disabled without changing Timer
+ * IRQ-source or NVIC state
  */
-driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx);
+driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx);
 
 // ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
 
 /**
  * @brief Provides a minimum blocking delay in microseconds using a 1 MHz Timer
  * @details
- * Uses a Timer previously configured through @ref TIM_ConfigDelay1MHz with a 1 MHz
- * programmed counter tick as a dedicated polling delay source. The helper
- * verifies that the APB1 Timer clock gate is
- * enabled, stops the counter, disables auto-reload preload so the delay window
- * uses the new `TIMx_ARR` immediately, writes `TIMx_ARR = delayUs - 1`,
- * restarts `TIMx_CNT` from @ref TIMx_DEFAULT_CNT, clears `TIMx_SR.UIF`, then
- * starts the counter with one-pulse mode enabled and update events temporarily
- * enabled so `TIMx_SR.UIF` can terminate polling. It stops the counter,
- * restores the original update-event enable state, and clears the update flag
- * before returning.
+ * Uses a Timer allocated and configured through @ref TIM_ConfigForBlockingDelay as a
+ * dedicated blocking polling-delay source. The helper verifies that the APB1 Timer
+ * clock gate is enabled, but deliberately does not revalidate the programmed
+ * prescaler or other base configuration. It updates
+ * `TIMx_ARR = delayUs - 1`, restarts `TIMx_CNT` from
+ * @ref `TIMx_DEFAULT_CNT`, clears `TIMx_SR.UIF`, starts the preconfigured
+ * one-pulse counter, and blocks while polling until `TIMx_SR.UIF` is asserted
+ * or the bounded budget expires. It then stops the counter when necessary and
+ * clears the update flag before returning.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
@@ -986,19 +991,25 @@ driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was unsupported, @p `delayUs` was `0U`, or a Timer state could not be decoded
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The update flag did not arrive within the bounded polling budget
+ * @pre The application successfully called @ref TIM_ConfigForBlockingDelay for @p TIMx
+ * and retained exclusive dedicated blocking-delay ownership without
+ * reconfiguring it
  * @note Assumptions and constraints:
- * - @p TIMx was configured through @ref TIM_ConfigDelay1MHz with a 1 MHz programmed counter tick.
  * - The Timer counter tick is exactly 1 MHz, so one counter tick equals 1 us.
  * - The requested delay is a minimum delay; software setup, polling, and
  *   cleanup can add a small positive overhead.
- * - The Timer is treated as a dedicated delay source; this helper controls
- *   `TIMx_CR1.CEN`, `TIMx_CR1.OPM`, `TIMx_CR1.ARPE`, `TIMx_ARR`, `TIMx_CNT`,
- *   `TIMx_CR1.UDIS` during the delay window, and `TIMx_SR.UIF`, and leaves the
- *   counter disabled before returning.
+ * - The Timer is treated as a dedicated blocking-delay source; this helper
+ *   controls `TIMx_CR1.CEN`, `TIMx_ARR`, `TIMx_CNT`, and `TIMx_SR.UIF`, and
+ *   leaves the counter disabled before returning.
  * - The delay is type-bounded to 16 bits, so the maximum delay is `65535 us`.
  * - This is a polling delay and does not use Timer IRQ/NVIC state.
+ * @warning Passing a Timer that was not successfully allocated through
+ * @ref TIM_ConfigForBlockingDelay, or that was subsequently reconfigured, violates the
+ * application-owned blocking-delay contract. This function does not validate
+ * the Timer base configuration, and the resulting blocking duration is
+ * unspecified
  */
 driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
 
@@ -1023,15 +1034,22 @@ driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
  * @returns @ref driver_status_t "Millisecond Delay - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was unsupported or @p `delayMs` was `0U`
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was unsupported, @p `delayMs` was `0U`, or a Timer state could not be decoded
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A microsecond delay chunk timed out
+ * @pre The application successfully called @ref TIM_ConfigForBlockingDelay for @p TIMx
+ * and retained exclusive dedicated blocking-delay ownership without
+ * reconfiguring it
  * @note Assumptions and constraints:
- * - @p TIMx was configured through @ref TIM_ConfigDelay1MHz with a 1 MHz programmed counter tick.
  * - @p delayMs must not be `0U`.
  * - This is a polling delay and does not use Timer IRQ/NVIC state.
+ * @warning Passing a Timer that was not successfully allocated through
+ * @ref TIM_ConfigForBlockingDelay, or that was subsequently reconfigured, violates the
+ * application-owned blocking-delay contract. This function does not validate
+ * the Timer base configuration, and the resulting blocking duration is
+ * unspecified
  */
-driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
+driver_status_t TIM_BlockingDelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 
 /** @} */ // TIM_03_Driver
 

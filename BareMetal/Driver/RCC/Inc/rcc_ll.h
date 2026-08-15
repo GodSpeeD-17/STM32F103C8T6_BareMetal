@@ -39,8 +39,8 @@ extern "C" {
  * @ingroup	RCC_02_LL
  * @details
  * These macros build a thin RCC-specific convenience layer on top of the generic
- * @ref REGOPS_READ, @ref REGOPS_WRITE, @ref REGOPS_SET, @ref REGOPS_CLEAR, and
- * @ref REGOPS_MODIFY utilities.
+ * @ref `REGOPS_READ`, @ref `REGOPS_WRITE`, @ref `REGOPS_SET`, @ref `REGOPS_CLEAR`, and
+ * @ref `REGOPS_MODIFY` utilities.
  *
  * Practical Rule:
  * - Always access RCC registers through the `.REG` member.

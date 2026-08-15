@@ -69,12 +69,12 @@ void Reset_Handler(void)
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	//! Enable the dedicated delay Timer clock, then apply the canonical 72 MHz-to-1 MHz configuration.
+	//! Enable the dedicated blocking-delay Timer clock, then apply the canonical 72 MHz-to-1 MHz configuration.
 	if (RCC_APB1_ClockEnable(DELAY_TIMER_CLOCK_ENABLE_MASK) != DRIVER_STATUS_SUCCESS)
 	{
 		Default_Handler();
 	}
-	if (TIM_ConfigDelay1MHz(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
+	if (TIM_ConfigForBlockingDelay(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
 	{
 		Default_Handler();
 	}
@@ -89,7 +89,7 @@ void Reset_Handler(void)
 	Default_Handler();
 }
 
-// Timer Delay Functions
+// Timer Blocking Delay Functions
 #ifndef SYSTICK_DELAY__
 void delay_us(uint32_t delayUs)
 {
@@ -105,7 +105,7 @@ void delay_ms(uint32_t delayMs)
 {
 	if (delayMs != 0UL)
 	{
-		(void) TIM_DelayMs(DELAY_TIMER, delayMs);
+		(void) TIM_BlockingDelayMs(DELAY_TIMER, delayMs);
 	}
 }
 

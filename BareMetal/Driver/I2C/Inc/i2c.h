@@ -48,7 +48,7 @@ typedef uint8_t									i2c_t;
 
 /**
  * @brief Convert driver I2C instance to low-level peripheral pointer
- * @param[in] i2cx Driver I2C instance ( @ref I2C_1, @ref I2C_2)
+ * @param[in] i2cx Driver I2C instance ( @ref `I2C_1`, @ref `I2C_2`)
  * @returns Corresponding I2C_TypeDef peripheral pointer
  */
 __STATIC_FORCEINLINE I2C_TypeDef* I2C_D2L_GetInstance(const i2c_t i2cx)
@@ -243,8 +243,8 @@ typedef struct
 	/** 
 	 * @brief I2C communication speed mode
 	 * @details
-	 * - Use @ref I2C_PROTOCOL_SPEED_MODE_SM for Standard Mode (100 kHz)
-	 * - Use @ref I2C_PROTOCOL_SPEED_MODE_FM for Fast Mode (400 kHz)
+	 * - Use @ref `I2C_PROTOCOL_SPEED_MODE_SM` for Standard Mode (100 kHz)
+	 * - Use @ref `I2C_PROTOCOL_SPEED_MODE_FM` for Fast Mode (400 kHz)
 	 * 
 	 * **Standard Mode (100 kHz):**
 	 * - Maximum frequency: 100 kHz
@@ -263,8 +263,8 @@ typedef struct
 	/** 
 	 * @brief Fast Mode duty cycle configuration
 	 * @details
-	 * - Use @ref I2C_PROTOCOL_SPEED_FM_DUTY_2_1 for 2:1 duty cycle (Thigh/Tlow = 2)
-	 * - Use @ref I2C_PROTOCOL_SPEED_FM_DUTY_16_9 for 16:9 duty cycle (Thigh/Tlow ≈ 1.78)
+	 * - Use @ref `I2C_PROTOCOL_SPEED_FM_DUTY_2_1` for 2:1 duty cycle (Thigh/Tlow = 2)
+	 * - Use @ref `I2C_PROTOCOL_SPEED_FM_DUTY_16_9` for 16:9 duty cycle (Thigh/Tlow ≈ 1.78)
 	 * 
 	 * **2:1 Duty Cycle:**
 	 * - Thigh = 2 × CCR × TPCLK
@@ -286,8 +286,8 @@ typedef struct
 	/** 
 	 * @brief I2C acknowledgment control
 	 * @details
-	 * - Use @ref I2C_PROTOCOL_ACK_ENABLE to enable acknowledgment (recommended)
-	 * - Use @ref I2C_PROTOCOL_ACK_DISABLE to disable acknowledgment
+	 * - Use @ref `I2C_PROTOCOL_ACK_ENABLE` to enable acknowledgment (recommended)
+	 * - Use @ref `I2C_PROTOCOL_ACK_DISABLE` to disable acknowledgment
 	 * 
 	 * **When Enabled:**
 	 * - Slave generates ACK pulse after each byte reception
@@ -306,8 +306,8 @@ typedef struct
 	/** 
 	 * @brief I2C clock stretching control
 	 * @details
-	 * - Use @ref I2C_PROTOCOL_STRETCH_ENABLE to allow clock stretching (recommended)
-	 * - Use @ref I2C_PROTOCOL_STRETCH_DISABLE to prevent clock stretching
+	 * - Use @ref `I2C_PROTOCOL_STRETCH_ENABLE` to allow clock stretching (recommended)
+	 * - Use @ref `I2C_PROTOCOL_STRETCH_DISABLE` to prevent clock stretching
 	 * 
 	 * **When Enabled:**
 	 * - Slave can hold SCL low to pause communication
@@ -463,8 +463,8 @@ typedef uint16_t 								i2c_address_t;
  * - 10-bit addressing requires both master and slave support
  * 
  * @warning Address values outside valid ranges may cause undefined behavior
- * @see @ref I2C_ADDRESS_MODE_7BIT for 7-bit address range details  
- * @see @ref I2C_ADDRESS_MODE_10BIT for 10-bit address range details
+ * @see @ref `I2C_ADDRESS_MODE_7BIT` for 7-bit address range details
+ * @see @ref `I2C_ADDRESS_MODE_10BIT` for 10-bit address range details
  * </details>
  */
 typedef struct

@@ -45,6 +45,23 @@ Use the same list/value/colon layout for non-status return values, omitting
 
 Do not use the legacy `@retval VALUE Description` form.
 
+Every macro or symbolic constant used as a Doxygen `@ref` target must be
+enclosed in backticks. Apply this consistently in accepted/expected-value
+lists, parameter descriptions, return descriptions, notes, warnings, and
+ordinary Doxygen prose. Keep the backticks immediately around the referenced
+identifier:
+
+```c
+ * - @ref `PERIPH_EVENT_UPDATE`: Update event
+ * - Any non-empty combination contained by @ref `PERIPH_EVENT_ALL`
+ * @note Start operation with @ref `DRIVER_STATUS_ON`
+```
+
+Do not leave macro or symbolic-constant reference targets unquoted. This
+backtick rule does not apply to referenced types, structures, members, groups,
+or functions unless another formatting rule explicitly requires code styling
+for them.
+
 ## Function Doxygen Layout
 
 Document every public and private function in this order:
@@ -54,7 +71,7 @@ Document every public and private function in this order:
 2. One `@param[in]`, `@param[out]`, or `@param[in,out]` entry per parameter.
 3. An `Accepted values:` or `Expected values:` list immediately after each
    parameter whenever its valid input or output vocabulary can be stated.
-4. `@returns @ref RETURN_TYPE "Function-specific operation status"` for
+4. A function-specific `@returns` line naming the returned status type for
    status-returning functions.
 5. Complete `@retval` entries for every status the implementation can return.
 6. Applicable `@pre`, `@note`, and `@warning` entries.
@@ -64,8 +81,8 @@ Use this status-returning function format:
 ```c
  * @param[in] operationState Requested Timer operation state
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF : Stop Timer counter operation.
- * - @ref DRIVER_STATUS_ON : Start Timer counter operation.
+ * - @ref `DRIVER_STATUS_OFF` : Stop Timer counter operation.
+ * - @ref `DRIVER_STATUS_ON` : Start Timer counter operation.
  * @returns @ref driver_status_t "Operation-state operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer counter operation state was updated
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `operationState` was invalid
@@ -139,12 +156,12 @@ and add enough tabs after every shorter name for all values to start in the
 same column:
 
 ```c
-/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_DELAY_MS_CHUNK_US */
-#define TIM_DRIVER_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
-/** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_DELAY_POLL_BUDGET_PER_US */
-#define TIM_DRIVER_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
-/** @brief Fixed setup allowance added to the polling-loop budget @def TIM_DRIVER_DELAY_POLL_BUDGET_BASE */
-#define TIM_DRIVER_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
+/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US */
+#define TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
+/** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US */
+#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
+/** @brief Fixed setup allowance added to the blocking polling-loop budget @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE */
+#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
 ```
 
 Recalculate alignment independently for each banner section; do not use one
@@ -566,8 +583,8 @@ peripheral to an arbitrary requested frequency. Callers provide explicit
 register-semantic configuration values. A narrowly named service-bootstrap
 helper is acceptable when a concrete admitted service requires one fixed
 configuration, validates its documented clock assumption, and delegates the
-canonical root configuration API. For example, `TIM_ConfigDelay1MHz()` may
-configure the dedicated polling-delay service for a validated 72 MHz Timer
+canonical root configuration API. For example, `TIM_ConfigForBlockingDelay()` may
+configure the dedicated blocking polling-delay service for a validated 72 MHz Timer
 kernel clock; it must not become a general frequency setter.
 
 Calculated-frequency getters are acceptable because they observe and report
@@ -575,6 +592,8 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-15: Required every macro or symbolic constant used as a Doxygen
+  `@ref` target to be enclosed in backticks in all documentation contexts.
 - 2026-08-15: Assigned peripheral clock-gate query/mutation to RCC/application,
   prohibited peripheral Drivers from hiding gate transitions inside lifecycle
   or narrow APIs, and required `DeConfig()` to leave application-owned RCC and

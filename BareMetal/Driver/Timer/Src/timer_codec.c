@@ -45,11 +45,11 @@
  * @brief Validates whether a state selector is an accepted ON/OFF state
  * @param[in] state Driver state selector
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF : Disabled/cleared state
- * - @ref DRIVER_STATUS_ON : Enabled/set state
+ * - @ref `DRIVER_STATUS_OFF` : Disabled/cleared state
+ * - @ref `DRIVER_STATUS_ON` : Enabled/set state
  * @returns @ref driver_status_t "Binary-state validation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is accepted
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not @ref DRIVER_STATUS_OFF or @ref DRIVER_STATUS_ON
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
  */
 __STATIC_FORCEINLINE driver_status_t Codec_TIM_ValidateState(const driver_status_t state)
 {
@@ -89,8 +89,8 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_ExtractBitStateFromImage(const re
  * @param[in] bitMask Register-positioned bit mask
  * @param[in] state Requested ON/OFF state
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF : Clear @p bitMask
- * - @ref DRIVER_STATUS_ON : Set @p bitMask
+ * - @ref `DRIVER_STATUS_OFF` : Clear @p bitMask
+ * - @ref `DRIVER_STATUS_ON` : Set @p bitMask
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: State was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
@@ -172,10 +172,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_StageScalarField
  * @brief Decodes a Timer single-channel mask into a zero-based channel index
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 : Decode channel 1 index
- * - @ref TIMx_CHANNEL_2 : Decode channel 2 index
- * - @ref TIMx_CHANNEL_3 : Decode channel 3 index
- * - @ref TIMx_CHANNEL_4 : Decode channel 4 index
+ * - @ref `TIMx_CHANNEL_1` : Decode channel 1 index
+ * - @ref `TIMx_CHANNEL_2` : Decode channel 2 index
+ * - @ref `TIMx_CHANNEL_3` : Decode channel 3 index
+ * - @ref `TIMx_CHANNEL_4` : Decode channel 4 index
  * @param[out] pChannelIndex Destination for decoded channel index
  * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Channel index was decoded
@@ -504,10 +504,10 @@ __STATIC_FORCEINLINE reg_bit_pos_t Codec_TIM_GetCCERPolarityPos(const tim_channe
  * @brief Encodes a count-mode selector into a register-positioned `CR1.CMS` value
  * @param[in] mode Timer count-mode selector
  * Accepted values:
- * - @ref TIMx_MODE_NORMAL : Edge-aligned counter mode
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
- * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
+ * - @ref `TIMx_MODE_NORMAL` : Edge-aligned counter mode
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING` : Center-aligned mode 1
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING` : Center-aligned mode 2
+ * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING` : Center-aligned mode 3
  * @param[out] pFieldSet Destination for register-positioned `CR1.CMS` value
  * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Count mode was encoded
@@ -561,10 +561,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeCountModeToCR1
  * @brief Decodes a register-positioned `CR1.CMS` value into a count-mode selector
  * @param[in] fieldSet Register-positioned `CR1.CMS` value
  * Accepted values:
- * - @ref TIM_CR1_CMS_EDGE_ALIGNED : Edge-aligned hardware encoding
- * - @ref TIM_CR1_CMS_CENTER_ALIGNED_MODE_1 : Center-aligned mode 1 hardware encoding
- * - @ref TIM_CR1_CMS_CENTER_ALIGNED_MODE_2 : Center-aligned mode 2 hardware encoding
- * - @ref TIM_CR1_CMS_CENTER_ALIGNED_MODE_3 : Center-aligned mode 3 hardware encoding
+ * - @ref `TIM_CR1_CMS_EDGE_ALIGNED` : Edge-aligned hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_1` : Center-aligned mode 1 hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_2` : Center-aligned mode 2 hardware encoding
+ * - @ref `TIM_CR1_CMS_CENTER_ALIGNED_MODE_3` : Center-aligned mode 3 hardware encoding
  * @param[out] pMode Destination for decoded count-mode selector
  * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Count mode was decoded
@@ -618,9 +618,9 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToCountMode
  * @brief Encodes a digital-filter clock-division selector into a register-positioned `CR1.CKD` value
  * @param[in] digitalFilterClockDivision Digital-filter clock-division selector
  * Accepted values:
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1 : `t_DTS = t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2 : `t_DTS = 2 * t_CK_INT`
- * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4 : `t_DTS = 4 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1` : `t_DTS = t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2` : `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4` : `t_DTS = 4 * t_CK_INT`
  * @param[out] pFieldSet Destination for register-positioned `CR1.CKD` value
  * @returns @ref driver_status_t "Digital-filter clock-division encoding status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Digital-filter clock division was encoded
@@ -669,9 +669,9 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeDigitalFilterClockDivisionT
  * @brief Decodes a register-positioned `CR1.CKD` value into a digital-filter clock-division selector
  * @param[in] fieldSet Register-positioned `CR1.CKD` value
  * Accepted values:
- * - @ref TIM_CR1_CKD_TDTS_TCK_INT : `t_DTS = t_CK_INT`
- * - @ref TIM_CR1_CKD_TDTS_2_TCK_INT : `t_DTS = 2 * t_CK_INT`
- * - @ref TIM_CR1_CKD_TDTS_4_TCK_INT : `t_DTS = 4 * t_CK_INT`
+ * - @ref `TIM_CR1_CKD_TDTS_TCK_INT` : `t_DTS = t_CK_INT`
+ * - @ref `TIM_CR1_CKD_TDTS_2_TCK_INT` : `t_DTS = 2 * t_CK_INT`
+ * - @ref `TIM_CR1_CKD_TDTS_4_TCK_INT` : `t_DTS = 4 * t_CK_INT`
  * @param[out] pDigitalFilterClockDivision Destination for decoded digital-filter clock-division selector
  * @returns @ref driver_status_t "Digital-filter clock-division decoding status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Digital-filter clock division was decoded
@@ -722,14 +722,14 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR1ToDigitalFilterClockDivi
  * @brief Encodes a master-mode selector into a register-positioned `CR2.MMS` value
  * @param[in] masterMode Timer master-mode selector
  * Accepted values:
- * - @ref TIMx_MMS_RESET : Reset trigger output
- * - @ref TIMx_MMS_ENABLE : Counter-enable trigger output
- * - @ref TIMx_MMS_UPDATE : Update-event trigger output
- * - @ref TIMx_MMS_CMP_PULSE : Compare-pulse trigger output
- * - @ref TIMx_MMS_CMP_OC1REF : Output compare 1 reference trigger output
- * - @ref TIMx_MMS_CMP_OC2REF : Output compare 2 reference trigger output
- * - @ref TIMx_MMS_CMP_OC3REF : Output compare 3 reference trigger output
- * - @ref TIMx_MMS_CMP_OC4REF : Output compare 4 reference trigger output
+ * - @ref `TIMx_MMS_RESET` : Reset trigger output
+ * - @ref `TIMx_MMS_ENABLE` : Counter-enable trigger output
+ * - @ref `TIMx_MMS_UPDATE` : Update-event trigger output
+ * - @ref `TIMx_MMS_CMP_PULSE` : Compare-pulse trigger output
+ * - @ref `TIMx_MMS_CMP_OC1REF` : Output compare 1 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC2REF` : Output compare 2 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC3REF` : Output compare 3 reference trigger output
+ * - @ref `TIMx_MMS_CMP_OC4REF` : Output compare 4 reference trigger output
  * @param[out] pFieldSet Destination for register-positioned `CR2.MMS` value
  * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master mode was encoded
@@ -803,14 +803,14 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeMasterModeToCR2
  * @brief Decodes a register-positioned `CR2.MMS` value into a master-mode selector
  * @param[in] fieldSet Register-positioned `CR2.MMS` value
  * Accepted values:
- * - @ref TIM_CR2_MMS_RESET : Reset trigger-output encoding
- * - @ref TIM_CR2_MMS_ENABLE : Counter-enable trigger-output encoding
- * - @ref TIM_CR2_MMS_UPDATE : Update trigger-output encoding
- * - @ref TIM_CR2_MMS_COMPARE_PULSE : Compare-pulse trigger-output encoding
- * - @ref TIM_CR2_MMS_COMPARE_OC1REF : Output compare 1 reference trigger-output encoding
- * - @ref TIM_CR2_MMS_COMPARE_OC2REF : Output compare 2 reference trigger-output encoding
- * - @ref TIM_CR2_MMS_COMPARE_OC3REF : Output compare 3 reference trigger-output encoding
- * - @ref TIM_CR2_MMS_COMPARE_OC4REF : Output compare 4 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_RESET` : Reset trigger-output encoding
+ * - @ref `TIM_CR2_MMS_ENABLE` : Counter-enable trigger-output encoding
+ * - @ref `TIM_CR2_MMS_UPDATE` : Update trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_PULSE` : Compare-pulse trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC1REF` : Output compare 1 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC2REF` : Output compare 2 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC3REF` : Output compare 3 reference trigger-output encoding
+ * - @ref `TIM_CR2_MMS_COMPARE_OC4REF` : Output compare 4 reference trigger-output encoding
  * @param[out] pMasterMode Destination for decoded master-mode selector
  * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master mode was decoded
@@ -884,10 +884,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCR2ToMasterMode
  * @brief Encodes a slave-mode selector into a register-positioned `SMCR.SMS` value
  * @param[in] slaveMode Timer slave-mode selector
  * Accepted values:
- * - @ref TIMx_SMS_DISABLE : Slave mode disabled
- * - @ref TIMx_SMS_ENC_MODE1 : Encoder mode 1
- * - @ref TIMx_SMS_ENC_MODE2 : Encoder mode 2
- * - @ref TIMx_SMS_ENC_MODE3 : Encoder mode 3
+ * - @ref `TIMx_SMS_DISABLE` : Slave mode disabled
+ * - @ref `TIMx_SMS_ENC_MODE1` : Encoder mode 1
+ * - @ref `TIMx_SMS_ENC_MODE2` : Encoder mode 2
+ * - @ref `TIMx_SMS_ENC_MODE3` : Encoder mode 3
  * @param[out] pFieldSet Destination for register-positioned `SMCR.SMS` value
  * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave mode was encoded
@@ -941,10 +941,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_EncodeSlaveModeToSMCR
  * @brief Decodes a register-positioned `SMCR.SMS` value into a slave-mode selector
  * @param[in] fieldSet Register-positioned `SMCR.SMS` value
  * Accepted values:
- * - @ref TIM_SMCR_SMS_DISABLED : Slave mode disabled hardware encoding
- * - @ref TIM_SMCR_SMS_ENCODER_MODE_1 : Encoder mode 1 hardware encoding
- * - @ref TIM_SMCR_SMS_ENCODER_MODE_2 : Encoder mode 2 hardware encoding
- * - @ref TIM_SMCR_SMS_ENCODER_MODE_3 : Encoder mode 3 hardware encoding
+ * - @ref `TIM_SMCR_SMS_DISABLED` : Slave mode disabled hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_1` : Encoder mode 1 hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_2` : Encoder mode 2 hardware encoding
+ * - @ref `TIM_SMCR_SMS_ENCODER_MODE_3` : Encoder mode 3 hardware encoding
  * @param[out] pSlaveMode Destination for decoded slave-mode selector
  * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave mode was decoded
@@ -1000,10 +1000,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeSMCRToSlaveMode
  * @brief Encodes a channel capture/compare selector into a CCMR-local `CCxS` value
  * @param[in] captureCompareSelection Timer capture/compare selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_CCS_OUTPUT : Channel configured as output compare
+ * - @ref `TIMx_CHANNEL_CCS_OUTPUT` : Channel configured as output compare
  * - @ref TIMx_CHANNEL_CCS_INPUT_TIx : Input capture mapped to direct TI input
  * - @ref TIMx_CHANNEL_CCS_INPUT_TIx_1 : Input capture mapped to indirect TI input
- * - @ref TIMx_CHANNEL_CCS_INPUT_TRC : Input capture mapped to TRC
+ * - @ref `TIMx_CHANNEL_CCS_INPUT_TRC` : Input capture mapped to TRC
  * @param[out] pRawField Destination for right-aligned CCMR shared encoding
  * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Capture/compare selector was encoded
@@ -1114,14 +1114,14 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToChannelSelection
  * @brief Encodes an output-compare mode selector into a CCMR-local `OCxM` value
  * @param[in] outputCompareMode Timer output-compare mode selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_MODE_FREEZE : Freeze output compare output
- * - @ref TIMx_CHANNEL_MODE_SET_CH : Set output active on match
- * - @ref TIMx_CHANNEL_MODE_RESET_CH : Reset output inactive on match
- * - @ref TIMx_CHANNEL_MODE_TOGGLE : Toggle output on match
- * - @ref TIMx_CHANNEL_MODE_FORCE_RESET : Force output inactive
- * - @ref TIMx_CHANNEL_MODE_FORCE_SET : Force output active
- * - @ref TIMx_CHANNEL_MODE_PWM1 : PWM mode 1
- * - @ref TIMx_CHANNEL_MODE_PWM2 : PWM mode 2
+ * - @ref `TIMx_CHANNEL_MODE_FREEZE` : Freeze output compare output
+ * - @ref `TIMx_CHANNEL_MODE_SET_CH` : Set output active on match
+ * - @ref `TIMx_CHANNEL_MODE_RESET_CH` : Reset output inactive on match
+ * - @ref `TIMx_CHANNEL_MODE_TOGGLE` : Toggle output on match
+ * - @ref `TIMx_CHANNEL_MODE_FORCE_RESET` : Force output inactive
+ * - @ref `TIMx_CHANNEL_MODE_FORCE_SET` : Force output active
+ * - @ref `TIMx_CHANNEL_MODE_PWM1` : PWM mode 1
+ * - @ref `TIMx_CHANNEL_MODE_PWM2` : PWM mode 2
  * @param[out] pRawField Destination for right-aligned CCMR shared encoding
  * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output-compare mode was encoded
@@ -1278,7 +1278,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_TIM_DecodeCCMRToOutputCompareMode
  * @brief Encodes Timer interrupt-request sources into raw `DIER` interrupt bits
  * @param[in] irqSources Timer interrupt-request source mask
  * Accepted values:
- * - Any combination contained by @ref TIMx_IRQ_SOURCE_ALL
+ * - Any combination contained by @ref `TIMx_IRQ_SOURCE_ALL`
  * @returns Raw `DIER` interrupt bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQSourcesToDIERRaw(const tim_irq_source_t irqSources)
@@ -1356,7 +1356,7 @@ __STATIC_FORCEINLINE tim_irq_source_t Codec_TIM_DecodeDIERRawToIRQSources(const 
  * @brief Encodes Timer event flags into raw `SR` flag bits
  * @param[in] irqEvents Timer event-flag mask
  * Accepted values:
- * - Any combination contained by @ref TIMx_IRQ_EVENT_ALL
+ * - Any combination contained by @ref `TIMx_IRQ_EVENT_ALL`
  * @returns Raw `SR` flag bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQEventsToSRRaw(const tim_event_flag_t irqEvents)
@@ -1466,12 +1466,12 @@ __STATIC_FORCEINLINE tim_event_flag_t Codec_TIM_DecodeSRRawToIRQEvents(const reg
  * @brief Encodes a Timer DMA selector mask into raw `DIER` DMA bits
  * @param[in] dmaMask Timer DMA selector mask
  * Accepted values:
- * - @ref TIMx_DMA_UPDATE : Update DMA source
- * - @ref TIMx_DMA_CC1DE : Channel 1 capture/compare DMA source
- * - @ref TIMx_DMA_CC2DE : Channel 2 capture/compare DMA source
- * - @ref TIMx_DMA_CC3DE : Channel 3 capture/compare DMA source
- * - @ref TIMx_DMA_CC4DE : Channel 4 capture/compare DMA source
- * - @ref TIMx_DMA_ALL : All supported DMA sources
+ * - @ref `TIMx_DMA_UPDATE` : Update DMA source
+ * - @ref `TIMx_DMA_CC1DE` : Channel 1 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC2DE` : Channel 2 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC3DE` : Channel 3 capture/compare DMA source
+ * - @ref `TIMx_DMA_CC4DE` : Channel 4 capture/compare DMA source
+ * - @ref `TIMx_DMA_ALL` : All supported DMA sources
  * @returns Raw `DIER` DMA bit mask
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeDMAMaskToDIERRaw(const tim_dma_t dmaMask)

@@ -6,7 +6,7 @@
  * @date	15-08-2026
  *
  * @details
- * Configures TIM2 as a dedicated 1 MHz polling-delay source. The application
+ * Configures TIM2 as a dedicated 1 MHz blocking polling-delay source. The application
  * toggles the on-board LED once per blocking delay interval and treats any
  * Timer status failure as terminal.
  */
@@ -43,14 +43,14 @@ static void App_ErrorHandler(void)
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 clock gate or kernel clock was unavailable, or the kernel clock was not 72 MHz
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The TIM2 counter was running
  * @note The application explicitly enables the TIM2 clock gate before Timer
- * configuration, which leaves counter operation disabled for @ref TIM_DelayMs
+ * configuration, which leaves counter operation disabled for @ref TIM_BlockingDelayMs
  */
 static driver_status_t App_Init(void)
 {
-	//! Explicitly enable the application-owned TIM2 clock before configuring the delay service.
+	//! Explicitly enable the application-owned TIM2 clock before configuring the blocking-delay service.
 	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM2EN));
-	//! Apply the canonical dedicated-delay configuration for the established 72 MHz clock tree.
-	return TIM_ConfigDelay1MHz(TIM2);
+	//! Apply the canonical dedicated blocking-delay configuration for the established 72 MHz clock tree.
+	return TIM_ConfigForBlockingDelay(TIM2);
 }
 
 // ==================================================================================================== //
@@ -58,7 +58,7 @@ static driver_status_t App_Init(void)
 // ==================================================================================================== //
 
 /**
- * @brief Runs the TIM2 polling-delay demonstration
+ * @brief Runs the TIM2 blocking polling-delay demonstration
  * @returns Process status
  * @retval - `0`: The function returned normally, which is not expected in this
  * bare-metal application.
@@ -72,10 +72,11 @@ int main(void)
 
 	while (1)
 	{
+		//! Toggle on-board LED
 		OB_LED_Toggle();
 
 		//! Stop the demo on timeout or lost Timer ownership instead of hiding the status.
-		if (TIM_DelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+		if (TIM_BlockingDelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
 			App_ErrorHandler();
 		}

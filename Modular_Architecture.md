@@ -182,7 +182,7 @@ Not acceptable in `startup.c`:
 
 - direct Timer configuration such as `TIM_Config()`
 - `TIM_DelayUs()`
-- `TIM_DelayMs()`
+- `TIM_BlockingDelayMs()`
 - raw `TIMx->ARR` / `TIMx->CNT` / `TIMx->SR` access
 - Timer IRQ delay completion state
 - SysTick delay implementation
@@ -300,7 +300,8 @@ Project_DelayMs(1000UL);
 The application should not care whether the backend is Timer, SysTick, DWT, or
 another mechanism.
 
-For the current Timer driver refactor, the preferred Timer delay backend is:
+For the current Timer driver refactor, the preferred Timer delay backend is
+explicitly blocking:
 
 ```c
 driver_status_t Project_DelayInit(void)
@@ -309,7 +310,7 @@ driver_status_t Project_DelayInit(void)
 	(
 		RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK)
 	);
-	return TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
+	return TIM_ConfigForBlockingDelay(PROJECT_DELAY_TIMER);
 }
 
 driver_status_t Project_DelayUs(const uint16_t delayUs)
@@ -319,7 +320,7 @@ driver_status_t Project_DelayUs(const uint16_t delayUs)
 
 driver_status_t Project_DelayMs(const uint32_t delayMs)
 {
-	return TIM_DelayMs(PROJECT_DELAY_TIMER, delayMs);
+	return TIM_BlockingDelayMs(PROJECT_DELAY_TIMER, delayMs);
 }
 ```
 
@@ -399,13 +400,13 @@ Project_Init()
   -> RCC_Config_72MHz()
   -> Project_DelayInit()
        -> RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK)
-       -> TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER)
+       -> TIM_ConfigForBlockingDelay(PROJECT_DELAY_TIMER)
   -> OB_LED_Init()
   -> OB_LED_Reset()
 
 main()
   -> Project_DelayMs(...)
-       -> TIM_DelayMs(PROJECT_DELAY_TIMER, ...)
+       -> TIM_BlockingDelayMs(PROJECT_DELAY_TIMER, ...) [blocking]
 ```
 
 ## Migration Plan
@@ -443,9 +444,9 @@ Implement the Timer backend using the current Timer driver APIs:
 
 ```c
 RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK);
-TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
+TIM_ConfigForBlockingDelay(PROJECT_DELAY_TIMER);
 TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
-TIM_DelayMs(PROJECT_DELAY_TIMER, delayMs);
+TIM_BlockingDelayMs(PROJECT_DELAY_TIMER, delayMs);
 ```
 
 Do not use old IRQ-based delay code.
@@ -534,9 +535,9 @@ needed by the modular project delay facade:
 
 ```c
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
-driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx);
+driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx);
 driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
-driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
+driver_status_t TIM_BlockingDelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 ```
 
 Important constraints:
@@ -547,9 +548,10 @@ Important constraints:
   clock gate.
 - `TIM_DelayUs()` accepts `1U..0xFFFFU`.
 - `TIM_DelayUs()` is a minimum blocking delay, not a cycle-exact delay.
-- `TIM_DelayMs()` composes repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
-- Delay helpers assume the Timer clock gate is enabled and the Timer was
-  configured through `TIM_Config()` with a 1 MHz programmed counter tick.
+- `TIM_BlockingDelayMs()` composes repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
+- Blocking-delay helpers require a Timer successfully allocated through
+  `TIM_ConfigForBlockingDelay()`. The application preserves that dedicated
+  configuration; delay calls do not revalidate the programmed timebase.
 
 ## Current Example State
 
@@ -581,7 +583,7 @@ DELAY_TIMER->SR.REG &= ...;
 ```c
 // systick.c
 TIM_Config(...);
-TIM_DelayMs(...);
+TIM_BlockingDelayMs(...);
 ```
 
 These mix ownership and make future changes spread across unrelated files.

@@ -129,9 +129,9 @@ typedef struct _tim_config_counter_t
 	 * @brief Digital filter and dead-time sampling clock division selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1 : `t_DTS = t_CK_INT`
-	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2 : `t_DTS = 2 * t_CK_INT`
-	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4 : `t_DTS = 4 * t_CK_INT`
+	 * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_1` : `t_DTS = t_CK_INT`
+	 * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_2` : `t_DTS = 2 * t_CK_INT`
+	 * - @ref `TIMx_DIGITAL_FILTER_CLOCK_DIV_4` : `t_DTS = 4 * t_CK_INT`
 	 * @memberof tim_config_counter_t
 	 */
 	tim_digital_filter_clock_division_t	digital_filter_clock_division: 2;
@@ -141,10 +141,10 @@ typedef struct _tim_config_counter_t
 	 * @details
 	 * Selects edge-aligned counting or one of the center-aligned counting modes.
 	 * Accepted values:
-	 * - @ref TIMx_MODE_NORMAL : Edge-aligned mode
-	 * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
-	 * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
-	 * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
+	 * - @ref `TIMx_MODE_NORMAL` : Edge-aligned mode
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING` : Center-aligned mode 1
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING` : Center-aligned mode 2
+	 * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING` : Center-aligned mode 3
 	 * @memberof tim_config_counter_t
 	 */
 	tim_count_mode_t		alignment: 2;
@@ -153,8 +153,8 @@ typedef struct _tim_config_counter_t
 	 * @brief Counter direction selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_DIR_COUNT_UP : Counter counts up
-	 * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
+	 * - @ref `TIMx_DIR_COUNT_UP` : Counter counts up
+	 * - @ref `TIMx_DIR_COUNT_DOWN` : Counter counts down
 	 * @memberof tim_config_counter_t
 	 */
 	tim_direction_t			direction: 1;
@@ -163,8 +163,8 @@ typedef struct _tim_config_counter_t
 	 * @brief One-pulse mode selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_OPM_DISABLE : Counter is not stopped at the next update event
-	 * - @ref TIMx_OPM_ENABLE : Counter stops at the next update event
+	 * - @ref `TIMx_OPM_DISABLE` : Counter is not stopped at the next update event
+	 * - @ref `TIMx_OPM_ENABLE` : Counter stops at the next update event
 	 * @memberof tim_config_counter_t
 	 */
 	tim_opm_t				one_pulse: 1;
@@ -173,8 +173,8 @@ typedef struct _tim_config_counter_t
 	 * @brief Auto-reload preload selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_ARPE_DISABLE : Auto-reload preload is disabled
-	 * - @ref TIMx_ARPE_ENABLE : Auto-reload preload is enabled
+	 * - @ref `TIMx_ARPE_DISABLE` : Auto-reload preload is disabled
+	 * - @ref `TIMx_ARPE_ENABLE` : Auto-reload preload is enabled
 	 * @memberof tim_config_counter_t
 	 */
 	tim_arpe_t				auto_reload_preload: 1;
@@ -183,8 +183,8 @@ typedef struct _tim_config_counter_t
 	 * @brief Update request source selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate an update request
-	 * - @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY : Only counter overflow or underflow generates an update request
+	 * - @ref `TIMx_UPDATE_SOURCE_ANY` : Any update source may generate an update request
+	 * - @ref `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY` : Only counter overflow or underflow generates an update request
 	 * @memberof tim_config_counter_t
 	 */
 	tim_update_source_t		update_source: 1;

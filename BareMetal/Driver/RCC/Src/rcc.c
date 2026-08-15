@@ -188,7 +188,7 @@ static driver_status_t _RCC_WaitForSystemClockSwitch(const rcc_system_clock_t so
  * @param[in] pLUT Pointer to the LUT to scan.
  * @param[in] itemCount Number of valid items in the LUT.
  * @param[in] fieldValue LL field value to search for.
- * @returns Matching LUT index when found, otherwise @ref RCC_DRIVER_INVALID_INDEX.
+ * @returns Matching LUT index when found, otherwise @ref `RCC_DRIVER_INVALID_INDEX`.
  */
 __STATIC_FORCEINLINE uint32_t _RCC_FindFieldValueMapIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t fieldValue)
 {

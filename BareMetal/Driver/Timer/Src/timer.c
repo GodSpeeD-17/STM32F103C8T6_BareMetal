@@ -21,8 +21,8 @@
  *
  * Channel/PWM, DMA, and master/slave behavior remain deferred. This driver also
  * owns Timer DIER interrupt-request sources, SR event observation/acknowledgement,
- * and the fixed @ref TIM_ConfigDelay1MHz service bootstrap plus bounded
- * blocking @ref TIM_DelayUs / @ref TIM_DelayMs helpers. Generic
+ * and the fixed @ref TIM_ConfigForBlockingDelay service bootstrap plus bounded
+ * blocking @ref TIM_DelayUs / @ref TIM_BlockingDelayMs helpers. Generic
  * Clock-gate mutation and NVIC delivery remain under RCC/application and
  * NVIC/application ownership respectively. Timer configuration APIs require
  * the application to enable the matching APB1 clock gate before entry.
@@ -48,12 +48,12 @@
 //										Local Driver Configuration										//
 // ==================================================================================================== //
 
-/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_DELAY_MS_CHUNK_US */
-#define TIM_DRIVER_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
-/** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_DELAY_POLL_BUDGET_PER_US */
-#define TIM_DRIVER_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
-/** @brief Fixed setup allowance added to the polling-loop budget @def TIM_DRIVER_DELAY_POLL_BUDGET_BASE */
-#define TIM_DRIVER_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
+/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US */
+#define TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
+/** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US */
+#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
+/** @brief Fixed setup allowance added to the blocking polling-loop budget @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE */
+#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
 
 // ==================================================================================================== //
 //									Timer Clock Bus Mapping										//
@@ -287,7 +287,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateCounterConfig(const tim_config
  * @brief Validates a Timer ON/OFF state selector
  * @param[in] state Timer state selector
  * @returns @ref driver_status_t "Binary-state validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is @ref DRIVER_STATUS_OFF or @ref DRIVER_STATUS_ON
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is invalid
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_ValidateState(const driver_status_t state)
@@ -846,43 +846,70 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ClearUpdateFlagIfPending(TIM_TypeDef* 
 }
 
 /**
- * @brief Restores the stopped Timer state owned by one blocking-delay operation
+ * @brief Aborts one incomplete blocking delay and clears its update flag
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - `TIM2`
  * - `TIM3`
  * - `TIM4`
- * @param[in] updateEventState Caller-owned pre-delay update-event state
- * Accepted values:
- * - @ref DRIVER_STATUS_OFF : Restore disabled update events
- * - @ref DRIVER_STATUS_ON : Restore enabled update events
- * @returns @ref driver_status_t "Delay-cleanup operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter stop, update-event state, and UIF cleanup were restored
+ * @returns @ref driver_status_t "Blocking-delay abort status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter operation and `UIF` were cleared after an incomplete delay
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx or @p updateEventState is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is invalid or Timer state could not be decoded
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @pre @p TIMx retains the dedicated blocking-delay configuration established by
+ * @ref TIM_ConfigForBlockingDelay
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_RestoreDelayState
-(
-	TIM_TypeDef* const		TIMx,
-	const driver_status_t	updateEventState
-)
+__STATIC_FORCEINLINE driver_status_t _TIM_CleanupBlockingDelayState(TIM_TypeDef* const TIMx)
 {
 	// Local Variables
 	reg currentControlRegisterImage = 0x00000000UL;
 	reg targetControlRegisterImage = 0x00000000UL;
 
-	//! Complete every fallible validation before staging the cleanup image.
+	//! Abort incomplete counter operation while preserving the dedicated blocking-delay configuration.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
-	ASSERT_DRIVER_STATUS(_TIM_ValidateState(updateEventState));
 	currentControlRegisterImage = LL_TIM_ReadCR1(TIMx);
 	targetControlRegisterImage = currentControlRegisterImage;
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&targetControlRegisterImage, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&targetControlRegisterImage, updateEventState));
 
-	//! Dirty-write the restored CR1 image, then remove any terminal update flag.
+	//! Dirty-write CEN, then remove any update flag that raced with the abort.
 	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentControlRegisterImage, targetControlRegisterImage));
 	return _TIM_ClearUpdateFlagIfPending(TIMx);
+}
+
+/**
+ * @brief Polls one dedicated blocking-delay Timer until its update flag is asserted
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
+ * @param[in] pollsRemaining Maximum number of clear-flag samples to tolerate
+ * Accepted values:
+ * - `1U..0xFFFFFFFFU`: Bounded polling budget
+ * @returns @ref driver_status_t "Delay-polling operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: `TIMx_SR.UIF` was asserted
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: Polling budget expired before `TIMx_SR.UIF` was asserted
+ * @pre The caller validated @p TIMx and its clock-gate state
+ */
+__STATIC_FORCEINLINE driver_status_t _TIM_PollBlockingDelayCompletion(TIM_TypeDef* const TIMx, uint32_t	pollsRemaining)
+{
+	driver_status_t updateFlagState = DRIVER_STATUS_OFF;
+
+	while (pollsRemaining > 0UL)
+	{
+		//! Sample UIF until hardware completes the one-pulse blocking delay.
+		updateFlagState = Codec_TIM_ExtractUpdateFlagState(LL_TIM_ReadSR(TIMx));
+		if (updateFlagState == DRIVER_STATUS_ON)
+		{
+			return DRIVER_STATUS_SUCCESS;
+		}
+
+		//! Consume one bounded blocking sample only when the completion flag remained clear.
+		pollsRemaining--;
+	}
+
+	return DRIVER_STATUS_ERROR_TIMEOUT;
 }
 
 // ==================================================================================================== //
@@ -1853,14 +1880,7 @@ driver_status_t TIM_SetDigitalFilterClockDivision
 	currentCr1RegImage = cr1RegImage;
 
 	//! Stage the tDTS clock-division selector and preserve unrelated CR1 fields.
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageDigitalFilterClockDivision
-		(
-			&cr1RegImage,
-			digitalFilterClockDivision
-		)
-	);
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageDigitalFilterClockDivision(&cr1RegImage, digitalFilterClockDivision));
 	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentCr1RegImage, cr1RegImage));
 
 	return DRIVER_STATUS_SUCCESS;
@@ -1952,13 +1972,16 @@ driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t
 //										Timer Blocking Delay APIs										//
 // ==================================================================================================== //
 
-// ------------------------------- Timer 1 MHz Delay Configuration Helper ----------------------------- //
+// ---------------------------- Timer Blocking Delay Configuration Helper --------------------------- //
 
-driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx)
+driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx)
 {
 	// Local Variables
+	driver_status_t status = DRIVER_STATUS_SUCCESS;
 	frequency_t timerInputClock = RCC_FREQ_ZERO;
-	const tim_config_t delayTimerConfig =
+	reg currentControlRegisterImage = 0x00000000UL;
+	reg targetControlRegisterImage = 0x00000000UL;
+	const tim_config_t blockingDelayTimerConfig =
 	{
 		.timebase =
 		{
@@ -1971,8 +1994,8 @@ driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx)
 			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
 			.alignment = TIMx_MODE_NORMAL,
 			.direction = TIMx_DIR_COUNT_UP,
-			.one_pulse = TIMx_OPM_DISABLE,
-			.auto_reload_preload = TIMx_ARPE_ENABLE,
+			.one_pulse = TIMx_OPM_ENABLE,
+			.auto_reload_preload = TIMx_ARPE_DISABLE,
 			.update_source = TIMx_UPDATE_SOURCE_ANY
 		}
 	};
@@ -1986,8 +2009,29 @@ driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx)
 		return DRIVER_STATUS_ERROR_STATE;
 	}
 
-	//! Reuse the root transaction so delay configuration retains canonical ownership and cleanup.
-	return TIM_Config(TIMx, &delayTimerConfig);
+	//! Apply the stable timebase, OPM, and immediate-ARR policy for the blocking delay service.
+	status = TIM_Config(TIMx, &blockingDelayTimerConfig);
+	if (status != DRIVER_STATUS_SUCCESS)
+	{
+		return status;
+	}
+
+	//! Enable update events once so every allocated blocking delay can terminate on UIF.
+	currentControlRegisterImage = LL_TIM_ReadCR1(TIMx);
+	targetControlRegisterImage = currentControlRegisterImage;
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&targetControlRegisterImage, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+	(
+		_TIM_WriteCR1IfChanged
+		(
+			TIMx,
+			currentControlRegisterImage,
+			targetControlRegisterImage
+		)
+	);
+
+	//! Complete allocation with a stopped counter and no stale blocking-delay completion flag.
+	return _TIM_ClearUpdateFlagIfPending(TIMx);
 }
 
 // ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
@@ -1996,93 +2040,62 @@ driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs)
 {
 	// Local Variables
 	tim_auto_reload_t delayReload = 0U;
-	frequency_t actualFrequency = 0UL;
-	driver_status_t updateEventState = DRIVER_STATUS_ERROR;
-	driver_status_t updateFlagState = DRIVER_STATUS_OFF;
 	driver_status_t pollStatus = DRIVER_STATUS_SUCCESS;
 	driver_status_t cleanupStatus = DRIVER_STATUS_SUCCESS;
 	uint32_t pollsRemaining = 0UL;
 	reg currentControlRegisterImage = 0x00000000UL;
-	reg cr1RegImage = 0x00000000UL;
+	reg currentAutoReloadRegisterImage = 0x00000000UL;
+	reg currentCounterRegisterImage = 0x00000000UL;
+	reg targetControlRegisterImage = 0x00000000UL;
 
 	// Validate Input
 	if (delayUs == 0U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	//! The programmed-frequency query owns Timer validation and the one required clock-gate check.
-	ASSERT_DRIVER_STATUS(TIM_GetProgrammedTickFrequency(TIMx, &actualFrequency));
-	if (actualFrequency != (frequency_t) 1000000UL)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
+	//! Validate peripheral access; blocking-delay allocation remains an application-owned contract.
+	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 
 	delayReload = (tim_auto_reload_t) (delayUs - 1U);
-	pollsRemaining = (((uint32_t) delayUs) * TIM_DRIVER_DELAY_POLL_BUDGET_PER_US) + TIM_DRIVER_DELAY_POLL_BUDGET_BASE;
+	pollsRemaining = (((uint32_t) delayUs) * TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US) + TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE;
 
-	//! Disable ARPE and stop the counter before preparing the delay window.
-	cr1RegImage = LL_TIM_ReadCR1(TIMx);
-	updateEventState = Codec_TIM_ExtractUpdateEventState(cr1RegImage);
-	ASSERT_DRIVER_STATUS(_TIM_ValidateState(updateEventState));
-	currentControlRegisterImage = cr1RegImage;
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&cr1RegImage, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageAutoReloadPreload(&cr1RegImage, TIMx_ARPE_DISABLE));
-	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentControlRegisterImage, cr1RegImage));
-
-	//! Configure ARR and CNT for this delay window, then clear any stale update flag.
-	LL_TIM_WriteARR(TIMx, (reg) delayReload);
-	LL_TIM_WriteCNT(TIMx, (reg) TIMx_DEFAULT_CNT);
+	//! Program only changed blocking-delay interval and counter images, then clear stale completion state.
+	currentAutoReloadRegisterImage = LL_TIM_ReadARR(TIMx);
+	currentCounterRegisterImage = LL_TIM_ReadCNT(TIMx);
+	ASSERT_DRIVER_STATUS(_TIM_WriteARRIfChanged(TIMx, currentAutoReloadRegisterImage, (reg) delayReload));
+	ASSERT_DRIVER_STATUS(_TIM_WriteCNTIfChanged(TIMx, currentCounterRegisterImage, (reg) TIMx_DEFAULT_CNT));
 	ASSERT_DRIVER_STATUS(_TIM_ClearUpdateFlagIfPending(TIMx));
 
-	//! Enable OPM and CEN together so counting starts only after ARR/CNT/UIF are prepared.
-	currentControlRegisterImage = cr1RegImage;
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageOnePulse(&cr1RegImage, TIMx_OPM_ENABLE));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageUpdateEventState(&cr1RegImage, DRIVER_STATUS_ON));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&cr1RegImage, DRIVER_STATUS_ON));
-	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentControlRegisterImage, cr1RegImage));
+	//! Start the preconfigured one-pulse blocking delay only after ARR, CNT, and UIF are ready.
+	currentControlRegisterImage = LL_TIM_ReadCR1(TIMx);
+	targetControlRegisterImage = currentControlRegisterImage;
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageCounterEnableState(&targetControlRegisterImage, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS(_TIM_WriteCR1IfChanged(TIMx, currentControlRegisterImage, targetControlRegisterImage));
 
-	while (updateFlagState == DRIVER_STATUS_OFF)
+	//! Poll within the bounded blocking budget; OPM stops the counter after successful completion.
+	pollStatus = _TIM_PollBlockingDelayCompletion(TIMx, pollsRemaining);
+	if (pollStatus == DRIVER_STATUS_SUCCESS)
 	{
-		//! Decode each polled UIF sample without treating a Codec failure as event completion.
-		updateFlagState = Codec_TIM_ExtractUpdateFlagState(LL_TIM_ReadSR(TIMx));
-		pollStatus = _TIM_ValidateState(updateFlagState);
-		if (pollStatus != DRIVER_STATUS_SUCCESS)
-		{
-			cleanupStatus = _TIM_RestoreDelayState(TIMx, updateEventState);
-			if (cleanupStatus != DRIVER_STATUS_SUCCESS)
-			{
-				return cleanupStatus;
-			}
-			return pollStatus;
-		}
-		if (updateFlagState == DRIVER_STATUS_ON)
-		{
-			break;
-		}
-
-		//! Bound polling so a stopped or misclocked peripheral cannot block forever.
-		if (pollsRemaining == 0UL)
-		{
-			cleanupStatus = _TIM_RestoreDelayState(TIMx, updateEventState);
-			if (cleanupStatus != DRIVER_STATUS_SUCCESS)
-			{
-				return cleanupStatus;
-			}
-			return DRIVER_STATUS_ERROR_TIMEOUT;
-		}
-		pollsRemaining--;
+		//! Acknowledge the completion event without redundantly stopping an OPM-stopped counter.
+		return _TIM_ClearUpdateFlagIfPending(TIMx);
 	}
 
-	//! OPM should clear CEN after UIF, but stop explicitly and restore the caller's update-event state.
-	return _TIM_RestoreDelayState(TIMx, updateEventState);
+	//! An incomplete delay may still be counting, so abort it and clear any racing update event.
+	cleanupStatus = _TIM_CleanupBlockingDelayState(TIMx);
+	if (cleanupStatus != DRIVER_STATUS_SUCCESS)
+	{
+		return cleanupStatus;
+	}
+
+	return pollStatus;
 }
 
 // ---------------------------------- Timer Millisecond Delay Helper ---------------------------------- //
 
-driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs)
+driver_status_t TIM_BlockingDelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs)
 {
 	// Local Variables
-	uint32_t elapsedMs = 0UL;
+	volatile uint32_t elapsedMs = 0UL;
 
 	//! Reject an empty request before the first composed Timer transaction.
 	if (delayMs == 0UL)
@@ -2093,7 +2106,7 @@ driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs)
 	//! Compose the millisecond delay from bounded 1000-us primitive operations.
 	for (elapsedMs = 0UL; elapsedMs < delayMs; elapsedMs++)
 	{
-		ASSERT_DRIVER_STATUS(TIM_DelayUs(TIMx, TIM_DRIVER_DELAY_MS_CHUNK_US));
+		ASSERT_DRIVER_STATUS(TIM_DelayUs(TIMx, TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US));
 	}
 
 	return DRIVER_STATUS_SUCCESS;

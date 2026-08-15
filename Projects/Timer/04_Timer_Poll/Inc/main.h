@@ -14,6 +14,6 @@
 // ==================================================================================================== //
 
 /** @brief Polling-delay demonstration interval in milliseconds @def LOOP_DELAY_MS */
-#define LOOP_DELAY_MS		((uint32_t) 100UL)
+#define LOOP_DELAY_MS		((uint32_t) 1000UL)
 
 #endif /* MAIN_H_ */

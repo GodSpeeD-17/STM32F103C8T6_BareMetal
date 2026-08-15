@@ -74,7 +74,7 @@ extern "C" {
  *
  * @see Reference Manual RM0008, Section 3.2 "Memory Map"
  * @see @ref I2C_01_Registers_02_Memory "I2C Peripheral Memory Address"
- * @see @ref BIT_POS() "Peripheral Index Computation"
+ * @see @ref `BIT_POS`() "Peripheral Index Computation"
  */
 #define I2C_PERIPHERAL_SIZE						((uint32_t) 0x400UL)
 

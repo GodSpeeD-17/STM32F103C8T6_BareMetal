@@ -32,9 +32,9 @@
 // #define SYSTICK_DELAY__			// Uncomment this to achieve delay from SysTick
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
-	/** @brief Dedicated Timer instance used by the startup delay service @def DELAY_TIMER */
+	/** @brief Dedicated Timer instance used by the startup blocking-delay service @def DELAY_TIMER */
 	#define DELAY_TIMER					TIM4
-	/** @brief APB1 clock-enable mask owned by the startup delay service @def DELAY_TIMER_CLOCK_ENABLE_MASK */
+	/** @brief APB1 clock-enable mask owned by the startup blocking-delay service @def DELAY_TIMER_CLOCK_ENABLE_MASK */
 	#define DELAY_TIMER_CLOCK_ENABLE_MASK		RCC_APB1ENR_TIM4EN
 #endif /* SYSTICK_DELAY__ */
 

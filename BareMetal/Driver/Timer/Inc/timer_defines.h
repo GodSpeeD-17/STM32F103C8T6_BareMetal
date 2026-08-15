@@ -250,7 +250,7 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask contains only supported channel bits
  * @param[in]	channelMask	Timer channel mask to check
  * @returns Supported-range status
- * @retval - `0x00U`: @p channelMask contains bits outside @ref TIMx_CHANNEL_ALL
+ * @retval - `0x00U`: @p channelMask contains bits outside @ref `TIMx_CHANNEL_ALL`
  * @retval - `0x01U`: @p channelMask contains only supported channel bits
  * @def TIM_CHANNEL_MASK_HAS_ONLY_VALID_CHANNELS
  */
@@ -292,7 +292,7 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
 
 /**
  * @brief Returns the channel index for a single-channel mask
- * @param[in]	channelMask	Timer single-channel mask ( @ref TIMx_CHANNEL_1 ... @ref TIMx_CHANNEL_ALL)
+ * @param[in]	channelMask	Timer single-channel mask ( @ref `TIMx_CHANNEL_1` ... @ref `TIMx_CHANNEL_ALL`)
  * @returns Timer channel index decoded from @p channelMask
  * @retval - `0U..3U`: Valid Timer channel index
  * @retval - `TIM_CHANNEL_INDEX_INVALID`: Invalid, empty, or multi-channel mask

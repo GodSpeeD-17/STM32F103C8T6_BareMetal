@@ -508,13 +508,13 @@ primary public surface; the six legacy IRQ compatibility wrappers are removed.
 | Operation state | `TIM_GetOperationState`, `TIM_SetOperationState` | Coherent ownership of `CR1.CEN`. |
 | Lifecycle | `TIM_Config`, `TIM_DeConfig` | Independent lifecycle entry points requiring an enabled application-owned gate. Configuration covers the timebase and counter domains represented by `tim_config_t`; both APIs leave RCC gate and NVIC state unchanged. |
 | General frequency-setting presets | none | General frequency-targeting configuration functions were removed; applications provide explicit prescaler/configuration data. |
-| Delay-service configuration | `TIM_ConfigDelay1MHz` | Narrow fixed service bootstrap; validates a 72 MHz Timer kernel clock and delegates the canonical root configuration. |
+| Blocking-delay service configuration | `TIM_ConfigForBlockingDelay` | Narrow fixed service bootstrap; validates a 72 MHz Timer kernel clock, delegates the canonical root configuration, and establishes the stable OPM/ARPE/UDIS/UIF policy required by blocking polling. |
 | Grouped base configuration | timebase and counter `Get`/`Set` pairs | Domain structures, grouped staging, and shared apply paths; timebase validation/staging now precedes the MMIO-only commit phase. |
 | Timebase scalar access | programmed frequency, PSC, ARR, and CNT functions | PSC/ARR/CNT pairs and `TIM_GetProgrammedTickFrequency` are present. A narrow symmetric programmed-frequency setter is absent; active shadow state remains unobservable. |
 | Counter behavior scalar access | DIR, CMS, OPM, ARPE, URS, and digital-filter clock-division pairs | Complete for represented CR1 fields; cross-field compatibility and live-state constraints need strengthening. |
 | IRQ/event handling | `TIM_GetIRQSources`, `TIM_SetIRQSources`, `TIM_GetIRQEvents`, `TIM_AckIRQEvents` | Separate DIER-source and SR-event types cover trigger and overcapture vocabulary; NVIC delivery is independent. Generic acknowledgement rejects input-capture lanes until capture consumption is admitted. |
 | Former IRQ compatibility | six `TIM_IRQ_*` wrappers | Removed after consumer migration; no Boolean error-collapsing wrapper remains. |
-| Blocking delay | `TIM_DelayUs`, `TIM_DelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. |
+| Blocking delay | `TIM_DelayUs`, `TIM_BlockingDelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. Applications must allocate the instance through `TIM_ConfigForBlockingDelay` and preserve its configuration; delay calls do not revalidate base configuration. |
 | Channel/output compare | none | Accepted-next primitives for the dormant PWM migration are absent despite partial Codec/LL groundwork. |
 | Input capture | none | Deferred candidate; consuming-read and overcapture semantics would be required if a named consumer admits it. |
 | Master/slave/encoder | none | Deferred candidates; partial selector groundwork does not constitute admitted public scope. |
@@ -531,9 +531,9 @@ Driver API candidates.
 | Base clock, operation, timebase, counter functions | Implemented; not fully verified | Retain while closing atomicity, transition, concurrency, and documentation gates. |
 | `TIM_Config` | Implemented; retained trace evidence open | Independent conjugate of `TIM_DeConfig`; it applies timebase/counter state, leaves IRQ-source and NVIC delivery state unobserved and unchanged, never invokes deconfiguration, and reuses both grouped staging paths before one root-owned ordered commit. |
 | Former frequency-setting configuration functions | Removed | `TIM_ConfigTickFrequency`, `TIM_Config1MHz`, `TIM_ConfigBaseTickFrequency`, and `TIM_ConfigBase1MHz` have no canonical replacement; use explicit `tim_config_t` data. |
-| `TIM_ConfigDelay1MHz` | Dedicated service bootstrap | Retain only for the admitted polling-delay service; it validates the fixed 72 MHz kernel-clock contract before delegating `TIM_Config`. |
+| `TIM_ConfigForBlockingDelay` | Dedicated service bootstrap | Retain only for the admitted blocking polling-delay service; it validates the fixed 72 MHz kernel-clock contract before delegating `TIM_Config`. |
 | Timer IRQ source/event functions | Implemented; evidence open | Retain the four canonical functions and separate source/event types; add retained Codec/MMIO traces before closing the evidence gate. |
-| `TIM_DelayUs`, `TIM_DelayMs` | Compatibility/service | Move behind dedicated-Timer ownership while retaining temporary wrappers. |
+| `TIM_DelayUs`, `TIM_BlockingDelayMs` | Compatibility/service | Move behind dedicated-Timer ownership while retaining temporary wrappers; application-owned allocation through `TIM_ConfigForBlockingDelay` is a precondition rather than runtime configuration discovery. |
 | Channel/output selectors and Codecs | Candidate/partly admitted | Admit only the subset required by the dormant PWM migration; keep other selectors dormant. |
 | `tim_remap_t` and TIM1/TIM2/TIM3/TIM4 remap selectors | Misowned compatibility debt | Move to AFIO/pin-routing ownership. TIM1 selectors are outside the current Timer instance scope. |
 | Frequency-specific default constants | Explicit configuration data | Retain only where a project establishes the documented Timer kernel clock before using the constant; they do not justify frequency-setting functions. |
@@ -668,9 +668,9 @@ TIM_GetProgrammedTickFrequency(...)
 The getter calculates frequency from the live Timer kernel clock and programmed
 PSC state. General frequency-targeting setters and presets are rejected;
 callers select explicit prescaler and timebase values through @ref tim_config_t
-or narrow register-semantic setters. `TIM_ConfigDelay1MHz()` is the sole
+or narrow register-semantic setters. `TIM_ConfigForBlockingDelay()` is the sole
 service-specific fixed-frequency exception: it validates the documented
-72 MHz input clock and configures only the admitted polling-delay service.
+72 MHz input clock and configures only the admitted blocking polling-delay service.
 
 #### 5. Define state-return convention deliberately
 
@@ -682,7 +682,7 @@ wrappers that turn invalid access into a legitimate OFF result.
 
 #### 6. Move dedicated-Timer conveniences above the core surface
 
-Preserve `TIM_DelayUs()` and `TIM_DelayMs()` until consumers migrate, but plan a
+Preserve `TIM_DelayUs()` and `TIM_BlockingDelayMs()` until consumers migrate, but plan a
 `timer_delay` service whose contract explicitly owns a dedicated Timer. The
 core Timer API must not imply that a blocking delay preserves an arbitrary
 caller's channel, trigger, DMA, or synchronization configuration.

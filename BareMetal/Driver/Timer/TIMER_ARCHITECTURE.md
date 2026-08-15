@@ -259,9 +259,9 @@ Current first-pass public API scope:
 - conjugate root lifecycle APIs `TIM_Config()` and `TIM_DeConfig()`
 - `TIM_GetIRQSources()` / `TIM_SetIRQSources()` for Timer-owned DIER state
 - `TIM_GetIRQEvents()` / `TIM_AckIRQEvents()` for Timer-owned SR state
-- dedicated 72 MHz-to-1 MHz polling-delay configuration through
-  `TIM_ConfigDelay1MHz()`
-- blocking polling delay helpers `TIM_DelayUs()` / `TIM_DelayMs()`
+- dedicated 72 MHz-to-1 MHz blocking polling-delay configuration through
+  `TIM_ConfigForBlockingDelay()`
+- blocking polling delay helpers `TIM_DelayUs()` / `TIM_BlockingDelayMs()`
 - grouped `TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
 - scalar `Get`/`Set` APIs for `prescaler`, `auto_reload`, `counter_value`,
@@ -438,29 +438,30 @@ state.
 
 General frequency-targeting configuration functions are intentionally absent.
 Applications provide explicit prescaler and timebase configuration data. The
-sole fixed-frequency exception is `TIM_ConfigDelay1MHz()`: a narrowly named
-bootstrap for the admitted polling-delay service that first validates a 72 MHz
+sole fixed-frequency exception is `TIM_ConfigForBlockingDelay()`: a narrowly named
+bootstrap for the admitted blocking polling-delay service that first validates a 72 MHz
 Timer kernel clock, then delegates the canonical configuration to
 `TIM_Config()`.
 `TIM_GetProgrammedTickFrequency()` remains as an observational calculation
 from the live Timer kernel clock and programmed PSC value.
 
-`TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that has
-already been configured through `TIM_ConfigDelay1MHz()` with a 1 MHz programmed tick. It does not create a general
-delay service and does not use IRQ/NVIC state. The helper verifies that the
-Timer clock gate is enabled and its active tick is exactly 1 MHz, stops the
-counter, disables `CR1.ARPE` so the
-new `ARR` value is immediate, writes `ARR = delayUs - 1`, resets `CNT`, clears
-`SR.UIF`, and then starts the counter with `CR1.OPM` set and `CR1.UDIS`
-temporarily clear so `SR.UIF` can be observed. It polls `SR.UIF` until the
-one-pulse update event completes, then stops the counter, restores the original
-update-event enable state, and clears `SR.UIF`. Polling has a bounded timeout
-and performs the same cleanup on timeout. The delay is a minimum blocking
+`TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that the
+application successfully allocated through `TIM_ConfigForBlockingDelay()` and has not
+subsequently reconfigured. It does not create a general delay service and does
+not use IRQ/NVIC state. The helper verifies only the Timer access preconditions;
+it deliberately does not revalidate PSC or the remaining base configuration.
+`TIM_ConfigForBlockingDelay()` permanently enables OPM and update events, disables
+ARPE, clears `SR.UIF`, and leaves the counter stopped for the duration of the
+application-owned allocation. Each `TIM_DelayUs()` call updates
+`ARR = delayUs - 1`, resets `CNT`, clears `SR.UIF`, starts `CEN`, and blocks
+while polling `SR.UIF` until the one-pulse update event completes or the
+bounded budget expires. One cleanup path stops the counter when necessary and
+clears `SR.UIF` for both success and failure. The delay is a minimum blocking
 delay because software setup, polling, and cleanup can add a small positive
 overhead. The public `uint16_t` input bounds the accepted range to
 `1U..0xFFFFU`, so the maximum requested delay is `65535 us`.
 
-`TIM_DelayMs()` is a thin blocking wrapper over `TIM_DelayUs()`. It rejects
+`TIM_BlockingDelayMs()` is a thin blocking wrapper over `TIM_DelayUs()`. It rejects
 `0U`, then performs one `TIM_DelayUs(TIMx, 1000U)` chunk for each requested
 millisecond. Because the wrapper composes repeated microsecond-delay calls, its
 delay is also a minimum delay and accumulates the per-chunk software overhead.
@@ -604,11 +605,13 @@ Completed:
   `TIM_SetIRQSources()` and is never part of `tim_config_t`.
 - `TIM_DeConfig()` requires an enabled application-owned clock, pulses the
   matching RCC reset, and leaves clock-gate and NVIC state unchanged.
-- `TIM_ConfigDelay1MHz()` validates a 72 MHz Timer kernel clock and applies the
-  canonical dedicated polling-delay configuration through `TIM_Config()`.
-- `TIM_DelayUs()` and `TIM_DelayMs()` exist as blocking polling helpers for
-  Timers explicitly configured through `TIM_ConfigDelay1MHz()` with a 1 MHz tick, with exact-frequency
-  validation and bounded polling.
+- `TIM_ConfigForBlockingDelay()` validates a 72 MHz Timer kernel clock and applies the
+  canonical dedicated blocking polling-delay configuration through
+  `TIM_Config()`.
+- `TIM_DelayUs()` and `TIM_BlockingDelayMs()` exist as blocking polling helpers for
+  Timers explicitly allocated through `TIM_ConfigForBlockingDelay()`. The application
+  preserves that dedicated configuration; delay calls do not revalidate it and
+  retain bounded polling.
 - IRQ source/event APIs use separate types, cover trigger and overcapture
   vocabulary, and never mutate the per-instance NVIC line.
 - `timer.c` orchestrates config-owned fields through full-domain validation and

@@ -79,8 +79,8 @@ extern "C" {
  * field positions, or update/interrupt policy.
  *
  * Practical Rule:
- * - Use `.REG` through @ref LL_TIM_REG for Timer union registers.
- * - Use @ref LL_TIM_SCALAR_REG for direct scalar register members.
+ * - Use `.REG` through @ref `LL_TIM_REG` for Timer union registers.
+ * - Use @ref `LL_TIM_SCALAR_REG` for direct scalar register members.
  * - Do not use `.BIT` in the LL layer.
  * - Read-modify-write policy belongs to the caller, not to this LL layer.
  *
@@ -95,7 +95,7 @@ extern "C" {
  * @param[in]	_TIMX	Target Timer peripheral instance expression
  * @param[in]	_REG	Union register member token inside @ref TIM_TypeDef
  * @returns Pointer to the selected Timer register `.REG` image.
- * @note Thin Timer LL alias over @ref REGOPS_REG.
+ * @note Thin Timer LL alias over @ref `REGOPS_REG`.
  * @note Use this only for union registers that expose a `.REG` member.
  */
 #define LL_TIM_REG(_TIMX, _REG)					REGOPS_REG((_TIMX), _REG)
