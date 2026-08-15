@@ -39,17 +39,40 @@ static void APP_ErrorHandler(void)
  * @brief Initializes TIM3 for a one-second update interrupt
  * @details
  * The sequence first establishes the tick and auto-reload period while TIM3
- * is stopped, then enables the update source and starts counter operation.
- * @returns @ref driver_status_t "IRQ Timer Initialization - Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			TIM3 update interrupts were started.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`:	A Timer selector or exact tick request was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`:		A required Timer clock or IRQ state was unavailable.
+ * is stopped, then enables the Timer update source, prepares the dedicated
+ * NVIC line, and starts counter operation.
+ * @returns @ref driver_status_t "IRQ-Timer initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM3 update interrupts were started
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A Timer configuration selector was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A required Timer clock or IRQ state was unavailable
  */
 static driver_status_t APP_Init(void)
 {
-	ASSERT_DRIVER_STATUS(TIM_ConfigTickFrequency(TIM3, APP_TIMER_TICK_FREQUENCY_HZ));
-	ASSERT_DRIVER_STATUS(TIM_SetAutoReload(TIM3, APP_TIMER_AUTO_RELOAD));
-	ASSERT_DRIVER_STATUS(TIM_SetIRQState(TIM3, TIMx_IRQ_OVF_UVF, DRIVER_STATUS_ON));
+	const tim_config_t config =
+	{
+		.timebase =
+		{
+			.prescaler = APP_TIMER_PRESCALER,
+			.auto_reload = APP_TIMER_AUTO_RELOAD,
+			.initial_count = TIMx_DEFAULT_CNT
+		},
+		.counter =
+		{
+			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
+			.alignment = TIMx_MODE_NORMAL,
+			.direction = TIMx_DIR_COUNT_UP,
+			.one_pulse = TIMx_OPM_DISABLE,
+			.auto_reload_preload = TIMx_ARPE_ENABLE,
+			.update_source = TIMx_UPDATE_SOURCE_ANY
+		},
+		.irq_sources = TIMx_IRQ_SOURCE_UPDATE
+	};
+
+	//! Apply the complete TIM3 configuration, including its Timer-owned update IRQ source.
+	ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
+	//! Timer owns DIER; the application separately owns stale-pending cleanup and NVIC delivery.
+	NVIC_IRQ_ClearPending(TIM3_IRQn);
+	NVIC_IRQ_Enable(TIM3_IRQn);
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIM3, DRIVER_STATUS_ON));
 
 	return DRIVER_STATUS_SUCCESS;
@@ -93,19 +116,19 @@ int main(void)
  */
 void TIM3_IRQHandler(void)
 {
-	tim_irq_t pendingMask = (tim_irq_t) 0U;
+	tim_event_flag_t irqEvents = TIMx_IRQ_EVENT_NONE;
 
-	if (TIM_GetPendingIRQMask(TIM3, &pendingMask) != DRIVER_STATUS_SUCCESS)
+	if (TIM_GetIRQEvents(TIM3, &irqEvents) != DRIVER_STATUS_SUCCESS)
 	{
 		APP_ErrorHandler();
 	}
 
-	if ((pendingMask & TIMx_IRQ_OVF_UVF) != (tim_irq_t) 0U)
+	if ((irqEvents & TIMx_IRQ_EVENT_UPDATE) != TIMx_IRQ_EVENT_NONE)
 	{
 		OB_LED_Toggle();
 
 		//! Acknowledge only the serviced update flag and preserve unrelated Timer flags.
-		if (TIM_AcknowledgeIRQ(TIM3, TIMx_IRQ_OVF_UVF) != DRIVER_STATUS_SUCCESS)
+		if (TIM_AckIRQEvents(TIM3, TIMx_IRQ_EVENT_UPDATE) != DRIVER_STATUS_SUCCESS)
 		{
 			APP_ErrorHandler();
 		}

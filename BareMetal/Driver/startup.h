@@ -32,8 +32,33 @@
 // #define SYSTICK_DELAY__			// Uncomment this to achieve delay from SysTick
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
-	// Timer used for Delay
-	#define DELAY_TIMER							TIM4
+	/** @brief Dedicated Timer instance used by the startup delay service @def DELAY_TIMER */
+	#define DELAY_TIMER				TIM4
+	/**
+	 * @brief Root configuration initializer for the 1 MHz startup delay Timer
+	 * @details The startup sequence establishes a 72 MHz Timer kernel clock
+	 * before applying this explicit configuration object.
+	 * @def DELAY_TIMER_CONFIG
+	 */
+	#define DELAY_TIMER_CONFIG		\
+	{							\
+		.timebase =				\
+		{						\
+			.prescaler = TIMx_DEFAULT_1MHz_PSC,	\
+			.auto_reload = TIMx_DEFAULT_1MHz_ARR,	\
+			.initial_count = TIMx_DEFAULT_CNT	\
+		},						\
+		.counter =				\
+		{						\
+			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1, \
+			.alignment = TIMx_MODE_NORMAL,		\
+			.direction = TIMx_DIR_COUNT_UP,		\
+			.one_pulse = TIMx_OPM_DISABLE,		\
+			.auto_reload_preload = TIMx_ARPE_ENABLE,	\
+			.update_source = TIMx_UPDATE_SOURCE_ANY	\
+		},						\
+		.irq_sources = TIMx_IRQ_SOURCE_NONE	\
+	}
 #endif /* SYSTICK_DELAY__ */
 
 /*----------------------------------- Linker Script --------------------------------------------*/

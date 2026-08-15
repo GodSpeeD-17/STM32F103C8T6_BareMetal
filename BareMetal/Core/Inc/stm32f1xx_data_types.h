@@ -86,6 +86,13 @@ typedef uint8_t									reg_bit_pos_t;
 typedef uint8_t									reg_field_width_t;
 
 // ==================================================================================================== //
+//									Shared Physical Quantity Types									//
+// ==================================================================================================== //
+
+/** @brief Frequency value in hertz shared by every peripheral driver @typedef frequency_t */
+typedef uint32_t								frequency_t;
+
+// ==================================================================================================== //
 //										Driver Operation Status Type									//
 // ==================================================================================================== //
 
@@ -206,9 +213,6 @@ typedef uint8_t									rcc_pll_src_t;
 typedef uint8_t									rcc_pll_src_psc_t;
 /** @brief PLL multiplication factor type @typedef rcc_pll_mul_t */
 typedef uint8_t									rcc_pll_mul_t;
-/** @brief RCC frequency unit type @typedef rcc_freq_t */
-typedef uint32_t								rcc_freq_t;
-
 /** @} */ // RCC_03_Driver_01_DataTypes
 
 // --- C++ Safeguards ---

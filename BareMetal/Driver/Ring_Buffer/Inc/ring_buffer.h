@@ -27,20 +27,29 @@
  * @ingroup RingBuffer
  * @details Sets up the buffer pointers and indices. **It is mandatory** that
  * the provided buffer size is a **power of 2** for the fast bitwise index wrapping to work.
- * @param rb Pointer to the ring_buffer_t structure to initialize.
- * @param buffer Pointer to the data buffer (must be of size `size`).
- * @param size The size of the buffer. Must be a power of 2 (e.g., 2, 4, 8, ...).
- * @returns Driver Operation Status:
- * @returns - `DRIVER_STATUS_SUCCESS`: Initialization Successful
- * @returns - `DRIVER_STATUS_ERROR_FAIL`: `size` is not a power of 2
+ * @param[out] rb Ring Buffer structure to initialize
+ * Expected values:
+ * - Non-`NULL`: Initialized Ring Buffer state is written to @p rb
+ * @param[in] buffer Data storage containing @p size elements
+ * Accepted values:
+ * - Non-`NULL`: Caller-owned Ring Buffer storage
+ * @param[in] size Number of elements in @p buffer
+ * Accepted values:
+ * - `1U..0x8000U`: Any power of two representable by @ref ring_buffer_size_t
+ * @returns @ref driver_status_t "Ring Buffer initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Ring Buffer initialization succeeded
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p rb or @p buffer is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p size is not a non-zero power of two
  */
 driver_status_t RingBuffer_Init(ring_buffer_t* rb, ring_buffer_data_t* const buffer, const ring_buffer_size_t size)
 {
-	// Size should be power of 2
-	if(_isPowerOf2(size) != 0x01)
+	//! Validate caller-owned storage before publishing any Ring Buffer state.
+	if ((rb == NULL) || (buffer == NULL))
 	{
-		return DRIVER_STATUS_ERROR_FAIL;
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
+	//! Validate the wraparound invariant before publishing any Ring Buffer state.
+	ASSERT_DRIVER_STATUS(RingBuffer_ValidateSize(size));
 
 	// Init Ring Buffer
 	rb->buffer = buffer;

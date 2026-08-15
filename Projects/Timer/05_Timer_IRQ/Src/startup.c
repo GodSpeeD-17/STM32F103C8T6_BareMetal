@@ -66,8 +66,9 @@ void Reset_Handler(void)
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	//! Keep the shared delay contract on its dedicated TIM4 resource.
-	if (TIM_Config1MHz(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
+	//! Keep the shared delay contract on its dedicated TIM4 resource through explicit configuration data.
+	const tim_config_t delayTimerConfig = DELAY_TIMER_CONFIG;
+	if (TIM_Config(DELAY_TIMER, &delayTimerConfig) != DRIVER_STATUS_SUCCESS)
 	{
 		Default_Handler();
 	}

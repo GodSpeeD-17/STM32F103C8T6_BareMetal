@@ -180,7 +180,7 @@ Acceptable `startup.c` responsibilities:
 
 Not acceptable in `startup.c`:
 
-- `TIM_Config1MHz()`
+- direct Timer configuration such as `TIM_Config()`
 - `TIM_DelayUs()`
 - `TIM_DelayMs()`
 - raw `TIMx->ARR` / `TIMx->CNT` / `TIMx->SR` access
@@ -305,7 +305,7 @@ For the current Timer driver refactor, the preferred Timer delay backend is:
 ```c
 driver_status_t Project_DelayInit(void)
 {
-	return TIM_Config1MHz(PROJECT_DELAY_TIMER);
+	return TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG);
 }
 
 driver_status_t Project_DelayUs(const uint16_t delayUs)
@@ -394,7 +394,7 @@ Current preferred Timer delay flow:
 Project_Init()
   -> RCC_Config_72MHz()
   -> Project_DelayInit()
-       -> TIM_Config1MHz(PROJECT_DELAY_TIMER)
+       -> TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG)
   -> OB_LED_Init()
   -> OB_LED_Reset()
 
@@ -436,7 +436,7 @@ Projects/Template/Src/project_delay.c
 Implement the Timer backend using the current Timer driver APIs:
 
 ```c
-TIM_Config1MHz(PROJECT_DELAY_TIMER);
+TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG);
 TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
 TIM_DelayMs(PROJECT_DELAY_TIMER, delayMs);
 ```
@@ -522,23 +522,23 @@ startup/runtime split should remain clean.
 
 ## Current Timer Driver Alignment
 
-The current Timer driver now provides the public helpers needed by the modular
-project delay facade:
+The current Timer driver provides the root configuration and delay operations
+needed by the modular project delay facade:
 
 ```c
-driver_status_t TIM_Config1MHz(TIM_TypeDef* const TIMx);
+driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
 driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
 driver_status_t TIM_DelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 ```
 
 Important constraints:
 
-- `TIM_Config1MHz()` assumes a 72 MHz Timer kernel clock.
+- Projects own explicit prescaler/timebase data; no frequency-targeting Timer configuration function exists.
 - `TIM_DelayUs()` accepts `1U..0xFFFFU`.
 - `TIM_DelayUs()` is a minimum blocking delay, not a cycle-exact delay.
 - `TIM_DelayMs()` composes repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
 - Delay helpers assume the Timer clock gate is enabled and the Timer was
-  configured by `TIM_Config1MHz()`.
+  configured through `TIM_Config()` with a 1 MHz programmed counter tick.
 
 ## Known Current Deviation In Examples
 
@@ -551,10 +551,9 @@ TIM_1MHz_Load_Default(&TIM_Configuration);
 TIM_Config(&TIM_Configuration);
 ```
 
-The current Timer driver API expects:
+The current Timer driver API expects an explicit project-owned root configuration:
 
 ```c
-TIM_Config1MHz(TIMx);
 TIM_Config(TIMx, &config);
 ```
 
@@ -583,7 +582,7 @@ DELAY_TIMER->SR.REG &= ...;
 
 ```c
 // systick.c
-TIM_Config1MHz(...);
+TIM_Config(...);
 TIM_DelayMs(...);
 ```
 

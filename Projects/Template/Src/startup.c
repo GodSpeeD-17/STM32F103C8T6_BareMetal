@@ -66,8 +66,12 @@ void Reset_Handler(void)
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	// Configure a dedicated polling Timer with an exact 1 MHz counter tick.
-	(void) TIM_Config1MHz(DELAY_TIMER);
+	//! Apply explicit configuration data for the dedicated 1 MHz polling Timer.
+	const tim_config_t delayTimerConfig = DELAY_TIMER_CONFIG;
+	if (TIM_Config(DELAY_TIMER, &delayTimerConfig) != DRIVER_STATUS_SUCCESS)
+	{
+		Default_Handler();
+	}
 #endif /* SYSTICK_DELAY__ */
 	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick

@@ -59,6 +59,8 @@ extern "C" {
  * @brief	RCC Frequency Types and Limits
  * @defgroup RCC_03_Driver_02_Frequency RCC Driver Frequency Types and Macros
  * @ingroup	RCC_03_Driver
+ * @details All hertz-valued RCC fields and APIs use the Core-owned
+ * @ref frequency_t alias.
  * @{
  */
 
@@ -73,37 +75,37 @@ typedef struct _rcc_clock_frequencies_t
 	 * @brief System clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	sysclk;
+	frequency_t	sysclk;
 
 	/**
 	 * @brief AHB clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	hclk;
+	frequency_t	hclk;
 
 	/**
 	 * @brief APB1 clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	pclk1;
+	frequency_t	pclk1;
 	
 	/**
 	 * @brief APB2 clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	pclk2;
+	frequency_t	pclk2;
 
 	/**
 	 * @brief ADC clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	adcclk;
+	frequency_t	adcclk;
 
 	/**
 	 * @brief USB clock frequency in Hz
 	 * @memberof rcc_clock_frequencies_t
 	 */
-	rcc_freq_t	usbclk;
+	frequency_t	usbclk;
 
 } rcc_clock_frequencies_t;
 
@@ -590,28 +592,28 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMas
 
 /**
  * @brief	Returns the current core clock frequency before AHB division
- * @returns	Core clock frequency in Hz
+ * @returns @ref frequency_t "Core clock frequency in hertz"
  */
-rcc_freq_t RCC_GetCoreClockFreq(void);
+frequency_t RCC_GetCoreClockFreq(void);
 
 /**
  * @brief	Returns the current frequency of a requested bus
  * @param[in] bus	Target bus selector of @ref rcc_bus_t
- * @returns	Bus clock frequency in Hz
+ * @returns @ref frequency_t "Bus clock frequency in hertz"
  */
-rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus);
+frequency_t RCC_GetBusFreq(const rcc_bus_t bus);
 
 /**
  * @brief	Returns the current ADC clock frequency
- * @returns	ADC clock frequency in Hz
+ * @returns @ref frequency_t "ADC clock frequency in hertz"
  */
-rcc_freq_t RCC_GetADCFreq(void);
+frequency_t RCC_GetADCFreq(void);
 
 /**
  * @brief	Returns the current USB clock frequency
- * @returns	USB clock frequency in Hz
+ * @returns @ref frequency_t "USB clock frequency in hertz"
  */
-rcc_freq_t RCC_GetUSBFreq(void);
+frequency_t RCC_GetUSBFreq(void);
 
 /**
  * @brief	Returns the cached or current derived RCC clock frequencies snapshot
@@ -821,27 +823,27 @@ driver_status_t RCC_Config72MHz(void);
 
 /**
  * @brief	Legacy wrapper that returns the current AHB clock frequency
- * @returns	AHB clock frequency in Hz
+ * @returns @ref frequency_t "AHB clock frequency in hertz"
  */
-__STATIC_FORCEINLINE rcc_freq_t RCC_GetAHBClock(void)
+__STATIC_FORCEINLINE frequency_t RCC_GetAHBClock(void)
 {
 	return RCC_GetBusFreq(RCC_AHB_BUS);
 }
 
 /**
  * @brief	Legacy wrapper that returns the current APB1 clock frequency
- * @returns	APB1 clock frequency in Hz
+ * @returns @ref frequency_t "APB1 clock frequency in hertz"
  */
-__STATIC_FORCEINLINE rcc_freq_t RCC_GetAPB1Clock(void)
+__STATIC_FORCEINLINE frequency_t RCC_GetAPB1Clock(void)
 {
 	return RCC_GetBusFreq(RCC_APB1_BUS);
 }
 
 /**
  * @brief	Legacy wrapper that returns the current APB2 clock frequency
- * @returns	APB2 clock frequency in Hz
+ * @returns @ref frequency_t "APB2 clock frequency in hertz"
  */
-__STATIC_FORCEINLINE rcc_freq_t RCC_GetAPB2Clock(void)
+__STATIC_FORCEINLINE frequency_t RCC_GetAPB2Clock(void)
 {
 	return RCC_GetBusFreq(RCC_APB2_BUS);
 }

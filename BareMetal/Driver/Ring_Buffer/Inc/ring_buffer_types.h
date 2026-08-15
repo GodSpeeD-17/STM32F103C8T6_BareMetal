@@ -93,15 +93,25 @@ typedef struct _ring_buffer_t
 #define SIZEOF(X) (sizeof((X)) / sizeof((X)[0]))
 
 /**
- * @brief Check if a number is a power of 2
- * @param num The number to check
- * @returns Number is a power of 2 or not
- * @returns 0x00: Not a power of 2
- * @returns 0x01: Power of 2
+ * @brief Validates that a Ring Buffer size is a power of two
+ * @param[in] size Ring Buffer size to validate
+ * Accepted values:
+ * - `1U..0x8000U`: Any power of two representable by @ref ring_buffer_size_t
+ * @returns @ref driver_status_t "Ring Buffer size validation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p size is a non-zero power of two
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p size is zero or is not a power of two
  */
-__STATIC_FORCEINLINE uint8_t _isPowerOf2(const uint32_t num)
+__STATIC_FORCEINLINE driver_status_t RingBuffer_ValidateSize(const ring_buffer_size_t size)
 {
-	return ((uint8_t) (num && (!(num & (num - 1)))));
+	//! Power-of-two values contain exactly one set bit; zero is explicitly invalid.
+	if ((size != 0U) && ((((uint32_t) size) & (((uint32_t) size) - 1UL)) == 0x00000000UL))
+	{
+		return DRIVER_STATUS_SUCCESS;
+	}
+	else
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
 }
 
 /**

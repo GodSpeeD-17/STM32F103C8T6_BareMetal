@@ -20,6 +20,7 @@ not override safety gaps reopened by the top-down audit.
 
 - [x] Document intended Timer architecture and pending deviations in this directory.
 - [x] Introduce `Inc/timer_data_types.h` for Timer scalar aliases and shared plain data aliases.
+- [x] Use the Core-owned `frequency_t` alias for every Timer frequency value instead of a duplicate Timer-specific typedef.
 - [x] Introduce `Inc/timer_defines.h` for public selectors, defaults, validation helpers, and pure utilities.
 - [x] Move Timer public selectors/defaults out of `stm32f1xx.h` while keeping Core raw-only.
 - [x] Add `Inc/timer_ll.h` with dumb register read/write helpers only.
@@ -31,8 +32,8 @@ not override safety gaps reopened by the top-down audit.
 - [x] Add `Accepted values` and `Expected values` Doxygen scope details to `timer.h`, `timer_config.h`, and `timer_codec.h`.
 - [x] Standardize `timer.h` public API `@returns` and `@retval` Doxygen wording around function-specific operation status.
 - [x] Implement the first-pass Timer config update-event sequence around `EGR.UG`, `CNT`, and generated `SR.UIF` (full-domain closure is reopened below).
-- [x] Add public header-local static inline `TIM_Config1MHz()` preset wrapper over `TIM_Config()`.
-- [x] Add public `TIM_DelayUs()` blocking polling helper for Timers configured by `TIM_Config1MHz()`.
+- [x] Remove frequency-targeting configuration functions; applications now provide explicit `tim_config_t` prescaler/timebase data.
+- [x] Add public `TIM_DelayUs()` blocking polling helper for Timers explicitly configured with a 1 MHz programmed tick.
 - [x] Add public `TIM_DelayMs()` blocking polling wrapper over `TIM_DelayUs(TIMx, 1000U)`.
 - [x] Reorganize `timer.c` public implementations under the same banner and sub-banner order used by `timer.h`.
 - [x] Add file-level Doxygen `@section` blocks to `timer.c` for scope, field ownership, and source layout.
@@ -63,8 +64,10 @@ not override safety gaps reopened by the top-down audit.
 - [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
 - [x] `timer.h` public APIs now use function-specific `@returns @ref driver_status_t "... - Operation Status"` labels and parameter-specific `@retval` wording.
-- [x] First-pass `TIM_Config()` commits `PSC`/`ARR` with `UDIS=0`, `URS=1`, and `EGR.UG`, restoring requested `CR1`, `CNT`, and entry NVIC state; full-domain/failure closure remains reopened.
-- [x] `TIM_Config1MHz()` derives the prescaler from the live instance-mapped Timer kernel clock through `TIM_ConfigTickFrequency()`.
+- [x] `TIM_Config()` and `TIM_DeConfig()` form an independent conjugate root lifecycle pair; neither calls the other and the application owns their ordering.
+- [x] `TIM_Config()` directly delegates every admitted `tim_config_t` domain to its narrow transaction helper without a root-shadow wrapper.
+- [x] `tim_config_t` includes Timer-owned IRQ sources; deferred domains remain unchanged until admitted or explicitly reset by the application.
+- [x] Stage all timebase/commit images and validate the stopped-counter precondition before the first MMIO write.
 - [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
 - [x] `TIM_DelayUs()` verifies an exact 1 MHz tick and uses bounded polling with cleanup on timeout.
 - [x] `TIM_DelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
@@ -74,6 +77,13 @@ not override safety gaps reopened by the top-down audit.
 - [x] `TIM_GetClockState()` and `TIM_SetClockState()` validate the Timer instance directly and do not require the Timer clock gate to already be enabled.
 - [x] A first-pass stopped guard exists for timebase and DIR/CMS setters; atomic ordering and complete mode validation remain reopened.
 - [x] First-pass Timer IRQ source state, pending flags, and acknowledgements use codec-owned DIER/SR mapping and instance NVIC coordination; the target source/event/delivery split remains reopened.
+- [x] Replace the first-pass IRQ surface with `TIM_GetIRQSources()`,
+  `TIM_SetIRQSources()`, `TIM_GetIRQEvents()`, and `TIM_AckIRQEvents()`.
+- [x] Separate `tim_irq_source_t` from `tim_event_flag_t`, include trigger and
+  overcapture vocabulary, remove `tim_irq_enable_t` and all six legacy IRQ
+  wrappers, and leave generic NVIC delivery under NVIC/application ownership.
+- [x] Make generic capture/compare event acknowledgement mode-aware and reject
+  input-capture lanes until the deferred capture-consumption contract exists.
 - [x] A host codec suite verified CR1/timebase preservation and DIER/SR IRQ behavior during the refactor; its repository-local test artifact is intentionally not retained.
 
 ## Reopened P0 Safety Work
@@ -81,9 +91,10 @@ not override safety gaps reopened by the top-down audit.
 These items must close before channel/PWM implementation begins:
 
 - [ ] Make every timebase/lifecycle transaction complete validation and Codec staging before its first MMIO write; a BUSY/error result must leave hardware unchanged.
-- [ ] Restrict the first safe base-config contract to reset/dormant, exclusively owned feature state and trace the complete URS/UDIS/UG behavior.
+- [ ] Restrict the first safe root-config contract to exclusive application ownership, preserve deferred feature state, and trace the complete URS/UDIS/UG behavior.
 - [ ] Separate programmed preload state from active/effective state and freeze the coherent PSC/ARR/CCR commit contract required by PWM.
-- [ ] Split Timer IRQ-source enables, event flags, DMA-source enables, and NVIC delivery ownership/types; include trigger and overcapture domains.
+- [ ] Finish the deferred DMA-source vocabulary independently from the completed
+  Timer IRQ-source/event/NVIC split, including `DIER.TDE` when DMA admission opens.
 - [ ] Correct write-only EGR, mode-dependent CCR, SR W0C, DMAR portal, and generic LL/RegOps access semantics.
 - [ ] Validate current DIR/CMS transitions against the complete live mode context.
 - [ ] Define `TIM_SetClockState(..., DRIVER_STATUS_OFF)` as a stopped/quiescent transition or an accurately named intentional pause action.
@@ -122,6 +133,6 @@ These items must close before channel/PWM implementation begins:
   register-specific dirty-write decisions, and public status handling;
   peripheral-independent compare/write mechanics belong to RegOps.
 - Current compatibility API `TIM_SetClockState()` owns direct RCC APB1 clock-gate mutation; its OFF transition remains reopened for stopped/quiescent policy.
-- Current `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally as base lifecycle orchestration; target naming/entry-state contracts remain open.
+- `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally as root lifecycle orchestration, but neither may call its conjugate; narrow field APIs retain explicit clock ownership.
 - Clock-state APIs validate Timer instance/state and do not require the gate to already be enabled; that fact does not authorize gating an active Timer.
 - Narrow grouped/scalar `Get` and `Set` APIs verify clock availability through the private `_TIM_ValidateClockEnabled()` helper and do not change clock state.

@@ -93,7 +93,7 @@ typedef struct _tim_config_timebase_t
 	 * - `0x0000U..0xFFFFU`: Any value representable by @ref tim_auto_reload_t
 	 * @memberof tim_config_timebase_t
 	 */
-	tim_auto_reload_t			auto_reload;
+	tim_auto_reload_t		auto_reload;
 
 	/**
 	 * @brief Initial counter value staged into `TIMx_CNT`
@@ -126,14 +126,15 @@ typedef struct _tim_config_timebase_t
 typedef struct _tim_config_counter_t
 {
 	/**
-	 * @brief Counter direction selector
+	 * @brief Digital filter and dead-time sampling clock division selector
 	 * @details
 	 * Accepted values:
-	 * - @ref TIMx_DIR_COUNT_UP : Counter counts up
-	 * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
+	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_1 : `t_DTS = t_CK_INT`
+	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_2 : `t_DTS = 2 * t_CK_INT`
+	 * - @ref TIMx_DIGITAL_FILTER_CLOCK_DIV_4 : `t_DTS = 4 * t_CK_INT`
 	 * @memberof tim_config_counter_t
 	 */
-	tim_direction_t			direction;
+	tim_digital_filter_clock_division_t	digital_filter_clock_division: 2;
 
 	/**
 	 * @brief Counter alignment mode selector
@@ -146,7 +147,17 @@ typedef struct _tim_config_counter_t
 	 * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
 	 * @memberof tim_config_counter_t
 	 */
-	tim_count_mode_t			alignment;
+	tim_count_mode_t		alignment: 2;
+
+	/**
+	 * @brief Counter direction selector
+	 * @details
+	 * Accepted values:
+	 * - @ref TIMx_DIR_COUNT_UP : Counter counts up
+	 * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
+	 * @memberof tim_config_counter_t
+	 */
+	tim_direction_t			direction: 1;
 
 	/**
 	 * @brief One-pulse mode selector
@@ -156,7 +167,7 @@ typedef struct _tim_config_counter_t
 	 * - @ref TIMx_OPM_ENABLE : Counter stops at the next update event
 	 * @memberof tim_config_counter_t
 	 */
-	tim_opm_t					one_pulse;
+	tim_opm_t				one_pulse: 1;
 
 	/**
 	 * @brief Auto-reload preload selector
@@ -166,28 +177,17 @@ typedef struct _tim_config_counter_t
 	 * - @ref TIMx_ARPE_ENABLE : Auto-reload preload is enabled
 	 * @memberof tim_config_counter_t
 	 */
-	tim_arpe_t				auto_reload_preload;
+	tim_arpe_t				auto_reload_preload: 1;
 
 	/**
 	 * @brief Update request source selector
 	 * @details
 	 * Accepted values:
 	 * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate an update request
-	 * - @ref TIMx_UPDATE_SOURCE_OVF_DMA : Only overflow/underflow or DMA source generates an update request
+	 * - @ref TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY : Only counter overflow or underflow generates an update request
 	 * @memberof tim_config_counter_t
 	 */
-	tim_update_source_t		update_source;
-
-	/**
-	 * @brief Digital filter and dead-time sampling clock division selector
-	 * @details
-	 * Accepted values:
-	 * - @ref TIMx_CKD_CLK_FREQ : `t_DTS = t_CK_INT`
-	 * - @ref TIMx_CKD_CLK_2_FREQ : `t_DTS = 2 * t_CK_INT`
-	 * - @ref TIMx_CKD_CLK_4_FREQ : `t_DTS = 4 * t_CK_INT`
-	 * @memberof tim_config_counter_t
-	 */
-	tim_clock_division_t		clock_division;
+	tim_update_source_t		update_source: 1;
 
 } tim_config_counter_t;
 
@@ -206,6 +206,10 @@ typedef struct _tim_config_counter_t
  * Root configuration object consumed by the Timer driver. It deliberately does
  * not contain a Timer peripheral pointer; the public driver API should receive
  * `TIMx` separately so this structure remains reusable across Timer instances.
+ * The structure covers every currently implemented configurable Timer domain.
+ * Deferred channel, capture, synchronization, and DMA domains are not
+ * represented and are preserved by @ref TIM_Config. Applications call
+ * @ref TIM_DeConfig explicitly when complete hardware-reset state is required.
  */
 typedef struct _tim_config_t
 {
@@ -220,6 +224,15 @@ typedef struct _tim_config_t
 	 * @memberof tim_config_t
 	 */
 	tim_config_counter_t	counter;
+
+	/**
+	 * @brief Timer interrupt-request sources staged into `TIMx_DIER`
+	 * Accepted values:
+	 * - @ref TIMx_IRQ_SOURCE_NONE : Keep all Timer interrupt-request sources disabled
+	 * - Any combination contained by @ref TIMx_IRQ_SOURCE_ALL : Enable the selected sources
+	 * @memberof tim_config_t
+	 */
+	tim_irq_source_t		irq_sources;
 
 } tim_config_t;
 

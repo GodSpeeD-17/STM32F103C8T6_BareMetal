@@ -246,9 +246,9 @@ __STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapLLFieldByIndex(const _rcc_fie
  * @param[in] prescalerSelector The AHB prescaler selector.
  * @returns The effective divider value.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
 {
-	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
+	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_AHBPrescalerLUT,
 		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
@@ -262,9 +262,9 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBPrescalerDividerBySelector(const rcc_
  * @param[in] prescalerSelector The APB prescaler selector.
  * @returns The effective divider value.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPBBusPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_GetAPBBusPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
 {
-	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
+	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_APBPrescalerLUT,
 		ARRAY_SIZE(_RCC_APBPrescalerLUT),
@@ -278,9 +278,9 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPBBusPrescalerDividerBySelector(const r
  * @param[in] prescalerSelector The ADC prescaler selector.
  * @returns The effective divider value.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCPrescalerDividerBySelector(const rcc_component_prescaler_t prescalerSelector)
+__STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerDividerBySelector(const rcc_component_prescaler_t prescalerSelector)
 {
-	return (rcc_freq_t) _RCC_GetFieldValueMapValueByIndex
+	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
 	(
 		_RCC_ADCPrescalerLUT,
 		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
@@ -609,7 +609,7 @@ __STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetUSBPrescalerSelectorFromL
  * @param[in] bus Target bus selector.
  * @returns Effective divider value for the requested bus.
  */
-static rcc_freq_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
+static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 {
 	uint32_t ahbPrescalerField = RCC_CFGR_HPRE_DIV1;
 	uint32_t apb1PrescalerField = RCC_CFGR_PPRE1_DIV1;
@@ -656,7 +656,7 @@ static rcc_freq_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The PLL input frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetPLLInputClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetPLLInputClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	if (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSI)
 	{
@@ -676,7 +676,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetPLLInputClockFrequency(const rcc_clock_t
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target SYSCLK frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetSystemClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetSystemClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	switch (pClockTreeConfig->system.clk_src)
 	{
@@ -690,7 +690,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetSystemClockFrequency(const rcc_clock_tre
 		}
 		case RCC_SYS_CLK_PLL:
 		{
-			return (_RCC_GetPLLInputClockFrequency(pClockTreeConfig) * (rcc_freq_t) pClockTreeConfig->system.pll.multiplication_factor);
+			return (_RCC_GetPLLInputClockFrequency(pClockTreeConfig) * (frequency_t) pClockTreeConfig->system.pll.multiplication_factor);
 		}
 		default:
 		{
@@ -704,7 +704,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetSystemClockFrequency(const rcc_clock_tre
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target HCLK frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetSystemClockFrequency(pClockTreeConfig) / _RCC_GetAHBPrescalerDividerBySelector(pClockTreeConfig->bus.AHB));
 }
@@ -714,7 +714,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_c
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target APB1 frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB1));
 }
@@ -724,7 +724,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree_
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target APB2 frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB2));
 }
@@ -734,7 +734,7 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree_
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target ADC frequency.
  */
-__STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+__STATIC_FORCEINLINE frequency_t _RCC_GetADCClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
 	return (_RCC_GetAPB2ClockFrequency(pClockTreeConfig) / _RCC_GetADCPrescalerDividerBySelector(pClockTreeConfig->component.ADC));
 }
@@ -744,9 +744,9 @@ __STATIC_FORCEINLINE rcc_freq_t _RCC_GetADCClockFrequency(const rcc_clock_tree_c
  * @param[in] pClockTreeConfig Pointer to the clock tree configuration.
  * @returns The target USB frequency.
  */
-static rcc_freq_t _RCC_GetUSBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
+static frequency_t _RCC_GetUSBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
-	const rcc_freq_t pllClock = _RCC_GetPLLInputClockFrequency(pClockTreeConfig) * (rcc_freq_t) pClockTreeConfig->system.pll.multiplication_factor;
+	const frequency_t pllClock = _RCC_GetPLLInputClockFrequency(pClockTreeConfig) * (frequency_t) pClockTreeConfig->system.pll.multiplication_factor;
 
 	if (pClockTreeConfig->system.clk_src != RCC_SYS_CLK_PLL)
 	{
@@ -1018,7 +1018,7 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 	rcc_system_clock_t systemClockSource = RCC_SYS_CLK_HSI;
 	uint32_t adcPrescaler = RCC_CFGR_ADCPRE_DIV2;
 	uint32_t usbPrescaler = RCC_CFGR_USBPRE_DIV1_5;
-	rcc_freq_t pllInputFrequency = RCC_FREQ_ZERO;
+	frequency_t pllInputFrequency = RCC_FREQ_ZERO;
 
 	if (pClockFrequencies == NULL)
 	{
@@ -1046,7 +1046,7 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 			{
 				pllInputFrequency >>= 1;
 			}
-			pClockFrequencies->sysclk = (pllInputFrequency * (rcc_freq_t) RCC_GetPLLMultiplier());
+			pClockFrequencies->sysclk = (pllInputFrequency * (frequency_t) RCC_GetPLLMultiplier());
 			break;
 		}
 		default:
@@ -1624,7 +1624,7 @@ driver_status_t RCC_GetClockFrequencies(rcc_clock_frequencies_t* const pClockFre
 	return DRIVER_STATUS_SUCCESS;
 }
 
-rcc_freq_t RCC_GetCoreClockFreq(void)
+frequency_t RCC_GetCoreClockFreq(void)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{
@@ -1683,7 +1683,7 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 	}
 }
 
-rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
+frequency_t RCC_GetBusFreq(const rcc_bus_t bus)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{
@@ -1721,7 +1721,7 @@ rcc_freq_t RCC_GetBusFreq(const rcc_bus_t bus)
 	}
 }
 
-rcc_freq_t RCC_GetADCFreq(void)
+frequency_t RCC_GetADCFreq(void)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{
@@ -1741,7 +1741,7 @@ rcc_freq_t RCC_GetADCFreq(void)
 	return clockFrequencies.adcclk;
 }
 
-rcc_freq_t RCC_GetUSBFreq(void)
+frequency_t RCC_GetUSBFreq(void)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{

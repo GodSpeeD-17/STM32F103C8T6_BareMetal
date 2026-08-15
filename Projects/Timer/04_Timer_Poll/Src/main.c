@@ -26,7 +26,7 @@
  * The Blue Pill on-board LED is active-low. The handler switches it on and
  * stops application progress after a Timer operation fails.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -37,16 +37,37 @@ static void APP_ErrorHandler(void)
 
 /**
  * @brief Initializes TIM2 as the polling demo's dedicated delay source
- * @returns @ref driver_status_t "Polling Timer Initialization - Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`:			TIM2 was configured with a 1 MHz counter tick.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`:	A 1 MHz tick was not exactly representable.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`:		The TIM2 input clock was unavailable.
- * @note The public preset owns the Timer clock gate and leaves counter
- * operation disabled for @ref TIM_DelayMs.
+ * @returns @ref driver_status_t "Polling-Timer initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM2 was configured with a 1 MHz counter tick
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A Timer configuration selector was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 clock or reset sequence failed
+ * @note The root configuration owns the Timer clock gate and leaves counter
+ * operation disabled for @ref TIM_DelayMs
  */
-static driver_status_t APP_Init(void)
+static driver_status_t App_Init(void)
 {
-	return TIM_Config1MHz(TIM2);
+	const tim_config_t config =
+	{
+		.timebase =
+		{
+			.prescaler = TIMx_DEFAULT_1MHz_PSC,
+			.auto_reload = TIMx_DEFAULT_1MHz_ARR,
+			.initial_count = TIMx_DEFAULT_CNT
+		},
+		.counter =
+		{
+			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
+			.alignment = TIMx_MODE_NORMAL,
+			.direction = TIMx_DIR_COUNT_UP,
+			.one_pulse = TIMx_OPM_DISABLE,
+			.auto_reload_preload = TIMx_ARPE_ENABLE,
+			.update_source = TIMx_UPDATE_SOURCE_ANY
+		},
+		.irq_sources = TIMx_IRQ_SOURCE_NONE
+	};
+
+	//! Apply explicit Timer configuration data instead of a frequency-specific preset API.
+	return TIM_Config(TIM2, &config);
 }
 
 // ==================================================================================================== //
@@ -61,9 +82,9 @@ static driver_status_t APP_Init(void)
  */
 int main(void)
 {
-	if (APP_Init() != DRIVER_STATUS_SUCCESS)
+	if (App_Init() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	while (1)
@@ -73,7 +94,7 @@ int main(void)
 		//! Stop the demo on timeout or lost Timer ownership instead of hiding the status.
 		if (TIM_DelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 	}
 

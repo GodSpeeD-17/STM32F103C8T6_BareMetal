@@ -19,7 +19,7 @@ typedef struct {
 	// GPIO Configuration Structure
 	gpio_config_t GPIOx_CONFIG;
 	// PWM Frequency (in Hz)
-	uint32_t freq_Hz;
+	frequency_t freq_Hz;
 	// PWM Duty Cycle (in %)
 	// - Gain factor of 10
 		// - `0` for 0%

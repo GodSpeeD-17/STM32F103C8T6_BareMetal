@@ -336,9 +336,17 @@ driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudR
 	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	if((usart < USART_MIN) || (usart > USART_MAX))
 		return status;
-	uint32_t clockFreq = (usart == USART_1)? RCC_GetAPB2Clock() : RCC_GetBusFreq(RCC_APB1_BUS);
+	frequency_t clockFrequency = RCC_FREQ_ZERO;
+	if (usart == USART_1)
+	{
+		clockFrequency = RCC_GetAPB2Clock();
+	}
+	else
+	{
+		clockFrequency = RCC_GetBusFreq(RCC_APB1_BUS);
+	}
 	// Update Baud Rate Register Value
-	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFreq/(__usartDriverBaudRateMapping__[baudRate]));
+	USART_Get_Mapping(usart)->BRR.REG = (uint32_t)(clockFrequency/(__usartDriverBaudRateMapping__[baudRate]));
 	// Return status
 	status = DRIVER_STATUS_SUCCESS;
 	return status;

@@ -236,12 +236,13 @@ questions inside the declared scope.
 
 | ID | State | Decision or evidence | Consequence |
 | --- | --- | --- | --- |
-| A-001 | `[Observed]` | The current Timer root configuration contains timebase and counter groups only. | Channel, synchronization, and DMA configuration are not currently root-configured. |
+| A-001 | `[Observed]` | The current Timer root configuration contains timebase, counter, and Timer-owned IRQ-source domains. | Channel, capture, synchronization, DMA, and NVIC-delivery configuration are not currently root-configured. |
 | A-002 | `[Observed]` | Timer Codec already contains master/slave, output-compare, channel-state/polarity, IRQ, and DMA transformations beyond the current public Driver surface. | Existing lower-layer breadth must be classified as planned foundation or excess; it cannot create public scope by itself. |
 | A-003 | `[Observed]` | Timer LL provides named accessors for the complete TIM2-TIM4 register map. | Required access and raw foundation must be distinguished in the LL matrix. |
 | D-001 | `[Decision]` | Timer public APIs will represent Timer primitives; PWM frequency/duty and GPIO-route composition remain above Timer. | PWM mode is a valid output-compare selector, but percentage duty-cycle policy does not belong in Timer. |
 | D-002 | `[Decision]` | Persistent readable state should normally have paired `Get` and `Set` APIs; actions and acknowledge operations use explicit verbs instead. | Avoid fake getters for action registers and avoid fake setters for pending flags. |
 | D-003 | `[Decision]` | Group setters are the canonical transaction paths; scalar setters delegate to them when fields share constraints or latch behavior. | Validation, stopped-state policy, staging, dirty writes, and update-event sequencing stay centralized. |
+| D-004 | `[Decision]` | Every hertz-valued quantity uses the Core-owned `frequency_t` alias. | RCC, Timer, and peer consumers must not introduce duplicate peripheral-specific frequency aliases. |
 | C-001 | `[Decision]` | Codec transformations operate on `reg` images and domain types only. | Peripheral pointers, RCC/NVIC access, and volatile reads/writes are forbidden in Codec. |
 | L-001 | `[Decision]` | LL is mechanically complete only when access semantics are correct, not merely when every register has a read/write wrapper. | `SR` acknowledge and `EGR` action writes require semantic scrutiny even if generic accessors exist. |
 | X-001 | `[Decision]` | Safety Waves 1-3 precede every new Timer feature; the narrow PWM-output foundation is the first expansion after the P0 gates. | Current defects are mitigated before channel code reuses the same transaction, LL, and IRQ patterns. |
@@ -254,7 +255,7 @@ final planning conclusions follow in the remaining sections.
 | Evidence | Repository source | Audit use |
 | --- | --- | --- |
 | Public Timer contracts | [`Timer/Inc/timer.h`](Timer/Inc/timer.h) | Current API families, compatibility surface, documented side effects |
-| Public types/selectors/config | [`Timer/Inc/timer_data_types.h`](Timer/Inc/timer_data_types.h), [`timer_defines.h`](Timer/Inc/timer_defines.h), [`timer_config.h`](Timer/Inc/timer_config.h) | Current semantic vocabulary and grouped configuration coverage |
+| Public types/selectors/config | [`stm32f1xx_data_types.h`](../Core/Inc/stm32f1xx_data_types.h), [`Timer/Inc/timer_data_types.h`](Timer/Inc/timer_data_types.h), [`timer_defines.h`](Timer/Inc/timer_defines.h), [`timer_config.h`](Timer/Inc/timer_config.h) | Shared frequency type, current Timer semantic vocabulary, and grouped configuration coverage |
 | Driver transactions/helpers | [`Timer/Src/timer.c`](Timer/Src/timer.c) | Validation order, MMIO order, preload commit, IRQ/NVIC, delay cleanup |
 | Codec declarations/implementation | [`Timer/Inc/timer_codec.h`](Timer/Inc/timer_codec.h), [`timer_codec.c`](Timer/Src/timer_codec.c) | Current Extract/Stage symmetry, dormant coverage, W0C behavior, gaps |
 | LL register access | [`Timer/Inc/timer_ll.h`](Timer/Inc/timer_ll.h) | Complete-map inventory and access-direction audit |
@@ -362,8 +363,8 @@ function must also declare one audience:
 
 ### Current Timer Public Inventory
 
-The application header `timer.h` exposes 43 callable symbols: 37 primary
-functions or inline wrappers and 6 legacy IRQ compatibility wrappers.
+The application header `timer.h` exposes 35 callable symbols, all through the
+primary public surface; the six legacy IRQ compatibility wrappers are removed.
 `timer_defines.h` additionally exposes four pure callable utilities:
 `TIM_InstanceToIndex`, `TIM_ChannelMaskToIndex`,
 `TIM_ChannelMaskExtractLowestChannel`, and `TIM_ChannelMaskRemoveChannel`.
@@ -372,13 +373,13 @@ functions or inline wrappers and 6 legacy IRQ compatibility wrappers.
 | --- | --- | --- |
 | Clock gate | `TIM_GetClockState`, `TIM_SetClockState` | Instance mapping is coherent for TIM2-TIM4, but OFF currently lacks a counter/request/trigger quiescence or intentional pause/resume contract. |
 | Operation state | `TIM_GetOperationState`, `TIM_SetOperationState` | Coherent ownership of `CR1.CEN`. |
-| Lifecycle | `TIM_Config`, `TIM_DeConfig` | Useful base-Timer lifecycle; classify `TIM_Config` as a compatibility/base API and target `TIM_ConfigBase` rather than growing a root “god config.” |
-| Tick preset | `TIM_ConfigTickFrequency`, `TIM_Config1MHz` | Useful preset behavior, but `TIM_ConfigTickFrequency` also replaces ARR, CNT, and represented CR1 behavior; its name is narrower than its side effects. |
-| Grouped base configuration | timebase and counter `Get`/`Set` pairs | Best current pattern: domain structures, grouped staging, and shared apply paths. Failure ordering still needs correction. |
-| Timebase scalar access | frequency, PSC, ARR, and CNT functions | PSC/ARR/CNT pairs are present. Frequency has a query plus a broad preset, not a narrow symmetric programmed-frequency setter; active shadow state remains unobservable. |
-| Counter behavior scalar access | DIR, CMS, OPM, ARPE, URS, and CKD pairs | Complete for represented CR1 fields; cross-field compatibility and live-state constraints need strengthening. |
-| IRQ/event handling | enable mask, source state, pending mask, acknowledge | The current vocabulary conflates source enables, event flags, and NVIC delivery. Trigger and overcapture domains are incomplete. |
-| IRQ compatibility | six `TIM_IRQ_*` wrappers | Migration-only; Boolean wrappers collapse errors into “not pending.” |
+| Lifecycle | `TIM_Config`, `TIM_DeConfig` | Independent symmetric lifecycle entry points; configuration directly applies every domain represented by `tim_config_t`, preserves deferred state, and never invokes deconfiguration. |
+| Frequency-setting presets | none | Frequency-targeting configuration functions were removed; applications provide explicit prescaler/configuration data. |
+| Grouped base configuration | timebase and counter `Get`/`Set` pairs | Domain structures, grouped staging, and shared apply paths; timebase validation/staging now precedes the MMIO-only commit phase. |
+| Timebase scalar access | programmed frequency, PSC, ARR, and CNT functions | PSC/ARR/CNT pairs and `TIM_GetProgrammedTickFrequency` are present. A narrow symmetric programmed-frequency setter is absent; active shadow state remains unobservable. |
+| Counter behavior scalar access | DIR, CMS, OPM, ARPE, URS, and digital-filter clock-division pairs | Complete for represented CR1 fields; cross-field compatibility and live-state constraints need strengthening. |
+| IRQ/event handling | `TIM_GetIRQSources`, `TIM_SetIRQSources`, `TIM_GetIRQEvents`, `TIM_AckIRQEvents` | Separate DIER-source and SR-event types cover trigger and overcapture vocabulary; NVIC delivery is independent. Generic acknowledgement rejects input-capture lanes until capture consumption is admitted. |
+| Former IRQ compatibility | six `TIM_IRQ_*` wrappers | Removed after consumer migration; no Boolean error-collapsing wrapper remains. |
 | Blocking delay | `TIM_DelayUs`, `TIM_DelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. |
 | Channel/output compare | none | Accepted-next primitives for the dormant PWM migration are absent despite partial Codec/LL groundwork. |
 | Input capture | none | Deferred candidate; consuming-read and overcapture semantics would be required if a named consumer admits it. |
@@ -394,31 +395,30 @@ Driver API candidates.
 | Existing public family | Lifecycle state | Disposition |
 | --- | --- | --- |
 | Base clock, operation, timebase, counter functions | Implemented; not fully verified | Retain while closing atomicity, transition, concurrency, and documentation gates. |
-| `TIM_Config` | Compatibility/base API | Introduce an accurately named base transaction and migrate; never expand this name into all Timer features. |
-| `TIM_ConfigTickFrequency`, `TIM_Config1MHz` | Compatibility/convenience | Split narrow programmed-frequency behavior from the explicit full-base preset; stop applying the 1 MHz-named ARR default to every requested tick frequency by using a neutral preset or explicit ARR input. |
-| Current IRQ/pending/ack functions and six wrappers | Compatibility | Migrate to IRQ-source/event/NVIC-separated contracts, then remove wrappers after consumers move. |
+| `TIM_Config` | Implemented; evidence open | Independent conjugate of `TIM_DeConfig`; directly orchestrates every implemented domain in `tim_config_t`, preserves deferred state, and never invokes deconfiguration. |
+| Former frequency-setting configuration functions | Removed | `TIM_ConfigTickFrequency`, `TIM_Config1MHz`, `TIM_ConfigBaseTickFrequency`, and `TIM_ConfigBase1MHz` have no canonical replacement; use explicit `tim_config_t` data. |
+| Timer IRQ source/event functions | Implemented; evidence open | Retain the four canonical functions and separate source/event types; add retained Codec/MMIO traces before closing the evidence gate. |
 | `TIM_DelayUs`, `TIM_DelayMs` | Compatibility/service | Move behind dedicated-Timer ownership while retaining temporary wrappers. |
 | Channel/output selectors and Codecs | Candidate/partly admitted | Admit only the subset required by the dormant PWM migration; keep other selectors dormant. |
 | `tim_remap_t` and TIM1/TIM2/TIM3/TIM4 remap selectors | Misowned compatibility debt | Move to AFIO/pin-routing ownership. TIM1 selectors are outside the current Timer instance scope. |
-| `TIMx_DEFAULT_10kHz_PSC`, `TIMx_DEFAULT_10kHz_ARR`, `TIMx_DEFAULT_1MHz_PSC` | Unused legacy defaults | Deprecate/remove; fixed prescaler defaults conflict with live-clock-derived presets. |
-| `TIMx_DEFAULT_1MHz_ARR`, `TIMx_DEFAULT_CNT` | Implemented compatibility defaults | Retain only until the explicit base-preset redesign migrates consumers. |
-| `tim_irq_enable_t` | Redundant compatibility type | Standardize binary state on `DRIVER_STATUS_OFF/ON`, then retire. |
-| `TIM_Get/SetClockDivision` and `TIMx_CKD_CLK_*` selectors | Misleading compatibility vocabulary | Rename around the CR1.CKD digital-filter sampling clock (`tDTS`); it does not divide the counter/kernel tick. |
-| `TIMx_UPDATE_SOURCE_OVF_DMA` | Misleading compatibility selector | Rename to overflow/underflow-only update-request semantics; URS selects which update events may set UIF/request, not “DMA as a source.” |
+| Frequency-specific default constants | Explicit configuration data | Retain only where a project establishes the documented Timer kernel clock before using the constant; they do not justify frequency-setting functions. |
+| Former `tim_irq_enable_t` | Removed | IRQ source staging now uses `DRIVER_STATUS_OFF/ON`. |
+| Former `TIM_Get/SetClockDivision` and `TIMx_CKD_CLK_*` selectors | Migrated | Replaced by digital-filter sampling-clock vocabulary around CR1.CKD (`tDTS`). |
+| Former `TIMx_UPDATE_SOURCE_OVF_DMA` | Migrated | Replaced by `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY`; URS does not make DMA an update source. |
 | Four public pure `timer_defines.h` utilities | Raw/public utility candidates | Keep instance indexing only if peer/public consumers need it; otherwise privatize. Keep channel-mask iteration only if an admitted public/peer path consumes it. |
 | Master/slave, capture, Hall/XOR, and DMA selector families | Deferred raw/Codec groundwork | Not a public guarantee; reconsider only with named consumers and completed capability evidence. |
 
 ### Current Private Helper Inventory
 
-The current 27 private helpers already form useful categories.
+The current 30 private helpers already form useful categories.
 
 | Category | Existing examples | Assessment |
 | --- | --- | --- |
 | Topology and peer integration | `_TIM_GetClockBus`, `_TIM_GetAPB1ClockMask`, `_TIM_GetAPB1ResetMask`, `_TIM_GetIRQn`, `_TIM_GetInputClockFrequency` | Correct ownership; names and dispatch must become bus/vector aware before adding different Timer families. |
-| Validation and preconditions | instance, selector, state, clock-enabled, and counter-stopped validators | Correct category; grouped compatibility, capability, channel, and transaction-wide validation are missing. |
+| Validation and preconditions | instance, selector, state, clock-enabled, counter-stopped, IRQ-source/event, and channel-event acknowledge validators | Correct category; broader grouped compatibility, capability, channel, and transaction-wide validation remain incomplete. |
 | Register-bound dirty write | `_TIM_WriteCR1IfChanged`, `_TIM_WritePSCIfChanged`, `_TIM_WriteARRIfChanged`, `_TIM_WriteCNTIfChanged` | Correctly delegates comparison/write mechanics to `RegOps_WriteIfChanged`; Timer retains validation and address binding. |
 | Update transaction | `_TIM_GenerateUpdateEvent`, `_TIM_ClearUpdateFlagIfPending`, `_TIM_CommitTimeBase` | Necessary hazardous-sequence isolation; the transaction scope is broader than “timebase.” |
-| Canonical apply paths | `_TIM_ApplyTimeBaseConfig`, `_TIM_ApplyCounterConfig`, `_TIM_ApplyRootConfig`, `_TIM_ApplyCounterEnableState` | Correct centralization principle; precondition and cleanup ordering must be repaired before reuse. |
+| Canonical apply paths | `_TIM_ApplyTimeBaseConfig`, `_TIM_ApplyCounterConfig`, `_TIM_ApplyBaseConfig`, `_TIM_ApplyCounterEnableState` | Correct centralization principle; timebase precondition ordering is mitigated while cleanup/concurrency closure remains open. |
 
 Large transaction helpers should ordinarily be `static` functions. Reserve
 `__STATIC_FORCEINLINE` for small leaf helpers where forced inlining has a
@@ -478,8 +478,9 @@ trace and optional on-target confirmation. Consequently:
 
 #### 3. Separate event, request, and delivery domains
 
-The current `tim_irq_t` is used for both DIER enables and SR flags even though
-the hardware sets are not isomorphic. The target model uses distinct types:
+The former `tim_irq_t` was used for both DIER enables and SR flags even though
+the hardware sets are not isomorphic. The implemented model now uses distinct
+types:
 
 - `tim_irq_source_t` — enable-capable Timer interrupt requests: update,
   capture/compare 1-4, and trigger;
@@ -490,21 +491,21 @@ the hardware sets are not isomorphic. The target model uses distinct types:
 - NVIC enable, pending, and active state — owned by NVIC and IRQ topology, not
   represented as Timer event flags.
 
-Canonical Timer functions should become:
+Canonical Timer functions are:
 
 ```c
-TIM_GetIRQSourceEnableMask(...)
-TIM_SetIRQSourceState(...)
-TIM_GetEventFlagMask(...)
-TIM_AcknowledgeEventFlags(...)
+TIM_GetIRQSources(...)
+TIM_SetIRQSources(...)
+TIM_GetIRQEvents(...)
+TIM_AckIRQEvents(...)
 ```
 
-`TIM_GetPendingIRQMask()` is currently an SR event-flag getter, not proof that
-DIER and NVIC make an IRQ pending. `TIM_AcknowledgeIRQ()` must not
-unconditionally clear an NVIC line whose other sources or peripherals may
-still require service. An optional coordinated delivery helper is admissible
-only when the IRQ mapping proves exclusive ownership and aggregates every
-source.
+The former `TIM_GetPendingIRQMask()` incorrectly named an SR event-flag getter
+as IRQ pending state, and the former `TIM_AcknowledgeIRQ()` unconditionally
+cleared NVIC pending state. Their replacements expose SR events explicitly and
+never mutate NVIC state. An optional coordinated delivery helper remains
+admissible only when the IRQ mapping proves exclusive ownership and aggregates
+every source.
 
 A generic event acknowledge must inspect each selected channel's CCMR mode.
 By target Driver policy, it rejects `CCxIF` acknowledgement for an input-
@@ -514,24 +515,19 @@ discards the unread capture notification.
 `TIM_DiscardCapturedValue()` is admissible only for a named consumer. Read the
 captured value before acknowledging its overcapture flag.
 
-#### 4. Separate programmed tick state from a full active preset
+#### 4. Keep calculated frequency observation separate from configuration
 
 The hardware exposes the programmed PSC preload, not the active prescaler
-shadow. Use a narrow pair whose name and contract state that limitation:
+shadow. Retain a calculated getter whose name and contract state that limitation:
 
 ```c
 TIM_GetProgrammedTickFrequency(...)
-TIM_SetProgrammedTickFrequency(...)
 ```
 
-The setter changes only programmed PSC state and preserves unrelated register
-images. It does not promise immediate effective timing unless an explicitly
-named commit/apply operation performs the full UG side-effect transaction.
-
-Retain a full base preset only under a name and Doxygen contract that states it
-enables the clock, stops the counter, selects default ARR/CNT/counter behavior,
-and leaves the counter stopped. `TIM_Config1MHz()` can remain a convenience
-wrapper over that explicit preset path.
+The getter calculates frequency from the live Timer kernel clock and programmed
+PSC state. Frequency-targeting setters and presets are rejected; callers select
+explicit prescaler and timebase values through @ref tim_config_t or narrow
+register-semantic setters.
 
 #### 5. Define state-return convention deliberately
 
@@ -696,9 +692,12 @@ effects. PWM must not abuse a base setter merely to force `UG`.
 | Break/dead-time, repetition counter, complementary outputs, main output enable | Advanced-Timer-specific Driver/Codec/LL extension |
 | Raw register-image APIs | LL/diagnostic only; rejected from application Timer API |
 
-Do not grow `tim_config_t` into one all-feature “god configuration.” Preserve
-one structure per coherent transaction: base time, counter, PWM output,
-input capture, synchronization, encoder, and DMA burst.
+Use `tim_config_t` as the root structure of structures for every admitted Timer
+configuration domain. Preserve one nested structure per coherent transaction:
+timebase, counter, IRQ sources, PWM output, input capture, synchronization,
+encoder, and DMA burst. Deferred domains are absent from the public structure
+and are preserved by `TIM_Config()` until admitted. Applications explicitly
+invoke `TIM_DeConfig()` when complete reset state is required.
 
 ### Private Helper Families by Admission State
 
@@ -895,7 +894,7 @@ remains dormant by design.
 | `PSC` | prescaler Extract/Stage | Current getter/group | Complete |
 | `ARR` | auto-reload Extract/Stage | Current getter/group | Complete |
 | `CNT` | counter value Extract/Stage | Current getter/setter/group | Complete |
-| `PSC+ARR+CNT` | grouped timebase Extract/Stage | Current base configuration | Complete surface |
+| `PSC+ARR+CNT` | grouped timebase Extract/Stage | Current root configuration | Complete surface |
 | `CR1.DIR/CMS/OPM/ARPE/URS/CKD` | scalar pairs plus grouped counter pair | Current counter functions | Complete surface; grouped extraction publication must be fixed |
 | `CR1.CEN` | state Extract/Stage | Current operation state | Complete |
 | `CR1.UDIS` | inverted update-event state pair | Private commit/delay | Complete but not proof of a public bit API |
@@ -912,9 +911,9 @@ remains dormant by design.
 | `CCER.CCxE` | single-channel state pair | Accepted channel family | Present, but mask-level Driver operation needs one-image staging support |
 | `CCER.CCxP` | single-channel polarity pair | Accepted channel family | Present |
 | `CCR1..CCR4` | none | Accepted-next PWM compare value; deferred capture value | Blocking the accepted-next channel/PWM slice |
-| DIER IRQ sources | mask Extract/Stage | Current IRQ functions | Partial: trigger request absent |
+| DIER IRQ sources | typed mask Extract/Stage | `TIM_GetIRQSources` / `TIM_SetIRQSources` | Complete for update, CC1-4, and trigger sources |
 | DIER DMA sources | mask Extract/Stage | Deferred DMA candidate | Partial: trigger DMA absent |
-| SR event flags | IRQ-mask Extract/Ack | Current event functions | Partial and incorrectly shares IRQ-source vocabulary; trigger/overcapture absent |
+| SR event flags | typed event Extract/Ack | `TIM_GetIRQEvents` / `TIM_AckIRQEvents` | Complete vocabulary for update, CC1-4, trigger, and overcapture; generic input-capture acknowledgement is intentionally rejected |
 | `SR.UIF` | dedicated Extract/Clear pair | Private update/delay | Redundant with canonical event-mask semantics |
 | `DCR` | none | Deferred DMA-burst candidate | Missing if a DMA peer contract is admitted |
 | `DMAR` | none | Live DMA endpoint | Correct unless an explicit CPU data API is approved |
@@ -1018,9 +1017,8 @@ overcapture handling stay in Driver.
 - Change event Extract/Ack Codecs to `tim_event_flag_t` and include `TIF` and
   `CC1OF..CC4OF`.
 - Change DMA enable Codecs to `tim_dma_source_t` and include `DIER.TDE`.
-- Use `DRIVER_STATUS_OFF/ON` consistently for binary stage state; retire the
-  separate `tim_irq_enable_t` conversion unless it has an independent semantic
-  purpose.
+- Use `DRIVER_STATUS_OFF/ON` consistently for binary stage state; the separate
+  `tim_irq_enable_t` conversion has been retired.
 - Keep one canonical SR event Extract/Ack implementation. UIF convenience
   helpers may be private wrappers over it.
 
@@ -1063,11 +1061,11 @@ address, not a staged configuration image.
    validated CCMR lane base plus field offsets and one CCER lane base plus
    offsets when the formula is clear; do not retain seven independent mapping
    helpers or replace them with an unnecessary LUT.
-5. **Binary state types are inconsistent.** IRQ staging alone uses
-   `tim_irq_enable_t`; standardize on the repository's ON/OFF state contract.
-6. **Private decoded return types are too raw.** DIER/SR semantic decoders
-   should return `tim_irq_source_t`, `tim_event_flag_t`, or
-   `tim_dma_source_t`, not `reg`.
+5. **Binary state type inconsistency is mitigated.** IRQ source staging uses
+   the repository's ON/OFF state contract and `tim_irq_enable_t` is removed.
+6. **IRQ/event decoded return types are corrected.** DIER/SR semantic decoders
+   return `tim_irq_source_t` and `tim_event_flag_t`; the deferred DMA decoder
+   still uses its existing type until DMA admission.
 7. **SR semantics are duplicated.** Dedicated UIF and generic IRQ flag paths
    should share one event implementation.
 8. **Exported surface is ahead of approved consumers.** Keep admitted-next
@@ -1364,7 +1362,7 @@ each accepted family into one row per public function before code is written.
 | Driver family / intent | Private Driver path | Codec dependency | LL / peer dependency | Current disposition |
 | --- | --- | --- | --- | --- |
 | Clock gate state | instance/bus/gate mapping, stopped/quiescent transition guard | None; exact peer service operation | RCC gate APIs | Present; OFF transition contract and topology generalization remain open |
-| Base lifecycle configure/deconfigure | validate, clock/reset ownership, stop, grouped apply, cleanup | timebase/counter and update action | CR1, PSC, ARR, CNT, EGR, SR; RCC/NVIC | `TIM_Config` is a compatibility/base API; target accurate base naming and close atomicity/failure postconditions |
+| Base lifecycle configure/deconfigure | validate, independent application-ordered lifecycle, clock ownership, stop, direct grouped apply, local cleanup | timebase/counter/IRQ-source and update action | CR1, DIER, PSC, ARR, CNT, EGR, SR; RCC and read-only NVIC state | `TIM_Config` directly delegates admitted domains without invoking `TIM_DeConfig`; close atomicity/failure postconditions |
 | Counter operation state | clock guard, apply state | CEN Extract/Stage | CR1 | Present |
 | Timebase grouped/scalar | stopped/ownership guard, snapshot, stage, preload commit | PSC/ARR/CNT grouped/scalar | CR1, PSC, ARR, CNT, EGR, SR | Present; critical partial-write and UG-scope gaps |
 | Counter behavior grouped/scalar | whole-mode compatibility and stopped guard | CR1 grouped/scalar | CR1 and SMCR observation where mode-dependent | Present surface; cross-field validation incomplete |
@@ -1394,16 +1392,16 @@ behavior that later work must not regress.
 
 | ID | Severity/state | Verified hazard | Mandatory mitigation |
 | --- | --- | --- | --- |
-| H-001 | Critical `[Gap]` | Grouped timebase apply writes PSC/ARR before the stopped-counter check and can return BUSY after mutation. | Finish all validation and staging before first MMIO write; add no-write-on-error trace tests. |
+| H-001 | Critical `[Mitigated]` | Grouped timebase apply now validates the stopped counter and completes timebase/CR1/EGR Codec staging before entering an MMIO-only commit phase. | Retain the ordering and add no-write-on-error MMIO trace tests. |
 | H-002 | Critical `[Gap]` | `EGR.UG` affects more than timebase: it reinitializes CNT direction-dependently, clears prescaler phase, and, when update events are enabled, can transfer preloads and affect TRGO/synchronized consumers. DMA timing can be affected when request gating permits; RM0008 supports the current `URS=1` suppression intent, but no retained MMIO trace/on-target verification proves the implementation sequence. Readable preload equality cannot prove active-shadow synchronization. | Model the whole update domain; separate dirty-write from commit necessity; quiesce/account for every consumer and trace URS/UDIS behavior. |
-| H-003 | High `[Gap]` | NVIC disable is derived from only UIE/CC1-4 while preserved `DIER.TIE` can remain enabled. TIM2-4 vectors are dedicated today; cross-peripheral aggregation becomes mandatory only for future shared-vector variants. | Include every DIER source for current instances; move or generalize NVIC ownership before admitting shared-vector variants. |
-| H-004 | High `[Gap]` | `TIM_GetPendingIRQMask` reports SR flags, not `SR & DIER` or NVIC pending; acknowledge clears NVIC unconditionally. | Separate event flags, enabled requests, and NVIC delivery APIs/types. |
+| H-003 | High `[Mitigated]` | `TIM_SetIRQSources` covers UIE/CC1-4/TIE and no longer derives or mutates NVIC state from DIER. TIM2-4 vectors are dedicated today; cross-peripheral aggregation becomes mandatory only for future shared-vector variants. | Retain Timer/NVIC ownership separation and require an explicit aggregation contract before shared-vector variants are admitted. |
+| H-004 | High `[Mitigated]` | `TIM_GetIRQEvents` reports SR flags explicitly and `TIM_AckIRQEvents` performs no NVIC mutation. | Retain distinct event, request-source, and delivery contracts; add retained trace evidence. |
 | H-005 | Deferred `[Deferred]` | If capture is admitted, input CCR read clears `CCxIF`, input CCR is read-only, and overcapture needs explicit vocabulary. | Require a mode-aware capture-consume API returning value/overcapture with tested read order; reject a generic public CCR setter. |
-| H-006 | High `[Gap]` | EGR is write-only but raw map/LL expose a readable path; DMAR appears like stable state. | Correct access qualifiers and remove invalid accessors; classify action/status/data portals. |
+| H-006 | High `[Mitigated]` | EGR now uses a write-only raw view and has no LL read; input CCR aliases are read-only; DMAR is documented as a 16-bit transfer portal. | Retain these access classes and add layout/one-access tests before admitting capture or DMA. |
 | H-007 | High `[Gap]` | Current DIR/CMS scalar transitions do not establish a complete CR1/SMCR mode contract, including hardware/raw encoder-state interactions. | Validate the complete current counter-mode context before staging DIR/CMS changes. |
 | H-008 | High `[Gap]` | Read-stage-write sequences can race ISR/task/DMA/hardware updates; NVIC disable does not stop active handlers, triggers, DMA, or other callers. | Enforce single owner or per-instance transaction guard plus feature-specific quiescence; document ISR eligibility. |
 | H-009 | Medium `[Gap]` | Early-return assertion macros inside temporary-state transactions create a structural cleanup hazard if a post-mutation call becomes fallible; no currently reachable cleanup skip has been proven. | Use acquire/mutate/single-cleanup/restore flow before adding fallible steps and define failure postconditions. |
-| H-010 | Medium `[Gap]` | Current PSC and preloaded ARR reads report programmed state, while frequency/base names can imply effective active state. | Name and document configured/preload versus effective state; do not promise unobservable active shadows. Apply the same admission rule to future CCR preloads. |
+| H-010 | Medium `[Partially mitigated]` | `TIM_GetProgrammedTickFrequency` and base-preset names now expose programmed/broad state, but active PSC/ARR shadow state remains unobservable. | Preserve programmed-versus-effective wording and apply the same admission rule to future CCR preloads. |
 | H-011 | Medium `[Gap]` | Multi-register getters can mix hardware moments while the Timer is live. | Declare non-coherent sampling or hold a valid hardware/software snapshot guard. |
 | H-012 | Scope `[Observed]` | Current topology intentionally assumes TIM2-4, four 16-bit channels, APB1, and dedicated vectors, matching the declared target. | Preserve this boundary; require capability data before any future variant is admitted. |
 | H-013 | Good `[Observed]` | Current W0C Codec writes ones to unselected writable flags. | Retain this preservation rule; separately document the selected-source arrival race. |
@@ -1533,10 +1531,10 @@ the named implementation scope. `Deferred` is outside the admitted scope.
 | D-01 | Planning-met | Public inventory, audience rules, admission table, and symbol disposition are recorded. | `91635a4`, 2026-08-15 | Architecture review |
 | D-02 | Open | Per-function contract rows remain required before each source wave. | Current audit | Architecture review |
 | D-03 | Planning-met | Base groups retained; god config rejected; candidate feature groups separated. | Current audit | Architecture review |
-| D-04 | Open P0 | H-001 proves a write occurs before BUSY validation. | `timer.c` timebase apply/commit path | Evidence review |
+| D-04 | Implementation-met; evidence open | Source ordering mitigates H-001; retained no-write-on-error MMIO trace evidence is still required. | `timer.c` timebase apply/commit path, 2026-08-15 | Evidence review |
 | D-05 | Open P0 | Cleanup structure and injected-failure traces are not retained. | H-009 / Wave 1 | Architecture review |
 | D-06 | Open P0 | H-002/H-010/H-016; no retained whole-domain commit trace. | RM0008 Ch. 15 / current source | Evidence review |
-| D-07 | Open P0 | H-003/H-004; DIER/SR/NVIC vocabulary remains conflated. | Current Driver/Codec | Evidence review |
+| D-07 | Implementation-met; evidence open | IRQ sources, event flags, and NVIC delivery now use separate contracts; retained Codec/MMIO and IRQ-delivery traces remain required. | Current Driver/Codec and IRQ example, 2026-08-15 | Evidence review |
 | D-08 | Open P0 | No explicit instance ownership/guard contract or interleaving evidence. | H-008 | Architecture review |
 | D-09 | Open | RCC topology exists; clock-OFF, NVIC, AFIO, DMA, and shared-resource contracts remain incomplete. | H-003/H-015/H-017 | Architecture review |
 | D-10 | Planning-met | Existing and candidate helpers classified by earned responsibility. | Driver helper inventory | Architecture review |
@@ -1550,7 +1548,7 @@ the named implementation scope. `Deferred` is outside the admitted scope.
 | L-01 | Planning-met | Current and accepted-next register demand is mapped. | LL demand and trace tables | Architecture review |
 | L-02 | Planning-met | CR2/SMCR/DCR/DMAR explicitly dormant; invalid EGR read identified. | LL classification table | Architecture review |
 | L-03 | Open | Generic checked/unchecked contract and one-transfer proof remain unfrozen. | LL audit | Evidence review |
-| L-04 | Open P0 | EGR, CCR, SR, and DMAR semantic/access corrections remain. | H-005/H-006 | Evidence review |
+| L-04 | Implementation-met; evidence open | EGR/CCR/DMAR access classes were corrected; retained layout/one-access evidence and future mode-aware capture APIs remain required. | H-005/H-006, 2026-08-15 | Evidence review |
 | L-05 | Open P0 | RegOps exclusions are planned but not yet proven across special registers. | Special RegOps section | Architecture review |
 | L-06 | Open | Active/preload and mode-specific Driver contracts remain incomplete. | H-002/H-010/H-014 | Architecture review |
 | L-07 | Open | No retained layout/one-access fake-register test evidence. | Wave 2 | Evidence review |
@@ -1644,23 +1642,25 @@ because the already-frozen Driver transaction demanded it.
 
 ### Wave 1 — Base Transaction Safety
 
-- Limit the first safe lifecycle contract to an exclusively owned Timer whose
-  channel, master/slave, DMA, and external raw-LL state is reset/dormant. The
-  canonical base configure path must establish that through reset/unowned
-  entry or minimum raw observation and reject non-dormant state; it cannot
-  claim control of deferred feature domains.
+- Limit the first safe lifecycle contract to an exclusively owned Timer. The
+  application must explicitly deconfigure when deferred channel, master/slave,
+  DMA, or external raw-LL state must begin dormant; the canonical root
+  configure path preserves those unrepresented domains and cannot claim their
+  ownership.
 - Move counter-stopped and all other fallible checks before PSC/ARR/CNT writes.
 - Stage every timebase image locally and publish none on Codec failure.
 - Skip ordinary register writes when readable programmed images are unchanged.
 - Do not use preload equality to skip an active commit. Define whether the API
   is preload-only, always commits, or has trustworthy commit provenance that
   proves the active shadow is synchronized.
-- For Wave 1's reset/dormant entry domain, prove the documented UG behavior and
-  reject any observed channel/trigger/DMA/downstream ownership. Later feature
-  waves expand the commit contract as those domains are admitted.
+- For Wave 1's application-owned entry domain, prove the documented UG behavior
+  and preserve channel/trigger/DMA/downstream state that is not represented by
+  `tim_config_t`. The application explicitly invokes `TIM_DeConfig()` when it
+  requires those deferred domains to enter reset state.
 - Replace post-mutation early returns with a single cleanup path.
-- Classify `TIM_Config` as compatibility and freeze `TIM_ConfigBase` (or an
-  equivalently accurate name) with reset/unowned entry semantics.
+- Keep `TIM_Config` and `TIM_DeConfig` as independent canonical conjugate
+  root-lifecycle entry points. Neither calls the other; the application owns
+  ordering and the decision to reset before configuration.
 - Define `TIM_Config`, `TIM_DeConfig`, and delay success/failure postconditions
   for clock, CEN, NVIC, CNT, flags, and configuration.
 - Validate current DIR/CMS transitions against the complete live CR1/SMCR mode
@@ -1687,8 +1687,8 @@ Required tests:
   explicit, including the case where programmed images are equal but active
   synchronization is unknown;
 - injected failure after temporary state proves restoration;
-- reset/dormant-domain UG trace proves every documented Wave 1 side effect is
-  controlled and every out-of-domain feature state is rejected.
+- application-owned-domain UG trace proves every documented Wave 1 side effect
+  is controlled and every out-of-domain feature state is preserved.
 
 ### Wave 2 — Raw Map, LL, and RegOps Semantics
 
@@ -1704,18 +1704,20 @@ Required tests:
 
 ### Wave 3 — Event and Interrupt Model
 
-- Introduce separate IRQ-source, event-flag, and DMA-source types.
-- Cover `TIE/TIF/TDE` and `CC1OF..CC4OF`.
-- Replace IRQ-named SR functions with event observation/acknowledge functions.
-- Make Timer source enable independent from generic NVIC line state.
+- Separate IRQ-source and event-flag types are implemented; DMA-source naming
+  remains deferred with DMA admission.
+- `TIE/TIF` and `CC1OF..CC4OF` are covered; `TDE` remains deferred.
+- IRQ-named SR functions were replaced by event observation/acknowledgement.
+- Timer source enable is independent from generic NVIC line state.
 - If a convenience integration remains, aggregate all Timer sources and every
   peripheral sharing the vector before disabling/clearing NVIC.
-- Define enable-time stale-pending behavior and selected-source W0C race policy.
-- Make generic `CCxIF` acknowledge mode-aware. By Driver policy, reject it for
+- Enable-time stale-pending behavior belongs to the application/NVIC layer;
+  the selected-source W0C race is documented on `TIM_AckIRQEvents`.
+- Generic `CCxIF` acknowledgement is mode-aware. By Driver policy, reject it for
   an input-capture lane so an unread notification is not silently discarded;
   reserve normal consumption for `TIM_ReadCapturedValue` and add an explicit
   discard action only if a consumer admits it.
-- Keep compatibility wrappers only as documented migrations.
+- Legacy compatibility wrappers are removed after consumer migration.
 
 ### Wave 4 — Programmed Tick, Active Commit, and Delay Service
 
@@ -2169,10 +2171,10 @@ or safe canonical reference for every STM32 driver.
 
 | Layer | Final planning verdict |
 | --- | --- |
-| Driver | Strong for base clock/counter/timebase grouping and centralized apply paths, but current timebase failure ordering, clock/mode transitions, and IRQ/NVIC semantics are blocking defects. The accepted-next TIM2-4 channel/PWM-output surface is missing; capture/synchronization/DMA remain intentionally unadmitted. |
+| Driver | Strong for base clock/counter/timebase grouping and centralized apply paths; timebase failure ordering and IRQ source/event/NVIC separation are implemented, while clock/mode transitions and retained evidence remain open. The accepted-next TIM2-4 channel/PWM-output surface is missing; capture/synchronization/DMA remain intentionally unadmitted. |
 | Codec | Correct pure image-transformation boundary and sufficient surface for the current Driver; accepted-next CCR/PWM-output transformations and transactional grouped publication remain open. Input-capture/trigger/DMA breadth is candidate-only, not a current completeness defect. |
-| LL | Complete TIM2-TIM4 register-address coverage; not semantically closed until write-only EGR, mode-dependent CCR, DMAR portal, and generic RegOps restrictions are corrected. |
-| Cross-layer | Ownership is mostly modular, but preload/update side effects, event/request/NVIC separation, concurrency, cleanup, and programmed-versus-effective state need explicit contracts and tests. |
+| LL | Complete TIM2-TIM4 register-address coverage with EGR/CCR/DMAR access classes corrected; retained access tests, mode-aware Driver ownership, and generic RegOps restrictions remain open. |
+| Cross-layer | Ownership is mostly modular and event/request/NVIC separation is implemented, but preload/update side effects, concurrency, cleanup, and programmed-versus-effective state still need explicit contracts and tests. |
 
 Therefore:
 
@@ -2188,7 +2190,7 @@ Therefore:
 | --- | --- | --- | --- |
 | F-001 | `[Conclusion]` | Freeze public Driver intent and private transaction plans before deriving Codec and LL. | Register breadth can never create public scope. |
 | F-002 | `[Conclusion]` | Perform a Codec applicability pass for every API, but permit a documented no-Codec path. | Exact action payloads and peer-only composite features avoid artificial layers. |
-| F-003 | `[Conclusion]` | Keep one config structure per coherent hardware transaction. | No all-feature Timer “god config”; grouped apply paths remain canonical. |
+| F-003 | `[Conclusion]` | Keep one nested config structure per coherent hardware transaction beneath root `tim_config_t`. | The root lifecycle remains complete without flattening unrelated domain semantics. |
 | F-004 | `[Conclusion]` | Separate IRQ sources, event flags, DMA sources, and NVIC delivery state. | DIER, SR, DMA, and NVIC semantics cannot be conflated by one mask type. |
 | F-005 | `[Conclusion]` | Separate PWM compare-value access from captured-value consumption. | Public APIs expose CCR mode semantics and read-clear/overcapture behavior accurately. |
 | F-006 | `[Conclusion]` | Build PWM above Timer PWM-output/timebase/channel primitives. | Timer owns hardware primitives; PWM owns duty/frequency/GPIO/shared-channel policy. |
@@ -2199,7 +2201,7 @@ Therefore:
 | F-011 | `[Conclusion]` | Require an explicit single-owner or transaction-guard contract per instance. | Task, ISR, DMA, trigger, and hardware writers are considered before read-stage-write. |
 | F-012 | `[Deferred]` | Public software-event generation remains private until a named consumer passes admission. | Existing private UG use does not create an application API by itself. |
 | F-013 | `[Deferred]` | Basic, advanced-control, 32-bit, reduced-channel, and shared-vector variants follow capability-gated extensions. | TIM2-TIM4 structures are not widened speculatively. |
-| F-014 | `[Conclusion]` | Treat current `TIM_Config` as a compatibility/base API and target accurately named reset/unowned base configuration. | The root name cannot grow into an all-feature configuration or force unrelated updates. |
+| F-014 | `[Implemented]` | Use independent symmetric `TIM_Config` / `TIM_DeConfig` root lifecycle entry points and remove frequency-setting configuration helpers. | `tim_config_t` owns all admitted domains; configuration preserves deferred domains, explicit deconfiguration resets them, and calculated-frequency getters remain observational only. |
 | F-015 | `[Conclusion]` | Make generic CCx event acknowledgement mode-aware and reject input-capture CCxIF discard by default. | Capture consumption remains explicit; a discard action requires independent admission. |
 | F-016 | `[Conclusion]` | Limit the first PWM migration to TIM2/TIM3/TIM4 and a narrow PWM1/PWM2 output contract. | TIM1 and broader output-compare modes remain deferred; AFIO/package/SWJ routing stays peer-owned. |
 

@@ -57,10 +57,10 @@ typedef uint8_t									tim_arpe_t;
 typedef uint8_t									tim_opm_t;
 /** @brief Timer update-source selector type @typedef tim_update_source_t */
 typedef uint8_t									tim_update_source_t;
-/** @brief Timer IRQ enable selector type @typedef tim_irq_enable_t */
-typedef uint8_t									tim_irq_enable_t;
-/** @brief Timer IRQ source bit-mask selector type @typedef tim_irq_t */
-typedef uint8_t									tim_irq_t;
+/** @brief Timer interrupt-request source bit-mask selector type @typedef tim_irq_source_t */
+typedef uint8_t									tim_irq_source_t;
+/** @brief Timer event-flag bit-mask selector type @typedef tim_event_flag_t */
+typedef uint16_t								tim_event_flag_t;
 /** @brief Timer DMA source bit-mask selector type @typedef tim_dma_t */
 typedef uint8_t									tim_dma_t;
 /** @brief Timer channel mode selector type @typedef tim_channel_mode_t */
@@ -75,8 +75,8 @@ typedef uint8_t									tim_channel_oc_fast_t;
 typedef uint8_t									tim_channel_oc_clear_t;
 /** @brief Timer channel polarity selector type @typedef tim_channel_polarity_t */
 typedef uint8_t									tim_channel_polarity_t;
-/** @brief Timer clock-division selector type @typedef tim_clock_division_t */
-typedef uint8_t									tim_clock_division_t;
+/** @brief Timer digital-filter sampling-clock division selector type @typedef tim_digital_filter_clock_division_t */
+typedef uint8_t									tim_digital_filter_clock_division_t;
 /** @brief Timer master-mode selector type @typedef tim_master_mode_t */
 typedef uint8_t									tim_master_mode_t;
 /** @brief Timer slave-mode selector type @typedef tim_slave_mode_t */
@@ -91,9 +91,6 @@ typedef uint16_t								tim_prescaler_t;
 typedef uint16_t								tim_auto_reload_t;
 /** @brief Timer counter value type @typedef tim_counter_value_t */
 typedef uint16_t								tim_counter_value_t;
-/** @brief Timer frequency value type in hertz @typedef tim_frequency_t */
-typedef uint32_t								tim_frequency_t;
-
 /** @} */ // TIM_03_Driver_01_Types
 
 /** @} */ // TIM_03_Driver

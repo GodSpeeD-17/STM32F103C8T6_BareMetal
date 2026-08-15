@@ -262,18 +262,6 @@ __STATIC_FORCEINLINE void LL_TIM_WriteSR(TIM_TypeDef* const TIMx, const reg regI
 }
 
 /**
- * @brief Reads the Timer `EGR` register image
- * @param[in]	TIMx	Timer peripheral instance
- * @returns Full `TIMx_EGR` image.
- * @note Event-generation sequencing belongs above LL.
- */
-__STATIC_FORCEINLINE reg LL_TIM_ReadEGR(const TIM_TypeDef* const TIMx)
-{
-	//! Address the EGR union image through the shared register-pointer accessor.
-	return LL_TIM_ReadRegister(LL_TIM_REG(TIMx, EGR));
-}
-
-/**
  * @brief Writes the Timer `EGR` register image
  * @param[in]	TIMx		Timer peripheral instance
  * @param[in]	regImage	Full `TIMx_EGR` image to write
@@ -435,12 +423,13 @@ __STATIC_FORCEINLINE void LL_TIM_WriteARR(TIM_TypeDef* const TIMx, const reg reg
  * @brief Reads the Timer `CCR1` register image
  * @param[in]	TIMx	Timer peripheral instance
  * @returns Full `TIMx_CCR1` image.
- * @note Capture versus compare meaning depends on staged channel mode above LL.
+ * @note In input-capture mode, reading `CCRx` consumes the corresponding
+ * `CCxIF` flag. The Driver must own that consuming-read policy.
  */
 __STATIC_FORCEINLINE reg LL_TIM_ReadCCR1(const TIM_TypeDef* const TIMx)
 {
-	//! Read the shared channel-1 capture/compare storage through its writable output view.
-	return LL_TIM_ReadRegister(&(TIMx->CCR1.CC1_OUT));
+	//! Read the shared channel-1 storage through its read-only input view.
+	return LL_TIM_ReadRegister(&(TIMx->CCR1.CC1_IN));
 }
 
 /**
@@ -459,12 +448,13 @@ __STATIC_FORCEINLINE void LL_TIM_WriteCCR1(TIM_TypeDef* const TIMx, const reg re
  * @brief Reads the Timer `CCR2` register image
  * @param[in]	TIMx	Timer peripheral instance
  * @returns Full `TIMx_CCR2` image.
- * @note Capture versus compare meaning depends on staged channel mode above LL.
+ * @note In input-capture mode, reading `CCRx` consumes the corresponding
+ * `CCxIF` flag. The Driver must own that consuming-read policy.
  */
 __STATIC_FORCEINLINE reg LL_TIM_ReadCCR2(const TIM_TypeDef* const TIMx)
 {
-	//! Read the shared channel-2 capture/compare storage through its writable output view.
-	return LL_TIM_ReadRegister(&(TIMx->CCR2.CC2_OUT));
+	//! Read the shared channel-2 storage through its read-only input view.
+	return LL_TIM_ReadRegister(&(TIMx->CCR2.CC2_IN));
 }
 
 /**
@@ -483,12 +473,13 @@ __STATIC_FORCEINLINE void LL_TIM_WriteCCR2(TIM_TypeDef* const TIMx, const reg re
  * @brief Reads the Timer `CCR3` register image
  * @param[in]	TIMx	Timer peripheral instance
  * @returns Full `TIMx_CCR3` image.
- * @note Capture versus compare meaning depends on staged channel mode above LL.
+ * @note In input-capture mode, reading `CCRx` consumes the corresponding
+ * `CCxIF` flag. The Driver must own that consuming-read policy.
  */
 __STATIC_FORCEINLINE reg LL_TIM_ReadCCR3(const TIM_TypeDef* const TIMx)
 {
-	//! Read the shared channel-3 capture/compare storage through its writable output view.
-	return LL_TIM_ReadRegister(&(TIMx->CCR3.CC3_OUT));
+	//! Read the shared channel-3 storage through its read-only input view.
+	return LL_TIM_ReadRegister(&(TIMx->CCR3.CC3_IN));
 }
 
 /**
@@ -507,12 +498,13 @@ __STATIC_FORCEINLINE void LL_TIM_WriteCCR3(TIM_TypeDef* const TIMx, const reg re
  * @brief Reads the Timer `CCR4` register image
  * @param[in]	TIMx	Timer peripheral instance
  * @returns Full `TIMx_CCR4` image.
- * @note Capture versus compare meaning depends on staged channel mode above LL.
+ * @note In input-capture mode, reading `CCRx` consumes the corresponding
+ * `CCxIF` flag. The Driver must own that consuming-read policy.
  */
 __STATIC_FORCEINLINE reg LL_TIM_ReadCCR4(const TIM_TypeDef* const TIMx)
 {
-	//! Read the shared channel-4 capture/compare storage through its writable output view.
-	return LL_TIM_ReadRegister(&(TIMx->CCR4.CC4_OUT));
+	//! Read the shared channel-4 storage through its read-only input view.
+	return LL_TIM_ReadRegister(&(TIMx->CCR4.CC4_IN));
 }
 
 /**
@@ -554,8 +546,9 @@ __STATIC_FORCEINLINE void LL_TIM_WriteDCR(TIM_TypeDef* const TIMx, const reg reg
 /**
  * @brief Reads the Timer `DMAR` register image
  * @param[in]	TIMx	Timer peripheral instance
- * @returns Full `TIMx_DMAR` image.
- * @note DMA-burst transfer policy belongs above LL.
+ * @returns Current 16-bit `TIMx_DMAR` portal payload in a register image.
+ * @note `TIMx_DMAR` is a transfer portal rather than stable configuration
+ * state. DMA-burst direction, width, and sequencing belong above LL.
  */
 __STATIC_FORCEINLINE reg LL_TIM_ReadDMAR(const TIM_TypeDef* const TIMx)
 {
@@ -567,7 +560,8 @@ __STATIC_FORCEINLINE reg LL_TIM_ReadDMAR(const TIM_TypeDef* const TIMx)
  * @brief Writes the Timer `DMAR` register image
  * @param[in]	TIMx		Timer peripheral instance
  * @param[in]	regImage	Full `TIMx_DMAR` image to write
- * @note Caller owns DMA-burst transfer policy.
+ * @note Caller owns the 16-bit payload constraint plus DMA-burst direction,
+ * width, and sequencing policy.
  */
 __STATIC_FORCEINLINE void LL_TIM_WriteDMAR(TIM_TypeDef* const TIMx, const reg regImage)
 {

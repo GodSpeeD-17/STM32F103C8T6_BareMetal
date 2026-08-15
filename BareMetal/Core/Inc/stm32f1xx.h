@@ -252,11 +252,11 @@ extern "C" {
  * @{
  */
 /** @brief Zero frequency constant @def RCC_FREQ_ZERO */
-#define RCC_FREQ_ZERO							((rcc_freq_t) 0UL)
+#define RCC_FREQ_ZERO							((frequency_t) 0UL)
 /** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
-#define RCC_FREQ_1kHz							((rcc_freq_t) 1000UL)
+#define RCC_FREQ_1kHz							((frequency_t) 1000UL)
 /** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
-#define RCC_FREQ_1MHz							((rcc_freq_t) 1000000UL)
+#define RCC_FREQ_1MHz							((frequency_t) 1000000UL)
 
 /** @} */ // RCC_03_Driver_02_Frequency
 
@@ -450,25 +450,25 @@ extern "C" {
 
 #ifdef STM32F103C8T6__
 /** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
-#define RCC_HSI_FREQ							((rcc_freq_t) 8000000UL)
+#define RCC_HSI_FREQ							((frequency_t) 8000000UL)
 /** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
-#define RCC_HSE_FREQ							((rcc_freq_t) 8000000UL)
+#define RCC_HSE_FREQ							((frequency_t) 8000000UL)
 /** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
-#define RCC_SYSCLK_MAX_FREQ						((rcc_freq_t) 72000000UL)
+#define RCC_SYSCLK_MAX_FREQ						((frequency_t) 72000000UL)
 /** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
 #define RCC_HCLK_MAX_FREQ						(RCC_SYSCLK_MAX_FREQ)
 /** @brief Maximum APB1 frequency @def RCC_PCLK1_MAX_FREQ */
-#define RCC_PCLK1_MAX_FREQ						((rcc_freq_t) 36000000UL)
+#define RCC_PCLK1_MAX_FREQ						((frequency_t) 36000000UL)
 /** @brief Maximum APB2 frequency @def RCC_PCLK2_MAX_FREQ */
-#define RCC_PCLK2_MAX_FREQ						((rcc_freq_t) 72000000UL)
+#define RCC_PCLK2_MAX_FREQ						((frequency_t) 72000000UL)
 /** @brief Maximum ADC clock frequency @def RCC_ADCCLK_MAX_FREQ */
-#define RCC_ADCCLK_MAX_FREQ						((rcc_freq_t) 14000000UL)
+#define RCC_ADCCLK_MAX_FREQ						((frequency_t) 14000000UL)
 /** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
-#define RCC_USBCLK_TARGET_FREQ					((rcc_freq_t) 48000000UL)
+#define RCC_USBCLK_TARGET_FREQ					((frequency_t) 48000000UL)
 /** @brief Maximum SYSCLK allowed with Flash latency 0 @def RCC_FLASH_LATENCY_0_MAX_FREQ */
-#define RCC_FLASH_LATENCY_0_MAX_FREQ			((rcc_freq_t) 24000000UL)
+#define RCC_FLASH_LATENCY_0_MAX_FREQ			((frequency_t) 24000000UL)
 /** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
-#define RCC_FLASH_LATENCY_1_MAX_FREQ			((rcc_freq_t) 48000000UL)
+#define RCC_FLASH_LATENCY_1_MAX_FREQ			((frequency_t) 48000000UL)
 
 #endif /* STM32F103C8T6__ */
 

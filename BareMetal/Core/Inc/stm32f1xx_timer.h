@@ -1199,18 +1199,18 @@ typedef volatile struct __TIM_TypeDef
 	union
 	{
 		/** @brief Full 32-bit `TIMx_EGR` register image */
-		_IO REG;
+		_O REG;
 		/** @brief Named `TIMx_EGR` bitfield view */
 		struct
 		{
-			_IO UG : 1;				/**< Update generation */
-			_IO CC1G : 1;			/**< Capture/compare 1 generation */
-			_IO CC2G : 1;			/**< Capture/compare 2 generation */
-			_IO CC3G : 1;			/**< Capture/compare 3 generation */
-			_IO CC4G : 1;			/**< Capture/compare 4 generation */
-			_IO reserved_1 : 1;		/**< Reserved */
-			_IO TG : 1;				/**< Trigger generation */
-			_IO reserved_2 : 25;	/**< Reserved */
+			_O UG : 1;				/**< Update generation */
+			_O CC1G : 1;			/**< Capture/compare 1 generation */
+			_O CC2G : 1;			/**< Capture/compare 2 generation */
+			_O CC3G : 1;			/**< Capture/compare 3 generation */
+			_O CC4G : 1;			/**< Capture/compare 4 generation */
+			_O reserved_1 : 1;		/**< Reserved */
+			_O TG : 1;				/**< Trigger generation */
+			_O reserved_2 : 25;	/**< Reserved */
 		} BIT;
 	} EGR;
 
@@ -1360,53 +1360,53 @@ typedef volatile struct __TIM_TypeDef
 
 	/**
 	 * @section TIM_TypeDef_CCR1 Timer Capture/Compare Register 1 (CCR1)
-	 * @brief [R/W] Capture/compare value for channel 1
+	 * @brief [R or R/W] Capture/compare value for channel 1
 	 * @details
 	 * `CC1_IN` and `CC1_OUT` are aliases for the same hardware register image.
 	 * The active meaning depends on the channel mode selected in `TIMx_CCMR1`.
 	 */
 	union
 	{
-		_IO CC1_IN;				/**< Input-capture view of channel 1 capture/compare value */
+		_I CC1_IN;				/**< Read-only input-capture view of channel 1 capture/compare value */
 		_IO CC1_OUT;			/**< Output-compare view of channel 1 capture/compare value */
 	} CCR1;
 
 	/**
 	 * @section TIM_TypeDef_CCR2 Timer Capture/Compare Register 2 (CCR2)
-	 * @brief [R/W] Capture/compare value for channel 2
+	 * @brief [R or R/W] Capture/compare value for channel 2
 	 * @details
 	 * `CC2_IN` and `CC2_OUT` are aliases for the same hardware register image.
 	 * The active meaning depends on the channel mode selected in `TIMx_CCMR1`.
 	 */
 	union
 	{
-		_IO CC2_IN;				/**< Input-capture view of channel 2 capture/compare value */
+		_I CC2_IN;				/**< Read-only input-capture view of channel 2 capture/compare value */
 		_IO CC2_OUT;			/**< Output-compare view of channel 2 capture/compare value */
 	} CCR2;
 
 	/**
 	 * @section TIM_TypeDef_CCR3 Timer Capture/Compare Register 3 (CCR3)
-	 * @brief [R/W] Capture/compare value for channel 3
+	 * @brief [R or R/W] Capture/compare value for channel 3
 	 * @details
 	 * `CC3_IN` and `CC3_OUT` are aliases for the same hardware register image.
 	 * The active meaning depends on the channel mode selected in `TIMx_CCMR2`.
 	 */
 	union
 	{
-		_IO CC3_IN;				/**< Input-capture view of channel 3 capture/compare value */
+		_I CC3_IN;				/**< Read-only input-capture view of channel 3 capture/compare value */
 		_IO CC3_OUT;			/**< Output-compare view of channel 3 capture/compare value */
 	} CCR3;
 
 	/**
 	 * @section TIM_TypeDef_CCR4 Timer Capture/Compare Register 4 (CCR4)
-	 * @brief [R/W] Capture/compare value for channel 4
+	 * @brief [R or R/W] Capture/compare value for channel 4
 	 * @details
 	 * `CC4_IN` and `CC4_OUT` are aliases for the same hardware register image.
 	 * The active meaning depends on the channel mode selected in `TIMx_CCMR2`.
 	 */
 	union
 	{
-		_IO CC4_IN;				/**< Input-capture view of channel 4 capture/compare value */
+		_I CC4_IN;				/**< Read-only input-capture view of channel 4 capture/compare value */
 		_IO CC4_OUT;			/**< Output-compare view of channel 4 capture/compare value */
 	} CCR4;
 
@@ -1436,10 +1436,10 @@ typedef volatile struct __TIM_TypeDef
 
 	/**
 	 * @section TIM_TypeDef_DMAR Timer DMA Address Register (DMAR)
-	 * @brief [R/W] DMA burst transfer register access window
+	 * @brief [R/W Portal] DMA burst transfer register access window
 	 * @details
-	 * `TIMx_DMAR` is the data access window used for DMA burst transfers
-	 * configured by `TIMx_DCR`.
+	 * `TIMx_DMAR` is a 16-bit payload portal used for DMA burst transfers
+	 * configured by `TIMx_DCR`; it is not stable configuration state.
 	 */
 	_IO DMAR;
 } TIM_TypeDef;
