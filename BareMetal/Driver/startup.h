@@ -34,10 +34,6 @@
 #ifndef SYSTICK_DELAY__
 	// Timer used for Delay
 	#define DELAY_TIMER							TIM4
-	// Channel for Timer used for Delay
-	#define DELAY_TIMER_CHANNEL					TIMx_CHANNEL_NONE
-// Timer Interrupt Handler
-#define DELAY_TIMER_IRQHandler					TIM4_IRQHandler
 #endif /* SYSTICK_DELAY__ */
 
 /*----------------------------------- Linker Script --------------------------------------------*/
@@ -135,11 +131,7 @@ __attribute__((weak, alias("Default_Handler"))) void TIM1_TRG_COM_IRQHandler(voi
 __attribute__((weak, alias("Default_Handler"))) void TIM1_CC_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TIM3_IRQHandler(void);
-#ifdef SYSTICK_DELAY__
 __attribute__((weak, alias("Default_Handler"))) void TIM4_IRQHandler(void);
-#else
-void TIM4_IRQHandler(void);
-#endif /* SYSTICK_DELAY__ */
 __attribute__((weak, alias("Default_Handler"))) void I2C1_EV_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C1_ER_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void I2C2_EV_IRQHandler(void);

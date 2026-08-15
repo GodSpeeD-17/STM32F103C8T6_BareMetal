@@ -73,10 +73,8 @@ extern "C" {
 #define TIM_INSTANCE_INDEX_TIM3							((tim_instance_index_t) 0x01U)
 /** @brief `TIM4` instance index @def TIM_INSTANCE_INDEX_TIM4 */
 #define TIM_INSTANCE_INDEX_TIM4							((tim_instance_index_t) 0x02U)
-/** @brief `TIM5` instance index @def TIM_INSTANCE_INDEX_TIM5 */
-#define TIM_INSTANCE_INDEX_TIM5							((tim_instance_index_t) 0x03U)
 /** @brief Last supported general-purpose Timer instance index @def TIM_INSTANCE_INDEX_LAST */
-#define TIM_INSTANCE_INDEX_LAST							TIM_INSTANCE_INDEX_TIM5
+#define TIM_INSTANCE_INDEX_LAST							TIM_INSTANCE_INDEX_TIM4
 /** @brief Number of supported general-purpose Timer instances @def TIM_INSTANCE_COUNT */
 #define TIM_INSTANCE_COUNT								((tim_instance_index_t) (TIM_INSTANCE_INDEX_LAST + 1U))
 /** @brief Invalid Timer instance index sentinel @def TIM_INSTANCE_INDEX_INVALID */
@@ -100,7 +98,6 @@ extern "C" {
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns Timer instance validity status
  * @retval - `0x00U`: @p TIMx is not supported by this Timer driver pass
  * @retval - `0x01U`: @p TIMx is a supported general-purpose Timer instance
@@ -110,8 +107,7 @@ extern "C" {
 (																\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM2_BASE_ADDRESS)) ||	\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM3_BASE_ADDRESS)) ||	\
-	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM4_BASE_ADDRESS)) ||	\
-	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM5_BASE_ADDRESS))		\
+	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM4_BASE_ADDRESS))		\
 )
 
 /**
@@ -121,12 +117,10 @@ extern "C" {
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns Timer instance index
  * @retval - @ref `TIM_INSTANCE_INDEX_TIM2`: @p TIMx is @ref `TIM2`
  * @retval - @ref `TIM_INSTANCE_INDEX_TIM3`: @p TIMx is @ref `TIM3`
  * @retval - @ref `TIM_INSTANCE_INDEX_TIM4`: @p TIMx is @ref `TIM4`
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM5`: @p TIMx is @ref `TIM5`
  * @retval - @ref `TIM_INSTANCE_INDEX_INVALID`: @p TIMx is not supported
  */
 __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef* const TIMx)
@@ -150,11 +144,6 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
 		case TIM4_BASE_ADDRESS:
 		{
 			instanceIndex = TIM_INSTANCE_INDEX_TIM4;
-			break;
-		}
-		case TIM5_BASE_ADDRESS:
-		{
-			instanceIndex = TIM_INSTANCE_INDEX_TIM5;
 			break;
 		}
 		default:

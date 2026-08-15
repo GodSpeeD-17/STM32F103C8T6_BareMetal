@@ -2,22 +2,15 @@
 // Header Files
 #include "main.h"
 /*-------------------------------------------------------------------------------*/
-// Timer 4 Configuration
-tim_config_t TIM4_Config = {
-	.TIM = TIM4,
-	.channel = TIMx_CHANNEL_ALL
-};
-/*-------------------------------------------------------------------------------*/
 // Main Entry Point
-int main(){
+int main(void){
 	// Initialisation
-	TIM_10kHz_Load_Default(&TIM4_Config);
-	// Configure Timer 4 with 1MHz Configuration
-	TIM_Config(&TIM4_Config);
-	// Enable Interrupt for Timer 4
-	TIM_IRQ_Enable(TIM4_Config.TIM, TIMx_IRQ_OVF_UVF);
-	// Enable the Timer 4
-	TIM_Enable(TIM4_Config.TIM);
+	(void) TIM_ConfigTickFrequency(TIM3, (tim_frequency_t) 10000UL);
+	(void) TIM_SetAutoReload(TIM3, (tim_auto_reload_t) 9999U);
+	// Enable the Timer 3 update interrupt
+	(void) TIM_SetIRQState(TIM3, TIMx_IRQ_OVF_UVF, DRIVER_STATUS_ON);
+	// Enable Timer 3
+	(void) TIM_SetOperationState(TIM3, DRIVER_STATUS_ON);
 	// Infinite Loop
 	while(1){
 		// Do Nothing
@@ -27,13 +20,15 @@ int main(){
 }
 /*-------------------------------------------------------------------------------*/
 // Timer IRQ Handler
-void TIM4_IRQHandler(void){
+void TIM3_IRQHandler(void){
+	tim_irq_t pendingMask = (tim_irq_t) 0U;
+	(void) TIM_GetPendingIRQMask(TIM3, &pendingMask);
 	// Overflow/Underflow detected
-	if(TIM_IRQ_Get_Status(TIM4_Config.TIM, TIMx_IRQ_OVF_UVF)){
+	if((pendingMask & TIMx_IRQ_OVF_UVF) != (tim_irq_t) 0U){
 		// Toggle OB LED
 		OB_LED_Toggle();
 		// Acknowledge the Interrupt
-		TIM_IRQ_Ack(TIM4_Config.TIM, TIMx_IRQ_OVF_UVF);
+		(void) TIM_AcknowledgeIRQ(TIM3, TIMx_IRQ_OVF_UVF);
 	}
 
 }

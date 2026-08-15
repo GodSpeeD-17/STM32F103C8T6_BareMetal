@@ -1,24 +1,5 @@
 /*-------------------------------- Includes ---------------------------*/
 #include "startup.h"
-/*-------------------------------- Local Variables ------------------------*/
-// Timer Delay Configuration
-#ifndef SYSTICK_DELAY__
-// Timer Configuration Structure
-tim_config_t _TIM_Configuration = {
-#ifdef __OLD_TIMER_METHOD__
-	// Timer
-	.TIM = DELAY_TIMER,
-	// Channel
-	.channel = DELAY_TIMER_CHANNEL,
-#else
-	// Timer
-	.instance = DELAY_TIMER,
-	// Channel
-	.channel.instance = DELAY_TIMER_CHANNEL,
-#endif /* __OLD_TIMER_METHOD__ */
-};
-#endif /* SYSTICK_DELAY__ */
-
 /*-------------------------------- Heap Pointer ---------------------------*/
 static uint8_t *heap_ptr = &_sheap;
 
@@ -85,12 +66,8 @@ void Reset_Handler(void)
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	// TIM Configuration for 1us resolution
-	TIM_1MHz_Load_Default(&_TIM_Configuration);
-	// Configure TIM with the parameters
-	TIM_Config(&_TIM_Configuration);
-	// Configure TIM Interrupt for Overflow
-	TIM_IRQ_Enable(DELAY_TIMER, TIMx_IRQ_OVF_UVF);
+	// Configure a dedicated polling Timer with an exact 1 MHz counter tick.
+	(void) TIM_Config1MHz(DELAY_TIMER);
 #endif /* SYSTICK_DELAY__ */
 	SysTick_Enable();
 	// Step 5: Call main()
@@ -99,38 +76,16 @@ void Reset_Handler(void)
 	Default_Handler();
 }
 
-/*-------------------------------- Timer Handler ------------------------*/
 // Timer Delay Functions
 #ifndef SYSTICK_DELAY__
-// Delay Counter
-static volatile uint8_t delayCompleted = 0x00;
-
-/**
- * @brief Provides a blocking delay in microseconds using TIMx
- * @param delayUs Delay time in microseconds
- * @note Maximum delay achievable is 4,294,967 us (~4.29 seconds)
- * @note - Assumes 1MHz timer frequency
- * @note - Timer is configured in Upcounting Mode
- * @note - Timer is disabled after delay is complete
- * @note - Uses polling method to check for delay completion
- */
 void delay_us(uint32_t delayUs)
 {
-	// Disable the Timer
-	TIM_Disable(DELAY_TIMER);
-	// Configure Timer Count Value
-	DELAY_TIMER->CNT = TIMx_DEFAULT_CNT;
-	// Configure Delay Time
-	DELAY_TIMER->ARR = (delayUs - 1);
-	// Enable the Timer
-	TIM_Enable(DELAY_TIMER);
-	// Wait until delay is done
-	while (delayCompleted != 0x01);
-	delayCompleted = 0x00;
-	// Disable the Timer
-	TIM_Disable(DELAY_TIMER);
-	// Clear the UIF Flag
-	DELAY_TIMER->SR.REG &= ~TIM_SR_UIF;
+	while (delayUs != 0UL)
+	{
+		const uint16_t chunkUs = (delayUs > 0xFFFFUL) ? 0xFFFFU : (uint16_t) delayUs;
+		(void) TIM_DelayUs(DELAY_TIMER, chunkUs);
+		delayUs -= (uint32_t) chunkUs;
+	}
 }
 
 /**
@@ -144,26 +99,9 @@ void delay_us(uint32_t delayUs)
  */
 void delay_ms(uint32_t delayMs)
 {
-	// Iteration for each number of milliseconds
-	while (delayMs--)
+	if (delayMs != 0UL)
 	{
-		// Create delay of ~998us
-		delay_us(998);
-	}
-}
-
-/**
- * @brief Timer Interrupt Handler
- */
-void DELAY_TIMER_IRQHandler(void)
-{
-	// Check for Interrupt Flag
-	if (TIM_IRQ_Get_OVF_UVF(DELAY_TIMER))
-	{
-		// Status for Delay Complete
-		delayCompleted = 0x01;
-		// Acknowledge the Interrupt Flag
-		TIM_IRQ_Ack_OVF_UVF(DELAY_TIMER);
+		(void) TIM_DelayMs(DELAY_TIMER, delayMs);
 	}
 }
 

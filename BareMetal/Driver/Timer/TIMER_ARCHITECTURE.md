@@ -2,7 +2,7 @@
 
 This document captures the intended Timer driver architecture and the current
 refactor checkpoint. It is scoped to the current general-purpose Timer driver
-surface for `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
+surface for `TIM2`, `TIM3`, and `TIM4` on the STM32F103C8T6.
 
 The first refactor pass preserves the current public Timer selector vocabulary
 where practical, including existing `TIMx_*` selector names. Public helper APIs
@@ -71,7 +71,7 @@ configuration structures live in `timer_config.h`.
 
 `timer_config.h` owns Timer configuration structures only. They are deliberately
 timer-instance independent so the same configuration object can be applied to
-`TIM2`, `TIM3`, `TIM4`, or `TIM5` by passing the instance separately to the
+`TIM2`, `TIM3`, or `TIM4` by passing the instance separately to the
 driver API.
 
 Current first-pass structure shape:
@@ -100,7 +100,7 @@ NVIC helpers, public driver API declarations, or codec staging.
 
 Expected groups:
 
-- Timer instance validation for `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
+- Timer instance validation for `TIM2`, `TIM3`, and `TIM4`.
 - Timer channel selectors and channel-mask validation.
 - Counter mode, direction, preload, one-pulse, and update-source selectors.
 - Channel output/input selectors and validation.
@@ -231,7 +231,9 @@ Current first-pass public API scope:
 - counter operation state APIs `TIM_GetOperationState()` /
   `TIM_SetOperationState()`
 - `TIM_Config()` and `TIM_DeConfig()`
+- exact tick-frequency configuration through `TIM_ConfigTickFrequency()`
 - header-local static inline preset root wrapper `TIM_Config1MHz()`
+- IRQ source enable, pending-mask, and acknowledge APIs with NVIC coordination
 - blocking polling delay helpers `TIM_DelayUs()` / `TIM_DelayMs()`
 - grouped `TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
@@ -283,33 +285,31 @@ Instead of allowing `TIM_SetPrescaler()` to change RCC state as a hidden side
 effect.
 
 `TIM_Config()` validates the full public configuration, enables the Timer clock
-gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter
-through `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, reads the
-configuration-owned registers, stages through the codec, writes only changed
-`CR1`, `PSC`, and `ARR` images, temporarily clears `CR1.UDIS` for the forced
-`TIMx_EGR.UG`, restores the final `CR1` image, conditionally clears a generated
-`TIMx_SR.UIF`, and writes `TIMx_CNT` after the update event only when the
-requested initial count differs from the post-update counter image. The current
-implementation leaves the counter disabled after configuration; users explicitly
-start the counter with
+gate, stops the counter, temporarily masks an enabled instance NVIC line, and
+applies counter configuration through a safe stopped DIR/CMS transition. It
+writes the staged `PSC` and `ARR`, then uses `UDIS=0`, `URS=1`, and `EGR.UG` to
+load buffered values without asserting `UIF` or requesting an interrupt/DMA.
+It restores the requested `CR1`, `CNT`, and NVIC state and leaves the counter
+disabled. Users explicitly start it with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 `TIM_Config1MHz()` is a narrow header-local static inline preset wrapper over
-`TIM_Config()`. It takes only `TIMx`, fills a local `tim_config_t` with the
-fixed 1 MHz default preset values, and then delegates to the normal root
-configuration path. The preset uses @ref `TIMx_DEFAULT_1MHz_PSC`, which assumes
-a 72 MHz Timer kernel clock. It must not duplicate register writes or bypass
-the update-event latch sequence owned by `TIM_Config()`.
+`TIM_ConfigTickFrequency()`. The latter derives the current APB1 Timer kernel
+clock, including the STM32 APB prescaler x2 rule, and accepts only exact tick
+frequencies representable by the 16-bit `PSC`. No fixed 72 MHz assumption is
+made.
 
 `TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that has
 already been configured with `TIM_Config1MHz()`. It does not create a general
-delay service and does not use IRQ/NVIC state. The helper verifies only that
-the Timer clock gate is enabled, stops the counter, disables `CR1.ARPE` so the
+delay service and does not use IRQ/NVIC state. The helper verifies that the
+Timer clock gate is enabled and its active tick is exactly 1 MHz, stops the
+counter, disables `CR1.ARPE` so the
 new `ARR` value is immediate, writes `ARR = delayUs - 1`, resets `CNT`, clears
 `SR.UIF`, and then starts the counter with `CR1.OPM` set and `CR1.UDIS`
 temporarily clear so `SR.UIF` can be observed. It polls `SR.UIF` until the
 one-pulse update event completes, then stops the counter, restores the original
-update-event enable state, and clears `SR.UIF`. The delay is a minimum blocking
+update-event enable state, and clears `SR.UIF`. Polling has a bounded timeout
+and performs the same cleanup on timeout. The delay is a minimum blocking
 delay because software setup, polling, and cleanup can add a small positive
 overhead. The public `uint16_t` input bounds the accepted range to
 `1U..0xFFFFU`, so the maximum requested delay is `65535 us`.
@@ -327,11 +327,10 @@ register writes feed shadow/preload logic:
 - `TIMx_PSC` is loaded into the active prescaler on an update event.
 - `TIMx_ARR` may be immediate or preloaded depending on `TIMx_CR1.ARPE`.
 - `TIMx_EGR.UG` forces an update event so staged timebase values become active.
-- `TIMx_CR1.UDIS` can block that update event, so root configuration temporarily
-  clears `UDIS` around the generated `UG` and restores the final `CR1` image
-  afterward.
-- Forcing `EGR.UG` can set `TIMx_SR.UIF`, so the driver may need to clear that
-  generated flag before returning.
+- `TIMx_CR1.UDIS` can block that update event, so timebase commits temporarily
+  use `UDIS=0`.
+- `TIMx_CR1.URS=1` prevents software-generated `UG` from asserting `UIF` or
+  requesting interrupt/DMA service.
 
 The implemented `TIM_Config()` sequence is:
 
@@ -340,31 +339,20 @@ The implemented `TIM_Config()` sequence is:
    `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`.
 3. Disable counter operation with
    `TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`.
-4. Read `CR1`, `PSC`, `ARR`, and pre-update `SR` into local images.
-5. Stage `CR1`, `PSC`, `ARR`, and requested `CNT` through codec APIs.
-6. Build a pre-update `CR1` image from the final staged `CR1` image with
-   `UDIS` cleared.
-7. Write only changed pre-update `CR1`, `PSC`, and `ARR` staged images.
-8. Generate `TIMx_EGR.UG` through the codec-staged update event image so `PSC`
-   and any preloaded `ARR` value are latched.
-9. If `TIMx_SR.UIF` was clear before `UG`, clear `UIF` after `UG` only if that
-   generated update event made it pending. A pre-existing pending `UIF` is
-   preserved.
-10. Restore the final `CR1` image, including the `UDIS` state that
-    `tim_config_t` does not own.
-11. Read `CNT` after `UG`, then write the requested initial counter value only
-   when it differs from the post-update counter image.
-12. Leave operation disabled until the user calls
+4. Temporarily mask the instance NVIC line if it is enabled.
+5. Stage and apply counter configuration, using an edge-aligned intermediate
+   when DIR/CMS changes require it.
+6. Stage and write only changed `PSC` and `ARR` images.
+7. Temporarily use `UDIS=0` and `URS=1`, then generate `TIMx_EGR.UG` so
+   buffered timebase values become active without asserting `UIF`.
+8. Restore the requested `CR1`, requested `CNT`, and entry NVIC state.
+9. Leave operation disabled until the user calls
     `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
-`TIM_DeConfig()` enables the Timer clock gate through
-`TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`, disables the counter through
-`TIM_SetOperationState(TIMx, DRIVER_STATUS_OFF)`, restores only the fields
-represented by `tim_config_t` through the same forced-update latch sequence,
-restores the original `UDIS` state, writes reset `CNT` after `UG`, and then
-disables the Timer clock gate through `TIM_SetClockState(TIMx, DRIVER_STATUS_OFF)`.
-It does not issue an RCC peripheral reset and does not touch channel, IRQ, PWM,
-DMA, master/slave, or delay-helper state.
+`TIM_DeConfig()` disables and clears the instance NVIC line, enables the Timer
+clock gate, pulses the corresponding RCC APB1 reset bit, and disables the clock
+gate. This restores the complete Timer register bank, including channel, IRQ,
+DMA, and master/slave state.
 
 Unlike GPIO, Timer should keep a structured configuration API. GPIO can remain
 ergonomic with a small fixed argument list because its basic configuration is
@@ -438,7 +426,7 @@ Completed:
 - Timer codec exists and operates on caller-owned register images.
 - Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or
   `DRIVER_STATUS_ON` directly.
-- `timer.h` is public API only for the first-pass config-owned Timer fields.
+- `timer.h` exposes root/timebase/counter, IRQ, and bounded delay APIs.
 - RCC clock-gate state APIs `TIM_GetClockState()` and `TIM_SetClockState()`
   are exposed before configuration APIs.
 - Counter operation state APIs `TIM_GetOperationState()` and
@@ -452,16 +440,17 @@ Completed:
 - `timer.h` public API return documentation now uses function-specific
   `@returns @ref driver_status_t "... - Operation Status"` labels and
   parameter-specific `@retval` wording.
-- `TIM_Config()` now temporarily clears `CR1.UDIS`, generates `TIMx_EGR.UG`,
-  restores the final `CR1` image, preserves pre-existing `TIMx_SR.UIF`, clears
-  only a newly generated update flag, and applies `TIMx_CNT` after the update
-  event.
-- `TIM_DeConfig()` stops the counter, restores only config-owned fields, and
-  ends at the Timer clock-gate boundary without issuing RCC peripheral reset.
+- `TIM_Config()` commits buffered timebase state with `UDIS=0`, `URS=1`, and
+  `EGR.UG`, then restores requested `CR1`, `CNT`, and entry NVIC state.
+- `TIM_DeConfig()` clears NVIC delivery state, pulses the matching RCC reset,
+  and leaves the Timer clock gate disabled.
 - `TIM_Config1MHz()` exists as a header-local static inline preset wrapper that
-  shapes a local `tim_config_t` and delegates to `TIM_Config()`.
+  derives the prescaler from the current Timer kernel clock.
 - `TIM_DelayUs()` and `TIM_DelayMs()` exist as blocking polling helpers for
-  Timers already configured by `TIM_Config1MHz()`.
+  Timers already configured by `TIM_Config1MHz()`, with exact-frequency
+  validation and bounded polling.
+- IRQ enable, pending-mask, and acknowledge APIs coordinate DIER/SR codec
+  mapping with the per-instance NVIC line.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
   codec staging, dirty writes, and `driver_status_t` status handling.
 - `timer.c` public implementation sections now mirror `timer.h` banner and
@@ -471,13 +460,8 @@ Completed:
 Remaining:
 - Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
   boundaries.
-- Timer IRQ public APIs are deferred and must be rebuilt so codec owns DIER/SR
-  mapping and the driver owns NVIC policy.
-- Project examples still use legacy Timer APIs and old configuration field
-  names.
-- Remaining Timer Doxygen/style work is limited to files not covered by the
-  latest public header/source pass, especially source-local helper return
-  wording, defines, and deferred public APIs.
+- PWM examples remain blocked on that channel API rebuild; Timer polling and
+  IRQ examples plus shared startup delay users have been migrated.
 
 ## Compatibility Boundary
 
@@ -490,6 +474,5 @@ Initial refactor steps should prefer compatibility over unnecessary renaming:
   member, so one configuration can be reused across Timer instances.
 - Update examples only after the public header/API contract changes.
 
-This branch intentionally accepts some compatibility breakage while the layer
-boundaries are being corrected. The Timer examples must be migrated before
-project builds are expected to be green again.
+Compatibility wrappers retain the legacy Timer IRQ helper names while routing
+them through the new status-returning implementation.

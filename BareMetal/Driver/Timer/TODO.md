@@ -5,7 +5,7 @@ item, verify it, commit it, then move to the next item.
 
 ## Scope
 
-- [x] Limit the first pass to general-purpose timers `TIM2`, `TIM3`, `TIM4`, and `TIM5`.
+- [x] Limit the STM32F103C8T6 driver to the implemented general-purpose timers `TIM2`, `TIM3`, and `TIM4`.
 - [ ] Preserve existing public `TIM_*` API names where practical during the layer split.
 - [x] Preserve existing public `TIMx_*` selector names initially to reduce churn.
 - [x] Keep public Timer configuration structures as the primary modular configuration API.
@@ -31,10 +31,10 @@ item, verify it, commit it, then move to the next item.
 - [x] Add public `TIM_DelayMs()` blocking polling wrapper over `TIM_DelayUs(TIMx, 1000U)`.
 - [x] Reorganize `timer.c` public implementations under the same banner and sub-banner order used by `timer.h`.
 - [x] Add file-level Doxygen `@section` blocks to `timer.c` for scope, field ownership, and source layout.
-- [ ] Rework Timer IRQ APIs so codec owns DIER/SR mapping and driver owns NVIC policy.
-- [ ] Update Timer examples and shared startup delay users to the new public API shape.
-- [ ] Finish remaining Timer Doxygen/style pass for source-local helper return wording, defines, and deferred public APIs.
-- [ ] Build affected projects and fix integration issues.
+- [x] Rework Timer IRQ APIs so codec owns DIER/SR mapping and driver owns NVIC policy.
+- [x] Update Timer polling/IRQ examples and shared startup delay users to the new public API shape.
+- [x] Finish the Timer Doxygen pass for the implemented public APIs.
+- [x] Build the Timer examples and one startup-delay consumer.
 
 ## Completed Deviations
 
@@ -54,34 +54,34 @@ item, verify it, commit it, then move to the next item.
 - [x] Counter operation state APIs `TIM_GetOperationState()` and `TIM_SetOperationState()` were exposed.
 - [x] Binary state codec extractors return decoded `DRIVER_STATUS_OFF` or `DRIVER_STATUS_ON` directly.
 - [x] Core shared CCMR raw-value macros were normalized to STM32-style `CCxS`, `OCxM`, `ICxPSC`, and `ICxF` notation.
-- [x] `TIM_DeConfig()` uses `TIM_SetClockState()`, `TIM_SetOperationState()`, config-owned reset staging, and clock-gate disable without issuing RCC peripheral reset.
+- [x] `TIM_DeConfig()` disables/clears NVIC state, pulses the matching RCC peripheral reset, and leaves the clock gate disabled.
 - [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
 - [x] `timer.h` public APIs now use function-specific `@returns @ref driver_status_t "... - Operation Status"` labels and parameter-specific `@retval` wording.
-- [x] `TIM_Config()` now stages `CR1`, `PSC`, and `ARR`, temporarily clears `CR1.UDIS` for `EGR.UG`, restores final `CR1`, preserves pre-existing `SR.UIF`, clears only a newly generated update flag, and applies `CNT` after the update event.
-- [x] `TIM_Config1MHz()` now shapes a local 1 MHz `tim_config_t` preset in the header and delegates to `TIM_Config()`.
-- [x] `TIM_DelayUs()` now provides a `uint16_t`-bounded minimum blocking one-pulse polling delay using `ARR`/`CNT`/`UIF`, temporary `UDIS` enablement, and final counter stop for Timers configured by `TIM_Config1MHz()`.
+- [x] `TIM_Config()` now commits `PSC`/`ARR` with `UDIS=0`, `URS=1`, and `EGR.UG`, restoring requested `CR1`, `CNT`, and entry NVIC state.
+- [x] `TIM_Config1MHz()` derives the prescaler from the live APB1 Timer kernel clock through `TIM_ConfigTickFrequency()`.
+- [x] `TIM_DelayUs()` verifies an exact 1 MHz tick and uses bounded polling with cleanup on timeout.
 - [x] `TIM_DelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
 - [x] `timer.c` public implementation order now mirrors `timer.h`, including conjugate getter/setter sub-banners and final blocking-delay helpers.
 - [x] `timer.c` file overview now uses Doxygen `@section` blocks for scope, field ownership, and source layout.
 - [x] `_TIM_ClockEnabled()` was replaced by `_TIM_ValidateClockEnabled()` for narrow API clock-gate precondition checks.
 - [x] `TIM_GetClockState()` and `TIM_SetClockState()` validate the Timer instance directly and do not require the Timer clock gate to already be enabled.
+- [x] Timebase and DIR/CMS setters reject a running counter with `DRIVER_STATUS_ERROR_BUSY`.
+- [x] Timer IRQ source state, pending flags, and acknowledgements use codec-owned DIER/SR mapping and instance NVIC coordination.
+- [x] Host codec tests cover CR1/timebase preservation and DIER/SR IRQ behavior.
 
 ## Remaining Deviations To Remove
 
 - [ ] Channel/PWM public APIs are currently deferred and must be rebuilt on top of the existing channel codec surface.
-- [ ] Timer IRQ public APIs are currently deferred and must be rebuilt with codec-owned DIER/SR mapping and driver-owned NVIC policy.
-- [ ] Driver must validate channel masks and IRQ masks when those public APIs are reintroduced.
-- [ ] IRQ disable policy can disable NVIC while other Timer IRQ sources remain enabled.
-- [ ] Remaining Doxygen/style pass is still required for source-local helper return wording, `timer_defines.h`, and deferred public APIs.
+- [ ] Channel masks must be validated when channel APIs are reintroduced.
 - [ ] A final Timer-wide style audit is still required for tabs, banners, and single-argument function layout.
-- [ ] Timer example projects still use the legacy Timer config shape and removed legacy helper APIs.
+- [ ] PWM examples remain on the legacy API until channel/PWM public APIs are rebuilt.
 
 ## Verification Targets
 
-- [ ] `Projects/Timer/04_Timer_Poll`
-- [ ] `Projects/Timer/05_Timer_IRQ`
-- [ ] One GPIO project using timer-based startup delay, for example `Projects/GPIO/03_PB_IRQ`
+- [x] `Projects/Timer/04_Timer_Poll`
+- [x] `Projects/Timer/05_Timer_IRQ`
+- [x] One GPIO project using timer-based startup delay: `Projects/GPIO/03_PB_IRQ`
 
 ## Latest Verification Notes
 
@@ -89,8 +89,8 @@ item, verify it, commit it, then move to the next item.
 - [x] `BareMetal/Driver/Timer/Src/timer_codec.c` passes `arm-none-eabi-gcc -fsyntax-only -Wall -Wextra -Werror`.
 - [x] `BareMetal/Driver/RCC/Src/rcc.c` passes `arm-none-eabi-gcc -fsyntax-only -Wall -Wextra -Werror`.
 - [x] `git diff --check` passes.
-- [ ] `Projects/Timer/04_Timer_Poll` build fails because `main.c` still uses `.instance`, `.channel`, `TIM_1MHz_Load_Default()`, and old one-argument `TIM_Config()`.
-- [ ] `Projects/Timer/05_Timer_IRQ` build fails because `main.c` still uses the old config shape plus deferred IRQ APIs such as `TIM_IRQ_Enable()`, `TIM_IRQ_Get_Status()`, and `TIM_IRQ_Ack()`.
+- [x] `Projects/Timer/04_Timer_Poll`, `Projects/Timer/05_Timer_IRQ`, and `Projects/GPIO/03_PB_IRQ` configure and build successfully.
+- [x] Host Timer codec test builds with `-Wall -Wextra -Werror` and passes through CTest.
 
 ## Notes
 

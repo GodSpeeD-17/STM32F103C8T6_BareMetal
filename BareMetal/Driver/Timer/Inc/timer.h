@@ -6,8 +6,7 @@
  * @date	20-06-2026
  *
  * @details
- * This header exposes the public Timer driver API for the first Timer
- * refactor pass. Public code sees Timer configuration structures, public
+ * This header exposes the public Timer driver API. Public code sees Timer configuration structures, public
  * selectors, validation macros, and driver entry points. Low-level register
  * access and codec image staging remain private to `timer.c`.
  *
@@ -18,10 +17,9 @@
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
- * Channel/PWM, IRQ/NVIC, DMA, master/slave, and broad delay-service APIs are
- * outside this public header scope for this pass. The delay helpers in this
- * pass are the blocking @ref `TIM_DelayUs` and @ref `TIM_DelayMs` convenience
- * APIs for a Timer already configured with @ref `TIM_Config1MHz`.
+ * Channel/PWM, DMA, and master/slave APIs remain outside this public header
+ * scope. IRQ/NVIC coordination and the blocking @ref `TIM_DelayUs` and
+ * @ref `TIM_DelayMs` convenience APIs are provided.
  */
 
 #ifndef TIMER_H_
@@ -60,7 +58,6 @@ extern "C" {
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns @ref driver_status_t "Clock State - Operation Status"
  * @retval - @ref `DRIVER_STATUS_OFF`: Timer APB1 clock gate is disabled.
  * @retval - @ref `DRIVER_STATUS_ON`: Timer APB1 clock gate is enabled.
@@ -81,7 +78,6 @@ driver_status_t TIM_GetClockState(TIM_TypeDef* const TIMx);
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] clockState Requested Timer clock-gate state
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`: Disable the APB1 Timer clock gate.
@@ -110,7 +106,6 @@ driver_status_t TIM_SetClockState(TIM_TypeDef* const TIMx, const driver_status_t
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns @ref driver_status_t "Operation State - Operation Status"
  * @retval - @ref `DRIVER_STATUS_OFF`: Timer counter operation is disabled.
  * @retval - @ref `DRIVER_STATUS_ON`: Timer counter operation is enabled.
@@ -132,7 +127,6 @@ driver_status_t TIM_GetOperationState(TIM_TypeDef* const TIMx);
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] operationState Requested Timer counter operation state
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`: Disable Timer counter operation.
@@ -152,43 +146,24 @@ driver_status_t TIM_SetOperationState(TIM_TypeDef* const TIMx, const driver_stat
 // ---------------------------------- Timer Root Configuration Pair ----------------------------------- //
 
 /**
- * @brief Restores the Timer configuration fields owned by this API pass
+ * @brief Fully resets and disables one supported Timer instance
  * @details
- * Restores the register fields represented by @ref `tim_config_t` back to
- * their reset/default raw values. The driver validates @p TIMx, enables the
- * APB1 Timer clock gate with @ref `TIM_SetClockState`, disables the counter
- * with @ref `TIM_SetOperationState`, stages the reset images locally, and then
- * commits them through the same update-event latch sequence used by
- * @ref `TIM_Config`.
- *
- * The reset sequence writes `TIMx_CR1`, `TIMx_PSC`, and `TIMx_ARR` before
- * generating one software update event with `TIMx_EGR.UG`. Because
- * @ref `tim_config_t` does not own `TIMx_CR1.UDIS`, the driver temporarily
- * clears `UDIS` only for that generated update event so the reset prescaler and
- * auto-reload values are latched into active Timer logic. The original `UDIS`
- * state is restored afterward. `TIMx_CNT` is written last because the generated
- * update event can alter the counter value.
- *
- * If `TIMx_SR.UIF` was clear before the generated update event and becomes
- * pending afterward, the driver clears that generated flag before returning. A
- * pre-existing pending `TIMx_SR.UIF` flag is preserved.
+ * Disables and clears the instance NVIC line, enables its APB1 clock, pulses
+ * the matching RCC peripheral-reset bit, and disables the APB1 clock again.
+ * This restores the complete Timer register bank, including channel, IRQ,
+ * DMA, and master/slave state, to the hardware reset state.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns @ref driver_status_t "Root De-Configuration - Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer configuration fields were restored.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer and NVIC state were reset.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate could not be verified during the reset sequence.
- * @note This API is limited to the fields represented by @ref `tim_config_t`.
- * Channel/PWM, IRQ/NVIC, DMA, master/slave, and delay-helper state are not part
- * of this de-configuration scope.
- * @note This API does not issue an RCC peripheral reset. It leaves the Timer
- * counter disabled and disables the Timer APB1 clock gate before returning.
+ * @note The Timer counter and APB1 clock gate are disabled before returning.
  */
 driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
 
@@ -202,17 +177,12 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * requested images are staged before the first hardware write so codec failures
  * cannot leave a partially staged configuration.
  *
- * The configuration sequence writes `TIMx_CR1`, `TIMx_PSC`, and `TIMx_ARR`
- * before generating one software update event with `TIMx_EGR.UG`; this update
- * event latches the prescaler and any preloaded auto-reload value into active
- * Timer logic. Because @ref `tim_config_t` does not own `TIMx_CR1.UDIS`, the
- * driver temporarily clears `UDIS` only for this generated update event and
- * restores the original `UDIS` state afterward. `TIMx_CNT` is applied after
- * the update event so the requested initial counter value is preserved.
- *
- * If `TIMx_SR.UIF` was clear before the generated update event and becomes
- * pending afterward, the driver clears that generated update flag before
- * returning. A pre-existing pending `TIMx_SR.UIF` flag is preserved.
+ * The configuration sequence writes `TIMx_PSC` and `TIMx_ARR`, temporarily
+ * enables update events and selects overflow/underflow-only update requests,
+ * then generates `TIMx_EGR.UG`. This loads buffered timebase values without
+ * generating `UIF`, an interrupt, or a DMA request. The final `TIMx_CR1` state
+ * and requested initial counter value are then restored. If the instance NVIC
+ * line was enabled, it is masked for the transaction and restored afterward.
  *
  * This API stages:
  * - `TIMx_CR1` fields represented by @ref `tim_config_counter_t`
@@ -225,7 +195,6 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] pConfig Timer root configuration
  * Accepted values:
  * - Non-`NULL`: Complete Timer configuration object
@@ -236,23 +205,36 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` / @p `pConfig` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / one or more configuration fields were invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate could not be verified during the configuration sequence.
- * @note This API does not configure channel/PWM, IRQ/NVIC, DMA, master/slave,
- * or delay-helper state.
+ * @note This API does not configure channel/PWM, DIER/SR, DMA, or
+ * master/slave state.
  * @note This API leaves the Timer counter disabled. Use
  * @ref `TIM_SetOperationState` with @ref `DRIVER_STATUS_ON` to start the
  * counter after configuration.
  */
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
 
+// ------------------------------- Timer Tick-Frequency Configuration -------------------------------- //
+
+/**
+ * @brief Configures a Timer for an exact counter tick frequency
+ * @param[in] TIMx Timer peripheral instance
+ * @param[in] targetFrequency Requested counter tick frequency in hertz
+ * @returns @ref driver_status_t "Tick Frequency Configuration - Operation Status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Exact tick frequency was configured.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The instance/frequency was invalid or not exactly representable by PSC.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The Timer input clock could not be derived.
+ * @note The resulting counter is left disabled with ARR set to @ref `TIMx_DEFAULT_1MHz_ARR`.
+ */
+driver_status_t TIM_ConfigTickFrequency(TIM_TypeDef* const TIMx, const tim_frequency_t targetFrequency);
+
 // --------------------------------- Timer 1 MHz Configuration Preset --------------------------------- //
 
 /**
  * @brief Configures one Timer instance for a 1 MHz counter tick
  * @details
- * Builds a local @ref `tim_config_t` preset and applies it through
- * @ref `TIM_Config`. The wrapper uses the existing default 1 MHz preset
- * values:
- * - @ref `TIMx_DEFAULT_1MHz_PSC`
+ * Derives the current APB1 Timer kernel clock and delegates to
+ * @ref `TIM_ConfigTickFrequency`. The requested frequency must be exactly
+ * representable by the 16-bit prescaler.
  * - @ref `TIMx_DEFAULT_1MHz_ARR`
  * - @ref `TIMx_DEFAULT_CNT`
  *
@@ -265,46 +247,21 @@ driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pC
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @returns @ref driver_status_t "1 MHz Configuration - Operation Status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer was configured for a 1 MHz counter tick.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate could not be verified during the configuration sequence.
- * @note - This is a header-local static inline wrapper around @ref `TIM_Config`.
+ * @note - This is a header-local static inline wrapper around @ref `TIM_ConfigTickFrequency`.
  * @note - This wrapper leaves the Timer counter disabled, matching @ref `TIM_Config`.
  * @note - Assumptions and constraints:
  * @note - @p `TIMx` is one of the supported APB1 general-purpose Timers.
- * @note - @ref `TIMx_DEFAULT_1MHz_PSC` assumes the Timer kernel clock is
- *   72 MHz. If the current clock tree uses a different Timer kernel clock,
- *   this wrapper still applies the preset but the resulting counter tick will
- *   not be exactly 1 MHz.
  * @note - The counting window uses @ref `TIMx_DEFAULT_1MHz_ARR`, so this preset
  *   configures a 1 MHz counter tick with the default 1 MHz count window.
  */
 __STATIC_INLINE driver_status_t TIM_Config1MHz(TIM_TypeDef* const TIMx)
 {
-	// Local Variables
-	tim_config_t config =
-	{
-		.timebase =
-		{
-			.prescaler		= TIMx_DEFAULT_1MHz_PSC,
-			.auto_reload	= TIMx_DEFAULT_1MHz_ARR,
-			.initial_count	= TIMx_DEFAULT_CNT
-		},
-		.counter =
-		{
-			.direction				= TIMx_DIR_COUNT_UP,
-			.alignment				= TIMx_MODE_NORMAL,
-			.one_pulse				= TIMx_OPM_DISABLE,
-			.auto_reload_preload	= TIMx_ARPE_ENABLE,
-			.update_source			= TIMx_UPDATE_SOURCE_ANY,
-			.clock_division			= TIMx_CKD_CLK_FREQ
-		}
-	};
-
-	return TIM_Config(TIMx, &config);
+	return TIM_ConfigTickFrequency(TIMx, (tim_frequency_t) 1000000UL);
 }
 
 // ==================================================================================================== //
@@ -326,7 +283,6 @@ __STATIC_INLINE driver_status_t TIM_Config1MHz(TIM_TypeDef* const TIMx)
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pTimeBase Destination for the current Timer timebase configuration
  * Expected values:
  * - Non-`NULL`: TimeBase configuration is written to @p pTimeBase
@@ -350,15 +306,17 @@ driver_status_t TIM_GetTimeBaseConfig
  * @details
  * Applies @ref `tim_config_timebase_t::prescaler` to `TIMx_PSC`,
  * @ref `tim_config_timebase_t::auto_reload` to `TIMx_ARR`, and
- * @ref `tim_config_timebase_t::initial_count` to `TIMx_CNT`. Each register is
- * written only when the staged value differs from the current hardware image.
+ * @ref `tim_config_timebase_t::initial_count` to `TIMx_CNT`. The counter must
+ * be stopped. A software update event makes buffered PSC/ARR values active;
+ * temporary `UDIS=0` and `URS=1` prevent that commit from creating `UIF`, an
+ * interrupt, or a DMA request. The requested CNT and original CR1 state are
+ * restored after the commit.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] pTimeBase Timer timebase configuration
  * Accepted values:
  * - Non-`NULL`: TimeBase configuration to apply
@@ -370,6 +328,7 @@ driver_status_t TIM_GetTimeBaseConfig
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pTimeBase` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / one or more timebase fields were invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  * @note This API does not modify `TIMx_CR1` counter behavior fields.
  */
 driver_status_t TIM_SetTimeBaseConfig
@@ -391,7 +350,6 @@ driver_status_t TIM_SetTimeBaseConfig
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pCounter Destination for the current Timer counter configuration
  * Expected values:
  * - Non-`NULL`: Counter configuration is written to @p pCounter
@@ -422,16 +380,16 @@ driver_status_t TIM_GetCounterConfig
 /**
  * @brief Configures the Timer counter behavior fields
  * @details
- * Stages @ref `tim_config_counter_t` into the `TIMx_CR1` image and writes
- * `TIMx_CR1` only when the staged image differs from the current hardware
- * image. Counter enable state and update-event enable state are preserved.
+ * Stages @ref `tim_config_counter_t` into `TIMx_CR1` while preserving counter
+ * enable and update-event-enable state. The counter must be stopped. Changes
+ * involving center-aligned mode pass through a legal edge-aligned intermediate
+ * state before DIR/CMS are committed.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] pCounter Timer counter configuration
  * Accepted values:
  * - Non-`NULL`: Counter configuration to apply
@@ -450,6 +408,7 @@ driver_status_t TIM_GetCounterConfig
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pCounter` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / one or more counter fields were invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  */
 driver_status_t TIM_SetCounterConfig
 (
@@ -472,7 +431,6 @@ driver_status_t TIM_SetCounterConfig
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pFrequency Destination for the derived counter tick frequency in hertz
  * Expected values:
  * - Non-`NULL`: Derived counter tick frequency in hertz is written to @p pFrequency
@@ -504,7 +462,6 @@ driver_status_t TIM_GetFrequency
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pPrescaler Destination for the current `TIMx_PSC` value
  * Expected values:
  * - Non-`NULL`: Current `TIMx_PSC[15:0]` value is written to @p pPrescaler
@@ -524,15 +481,15 @@ driver_status_t TIM_GetPrescaler
 /**
  * @brief Configures the Timer prescaler value
  * @details
- * Writes only `TIMx_PSC` if @p prescaler differs from the current hardware
- * image.
+ * Updates `TIMx_PSC` and generates a non-requesting software update event so
+ * the new prescaler is active when this function returns. The counter must be
+ * stopped; ARR, CNT, and the caller's CR1 state are preserved.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] prescaler Prescaler value staged into `TIMx_PSC`
  * Accepted values:
  * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_prescaler_t`
@@ -540,6 +497,7 @@ driver_status_t TIM_GetPrescaler
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `prescaler` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  * @note This API updates only `TIMx_PSC`; it does not modify `TIMx_ARR`,
  * `TIMx_CNT`, or `TIMx_CR1`.
  */
@@ -558,7 +516,6 @@ driver_status_t TIM_SetPrescaler
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pAutoReload Destination for the current `TIMx_ARR` value
  * Expected values:
  * - Non-`NULL`: Current `TIMx_ARR[15:0]` value is written to @p pAutoReload
@@ -578,15 +535,15 @@ driver_status_t TIM_GetAutoReload
 /**
  * @brief Configures the Timer auto-reload value
  * @details
- * Writes only `TIMx_ARR` if @p autoReload differs from the current hardware
- * image.
+ * Updates `TIMx_ARR` and generates a non-requesting software update event so
+ * a preloaded ARR is active when this function returns. The counter must be
+ * stopped; PSC, CNT, and the caller's CR1 state are preserved.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] autoReload Auto-reload value staged into `TIMx_ARR`
  * Accepted values:
  * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_auto_reload_t`
@@ -594,6 +551,7 @@ driver_status_t TIM_GetAutoReload
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `autoReload` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  * @note This API updates only `TIMx_ARR`; it does not modify `TIMx_PSC`,
  * `TIMx_CNT`, or `TIMx_CR1`.
  */
@@ -612,7 +570,6 @@ driver_status_t TIM_SetAutoReload
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pCounterValue Destination for the current `TIMx_CNT` value
  * Expected values:
  * - Non-`NULL`: Current `TIMx_CNT[15:0]` value is written to @p pCounterValue
@@ -640,7 +597,6 @@ driver_status_t TIM_GetCounterValue
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] counterValue Counter value staged into `TIMx_CNT`
  * Accepted values:
  * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_counter_value_t`
@@ -648,6 +604,7 @@ driver_status_t TIM_GetCounterValue
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `counterValue` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  * @note This API updates only `TIMx_CNT`; it does not modify `TIMx_PSC`,
  * `TIMx_ARR`, or `TIMx_CR1`.
  */
@@ -670,7 +627,6 @@ driver_status_t TIM_SetCounterValue
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pDirection Destination for the current direction selector
  * Expected values:
  * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
@@ -690,15 +646,15 @@ driver_status_t TIM_GetDirection
 /**
  * @brief Configures the Timer counter direction selector
  * @details
- * Stages only the counter direction field in `TIMx_CR1` and writes `TIMx_CR1`
- * only when the staged image differs from the current hardware image.
+ * Updates the full counter configuration through the safe DIR/CMS transition
+ * sequence while preserving all unrelated CR1 fields. The counter must be
+ * stopped.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] direction Timer counter direction selector
  * Accepted values:
  * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
@@ -707,6 +663,7 @@ driver_status_t TIM_GetDirection
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `direction` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  */
 driver_status_t TIM_SetDirection
 (
@@ -723,7 +680,6 @@ driver_status_t TIM_SetDirection
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pAlignment Destination for the current edge/center-aligned selector
  * Expected values:
  * - @ref `TIMx_MODE_NORMAL`: Edge-aligned mode
@@ -745,15 +701,15 @@ driver_status_t TIM_GetAlignment
 /**
  * @brief Configures the Timer counter alignment selector
  * @details
- * Stages only `TIMx_CR1.CMS[1:0]` and writes `TIMx_CR1` only when the staged
- * image differs from the current hardware image.
+ * Updates the full counter configuration through the safe DIR/CMS transition
+ * sequence while preserving all unrelated CR1 fields. The counter must be
+ * stopped.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] alignment Timer edge/center-aligned selector
  * Accepted values:
  * - @ref `TIMx_MODE_NORMAL`: Edge-aligned mode
@@ -764,8 +720,7 @@ driver_status_t TIM_GetAlignment
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was applied.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `alignment` was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
- * @warning STM32F1 does not allow switching from edge-aligned to center-aligned
- * mode while the counter is enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running.
  */
 driver_status_t TIM_SetAlignment
 (
@@ -782,7 +737,6 @@ driver_status_t TIM_SetAlignment
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pOnePulse Destination for the current one-pulse selector
  * Expected values:
  * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at the next update event
@@ -810,7 +764,6 @@ driver_status_t TIM_GetOnePulse
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] onePulse Timer one-pulse selector
  * Accepted values:
  * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at the next update event
@@ -835,7 +788,6 @@ driver_status_t TIM_SetOnePulse
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pAutoReloadPreload Destination for the current auto-reload preload selector
  * Expected values:
  * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload is disabled
@@ -863,7 +815,6 @@ driver_status_t TIM_GetAutoReloadPreload
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] autoReloadPreload Timer auto-reload preload selector
  * Accepted values:
  * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload is disabled
@@ -888,7 +839,6 @@ driver_status_t TIM_SetAutoReloadPreload
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pUpdateSource Destination for the current update request source selector
  * Expected values:
  * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate an update request
@@ -916,7 +866,6 @@ driver_status_t TIM_GetUpdateSource
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] updateSource Timer update request source selector
  * Accepted values:
  * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate an update request
@@ -941,7 +890,6 @@ driver_status_t TIM_SetUpdateSource
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[out] pClockDivision Destination for the current clock division selector
  * Expected values:
  * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
@@ -970,7 +918,6 @@ driver_status_t TIM_GetClockDivision
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] clockDivision Timer clock division selector
  * Accepted values:
  * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
@@ -986,6 +933,71 @@ driver_status_t TIM_SetClockDivision
 	TIM_TypeDef* const			TIMx,
 	const tim_clock_division_t	clockDivision
 );
+
+// ==================================================================================================== //
+//										Timer IRQ APIs										//
+// ==================================================================================================== //
+
+/** @brief Returns the currently enabled Timer interrupt-source mask. */
+driver_status_t TIM_GetIRQEnableMask(TIM_TypeDef* const TIMx, tim_irq_t* const pIrqMask);
+
+/**
+ * @brief Enables or disables selected Timer interrupt sources and coordinates the instance NVIC line
+ * @note Disabling selected sources disables NVIC only when no Timer interrupt source remains enabled.
+ */
+driver_status_t TIM_SetIRQState
+(
+	TIM_TypeDef* const		TIMx,
+	const tim_irq_t		irqMask,
+	const driver_status_t	irqState
+);
+
+/** @brief Returns pending Timer event flags represented by the public IRQ-source mask. */
+driver_status_t TIM_GetPendingIRQMask(TIM_TypeDef* const TIMx, tim_irq_t* const pIrqMask);
+
+/** @brief Acknowledges selected pending Timer event flags using SR write-zero-to-clear semantics. */
+driver_status_t TIM_AcknowledgeIRQ(TIM_TypeDef* const TIMx, const tim_irq_t irqMask);
+
+/** @brief Compatibility wrapper for enabling selected Timer IRQ sources. */
+__STATIC_INLINE driver_status_t TIM_IRQ_Enable(TIM_TypeDef* const TIMx, const tim_irq_t irqMask)
+{
+	return TIM_SetIRQState(TIMx, irqMask, DRIVER_STATUS_ON);
+}
+
+/** @brief Compatibility wrapper for disabling selected Timer IRQ sources. */
+__STATIC_INLINE driver_status_t TIM_IRQ_Disable(TIM_TypeDef* const TIMx, const tim_irq_t irqMask)
+{
+	return TIM_SetIRQState(TIMx, irqMask, DRIVER_STATUS_OFF);
+}
+
+/** @brief Compatibility wrapper returning 1 when any selected Timer IRQ flag is pending. */
+__STATIC_INLINE uint8_t TIM_IRQ_Get_Status(TIM_TypeDef* const TIMx, const tim_irq_t irqMask)
+{
+	tim_irq_t pendingMask = (tim_irq_t) 0U;
+	return
+	(
+		(TIM_GetPendingIRQMask(TIMx, &pendingMask) == DRIVER_STATUS_SUCCESS) &&
+		((pendingMask & irqMask) != (tim_irq_t) 0U)
+	) ? 0x01U : 0x00U;
+}
+
+/** @brief Compatibility wrapper for acknowledging selected Timer IRQ flags. */
+__STATIC_INLINE driver_status_t TIM_IRQ_Ack(TIM_TypeDef* const TIMx, const tim_irq_t irqMask)
+{
+	return TIM_AcknowledgeIRQ(TIMx, irqMask);
+}
+
+/** @brief Compatibility wrapper for the update overflow/underflow flag. */
+__STATIC_INLINE uint8_t TIM_IRQ_Get_OVF_UVF(TIM_TypeDef* const TIMx)
+{
+	return TIM_IRQ_Get_Status(TIMx, TIMx_IRQ_OVF_UVF);
+}
+
+/** @brief Compatibility wrapper for acknowledging the update overflow/underflow flag. */
+__STATIC_INLINE driver_status_t TIM_IRQ_Ack_OVF_UVF(TIM_TypeDef* const TIMx)
+{
+	return TIM_AcknowledgeIRQ(TIMx, TIMx_IRQ_OVF_UVF);
+}
 
 // ==================================================================================================== //
 //										Timer Blocking Delay APIs										//
@@ -1011,7 +1023,6 @@ driver_status_t TIM_SetClockDivision
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] delayUs Delay duration in microseconds
  * Accepted values:
  * - `1U..0xFFFFU`: Blocking delay duration in microseconds.
@@ -1019,7 +1030,8 @@ driver_status_t TIM_SetClockDivision
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `delayUs` was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz.
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The update flag did not arrive within the bounded polling budget.
  * @note Assumptions and constraints:
  * - @p `TIMx` was configured by @ref `TIM_Config1MHz`.
  * - The Timer counter tick is exactly 1 MHz, so one counter tick equals 1 us.
@@ -1049,7 +1061,6 @@ driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
  * - @ref `TIM2`
  * - @ref `TIM3`
  * - @ref `TIM4`
- * - @ref `TIM5`
  * @param[in] delayMs Delay duration in milliseconds
  * Accepted values:
  * - `1U..0xFFFFFFFFU`: Blocking delay duration in milliseconds.
@@ -1057,7 +1068,8 @@ driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Delay completed.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` was `NULL`.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `delayMs` was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz.
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A microsecond delay chunk timed out.
  * @note Assumptions and constraints:
  * - @p `TIMx` was configured by @ref `TIM_Config1MHz`.
  * - @p `delayMs` must not be `0U`.

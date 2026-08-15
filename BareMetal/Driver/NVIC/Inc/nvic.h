@@ -283,6 +283,30 @@ __STATIC_FORCEINLINE void NVIC_IRQ_Disable(const irq_t IRQn)
 }
 
 /**
+ * @brief Gets one external IRQ enable state
+ * @param[in] IRQn External IRQ number
+ * @returns IRQ enable state
+ * @retval - @ref `DRIVER_STATUS_OFF`: IRQ is disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: IRQ is enabled.
+ */
+__STATIC_FORCEINLINE driver_status_t NVIC_IRQ_GetState(const irq_t IRQn)
+{
+	return ((NVIC->ISER[NVIC_IRQ_GET_REG_INDEX(IRQn)] & _NVIC_GetIRQBitMask(IRQn)) != 0x00000000UL) ?
+		DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
+}
+
+/**
+ * @brief Clears one external IRQ pending state
+ * @param[in] IRQn External IRQ number
+ * @returns Void.
+ */
+__STATIC_FORCEINLINE void NVIC_IRQ_ClearPending(const irq_t IRQn)
+{
+	//! Write-one-to-clear the selected pending bit.
+	NVIC->ICPR[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
+}
+
+/**
  * @brief Triggers one external IRQ from software
  * @param[in] IRQn External IRQ number
  * Accepted values:
