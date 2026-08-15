@@ -59,19 +59,26 @@ void Reset_Handler(void)
 	__asm__ volatile ("" ::: "memory");		
 	// Step 3: Configure SysClock at 72MHz
 	RCC_Config_72MHz();
-// Step 4: Configure SysTick & Timer
+	// Step 4: Configure SysTick and the startup delay service
 #ifdef SYSTICK_DELAY__
 	// SysTick: Resolution 1us
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / FREQ_1MHz));
 #else
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	// Configure a dedicated polling Timer with an exact 1 MHz counter tick.
-	(void) TIM_Config1MHz(DELAY_TIMER);
+	//! Keep the shared delay contract on its dedicated TIM4 resource.
+	if (TIM_Config1MHz(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
+	{
+		Default_Handler();
+	}
 #endif /* SYSTICK_DELAY__ */
 	SysTick_Enable();
 	// Step 5: Configure OB LED & Enable SysTick
-	OB_LED_Init();
+	//! Stop startup when the board LED cannot provide a reliable application status indicator.
+	if (OB_LED_Init() != DRIVER_STATUS_SUCCESS)
+	{
+		Default_Handler();
+	}
 	OB_LED_Reset();
 	// Step 6: Call main()
 	main();
@@ -85,8 +92,22 @@ void delay_us(uint32_t delayUs)
 {
 	while (delayUs != 0UL)
 	{
-		const uint16_t chunkUs = (delayUs > 0xFFFFUL) ? 0xFFFFU : (uint16_t) delayUs;
-		(void) TIM_DelayUs(DELAY_TIMER, chunkUs);
+		uint16_t chunkUs;
+
+		//! Bound each public delay request to the Timer API's 16-bit duration contract.
+		if (delayUs > 0xFFFFUL)
+		{
+			chunkUs = 0xFFFFU;
+		}
+		else
+		{
+			chunkUs = (uint16_t) delayUs;
+		}
+
+		if (TIM_DelayUs(DELAY_TIMER, chunkUs) != DRIVER_STATUS_SUCCESS)
+		{
+			Default_Handler();
+		}
 		delayUs -= (uint32_t) chunkUs;
 	}
 }
@@ -95,7 +116,10 @@ void delay_ms(uint32_t delayMs)
 {
 	if (delayMs != 0UL)
 	{
-		(void) TIM_DelayMs(DELAY_TIMER, delayMs);
+		if (TIM_DelayMs(DELAY_TIMER, delayMs) != DRIVER_STATUS_SUCCESS)
+		{
+			Default_Handler();
+		}
 	}
 }
 

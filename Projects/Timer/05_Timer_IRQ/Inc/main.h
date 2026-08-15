@@ -1,19 +1,21 @@
-// Header Guards
+// Header Guard
 #ifndef MAIN_H_
 #define MAIN_H_
 
-/*-------------------------------------------------------------------------------*/
-// Headers
-#include "gpio.h"
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
 #include "bsp.h"
-#include "systick.h"
 #include "timer.h"
-/*-------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------*/
-// MACROS
-#define LOOP_DELAY_MS						(1000)
-/*-------------------------------------------------------------------------------*/
+// ==================================================================================================== //
+//										Application Constants										//
+// ==================================================================================================== //
+
+/** @brief TIM3 counter tick frequency used by the IRQ demo @def APP_TIMER_TICK_FREQUENCY_HZ */
+#define APP_TIMER_TICK_FREQUENCY_HZ		((tim_frequency_t) 10000UL)
+/** @brief TIM3 auto-reload value producing a one-second update period @def APP_TIMER_AUTO_RELOAD */
+#define APP_TIMER_AUTO_RELOAD			((tim_auto_reload_t) 9999U)
 
 void TIM3_IRQHandler(void);
 
