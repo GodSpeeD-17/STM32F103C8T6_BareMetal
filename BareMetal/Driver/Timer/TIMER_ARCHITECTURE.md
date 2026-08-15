@@ -1,5 +1,14 @@
 # Timer Driver Refactor Architecture
 
+> **Status — historical implementation snapshot.** The normative planning,
+> API-admission, ownership, safety-mitigation, and completion-gate authority is
+> [`../DRIVER_STACK_TOP_DOWN_AUDIT.md`](../DRIVER_STACK_TOP_DOWN_AUDIT.md).
+> Where this checkpoint assigns Timer-owned NVIC policy, treats every Timer
+> register as an ordinary reader/writer pair, uses the legacy IRQ/SR
+> vocabulary, or calls update sequencing complete, the top-down audit
+> supersedes it. Update both files in the same implementation wave when the
+> source architecture changes.
+
 This document captures the intended Timer driver architecture and the current
 refactor checkpoint. It is scoped to the current general-purpose Timer driver
 surface for `TIM2`, `TIM3`, and `TIM4` on the STM32F103C8T6.
@@ -19,7 +28,7 @@ boundaries are correct.
 | Timer config | `BareMetal/Driver/Timer/Inc/timer_config.h` | Timer-independent public configuration structures, including `tim_config_t` as a structure of structures | Timer instance pointers, register access, RCC/NVIC access, driver orchestration |
 | Timer LL | `BareMetal/Driver/Timer/Inc/timer_ll.h` | Dumb static inline register read/write helpers and minimal register address macros | Validation, encoding, mode decisions, batching, clock-state sequencing, NVIC policy |
 | Timer codec | `BareMetal/Driver/Timer/Inc/timer_codec.h`, `BareMetal/Driver/Timer/Src/timer_codec.c` | Private Encode/Decode helpers and public Extract/Stage functions over caller-owned register images | Hardware reads/writes, clock-state sequencing, public API decisions |
-| Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, `BareMetal/Driver/Timer/Src/timer.c` | Public API, validation, orchestration, clock-state handling, batching, dirty-register writes, status handling, NVIC policy | Raw register map definitions, direct register field placement when codec can own it |
+| Timer driver | `BareMetal/Driver/Timer/Inc/timer.h`, `BareMetal/Driver/Timer/Src/timer.c` | Public API, validation, orchestration, clock-state handling, batching, dirty-register writes, status handling; current first-pass NVIC coordination is compatibility behavior | Raw register map definitions, direct register field placement when codec can own it; generic NVIC delivery ownership in the target design |
 | Project/application | `Projects/*` and shared startup code | Board/application behavior and examples | Driver internals and raw register writes unless intentionally teaching raw access |
 
 ## Core Register Layer
@@ -126,6 +135,11 @@ Expected accessors:
   `EGR`, `CCMR1`, `CCMR2`, `CCER`, `CNT`, `PSC`, `ARR`, `CCR1` through `CCR4`,
   `DCR`, and `DMAR` as needed.
 
+This list records the first-pass complete map, not legal bidirectional access.
+The target audit removes `LL_TIM_ReadEGR`, treats input-mode CCR reads as
+consuming/read-clear, and treats DMAR as a typed transfer portal rather than
+ordinary RW configuration.
+
 LL must not:
 
 - Validate public Timer config.
@@ -222,7 +236,9 @@ It must:
 - Stage changes through codec APIs.
 - Write only when the staged image differs from the original image.
 - Return `driver_status_t` for primary public mutation/extraction APIs.
-- Own NVIC enable/disable policy for Timer IRQ APIs.
+- Own Timer DIER/SR sequencing. Current first-pass NVIC coordination is a
+  compatibility behavior; the target architecture separates Timer sources and
+  event flags from generic NVIC delivery ownership.
 
 Existing value-returning APIs can remain as wrappers where useful, but the
 primary public path should be status-returning.
@@ -249,6 +265,8 @@ gate for one supported Timer instance. They do not start/stop the counter and
 do not reset or rewrite Timer registers. These two APIs validate the Timer
 instance and requested state, then directly read or mutate the RCC APB1 clock
 enable bit; they must not require the Timer clock gate to already be enabled.
+The target contract reopens the OFF transition: gating an active/non-quiescent
+Timer must be rejected or exposed as an accurately named intentional pause.
 
 `TIM_GetOperationState()` and `TIM_SetOperationState()` own only
 `TIMx_CR1.CEN`. They do not enable or disable the RCC APB1 clock gate. Public
