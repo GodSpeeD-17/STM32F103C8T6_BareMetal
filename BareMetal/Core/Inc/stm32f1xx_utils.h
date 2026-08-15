@@ -1,45 +1,19 @@
 /**
  * @file stm32f1xx_utils.h
- * @author	Shrey Shah
- * @brief	Basic Utilities for STM32F1xx
+ * @author Shrey Shah
+ * @brief Shared bit manipulation and register operation utilities
  * @version v1.2
  * @date 01-03-2026
  * @defgroup 01_STM32F1xx_Utilities Basic Utilities
  * @ingroup STM32F1xx
  * @details
- * This module provides basic utilities for STM32F1xx series including:
- * - Bit manipulation macros
- * - Driver status codes and assertions
- * - Register operation utilities
- *
- * These utilities are designed to be used across all peripheral drivers and application code.
- * 
- * @details
- *******************************************************************************************************************
- *  Basic Notes:-
- *  YouTube Reference Video: https://youtu.be/zvTd3Zxtiek
- *  `uint32_t` inside every BIT struct because of padding alignment
- *  `volatile` used for ensuring no further optimization by compiler
- *  `: x` indicates only x bit(s) to be used from that 32-bit
- ****************************************************************************************************************
- *                        🔧 Bit Manipulation Built-ins (GCC)
- * -------------------------------------------------------------------------------------
- * | Built-in Function      | Description                                          |
- * |------------------------|------------------------------------------------------|
- * | __builtin_clz(x)       | Counts leading zeros from MSB (Undefined if x == 0) |
- * | __builtin_ctz(x)       | Counts trailing zeros from LSB (Undefined if x == 0)|
- * | __builtin_popcount(x)  | Counts number of bits set to 1 (Hamming weight)     |
- * | __builtin_parity(x)    | Returns 1 if number of 1-bits is odd, else 0        |
- * | __builtin_ffsl(x)      | Index (1-based) of first bit set (LSB side)         |
- * | __builtin_bswap16(x)   | Swaps byte order for 16-bit integer                  |
- * | __builtin_bswap32(x)   | Swaps byte order for 32-bit integer                  |
- * | __builtin_bswap64(x)   | Swaps byte order for 64-bit integer                  |
- * -------------------------------------------------------------------------------------
- * 
- * @note
- * - All __builtin_* functions are evaluated at compile-time if argument is constant.
- * - __builtin_clz/ctz are undefined if input is zero; guard input accordingly.
- * - These generate single assembly instructions on ARM Cortex-M.  
+ * Provides constant-expression helpers for constructing register fields,
+ * direct register-operation macros, and checked inline helpers for staging and
+ * accessing 32-bit memory-mapped registers.
+ * @note @ref reg is the canonical type for register images, masks, and field
+ * values throughout this module.
+ * @warning Direct `REGOPS_xxx` macros do not validate register pointers. Use
+ * the `RegOps_xxx` inline helpers when null-pointer status reporting is needed.
  */
 
 // Header Guards
@@ -69,204 +43,161 @@ extern "C" {
 /**
  * @brief Shifts a raw value into a register field position
  * @def REG_FIELD_VALUE
- * @param[in] _Pos Bit position, zero-based; treated as @ref `reg_bit_pos_t`
- * @param[in] _Val Raw value before shifting
- * @returns Shifted 32-bit value
- * @note @p _Pos must be in the range `0U..31U`.
- * @note @p _Val must already be masked to the intended field width.
+ * @param[in] _FieldPosition Zero-based field position in the range `0U..31U`
+ * @param[in] _FieldValue Right-aligned register field value
+ * @returns Positioned register field value as @ref reg
+ * @note @p _FieldPosition must be in the range `0U..31U`.
+ * @note @p _FieldValue must already be masked to the intended field width.
+ * @warning Bits shifted beyond bit `31U` are discarded.
  */
-#define REG_FIELD_VALUE(_Pos, _Val)						((reg) (((uint32_t) (_Val)) << ((reg_bit_pos_t) (_Pos))))
+#define REG_FIELD_VALUE(_FieldPosition, _FieldValue)				\
+	((reg) (((reg) (_FieldValue)) << ((reg_bit_pos_t) (_FieldPosition))))
 
 /**
- * @brief Creates a register-positioned contiguous field mask from field width and position
+ * @brief Creates a contiguous field mask at a register bit position
  * @def REG_FIELD_MASK
- * @param[in] _Pos Target bit position, zero-based; treated as @ref `reg_bit_pos_t`
- * @param[in] _FieldWidth Number of bits in the field, treated as @ref `reg_field_width_t`
- * @returns Register-positioned 32-bit field mask
- * @retval - `0x00000000UL`: @p _FieldWidth is `0U`
- * @retval - Non-zero contiguous mask shifted to @p _Pos: @p _FieldWidth is `1U..32U`
- * @note - For example, `_FieldWidth == 3U` and `_Pos == 4U` yields `0x00000070UL`.
- * @note - @p `_FieldWidth` must be in the range `0U..32U`.
- * @note - @p `_Pos` must be in the range `0U..31U`.
- * @note - @p `_FieldWidth + _Pos` must not exceed `32U`.
+ * @param[in] _Pos First field bit position in the range `0U..31U`
+ * @param[in] _FieldWidth Number of field bits in the range `0U..31U`
+ * @returns Positioned field mask as @ref reg
+ * @warning Mask bits shifted beyond bit `31U` are discarded; the result always remains 32-bit.
+ * @note Use `0xFFFFFFFFUL` when all 32 register bits are required.
+ * @note For example, `REG_FIELD_MASK(4U, 3U)` produces `0x00000070UL`.
  */
-#define REG_FIELD_MASK(_Pos, _FieldWidth)											\
+#define REG_FIELD_MASK(_Pos, _FieldWidth)										\
 	REG_FIELD_VALUE																	\
 	(																				\
-		((reg_bit_pos_t) (_Pos)),													\
-		((((reg_field_width_t) (_FieldWidth)) >= ((reg_field_width_t) 32U)) ?		\
-			0xFFFFFFFFUL :															\
-			(((uint32_t) 0x01UL << ((reg_field_width_t) (_FieldWidth))) -			\
-				(uint32_t) 0x01UL))													\
+		(_Pos),																		\
+		((reg) ((0x01UL << ((reg_field_width_t) (_FieldWidth))) - 0x01UL))			\
 	)
 
 /**
  * @brief Packs a right-aligned field value into register position
  * @def REG_FIELD_PACK
- * @see `REG_FIELD_VALUE`
- * @see `REG_FIELD_MASK`
- * @param[in] _Pos Target bit position, zero-based; treated as @ref `reg_bit_pos_t`
+ * @see REG_FIELD_VALUE
+ * @see REG_FIELD_MASK
+ * @param[in] _Pos Zero-based field position in the range `0U..31U`
  * @param[in] _Val Right-aligned raw field value
- * @param[in] _FieldWidth Number of bits in the field, treated as @ref `reg_field_width_t`
- * @returns Shifted 32-bit register field value
- * @retval - @p _Val masked to @p _FieldWidth bits and shifted to @p _Pos
- * @note @p `_FieldWidth` must be in the range `0U..32U`.
- * @note @p `_Pos` must be in the range `0U..31U`.
- * @note @p `_FieldWidth + _Pos` must not exceed `32U`.
+ * @param[in] _FieldWidth Number of field bits in the range `0U..31U`
+ * @returns Masked and positioned register field value as @ref reg
+ * @warning Bits positioned beyond bit `31U` are discarded.
  */
-#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)										\
-	REG_FIELD_VALUE																	\
-	(																				\
-		((reg_bit_pos_t) (_Pos)),													\
-		(((uint32_t) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth)))					\
+#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)								\
+	REG_FIELD_VALUE																\
+	(																			\
+		((reg_bit_pos_t) (_Pos)),												\
+		(((reg) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth)))					\
 	)
 
 /**
  * @brief Creates a single-bit mask at the requested bit position
  * @def REG_BIT_MASK
- * @see `REG_FIELD_VALUE`
- * @param[in] _Pos Bit position, zero-based; treated as @ref `reg_bit_pos_t`
- * @returns 32-bit mask with only bit @p _Pos set
- * @note @p _Pos must be in the range `0U..31U`.
+ * @see REG_FIELD_VALUE
+ * @param[in] _Pos Zero-based bit position in the range `0U..31U`
+ * @returns Register mask with only bit @p _Pos set
  */
 #define REG_BIT_MASK(_Pos)								REG_FIELD_VALUE(((reg_bit_pos_t) (_Pos)), 0x01UL)
 
 /**
- * @brief   Compute peripheral index based on base addresses and peripheral size
- * @addtogroup 01_STM32F1xx_Utilities_01_Bit
- *
- * @details
- * This macro computes the **zero-based peripheral index** (or bit position)
- * of a given peripheral instance by comparing its memory-mapped address
- * with that of a reference instance of the same peripheral family.
- *
- * The computation uses the **known peripheral memory spacing** (in bytes)
- * rather than the structure size (`sizeof()`), ensuring accurate results even
- * when peripheral register blocks do not occupy their entire memory region.
- *
- * It is primarily used to determine **clock-enable bit positions** or
- * **array indices** for peripherals of the same type (e.g., GPIOA–GPIOG,
- * USART1–USART3, TIM2–TIM5, etc.).
- *
- * @note - Performs pure compile-time address arithmetic when constant operands are used.
- * @note - No hardware register access is performed.
- * @note - Peripheral instances must have equal address spacing in the memory map.
- *
- * @param[in] value   The address (or pointer) of the target peripheral instance  
- *					(e.g., @ref `GPIOC`, @ref `USART2`, @ref `TIM4`)
- * @param[in] base	The address (or pointer) of the reference peripheral instance  
- *					(e.g., @ref `GPIOA`, @ref `USART1`, @ref `TIM2`)
- * @param[in] size	The memory spacing (in bytes) between consecutive instances  
- *					of the same peripheral type  
- *					(e.g., @ref `GPIO_PERIPHERAL_SIZE` "GPIO_PERIPHERAL_SIZE")
- *
- * @returns The zero-based index of the target peripheral relative to the base.
- *
- * @pre Both `base` and `value` must belong to peripherals of the same family
- *	  and share the same address spacing.
- * @see - @ref `GPIO_PERIPHERAL_SIZE`: GPIO memory spacing.
- * @see - @ref `RCC_APB2ENR`: Clock enable bit positions.
- *
- * @warning - The result is undefined if `base` and `value` are not aligned to `size`.
- * @warning - Passing an incorrect `size` value may result in invalid peripheral indices.
- *
+ * @brief Calculates a zero-based peripheral index from address spacing
  * @def BIT_POS
+ * @param[in] _Instance Target peripheral address or pointer
+ * @param[in] _BaseInstance First peripheral address or pointer in the same family
+ * @param[in] _InstanceSpacing Byte spacing between consecutive peripheral instances
+ * @returns Zero-based peripheral index relative to @p _BaseInstance
+ * @pre @p _Instance and @p _BaseInstance belong to the same equally spaced peripheral family.
+ * @pre @p _InstanceSpacing is non-zero and matches the hardware memory-map spacing.
+ * @warning Misaligned addresses or incorrect spacing produce an invalid index.
+ * @note Constant operands allow the compiler to evaluate the expression at compile time.
  */
-#define BIT_POS(value, base, size) \
-	((uint32_t)((((uint32_t)(value)) - ((uint32_t)(base))) / (uint32_t)(size)))
+#define BIT_POS(_Instance, _BaseInstance, _InstanceSpacing)		\
+	((reg_bit_pos_t) ((((uintptr_t) (_Instance)) - ((uintptr_t) (_BaseInstance))) / ((uintptr_t) (_InstanceSpacing))))
 
 /** @} */ // 01_STM32F1xx_Utilities_01_Bit
 
 /**
  * @defgroup 01_STM32F1xx_Utilities_02_RegOpsMacros Generic Register Operation Macros
  * @ingroup 01_STM32F1xx_Utilities
- * @brief Generic macros for register operations - Use these everywhere!
- * 
- * @details
- * These macros provide fast, zero-overhead register access operations.
- * They are designed to be used with any peripheral register pointer.
- * 
- * @note All macros expect a valid register pointer - NULL not checked for performance
- * @warning _REG parameter must be a pointer to a 32-bit volatile register
- * 
+ * @brief Unchecked direct register-access macros
+ * @details These macros access compatible 32-bit memory-mapped registers
+ * without status handling.
+ * @warning Register-pointer arguments must be valid and non-`NULL`.
  * @{
  */
 
 /**
- * @brief Returns pointer to a peripheral register `.REG` image
+ * @brief Gets a peripheral register's writable `.REG` member address
  * @def REGOPS_REG
- * @param[in]	_PERIPHERAL	Peripheral instance expression
- * @param[in]	_REG	Register member token inside the peripheral register map
- * @returns Pointer to the selected register `.REG` image.
+ * @param[in] _Peripheral Peripheral instance pointer
+ * @param[in] _Register Register member token inside the peripheral register map
+ * @returns Pointer to the selected `.REG` member
  * @note This macro exists because C cannot pass a struct member token to a
  * generic static inline function without first forming the member address.
- * @note @p _PERIPHERAL must point to a register map where @p _REG exposes a `.REG`
- * member.
+ * @pre @p _Peripheral points to a register map where @p _Register exposes `.REG`.
  */
-#define REGOPS_REG(_PERIPHERAL, _REG)				(&((_PERIPHERAL)->_REG.REG))
+#define REGOPS_REG(_Peripheral, _Register)				(&((_Peripheral)->_Register.REG))
 
 /**
- * @brief Read value from register
- * 
- * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
- * @param[out]	_VAR	Variable to store read value
- * 
- * @note `_VAR` is modified directly by this macro
+ * @brief Reads a complete register image
+ * @def REGOPS_READ
+ * @param[in] _Register Pointer to a readable memory-mapped register
+ * @param[out] _RegisterImage Destination register image
+ * @returns Assigned register image
+ * @note @p _RegisterImage is evaluated as an assignable expression.
  */
-#define REGOPS_READ(_REG, _VAR)						((_VAR) = *(_REG))
+#define REGOPS_READ(_Register, _RegisterImage)						((_RegisterImage) = *(_Register))
 
 /**
- * @brief Write value to register
- * 
- * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
- * @param[in]	_VAL	Value to write
- * 
- * @note Entire register content is replaced
+ * @brief Writes a complete register image
+ * @def REGOPS_WRITE
+ * @param[in,out] _Register Pointer to a writable memory-mapped register
+ * @param[in] _RegisterImage Complete register image to write
+ * @returns Assigned register image
  */
-#define REGOPS_WRITE(_REG, _VAL)					(*(_REG) = (_VAL))
+#define REGOPS_WRITE(_Register, _RegisterImage)					(*(_Register) = (_RegisterImage))
 
 /**
- * @brief Set (OR) bits in register
- * 
- * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
- * @param[in]	_MASK	Bit mask to set
- * 
- * @note Only bits set in `_MASK` are affected
+ * @brief Sets selected register bits
+ * @def REGOPS_SET
+ * @param[in,out] _Register Pointer to a writable memory-mapped register
+ * @param[in] _BitMask Register bit mask to set
+ * @returns Updated register image
+ * @warning This macro performs a non-atomic read-modify-write operation.
  */
-#define REGOPS_SET(_REG, _MASK)						(*(_REG) |= (_MASK))
+#define REGOPS_SET(_Register, _BitMask)						(*(_Register) |= (_BitMask))
 
 /**
- * @brief Clear (AND NOT) bits in register
- * 
- * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
- * @param[in]	_MASK	Bit mask to clear
- * 
- * @note Only bits set in `_MASK` are cleared
+ * @brief Clears selected register bits
+ * @def REGOPS_CLEAR
+ * @param[in,out] _Register Pointer to a writable memory-mapped register
+ * @param[in] _BitMask Register bit mask to clear
+ * @returns Updated register image
+ * @warning This macro performs a non-atomic read-modify-write operation.
  */
-#define REGOPS_CLEAR(_REG, _MASK)					(*(_REG) &= ~(_MASK))
+#define REGOPS_CLEAR(_Register, _BitMask)					(*(_Register) &= ~(_BitMask))
 
 /**
- * @brief Toggle (XOR) bits in register
- * 
- * @param[in]	_REG	Register pointer (e.g., &RCC->CR.REG)
- * @param[in]	_MASK	Bit mask to toggle
- * 
- * @note Only bits set in `_MASK` are toggled
+ * @brief Toggles selected register bits
+ * @def REGOPS_TOGGLE
+ * @param[in,out] _Register Pointer to a writable memory-mapped register
+ * @param[in] _BitMask Register bit mask to toggle
+ * @returns Updated register image
+ * @warning This macro performs a non-atomic read-modify-write operation.
  */
-#define REGOPS_TOGGLE(_REG, _MASK)					(*(_REG) ^= (_MASK))
+#define REGOPS_TOGGLE(_Register, _BitMask)					(*(_Register) ^= (_BitMask))
 
 /**
- * @brief Modify specific bits in register (masked write)
- * 
- * @param[in]	_REG	Register pointer
- * @param[in]	_MASK	Bits to modify
- * @param[in]	_VAL	Value to write
- * 
- * @note - Only bits specified in `_MASK` are modified
- * @note - `_VAL` must be aligned to `_MASK` position (already shifted)
- * @note - Bits in `_VAL` outside `_MASK` are masked out
+ * @brief Replaces selected bits in a register
+ * @def REGOPS_MODIFY
+ * @param[in,out] _Register Pointer to a writable memory-mapped register
+ * @param[in] _PositionedFieldMask Positioned register field mask
+ * @param[in] _PositionedFieldValue Positioned register field value
+ * @returns Updated register image
+ * @note Bits in @p _PositionedFieldValue outside @p _PositionedFieldMask are ignored.
+ * @warning This macro performs a non-atomic read-modify-write operation.
  */
-#define REGOPS_MODIFY(_REG, _MASK, _VAL)			(*(_REG) = (*(_REG) & ~(_MASK)) | ((_VAL) & (_MASK)))
+#define REGOPS_MODIFY(_Register, _PositionedFieldMask, _PositionedFieldValue)			\
+	(*(_Register) = (*(_Register) & ~(_PositionedFieldMask)) |							\
+		((_PositionedFieldValue) & (_PositionedFieldMask)))
 
 /** @} */ // 01_STM32F1xx_Utilities_02_RegOpsMacros
 
@@ -275,225 +206,267 @@ extern "C" {
 // ==================================================================================================== //
 
 /**
- * @brief		Register Operations Utilities
- * @defgroup	01_STM32F1xx_Utilities_04_RegisterOps Register Operations Utilities
- * @ingroup		01_STM32F1xx_Utilities
+ * @defgroup 01_STM32F1xx_Utilities_04_RegisterOps Register Operations Utilities
+ * @ingroup 01_STM32F1xx_Utilities
+ * @brief Checked helpers for staging and accessing 32-bit registers
  * @{
  */
 
 /**
- * @brief Clears and sets one field inside a 32-bit register image
- * @param[in] regImage Register image before field replacement
- * @param[in] fieldMask Register-positioned field mask to clear
- * @param[in] fieldSet Register-positioned field value to set
- * @returns Updated register image
- * @note This helper performs: `regImage = (regImage & ~fieldMask) | (fieldSet & fieldMask)`.
- * @note @p fieldSet must already be shifted into register position.
+ * @brief Replaces a positioned field in a register image
+ * @param[in] registerImage Register image before field replacement
+ * @param[in] positionedFieldMask Register-positioned field mask
+ * @param[in] positionedFieldValue Register-positioned replacement value
+ * @returns Updated register image as @ref reg
+ * @note Bits in @p positionedFieldValue outside @p positionedFieldMask are ignored.
  */
-__STATIC_FORCEINLINE reg RegOps_StageField(const reg regImage, const reg fieldMask, const reg fieldSet)
+__STATIC_FORCEINLINE reg RegOps_StageField
+(
+	const reg	registerImage,
+	const reg	positionedFieldMask,
+	const reg	positionedFieldValue
+)
 {
 	// Local Variable
-	reg updatedRegImage = regImage;
-	//! Clear the selected field and set it to the new value
-	updatedRegImage &= ~fieldMask;
-	//! Set the new field value, ensuring only bits covered by fieldMask are affected
-	updatedRegImage |= (fieldSet & fieldMask);
-	//! Return the updated register image with the staged field value
-	return updatedRegImage;
+	reg updatedRegisterImage = registerImage;
+
+	//! Clear the selected field while preserving every unrelated register bit.
+	updatedRegisterImage &= ~positionedFieldMask;
+	//! Apply only replacement bits covered by the positioned field mask.
+	updatedRegisterImage |= (positionedFieldValue & positionedFieldMask);
+
+	return updatedRegisterImage;
 }
 
 /**
- * @brief Extracts a right-aligned field value from a 32-bit register image
- * @param[in] regImage Register image to inspect
- * @param[in] fieldMask Register-positioned field mask
- * @param[in] pos Target bit position, zero-based, typed as @ref `reg_bit_pos_t`
- * @returns Right-aligned raw field value as @ref `reg`.
- * @note This helper performs: `(regImage & fieldMask) >> pos`.
- * @note @p fieldMask must already be shifted into register position.
- * @note @p pos must match the least-significant bit position of @p fieldMask.
+ * @brief Extracts a right-aligned field from a register image
+ * @param[in] registerImage Register image to inspect
+ * @param[in] positionedFieldMask Register-positioned field mask
+ * @param[in] fieldPosition Zero-based least-significant field bit position
+ * @returns Right-aligned field value as @ref reg
+ * @pre @p fieldPosition matches the least-significant set bit in
+ * @p positionedFieldMask.
  */
 __STATIC_FORCEINLINE reg RegOps_ExtractFieldValue
 (
-	const reg						regImage,
-	const reg						fieldMask,
-	const reg_bit_pos_t				pos
+	const reg				registerImage,
+	const reg				positionedFieldMask,
+	const reg_bit_pos_t		fieldPosition
 )
 {
 	//! Mask first, then shift down so callers receive a right-aligned raw field value.
-	return ((regImage & fieldMask) >> pos);
+	return ((registerImage & positionedFieldMask) >> fieldPosition);
 }
 
 /**
  * @brief Stages a right-aligned field value into a 32-bit register image
- * @see `REG_FIELD_MASK`
- * @see `REG_FIELD_PACK`
- * @see `RegOps_StageField`
- * @param[in] regImage Register image before field replacement
- * @param[in] pos Target bit position, zero-based, typed as @ref `reg_bit_pos_t`
- * @param[in] value Right-aligned raw field value to stage
- * @param[in] fieldWidth Number of bits in the field, typed as @ref `reg_field_width_t`
- * @returns Updated register image
- * @note This helper computes the register-positioned field mask with
- * @ref `REG_FIELD_MASK`, clears that field, and writes @p value at @p pos.
- * @note @p fieldWidth must be in the range `0U..32U`.
- * @note @p pos must be in the range `0U..31U`.
- * @note @p fieldWidth + @p pos must not exceed `32U`.
+ * @see REG_FIELD_MASK
+ * @see REG_FIELD_PACK
+ * @see RegOps_StageField
+ * @param[in] registerImage Register image before field replacement
+ * @param[in] fieldPosition Zero-based least-significant field bit position
+ * @param[in] fieldValue Right-aligned field value to stage
+ * @param[in] fieldWidth Number of bits occupied by the field
+ * @returns Updated register image as @ref reg
+ * @note @p fieldWidth must be in the range `0U..31U`.
+ * @note @p fieldPosition must be in the range `0U..31U`.
+ * @warning Field bits positioned beyond bit `31U` are discarded.
  */
 __STATIC_FORCEINLINE reg RegOps_StageFieldValue
 (
-	const reg					regImage,
-	const reg_bit_pos_t			pos,
-	const reg					value,
-	const reg_field_width_t		fieldWidth
+	const reg				registerImage,
+	const reg_bit_pos_t		fieldPosition,
+	const reg				fieldValue,
+	const reg_field_width_t	fieldWidth
 )
 {
 	// Local Variables
-	const reg fieldMask = REG_FIELD_MASK(pos, fieldWidth);
-	const reg fieldSet = REG_FIELD_PACK(pos, value, fieldWidth);
-	return RegOps_StageField(regImage, fieldMask, fieldSet);
+	const reg positionedFieldMask = REG_FIELD_MASK(fieldPosition, fieldWidth);
+	const reg positionedFieldValue = REG_FIELD_PACK(fieldPosition, fieldValue, fieldWidth);
+
+	//! Reuse the mask-based staging primitive after positioning both field operands.
+	return RegOps_StageField(registerImage, positionedFieldMask, positionedFieldValue);
 }
 
 /**
- * @brief Read a 32-bit memory-mapped register.
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[out]	pRegImage	Pointer to variable receiving the register value
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Read completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister or @p pRegImage is `NULL`.
- * @note This API does not validate the address range. It assumes @p pRegister
- * points to valid memory-mapped I/O.
+ * @brief Reads a complete 32-bit memory-mapped register image
+ * @param[in] pRegister Pointer to a readable memory-mapped register
+ * @param[out] pRegisterImage Destination for the captured register image
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was captured.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer is `NULL`.
+ * @note The caller owns address-range and peripheral-instance validation.
  */
-__STATIC_FORCEINLINE driver_status_t RegOps_Read(const _IO* const pRegister, uint32_t* const pRegImage)
+__STATIC_FORCEINLINE driver_status_t RegOps_Read(const _IO* const pRegister, reg* const pRegisterImage)
 {
-	//! Validate source register pointer and destination image pointer before dereferencing
-	if ((pRegister == NULL) || (pRegImage == NULL))
+	//! Validate both addresses before touching memory-mapped I/O or caller storage.
+	if ((pRegister == NULL) || (pRegisterImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Read the full 32-bit memory-mapped register image into caller-owned storage
-	*pRegImage = *pRegister;
+	//! Capture the volatile register once so the caller receives one coherent image.
+	*pRegisterImage = *pRegister;
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
- * @brief Write a 32-bit memory-mapped register.
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[in]	regImage	Value to write
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @brief Writes a complete 32-bit memory-mapped register image
+ * @param[in,out] pRegister Pointer to a writable memory-mapped register
+ * @param[in] registerImage Complete register image to write
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was written.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @note The caller owns address-range, peripheral-instance, and write-policy validation.
  */
-__STATIC_FORCEINLINE driver_status_t RegOps_Write(_IO* const pRegister, const uint32_t regImage)
+__STATIC_FORCEINLINE driver_status_t RegOps_Write(_IO* const pRegister, const reg registerImage)
 {
-	//! Validate writable register pointer before dereferencing
+	//! Reject an invalid destination before performing the volatile register write.
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Write the complete 32-bit register image to the memory-mapped register
-	*pRegister = regImage;
+	//! Replace the complete register image exactly as supplied by the caller.
+	*pRegister = registerImage;
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
- * @brief Set bits in a 32-bit memory-mapped register (OR operation).
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[in]	mask		Bit mask to set
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @brief Writes a register only when its staged image differs from hardware
+ * @param[in,out] pRegister Pointer to the writable memory-mapped register
+ * @param[in] currentRegisterImage Previously captured image of @p pRegister
+ * @param[in] stagedRegisterImage Complete register image requested by the caller
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Write was skipped or completed.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @pre @p currentRegisterImage represents the current image of @p pRegister.
+ * @note Supplying the current image lets callers reuse an existing snapshot
+ * without forcing another volatile register read.
  */
-__STATIC_FORCEINLINE driver_status_t RegOps_Set(_IO* const pRegister, const uint32_t mask)
+__STATIC_FORCEINLINE driver_status_t RegOps_WriteIfChanged
+(
+	_IO* const	pRegister,
+	const reg	currentRegisterImage,
+	const reg	stagedRegisterImage
+)
 {
-	//! Validate writable register pointer before performing read-modify-write
+	//! Validate the register even when equal images would otherwise skip the write.
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Set only the bits selected by mask while preserving all other register bits
-	*pRegister |= mask;
+	//! Avoid register side effects and bus traffic when staging produced no change.
+	if (currentRegisterImage != stagedRegisterImage)
+	{
+		return RegOps_Write(pRegister, stagedRegisterImage);
+	}
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
- * @brief Clear bits in a 32-bit memory-mapped register (AND with ~mask).
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[in]	mask		Bit mask to clear
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @brief Sets selected bits in a memory-mapped register
+ * @param[in,out] pRegister Pointer to a writable memory-mapped register
+ * @param[in] bitMask Register bit mask to set
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected bits were set.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @warning This helper performs a non-atomic read-modify-write operation.
  */
-__STATIC_FORCEINLINE driver_status_t RegOps_Clear(_IO* const pRegister, const uint32_t mask)
+__STATIC_FORCEINLINE driver_status_t RegOps_Set(_IO* const pRegister, const reg bitMask)
 {
-	//! Validate writable register pointer before performing read-modify-write
+	//! Reject an invalid destination before starting the read-modify-write sequence.
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Clear only the bits selected by mask while preserving all other register bits
-	*pRegister &= ~mask;
+	//! Preserve unrelated register bits while setting the requested mask.
+	*pRegister |= bitMask;
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
- * @brief Toggle bits in a 32-bit memory-mapped register (XOR operation).
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[in]	mask		Bit mask to toggle
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @brief Clears selected bits in a memory-mapped register
+ * @param[in,out] pRegister Pointer to a writable memory-mapped register
+ * @param[in] bitMask Register bit mask to clear
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected bits were cleared.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @warning This helper performs a non-atomic read-modify-write operation.
  */
-__STATIC_FORCEINLINE driver_status_t RegOps_Toggle(_IO* const pRegister, const uint32_t mask)
+__STATIC_FORCEINLINE driver_status_t RegOps_Clear(_IO* const pRegister, const reg bitMask)
 {
-	//! Validate writable register pointer before performing read-modify-write
+	//! Reject an invalid destination before starting the read-modify-write sequence.
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Toggle only the bits selected by mask while preserving all other register bits
-	*pRegister ^= mask;
+	//! Preserve unrelated register bits while clearing the requested mask.
+	*pRegister &= ~bitMask;
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
 /**
- * @brief Write a masked field inside a 32-bit register.
- * @details
- * This helper performs: `reg = (reg & ~mask) | (value & mask)`.
- * Use it for writing bitfields where `value` is already aligned to the mask position.
- * @param[in]	pRegister	Pointer to the memory-mapped register
- * @param[in]	mask		Field mask (already shifted to position)
- * @param[in]	value		Field value (already shifted to position)
- * @returns @ref driver_status_t "Driver Operation Status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation completed successfully.
+ * @brief Toggles selected bits in a memory-mapped register
+ * @param[in,out] pRegister Pointer to a writable memory-mapped register
+ * @param[in] bitMask Register bit mask to toggle
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected bits were toggled.
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
- * @warning Caller must ensure @p value is correctly shifted and does not set
- * bits outside @p mask.
+ * @warning This helper performs a non-atomic read-modify-write operation.
+ */
+__STATIC_FORCEINLINE driver_status_t RegOps_Toggle(_IO* const pRegister, const reg bitMask)
+{
+	//! Reject an invalid destination before starting the read-modify-write sequence.
+	if (pRegister == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Preserve unrelated register bits while toggling the requested mask.
+	*pRegister ^= bitMask;
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+/**
+ * @brief Replaces selected bits in a memory-mapped register
+ * @param[in,out] pRegister Pointer to a writable memory-mapped register
+ * @param[in] positionedFieldMask Register-positioned field mask
+ * @param[in] positionedFieldValue Register-positioned replacement value
+ * @returns Driver operation status
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected register bits were replaced.
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegister is `NULL`.
+ * @note Bits in @p positionedFieldValue outside @p positionedFieldMask are ignored.
+ * @warning This helper performs a non-atomic read-modify-write operation.
  */
 __STATIC_FORCEINLINE driver_status_t RegOps_WriteMasked
 (
-	_IO* const			pRegister,
-	const uint32_t		mask,
-	const uint32_t		value
+	_IO* const	pRegister,
+	const reg	positionedFieldMask,
+	const reg	positionedFieldValue
 )
 {
-	//! Validate writable register pointer before performing masked read-modify-write
+	// Local Variable
+	reg updatedRegisterImage;
+
+	//! Reject an invalid destination before starting the read-modify-write sequence.
 	if (pRegister == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Clear the selected field first, then write only the masked portion of the new value
-	*pRegister = (*pRegister & ~mask) | (value & mask);
+	//! Stage the field from one hardware snapshot so unrelated bits remain unchanged.
+	updatedRegisterImage = RegOps_StageField(*pRegister, positionedFieldMask, positionedFieldValue);
+	*pRegister = updatedRegisterImage;
 
 	return DRIVER_STATUS_SUCCESS;
 }

@@ -44,7 +44,7 @@ extern "C" {
  * dirty-register writes, and interrupt/NVIC policy.
  *
  * @note Stage APIs mutate caller-owned register images in place. The image
- * pointer must reference a local driver-owned @ref `reg` image, not a live
+ * pointer must reference a local driver-owned @ref reg image, not a live
  * peripheral register address. Implementations stage through local temporaries
  * and write back only after successful validation.
  * @{
@@ -65,8 +65,8 @@ extern "C" {
  * Expected values:
  * - `0x0000U..0xFFFFU`: Extracted `PSC[15:0]` value
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPrescaler is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Prescaler value was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPrescaler is `NULL`
  */
 driver_status_t Codec_TIM_ExtractPrescaler
 (
@@ -79,10 +79,10 @@ driver_status_t Codec_TIM_ExtractPrescaler
  * @param[in,out] pPscRegImage Caller-owned `PSC` image to update in place
  * @param[in] prescaler Prescaler value to stage into `PSC[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_prescaler_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref tim_prescaler_t
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Prescaler value was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPscRegImage is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Prescaler value was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPscRegImage is `NULL`
  */
 driver_status_t Codec_TIM_StagePrescaler
 (
@@ -97,8 +97,8 @@ driver_status_t Codec_TIM_StagePrescaler
  * Expected values:
  * - `0x0000U..0xFFFFU`: Extracted `ARR[15:0]` value
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReload is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Auto-reload value was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pAutoReload is `NULL`
  */
 driver_status_t Codec_TIM_ExtractAutoReload
 (
@@ -111,10 +111,10 @@ driver_status_t Codec_TIM_ExtractAutoReload
  * @param[in,out] pArrRegImage Caller-owned `ARR` image to update in place
  * @param[in] autoReload Auto-reload value to stage into `ARR[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_auto_reload_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref tim_auto_reload_t
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload value was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pArrRegImage is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Auto-reload value was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pArrRegImage is `NULL`
  */
 driver_status_t Codec_TIM_StageAutoReload
 (
@@ -129,8 +129,8 @@ driver_status_t Codec_TIM_StageAutoReload
  * Expected values:
  * - `0x0000U..0xFFFFU`: Extracted `CNT[15:0]` value
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounterValue is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Counter value was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCounterValue is `NULL`
  */
 driver_status_t Codec_TIM_ExtractCounterValue
 (
@@ -143,10 +143,10 @@ driver_status_t Codec_TIM_ExtractCounterValue
  * @param[in,out] pCntRegImage Caller-owned `CNT` image to update in place
  * @param[in] counterValue Counter value to stage into `CNT[15:0]`
  * Accepted values:
- * - `0x0000U..0xFFFFU`: Any value representable by @ref `tim_counter_value_t`
+ * - `0x0000U..0xFFFFU`: Any value representable by @ref tim_counter_value_t
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter value was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCntRegImage is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Counter value was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCntRegImage is `NULL`
  */
 driver_status_t Codec_TIM_StageCounterValue
 (
@@ -165,12 +165,12 @@ driver_status_t Codec_TIM_StageCounterValue
  * @param[in] cntRegImage Caller-owned `CNT` image
  * @param[out] pTimebase Destination for decoded timebase configuration
  * Expected member values:
- * - @ref `tim_config_timebase_t::prescaler`: Extracted `PSC[15:0]` value
- * - @ref `tim_config_timebase_t::auto_reload`: Extracted `ARR[15:0]` value
- * - @ref `tim_config_timebase_t::initial_count`: Extracted `CNT[15:0]` value
+ * - @ref tim_config_timebase_t::prescaler : Extracted `PSC[15:0]` value
+ * - @ref tim_config_timebase_t::auto_reload : Extracted `ARR[15:0]` value
+ * - @ref tim_config_timebase_t::initial_count : Extracted `CNT[15:0]` value
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pTimebase is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Timebase configuration was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pTimebase is `NULL`
  */
 driver_status_t Codec_TIM_ExtractTimeBaseConfig
 (
@@ -187,12 +187,12 @@ driver_status_t Codec_TIM_ExtractTimeBaseConfig
  * @param[in,out] pCntRegImage Caller-owned `CNT` image to update in place
  * @param[in] pTimebase Timebase configuration to stage
  * Accepted member values:
- * - @ref `tim_config_timebase_t::prescaler`: Any value accepted by @ref `Codec_TIM_StagePrescaler`
- * - @ref `tim_config_timebase_t::auto_reload`: Any value accepted by @ref `Codec_TIM_StageAutoReload`
- * - @ref `tim_config_timebase_t::initial_count`: Any value accepted by @ref `Codec_TIM_StageCounterValue`
+ * - @ref tim_config_timebase_t::prescaler : Any value accepted by @ref Codec_TIM_StagePrescaler
+ * - @ref tim_config_timebase_t::auto_reload : Any value accepted by @ref Codec_TIM_StageAutoReload
+ * - @ref tim_config_timebase_t::initial_count : Any value accepted by @ref Codec_TIM_StageCounterValue
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timebase configuration was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more required pointers are `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Timebase configuration was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR One or more required pointers are `NULL`
  */
 driver_status_t Codec_TIM_StageTimeBaseConfig
 (
@@ -215,12 +215,12 @@ driver_status_t Codec_TIM_StageTimeBaseConfig
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pDirection Destination for decoded direction selector
  * Expected values:
- * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
- * - @ref `TIMx_DIR_COUNT_DOWN`: Counter counts down
+ * - @ref TIMx_DIR_COUNT_UP : Counter counts up
+ * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDirection is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `DIR` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Direction selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pDirection is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `DIR` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractCounterDirection
 (
@@ -233,12 +233,12 @@ driver_status_t Codec_TIM_ExtractCounterDirection
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] direction Timer counter direction selector
  * Accepted values:
- * - @ref `TIMx_DIR_COUNT_UP`: Counter counts up
- * - @ref `TIMx_DIR_COUNT_DOWN`: Counter counts down
+ * - @ref TIMx_DIR_COUNT_UP : Counter counts up
+ * - @ref TIMx_DIR_COUNT_DOWN : Counter counts down
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Direction selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p direction cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Direction selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p direction cannot be encoded
  */
 driver_status_t Codec_TIM_StageCounterDirection
 (
@@ -251,14 +251,14 @@ driver_status_t Codec_TIM_StageCounterDirection
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pAlignment Destination for decoded edge/center-aligned selector
  * Expected values:
- * - @ref `TIMx_MODE_NORMAL`: Edge-aligned mode
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`: Center-aligned mode 1
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`: Center-aligned mode 2
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`: Center-aligned mode 3
+ * - @ref TIMx_MODE_NORMAL : Edge-aligned mode
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAlignment is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `CMS` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Alignment selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pAlignment is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `CMS` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractCounterAlignment
 (
@@ -271,14 +271,14 @@ driver_status_t Codec_TIM_ExtractCounterAlignment
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] alignment Timer edge/center-aligned selector
  * Accepted values:
- * - @ref `TIMx_MODE_NORMAL`: Edge-aligned mode
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`: Center-aligned mode 1
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`: Center-aligned mode 2
- * - @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`: Center-aligned mode 3
+ * - @ref TIMx_MODE_NORMAL : Edge-aligned mode
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING : Center-aligned mode 1
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING : Center-aligned mode 2
+ * - @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING : Center-aligned mode 3
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Alignment selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p alignment cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Alignment selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p alignment cannot be encoded
  */
 driver_status_t Codec_TIM_StageCounterAlignment
 (
@@ -291,12 +291,12 @@ driver_status_t Codec_TIM_StageCounterAlignment
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pOnePulse Destination for decoded one-pulse selector
  * Expected values:
- * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at the next update event
- * - @ref `TIMx_OPM_ENABLE`: Counter stops at the next update event
+ * - @ref TIMx_OPM_DISABLE : Counter is not stopped at the next update event
+ * - @ref TIMx_OPM_ENABLE : Counter stops at the next update event
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOnePulse is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `OPM` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS One-pulse selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pOnePulse is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `OPM` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractOnePulse
 (
@@ -309,12 +309,12 @@ driver_status_t Codec_TIM_ExtractOnePulse
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] onePulse Timer one-pulse selector
  * Accepted values:
- * - @ref `TIMx_OPM_DISABLE`: Counter is not stopped at next update event
- * - @ref `TIMx_OPM_ENABLE`: Counter stops at next update event
+ * - @ref TIMx_OPM_DISABLE : Counter is not stopped at next update event
+ * - @ref TIMx_OPM_ENABLE : Counter stops at next update event
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: One-pulse selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p onePulse cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS One-pulse selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p onePulse cannot be encoded
  */
 driver_status_t Codec_TIM_StageOnePulse
 (
@@ -327,12 +327,12 @@ driver_status_t Codec_TIM_StageOnePulse
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pAutoReloadPreload Destination for decoded auto-reload preload selector
  * Expected values:
- * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload is disabled
- * - @ref `TIMx_ARPE_ENABLE`: Auto-reload preload is enabled
+ * - @ref TIMx_ARPE_DISABLE : Auto-reload preload is disabled
+ * - @ref TIMx_ARPE_ENABLE : Auto-reload preload is enabled
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAutoReloadPreload is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `ARPE` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Auto-reload preload selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pAutoReloadPreload is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `ARPE` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractAutoReloadPreload
 (
@@ -345,12 +345,12 @@ driver_status_t Codec_TIM_ExtractAutoReloadPreload
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] autoReloadPreload Timer auto-reload preload selector
  * Accepted values:
- * - @ref `TIMx_ARPE_DISABLE`: Auto-reload preload disabled
- * - @ref `TIMx_ARPE_ENABLE`: Auto-reload preload enabled
+ * - @ref TIMx_ARPE_DISABLE : Auto-reload preload disabled
+ * - @ref TIMx_ARPE_ENABLE : Auto-reload preload enabled
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Auto-reload preload selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReloadPreload cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Auto-reload preload selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p autoReloadPreload cannot be encoded
  */
 driver_status_t Codec_TIM_StageAutoReloadPreload
 (
@@ -363,12 +363,12 @@ driver_status_t Codec_TIM_StageAutoReloadPreload
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pUpdateSource Destination for decoded update-source selector
  * Expected values:
- * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate an update request
- * - @ref `TIMx_UPDATE_SOURCE_OVF_DMA`: Only overflow/underflow or DMA source generates an update request
+ * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate an update request
+ * - @ref TIMx_UPDATE_SOURCE_OVF_DMA : Only overflow/underflow or DMA source generates an update request
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update-source selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pUpdateSource is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `URS` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Update-source selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pUpdateSource is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `URS` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractUpdateSource
 (
@@ -381,12 +381,12 @@ driver_status_t Codec_TIM_ExtractUpdateSource
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] updateSource Timer update-source selector
  * Accepted values:
- * - @ref `TIMx_UPDATE_SOURCE_ANY`: Any update source may generate update request
- * - @ref `TIMx_UPDATE_SOURCE_OVF_DMA`: Only overflow/underflow or DMA source generates update request
+ * - @ref TIMx_UPDATE_SOURCE_ANY : Any update source may generate update request
+ * - @ref TIMx_UPDATE_SOURCE_OVF_DMA : Only overflow/underflow or DMA source generates update request
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update-source selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p updateSource cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Update-source selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p updateSource cannot be encoded
  */
 driver_status_t Codec_TIM_StageUpdateSource
 (
@@ -399,13 +399,13 @@ driver_status_t Codec_TIM_StageUpdateSource
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pClockDivision Destination for decoded clock-division selector
  * Expected values:
- * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
- * - @ref `TIMx_CKD_CLK_2_FREQ`: `t_DTS = 2 * t_CK_INT`
- * - @ref `TIMx_CKD_CLK_4_FREQ`: `t_DTS = 4 * t_CK_INT`
+ * - @ref TIMx_CKD_CLK_FREQ : `t_DTS = t_CK_INT`
+ * - @ref TIMx_CKD_CLK_2_FREQ : `t_DTS = 2 * t_CK_INT`
+ * - @ref TIMx_CKD_CLK_4_FREQ : `t_DTS = 4 * t_CK_INT`
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-division selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockDivision is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `CKD` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Clock-division selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pClockDivision is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `CKD` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractClockDivision
 (
@@ -418,13 +418,13 @@ driver_status_t Codec_TIM_ExtractClockDivision
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] clockDivision Timer clock-division selector
  * Accepted values:
- * - @ref `TIMx_CKD_CLK_FREQ`: `t_DTS = t_CK_INT`
- * - @ref `TIMx_CKD_CLK_2_FREQ`: `t_DTS = 2 * t_CK_INT`
- * - @ref `TIMx_CKD_CLK_4_FREQ`: `t_DTS = 4 * t_CK_INT`
+ * - @ref TIMx_CKD_CLK_FREQ : `t_DTS = t_CK_INT`
+ * - @ref TIMx_CKD_CLK_2_FREQ : `t_DTS = 2 * t_CK_INT`
+ * - @ref TIMx_CKD_CLK_4_FREQ : `t_DTS = 4 * t_CK_INT`
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-division selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockDivision cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Clock-division selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p clockDivision cannot be encoded
  */
 driver_status_t Codec_TIM_StageClockDivision
 (
@@ -441,20 +441,20 @@ driver_status_t Codec_TIM_StageClockDivision
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[out] pCounter Destination for decoded counter configuration
  * Expected member values:
- * - @ref `tim_config_counter_t::direction`: @ref `TIMx_DIR_COUNT_UP` or @ref `TIMx_DIR_COUNT_DOWN`
- * - @ref `tim_config_counter_t::alignment`: @ref `TIMx_MODE_NORMAL`,
- *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING`,
- *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING`, or
- *   @ref `TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING`
- * - @ref `tim_config_counter_t::one_pulse`: @ref `TIMx_OPM_DISABLE` or @ref `TIMx_OPM_ENABLE`
- * - @ref `tim_config_counter_t::auto_reload_preload`: @ref `TIMx_ARPE_DISABLE` or @ref `TIMx_ARPE_ENABLE`
- * - @ref `tim_config_counter_t::update_source`: @ref `TIMx_UPDATE_SOURCE_ANY` or @ref `TIMx_UPDATE_SOURCE_OVF_DMA`
- * - @ref `tim_config_counter_t::clock_division`: @ref `TIMx_CKD_CLK_FREQ`,
- *   @ref `TIMx_CKD_CLK_2_FREQ`, or @ref `TIMx_CKD_CLK_4_FREQ`
+ * - @ref tim_config_counter_t::direction : @ref TIMx_DIR_COUNT_UP or @ref TIMx_DIR_COUNT_DOWN
+ * - @ref tim_config_counter_t::alignment : @ref TIMx_MODE_NORMAL,
+ *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_DOWN_COUNTING,
+ *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_UP_COUNTING, or
+ *   @ref TIMx_MODE_ALTERNATE_INTERRUPT_BOTH_COUNTING
+ * - @ref tim_config_counter_t::one_pulse : @ref TIMx_OPM_DISABLE or @ref TIMx_OPM_ENABLE
+ * - @ref tim_config_counter_t::auto_reload_preload : @ref TIMx_ARPE_DISABLE or @ref TIMx_ARPE_ENABLE
+ * - @ref tim_config_counter_t::update_source : @ref TIMx_UPDATE_SOURCE_ANY or @ref TIMx_UPDATE_SOURCE_OVF_DMA
+ * - @ref tim_config_counter_t::clock_division : @ref TIMx_CKD_CLK_FREQ,
+ *   @ref TIMx_CKD_CLK_2_FREQ, or @ref TIMx_CKD_CLK_4_FREQ
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A raw `CR1` field is not decodable by the current public Timer vocabulary
+ * @retval DRIVER_STATUS_SUCCESS Counter configuration was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCounter is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG A raw `CR1` field is not decodable by the current public Timer vocabulary
  * @note This API preserves no hardware state because it reads only @p cr1RegImage.
  */
 driver_status_t Codec_TIM_ExtractCounterConfig
@@ -468,16 +468,16 @@ driver_status_t Codec_TIM_ExtractCounterConfig
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] pCounter Counter configuration to stage
  * Accepted member values:
- * - @ref `tim_config_counter_t::direction`: Any value accepted by @ref `Codec_TIM_StageCounterDirection`
- * - @ref `tim_config_counter_t::alignment`: Any value accepted by @ref `Codec_TIM_StageCounterAlignment`
- * - @ref `tim_config_counter_t::one_pulse`: Any value accepted by @ref `Codec_TIM_StageOnePulse`
- * - @ref `tim_config_counter_t::auto_reload_preload`: Any value accepted by @ref `Codec_TIM_StageAutoReloadPreload`
- * - @ref `tim_config_counter_t::update_source`: Any value accepted by @ref `Codec_TIM_StageUpdateSource`
- * - @ref `tim_config_counter_t::clock_division`: Any value accepted by @ref `Codec_TIM_StageClockDivision`
+ * - @ref tim_config_counter_t::direction : Any value accepted by @ref Codec_TIM_StageCounterDirection
+ * - @ref tim_config_counter_t::alignment : Any value accepted by @ref Codec_TIM_StageCounterAlignment
+ * - @ref tim_config_counter_t::one_pulse : Any value accepted by @ref Codec_TIM_StageOnePulse
+ * - @ref tim_config_counter_t::auto_reload_preload : Any value accepted by @ref Codec_TIM_StageAutoReloadPreload
+ * - @ref tim_config_counter_t::update_source : Any value accepted by @ref Codec_TIM_StageUpdateSource
+ * - @ref tim_config_counter_t::clock_division : Any value accepted by @ref Codec_TIM_StageClockDivision
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: `CR1` image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCounter or @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more selectors cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS `CR1` image was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCounter or @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG One or more selectors cannot be encoded
  * @note This API preserves `CEN` and `UDIS`; use the dedicated state codecs for those fields.
  */
 driver_status_t Codec_TIM_StageCounterConfig
@@ -494,8 +494,8 @@ driver_status_t Codec_TIM_StageCounterConfig
  * @brief Extracts the Timer counter enable state from a `CR1` image
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @returns Decoded counter enable state
- * @retval - @ref `DRIVER_STATUS_OFF`: Counter is disabled
- * @retval - @ref `DRIVER_STATUS_ON`: Counter is enabled
+ * @retval DRIVER_STATUS_OFF Counter is disabled
+ * @retval DRIVER_STATUS_ON Counter is enabled
  */
 driver_status_t Codec_TIM_ExtractCounterEnableState(const reg cr1RegImage);
 
@@ -504,12 +504,12 @@ driver_status_t Codec_TIM_ExtractCounterEnableState(const reg cr1RegImage);
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] counterState Requested counter state
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Clear `CEN`
- * - @ref `DRIVER_STATUS_ON`: Set `CEN`
+ * - @ref DRIVER_STATUS_OFF : Clear `CEN`
+ * - @ref DRIVER_STATUS_ON : Set `CEN`
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Counter enable state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p counterState is not an accepted state
+ * @retval DRIVER_STATUS_SUCCESS Counter enable state was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p counterState is not an accepted state
  */
 driver_status_t Codec_TIM_StageCounterEnableState
 (
@@ -521,8 +521,8 @@ driver_status_t Codec_TIM_StageCounterEnableState
  * @brief Extracts the Timer update-event enable state from a `CR1` image
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @returns Decoded update-event enable state
- * @retval - @ref `DRIVER_STATUS_OFF`: Update events are disabled through `UDIS`
- * @retval - @ref `DRIVER_STATUS_ON`: Update events are enabled
+ * @retval DRIVER_STATUS_OFF Update events are disabled through `UDIS`
+ * @retval DRIVER_STATUS_ON Update events are enabled
  * @note Raw `UDIS` has inverse polarity: `UDIS == 1U` means update events are disabled.
  */
 driver_status_t Codec_TIM_ExtractUpdateEventState(const reg cr1RegImage);
@@ -532,12 +532,12 @@ driver_status_t Codec_TIM_ExtractUpdateEventState(const reg cr1RegImage);
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in] updateEventState Requested update-event state
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Set `UDIS`
- * - @ref `DRIVER_STATUS_ON`: Clear `UDIS`
+ * - @ref DRIVER_STATUS_OFF : Set `UDIS`
+ * - @ref DRIVER_STATUS_ON : Clear `UDIS`
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update-event state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p updateEventState is not an accepted state
+ * @retval DRIVER_STATUS_SUCCESS Update-event state was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr1RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p updateEventState is not an accepted state
  * @note Raw `UDIS` has inverse polarity: `UDIS == 1U` means update events are disabled.
  */
 driver_status_t Codec_TIM_StageUpdateEventState
@@ -558,8 +558,8 @@ driver_status_t Codec_TIM_StageUpdateEventState
  * @brief Stages a software update event generation request into an `EGR` image
  * @param[in,out] pEgrRegImage Caller-owned `EGR` image to update in place
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update event generation request was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pEgrRegImage is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Update event generation request was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pEgrRegImage is `NULL`
  * @note This API stages `TIMx_EGR.UG`. `EGR` is an action register, so a
  * conjugate Extract API is not meaningful.
  */
@@ -573,8 +573,8 @@ driver_status_t Codec_TIM_StageUpdateEventGeneration(reg* const pEgrRegImage);
  * @brief Extracts the update interrupt flag state from an `SR` image
  * @param[in] srRegImage Caller-owned `SR` image
  * @returns Decoded update flag state
- * @retval - @ref `DRIVER_STATUS_OFF`: `TIMx_SR.UIF` is not pending
- * @retval - @ref `DRIVER_STATUS_ON`: `TIMx_SR.UIF` is pending
+ * @retval DRIVER_STATUS_OFF `TIMx_SR.UIF` is not pending
+ * @retval DRIVER_STATUS_ON `TIMx_SR.UIF` is pending
  */
 driver_status_t Codec_TIM_ExtractUpdateFlagState(const reg srRegImage);
 
@@ -582,8 +582,8 @@ driver_status_t Codec_TIM_ExtractUpdateFlagState(const reg srRegImage);
  * @brief Stages a write-0-to-clear image for the update interrupt flag
  * @param[in,out] pSrRegImage Caller-owned `SR` image to update in place
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Update flag clear image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSrRegImage is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Update flag clear image was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pSrRegImage is `NULL`
  * @note STM32F1 Timer status flags use write-`0`-to-clear semantics. This API
  * clears only `TIMx_SR.UIF` and writes `1` to other supported status flags to
  * preserve them.
@@ -603,18 +603,18 @@ driver_status_t Codec_TIM_StageUpdateFlagClear(reg* const pSrRegImage);
  * @param[in] cr2RegImage Caller-owned `CR2` image
  * @param[out] pMasterMode Destination for decoded master-mode selector
  * Expected values:
- * - @ref `TIMx_MMS_RESET`: Reset trigger output
- * - @ref `TIMx_MMS_ENABLE`: Counter-enable trigger output
- * - @ref `TIMx_MMS_UPDATE`: Update-event trigger output
- * - @ref `TIMx_MMS_CMP_PULSE`: Compare-pulse trigger output
- * - @ref `TIMx_MMS_CMP_OC1REF`: Output compare 1 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC2REF`: Output compare 2 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC3REF`: Output compare 3 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC4REF`: Output compare 4 reference trigger output
+ * - @ref TIMx_MMS_RESET : Reset trigger output
+ * - @ref TIMx_MMS_ENABLE : Counter-enable trigger output
+ * - @ref TIMx_MMS_UPDATE : Update-event trigger output
+ * - @ref TIMx_MMS_CMP_PULSE : Compare-pulse trigger output
+ * - @ref TIMx_MMS_CMP_OC1REF : Output compare 1 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC2REF : Output compare 2 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC3REF : Output compare 3 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC4REF : Output compare 4 reference trigger output
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master-mode selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pMasterMode is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `MMS` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Master-mode selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pMasterMode is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `MMS` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractMasterMode
 (
@@ -627,18 +627,18 @@ driver_status_t Codec_TIM_ExtractMasterMode
  * @param[in,out] pCr2RegImage Caller-owned `CR2` image to update in place
  * @param[in] masterMode Timer master-mode selector
  * Accepted values:
- * - @ref `TIMx_MMS_RESET`: Reset trigger output
- * - @ref `TIMx_MMS_ENABLE`: Counter-enable trigger output
- * - @ref `TIMx_MMS_UPDATE`: Update-event trigger output
- * - @ref `TIMx_MMS_CMP_PULSE`: Compare-pulse trigger output
- * - @ref `TIMx_MMS_CMP_OC1REF`: Output compare 1 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC2REF`: Output compare 2 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC3REF`: Output compare 3 reference trigger output
- * - @ref `TIMx_MMS_CMP_OC4REF`: Output compare 4 reference trigger output
+ * - @ref TIMx_MMS_RESET : Reset trigger output
+ * - @ref TIMx_MMS_ENABLE : Counter-enable trigger output
+ * - @ref TIMx_MMS_UPDATE : Update-event trigger output
+ * - @ref TIMx_MMS_CMP_PULSE : Compare-pulse trigger output
+ * - @ref TIMx_MMS_CMP_OC1REF : Output compare 1 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC2REF : Output compare 2 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC3REF : Output compare 3 reference trigger output
+ * - @ref TIMx_MMS_CMP_OC4REF : Output compare 4 reference trigger output
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Master-mode selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr2RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p masterMode cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Master-mode selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCr2RegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p masterMode cannot be encoded
  */
 driver_status_t Codec_TIM_StageMasterMode
 (
@@ -655,14 +655,14 @@ driver_status_t Codec_TIM_StageMasterMode
  * @param[in] smcrRegImage Caller-owned `SMCR` image
  * @param[out] pSlaveMode Destination for decoded slave-mode selector
  * Expected values:
- * - @ref `TIMx_SMS_DISABLE`: Slave mode disabled
- * - @ref `TIMx_SMS_ENC_MODE1`: Encoder mode 1
- * - @ref `TIMx_SMS_ENC_MODE2`: Encoder mode 2
- * - @ref `TIMx_SMS_ENC_MODE3`: Encoder mode 3
+ * - @ref TIMx_SMS_DISABLE : Slave mode disabled
+ * - @ref TIMx_SMS_ENC_MODE1 : Encoder mode 1
+ * - @ref TIMx_SMS_ENC_MODE2 : Encoder mode 2
+ * - @ref TIMx_SMS_ENC_MODE3 : Encoder mode 3
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave-mode selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSlaveMode is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Raw `SMS` field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Slave-mode selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pSlaveMode is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG Raw `SMS` field is not decodable
  */
 driver_status_t Codec_TIM_ExtractSlaveMode
 (
@@ -675,14 +675,14 @@ driver_status_t Codec_TIM_ExtractSlaveMode
  * @param[in,out] pSmcrRegImage Caller-owned `SMCR` image to update in place
  * @param[in] slaveMode Timer slave-mode selector
  * Accepted values:
- * - @ref `TIMx_SMS_DISABLE`: Slave mode disabled
- * - @ref `TIMx_SMS_ENC_MODE1`: Encoder mode 1
- * - @ref `TIMx_SMS_ENC_MODE2`: Encoder mode 2
- * - @ref `TIMx_SMS_ENC_MODE3`: Encoder mode 3
+ * - @ref TIMx_SMS_DISABLE : Slave mode disabled
+ * - @ref TIMx_SMS_ENC_MODE1 : Encoder mode 1
+ * - @ref TIMx_SMS_ENC_MODE2 : Encoder mode 2
+ * - @ref TIMx_SMS_ENC_MODE3 : Encoder mode 3
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Slave-mode selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSmcrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p slaveMode cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Slave-mode selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pSmcrRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p slaveMode cannot be encoded
  */
 driver_status_t Codec_TIM_StageSlaveMode
 (
@@ -703,20 +703,20 @@ driver_status_t Codec_TIM_StageSlaveMode
  * @param[in] ccmrRegImage Caller-owned `CCMR1` or `CCMR2` image
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Extract channel 1 selection
- * - @ref `TIMx_CHANNEL_2`: Extract channel 2 selection
- * - @ref `TIMx_CHANNEL_3`: Extract channel 3 selection
- * - @ref `TIMx_CHANNEL_4`: Extract channel 4 selection
+ * - @ref TIMx_CHANNEL_1 : Extract channel 1 selection
+ * - @ref TIMx_CHANNEL_2 : Extract channel 2 selection
+ * - @ref TIMx_CHANNEL_3 : Extract channel 3 selection
+ * - @ref TIMx_CHANNEL_4 : Extract channel 4 selection
  * @param[out] pCaptureCompareSelection Destination for decoded `CCxS` selector
  * Expected values:
- * - @ref `TIMx_CHANNEL_CCS_OUTPUT`: Channel configured as output compare
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx`: Input capture mapped to direct TI input
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx_1`: Input capture mapped to indirect TI input
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TRC`: Input capture mapped to TRC
+ * - @ref TIMx_CHANNEL_CCS_OUTPUT : Channel configured as output compare
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TIx : Input capture mapped to direct TI input
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TIx_1 : Input capture mapped to indirect TI input
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TRC : Input capture mapped to TRC
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Capture/compare selection was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCaptureCompareSelection is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or raw `CCxS` is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Capture/compare selection was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCaptureCompareSelection is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or raw `CCxS` is not decodable
  * @note Caller must pass the `CCMR1` image for channels 1/2 and the `CCMR2` image for channels 3/4.
  */
 driver_status_t Codec_TIM_ExtractChannelSelection
@@ -731,20 +731,20 @@ driver_status_t Codec_TIM_ExtractChannelSelection
  * @param[in,out] pCcmrRegImage Caller-owned `CCMR1` or `CCMR2` image to update in place
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Stage channel 1 selection
- * - @ref `TIMx_CHANNEL_2`: Stage channel 2 selection
- * - @ref `TIMx_CHANNEL_3`: Stage channel 3 selection
- * - @ref `TIMx_CHANNEL_4`: Stage channel 4 selection
+ * - @ref TIMx_CHANNEL_1 : Stage channel 1 selection
+ * - @ref TIMx_CHANNEL_2 : Stage channel 2 selection
+ * - @ref TIMx_CHANNEL_3 : Stage channel 3 selection
+ * - @ref TIMx_CHANNEL_4 : Stage channel 4 selection
  * @param[in] captureCompareSelection Timer `CCxS` selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_CCS_OUTPUT`: Channel configured as output compare
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx`: Input capture mapped to direct TI input
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TIx_1`: Input capture mapped to indirect TI input
- * - @ref `TIMx_CHANNEL_CCS_INPUT_TRC`: Input capture mapped to TRC
+ * - @ref TIMx_CHANNEL_CCS_OUTPUT : Channel configured as output compare
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TIx : Input capture mapped to direct TI input
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TIx_1 : Input capture mapped to indirect TI input
+ * - @ref TIMx_CHANNEL_CCS_INPUT_TRC : Input capture mapped to TRC
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Capture/compare selection was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCcmrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or @p captureCompareSelection cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Capture/compare selection was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCcmrRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or @p captureCompareSelection cannot be encoded
  * @note Caller must pass the `CCMR1` image for channels 1/2 and the `CCMR2` image for channels 3/4.
  */
 driver_status_t Codec_TIM_StageChannelSelection
@@ -763,36 +763,36 @@ driver_status_t Codec_TIM_StageChannelSelection
  * @param[in] ccmrRegImage Caller-owned `CCMR1` or `CCMR2` image
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Extract channel 1 output-compare configuration
- * - @ref `TIMx_CHANNEL_2`: Extract channel 2 output-compare configuration
- * - @ref `TIMx_CHANNEL_3`: Extract channel 3 output-compare configuration
- * - @ref `TIMx_CHANNEL_4`: Extract channel 4 output-compare configuration
+ * - @ref TIMx_CHANNEL_1 : Extract channel 1 output-compare configuration
+ * - @ref TIMx_CHANNEL_2 : Extract channel 2 output-compare configuration
+ * - @ref TIMx_CHANNEL_3 : Extract channel 3 output-compare configuration
+ * - @ref TIMx_CHANNEL_4 : Extract channel 4 output-compare configuration
  * @param[out] pOutputCompareClear Optional destination for decoded output-compare clear selector
  * Expected values when non-`NULL`:
- * - @ref `TIMx_CHANNEL_OC_CLEAR_DISABLE`: Output-compare clear is disabled
- * - @ref `TIMx_CHANNEL_OC_CLEAR_ENABLE`: Output-compare clear is enabled
+ * - @ref TIMx_CHANNEL_OC_CLEAR_DISABLE : Output-compare clear is disabled
+ * - @ref TIMx_CHANNEL_OC_CLEAR_ENABLE : Output-compare clear is enabled
  * @param[out] pOutputCompareMode Optional destination for decoded output-compare mode selector
  * Expected values when non-`NULL`:
- * - @ref `TIMx_CHANNEL_MODE_FREEZE`: Freeze output compare output
- * - @ref `TIMx_CHANNEL_MODE_SET_CH`: Set output active on match
- * - @ref `TIMx_CHANNEL_MODE_RESET_CH`: Reset output inactive on match
- * - @ref `TIMx_CHANNEL_MODE_TOGGLE`: Toggle output on match
- * - @ref `TIMx_CHANNEL_MODE_FORCE_RESET`: Force output inactive
- * - @ref `TIMx_CHANNEL_MODE_FORCE_SET`: Force output active
- * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
- * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
+ * - @ref TIMx_CHANNEL_MODE_FREEZE : Freeze output compare output
+ * - @ref TIMx_CHANNEL_MODE_SET_CH : Set output active on match
+ * - @ref TIMx_CHANNEL_MODE_RESET_CH : Reset output inactive on match
+ * - @ref TIMx_CHANNEL_MODE_TOGGLE : Toggle output on match
+ * - @ref TIMx_CHANNEL_MODE_FORCE_RESET : Force output inactive
+ * - @ref TIMx_CHANNEL_MODE_FORCE_SET : Force output active
+ * - @ref TIMx_CHANNEL_MODE_PWM1 : PWM mode 1
+ * - @ref TIMx_CHANNEL_MODE_PWM2 : PWM mode 2
  * @param[out] pOutputComparePreload Optional destination for decoded output-compare preload selector
  * Expected values when non-`NULL`:
- * - @ref `TIMx_CHANNEL_OC_PRELOAD_DISABLE`: Output-compare preload is disabled
- * - @ref `TIMx_CHANNEL_OC_PRELOAD_ENABLE`: Output-compare preload is enabled
+ * - @ref TIMx_CHANNEL_OC_PRELOAD_DISABLE : Output-compare preload is disabled
+ * - @ref TIMx_CHANNEL_OC_PRELOAD_ENABLE : Output-compare preload is enabled
  * @param[out] pOutputCompareFast Optional destination for decoded output-compare fast selector
  * Expected values when non-`NULL`:
- * - @ref `TIMx_CHANNEL_OC_FAST_DISABLE`: Output-compare fast mode is disabled
- * - @ref `TIMx_CHANNEL_OC_FAST_ENABLE`: Output-compare fast mode is enabled
+ * - @ref TIMx_CHANNEL_OC_FAST_DISABLE : Output-compare fast mode is disabled
+ * - @ref TIMx_CHANNEL_OC_FAST_ENABLE : Output-compare fast mode is enabled
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output-compare configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: All output pointers are `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel, `CCxS` is not output mode, or a raw output-compare field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Output-compare configuration was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR All output pointers are `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel, `CCxS` is not output mode, or a raw output-compare field is not decodable
  * @note This API decodes only output-compare interpretation. Input-capture
  * interpretation requires a separate codec surface.
  */
@@ -811,37 +811,37 @@ driver_status_t Codec_TIM_ExtractOutputCompareConfig
  * @param[in,out] pCcmrRegImage Caller-owned `CCMR1` or `CCMR2` image to update in place
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Stage channel 1 output-compare configuration
- * - @ref `TIMx_CHANNEL_2`: Stage channel 2 output-compare configuration
- * - @ref `TIMx_CHANNEL_3`: Stage channel 3 output-compare configuration
- * - @ref `TIMx_CHANNEL_4`: Stage channel 4 output-compare configuration
+ * - @ref TIMx_CHANNEL_1 : Stage channel 1 output-compare configuration
+ * - @ref TIMx_CHANNEL_2 : Stage channel 2 output-compare configuration
+ * - @ref TIMx_CHANNEL_3 : Stage channel 3 output-compare configuration
+ * - @ref TIMx_CHANNEL_4 : Stage channel 4 output-compare configuration
  * @param[in] outputCompareClear Timer output-compare clear selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_OC_CLEAR_DISABLE`: Disable output-compare clear
- * - @ref `TIMx_CHANNEL_OC_CLEAR_ENABLE`: Enable output-compare clear
+ * - @ref TIMx_CHANNEL_OC_CLEAR_DISABLE : Disable output-compare clear
+ * - @ref TIMx_CHANNEL_OC_CLEAR_ENABLE : Enable output-compare clear
  * @param[in] outputCompareMode Timer output-compare mode selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_MODE_FREEZE`: Freeze output compare output
- * - @ref `TIMx_CHANNEL_MODE_SET_CH`: Set output active on match
- * - @ref `TIMx_CHANNEL_MODE_RESET_CH`: Reset output inactive on match
- * - @ref `TIMx_CHANNEL_MODE_TOGGLE`: Toggle output on match
- * - @ref `TIMx_CHANNEL_MODE_FORCE_RESET`: Force output inactive
- * - @ref `TIMx_CHANNEL_MODE_FORCE_SET`: Force output active
- * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
- * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
+ * - @ref TIMx_CHANNEL_MODE_FREEZE : Freeze output compare output
+ * - @ref TIMx_CHANNEL_MODE_SET_CH : Set output active on match
+ * - @ref TIMx_CHANNEL_MODE_RESET_CH : Reset output inactive on match
+ * - @ref TIMx_CHANNEL_MODE_TOGGLE : Toggle output on match
+ * - @ref TIMx_CHANNEL_MODE_FORCE_RESET : Force output inactive
+ * - @ref TIMx_CHANNEL_MODE_FORCE_SET : Force output active
+ * - @ref TIMx_CHANNEL_MODE_PWM1 : PWM mode 1
+ * - @ref TIMx_CHANNEL_MODE_PWM2 : PWM mode 2
  * @param[in] outputComparePreload Timer output-compare preload selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_OC_PRELOAD_DISABLE`: Disable output-compare preload
- * - @ref `TIMx_CHANNEL_OC_PRELOAD_ENABLE`: Enable output-compare preload
+ * - @ref TIMx_CHANNEL_OC_PRELOAD_DISABLE : Disable output-compare preload
+ * - @ref TIMx_CHANNEL_OC_PRELOAD_ENABLE : Enable output-compare preload
  * @param[in] outputCompareFast Timer output-compare fast selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_OC_FAST_DISABLE`: Disable output-compare fast mode
- * - @ref `TIMx_CHANNEL_OC_FAST_ENABLE`: Enable output-compare fast mode
+ * - @ref TIMx_CHANNEL_OC_FAST_DISABLE : Disable output-compare fast mode
+ * - @ref TIMx_CHANNEL_OC_FAST_ENABLE : Enable output-compare fast mode
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output-compare configuration was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCcmrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or one or more selectors cannot be encoded
- * @note This API also stages `CCxS` to @ref `TIMx_CHANNEL_CCS_OUTPUT`.
+ * @retval DRIVER_STATUS_SUCCESS Output-compare configuration was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCcmrRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or one or more selectors cannot be encoded
+ * @note This API also stages `CCxS` to @ref TIMx_CHANNEL_CCS_OUTPUT.
  */
 driver_status_t Codec_TIM_StageOutputCompareConfig
 (
@@ -866,14 +866,14 @@ driver_status_t Codec_TIM_StageOutputCompareConfig
  * @param[in] ccerRegImage Caller-owned `CCER` image
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Extract channel 1 enable state
- * - @ref `TIMx_CHANNEL_2`: Extract channel 2 enable state
- * - @ref `TIMx_CHANNEL_3`: Extract channel 3 enable state
- * - @ref `TIMx_CHANNEL_4`: Extract channel 4 enable state
+ * - @ref TIMx_CHANNEL_1 : Extract channel 1 enable state
+ * - @ref TIMx_CHANNEL_2 : Extract channel 2 enable state
+ * - @ref TIMx_CHANNEL_3 : Extract channel 3 enable state
+ * - @ref TIMx_CHANNEL_4 : Extract channel 4 enable state
  * @returns Decoded channel enable state
- * @retval - @ref `DRIVER_STATUS_OFF`: Channel output is disabled
- * @retval - @ref `DRIVER_STATUS_ON`: Channel output is enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel
+ * @retval DRIVER_STATUS_OFF Channel output is disabled
+ * @retval DRIVER_STATUS_ON Channel output is enabled
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel
  */
 driver_status_t Codec_TIM_ExtractChannelEnableState
 (
@@ -886,18 +886,18 @@ driver_status_t Codec_TIM_ExtractChannelEnableState
  * @param[in,out] pCcerRegImage Caller-owned `CCER` image to update in place
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Stage channel 1 enable state
- * - @ref `TIMx_CHANNEL_2`: Stage channel 2 enable state
- * - @ref `TIMx_CHANNEL_3`: Stage channel 3 enable state
- * - @ref `TIMx_CHANNEL_4`: Stage channel 4 enable state
+ * - @ref TIMx_CHANNEL_1 : Stage channel 1 enable state
+ * - @ref TIMx_CHANNEL_2 : Stage channel 2 enable state
+ * - @ref TIMx_CHANNEL_3 : Stage channel 3 enable state
+ * - @ref TIMx_CHANNEL_4 : Stage channel 4 enable state
  * @param[in] channelState Requested channel enable state
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Clear `CCxE`
- * - @ref `DRIVER_STATUS_ON`: Set `CCxE`
+ * - @ref DRIVER_STATUS_OFF : Clear `CCxE`
+ * - @ref DRIVER_STATUS_ON : Set `CCxE`
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Channel enable state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCcerRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or @p channelState is not an accepted state
+ * @retval DRIVER_STATUS_SUCCESS Channel enable state was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCcerRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or @p channelState is not an accepted state
  */
 driver_status_t Codec_TIM_StageChannelEnableState
 (
@@ -915,18 +915,18 @@ driver_status_t Codec_TIM_StageChannelEnableState
  * @param[in] ccerRegImage Caller-owned `CCER` image
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Extract channel 1 polarity
- * - @ref `TIMx_CHANNEL_2`: Extract channel 2 polarity
- * - @ref `TIMx_CHANNEL_3`: Extract channel 3 polarity
- * - @ref `TIMx_CHANNEL_4`: Extract channel 4 polarity
+ * - @ref TIMx_CHANNEL_1 : Extract channel 1 polarity
+ * - @ref TIMx_CHANNEL_2 : Extract channel 2 polarity
+ * - @ref TIMx_CHANNEL_3 : Extract channel 3 polarity
+ * - @ref TIMx_CHANNEL_4 : Extract channel 4 polarity
  * @param[out] pPolarity Destination for decoded channel polarity selector
  * Expected values:
- * - @ref `TIMx_CHANNEL_POLARITY_HIGH`: Active-high polarity
- * - @ref `TIMx_CHANNEL_POLARITY_LOW`: Active-low polarity
+ * - @ref TIMx_CHANNEL_POLARITY_HIGH : Active-high polarity
+ * - @ref TIMx_CHANNEL_POLARITY_LOW : Active-low polarity
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Channel polarity selector was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPolarity is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or raw polarity field is not decodable
+ * @retval DRIVER_STATUS_SUCCESS Channel polarity selector was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPolarity is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or raw polarity field is not decodable
  */
 driver_status_t Codec_TIM_ExtractChannelPolarity
 (
@@ -940,18 +940,18 @@ driver_status_t Codec_TIM_ExtractChannelPolarity
  * @param[in,out] pCcerRegImage Caller-owned `CCER` image to update in place
  * @param[in] channel Timer single-channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Stage channel 1 polarity
- * - @ref `TIMx_CHANNEL_2`: Stage channel 2 polarity
- * - @ref `TIMx_CHANNEL_3`: Stage channel 3 polarity
- * - @ref `TIMx_CHANNEL_4`: Stage channel 4 polarity
+ * - @ref TIMx_CHANNEL_1 : Stage channel 1 polarity
+ * - @ref TIMx_CHANNEL_2 : Stage channel 2 polarity
+ * - @ref TIMx_CHANNEL_3 : Stage channel 3 polarity
+ * - @ref TIMx_CHANNEL_4 : Stage channel 4 polarity
  * @param[in] polarity Timer channel polarity selector
  * Accepted values:
- * - @ref `TIMx_CHANNEL_POLARITY_HIGH`: Active-high polarity
- * - @ref `TIMx_CHANNEL_POLARITY_LOW`: Active-low polarity
+ * - @ref TIMx_CHANNEL_POLARITY_HIGH : Active-high polarity
+ * - @ref TIMx_CHANNEL_POLARITY_LOW : Active-low polarity
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Channel polarity selector was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCcerRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel or @p polarity cannot be encoded
+ * @retval DRIVER_STATUS_SUCCESS Channel polarity selector was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCcerRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel or @p polarity cannot be encoded
  */
 driver_status_t Codec_TIM_StageChannelPolarity
 (
@@ -973,16 +973,16 @@ driver_status_t Codec_TIM_StageChannelPolarity
  * @param[in] dierRegImage Caller-owned `DIER` image
  * @param[out] pIrqMask Destination for enabled IRQ source mask
  * Expected values:
- * - @ref `TIMx_IRQ_OVF_UVF`: Update overflow/underflow IRQ source is enabled
- * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Channel 1 IRQ source is enabled
- * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Channel 2 IRQ source is enabled
- * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Channel 3 IRQ source is enabled
- * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Channel 4 IRQ source is enabled
- * - @ref `TIMx_IRQ_ALL`: All supported IRQ sources are enabled
+ * - @ref TIMx_IRQ_OVF_UVF : Update overflow/underflow IRQ source is enabled
+ * - @ref TIMx_IRQ_OUT_CMP_CH1 : Channel 1 IRQ source is enabled
+ * - @ref TIMx_IRQ_OUT_CMP_CH2 : Channel 2 IRQ source is enabled
+ * - @ref TIMx_IRQ_OUT_CMP_CH3 : Channel 3 IRQ source is enabled
+ * - @ref TIMx_IRQ_OUT_CMP_CH4 : Channel 4 IRQ source is enabled
+ * - @ref TIMx_IRQ_ALL : All supported IRQ sources are enabled
  * - `0x00U`: No supported IRQ sources are enabled
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ enable mask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIrqMask is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS IRQ enable mask was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pIrqMask is `NULL`
  */
 driver_status_t Codec_TIM_ExtractIRQEnableMask
 (
@@ -995,20 +995,20 @@ driver_status_t Codec_TIM_ExtractIRQEnableMask
  * @param[in,out] pDierRegImage Caller-owned `DIER` image to update in place
  * @param[in] irqMask Timer IRQ source mask to modify
  * Accepted values:
- * - @ref `TIMx_IRQ_OVF_UVF`: Update overflow/underflow IRQ source
- * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Channel 1 output-compare/input-capture IRQ source
- * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Channel 2 output-compare/input-capture IRQ source
- * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Channel 3 output-compare/input-capture IRQ source
- * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Channel 4 output-compare/input-capture IRQ source
- * - @ref `TIMx_IRQ_ALL`: All supported IRQ sources
+ * - @ref TIMx_IRQ_OVF_UVF : Update overflow/underflow IRQ source
+ * - @ref TIMx_IRQ_OUT_CMP_CH1 : Channel 1 output-compare/input-capture IRQ source
+ * - @ref TIMx_IRQ_OUT_CMP_CH2 : Channel 2 output-compare/input-capture IRQ source
+ * - @ref TIMx_IRQ_OUT_CMP_CH3 : Channel 3 output-compare/input-capture IRQ source
+ * - @ref TIMx_IRQ_OUT_CMP_CH4 : Channel 4 output-compare/input-capture IRQ source
+ * - @ref TIMx_IRQ_ALL : All supported IRQ sources
  * @param[in] irqEnable Requested IRQ enable selector
  * Accepted values:
- * - @ref `TIMx_IRQ_DISABLE`: Disable selected IRQ sources
- * - @ref `TIMx_IRQ_ENABLE`: Enable selected IRQ sources
+ * - @ref TIMx_IRQ_DISABLE : Disable selected IRQ sources
+ * - @ref TIMx_IRQ_ENABLE : Enable selected IRQ sources
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ enable state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDierRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p irqMask or @p irqEnable is invalid
+ * @retval DRIVER_STATUS_SUCCESS IRQ enable state was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pDierRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p irqMask or @p irqEnable is invalid
  * @note NVIC enable/disable policy belongs to the Timer driver layer.
  */
 driver_status_t Codec_TIM_StageIRQEnableMask
@@ -1027,16 +1027,16 @@ driver_status_t Codec_TIM_StageIRQEnableMask
  * @param[in] dierRegImage Caller-owned `DIER` image
  * @param[out] pDmaMask Destination for enabled DMA source mask
  * Expected values:
- * - @ref `TIMx_DMA_UPDATE`: Update DMA source is enabled
- * - @ref `TIMx_DMA_CC1DE`: Channel 1 capture/compare DMA source is enabled
- * - @ref `TIMx_DMA_CC2DE`: Channel 2 capture/compare DMA source is enabled
- * - @ref `TIMx_DMA_CC3DE`: Channel 3 capture/compare DMA source is enabled
- * - @ref `TIMx_DMA_CC4DE`: Channel 4 capture/compare DMA source is enabled
- * - @ref `TIMx_DMA_ALL`: All supported DMA sources are enabled
+ * - @ref TIMx_DMA_UPDATE : Update DMA source is enabled
+ * - @ref TIMx_DMA_CC1DE : Channel 1 capture/compare DMA source is enabled
+ * - @ref TIMx_DMA_CC2DE : Channel 2 capture/compare DMA source is enabled
+ * - @ref TIMx_DMA_CC3DE : Channel 3 capture/compare DMA source is enabled
+ * - @ref TIMx_DMA_CC4DE : Channel 4 capture/compare DMA source is enabled
+ * - @ref TIMx_DMA_ALL : All supported DMA sources are enabled
  * - `0x00U`: No supported DMA sources are enabled
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: DMA enable mask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDmaMask is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS DMA enable mask was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pDmaMask is `NULL`
  */
 driver_status_t Codec_TIM_ExtractDMAEnableMask
 (
@@ -1049,20 +1049,20 @@ driver_status_t Codec_TIM_ExtractDMAEnableMask
  * @param[in,out] pDierRegImage Caller-owned `DIER` image to update in place
  * @param[in] dmaMask Timer DMA source mask to modify
  * Accepted values:
- * - @ref `TIMx_DMA_UPDATE`: Update DMA source
- * - @ref `TIMx_DMA_CC1DE`: Channel 1 capture/compare DMA source
- * - @ref `TIMx_DMA_CC2DE`: Channel 2 capture/compare DMA source
- * - @ref `TIMx_DMA_CC3DE`: Channel 3 capture/compare DMA source
- * - @ref `TIMx_DMA_CC4DE`: Channel 4 capture/compare DMA source
- * - @ref `TIMx_DMA_ALL`: All supported DMA sources
+ * - @ref TIMx_DMA_UPDATE : Update DMA source
+ * - @ref TIMx_DMA_CC1DE : Channel 1 capture/compare DMA source
+ * - @ref TIMx_DMA_CC2DE : Channel 2 capture/compare DMA source
+ * - @ref TIMx_DMA_CC3DE : Channel 3 capture/compare DMA source
+ * - @ref TIMx_DMA_CC4DE : Channel 4 capture/compare DMA source
+ * - @ref TIMx_DMA_ALL : All supported DMA sources
  * @param[in] dmaState Requested DMA enable state
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Disable selected DMA sources
- * - @ref `DRIVER_STATUS_ON`: Enable selected DMA sources
+ * - @ref DRIVER_STATUS_OFF : Disable selected DMA sources
+ * - @ref DRIVER_STATUS_ON : Enable selected DMA sources
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: DMA enable state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDierRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p dmaMask or @p dmaState is invalid
+ * @retval DRIVER_STATUS_SUCCESS DMA enable state was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pDierRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p dmaMask or @p dmaState is invalid
  */
 driver_status_t Codec_TIM_StageDMAEnableMask
 (
@@ -1084,16 +1084,16 @@ driver_status_t Codec_TIM_StageDMAEnableMask
  * @param[in] srRegImage Caller-owned `SR` image
  * @param[out] pIrqMask Destination for pending IRQ flag mask
  * Expected values:
- * - @ref `TIMx_IRQ_OVF_UVF`: Update overflow/underflow IRQ flag is pending
- * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Channel 1 IRQ flag is pending
- * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Channel 2 IRQ flag is pending
- * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Channel 3 IRQ flag is pending
- * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Channel 4 IRQ flag is pending
- * - @ref `TIMx_IRQ_ALL`: All supported IRQ flags are pending
+ * - @ref TIMx_IRQ_OVF_UVF : Update overflow/underflow IRQ flag is pending
+ * - @ref TIMx_IRQ_OUT_CMP_CH1 : Channel 1 IRQ flag is pending
+ * - @ref TIMx_IRQ_OUT_CMP_CH2 : Channel 2 IRQ flag is pending
+ * - @ref TIMx_IRQ_OUT_CMP_CH3 : Channel 3 IRQ flag is pending
+ * - @ref TIMx_IRQ_OUT_CMP_CH4 : Channel 4 IRQ flag is pending
+ * - @ref TIMx_IRQ_ALL : All supported IRQ flags are pending
  * - `0x00U`: No supported IRQ flags are pending
  * @returns Extraction status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ flag mask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIrqMask is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS IRQ flag mask was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pIrqMask is `NULL`
  */
 driver_status_t Codec_TIM_ExtractIRQFlagMask
 (
@@ -1106,16 +1106,16 @@ driver_status_t Codec_TIM_ExtractIRQFlagMask
  * @param[in,out] pSrRegImage Caller-owned `SR` image to update in place
  * @param[in] irqMask Timer IRQ source mask to acknowledge
  * Accepted values:
- * - @ref `TIMx_IRQ_OVF_UVF`: Acknowledge update overflow/underflow IRQ flag
- * - @ref `TIMx_IRQ_OUT_CMP_CH1`: Acknowledge channel 1 output-compare/input-capture IRQ flag
- * - @ref `TIMx_IRQ_OUT_CMP_CH2`: Acknowledge channel 2 output-compare/input-capture IRQ flag
- * - @ref `TIMx_IRQ_OUT_CMP_CH3`: Acknowledge channel 3 output-compare/input-capture IRQ flag
- * - @ref `TIMx_IRQ_OUT_CMP_CH4`: Acknowledge channel 4 output-compare/input-capture IRQ flag
- * - @ref `TIMx_IRQ_ALL`: Acknowledge all supported IRQ flags
+ * - @ref TIMx_IRQ_OVF_UVF : Acknowledge update overflow/underflow IRQ flag
+ * - @ref TIMx_IRQ_OUT_CMP_CH1 : Acknowledge channel 1 output-compare/input-capture IRQ flag
+ * - @ref TIMx_IRQ_OUT_CMP_CH2 : Acknowledge channel 2 output-compare/input-capture IRQ flag
+ * - @ref TIMx_IRQ_OUT_CMP_CH3 : Acknowledge channel 3 output-compare/input-capture IRQ flag
+ * - @ref TIMx_IRQ_OUT_CMP_CH4 : Acknowledge channel 4 output-compare/input-capture IRQ flag
+ * - @ref TIMx_IRQ_ALL : Acknowledge all supported IRQ flags
  * @returns Staging status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ acknowledge image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p irqMask is invalid
+ * @retval DRIVER_STATUS_SUCCESS IRQ acknowledge image was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pSrRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p irqMask is invalid
  * @note STM32F1 Timer status flags use write-`0`-to-clear semantics. This API
  * clears only selected supported IRQ flags and stages write-`1` preserve bits
  * for other supported status flags when an acknowledge write is needed.

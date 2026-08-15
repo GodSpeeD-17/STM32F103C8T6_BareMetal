@@ -120,6 +120,8 @@ Expected accessors:
 - `LL_TIM_REG(TIMx, REG)` built on `REGOPS_REG`.
 - Generic `LL_TIM_ReadRegister()` and `LL_TIM_WriteRegister()` helpers using
   `RegOps_Read()` and `RegOps_Write()`.
+- Generic compare-and-write mechanics provided by `RegOps_WriteIfChanged()`;
+  Timer retains instance validation, register selection, and write sequencing.
 - Named register readers/writers for `CR1`, `CR2`, `SMCR`, `DIER`, `SR`,
   `EGR`, `CCMR1`, `CCMR2`, `CCER`, `CNT`, `PSC`, `ARR`, `CCR1` through `CCR4`,
   `DCR`, and `DMAR` as needed.
@@ -294,10 +296,12 @@ disabled. Users explicitly start it with
 `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
 
 `TIM_Config1MHz()` is a narrow header-local static inline preset wrapper over
-`TIM_ConfigTickFrequency()`. The latter derives the current APB1 Timer kernel
-clock, including the STM32 APB prescaler x2 rule, and accepts only exact tick
-frequencies representable by the 16-bit `PSC`. No fixed 72 MHz assumption is
-made.
+`TIM_ConfigTickFrequency()`. The latter resolves the Timer instance through a
+static `rcc_bus_t` LUT, derives the kernel clock from the mapped RCC bus, applies
+the STM32 APB prescaler x2 rule, and accepts only exact tick frequencies
+representable by the 16-bit `PSC`. TIM2-TIM4 currently map to APB1; adding a
+Timer on another APB bus requires a new LUT entry rather than clock-derivation
+logic changes. No fixed 72 MHz assumption is made.
 
 `TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that has
 already been configured with `TIM_Config1MHz()`. It does not create a general
@@ -393,7 +397,7 @@ oriented, for example:
 Use explicit `@retval` entries that name the relevant parameter with backticks:
 
 ```c
-@retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `clockState` was invalid.
+@retval DRIVER_STATUS_ERROR_INVALID_ARG @p TIMx / @p clockState was invalid.
 ```
 
 Source-file overview Doxygen may use `@section` blocks for scope, field
@@ -452,7 +456,8 @@ Completed:
 - IRQ enable, pending-mask, and acknowledge APIs coordinate DIER/SR codec
   mapping with the per-instance NVIC line.
 - `timer.c` orchestrates first-pass config-owned fields through validation, LL,
-  codec staging, dirty writes, and `driver_status_t` status handling.
+  codec staging, register-specific dirty-write decisions, and `driver_status_t`
+  status handling; RegOps owns the generic compare/write mechanism.
 - `timer.c` public implementation sections now mirror `timer.h` banner and
   sub-banner order, and the file overview uses Doxygen `@section` blocks for
   scope, field ownership, and source layout.

@@ -59,7 +59,8 @@ item, verify it, commit it, then move to the next item.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
 - [x] `timer.h` public APIs now use function-specific `@returns @ref driver_status_t "... - Operation Status"` labels and parameter-specific `@retval` wording.
 - [x] `TIM_Config()` now commits `PSC`/`ARR` with `UDIS=0`, `URS=1`, and `EGR.UG`, restoring requested `CR1`, `CNT`, and entry NVIC state.
-- [x] `TIM_Config1MHz()` derives the prescaler from the live APB1 Timer kernel clock through `TIM_ConfigTickFrequency()`.
+- [x] `TIM_Config1MHz()` derives the prescaler from the live instance-mapped Timer kernel clock through `TIM_ConfigTickFrequency()`.
+- [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
 - [x] `TIM_DelayUs()` verifies an exact 1 MHz tick and uses bounded polling with cleanup on timeout.
 - [x] `TIM_DelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
 - [x] `timer.c` public implementation order now mirrors `timer.h`, including conjugate getter/setter sub-banners and final blocking-delay helpers.
@@ -97,7 +98,9 @@ item, verify it, commit it, then move to the next item.
 - Use `reg`, `reg_field_t`, `driver_status_t`, and existing `RegOps_*` helpers consistently.
 - Every meaningful Timer codec Stage API should have a conjugate Extract API.
 - LL functions should not validate, encode, batch, or decide mode/policy.
-- Driver functions should own validation, sequencing, batching, dirty writes, and public status handling.
+- Driver functions should own validation, sequencing, batching,
+  register-specific dirty-write decisions, and public status handling;
+  peripheral-independent compare/write mechanics belong to RegOps.
 - Only `TIM_SetClockState()` owns RCC APB1 clock-gate mutation as a direct public state API.
 - `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally because they are full lifecycle orchestration APIs.
 - Clock-state APIs validate Timer instance/state and directly read or mutate the RCC APB1 clock gate; they do not require that gate to already be enabled.

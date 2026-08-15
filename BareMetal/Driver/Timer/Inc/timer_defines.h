@@ -34,7 +34,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup TIM Timer Driver
+ * @defgroup TIM General-Purpose Timer (TIM)
  * @brief STM32F1 general-purpose Timer driver stack
  */
 
@@ -67,11 +67,11 @@ extern "C" {
 
 /** @brief First supported general-purpose Timer instance index @def TIM_INSTANCE_INDEX_FIRST */
 #define TIM_INSTANCE_INDEX_FIRST						((tim_instance_index_t) 0x00U)
-/** @brief `TIM2` instance index @def TIM_INSTANCE_INDEX_TIM2 */
+/** @brief Timer 2 instance index @def TIM_INSTANCE_INDEX_TIM2 */
 #define TIM_INSTANCE_INDEX_TIM2							((tim_instance_index_t) 0x00U)
-/** @brief `TIM3` instance index @def TIM_INSTANCE_INDEX_TIM3 */
+/** @brief Timer 3 instance index @def TIM_INSTANCE_INDEX_TIM3 */
 #define TIM_INSTANCE_INDEX_TIM3							((tim_instance_index_t) 0x01U)
-/** @brief `TIM4` instance index @def TIM_INSTANCE_INDEX_TIM4 */
+/** @brief Timer 4 instance index @def TIM_INSTANCE_INDEX_TIM4 */
 #define TIM_INSTANCE_INDEX_TIM4							((tim_instance_index_t) 0x02U)
 /** @brief Last supported general-purpose Timer instance index @def TIM_INSTANCE_INDEX_LAST */
 #define TIM_INSTANCE_INDEX_LAST							TIM_INSTANCE_INDEX_TIM4
@@ -84,8 +84,8 @@ extern "C" {
  * @brief Checks whether a Timer instance index is supported by this driver
  * @param[in]	instanceIndex	Timer instance index to check
  * @returns Timer instance-index validity status
- * @retval - `0x00U`: @p instanceIndex is outside the supported range
- * @retval - `0x01U`: @p instanceIndex is supported
+ * @retval 0x00U @p instanceIndex is outside the supported range
+ * @retval 0x01U @p instanceIndex is supported
  * @def TIM_INSTANCE_INDEX_IS_VALID
  */
 #define TIM_INSTANCE_INDEX_IS_VALID(instanceIndex)		\
@@ -95,12 +95,12 @@ extern "C" {
  * @brief Checks whether a Timer peripheral instance is supported by this driver
  * @param[in]	TIMx	Timer peripheral instance
  * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @returns Timer instance validity status
- * @retval - `0x00U`: @p TIMx is not supported by this Timer driver pass
- * @retval - `0x01U`: @p TIMx is a supported general-purpose Timer instance
+ * @retval 0x00U @p TIMx is not supported by this Timer driver pass
+ * @retval 0x01U @p TIMx is a supported general-purpose Timer instance
  * @def TIM_INSTANCE_IS_VALID
  */
 #define TIM_INSTANCE_IS_VALID(TIMx)								\
@@ -114,21 +114,21 @@ extern "C" {
  * @brief Converts a supported Timer instance to a zero-based instance index
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
- * - @ref `TIM2`
- * - @ref `TIM3`
- * - @ref `TIM4`
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @returns Timer instance index
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM2`: @p TIMx is @ref `TIM2`
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM3`: @p TIMx is @ref `TIM3`
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM4`: @p TIMx is @ref `TIM4`
- * @retval - @ref `TIM_INSTANCE_INDEX_INVALID`: @p TIMx is not supported
+ * @retval TIM_INSTANCE_INDEX_TIM2 @p TIMx is `TIM2`.
+ * @retval TIM_INSTANCE_INDEX_TIM3 @p TIMx is `TIM3`.
+ * @retval TIM_INSTANCE_INDEX_TIM4 @p TIMx is `TIM4`.
+ * @retval TIM_INSTANCE_INDEX_INVALID @p TIMx is not supported.
  */
 __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef* const TIMx)
 {
 	// Local Variables
 	tim_instance_index_t instanceIndex = TIM_INSTANCE_INDEX_INVALID;
 	const uintptr_t timerAddress = (uintptr_t) TIMx;
-	//! Determine Timer Base Address and Instance Index
+	//! Translate the peripheral base address without dereferencing the instance.
 	switch (timerAddress)
 	{
 		case TIM2_BASE_ADDRESS:
@@ -206,8 +206,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel index is inside the supported channel-index range
  * @param[in]	channelIndex	Zero-based Timer channel index to check
  * @returns Channel-index validity status
- * @retval - `0x00U`: @p channelIndex is outside `0..3`
- * @retval - `0x01U`: @p channelIndex is inside `0..3`
+ * @retval 0x00U @p channelIndex is outside `0..3`
+ * @retval 0x01U @p channelIndex is inside `0..3`
  * @def TIM_CHANNEL_INDEX_IS_VALID
  */
 #define TIM_CHANNEL_INDEX_IS_VALID(channelIndex)	\
@@ -217,7 +217,7 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Converts a zero-based Timer channel index to a single-channel mask
  * @param[in]	channelIndex	Zero-based Timer channel index
  * @returns Timer channel mask generated from @p channelIndex
- * @retval - @ref `TIMx_CHANNEL_1` through @ref `TIMx_CHANNEL_4`: @p channelIndex is valid
+ * @retval TIMx_CHANNEL_1-TIMx_CHANNEL_4 @p channelIndex is valid.
  * @def TIM_CHANNEL_INDEX_TO_MASK
  */
 #define TIM_CHANNEL_INDEX_TO_MASK(channelIndex)		((tim_channel_t) REG_BIT_MASK(channelIndex))
@@ -239,8 +239,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask selects at least one channel
  * @param[in]	channelMask	Timer channel mask to check
  * @returns Channel-selection presence status
- * @retval - `0x00U`: @p channelMask selects no channel
- * @retval - `0x01U`: @p channelMask selects at least one channel
+ * @retval 0x00U @p channelMask selects no channel
+ * @retval 0x01U @p channelMask selects at least one channel
  * @def TIM_CHANNEL_MASK_HAS_ANY_CHANNEL
  */
 #define TIM_CHANNEL_MASK_HAS_ANY_CHANNEL(channelMask)	\
@@ -250,8 +250,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask contains only supported channel bits
  * @param[in]	channelMask	Timer channel mask to check
  * @returns Supported-range status
- * @retval - `0x00U`: @p channelMask contains bits outside @ref `TIMx_CHANNEL_ALL`
- * @retval - `0x01U`: @p channelMask contains only supported channel bits
+ * @retval 0x00U @p channelMask contains bits outside @ref TIMx_CHANNEL_ALL
+ * @retval 0x01U @p channelMask contains only supported channel bits
  * @def TIM_CHANNEL_MASK_HAS_ONLY_VALID_CHANNELS
  */
 #define TIM_CHANNEL_MASK_HAS_ONLY_VALID_CHANNELS(channelMask)	\
@@ -261,8 +261,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask is valid and non-empty
  * @param[in]	channelMask	Timer channel mask to check
  * @returns Channel-mask validity status
- * @retval - `0x00U`: @p channelMask is empty or contains unsupported bits
- * @retval - `0x01U`: @p channelMask selects one or more supported channels
+ * @retval 0x00U @p channelMask is empty or contains unsupported bits
+ * @retval 0x01U @p channelMask selects one or more supported channels
  * @def TIM_CHANNEL_MASK_IS_VALID
  */
 #define TIM_CHANNEL_MASK_IS_VALID(channelMask)		\
@@ -272,8 +272,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask has zero or one bit set
  * @param[in]	channelMask	Timer channel mask to check
  * @returns At-most-one-bit status
- * @retval - `0x00U`: @p channelMask contains multiple selected channels
- * @retval - `0x01U`: @p channelMask is zero or contains exactly one channel
+ * @retval 0x00U @p channelMask contains multiple selected channels
+ * @retval 0x01U @p channelMask is zero or contains exactly one channel
  * @def TIM_CHANNEL_MASK_HAS_AT_MOST_ONE_CHANNEL
  */
 #define TIM_CHANNEL_MASK_HAS_AT_MOST_ONE_CHANNEL(channelMask)	\
@@ -283,8 +283,8 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Checks if a Timer channel mask contains exactly one selected channel
  * @param[in]	channelMask	Timer channel mask to check
  * @returns Single-channel selection status
- * @retval - `0x00U`: @p channelMask is empty or selects multiple channels
- * @retval - `0x01U`: @p channelMask selects exactly one supported channel
+ * @retval 0x00U @p channelMask is empty or selects multiple channels
+ * @retval 0x01U @p channelMask selects exactly one supported channel
  * @def TIM_CHANNEL_MASK_HAS_ONLY_ONE_VALID_CHANNEL
  */
 #define TIM_CHANNEL_MASK_HAS_ONLY_ONE_VALID_CHANNEL(channelMask)	\
@@ -292,10 +292,10 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
 
 /**
  * @brief Returns the channel index for a single-channel mask
- * @param[in]	channelMask	Timer single-channel mask ( @ref `TIMx_CHANNEL_1` ... @ref `TIMx_CHANNEL_ALL`)
+ * @param[in]	channelMask	Timer single-channel mask ( @ref TIMx_CHANNEL_1 ... @ref TIMx_CHANNEL_ALL)
  * @returns Timer channel index decoded from @p channelMask
- * @retval - `0U..3U`: Valid Timer channel index
- * @retval - @ref `TIM_CHANNEL_INDEX_INVALID`: Invalid, empty, or multi-channel mask
+ * @retval 0U..3U Valid Timer channel index
+ * @retval TIM_CHANNEL_INDEX_INVALID Invalid, empty, or multi-channel mask
  */
 __STATIC_FORCEINLINE tim_channel_index_t TIM_ChannelMaskToIndex(const tim_channel_t channelMask)
 {
@@ -309,8 +309,7 @@ __STATIC_FORCEINLINE tim_channel_index_t TIM_ChannelMaskToIndex(const tim_channe
 		return TIM_CHANNEL_INDEX_INVALID;
 	}
 
-	//! Right-shift the single-channel mask until it matches the first channel mask
-	//! Count the shifts as the channel index
+	//! Right-shift the single-channel mask to channel 1 and count each shift as its index.
 	while (channelMaskImage != TIMx_CHANNEL_1)
 	{
 		channelMaskImage = (tim_channel_t) (((uint32_t) channelMaskImage) >> 1U);
@@ -324,11 +323,12 @@ __STATIC_FORCEINLINE tim_channel_index_t TIM_ChannelMaskToIndex(const tim_channe
  * @brief Extracts the lowest selected channel from a Timer channel mask
  * @param[in]	channelMask	Timer channel mask image
  * @returns Single-channel mask for the lowest selected channel
- * @retval - @ref `TIMx_CHANNEL_NONE`: @p channelMask has no selected channel
- * @retval - @ref `TIMx_CHANNEL_1` through @ref `TIMx_CHANNEL_4`: Lowest selected channel mask
+ * @retval TIMx_CHANNEL_NONE @p channelMask has no selected channel
+ * @retval TIMx_CHANNEL_1-TIMx_CHANNEL_4 Lowest selected channel mask.
  */
 __STATIC_FORCEINLINE tim_channel_t TIM_ChannelMaskExtractLowestChannel(const tim_channel_t channelMask)
 {
+	//! Isolate the least-significant selected bit without branching over channel count.
 	return (tim_channel_t) (((uint32_t) channelMask) & (0UL - ((uint32_t) channelMask)));
 }
 
@@ -337,9 +337,9 @@ __STATIC_FORCEINLINE tim_channel_t TIM_ChannelMaskExtractLowestChannel(const tim
  * @param[in,out]	pChannelMask	Timer channel mask image to update
  * @param[in]		channel			Timer single-channel mask to remove
  * @returns Remove status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p channel was removed from @p pChannelMask
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pChannelMask is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is not a single valid channel selected in @p pChannelMask
+ * @retval DRIVER_STATUS_SUCCESS @p channel was removed from @p pChannelMask
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pChannelMask is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is not a single valid channel selected in @p pChannelMask
  */
 __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 (
@@ -362,7 +362,7 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	//! Clear the specified channel bit from the channel mask image
+	//! Clear only the requested channel while preserving every other selected channel.
 	*pChannelMask = (tim_channel_t) (((uint32_t) (*pChannelMask)) & ~((uint32_t) channel));
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -393,8 +393,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer count mode selector is valid
  * @param[in]	mode	Timer count mode selector
  * @returns Count mode validity status
- * @retval - `0x00U`: @p mode is not supported
- * @retval - `0x01U`: @p mode is supported
+ * @retval 0x00U @p mode is not supported
+ * @retval 0x01U @p mode is supported
  * @def TIM_COUNT_MODE_IS_VALID
  */
 #define TIM_COUNT_MODE_IS_VALID(mode)												\
@@ -414,8 +414,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer direction selector is valid
  * @param[in]	direction	Timer direction selector
  * @returns Direction validity status
- * @retval - `0x00U`: @p direction is not supported
- * @retval - `0x01U`: @p direction is supported
+ * @retval 0x00U @p direction is not supported
+ * @retval 0x01U @p direction is supported
  * @def TIM_DIRECTION_IS_VALID
  */
 #define TIM_DIRECTION_IS_VALID(direction)						\
@@ -433,8 +433,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer auto-reload preload selector is valid
  * @param[in]	arpe	Timer auto-reload preload selector
  * @returns Auto-reload preload validity status
- * @retval - `0x00U`: @p arpe is not supported
- * @retval - `0x01U`: @p arpe is supported
+ * @retval 0x00U @p arpe is not supported
+ * @retval 0x01U @p arpe is supported
  * @def TIM_ARPE_IS_VALID
  */
 #define TIM_ARPE_IS_VALID(arpe)							\
@@ -452,8 +452,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer one-pulse selector is valid
  * @param[in]	onePulse	Timer one-pulse selector
  * @returns One-pulse selector validity status
- * @retval - `0x00U`: @p onePulse is not supported
- * @retval - `0x01U`: @p onePulse is supported
+ * @retval 0x00U @p onePulse is not supported
+ * @retval 0x01U @p onePulse is supported
  * @def TIM_OPM_IS_VALID
  */
 #define TIM_OPM_IS_VALID(onePulse)						\
@@ -471,8 +471,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer update-source selector is valid
  * @param[in]	updateSource	Timer update-source selector
  * @returns Update-source validity status
- * @retval - `0x00U`: @p updateSource is not supported
- * @retval - `0x01U`: @p updateSource is supported
+ * @retval 0x00U @p updateSource is not supported
+ * @retval 0x01U @p updateSource is supported
  * @def TIM_UPDATE_SOURCE_IS_VALID
  */
 #define TIM_UPDATE_SOURCE_IS_VALID(updateSource)							\
@@ -492,8 +492,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer clock-division selector is valid
  * @param[in]	clockDivision	Timer clock-division selector
  * @returns Clock-division validity status
- * @retval - `0x00U`: @p clockDivision is not supported
- * @retval - `0x01U`: @p clockDivision is supported
+ * @retval 0x00U @p clockDivision is not supported
+ * @retval 0x01U @p clockDivision is supported
  * @def TIM_CLOCK_DIVISION_IS_VALID
  */
 #define TIM_CLOCK_DIVISION_IS_VALID(clockDivision)							\
@@ -537,8 +537,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer channel mode selector is valid
  * @param[in]	channelMode	Timer channel mode selector
  * @returns Channel mode validity status
- * @retval - `0x00U`: @p channelMode is not supported
- * @retval - `0x01U`: @p channelMode is supported
+ * @retval 0x00U @p channelMode is not supported
+ * @retval 0x01U @p channelMode is supported
  * @def TIM_CHANNEL_MODE_IS_VALID
  */
 #define TIM_CHANNEL_MODE_IS_VALID(channelMode)								\
@@ -557,8 +557,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer capture/compare selection selector is valid
  * @param[in]	ccs	Timer capture/compare selection selector
  * @returns Capture/compare selection validity status
- * @retval - `0x00U`: @p ccs is not supported
- * @retval - `0x01U`: @p ccs is supported
+ * @retval 0x00U @p ccs is not supported
+ * @retval 0x01U @p ccs is supported
  * @def TIM_CHANNEL_CCS_IS_VALID
  */
 #define TIM_CHANNEL_CCS_IS_VALID(ccs)										\
@@ -573,8 +573,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer output-compare preload selector is valid
  * @param[in]	ocPreload	Timer output-compare preload selector
  * @returns Output-compare preload validity status
- * @retval - `0x00U`: @p ocPreload is not supported
- * @retval - `0x01U`: @p ocPreload is supported
+ * @retval 0x00U @p ocPreload is not supported
+ * @retval 0x01U @p ocPreload is supported
  * @def TIM_CHANNEL_OC_PRELOAD_IS_VALID
  */
 #define TIM_CHANNEL_OC_PRELOAD_IS_VALID(ocPreload)										\
@@ -592,8 +592,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer output-compare fast selector is valid
  * @param[in]	ocFast	Timer output-compare fast selector
  * @returns Output-compare fast validity status
- * @retval - `0x00U`: @p ocFast is not supported
- * @retval - `0x01U`: @p ocFast is supported
+ * @retval 0x00U @p ocFast is not supported
+ * @retval 0x01U @p ocFast is supported
  * @def TIM_CHANNEL_OC_FAST_IS_VALID
  */
 #define TIM_CHANNEL_OC_FAST_IS_VALID(ocFast)								\
@@ -611,8 +611,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer output-compare clear selector is valid
  * @param[in]	ocClear	Timer output-compare clear selector
  * @returns Output-compare clear validity status
- * @retval - `0x00U`: @p ocClear is not supported
- * @retval - `0x01U`: @p ocClear is supported
+ * @retval 0x00U @p ocClear is not supported
+ * @retval 0x01U @p ocClear is supported
  * @def TIM_CHANNEL_OC_CLEAR_IS_VALID
  */
 #define TIM_CHANNEL_OC_CLEAR_IS_VALID(ocClear)									\
@@ -630,8 +630,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer channel polarity selector is valid
  * @param[in]	polarity	Timer channel polarity selector
  * @returns Channel polarity validity status
- * @retval - `0x00U`: @p polarity is not supported
- * @retval - `0x01U`: @p polarity is supported
+ * @retval 0x00U @p polarity is not supported
+ * @retval 0x01U @p polarity is supported
  * @def TIM_CHANNEL_POLARITY_IS_VALID
  */
 #define TIM_CHANNEL_POLARITY_IS_VALID(polarity)									\
@@ -662,8 +662,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer IRQ enable selector is valid
  * @param[in]	irqEnable	Timer IRQ enable selector
  * @returns IRQ enable selector validity status
- * @retval - `0x00U`: @p irqEnable is not supported
- * @retval - `0x01U`: @p irqEnable is supported
+ * @retval 0x00U @p irqEnable is not supported
+ * @retval 0x01U @p irqEnable is supported
  * @def TIM_IRQ_ENABLE_IS_VALID
  */
 #define TIM_IRQ_ENABLE_IS_VALID(irqEnable)						\
@@ -697,8 +697,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks if a Timer IRQ mask selects at least one IRQ source
  * @param[in]	irqMask	Timer IRQ mask to check
  * @returns IRQ-selection presence status
- * @retval - `0x00U`: @p irqMask selects no IRQ source
- * @retval - `0x01U`: @p irqMask selects at least one IRQ source
+ * @retval 0x00U @p irqMask selects no IRQ source
+ * @retval 0x01U @p irqMask selects at least one IRQ source
  * @def TIM_IRQ_MASK_HAS_ANY_IRQ
  */
 #define TIM_IRQ_MASK_HAS_ANY_IRQ(irqMask)			\
@@ -708,8 +708,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks if a Timer IRQ mask contains only supported IRQ source bits
  * @param[in]	irqMask	Timer IRQ mask to check
  * @returns Supported-range status
- * @retval - `0x00U`: @p irqMask contains bits outside @ref `TIMx_IRQ_ALL`
- * @retval - `0x01U`: @p irqMask contains only supported IRQ source bits
+ * @retval 0x00U @p irqMask contains bits outside @ref TIMx_IRQ_ALL
+ * @retval 0x01U @p irqMask contains only supported IRQ source bits
  * @def TIM_IRQ_MASK_HAS_ONLY_VALID_IRQs
  */
 #define TIM_IRQ_MASK_HAS_ONLY_VALID_IRQs(irqMask)	\
@@ -719,8 +719,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks if a Timer IRQ mask is valid and non-empty
  * @param[in]	irqMask	Timer IRQ mask to check
  * @returns IRQ-mask validity status
- * @retval - `0x00U`: @p irqMask is empty or contains unsupported bits
- * @retval - `0x01U`: @p irqMask selects one or more supported IRQ sources
+ * @retval 0x00U @p irqMask is empty or contains unsupported bits
+ * @retval 0x01U @p irqMask selects one or more supported IRQ sources
  * @def TIM_IRQ_MASK_IS_VALID
  */
 #define TIM_IRQ_MASK_IS_VALID(irqMask)				\
@@ -756,8 +756,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer DMA mask is valid and non-empty
  * @param[in]	dmaMask	Timer DMA mask to check
  * @returns DMA-mask validity status
- * @retval - `0x00U`: @p dmaMask is empty or contains unsupported bits
- * @retval - `0x01U`: @p dmaMask selects one or more supported DMA sources
+ * @retval 0x00U @p dmaMask is empty or contains unsupported bits
+ * @retval 0x01U @p dmaMask selects one or more supported DMA sources
  * @def TIM_DMA_MASK_IS_VALID
  */
 #define TIM_DMA_MASK_IS_VALID(dmaMask)			\
@@ -797,8 +797,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer master-mode selector is valid
  * @param[in]	masterMode	Timer master-mode selector
  * @returns Master-mode validity status
- * @retval - `0x00U`: @p masterMode is not supported
- * @retval - `0x01U`: @p masterMode is supported
+ * @retval 0x00U @p masterMode is not supported
+ * @retval 0x01U @p masterMode is supported
  * @def TIM_MASTER_MODE_IS_VALID
  */
 #define TIM_MASTER_MODE_IS_VALID(masterMode)		\
@@ -817,8 +817,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer slave-mode selector is valid for the current public vocabulary
  * @param[in]	slaveMode	Timer slave-mode selector
  * @returns Slave-mode validity status
- * @retval - `0x00U`: @p slaveMode is not supported
- * @retval - `0x01U`: @p slaveMode is supported
+ * @retval 0x00U @p slaveMode is not supported
+ * @retval 0x01U @p slaveMode is supported
  * @def TIM_SLAVE_MODE_IS_VALID
  */
 #define TIM_SLAVE_MODE_IS_VALID(slaveMode)			\
