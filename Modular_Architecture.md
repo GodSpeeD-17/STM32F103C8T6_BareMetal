@@ -305,7 +305,7 @@ For the current Timer driver refactor, the preferred Timer delay backend is:
 ```c
 driver_status_t Project_DelayInit(void)
 {
-	return TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG);
+	return TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
 }
 
 driver_status_t Project_DelayUs(const uint16_t delayUs)
@@ -394,7 +394,7 @@ Current preferred Timer delay flow:
 Project_Init()
   -> RCC_Config_72MHz()
   -> Project_DelayInit()
-       -> TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG)
+       -> TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER)
   -> OB_LED_Init()
   -> OB_LED_Reset()
 
@@ -436,7 +436,7 @@ Projects/Template/Src/project_delay.c
 Implement the Timer backend using the current Timer driver APIs:
 
 ```c
-TIM_Config(PROJECT_DELAY_TIMER, &PROJECT_DELAY_TIMER_CONFIG);
+TIM_ConfigDelay1MHz(PROJECT_DELAY_TIMER);
 TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
 TIM_DelayMs(PROJECT_DELAY_TIMER, delayMs);
 ```

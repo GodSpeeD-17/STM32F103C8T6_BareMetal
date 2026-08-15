@@ -67,8 +67,7 @@ void Reset_Handler(void)
 	// SysTick: Resolution 1ms
 	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
 	// Configure a dedicated polling Timer with an exact 1 MHz counter tick.
-	const tim_config_t delayTimerConfig = DELAY_TIMER_CONFIG;
-	if (TIM_Config(DELAY_TIMER, &delayTimerConfig) != DRIVER_STATUS_SUCCESS)
+	if (TIM_ConfigDelay1MHz(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
 	{
 		Default_Handler();
 	}

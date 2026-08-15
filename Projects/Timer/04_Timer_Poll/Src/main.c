@@ -39,35 +39,16 @@ static void App_ErrorHandler(void)
  * @brief Initializes TIM2 as the polling demo's dedicated delay source
  * @returns @ref driver_status_t "Polling-Timer initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM2 was configured with a 1 MHz counter tick
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A Timer configuration selector was invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 clock or reset sequence failed
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: TIM2 or the canonical delay configuration was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The TIM2 kernel clock was unavailable or was not 72 MHz
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The TIM2 counter was running or its NVIC line was enabled
  * @note The root configuration owns the Timer clock gate and leaves counter
  * operation disabled for @ref TIM_DelayMs
  */
 static driver_status_t App_Init(void)
 {
-	const tim_config_t config =
-	{
-		.timebase =
-		{
-			.prescaler = TIMx_DEFAULT_1MHz_PSC,
-			.auto_reload = TIMx_DEFAULT_1MHz_ARR,
-			.initial_count = TIMx_DEFAULT_CNT
-		},
-		.counter =
-		{
-			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
-			.alignment = TIMx_MODE_NORMAL,
-			.direction = TIMx_DIR_COUNT_UP,
-			.one_pulse = TIMx_OPM_DISABLE,
-			.auto_reload_preload = TIMx_ARPE_ENABLE,
-			.update_source = TIMx_UPDATE_SOURCE_ANY
-		},
-		.irq_sources = TIMx_IRQ_SOURCE_NONE
-	};
-
-	//! Apply explicit Timer configuration data instead of a frequency-specific preset API.
-	return TIM_Config(TIM2, &config);
+	//! Apply the canonical dedicated-delay configuration for the established 72 MHz clock tree.
+	return TIM_ConfigDelay1MHz(TIM2);
 }
 
 // ==================================================================================================== //

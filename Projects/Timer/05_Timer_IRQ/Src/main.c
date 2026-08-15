@@ -45,6 +45,7 @@ static void APP_ErrorHandler(void)
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: TIM3 update interrupts were started
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A Timer configuration selector was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A required Timer clock or IRQ state was unavailable
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: TIM3 was running or its NVIC line was enabled during configuration
  */
 static driver_status_t APP_Init(void)
 {
@@ -64,13 +65,13 @@ static driver_status_t APP_Init(void)
 			.one_pulse = TIMx_OPM_DISABLE,
 			.auto_reload_preload = TIMx_ARPE_ENABLE,
 			.update_source = TIMx_UPDATE_SOURCE_ANY
-		},
-		.irq_sources = TIMx_IRQ_SOURCE_UPDATE
+		}
 	};
 
-	//! Apply the complete TIM3 configuration, including its Timer-owned update IRQ source.
+	//! Apply only TIM3 base configuration; IRQ-source intent remains a separate application decision.
 	ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
-	//! Timer owns DIER; the application separately owns stale-pending cleanup and NVIC delivery.
+	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.
+	ASSERT_DRIVER_STATUS(TIM_SetIRQSources(TIM3, TIMx_IRQ_SOURCE_UPDATE, DRIVER_STATUS_ON));
 	NVIC_IRQ_ClearPending(TIM3_IRQn);
 	NVIC_IRQ_Enable(TIM3_IRQn);
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIM3, DRIVER_STATUS_ON));

@@ -101,13 +101,14 @@ Current first-pass structure shape:
 - `tim_config_t`
   - `timebase`
   - `counter`
-  - `irq_sources`
 
-`tim_config_t` is the root structure of structures for every currently
-implemented configuration domain. Deferred domains are added only after their
-public contracts are admitted; until then `TIM_Config()` leaves them unchanged.
-Applications call `TIM_DeConfig()` explicitly when a complete hardware reset is
-required before applying the admitted configuration.
+`tim_config_t` is the root structure of structures for the currently
+implemented base-configuration domains. Timer IRQ sources are deliberately
+excluded: applications configure them explicitly through
+`TIM_SetIRQSources()`. Deferred domains are added only after their public
+contracts are admitted; until then `TIM_Config()` leaves them unchanged.
+Applications call `TIM_DeConfig()` explicitly when a complete hardware reset
+is required before applying the admitted configuration.
 
 `timer_config.h` must not own register access helpers, clock-state helpers,
 NVIC helpers, public driver API declarations, or codec staging.
@@ -259,6 +260,8 @@ Current first-pass public API scope:
 - conjugate root lifecycle APIs `TIM_Config()` and `TIM_DeConfig()`
 - `TIM_GetIRQSources()` / `TIM_SetIRQSources()` for Timer-owned DIER state
 - `TIM_GetIRQEvents()` / `TIM_AckIRQEvents()` for Timer-owned SR state
+- dedicated 72 MHz-to-1 MHz polling-delay configuration through
+  `TIM_ConfigDelay1MHz()`
 - blocking polling delay helpers `TIM_DelayUs()` / `TIM_DelayMs()`
 - grouped `TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
@@ -312,25 +315,134 @@ ASSERT_DRIVER_STATUS(TIM_SetPrescaler(TIM2, prescaler));
 Instead of allowing `TIM_SetPrescaler()` to change RCC state as a hidden side
 effect.
 
-`TIM_Config()` validates the complete root configuration before touching
-hardware, rejects enabled NVIC delivery or a running counter, enables the Timer
-clock gate when necessary, and visibly delegates the timebase, counter, and
-Timer-owned IRQ-source domains represented by `tim_config_t` to their narrow
-transaction helpers. It never calls `TIM_DeConfig()`. Deferred domains remain
-unchanged, and the configured IRQ-source set replaces only the admitted Timer
-interrupt-enable fields while preserving DMA-request and unrelated DIER state.
-The timebase transaction uses `UDIS=0`, `URS=1`, and `EGR.UG` to load buffered
-values without asserting `UIF` or requesting interrupt/DMA service. Successful
-configuration leaves the clock enabled and counter disabled without changing
-NVIC state.
+The implemented `TIM_Config()` contract owns the maximum admitted Timer
+configuration transaction. It validates the complete root request, rejects
+enabled NVIC delivery or a running counter, enables the Timer clock gate when
+necessary, stages the timebase and counter domains represented by
+`tim_config_t`, and commits them in the required hardware order.
+It never calls `TIM_DeConfig()`. Deferred domains and all `TIMx_DIER` state
+remain unchanged. The timebase commit uses `UDIS=0`, `URS=1`, and `EGR.UG` to
+load buffered values without asserting `UIF` or requesting interrupt/DMA
+service. Successful configuration leaves the clock enabled and counter
+disabled without changing Timer IRQ sources or NVIC state.
 
-Frequency-targeting configuration functions are intentionally absent.
-Applications provide explicit prescaler and timebase configuration data.
+### Configuration Decomposition Policy
+
+The target Timer decomposition follows the repository-wide structured
+configuration rule. Each admitted `tim_config_t` member owns one reusable
+structure-to-image staging path:
+
+```c
+_TIM_StageCounterConfig
+(
+	const tim_config_counter_t* const	pCounterConfig,
+	const reg							currentControlRegisterImage,
+	reg* const							pEdgeAlignedControlRegisterImage,
+	reg* const							pDirectionControlRegisterImage,
+	reg* const							pTargetControlRegisterImage
+);
+
+_TIM_StageTimeBaseConfig
+(
+	const tim_config_timebase_t* const	pTimeBaseConfig,
+	reg* const								pPrescalerRegisterImage,
+	reg* const								pAutoReloadRegisterImage,
+	reg* const								pCounterRegisterImage,
+	reg* const								pCommitControlRegisterImage,
+	reg* const								pUpdateEventRegisterImage
+);
+```
+
+These helpers perform no MMIO. They validate and transform only their supplied
+configuration domain and caller-owned images, delegate field placement to the
+Timer Codec, preserve unrelated fields, and publish staged images only after
+all fallible work succeeds.
+
+The existing `Codec_TIM_StageCounterConfig()` and
+`Codec_TIM_StageTimeBaseConfig()` functions already own the pure grouped
+structure-to-image transformations. They are therefore the canonical reusable
+staging paths unless a static Timer Driver helper must additionally compose
+Driver-owned transaction images, such as the temporary `CR1` commit policy or
+write-only `EGR.UG` action image. A Driver helper that merely forwards to one
+of these Codec functions is prohibited.
+
+`TIM_GetCounterConfig()` and `TIM_GetTimeBaseConfig()` form the extraction side
+of those grouped domains. Each getter validates its destination and live
+preconditions, reads the required images once, and publishes the complete
+structure only after Codec extraction succeeds.
+
+The same helpers serve both transaction scopes:
+
+```text
+TIM_SetCounterConfig()
+  -> validate clock and stopped-state policy
+  -> read CR1
+  -> _TIM_StageCounterConfig(...)
+  -> dirty-write CR1
+
+TIM_SetTimeBaseConfig()
+  -> validate clock and stopped-state policy
+  -> read PSC, ARR, CNT, and required CR1 context
+  -> _TIM_StageTimeBaseConfig(...)
+  -> perform the ordered timebase commit
+
+TIM_Config()
+  -> validate the complete root and lifecycle contract
+  -> read all required current images
+  -> _TIM_StageCounterConfig(...)
+  -> _TIM_StageTimeBaseConfig(...)
+  -> commit only after every represented domain stages successfully
+  -> preserve TIMx_DIER and NVIC state
+  -> perform one root cleanup path
+```
+
+`TIM_Config()` must not call the grouped public setters because each setter
+would commit independently and could leave a partially configured root request.
+It must also not delegate to a private `_TIM_ApplyConfig()` wrapper that hides
+the same maximum transaction. The public root function visibly owns domain
+composition, while narrow private helpers own reusable staging.
+
+`_TIM_CommitCounterConfig()` owns only the required edge-aligned DIR/CMS write
+sequence. `_TIM_CommitTimeBase()` owns only the hazardous `PSC`/`ARR`/`CNT` and
+`EGR.UG` sequence. Both receive fully staged images, perform no validation or
+unrelated configuration after the first write, return `driver_status_t`, and
+never acquire reset, NVIC, or broader lifecycle authority. The former
+`_TIM_ApplyCounterConfig()` and `_TIM_ApplyTimeBaseConfig()` wrappers are
+removed; public grouped setters now own their narrow transactions and the root
+function visibly composes both shared staging paths before its first write.
+
+Timer IRQ-source configuration is a separate explicit sequence:
+
+```c
+ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
+ASSERT_DRIVER_STATUS
+(
+	TIM_SetIRQSources
+	(
+		TIM3,
+		TIMx_IRQ_SOURCE_UPDATE,
+		DRIVER_STATUS_ON
+	)
+);
+NVIC_IRQ_ClearPending(TIM3_IRQn);
+NVIC_IRQ_Enable(TIM3_IRQn);
+```
+
+This ordering proves that the application deliberately requested Timer-side
+interrupt generation before enabling NVIC delivery. `TIM_Config()` never
+enables or disables a Timer IRQ source implicitly.
+
+General frequency-targeting configuration functions are intentionally absent.
+Applications provide explicit prescaler and timebase configuration data. The
+sole fixed-frequency exception is `TIM_ConfigDelay1MHz()`: a narrowly named
+bootstrap for the admitted polling-delay service that first validates a 72 MHz
+Timer kernel clock, then delegates the canonical configuration to
+`TIM_Config()`.
 `TIM_GetProgrammedTickFrequency()` remains as an observational calculation
 from the live Timer kernel clock and programmed PSC value.
 
 `TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that has
-already been configured through `TIM_Config()` with a 1 MHz programmed tick. It does not create a general
+already been configured through `TIM_ConfigDelay1MHz()` with a 1 MHz programmed tick. It does not create a general
 delay service and does not use IRQ/NVIC state. The helper verifies that the
 Timer clock gate is enabled and its active tick is exactly 1 MHz, stops the
 counter, disables `CR1.ARPE` so the
@@ -362,23 +474,29 @@ register writes feed shadow/preload logic:
 - `TIMx_CR1.URS=1` prevents software-generated `UG` from asserting `UIF` or
   requesting interrupt/DMA service.
 
-The implemented `TIM_Config()` sequence is:
+The current `TIM_Config()` sequence is:
 
 1. Validate `TIMx` and every field in @p pConfig without touching hardware.
 2. Decode the instance NVIC line and reject configuration while delivery is enabled.
 3. Snapshot the RCC APB1 clock-gate state and enable it when necessary with
    `TIM_SetClockState(TIMx, DRIVER_STATUS_ON)`.
-4. Reject a running counter without changing application-owned lifecycle state.
-5. Directly stage and apply counter configuration, using an edge-aligned intermediate
-   when DIR/CMS changes require it.
-6. Directly stage and write only changed `PSC` and `ARR` images.
-7. Temporarily use `UDIS=0` and `URS=1`, then generate `TIMx_EGR.UG` so
+4. Reject a running counter, then snapshot every register image required by
+   both represented configuration domains.
+5. Stage the complete counter domain and every required edge-aligned DIR/CMS
+   transition image through `_TIM_StageCounterConfig()`.
+6. Stage the complete timebase domain, temporary update policy, and write-only
+   `EGR.UG` action through `_TIM_StageTimeBaseConfig()`.
+7. Revalidate the stopped-counter guard immediately before the first Timer
+   write, then commit the staged counter transition images.
+8. Write only changed `PSC` and `ARR` images, temporarily use `UDIS=0` and
+   `URS=1`, then generate `TIMx_EGR.UG` so
    buffered timebase values become active without asserting `UIF`.
-8. Restore the requested `CR1` and requested `CNT`.
-9. Replace the admitted Timer-owned DIER source set while preserving unrelated DIER fields.
-10. Leave operation disabled until the user calls
+9. Restore the requested final `CR1` and requested `CNT`.
+10. Preserve all `TIMx_DIER` and NVIC state; IRQ sources remain an explicit application operation.
+11. Leave operation disabled until the user calls
     `TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)`.
-11. On failure, restore only a clock gate acquired by this transaction; never
+12. On precommit failure, leave all Timer registers unchanged and restore only
+    a clock gate acquired by this transaction; never
     call `TIM_DeConfig()` or reset application-owned peripheral state.
 
 `TIM_DeConfig()` disables and clears the instance NVIC line, enables the Timer
@@ -388,12 +506,13 @@ DMA, and master/slave state.
 
 Unlike GPIO, Timer should keep a structured configuration API. GPIO can remain
 ergonomic with a small fixed argument list because its basic configuration is
-only port, pin mask, mode, and config. Timer configuration spans clock period,
-counter behavior, update-event behavior, channel selection, channel mode,
-preload/fast/clear behavior, polarity, and IRQ concerns. A configuration
-structure keeps that API modular and extensible. The refactor should therefore
-fix ownership and staging of `tim_config_t`, not remove the structured
-configuration model.
+only port, pin mask, mode, and config. Timer base configuration already spans
+clock period, counter behavior, and update-event behavior; admitted channel
+domains will add their own coherent grouped structures. This keeps persistent
+configuration modular without hiding operational intent. IRQ-source enablement
+is deliberately not a structure member and remains an explicit public action.
+The refactor should therefore fix ownership and staging of `tim_config_t`, not
+remove the structured base-configuration model.
 
 ## Coding Style
 
@@ -472,19 +591,24 @@ Completed:
 - `timer.h` public API return documentation now uses function-specific
   `@returns @ref driver_status_t "... - Operation Status"` labels and
   parameter-specific `@retval` wording.
-- `TIM_Config()` never calls `TIM_DeConfig()`; it directly delegates counter,
-  timebase, and exact Timer IRQ-source configuration while preserving deferred
-  domains, unrelated DIER fields, and application-owned NVIC state.
+- `TIM_Config()` never calls `TIM_DeConfig()`; it visibly stages counter and
+  timebase configuration before one root-owned commit while preserving
+  deferred domains, all DIER fields, and application-owned NVIC state.
+- Timer IRQ-source enablement remains explicit through
+  `TIM_SetIRQSources()` and is never part of `tim_config_t`.
 - `TIM_DeConfig()` clears NVIC delivery state, pulses the matching RCC reset,
   and leaves the Timer clock gate disabled.
+- `TIM_ConfigDelay1MHz()` validates a 72 MHz Timer kernel clock and applies the
+  canonical dedicated polling-delay configuration through `TIM_Config()`.
 - `TIM_DelayUs()` and `TIM_DelayMs()` exist as blocking polling helpers for
-  Timers explicitly configured through `TIM_Config()` with a 1 MHz tick, with exact-frequency
+  Timers explicitly configured through `TIM_ConfigDelay1MHz()` with a 1 MHz tick, with exact-frequency
   validation and bounded polling.
 - IRQ source/event APIs use separate types, cover trigger and overcapture
   vocabulary, and never mutate the per-instance NVIC line.
-- `timer.c` orchestrates first-pass config-owned fields through validation, LL,
-  codec staging, register-specific dirty-write decisions, and `driver_status_t`
-  status handling; RegOps owns the generic compare/write mechanism.
+- `timer.c` orchestrates config-owned fields through full-domain validation,
+  reusable Driver/Codec staging, ordered MMIO-only commit helpers, and
+  `driver_status_t` status handling; RegOps owns generic compare/write behavior
+  for independent scalar transactions.
 - `timer.c` public implementation sections now mirror `timer.h` banner and
   sub-banner order, and the file overview uses Doxygen `@section` blocks for
   scope, field ownership, and source layout.

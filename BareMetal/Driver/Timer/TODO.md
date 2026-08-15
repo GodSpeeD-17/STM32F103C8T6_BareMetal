@@ -32,7 +32,8 @@ not override safety gaps reopened by the top-down audit.
 - [x] Add `Accepted values` and `Expected values` Doxygen scope details to `timer.h`, `timer_config.h`, and `timer_codec.h`.
 - [x] Standardize `timer.h` public API `@returns` and `@retval` Doxygen wording around function-specific operation status.
 - [x] Implement the first-pass Timer config update-event sequence around `EGR.UG`, `CNT`, and generated `SR.UIF` (full-domain closure is reopened below).
-- [x] Remove frequency-targeting configuration functions; applications now provide explicit `tim_config_t` prescaler/timebase data.
+- [x] Remove general frequency-targeting configuration functions; applications now provide explicit `tim_config_t` prescaler/timebase data.
+- [x] Add `TIM_ConfigDelay1MHz()` as the single service-specific fixed-frequency exception for a validated 72 MHz Timer kernel clock.
 - [x] Add public `TIM_DelayUs()` blocking polling helper for Timers explicitly configured with a 1 MHz programmed tick.
 - [x] Add public `TIM_DelayMs()` blocking polling wrapper over `TIM_DelayUs(TIMx, 1000U)`.
 - [x] Reorganize `timer.c` public implementations under the same banner and sub-banner order used by `timer.h`.
@@ -64,13 +65,18 @@ not override safety gaps reopened by the top-down audit.
 - [x] Grouped/scalar `Get` and `Set` APIs now require the clock gate to already be enabled and return `DRIVER_STATUS_ERROR_STATE` when it is disabled.
 - [x] `timer.h`, `timer_config.h`, and `timer_codec.h` now document caller input scope with `Accepted values` and decoded/output scope with `Expected values`.
 - [x] `timer.h` public APIs now use function-specific `@returns @ref driver_status_t "... - Operation Status"` labels and parameter-specific `@retval` wording.
-- [x] `TIM_Config()` and `TIM_DeConfig()` form an independent conjugate root lifecycle pair; neither calls the other and the application owns their ordering.
+- [x] `TIM_Config()` and `TIM_DeConfig()` remain independent root lifecycle
+  entry points; neither calls the other and the application owns their
+  ordering.
 - [x] `TIM_Config()` directly delegates every admitted `tim_config_t` domain to its narrow transaction helper without a root-shadow wrapper.
-- [x] `tim_config_t` includes Timer-owned IRQ sources; deferred domains remain unchanged until admitted or explicitly reset by the application.
+- [x] Remove Timer IRQ sources from `tim_config_t`; `TIM_Config()` preserves
+  DIER and applications express interrupt-generation intent explicitly through
+  `TIM_SetIRQSources()`.
 - [x] Stage all timebase/commit images and validate the stopped-counter precondition before the first MMIO write.
 - [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
 - [x] `TIM_DelayUs()` verifies an exact 1 MHz tick and uses bounded polling with cleanup on timeout.
 - [x] `TIM_DelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
+- [x] Shared startup delay consumers use `TIM_ConfigDelay1MHz()` instead of duplicating the canonical delay configuration object.
 - [x] `timer.c` public implementation order now mirrors `timer.h`, including conjugate getter/setter sub-banners and final blocking-delay helpers.
 - [x] `timer.c` file overview now uses Doxygen `@section` blocks for scope, field ownership, and source layout.
 - [x] `_TIM_ClockEnabled()` was replaced by `_TIM_ValidateClockEnabled()` for narrow API clock-gate precondition checks.
@@ -90,7 +96,19 @@ not override safety gaps reopened by the top-down audit.
 
 These items must close before channel/PWM implementation begins:
 
-- [ ] Make every timebase/lifecycle transaction complete validation and Codec staging before its first MMIO write; a BUSY/error result must leave hardware unchanged.
+- [x] Split `_TIM_ApplyCounterConfig()` and `_TIM_ApplyTimeBaseConfig()` so
+  grouped and root transactions reuse the existing grouped Codec staging paths
+  directly; add static Driver staging only for additional transaction images
+  and commit helpers only where real hardware ordering requires them.
+- [x] Make `TIM_Config()` visibly compose all `tim_config_t` domain-staging
+  helpers before its first write; make `TIM_SetCounterConfig()` and
+  `TIM_SetTimeBaseConfig()` reuse the same staging helpers while retaining
+  ownership of their own narrow Read/Modify/Write transactions.
+- [x] Make `TIM_Config()` and both grouped base-configuration setters complete
+  validation and Codec staging before their first Timer-register write; a
+  precommit BUSY/error result leaves Timer register state unchanged.
+- [ ] Extend the same no-write-on-error and single-cleanup proof to the remaining
+  Timer lifecycle and action transactions.
 - [ ] Restrict the first safe root-config contract to exclusive application ownership, preserve deferred feature state, and trace the complete URS/UDIS/UG behavior.
 - [ ] Separate programmed preload state from active/effective state and freeze the coherent PSC/ARR/CCR commit contract required by PWM.
 - [ ] Finish the deferred DMA-source vocabulary independently from the completed
@@ -134,5 +152,7 @@ These items must close before channel/PWM implementation begins:
   peripheral-independent compare/write mechanics belong to RegOps.
 - Current compatibility API `TIM_SetClockState()` owns direct RCC APB1 clock-gate mutation; its OFF transition remains reopened for stopped/quiescent policy.
 - `TIM_Config()` and `TIM_DeConfig()` may use `TIM_SetClockState()` internally as root lifecycle orchestration, but neither may call its conjugate; narrow field APIs retain explicit clock ownership.
+- `TIM_Config()` preserves every `TIMx_DIER` source; applications explicitly
+  call `TIM_SetIRQSources()` before enabling the independently owned NVIC line.
 - Clock-state APIs validate Timer instance/state and do not require the gate to already be enabled; that fact does not authorize gating an active Timer.
 - Narrow grouped/scalar `Get` and `Set` APIs verify clock availability through the private `_TIM_ValidateClockEnabled()` helper and do not change clock state.

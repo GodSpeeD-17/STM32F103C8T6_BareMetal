@@ -206,10 +206,12 @@ typedef struct _tim_config_counter_t
  * Root configuration object consumed by the Timer driver. It deliberately does
  * not contain a Timer peripheral pointer; the public driver API should receive
  * `TIMx` separately so this structure remains reusable across Timer instances.
- * The structure covers every currently implemented configurable Timer domain.
- * Deferred channel, capture, synchronization, and DMA domains are not
- * represented and are preserved by @ref TIM_Config. Applications call
- * @ref TIM_DeConfig explicitly when complete hardware-reset state is required.
+ * The structure covers the currently implemented base-configuration domains.
+ * Timer IRQ sources are deliberately excluded so applications must request
+ * every interrupt source explicitly through @ref TIM_SetIRQSources. Deferred
+ * channel, capture, synchronization, and DMA domains are also not represented
+ * and are preserved by @ref TIM_Config. Applications call @ref TIM_DeConfig
+ * explicitly when complete hardware-reset state is required.
  */
 typedef struct _tim_config_t
 {
@@ -224,15 +226,6 @@ typedef struct _tim_config_t
 	 * @memberof tim_config_t
 	 */
 	tim_config_counter_t	counter;
-
-	/**
-	 * @brief Timer interrupt-request sources staged into `TIMx_DIER`
-	 * Accepted values:
-	 * - @ref TIMx_IRQ_SOURCE_NONE : Keep all Timer interrupt-request sources disabled
-	 * - Any combination contained by @ref TIMx_IRQ_SOURCE_ALL : Enable the selected sources
-	 * @memberof tim_config_t
-	 */
-	tim_irq_source_t		irq_sources;
 
 } tim_config_t;
 

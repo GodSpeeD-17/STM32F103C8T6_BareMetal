@@ -16,12 +16,11 @@
  * - `TIMx_PSC` counter tick prescaler
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
- * - Timer-owned `TIMx_DIER` interrupt-request sources
  *
  * Channel/PWM, DMA, and master/slave APIs remain outside this public header
- * scope. Timer IRQ source/event APIs and the blocking @ref TIM_DelayUs and
- * @ref TIM_DelayMs convenience APIs are provided; NVIC delivery remains under
- * NVIC/application ownership.
+ * scope. Timer IRQ source/event APIs, the fixed @ref TIM_ConfigDelay1MHz
+ * service bootstrap, and the blocking @ref TIM_DelayUs and @ref TIM_DelayMs
+ * APIs are provided; NVIC delivery remains under NVIC/application ownership.
  */
 // Header Guard
 #ifndef TIMER_H_
@@ -174,53 +173,52 @@ driver_status_t TIM_SetOperationState(TIM_TypeDef* const TIMx, const driver_stat
 driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx);
 
 /**
- * @brief Configures the complete supported state of one general-purpose Timer
+ * @brief Configures the complete supported base state of one general-purpose Timer
  * @details
  * Applies every field contained in @ref tim_config_t. The driver validates
  * @p `TIMx` and the complete configuration before touching hardware, enables
  * the APB1 Timer clock gate when necessary, and directly orchestrates every
- * currently implemented configuration domain. This function never calls
+ * currently implemented base-configuration domain. This function never calls
  * @ref TIM_DeConfig; the application explicitly chooses whether a reset is
  * required before configuration. Deferred channel, capture, synchronization,
  * and DMA domains are not represented by @ref tim_config_t and remain
- * unchanged.
+ * unchanged. Timer IRQ-source state is also preserved; interrupt sources must
+ * be configured explicitly through @ref TIM_SetIRQSources.
  *
  * The configuration sequence writes `TIMx_PSC` and `TIMx_ARR`, temporarily
  * enables update events and selects overflow/underflow-only update requests,
  * then generates `TIMx_EGR.UG`. This loads buffered timebase values without
  * generating `UIF`, an interrupt, or a DMA request. The final `TIMx_CR1` state
- * and requested initial counter value are then restored. Timer-owned DIER
- * sources are replaced by the exact set in @ref tim_config_t::irq_sources
- * while unrelated DIER fields are preserved. The function does not mutate the
- * instance NVIC line; NVIC delivery remains explicit application ownership.
+ * and requested initial counter value are then restored. The function does not
+ * modify `TIMx_DIER` or the instance NVIC line; Timer interrupt sources and
+ * NVIC delivery remain explicit application ownership.
  *
  * This API stages:
  * - `TIMx_CR1` fields represented by @ref tim_config_counter_t
  * - `TIMx_PSC` from @ref tim_config_timebase_t::prescaler
  * - `TIMx_ARR` from @ref tim_config_timebase_t::auto_reload
  * - `TIMx_CNT` from @ref tim_config_timebase_t::initial_count
- * - Timer-owned `TIMx_DIER` sources represented by @ref tim_config_t::irq_sources
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - `TIM2`
  * - `TIM3`
  * - `TIM4`
- * @param[in] pConfig Complete supported Timer configuration
+ * @param[in] pConfig Complete supported Timer base configuration
  * Accepted values:
- * - Non-`NULL`: Complete Timer configuration object
+ * - Non-`NULL`: Complete Timer base-configuration object
  * - @ref tim_config_t::timebase : Timer prescaler, auto-reload, and initial counter values
  * - @ref tim_config_t::counter : Timer counter behavior selectors
- * - @ref tim_config_t::irq_sources : Timer-owned interrupt-request sources
  * @returns @ref driver_status_t "Root-configuration operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete supported Timer configuration was applied
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete supported Timer base configuration was applied
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pConfig` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` is unsupported or a configuration selector is invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate could not be verified during the configuration sequence
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running or the instance NVIC line is enabled
  * @pre The application owns the complete Timer transaction and has disabled the instance NVIC line
- * @note Success leaves the Timer clock enabled and counter disabled. Use @ref TIM_SetOperationState with @ref DRIVER_STATUS_ON to start the counter, then configure NVIC delivery explicitly when required
- * @warning A failed later domain does not invoke @ref TIM_DeConfig or undo an earlier committed domain; the application must explicitly deconfigure when reset-state recovery is required
+ * @note Success leaves the Timer clock enabled and counter disabled without changing Timer IRQ sources or NVIC state. Configure required IRQ sources explicitly through @ref TIM_SetIRQSources before enabling NVIC delivery
+ * @note @ref TIM_DeConfig performs a complete hardware reset and therefore clears Timer IRQ sources even though this configuration API preserves them
+ * @note Every represented base domain is staged before the first Timer-register write. A validation or staging failure leaves Timer register state unchanged and restores only a clock gate acquired by this function
  */
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
 
@@ -255,11 +253,7 @@ driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pC
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` is unsupported
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  */
-driver_status_t TIM_GetTimeBaseConfig
-(
-	TIM_TypeDef* const					TIMx,
-	tim_config_timebase_t* const		pTimeBase
-);
+driver_status_t TIM_GetTimeBaseConfig(TIM_TypeDef* const TIMx, tim_config_timebase_t* const	pTimeBase);
 
 /**
  * @brief Configures the Timer timebase fields
@@ -291,11 +285,7 @@ driver_status_t TIM_GetTimeBaseConfig
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running
  * @note This API does not modify `TIMx_CR1` counter behavior fields.
  */
-driver_status_t TIM_SetTimeBaseConfig
-(
-	TIM_TypeDef* const					TIMx,
-	const tim_config_timebase_t* const	pTimeBase
-);
+driver_status_t TIM_SetTimeBaseConfig(TIM_TypeDef* const TIMx, const tim_config_timebase_t* const pTimeBase);
 
 // --------------------------------- Timer Counter Configuration Pair --------------------------------- //
 
@@ -331,11 +321,7 @@ driver_status_t TIM_SetTimeBaseConfig
  * @note Counter enable state and update-event enable state are not part of
  * @ref tim_config_counter_t.
  */
-driver_status_t TIM_GetCounterConfig
-(
-	TIM_TypeDef* const				TIMx,
-	tim_config_counter_t* const		pCounter
-);
+driver_status_t TIM_GetCounterConfig(TIM_TypeDef* const TIMx, tim_config_counter_t* const pCounter);
 
 /**
  * @brief Configures the Timer counter behavior fields
@@ -370,11 +356,7 @@ driver_status_t TIM_GetCounterConfig
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running
  */
-driver_status_t TIM_SetCounterConfig
-(
-	TIM_TypeDef* const					TIMx,
-	const tim_config_counter_t* const	pCounter
-);
+driver_status_t TIM_SetCounterConfig(TIM_TypeDef* const TIMx, const tim_config_counter_t* const	pCounter);
 
 // ==================================================================================================== //
 //										Timer TimeBase Field APIs										//
@@ -403,11 +385,7 @@ driver_status_t TIM_SetCounterConfig
  * @note This reports the frequency implied by readable `TIMx_PSC`; it does not
  * prove that the active buffered prescaler has already been latched by an update event.
  */
-driver_status_t TIM_GetProgrammedTickFrequency
-(
-	TIM_TypeDef* const		TIMx,
-	frequency_t* const		pFrequency
-);
+driver_status_t TIM_GetProgrammedTickFrequency(TIM_TypeDef* const TIMx, frequency_t* const pFrequency);
 
 // --------------------------------------- Timer Prescaler Pair --------------------------------------- //
 
@@ -898,7 +876,7 @@ driver_status_t TIM_GetIRQSources(TIM_TypeDef* const TIMx, tim_irq_source_t* con
 driver_status_t TIM_SetIRQSources
 (
 	TIM_TypeDef* const			TIMx,
-	const tim_irq_source_t	irqSources,
+	const tim_irq_source_t		irqSources,
 	const driver_status_t		sourceState
 );
 
@@ -970,12 +948,42 @@ driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t
 //										Timer Blocking Delay APIs										//
 // ==================================================================================================== //
 
+// ------------------------------- Timer 1 MHz Delay Configuration Helper ----------------------------- //
+
+/**
+ * @brief Configures a dedicated polling-delay Timer for a 1 MHz counter tick
+ * @details
+ * Validates that @p TIMx receives a 72 MHz Timer kernel clock, builds the
+ * canonical polling-delay @ref tim_config_t, and delegates the complete
+ * admitted configuration to @ref TIM_Config. The fixed prescaler value is
+ * `71`, producing a 1 MHz counter tick from the validated 72 MHz input clock.
+ *
+ * This helper never invokes @ref TIM_DeConfig. The application owns any
+ * required reset before configuration and must keep the instance NVIC line
+ * disabled throughout the configuration transaction.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
+ * @returns @ref driver_status_t "Delay-Timer configuration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The Timer was configured with a 1 MHz counter tick
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is unsupported or the canonical configuration is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The Timer kernel clock is unavailable, is not 72 MHz, or clock-gate orchestration failed
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The Timer counter is running or the instance NVIC line is enabled
+ * @pre The RCC clock tree provides a 72 MHz kernel clock to @p TIMx
+ * @note Success leaves the Timer clock enabled and counter disabled without changing Timer IRQ-source state
+ */
+driver_status_t TIM_ConfigDelay1MHz(TIM_TypeDef* const TIMx);
+
 // ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
 
 /**
  * @brief Provides a minimum blocking delay in microseconds using a 1 MHz Timer
  * @details
- * Uses a Timer previously configured through @ref TIM_Config with a 1 MHz
+ * Uses a Timer previously configured through @ref TIM_ConfigDelay1MHz with a 1 MHz
  * programmed counter tick as a dedicated polling delay source. The helper
  * verifies that the APB1 Timer clock gate is
  * enabled, stops the counter, disables auto-reload preload so the delay window
@@ -1001,7 +1009,7 @@ driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The update flag did not arrive within the bounded polling budget
  * @note Assumptions and constraints:
- * - @p TIMx was configured through @ref TIM_Config with a 1 MHz programmed counter tick.
+ * - @p TIMx was configured through @ref TIM_ConfigDelay1MHz with a 1 MHz programmed counter tick.
  * - The Timer counter tick is exactly 1 MHz, so one counter tick equals 1 us.
  * - The requested delay is a minimum delay; software setup, polling, and
  *   cleanup can add a small positive overhead.
@@ -1039,7 +1047,7 @@ driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled or the counter tick is not exactly 1 MHz
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A microsecond delay chunk timed out
  * @note Assumptions and constraints:
- * - @p TIMx was configured through @ref TIM_Config with a 1 MHz programmed counter tick.
+ * - @p TIMx was configured through @ref TIM_ConfigDelay1MHz with a 1 MHz programmed counter tick.
  * - @p delayMs must not be `0U`.
  * - This is a polling delay and does not use Timer IRQ/NVIC state.
  */

@@ -259,6 +259,155 @@ table should be an array of `rcc_bus_t`, not an array of one-field metadata
 structures. Shared logic should consume the mapped value instead of hard-coding
 one bus or duplicating per-instance branches.
 
+## Structured Configuration and Transaction Decomposition
+
+A root configuration structure is a structure of independently coherent
+configuration domains. The root public configuration function represents the
+largest admitted configuration transaction for that peripheral. It must
+visibly orchestrate each domain represented by the root structure; do not hide
+the entire operation behind a private `_PERIPH_ApplyConfig()` helper that merely
+duplicates the public function's authority.
+
+Every nested configuration structure that represents an independently useful
+and admitted operation must normally have a symmetric public grouped `Get` /
+`Set` pair. Deliberately asymmetric hardware actions remain exceptions and
+must document why no conjugate exists. The root function and grouped setter
+must reuse the same narrowly scoped private staging helper; the grouped getter
+uses the corresponding extraction path. Derive helpers from reusable
+configuration domains and shared invariants, not merely to shorten a public
+function.
+
+Use this generic ownership model:
+
+```c
+typedef struct _periph_config_t
+{
+	periph_timebase_config_t	timebase;
+	periph_counter_config_t		counter;
+
+} periph_config_t;
+```
+
+Do not place interrupt-request source enables inside a root configuration
+structure. IRQ-source enablement must remain an explicit application action so
+the call site proves that interrupt generation was intentional. Root
+configuration preserves the peripheral IRQ-source register, and the
+application separately configures peripheral sources before enabling NVIC
+delivery.
+
+Use this generic sequence:
+
+```c
+ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
+ASSERT_DRIVER_STATUS
+(
+	PERIPH_SetIRQSources
+	(
+		PERIPH1,
+		PERIPH_IRQ_SOURCE_UPDATE,
+		DRIVER_STATUS_ON
+	)
+);
+NVIC_IRQ_ClearPending(PERIPH1_IRQn);
+NVIC_IRQ_Enable(PERIPH1_IRQn);
+```
+
+Omitting `PERIPH_SetIRQSources()` means the root configuration leaves existing
+peripheral IRQ-source state unchanged. Disabling sources is equally explicit;
+the application passes the owned source mask with `DRIVER_STATUS_OFF`.
+
+The corresponding staging helpers each accept only one configuration domain
+and the caller-owned register images that domain can modify:
+
+```c
+static driver_status_t _PERIPH_StageTimeBaseConfig
+(
+	const periph_timebase_config_t* const	pTimeBaseConfig,
+	reg* const								pPrescalerRegisterImage,
+	reg* const								pAutoReloadRegisterImage,
+	reg* const								pCounterRegisterImage
+);
+
+static driver_status_t _PERIPH_StageCounterConfig
+(
+	const periph_counter_config_t* const	pCounterConfig,
+	reg* const								pControlRegisterImage
+);
+```
+
+A staging helper must:
+
+- perform only the transformation described by its name and
+  configuration-domain input;
+- validate its own pointer/domain contract and return `driver_status_t`;
+- transform caller-owned, non-volatile register images without performing
+  MMIO, clock, reset, NVIC, operation-state, or cleanup work;
+- use Codec functions for individual field encoding instead of duplicating
+  register placement in the Driver;
+- stage through local working images and publish all output images only after
+  every fallible transformation succeeds; and
+- preserve every register field outside its declared domain.
+
+Do not add a private Driver forwarding wrapper when an existing grouped Codec
+function already expresses the complete reusable structure-to-image
+transformation. In that case, the Codec function is the canonical staging path
+and both public Driver transactions call it directly. Add a static Driver
+staging helper only when it composes additional Driver-owned policy or staged
+transaction images that do not belong in Codec. The architecture requires one
+reusable staging path, not an extra call layer.
+
+Public configuration APIs own the Read/Modify/Write transaction. Their generic
+flow is:
+
+```text
+PERIPH_GetTimeBaseConfig()
+  -> validate public output and live preconditions
+  -> read every required register image once
+  -> extract the complete timebase structure without changing hardware
+
+PERIPH_SetTimeBaseConfig()
+  -> validate public input and live preconditions
+  -> read every required current register image once
+  -> call _PERIPH_StageTimeBaseConfig(...)
+  -> commit changed images in the required hardware order
+  -> run the documented cleanup path
+
+PERIPH_Config()
+  -> validate the complete root request and lifecycle preconditions
+  -> read every image required by all represented domains
+  -> call _PERIPH_StageCounterConfig(...)
+  -> call _PERIPH_StageTimeBaseConfig(...)
+  -> commit only after all fallible staging succeeds
+  -> preserve peripheral IRQ-source state
+  -> run the documented cleanup path
+```
+
+The root function must not implement a second copy of the grouped staging
+logic, and it must not call public grouped setters when doing so would create
+multiple partially committed transactions. It reuses their private staging
+helpers, stages the whole root request before the first write, and then owns one
+ordered commit. Conversely, a grouped public setter reads and commits only the
+registers required by its own domain.
+
+A separate private commit helper is appropriate only when it names and owns a
+real reusable or hazardous hardware sequence, such as loading buffered values
+through an update event. It must not perform unrelated staging or silently
+acquire broader lifecycle authority. Driver commit helpers return
+`driver_status_t`; only deliberately mechanical LL write primitives remain
+`void`.
+
+For Timer, this means `TIM_Config()` visibly composes the staging paths for
+`tim_config_counter_t` and `tim_config_timebase_t` while preserving
+`TIMx_DIER`.
+`TIM_GetCounterConfig()` / `TIM_SetCounterConfig()` and
+`TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()` provide the grouped
+domain pairs. Their setters reuse the respective staging paths, while the root
+transaction performs one all-base-domain ordered commit. No private helper
+shadows all of `TIM_Config()`, and no configuration path calls
+`TIM_DeConfig()`.
+Applications configure Timer interrupt generation separately through
+`TIM_SetIRQSources()`.
+
 ## Conjugate API Naming and Scope
 
 Conjugate API pairs must be symmetric in both naming and semantic scope. Use
@@ -268,22 +417,40 @@ pair when one owns only a narrow subdomain and the other resets or mutates the
 complete peripheral.
 
 A root configuration type such as `tim_config_t` represents every currently
-admitted configuration domain. Its root configuration API applies that whole
-object, while its deconfiguration conjugate restores the complete peripheral
-to the documented reset state. Conjugate lifecycle entry points remain
-independent: a configuration function must not call its deconfiguration
-conjugate, and a deconfiguration function must not call its configuration
-conjugate. The application owns their ordering and explicitly requests a reset
-when required. Configuration preserves deferred or unrepresented domains until
-their contracts are admitted.
+admitted base-configuration domain intentionally included in that object. Its
+root configuration API applies that whole object, while preserving explicitly
+separate operational domains such as IRQ-source enables. Its deconfiguration
+conjugate restores the complete peripheral to the documented reset state.
+Conjugate lifecycle entry points remain independent: a configuration function
+must not call its deconfiguration conjugate, and a deconfiguration function
+must not call its configuration conjugate. The application owns their ordering
+and explicitly requests a reset when required. Configuration preserves
+deferred, unrepresented, and explicitly separated domains.
 
-Do not expose convenience functions that configure a peripheral to a requested
-frequency. Callers provide explicit register-semantic configuration values.
+Do not expose general-purpose convenience functions that configure a
+peripheral to an arbitrary requested frequency. Callers provide explicit
+register-semantic configuration values. A narrowly named service-bootstrap
+helper is acceptable when a concrete admitted service requires one fixed
+configuration, validates its documented clock assumption, and delegates the
+canonical root configuration API. For example, `TIM_ConfigDelay1MHz()` may
+configure the dedicated polling-delay service for a validated 72 MHz Timer
+kernel clock; it must not become a general frequency setter.
+
 Calculated-frequency getters are acceptable because they observe and report
 programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-15: Excluded IRQ-source enables from root configuration structures;
+  applications must configure peripheral interrupt generation explicitly
+  before independently enabling NVIC delivery.
+- 2026-08-15: Defined root configuration as visible composition of reusable
+  domain-staging helpers, assigned Read/Modify/Write and ordered commit
+  ownership to public Driver APIs, and prohibited private helpers that shadow
+  an entire public root transaction.
+- 2026-08-15: Permitted narrowly named fixed-configuration service helpers
+  when they validate their clock assumptions and delegate canonical root
+  configuration, while retaining the prohibition on general frequency setters.
 - 2026-08-15: Extended the retval list/value/colon layout to non-status return
   values and prohibited legacy entries without the list marker, code
   formatting, and colon.
