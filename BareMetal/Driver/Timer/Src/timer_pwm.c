@@ -34,9 +34,9 @@
  * - `TIM3`
  * - `TIM4`
  * @returns @ref driver_status_t "Timer-instance validation status"
- * @retval DRIVER_STATUS_SUCCESS @p TIMx is supported
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p TIMx is unsupported
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p TIMx is supported
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is unsupported
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateInstance(const TIM_TypeDef* const TIMx)
 {
@@ -66,9 +66,9 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateInstance(const TIM_TypeDef
  * Expected values:
  * - Non-`NULL`: Decoded APB1 clock enable mask is written to @p pClockEnableMask
  * @returns @ref driver_status_t "APB1 clock-mask decode status"
- * @retval DRIVER_STATUS_SUCCESS APB1 clock enable mask was decoded
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx or @p pClockEnableMask is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p TIMx is not supported
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 clock enable mask was decoded
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx or @p pClockEnableMask is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_DecodeAPB1ClockEnableMask
 (
@@ -114,13 +114,14 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_DecodeAPB1ClockEnableMask
  * @brief Validates that the Timer APB1 clock gate is enabled
  * @param[in] TIMx Timer peripheral instance
  * @returns @ref driver_status_t "Clock-gate validation status"
- * @retval DRIVER_STATUS_SUCCESS Timer APB1 clock gate is enabled
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p TIMx is not supported
- * @retval DRIVER_STATUS_ERROR_STATE Timer APB1 clock gate is disabled
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer APB1 clock gate is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateClockEnabled(TIM_TypeDef* const TIMx)
 {
+	// Local Variables
 	reg clockEnableMask = 0x00000000UL;
 	driver_status_t clockState = DRIVER_STATUS_ERROR;
 
@@ -143,8 +144,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateClockEnabled(TIM_TypeDef* 
  * @brief Validates a Timer single-channel selector
  * @param[in] channel Timer single-channel selector
  * @returns @ref driver_status_t "Channel validation status"
- * @retval DRIVER_STATUS_SUCCESS @p channel selects one supported channel
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channel is empty, selects multiple channels, or contains unsupported bits
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p channel selects one supported channel
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channel is empty, selects multiple channels, or contains unsupported bits
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannel(const tim_channel_t channel)
 {
@@ -161,8 +162,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannel(const tim_channel_
  * @brief Validates a non-empty Timer channel mask
  * @param[in] channelMask Timer channel mask
  * @returns @ref driver_status_t "Channel-mask validation status"
- * @retval DRIVER_STATUS_SUCCESS @p channelMask selects one or more supported channels
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p channelMask is empty or contains unsupported bits
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p channelMask selects one or more supported channels
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channelMask is empty or contains unsupported bits
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannelMask(const tim_channel_t channelMask)
 {
@@ -179,8 +180,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannelMask(const tim_chan
  * @brief Validates a Timer PWM mode selector
  * @param[in] mode Timer PWM mode selector
  * @returns @ref driver_status_t "PWM-mode validation status"
- * @retval DRIVER_STATUS_SUCCESS @p mode is valid
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p mode is not PWM mode 1 or PWM mode 2
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p mode is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mode is not PWM mode 1 or PWM mode 2
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateMode(const tim_channel_mode_t mode)
 {
@@ -197,8 +198,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateMode(const tim_channel_mod
  * @brief Validates a Timer PWM duty-cycle value
  * @param[in] dutyCycle PWM duty cycle in permille units
  * @returns @ref driver_status_t "PWM duty-cycle validation status"
- * @retval DRIVER_STATUS_SUCCESS @p dutyCycle is valid
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p dutyCycle is outside `0U..1000U`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p dutyCycle is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p dutyCycle is outside `0U..1000U`
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
 {
@@ -215,8 +216,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateDutyCycle(const tim_pwm_du
  * @brief Validates a Timer ON/OFF state selector
  * @param[in] state Timer state selector
  * @returns @ref driver_status_t "Binary-state validation status"
- * @retval DRIVER_STATUS_SUCCESS @p state is @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" or @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`"
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p state is invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is invalid
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateState(const driver_status_t state)
 {
@@ -375,9 +376,9 @@ __STATIC_FORCEINLINE void _TIM_PWM_WriteCCR
  * @param[in] cr1RegImage Caller-owned `TIMx_CR1` image
  * @param[in] arrRegImage Caller-owned `TIMx_ARR` image
  * @returns @ref driver_status_t "Timer PWM base-image validation status"
- * @retval DRIVER_STATUS_SUCCESS The Timer base images satisfy the PWM contract
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG `ARR` is outside the exact-duty range
- * @retval DRIVER_STATUS_ERROR_STATE A base field is undecodable or incompatible with PWM
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The Timer base images satisfy the PWM contract
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `ARR` is outside the exact-duty range
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A base field is undecodable or incompatible with PWM
  * @note This helper does not validate `CR1.CEN` or `CNT`
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateBaseImages
@@ -433,8 +434,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateBaseImages
  * @param[out] pMode Optional destination for the decoded PWM mode
  * @param[out] pPolarity Optional destination for the decoded output polarity
  * @returns @ref driver_status_t "PWM configuration extraction status"
- * @retval DRIVER_STATUS_SUCCESS The channel PWM configuration is valid
- * @retval DRIVER_STATUS_ERROR_STATE The channel is not configured for the supported PWM shape
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The channel PWM configuration is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The channel is not configured for the supported PWM shape
  * @pre @p channel is validated before this helper is called
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
@@ -502,9 +503,9 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
  * @param[in] dutyCycle Requested PWM duty cycle in permille units
  * @param[out] pCompareValue Destination for the computed 16-bit compare value
  * @returns @ref driver_status_t "PWM compare-value calculation status"
- * @retval DRIVER_STATUS_SUCCESS The compare value was calculated
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCompareValue is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p autoReload, @p mode, or @p dutyCycle is invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The compare value was calculated
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCompareValue is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p mode, or @p dutyCycle is invalid
  * @note The calculation uses 64-bit intermediates and performs no MMIO
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
@@ -561,9 +562,9 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
  * @param[in] compareValue Programmed Timer output-compare value
  * @param[out] pDutyCycle Destination for achieved duty in permille units
  * @returns @ref driver_status_t "PWM duty-cycle calculation status"
- * @retval DRIVER_STATUS_SUCCESS The achieved duty cycle was calculated
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pDutyCycle is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p autoReload, @p mode, or @p compareValue is invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The achieved duty cycle was calculated
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDutyCycle is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p mode, or @p compareValue is invalid
  * @note The calculation uses 64-bit intermediates and performs no MMIO
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle

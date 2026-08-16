@@ -84,49 +84,44 @@ access. Source Doxygen repeats only the operation-specific warning required to
 use an accessor safely. A C `volatile` declaration communicates access
 generation but does not, by itself, document these hardware semantics.
 
-Use Doxygen's native return-value layout exactly:
+Use the repository's Doxygen return-value layout exactly:
 
 ```c
- * @retval DRIVER_STATUS_SUCCESS Register image was captured
- * @retval DRIVER_STATUS_ERROR_NULL_PTR An input pointer is `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was captured
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer is `NULL`
 ```
 
-The first token after `@retval` is Doxygen's parser-visible return value. Keep
-that symbolic constant bare and place its description after one separating
-space. Do not insert a list marker, `@ref`, backticks, a colon, tabs, or extra
-alignment whitespace between `@retval` and its description, and do not
-terminate status descriptions with a period.
+For status-returning functions, retain the list marker, reference the symbolic
+status with a backtick-wrapped `@ref` target, and separate the description with
+one colon. Do not terminate status descriptions with a period.
 
-Use the same native layout for non-status return values:
+The configured Doxygen version may report repeated return-value warnings
+because it parses the list marker as the return-value key. Those exact `'-'`
+warnings are an accepted consequence of the repository display convention;
+do not rewrite the documented house style to silence them. All other Doxygen
+warnings remain subject to the normal validation pass.
+
+Use the corresponding list layout for non-status return values:
 
 ```c
- * @retval 0x00U The selector is not supported
- * @retval 0x01U The selector is supported
+ * @retval - `0x00U`: The selector is not supported
+ * @retval - `0x01U`: The selector is supported
 ```
 
-Do not use `@retval - ...`: Doxygen treats the hyphen as the return-value
-argument, collapses every entry onto the same value, and emits duplicate
-documentation warnings. Do not place `@ref` where `@retval` expects its value
-argument; use the ordinary two-part `@ref` form only in prose and lists.
-
-Every macro or symbolic constant used as a Doxygen `@ref` must use Doxygen's
-valid two-part reference form: a bare parser-visible target followed by a
-quoted display label whose identifier is enclosed in backticks. Apply this
-consistently in accepted/expected-value lists, parameter descriptions, return
-descriptions, notes, warnings, and ordinary Doxygen prose:
+Every macro or symbolic constant used as a Doxygen `@ref` must place the target
+inside backticks. Apply this consistently in accepted/expected-value lists,
+parameter descriptions, return descriptions, notes, warnings, and ordinary
+Doxygen prose:
 
 ```c
- * - @ref PERIPH_EVENT_UPDATE "`PERIPH_EVENT_UPDATE`": Update event
- * - Any non-empty combination contained by @ref PERIPH_EVENT_ALL "`PERIPH_EVENT_ALL`"
- * @note Start operation with @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`"
+ * - @ref `PERIPH_EVENT_UPDATE`: Update event
+ * - Any non-empty combination contained by @ref `PERIPH_EVENT_ALL`
+ * @note Start operation with @ref `DRIVER_STATUS_ON`
 ```
 
-Do not wrap the parser-visible target itself in backticks. A backtick
-immediately after `@ref` becomes part of the target token and causes Doxygen
-parse warnings. The quoted display label preserves the required code styling without invalidating
-the reference. This display-label rule does not apply to referenced types,
-structures, members, groups, or functions unless another formatting rule
-explicitly requires code styling for them.
+Do not add a second quoted display label after the `@ref` target. References to
+types, structures, members, groups, or functions remain unwrapped unless the
+surrounding repository style explicitly requires code styling.
 
 ## Function Doxygen Layout
 
@@ -147,23 +142,23 @@ Use this status-returning function format:
 ```c
  * @param[in] operationState Requested Timer operation state
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : Stop Timer counter operation.
- * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : Start Timer counter operation.
+ * - @ref `DRIVER_STATUS_OFF`: Stop Timer counter operation
+ * - @ref `DRIVER_STATUS_ON`: Start Timer counter operation
  * @returns @ref driver_status_t "Operation-state operation status"
- * @retval DRIVER_STATUS_SUCCESS Timer counter operation state was updated
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p `TIMx` / @p `operationState` was invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer counter operation state was updated
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `operationState` was invalid
 ```
 
 Validation helpers use an action-oriented `@brief` beginning with
 `Validates`, a referenced `driver_status_t` return line whose quoted text names
-the specific validation, and the same exact native return-value layout:
+the specific validation, and the same repository return-value layout:
 
 ```c
  * @brief Validates that the Timer counter is stopped
  * @param[in] TIMx Timer peripheral instance
  * @returns @ref driver_status_t "Counter-state validation status"
- * @retval DRIVER_STATUS_SUCCESS Timer clock is enabled and the counter is stopped
- * @retval DRIVER_STATUS_ERROR_BUSY Timer counter is running
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer clock is enabled and the counter is stopped
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running
 ```
 
 Parameter documentation must be specific to that parameter. Do not combine
@@ -703,6 +698,10 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-16: Restored the repository-owner Doxygen style using
+  backtick-wrapped `@ref` targets and list-style referenced `@retval` status
+  entries. This later decision supersedes the earlier same-day native Doxygen
+  return/reference syntax preference.
 - 2026-08-16: Replaced invalid backtick-wrapped Doxygen `@ref` targets with
   bare targets plus quoted backtick-styled display labels, and replaced the
   invalid `@retval - @ref ...` list form with Doxygen's native

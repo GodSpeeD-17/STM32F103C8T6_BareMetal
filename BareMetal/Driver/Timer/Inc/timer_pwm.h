@@ -73,24 +73,24 @@ extern "C" {
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @param[in] mode Timer PWM mode selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_MODE_PWM1 "`TIMx_CHANNEL_MODE_PWM1`" : PWM mode 1
- * - @ref TIMx_CHANNEL_MODE_PWM2 "`TIMx_CHANNEL_MODE_PWM2`" : PWM mode 2
+ * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
+ * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
  * @param[in] polarity Timer channel polarity selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_POLARITY_HIGH "`TIMx_CHANNEL_POLARITY_HIGH`" : Active-high output
- * - @ref TIMx_CHANNEL_POLARITY_LOW "`TIMx_CHANNEL_POLARITY_LOW`" : Active-low output
+ * - @ref `TIMx_CHANNEL_POLARITY_HIGH`: Active-high output
+ * - @ref `TIMx_CHANNEL_POLARITY_LOW`: Active-low output
  * @returns @ref driver_status_t "PWM-configuration operation status"
- * @retval DRIVER_STATUS_SUCCESS PWM channel was configured and remains disabled
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, mode, polarity, or programmed ARR is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate or Timer base configuration does not satisfy the PWM contract
- * @retval DRIVER_STATUS_ERROR_BUSY Counter or selected channel output is enabled
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PWM channel was configured and remains disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, mode, polarity, or programmed ARR is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate or Timer base configuration does not satisfy the PWM contract
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
  * @pre The application enabled the matching Timer APB1 clock gate
  * @pre The application completed @ref TIM_Config and left `CNT` at zero
  * @pre The selected channel output is disabled
@@ -117,23 +117,23 @@ driver_status_t TIM_ConfigPWM
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @param[out] pMode Destination for the configured PWM mode
  * Expected values:
- * - @ref TIMx_CHANNEL_MODE_PWM1 "`TIMx_CHANNEL_MODE_PWM1`" : PWM mode 1
- * - @ref TIMx_CHANNEL_MODE_PWM2 "`TIMx_CHANNEL_MODE_PWM2`" : PWM mode 2
+ * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
+ * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
  * @param[out] pPolarity Destination for the configured channel polarity
  * Expected values:
- * - @ref TIMx_CHANNEL_POLARITY_HIGH "`TIMx_CHANNEL_POLARITY_HIGH`" : Active-high output
- * - @ref TIMx_CHANNEL_POLARITY_LOW "`TIMx_CHANNEL_POLARITY_LOW`" : Active-low output
+ * - @ref `TIMx_CHANNEL_POLARITY_HIGH`: Active-high output
+ * - @ref `TIMx_CHANNEL_POLARITY_LOW`: Active-low output
  * @returns @ref driver_status_t "PWM-configuration extraction status"
- * @retval DRIVER_STATUS_SUCCESS Complete PWM configuration was published
- * @retval DRIVER_STATUS_ERROR_NULL_PTR An input or output pointer is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance or channel is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled or the channel does not have the admitted PWM shape
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete PWM configuration was published
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input or output pointer is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or the channel does not have the admitted PWM shape
  * @note Output storage remains unchanged on failure
  */
 driver_status_t TIM_GetPWMConfig
@@ -158,16 +158,16 @@ driver_status_t TIM_GetPWMConfig
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @returns @ref driver_status_t "PWM-deconfiguration operation status"
- * @retval DRIVER_STATUS_SUCCESS Selected channel-owned state was reset
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance or channel is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled or the selected channel is not configured for PWM
- * @retval DRIVER_STATUS_ERROR_BUSY Counter or selected channel output is enabled
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected channel-owned state was reset
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or the selected channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
  */
 driver_status_t TIM_DeConfigPWM
 (
@@ -196,21 +196,20 @@ driver_status_t TIM_DeConfigPWM
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @param[in] dutyCycle Duty cycle in permille units
  * Accepted values:
- * - @ref TIM_PWM_DUTY_CYCLE_MIN "`TIM_PWM_DUTY_CYCLE_MIN`" through
- *   @ref TIM_PWM_DUTY_CYCLE_MAX "`TIM_PWM_DUTY_CYCLE_MAX`"
+ * - @ref `TIM_PWM_DUTY_CYCLE_MIN` through @ref `TIM_PWM_DUTY_CYCLE_MAX`
  * @returns @ref driver_status_t "PWM duty-cycle operation status"
- * @retval DRIVER_STATUS_SUCCESS Selected compare value was programmed
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, duty, or programmed ARR is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled, channel
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected compare value was programmed
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, duty, or programmed ARR is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled, channel
  * is not configured for PWM, or a stopped counter is not at zero
- * @retval DRIVER_STATUS_ERROR_BUSY A stopped Timer still has the selected channel output enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: A stopped Timer still has the selected channel output enabled
  * @pre Disable the selected channel output before changing its stopped-state duty
  * @note The stopped path temporarily disables only the selected lane's CCR
  * preload, writes its active compare value, and restores preload before return
@@ -236,19 +235,18 @@ driver_status_t TIM_SetPWMDutyCycle
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @param[out] pDutyCycle Destination for the achieved duty in permille units
  * Expected values:
- * - @ref TIM_PWM_DUTY_CYCLE_MIN "`TIM_PWM_DUTY_CYCLE_MIN`" through
- *   @ref TIM_PWM_DUTY_CYCLE_MAX "`TIM_PWM_DUTY_CYCLE_MAX`"
+ * - @ref `TIM_PWM_DUTY_CYCLE_MIN` through @ref `TIM_PWM_DUTY_CYCLE_MAX`
  * @returns @ref driver_status_t "PWM duty-cycle extraction status"
- * @retval DRIVER_STATUS_SUCCESS Programmed duty was published
- * @retval DRIVER_STATUS_ERROR_NULL_PTR An input or output pointer is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, ARR, or compare value is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled or channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Programmed duty was published
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input or output pointer is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, ARR, or compare value is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or channel is not configured for PWM
  * @note While running, the readable preload may not yet be active until the next update event
  * @note Output storage remains unchanged on failure
  */
@@ -278,17 +276,16 @@ driver_status_t TIM_GetPWMDutyCycle
  * - `TIM4`
  * @param[in] channelMask Non-empty Timer channel mask
  * Accepted values:
- * - Any non-empty combination of @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- *   @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * - Any non-empty combination of @ref `TIMx_CHANNEL_1` through @ref `TIMx_CHANNEL_4`
  * @param[in] outputState Requested output state
  * Accepted values:
- * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : Disable selected channel outputs
- * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : Enable selected channel outputs
+ * - @ref `DRIVER_STATUS_OFF`: Disable selected channel outputs
+ * - @ref `DRIVER_STATUS_ON`: Enable selected channel outputs
  * @returns @ref driver_status_t "PWM output-state operation status"
- * @retval DRIVER_STATUS_SUCCESS Selected `CCxE` fields were updated coherently
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel mask, or output state is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled or an enabled lane is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected `CCxE` fields were updated coherently
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel mask, or output state is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or an enabled lane is not configured for PWM
  */
 driver_status_t TIM_SetPWMOutputState
 (
@@ -309,16 +306,16 @@ driver_status_t TIM_SetPWMOutputState
  * - `TIM4`
  * @param[in] channel Timer single-channel selector
  * Accepted values:
- * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
- * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
- * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
- * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * - @ref `TIMx_CHANNEL_1`: Timer channel 1
+ * - @ref `TIMx_CHANNEL_2`: Timer channel 2
+ * - @ref `TIMx_CHANNEL_3`: Timer channel 3
+ * - @ref `TIMx_CHANNEL_4`: Timer channel 4
  * @returns @ref driver_status_t "PWM output-state operation status"
- * @retval DRIVER_STATUS_OFF Selected channel output is disabled
- * @retval DRIVER_STATUS_ON Selected channel output is enabled
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
- * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance or channel is invalid
- * @retval DRIVER_STATUS_ERROR_STATE Clock gate is disabled or channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_OFF`: Selected channel output is disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: Selected channel output is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or channel is not configured for PWM
  */
 driver_status_t TIM_GetPWMOutputState
 (

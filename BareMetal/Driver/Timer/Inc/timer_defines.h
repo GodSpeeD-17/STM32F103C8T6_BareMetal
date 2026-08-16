@@ -217,7 +217,7 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
  * @brief Converts a zero-based Timer channel index to a single-channel mask
  * @param[in]	channelIndex	Zero-based Timer channel index
  * @returns Timer channel mask generated from @p channelIndex
- * @retval - `TIMx_CHANNEL_1-TIMx_CHANNEL_4`: @p channelIndex is valid
+ * @retval - @ref `TIMx_CHANNEL_1` - @ref `TIMx_CHANNEL_4`: @p channelIndex is valid
  * @def TIM_CHANNEL_INDEX_TO_MASK
  */
 #define TIM_CHANNEL_INDEX_TO_MASK(channelIndex)		((tim_channel_t) REG_BIT_MASK(channelIndex))
@@ -655,8 +655,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer PWM duty-cycle value is valid
  * @param[in]	dutyCycle	Timer PWM duty cycle in permille units
  * @returns Duty-cycle validity status
- * @retval 0x00U @p dutyCycle is outside `0..1000`
- * @retval 0x01U @p dutyCycle is inside `0..1000`
+ * @retval - `0x00U`: @p dutyCycle is outside `0..1000`
+ * @retval - `0x01U`: @p dutyCycle is inside `0..1000`
  * @def TIM_PWM_DUTY_CYCLE_IS_VALID
  */
 #define TIM_PWM_DUTY_CYCLE_IS_VALID(dutyCycle)	\
@@ -666,8 +666,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer auto-reload value admits exact PWM endpoints
  * @param[in]	autoReload	Timer auto-reload value
  * @returns PWM auto-reload validity status
- * @retval 0x00U @p autoReload is outside `1..65534`
- * @retval 0x01U @p autoReload is inside `1..65534`
+ * @retval - `0x00U`: @p autoReload is outside `1..65534`
+ * @retval - `0x01U`: @p autoReload is inside `1..65534`
  * @def TIM_PWM_AUTO_RELOAD_IS_VALID
  */
 #define TIM_PWM_AUTO_RELOAD_IS_VALID(autoReload)						\
@@ -680,8 +680,8 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  * @brief Checks whether a Timer channel mode is an admitted PWM mode
  * @param[in]	mode	Timer channel mode selector
  * @returns PWM-mode validity status
- * @retval 0x00U @p mode is not PWM mode 1 or PWM mode 2
- * @retval 0x01U @p mode is PWM mode 1 or PWM mode 2
+ * @retval - `0x00U`: @p mode is not PWM mode 1 or PWM mode 2
+ * @retval - `0x01U`: @p mode is PWM mode 1 or PWM mode 2
  * @def TIM_PWM_MODE_IS_VALID
  */
 #define TIM_PWM_MODE_IS_VALID(mode)							\

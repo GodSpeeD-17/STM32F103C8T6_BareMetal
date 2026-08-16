@@ -972,8 +972,8 @@ driver_status_t Codec_TIM_StageChannelPolarity
  * Expected values:
  * - `0x0000U..0xFFFFU`: Extracted `CCRx[15:0]` value
  * @returns @ref driver_status_t "Extraction status"
- * @retval DRIVER_STATUS_SUCCESS Compare value was extracted
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCompareValue is `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Compare value was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCompareValue is `NULL`
  * @note The Driver must establish output-compare interpretation before it
  * reads the hardware `CCRx` image supplied to this Codec.
  */
@@ -990,8 +990,8 @@ driver_status_t Codec_TIM_ExtractCompareValue
  * Accepted values:
  * - `0x0000U..0xFFFFU`: Any value representable by @ref tim_compare_value_t
  * @returns @ref driver_status_t "Staging status"
- * @retval DRIVER_STATUS_SUCCESS Compare value was staged
- * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pCcrRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Compare value was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCcrRegImage is `NULL`
  */
 driver_status_t Codec_TIM_StageCompareValue
 (
