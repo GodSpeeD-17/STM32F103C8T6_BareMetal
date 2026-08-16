@@ -17,6 +17,7 @@
  * hidden handle, endpoint, frequency, or requested-duty state.
  */
 
+// Header Guard
 #ifndef TIMER_PWM_H_
 #define TIMER_PWM_H_
 
@@ -66,17 +67,25 @@ extern "C" {
  * enables `CCxE` or `CR1.CEN`.
  *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
  * @param[in] mode Timer PWM mode selector
- * Accepted values: @ref TIMx_CHANNEL_MODE_PWM1 "`TIMx_CHANNEL_MODE_PWM1`" or
- * @ref TIMx_CHANNEL_MODE_PWM2 "`TIMx_CHANNEL_MODE_PWM2`"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_MODE_PWM1 "`TIMx_CHANNEL_MODE_PWM1`" : PWM mode 1
+ * - @ref TIMx_CHANNEL_MODE_PWM2 "`TIMx_CHANNEL_MODE_PWM2`" : PWM mode 2
  * @param[in] polarity Timer channel polarity selector
- * Accepted values: @ref TIMx_CHANNEL_POLARITY_HIGH "`TIMx_CHANNEL_POLARITY_HIGH`" or
- * @ref TIMx_CHANNEL_POLARITY_LOW "`TIMx_CHANNEL_POLARITY_LOW`"
- * @returns @ref driver_status_t "PWM configuration status"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_POLARITY_HIGH "`TIMx_CHANNEL_POLARITY_HIGH`" : Active-high output
+ * - @ref TIMx_CHANNEL_POLARITY_LOW "`TIMx_CHANNEL_POLARITY_LOW`" : Active-low output
+ * @returns @ref driver_status_t "PWM-configuration operation status"
  * @retval DRIVER_STATUS_SUCCESS PWM channel was configured and remains disabled
  * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, mode, polarity, or programmed ARR is invalid
@@ -90,21 +99,37 @@ extern "C" {
 driver_status_t TIM_ConfigPWM
 (
 	TIM_TypeDef* const				TIMx,
-	const tim_channel_t			channel,
+	const tim_channel_t				channel,
 	const tim_channel_mode_t		mode,
 	const tim_channel_polarity_t	polarity
 );
 
 /**
  * @brief Gets one Timer PWM channel's mode and polarity
+ * @details
+ * Reads the selected `CCMR` lane and `CCER`, validates the complete supported
+ * PWM shape, and publishes both selectors only after successful extraction.
+ *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
  * @param[out] pMode Destination for the configured PWM mode
+ * Expected values:
+ * - @ref TIMx_CHANNEL_MODE_PWM1 "`TIMx_CHANNEL_MODE_PWM1`" : PWM mode 1
+ * - @ref TIMx_CHANNEL_MODE_PWM2 "`TIMx_CHANNEL_MODE_PWM2`" : PWM mode 2
  * @param[out] pPolarity Destination for the configured channel polarity
- * @returns @ref driver_status_t "PWM configuration extraction status"
+ * Expected values:
+ * - @ref TIMx_CHANNEL_POLARITY_HIGH "`TIMx_CHANNEL_POLARITY_HIGH`" : Active-high output
+ * - @ref TIMx_CHANNEL_POLARITY_LOW "`TIMx_CHANNEL_POLARITY_LOW`" : Active-low output
+ * @returns @ref driver_status_t "PWM-configuration extraction status"
  * @retval DRIVER_STATUS_SUCCESS Complete PWM configuration was published
  * @retval DRIVER_STATUS_ERROR_NULL_PTR An input or output pointer is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance or channel is invalid
@@ -114,7 +139,7 @@ driver_status_t TIM_ConfigPWM
 driver_status_t TIM_GetPWMConfig
 (
 	TIM_TypeDef* const				TIMx,
-	const tim_channel_t			channel,
+	const tim_channel_t				channel,
 	tim_channel_mode_t* const		pMode,
 	tim_channel_polarity_t* const	pPolarity
 );
@@ -127,11 +152,17 @@ driver_status_t TIM_GetPWMConfig
  * and NVIC state is preserved.
  *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
- * @returns @ref driver_status_t "PWM deconfiguration status"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * @returns @ref driver_status_t "PWM-deconfiguration operation status"
  * @retval DRIVER_STATUS_SUCCESS Selected channel-owned state was reset
  * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance or channel is invalid
@@ -141,7 +172,7 @@ driver_status_t TIM_GetPWMConfig
 driver_status_t TIM_DeConfigPWM
 (
 	TIM_TypeDef* const		TIMx,
-	const tim_channel_t	channel
+	const tim_channel_t		channel
 );
 
 // ==================================================================================================== //
@@ -159,14 +190,21 @@ driver_status_t TIM_DeConfigPWM
  * Timer, it updates the programmed preload for the next natural update event.
  *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
  * @param[in] dutyCycle Duty cycle in permille units
- * Accepted values: @ref TIM_PWM_DUTY_CYCLE_MIN "`TIM_PWM_DUTY_CYCLE_MIN`" through
- * @ref TIM_PWM_DUTY_CYCLE_MAX "`TIM_PWM_DUTY_CYCLE_MAX`"
- * @returns @ref driver_status_t "PWM duty update status"
+ * Accepted values:
+ * - @ref TIM_PWM_DUTY_CYCLE_MIN "`TIM_PWM_DUTY_CYCLE_MIN`" through
+ *   @ref TIM_PWM_DUTY_CYCLE_MAX "`TIM_PWM_DUTY_CYCLE_MAX`"
+ * @returns @ref driver_status_t "PWM duty-cycle operation status"
  * @retval DRIVER_STATUS_SUCCESS Selected compare value was programmed
  * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, duty, or programmed ARR is invalid
@@ -179,20 +217,34 @@ driver_status_t TIM_DeConfigPWM
  */
 driver_status_t TIM_SetPWMDutyCycle
 (
-	TIM_TypeDef* const				TIMx,
+	TIM_TypeDef* const			TIMx,
 	const tim_channel_t			channel,
 	const tim_pwm_duty_cycle_t	dutyCycle
 );
 
 /**
  * @brief Gets the duty represented by one Timer PWM channel's programmed state
+ * @details
+ * Reads the configured PWM mode, `ARR`, and selected `CCRx`, then reconstructs
+ * the achieved duty in permille units. The destination is published only after
+ * successful validation and calculation.
+ *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
  * @param[out] pDutyCycle Destination for the achieved duty in permille units
- * @returns @ref driver_status_t "PWM duty extraction status"
+ * Expected values:
+ * - @ref TIM_PWM_DUTY_CYCLE_MIN "`TIM_PWM_DUTY_CYCLE_MIN`" through
+ *   @ref TIM_PWM_DUTY_CYCLE_MAX "`TIM_PWM_DUTY_CYCLE_MAX`"
+ * @returns @ref driver_status_t "PWM duty-cycle extraction status"
  * @retval DRIVER_STATUS_SUCCESS Programmed duty was published
  * @retval DRIVER_STATUS_ERROR_NULL_PTR An input or output pointer is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel, ARR, or compare value is invalid
@@ -203,8 +255,8 @@ driver_status_t TIM_SetPWMDutyCycle
 driver_status_t TIM_GetPWMDutyCycle
 (
 	TIM_TypeDef* const				TIMx,
-	const tim_channel_t			channel,
-	tim_pwm_duty_cycle_t* const	pDutyCycle
+	const tim_channel_t				channel,
+	tim_pwm_duty_cycle_t* const		pDutyCycle
 );
 
 // ==================================================================================================== //
@@ -220,14 +272,19 @@ driver_status_t TIM_GetPWMDutyCycle
  * changed.
  *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channelMask Non-empty Timer channel mask
- * Accepted values: Any combination of @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`"
- * through @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
+ * Accepted values:
+ * - Any non-empty combination of @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
+ *   @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
  * @param[in] outputState Requested output state
- * Accepted values: @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" or
- * @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`"
- * @returns @ref driver_status_t "PWM output-state update status"
+ * Accepted values:
+ * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : Disable selected channel outputs
+ * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : Enable selected channel outputs
+ * @returns @ref driver_status_t "PWM output-state operation status"
  * @retval DRIVER_STATUS_SUCCESS Selected `CCxE` fields were updated coherently
  * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
  * @retval DRIVER_STATUS_ERROR_INVALID_ARG Instance, channel mask, or output state is invalid
@@ -236,18 +293,27 @@ driver_status_t TIM_GetPWMDutyCycle
 driver_status_t TIM_SetPWMOutputState
 (
 	TIM_TypeDef* const			TIMx,
-	const tim_channel_t		channelMask,
+	const tim_channel_t			channelMask,
 	const driver_status_t		outputState
 );
 
 /**
  * @brief Gets one Timer PWM channel's output-enable state
+ * @details
+ * Validates the complete selected PWM shape before returning `CCxE` state.
+ *
  * @param[in] TIMx Timer peripheral instance
- * Accepted values: `TIM2`, `TIM3`, or `TIM4`
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
  * @param[in] channel Timer single-channel selector
- * Accepted values: @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" through
- * @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`"
- * @returns @ref driver_status_t "PWM output state"
+ * Accepted values:
+ * - @ref TIMx_CHANNEL_1 "`TIMx_CHANNEL_1`" : Timer channel 1
+ * - @ref TIMx_CHANNEL_2 "`TIMx_CHANNEL_2`" : Timer channel 2
+ * - @ref TIMx_CHANNEL_3 "`TIMx_CHANNEL_3`" : Timer channel 3
+ * - @ref TIMx_CHANNEL_4 "`TIMx_CHANNEL_4`" : Timer channel 4
+ * @returns @ref driver_status_t "PWM output-state operation status"
  * @retval DRIVER_STATUS_OFF Selected channel output is disabled
  * @retval DRIVER_STATUS_ON Selected channel output is enabled
  * @retval DRIVER_STATUS_ERROR_NULL_PTR @p TIMx is `NULL`
