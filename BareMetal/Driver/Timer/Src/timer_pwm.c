@@ -10,8 +10,9 @@
  * `timer_pwm.h`. The Driver owns validation, Timer register snapshots,
  * transaction sequencing, duty arithmetic, and dirty writes. The existing
  * Timer Codec owns field extraction/staging, while Timer LL owns named MMIO.
- * GPIO, AFIO, RCC clock-gate mutation, Timer frequency, and `CR1.CEN` remain
- * outside this source file's ownership.
+ * GPIO, AFIO, RCC clock-gate query/mutation, Timer frequency, and `CR1.CEN`
+ * remain outside this source file's ownership. A successful @ref TIM_Config
+ * call is the PWM subdomain's Timer-lifecycle prerequisite.
  */
 
 // ==================================================================================================== //
@@ -20,7 +21,6 @@
 #include "timer_pwm.h"
 #include "timer_codec.h"
 #include "timer_ll.h"
-#include "rcc.h"
 
 // ==================================================================================================== //
 //									Local Validation Helpers									//
@@ -53,91 +53,6 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateInstance(const TIM_TypeDef
 	}
 
 	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Decodes the APB1 clock enable mask for one Timer instance
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - `TIM2`
- * - `TIM3`
- * - `TIM4`
- * @param[out] pClockEnableMask Destination for the APB1 clock enable mask
- * Expected values:
- * - Non-`NULL`: Decoded APB1 clock enable mask is written to @p pClockEnableMask
- * @returns @ref driver_status_t "APB1 clock-mask decode status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 clock enable mask was decoded
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx or @p pClockEnableMask is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- */
-__STATIC_FORCEINLINE driver_status_t _TIM_PWM_DecodeAPB1ClockEnableMask
-(
-	const TIM_TypeDef* const	TIMx,
-	reg* const					pClockEnableMask
-)
-{
-	//! Validate destination storage before decoding the instance address.
-	if (pClockEnableMask == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
-
-	//! Compare pointer-width addresses so the lookup matches the uintptr_t base definitions.
-	switch ((uintptr_t) TIMx)
-	{
-		case TIM2_BASE_ADDRESS:
-		{
-			*pClockEnableMask = RCC_APB1ENR_TIM2EN;
-			break;
-		}
-		case TIM3_BASE_ADDRESS:
-		{
-			*pClockEnableMask = RCC_APB1ENR_TIM3EN;
-			break;
-		}
-		case TIM4_BASE_ADDRESS:
-		{
-			*pClockEnableMask = RCC_APB1ENR_TIM4EN;
-			break;
-		}
-		default:
-		{
-			return DRIVER_STATUS_ERROR_INVALID_ARG;
-		}
-	}
-
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Validates that the Timer APB1 clock gate is enabled
- * @param[in] TIMx Timer peripheral instance
- * @returns @ref driver_status_t "Clock-gate validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer APB1 clock gate is enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx is not supported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
- */
-__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateClockEnabled(TIM_TypeDef* const TIMx)
-{
-	// Local Variables
-	reg clockEnableMask = 0x00000000UL;
-	driver_status_t clockState = DRIVER_STATUS_ERROR;
-
-	//! Resolve and sample the APB1 enable bit without touching Timer registers.
-	ASSERT_DRIVER_STATUS(_TIM_PWM_DecodeAPB1ClockEnableMask(TIMx, &clockEnableMask));
-	clockState = RCC_APB1_ClockGetState(clockEnableMask);
-	if (clockState == DRIVER_STATUS_ON)
-	{
-		return DRIVER_STATUS_SUCCESS;
-	}
-	if (clockState == DRIVER_STATUS_ERROR_INVALID_ARG)
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	return DRIVER_STATUS_ERROR_STATE;
 }
 
 /**
@@ -236,7 +151,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateState(const driver_status_
 
 /**
  * @brief Reads the CCMR image containing one Timer channel
- * @param[in] TIMx Timer peripheral instance with an enabled clock gate
+ * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @returns The `CCMR1` or `CCMR2` image containing @p channel
  * @pre @p TIMx and @p channel are validated before this helper is called
@@ -258,7 +173,7 @@ __STATIC_FORCEINLINE reg _TIM_PWM_ReadCCMR
 
 /**
  * @brief Writes the selected CCMR only when its staged image changed
- * @param[in] TIMx Timer peripheral instance with an enabled clock gate
+ * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @param[in] currentImage Current `CCMR1` or `CCMR2` image
  * @param[in] stagedImage Staged `CCMR1` or `CCMR2` image
@@ -292,7 +207,7 @@ __STATIC_FORCEINLINE void _TIM_PWM_WriteCCMRIfChanged
 
 /**
  * @brief Reads the CCR selected by one Timer channel
- * @param[in] TIMx Timer peripheral instance with an enabled clock gate
+ * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @returns The selected `CCRx` register image
  * @pre @p channel is configured for output compare before this helper is called
@@ -328,7 +243,7 @@ __STATIC_FORCEINLINE reg _TIM_PWM_ReadCCR
 
 /**
  * @brief Writes the CCR selected by one Timer channel
- * @param[in] TIMx Timer peripheral instance with an enabled clock gate
+ * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @param[in] regImage Output-compare `CCRx` image to write
  * @returns Nothing
@@ -646,8 +561,8 @@ driver_status_t TIM_ConfigPWM
 	driver_status_t counterState = DRIVER_STATUS_ERROR;
 	driver_status_t channelState = DRIVER_STATUS_ERROR;
 
-	//! Complete argument and application-owned clock validation precedes Timer MMIO.
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	//! Complete argument validation precedes Timer MMIO.
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateMode(mode));
 	if (TIM_CHANNEL_POLARITY_IS_VALID(polarity) == 0x00U)
@@ -766,7 +681,7 @@ driver_status_t TIM_GetPWMConfig
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
 	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
@@ -804,7 +719,7 @@ driver_status_t TIM_DeConfigPWM
 	driver_status_t counterState = DRIVER_STATUS_ERROR;
 	driver_status_t channelState = DRIVER_STATUS_ERROR;
 
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
@@ -898,7 +813,7 @@ driver_status_t TIM_SetPWMDutyCycle
 	driver_status_t counterState = DRIVER_STATUS_ERROR;
 	driver_status_t channelState = DRIVER_STATUS_ERROR;
 
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateDutyCycle(dutyCycle));
 
@@ -998,7 +913,7 @@ driver_status_t TIM_GetPWMDutyCycle
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
 	//! Establish output-compare interpretation before performing the potentially consuming CCR read.
@@ -1042,7 +957,7 @@ driver_status_t TIM_SetPWMOutputState
 	tim_channel_t channel = TIMx_CHANNEL_NONE;
 	tim_channel_index_t channelIndex = TIM_CHANNEL_INDEX_FIRST;
 
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMask(channelMask));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateState(outputState));
 
@@ -1109,7 +1024,7 @@ driver_status_t TIM_GetPWMOutputState
 	reg ccmrRegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
 
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
 	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);

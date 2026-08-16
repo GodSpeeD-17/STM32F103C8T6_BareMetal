@@ -13,6 +13,8 @@ timebase, GPIO configuration, RCC clocks, interrupt delivery, or board routing.
 The base implementation is intentionally narrow:
 
 - Timer base configuration is completed before PWM configuration.
+- Successful `TIM_Config()` completion is the PWM lifecycle admission point;
+  Timer PWM does not independently query or mutate the RCC clock gate.
 - PWM configuration is completed while the Timer counter is disabled.
 - The application enables the Timer only after every required PWM channel is
   configured and assigned a duty cycle.
@@ -37,7 +39,8 @@ The following decisions are fixed for the first implementation:
 | --- | --- |
 | Repository placement | Add `Inc/timer_pwm.h` and `Src/timer_pwm.c` directly to the existing `Timer` module; do not create a new PWM folder or module. |
 | Public identity | Pass `TIMx` and `tim_channel_t` explicitly. Do not hide them in an endpoint enum, group enum, handle, or configuration object. |
-| Timer lifecycle | The application configures the Timer first, configures PWM second, and enables the Timer last. |
+| Timer lifecycle | The application successfully configures the Timer first, configures PWM second, and enables the Timer last. |
+| RCC boundary | Timer PWM neither queries nor mutates the Timer clock gate; successful `TIM_Config()` is its lifecycle prerequisite. |
 | Frequency ownership | Timer timebase APIs own PSC, ARR, counter mode, and resulting PWM frequency. Timer PWM does not accept or set frequency. |
 | GPIO ownership | The application owns GPIO mode, output speed, alternate-function selection, AFIO remap, and pin lifecycle. |
 | PWM configuration | `TIM_ConfigPWM()` accepts mode and polarity as independent scalar parameters. |
@@ -79,8 +82,11 @@ TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)
 ```
 
 Timer PWM never calls `TIM_Config()` or `TIM_SetOperationState()` on behalf of
-the application. This keeps timebase ownership, channel ownership, and counter
-operation visible at the call site.
+the application and never queries or mutates the Timer RCC clock gate. A
+successful `TIM_Config()` call is the evidence that the application admitted
+the Timer lifecycle before entering the PWM subdomain. This keeps timebase
+ownership, channel ownership, clock ownership, and counter operation visible
+at the call site.
 
 ## Part I — Theory with Register Mapping Bridge
 
@@ -337,7 +343,7 @@ same way as `timer.c`, but it must not:
 - encode raw CCMR/CCER fields in the Driver layer;
 - create `timer_pwm_codec.*` or `timer_pwm_ll.*`;
 - call GPIO, AFIO, NVIC, or project code;
-- mutate RCC clock gates;
+- query or mutate RCC clock gates;
 - allocate memory;
 - call public Timer APIs as a substitute for owning its complete transaction.
 
@@ -506,8 +512,8 @@ channel or starts the counter.
 Required preconditions:
 
 - `TIMx` is `TIM2`, `TIM3`, or `TIM4`.
-- The application enabled the corresponding APB1 clock gate.
-- The application already completed Timer base configuration.
+- The application successfully completed `TIM_Config()` and has not
+  invalidated the admitted Timer lifecycle.
 - `TIMx_CR1.CEN` is clear.
 - The selected `CCxE` bit is clear.
 - The Timer is edge-aligned and up-counting.
@@ -651,7 +657,7 @@ All fallible public APIs return `driver_status_t`.
 | `DRIVER_STATUS_ON` | Direct output-state getter reports the selected channel enabled. |
 | `DRIVER_STATUS_ERROR_NULL_PTR` | `TIMx` or required output storage is `NULL`. |
 | `DRIVER_STATUS_ERROR_INVALID_ARG` | Instance, channel, mask, mode, polarity, duty, or admitted ARR range is invalid. |
-| `DRIVER_STATUS_ERROR_STATE` | Clock is disabled, Timer base state is incompatible, or the channel does not have the admitted PWM shape. |
+| `DRIVER_STATUS_ERROR_STATE` | Timer base state is incompatible or the channel does not have the admitted PWM shape. |
 | `DRIVER_STATUS_ERROR_BUSY` | Configuration/deconfiguration requires a stopped counter or disabled channel, or stopped-duty loading requires selected CCxE clear. |
 
 Peer and lower-layer statuses are propagated rather than collapsed into a
@@ -780,6 +786,7 @@ The implementation wave must include:
 - affected Timer, GPIO, Template, and PWM project builds;
 - Doxygen generation with warning review;
 - direct-register-access and ignored-status searches;
+- RCC include, query, and mutation searches in `timer_pwm.c`;
 - legacy PWM API and dynamic-allocation searches;
 - `git diff --check`.
 
@@ -831,6 +838,7 @@ gates are resolved:
 
 - coherent programmed-versus-active preload semantics;
 - no Timer PWM access to write-only EGR or W0C SR;
+- no Timer PWM query or mutation of RCC clock-gate state;
 - selected-lane stopped loading without a Timer-wide update event;
 - complete no-write-on-error and post-mutation cleanup proof;
 - channel-mask validation and CCMR1/CCMR2/CCR selection coverage;

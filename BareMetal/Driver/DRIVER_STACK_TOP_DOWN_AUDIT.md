@@ -32,7 +32,11 @@ remain useful evidence but are not competing PWM API authority. The PWM
 subdomain also avoids the worked example's open cross-feature `EGR.UG` hazard:
 stopped configuration/duty transactions load only the selected active CCR
 through a temporary selected-lane preload bypass while CEN and CCxE are clear.
-Open Timer-base and future-feature findings remain open.
+Unlike the Timer root lifecycle and service APIs described later in this
+worked example, PWM APIs do not query the RCC gate: successful `TIM_Config()`
+completion is their lifecycle prerequisite. They validate `TIMx` identity and
+the Timer/PWM register state owned by their transaction only. Open Timer-base
+and future-feature findings remain open.
 
 ## Start Here
 

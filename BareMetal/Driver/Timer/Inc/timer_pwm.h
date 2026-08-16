@@ -11,6 +11,10 @@
  * configure each PWM channel through this interface second, and start the
  * shared counter through @ref TIM_SetOperationState last.
  *
+ * Timer PWM APIs do not query or mutate RCC state. Successful completion of
+ * @ref TIM_Config is the lifecycle admission point for every subsequent PWM
+ * operation, and the application must keep that Timer configuration valid.
+ *
  * PWM frequency remains a Timer timebase property. GPIO mode, output speed,
  * AFIO routing, RCC clock gates, IRQ delivery, and physical-pin lifecycle
  * remain application-owned. This interface allocates no memory and stores no
@@ -89,10 +93,9 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: PWM channel was configured and remains disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, mode, polarity, or programmed ARR is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate or Timer base configuration does not satisfy the PWM contract
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer base configuration does not satisfy the PWM contract
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
- * @pre The application enabled the matching Timer APB1 clock gate
- * @pre The application completed @ref TIM_Config and left `CNT` at zero
+ * @pre The application successfully completed @ref TIM_Config and left `CNT` at zero
  * @pre The selected channel output is disabled
  * @note GPIO and AFIO state are never read or modified
  */
@@ -133,7 +136,7 @@ driver_status_t TIM_ConfigPWM
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete PWM configuration was published
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input or output pointer is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or the channel does not have the admitted PWM shape
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The channel does not have the admitted PWM shape
  * @note Output storage remains unchanged on failure
  */
 driver_status_t TIM_GetPWMConfig
@@ -166,7 +169,7 @@ driver_status_t TIM_GetPWMConfig
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected channel-owned state was reset
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or the selected channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The selected channel is not configured for PWM
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
  */
 driver_status_t TIM_DeConfigPWM
@@ -207,8 +210,8 @@ driver_status_t TIM_DeConfigPWM
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected compare value was programmed
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, duty, or programmed ARR is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled, channel
- * is not configured for PWM, or a stopped counter is not at zero
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Channel is not configured for
+ * PWM or a stopped counter is not at zero
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: A stopped Timer still has the selected channel output enabled
  * @pre Disable the selected channel output before changing its stopped-state duty
  * @note The stopped path temporarily disables only the selected lane's CCR
@@ -246,7 +249,7 @@ driver_status_t TIM_SetPWMDutyCycle
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Programmed duty was published
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input or output pointer is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel, ARR, or compare value is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Channel is not configured for PWM
  * @note While running, the readable preload may not yet be active until the next update event
  * @note Output storage remains unchanged on failure
  */
@@ -285,7 +288,7 @@ driver_status_t TIM_GetPWMDutyCycle
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected `CCxE` fields were updated coherently
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel mask, or output state is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or an enabled lane is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: An enabled lane is not configured for PWM
  */
 driver_status_t TIM_SetPWMOutputState
 (
@@ -315,7 +318,7 @@ driver_status_t TIM_SetPWMOutputState
  * @retval - @ref `DRIVER_STATUS_ON`: Selected channel output is enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Clock gate is disabled or channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Channel is not configured for PWM
  */
 driver_status_t TIM_GetPWMOutputState
 (
