@@ -17,6 +17,7 @@
  * `timer.h` until the legacy Timer selector enums are removed from Core.
  */
 
+// Header Guards
 #ifndef TIMER_DEFINES_H_
 #define TIMER_DEFINES_H_
 
@@ -103,8 +104,8 @@ extern "C" {
  * @retval - `0x01U`: @p TIMx is a supported general-purpose Timer instance
  * @def TIM_INSTANCE_IS_VALID
  */
-#define TIM_INSTANCE_IS_VALID(TIMx)								\
-(																\
+#define TIM_INSTANCE_IS_VALID(TIMx)									\
+(																	\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM2_BASE_ADDRESS)) ||	\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM3_BASE_ADDRESS)) ||	\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM4_BASE_ADDRESS))		\
@@ -216,8 +217,11 @@ __STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef*
 /**
  * @brief Converts a zero-based Timer channel index to a single-channel mask
  * @param[in]	channelIndex	Zero-based Timer channel index
- * @returns Timer channel mask generated from @p channelIndex
- * @retval - @ref `TIMx_CHANNEL_1` - @ref `TIMx_CHANNEL_4`: @p channelIndex is valid
+ * @returns Timer channel mask generated from @p `channelIndex`
+ * @retval - @ref `TIMx_CHANNEL_1`
+ * @retval - @ref `TIMx_CHANNEL_2`
+ * @retval - @ref `TIMx_CHANNEL_3`
+ * @retval - @ref `TIMx_CHANNEL_4`
  * @def TIM_CHANNEL_INDEX_TO_MASK
  */
 #define TIM_CHANNEL_INDEX_TO_MASK(channelIndex)		((tim_channel_t) REG_BIT_MASK(channelIndex))

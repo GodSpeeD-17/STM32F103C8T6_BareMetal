@@ -2320,24 +2320,20 @@ driver_status_t Codec_TIM_StageChannelSelection
 driver_status_t Codec_TIM_ExtractOutputCompareConfig
 (
 	const reg							ccmrRegImage,
-	const tim_channel_t				channel,
+	const tim_channel_t					channel,
 	tim_channel_oc_clear_t* const		pOutputCompareClear,
 	tim_channel_mode_t* const			pOutputCompareMode,
-	tim_channel_oc_preload_t* const	pOutputComparePreload,
+	tim_channel_oc_preload_t* const		pOutputComparePreload,
 	tim_channel_oc_fast_t* const		pOutputCompareFast
 )
 {
+	// Local Variables
 	tim_channel_index_t channelIndex = TIM_CHANNEL_INDEX_INVALID;
 	reg_field_t rawField = (reg_field_t) 0x00U;
 	tim_channel_ccs_t captureCompareSelection = TIMx_CHANNEL_CCS_OUTPUT;
 
-	if
-	(
-		(pOutputCompareClear == NULL) &&
-		(pOutputCompareMode == NULL) &&
-		(pOutputComparePreload == NULL) &&
-		(pOutputCompareFast == NULL)
-	)
+	// Validate Input
+	if ((pOutputCompareClear == NULL) || (pOutputCompareMode == NULL) || (pOutputComparePreload == NULL) || (pOutputCompareFast == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
