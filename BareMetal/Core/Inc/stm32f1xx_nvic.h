@@ -1,38 +1,62 @@
 /**
- * @file    stm32f1xx_nvic.h
- * @author  Shrey Shah
- * @brief   STM32F1xx Nested Vectored Interrupt Controller (NVIC) Peripheral Structure
- * @version v1.2
- * @date    25-10-2025
- *
- * @defgroup NVIC Nested Vectored Interrupt Controller (NVIC)
- * @brief    Cortex-M3 NVIC Peripheral Register Structure
- *
- * @details 
- * - This module provides the register mapping for the Nested Vectored Interrupt Controller (NVIC)
- * - It manages all exception and interrupt handling on the STM32F1xx Cortex-M3 processor
- *
- * @note The NVIC is a Cortex-M3 core peripheral, not STM32-specific
- * @see Cortex-M3 Technical Reference Manual - Section 4.3 Nested Vectored Interrupt Controller
- * @see Reference Manual RM0008 - Section 10.2 Nested vectored interrupt controller
- *
+ * @file stm32f1xx_nvic.h
+ * @author Shrey Shah
+ * @brief STM32F1 NVIC Register-Layer Definitions
+ * @version v1.4
+ * @date 16-08-2026
+ * @see @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture"
  */
 
+// Header Guards
 #ifndef STM32F1XX_NVIC_H_
 #define STM32F1XX_NVIC_H_
 
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "stm32f1xx_data_types.h"
+#include "stm32f1xx_scb.h"
+
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#include "stm32f1xx_data_types.h"
-
-/*********************************************** NVIC Register Structure ***********************************************/
+#endif /* __cplusplus */
 
 /**
- * @brief    NVIC Peripheral Register Structure Definition
- * @defgroup NVIC_RegisterMap NVIC Registers
- * @ingroup  NVIC
+ * @defgroup NVIC Nested Vectored Interrupt Controller (NVIC)
+ * @brief Cortex-M3 external-interrupt state, delivery, and priority infrastructure
+ * @details
+ * This module maps the raw NVIC register block. Global priority grouping is
+ * configured through the SCB-owned AIRCR register; its positions and masks
+ * remain in @ref SCB_01_RegisterLayer_00_RegisterDefines.
+ *
+ * See @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture" for the
+ * complete interrupt theory, register semantics, and repository layer mapping.
+ */
+
+/**
+ * @defgroup NVIC_01_RegisterLayer NVIC Register Layer
+ * @ingroup NVIC
+ * @brief Raw Cortex-M3 NVIC register structure
+ * @details
+ * This layer owns the hardware-visible NVIC access widths and memory layout
+ * only. Driver-facing selectors, validation, encoding, and transaction
+ * policy belong in the NVIC Driver, Codec, and LL layers.
+ */
+
+/**
+ * @addtogroup NVIC_01_RegisterLayer
+ * @{
+ */
+
+// ==================================================================================================== //
+//											NVIC Register Map										//
+// ==================================================================================================== //
+
+/**
+ * @defgroup NVIC_01_RegisterLayer_01_RegisterMap NVIC Register Block Map
+ * @ingroup NVIC_01_RegisterLayer
+ * @brief Memory-mapped NVIC register block and practical register layout
  *
  * @details Complete register mapping for the Nested Vectored Interrupt Controller.
  *          The NVIC provides flexible interrupt management with hardware nesting support.
@@ -197,10 +221,13 @@ typedef volatile struct __NVIC_TypeDef
 
 } NVIC_TypeDef;
 
-/** @} */ // End of NVIC_RegisterMap
+/** @} */ // NVIC_01_RegisterLayer_01_RegisterMap
 
+/** @} */ // NVIC_01_RegisterLayer
+
+// --- C++ Safeguards ---
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif /* STM32F1XX_NVIC_H_ */

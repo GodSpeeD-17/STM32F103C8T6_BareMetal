@@ -81,11 +81,11 @@ extern "C" {
  * @returns Masked and positioned register field value as @ref reg
  * @warning Bits positioned beyond bit `31U` are discarded.
  */
-#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)								\
-	REG_FIELD_VALUE																\
-	(																			\
-		((reg_bit_pos_t) (_Pos)),												\
-		(((reg) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth)))					\
+#define REG_FIELD_PACK(_Pos, _Val, _FieldWidth)					\
+	REG_FIELD_VALUE												\
+	(															\
+		((reg_bit_pos_t) (_Pos)),								\
+		(((reg) (_Val)) & REG_FIELD_MASK(0U, (_FieldWidth)))	\
 	)
 
 /**

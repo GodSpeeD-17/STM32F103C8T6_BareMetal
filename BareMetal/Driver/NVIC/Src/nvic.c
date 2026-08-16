@@ -43,8 +43,8 @@
 
 /** @brief Bit shift used to divide an IRQ number by one 32-bit NVIC bank @def NVIC_IRQ_REGISTER_INDEX_SHIFT */
 #define NVIC_IRQ_REGISTER_INDEX_SHIFT			((uint8_t) 0x05U)
-/** @brief Mask used to select one bank-local IRQ bit position @def NVIC_IRQ_REGISTER_LOCAL_BIT_MASK */
-#define NVIC_IRQ_REGISTER_LOCAL_BIT_MASK		((uint8_t) 0x1FU)
+/** @brief Mask used to select one bank-local IRQ bit position @def NVIC_IRQ_REGISTER_LOCAL_BIT_Msk */
+#define NVIC_IRQ_REGISTER_LOCAL_BIT_Msk		((uint8_t) 0x1FU)
 
 // ==================================================================================================== //
 //									Local IRQ Translation Helpers									//
@@ -84,7 +84,7 @@ static driver_status_t _NVIC_ValidateIRQ(const irq_t IRQn)
  * @retval - `1U`: @p IRQn is in external IRQ range 32 through 42
  * @pre Caller validated @p IRQn through _NVIC_ValidateIRQ
  */
-static uint8_t _NVIC_GetIRQRegisterIndex(const irq_t IRQn)
+__STATIC_FORCEINLINE uint8_t _NVIC_GetIRQRegisterIndex(const irq_t IRQn)
 {
 	//! Divide the external IRQ number by the 32 bits represented by one bank.
 	return (uint8_t) (IRQn >> NVIC_IRQ_REGISTER_INDEX_SHIFT);
@@ -99,13 +99,12 @@ static uint8_t _NVIC_GetIRQRegisterIndex(const irq_t IRQn)
  * @retval - `0x00000001UL..0x80000000UL`: Bank-local bit for @p IRQn
  * @pre Caller validated @p IRQn through _NVIC_ValidateIRQ
  */
-static reg _NVIC_GetIRQActionMask(const irq_t IRQn)
+__STATIC_FORCEINLINE reg _NVIC_GetIRQActionMask(const irq_t IRQn)
 {
 	// Local Variable
-	const uint8_t localBitPosition = (uint8_t) (IRQn & NVIC_IRQ_REGISTER_LOCAL_BIT_MASK);
-
+	const uint8_t localBitPosition = (uint8_t) (IRQn & NVIC_IRQ_REGISTER_LOCAL_BIT_Msk);
 	//! Convert the bank-local bit position into a single write-action mask.
-	return ((reg) 0x00000001UL << localBitPosition);
+	return REG_BIT_MASK(localBitPosition);
 }
 
 // --------------------------------------- Local State Decode ---------------------------------------- //
@@ -123,7 +122,7 @@ static reg _NVIC_GetIRQActionMask(const irq_t IRQn)
  * @retval - @ref `DRIVER_STATUS_ON`: Selected state bit is set
  * @pre Caller supplies a single-bit @p irqActionMask for the selected bank
  */
-static driver_status_t _NVIC_DecodeIRQState(const reg registerImage, const reg irqActionMask)
+__STATIC_FORCEINLINE driver_status_t _NVIC_DecodeIRQState(const reg registerImage, const reg irqActionMask)
 {
 	//! Positive-polarity NVIC state bits map clear to OFF and set to ON.
 	if ((registerImage & irqActionMask) != 0x00000000UL)
@@ -280,11 +279,7 @@ driver_status_t NVIC_EnableIRQ(const irq_t IRQn)
 	ASSERT_DRIVER_STATUS(_NVIC_ValidateIRQ(IRQn));
 
 	//! Issue one direct ISER write-one-to-set action without a shared read-modify-write window.
-	LL_NVIC_WriteISER
-	(
-		_NVIC_GetIRQRegisterIndex(IRQn),
-		_NVIC_GetIRQActionMask(IRQn)
-	);
+	LL_NVIC_WriteISER(_NVIC_GetIRQRegisterIndex(IRQn), _NVIC_GetIRQActionMask(IRQn));
 
 	return DRIVER_STATUS_SUCCESS;
 }

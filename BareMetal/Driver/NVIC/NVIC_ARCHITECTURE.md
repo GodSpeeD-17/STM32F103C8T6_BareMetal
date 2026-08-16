@@ -321,7 +321,7 @@ nvic_codec.h / nvic_codec.c              nvic_ll.h
       \                          /
        v                        v
        Core register types, addresses, and raw fields
-       stm32f1xx_nvic.h / stm32f1xx_scb.h / stm32f1xx_defines.h
+       stm32f1xx_nvic.h / stm32f1xx_scb.h
 ```
 
 | Layer | Owns | Deliberately excludes |
@@ -536,7 +536,6 @@ that behavior through:
 - `BareMetal/Core/Inc/stm32f1xx_nvic.h`
 - `BareMetal/Core/Inc/stm32f1xx_scb.h`
 - `BareMetal/Core/Inc/stm32f1xx_base_address.h`
-- `BareMetal/Core/Inc/stm32f1xx_defines.h`
 - `BareMetal/Driver/NVIC/Inc/nvic.h`
 - `BareMetal/Driver/NVIC/Inc/nvic_codec.h`
 - `BareMetal/Driver/NVIC/Inc/nvic_ll.h`

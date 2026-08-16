@@ -228,6 +228,24 @@ same column:
 Recalculate alignment independently for each banner section; do not use one
 file-wide column.
 
+Group raw register-field macros under one logical banner per owning hardware
+register. Within each register banner, order fields from the least-significant
+implemented bit toward the most-significant implemented bit. When two
+documented views begin at the same bit, keep each view internally complete and
+place the broader register/subregister view before its contained fields.
+
+Use the owning block, register, and field in every field-macro root:
+`BLOCK_REGISTER_FIELD`. A single-bit field exposes `_Pos`, `_Msk`, and
+the unsuffixed mask alias. A multi-bit field exposes `_Pos`, `_Width`,
+`_Msk`, and the unsuffixed mask alias, in that order. Position and width
+macros use `reg_bit_pos_t` and `reg_field_width_t`; mask macros use
+`REG_BIT_MASK()` or `REG_FIELD_MASK()`.
+
+Use tab characters, not runs of spaces, for macro value alignment and for the
+leading indentation of multi-line macro continuations. The single lexical
+separator after `#define` and the conventional ` *` inside Doxygen blocks are
+not indentation and remain spaces.
+
 Keep register-mask macros native to the 32-bit register width and prefer the
 direct `0x01UL` shift expression. Support field widths `0U..31U`; use
 `0xFFFFFFFFUL` explicitly when all 32 register bits are required. Document
@@ -324,6 +342,18 @@ no validation, sequencing, or fallible policy.
 Place behavior that is independent of a specific peripheral in the lowest
 shared layer that can express it safely. Peripheral layers should retain only
 their own validation, register selection, sequencing, and hardware policy.
+
+Place every raw register-field macro in the Core register header of the
+hardware block that physically owns the register, even when another Driver
+consumes that field. For example, `SCB_AIRCR_xxx` symbols belong in
+`stm32f1xx_scb.h`; the NVIC stack may consume `AIRCR.PRIGROUP` without owning
+or duplicating its definitions. Compatibility headers may include the owner
+header to preserve macro visibility, but they must not redeclare the macros.
+
+Do not centralize peripheral instance/capability predicates or
+peripheral-specific operating limits in `stm32f1xx_defines.h`. Introduce them
+only when required and keep them inside the respective peripheral stack; for
+example, oscillator and clock-frequency limits belong to RCC.
 
 For example, compare-and-write behavior belongs in `RegOps_WriteIfChanged()`.
 Timer may wrap it to validate a Timer instance and select CR1, PSC, ARR, or CNT;
@@ -653,6 +683,19 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-16: Required register-scoped macro banners, least-significant-bit
+  first field order, `BLOCK_REGISTER_FIELD` roots, and complete
+  `_Pos`/`_Width`/`_Msk`/mask-alias families matching the Timer register
+  layer.
+- 2026-08-16: Assigned raw register-field macros to the Core header of the
+  physical register owner, prohibited peer Driver headers from duplicating
+  those definitions, and permitted compatibility includes to preserve macro
+  visibility.
+- 2026-08-16: Assigned peripheral instance/capability predicates and
+  peripheral-specific operating limits to their respective driver stacks
+  instead of the shared Core defines header.
+- 2026-08-16: Required macro value alignment and multi-line macro continuation
+  indentation to use tabs rather than runs of spaces.
 - 2026-08-16: Established the initial theory-to-implementation documentation
   bridge; the later two-part single-source rule below supersedes duplication of
   theory in function-local LL Doxygen.
