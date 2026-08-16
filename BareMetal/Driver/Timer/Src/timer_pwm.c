@@ -92,16 +92,19 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannelMask(const tim_chan
 }
 
 /**
- * @brief Validates a Timer PWM mode selector
- * @param[in] mode Timer PWM mode selector
- * @returns @ref driver_status_t "PWM-mode validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p mode is valid
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p mode is not PWM mode 1 or PWM mode 2
+ * @brief Validates a Timer PWM channel-mode selector
+ * @param[in] channelMode Timer PWM channel-mode selector
+ * Accepted values:
+ * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
+ * - @ref `TIMx_CHANNEL_MODE_PWM2`: PWM mode 2
+ * @returns @ref driver_status_t "PWM-channel-mode validation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p channelMode is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p channelMode is not PWM mode 1 or PWM mode 2
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateMode(const tim_channel_mode_t mode)
+__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannelMode(const tim_channel_mode_t channelMode)
 {
 	//! Restrict the public PWM surface to hardware PWM modes 1 and 2.
-	if (TIM_PWM_MODE_IS_VALID(mode) == 0x00U)
+	if (TIM_PWM_MODE_IS_VALID(channelMode) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -112,6 +115,8 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateMode(const tim_channel_mod
 /**
  * @brief Validates a Timer PWM duty-cycle value
  * @param[in] dutyCycle PWM duty cycle in permille units
+ * Accepted values:
+ * - @ref `TIM_PWM_DUTY_CYCLE_MIN` through @ref `TIM_PWM_DUTY_CYCLE_MAX`
  * @returns @ref driver_status_t "PWM duty-cycle validation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p dutyCycle is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p dutyCycle is outside `0U..1000U`
@@ -128,16 +133,19 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateDutyCycle(const tim_pwm_du
 }
 
 /**
- * @brief Validates a Timer ON/OFF state selector
- * @param[in] state Timer state selector
- * @returns @ref driver_status_t "Binary-state validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is invalid
+ * @brief Validates a Timer PWM channel output-enable-state selector
+ * @param[in] outputEnableState Requested Timer PWM channel output-enable state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable the selected PWM channel output
+ * - @ref `DRIVER_STATUS_ON`: Enable the selected PWM channel output
+ * @returns @ref driver_status_t "PWM-channel output-enable-state validation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p outputEnableState is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p outputEnableState is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateState(const driver_status_t state)
+__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateOutputEnableState(const driver_status_t outputEnableState)
 {
-	//! Public output-state mutation accepts only OFF and ON.
-	if ((state != DRIVER_STATUS_OFF) && (state != DRIVER_STATUS_ON))
+	//! Public output-enable-state mutation accepts only OFF and ON.
+	if ((outputEnableState != DRIVER_STATUS_OFF) && (outputEnableState != DRIVER_STATUS_ON))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -150,13 +158,13 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateState(const driver_status_
 // ==================================================================================================== //
 
 /**
- * @brief Reads the CCMR image containing one Timer channel
+ * @brief Reads the capture/compare mode register containing one Timer channel
  * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @returns The `CCMR1` or `CCMR2` image containing @p channel
  * @pre @p TIMx and @p channel are validated before this helper is called
  */
-__STATIC_FORCEINLINE reg _TIM_PWM_ReadCCMR
+__STATIC_FORCEINLINE reg _TIM_PWM_ReadCaptureCompareModeRegister
 (
 	const TIM_TypeDef* const	TIMx,
 	const tim_channel_t		channel
@@ -172,7 +180,7 @@ __STATIC_FORCEINLINE reg _TIM_PWM_ReadCCMR
 }
 
 /**
- * @brief Writes the selected CCMR only when its staged image changed
+ * @brief Writes the selected capture/compare mode register only when its staged image changed
  * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @param[in] currentImage Current `CCMR1` or `CCMR2` image
@@ -180,7 +188,7 @@ __STATIC_FORCEINLINE reg _TIM_PWM_ReadCCMR
  * @returns Nothing
  * @pre @p TIMx and @p channel are validated before this helper is called
  */
-__STATIC_FORCEINLINE void _TIM_PWM_WriteCCMRIfChanged
+__STATIC_FORCEINLINE void _TIM_PWM_WriteCaptureCompareModeRegisterIfChanged
 (
 	TIM_TypeDef* const		TIMx,
 	const tim_channel_t	channel,
@@ -206,14 +214,14 @@ __STATIC_FORCEINLINE void _TIM_PWM_WriteCCMRIfChanged
 }
 
 /**
- * @brief Reads the CCR selected by one Timer channel
+ * @brief Reads the capture/compare register selected by one Timer channel
  * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @returns The selected `CCRx` register image
  * @pre @p channel is configured for output compare before this helper is called
  * @warning Reading an input-capture `CCRx` can consume capture-notification state
  */
-__STATIC_FORCEINLINE reg _TIM_PWM_ReadCCR
+__STATIC_FORCEINLINE reg _TIM_PWM_ReadCaptureCompareRegister
 (
 	const TIM_TypeDef* const	TIMx,
 	const tim_channel_t		channel
@@ -242,14 +250,14 @@ __STATIC_FORCEINLINE reg _TIM_PWM_ReadCCR
 }
 
 /**
- * @brief Writes the CCR selected by one Timer channel
+ * @brief Writes the capture/compare register selected by one Timer channel
  * @param[in] TIMx Validated Timer peripheral instance
  * @param[in] channel Valid Timer single-channel selector
  * @param[in] regImage Output-compare `CCRx` image to write
  * @returns Nothing
  * @pre @p channel is configured for output compare before this helper is called
  */
-__STATIC_FORCEINLINE void _TIM_PWM_WriteCCR
+__STATIC_FORCEINLINE void _TIM_PWM_WriteCaptureCompareRegister
 (
 	TIM_TypeDef* const		TIMx,
 	const tim_channel_t	channel,
@@ -296,7 +304,7 @@ __STATIC_FORCEINLINE void _TIM_PWM_WriteCCR
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A base field is undecodable or incompatible with PWM
  * @note This helper does not validate `CR1.CEN` or `CNT`
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateBaseImages
+__STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateTimerBaseImages
 (
 	const reg	cr1RegImage,
 	const reg	arrRegImage
@@ -346,9 +354,9 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateBaseImages
  * @param[in] ccmrRegImage Caller-owned `CCMR1` or `CCMR2` image containing @p channel
  * @param[in] ccerRegImage Caller-owned `CCER` image
  * @param[in] channel Valid Timer single-channel selector
- * @param[out] pMode Optional destination for the decoded PWM mode
- * @param[out] pPolarity Optional destination for the decoded output polarity
- * @returns @ref driver_status_t "PWM configuration extraction status"
+ * @param[out] pChannelMode Optional destination for the decoded PWM channel mode
+ * @param[out] pChannelPolarity Optional destination for the decoded PWM channel polarity
+ * @returns @ref driver_status_t "PWM-channel configuration extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The channel PWM configuration is valid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The channel is not configured for the supported PWM shape
  * @pre @p channel is validated before this helper is called
@@ -358,15 +366,15 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
 	const reg						ccmrRegImage,
 	const reg						ccerRegImage,
 	const tim_channel_t			channel,
-	tim_channel_mode_t* const		pMode,
-	tim_channel_polarity_t* const	pPolarity
+	tim_channel_mode_t* const		pChannelMode,
+	tim_channel_polarity_t* const	pChannelPolarity
 )
 {
 	tim_channel_oc_clear_t outputCompareClear = TIMx_CHANNEL_OC_CLEAR_DISABLE;
 	tim_channel_mode_t outputCompareMode = TIMx_CHANNEL_MODE_FREEZE;
 	tim_channel_oc_preload_t outputComparePreload = TIMx_CHANNEL_OC_PRELOAD_DISABLE;
 	tim_channel_oc_fast_t outputCompareFast = TIMx_CHANNEL_OC_FAST_DISABLE;
-	tim_channel_polarity_t polarity = TIMx_CHANNEL_POLARITY_HIGH;
+	tim_channel_polarity_t channelPolarity = TIMx_CHANNEL_POLARITY_HIGH;
 
 	//! Decode output-compare interpretation and polarity into local storage.
 	if
@@ -384,7 +392,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
-	if (Codec_TIM_ExtractChannelPolarity(ccerRegImage, channel, &polarity) != DRIVER_STATUS_SUCCESS)
+	if (Codec_TIM_ExtractChannelPolarity(ccerRegImage, channel, &channelPolarity) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
@@ -400,13 +408,13 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
 	}
 
 	//! Publish optional outputs only after the complete channel shape validates.
-	if (pMode != NULL)
+	if (pChannelMode != NULL)
 	{
-		*pMode = outputCompareMode;
+		*pChannelMode = outputCompareMode;
 	}
-	if (pPolarity != NULL)
+	if (pChannelPolarity != NULL)
 	{
-		*pPolarity = polarity;
+		*pChannelPolarity = channelPolarity;
 	}
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -414,19 +422,19 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ExtractChannelConfig
 /**
  * @brief Computes one mode-correct CCR value with round-half-up duty arithmetic
  * @param[in] autoReload Programmed Timer auto-reload value
- * @param[in] mode Timer PWM mode selector
+ * @param[in] channelMode Timer PWM channel-mode selector
  * @param[in] dutyCycle Requested PWM duty cycle in permille units
  * @param[out] pCompareValue Destination for the computed 16-bit compare value
  * @returns @ref driver_status_t "PWM compare-value calculation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The compare value was calculated
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCompareValue is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p mode, or @p dutyCycle is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p channelMode, or @p dutyCycle is invalid
  * @note The calculation uses 64-bit intermediates and performs no MMIO
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
 (
 	const tim_auto_reload_t		autoReload,
-	const tim_channel_mode_t		mode,
+	const tim_channel_mode_t		channelMode,
 	const tim_pwm_duty_cycle_t	dutyCycle,
 	tim_compare_value_t* const		pCompareValue
 )
@@ -440,7 +448,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateMode(mode));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMode(channelMode));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateDutyCycle(dutyCycle));
 	if (TIM_PWM_AUTO_RELOAD_IS_VALID(autoReload) == 0x00U)
 	{
@@ -457,7 +465,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
 		) /
 		((uint64_t) TIM_PWM_DUTY_CYCLE_MAX)
 	);
-	if (mode == TIMx_CHANNEL_MODE_PWM1)
+	if (channelMode == TIMx_CHANNEL_MODE_PWM1)
 	{
 		compareValue = activeTicks;
 	}
@@ -473,19 +481,19 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeCompareValue
 /**
  * @brief Reconstructs achieved permille duty from one admitted PWM image
  * @param[in] autoReload Programmed Timer auto-reload value
- * @param[in] mode Timer PWM mode selector
+ * @param[in] channelMode Timer PWM channel-mode selector
  * @param[in] compareValue Programmed Timer output-compare value
  * @param[out] pDutyCycle Destination for achieved duty in permille units
  * @returns @ref driver_status_t "PWM duty-cycle calculation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The achieved duty cycle was calculated
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pDutyCycle is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p mode, or @p compareValue is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p autoReload, @p channelMode, or @p compareValue is invalid
  * @note The calculation uses 64-bit intermediates and performs no MMIO
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle
 (
 	const tim_auto_reload_t		autoReload,
-	const tim_channel_mode_t		mode,
+	const tim_channel_mode_t		channelMode,
 	const tim_compare_value_t		compareValue,
 	tim_pwm_duty_cycle_t* const	pDutyCycle
 )
@@ -499,7 +507,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateMode(mode));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMode(channelMode));
 	if (TIM_PWM_AUTO_RELOAD_IS_VALID(autoReload) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -512,7 +520,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle
 	}
 
 	//! Recover active ticks from the mode-specific compare placement.
-	if (mode == TIMx_CHANNEL_MODE_PWM1)
+	if (channelMode == TIMx_CHANNEL_MODE_PWM1)
 	{
 		activeTicks = (uint32_t) compareValue;
 	}
@@ -538,14 +546,15 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle
 //										Timer PWM Configuration APIs									//
 // ==================================================================================================== //
 
-driver_status_t TIM_ConfigPWM
+driver_status_t TIM_ConfigPWMChannel
 (
 	TIM_TypeDef* const				TIMx,
 	const tim_channel_t				channel,
-	const tim_channel_mode_t		mode,
-	const tim_channel_polarity_t	polarity
+	const tim_channel_mode_t		channelMode,
+	const tim_channel_polarity_t	channelPolarity
 )
 {
+	// Local Variables
 	reg cr1RegImage = 0x00000000UL;
 	reg arrRegImage = 0x00000000UL;
 	reg cntRegImage = 0x00000000UL;
@@ -564,8 +573,8 @@ driver_status_t TIM_ConfigPWM
 	//! Complete argument validation precedes Timer MMIO.
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateMode(mode));
-	if (TIM_CHANNEL_POLARITY_IS_VALID(polarity) == 0x00U)
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMode(channelMode));
+	if (TIM_CHANNEL_POLARITY_IS_VALID(channelPolarity) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -582,7 +591,7 @@ driver_status_t TIM_ConfigPWM
 		return DRIVER_STATUS_ERROR_STATE;
 	}
 	arrRegImage = LL_TIM_ReadARR(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateBaseImages(cr1RegImage, arrRegImage));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateTimerBaseImages(cr1RegImage, arrRegImage));
 	cntRegImage = LL_TIM_ReadCNT(TIMx);
 	if (Codec_TIM_ExtractCounterValue(cntRegImage, &counterValue) != DRIVER_STATUS_SUCCESS)
 	{
@@ -608,7 +617,7 @@ driver_status_t TIM_ConfigPWM
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	stagedCcmrRegImage = ccmrRegImage;
 	stagedCcerRegImage = ccerRegImage;
 
@@ -620,7 +629,7 @@ driver_status_t TIM_ConfigPWM
 			&stagedCcmrRegImage,
 			channel,
 			TIMx_CHANNEL_OC_CLEAR_DISABLE,
-			mode,
+			channelMode,
 			TIMx_CHANNEL_OC_PRELOAD_ENABLE,
 			TIMx_CHANNEL_OC_FAST_DISABLE
 		)
@@ -633,19 +642,19 @@ driver_status_t TIM_ConfigPWM
 			&directCcmrRegImage,
 			channel,
 			TIMx_CHANNEL_OC_CLEAR_DISABLE,
-			mode,
+			channelMode,
 			TIMx_CHANNEL_OC_PRELOAD_DISABLE,
 			TIMx_CHANNEL_OC_FAST_DISABLE
 		)
 	);
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelPolarity(&stagedCcerRegImage, channel, polarity));
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelPolarity(&stagedCcerRegImage, channel, channelPolarity));
 	ASSERT_DRIVER_STATUS
 	(
 		_TIM_PWM_ComputeCompareValue
 		(
 			autoReload,
-			mode,
+			channelMode,
 			TIM_PWM_DUTY_CYCLE_MIN,
 			&compareValue
 		)
@@ -657,34 +666,34 @@ driver_status_t TIM_ConfigPWM
 	{
 		LL_TIM_WriteCCER(TIMx, stagedCcerRegImage);
 	}
-	_TIM_PWM_WriteCCMRIfChanged(TIMx, channel, ccmrRegImage, directCcmrRegImage);
-	_TIM_PWM_WriteCCR(TIMx, channel, stagedCcrRegImage);
-	_TIM_PWM_WriteCCMRIfChanged(TIMx, channel, directCcmrRegImage, stagedCcmrRegImage);
+	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, ccmrRegImage, directCcmrRegImage);
+	_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
+	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, directCcmrRegImage, stagedCcmrRegImage);
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_GetPWMConfig
+driver_status_t TIM_GetPWMChannelConfig
 (
 	TIM_TypeDef* const				TIMx,
 	const tim_channel_t				channel,
-	tim_channel_mode_t* const		pMode,
-	tim_channel_polarity_t* const	pPolarity
+	tim_channel_mode_t* const		pChannelMode,
+	tim_channel_polarity_t* const	pChannelPolarity
 )
 {
 	reg ccmrRegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
-	tim_channel_mode_t mode = TIMx_CHANNEL_MODE_FREEZE;
-	tim_channel_polarity_t polarity = TIMx_CHANNEL_POLARITY_HIGH;
+	tim_channel_mode_t channelMode = TIMx_CHANNEL_MODE_FREEZE;
+	tim_channel_polarity_t channelPolarity = TIMx_CHANNEL_POLARITY_HIGH;
 
-	if ((pMode == NULL) || (pPolarity == NULL))
+	if ((pChannelMode == NULL) || (pChannelPolarity == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
 	ASSERT_DRIVER_STATUS
 	(
@@ -693,17 +702,17 @@ driver_status_t TIM_GetPWMConfig
 			ccmrRegImage,
 			ccerRegImage,
 			channel,
-			&mode,
-			&polarity
+			&channelMode,
+			&channelPolarity
 		)
 	);
 
-	*pMode = mode;
-	*pPolarity = polarity;
+	*pChannelMode = channelMode;
+	*pChannelPolarity = channelPolarity;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_DeConfigPWM
+driver_status_t TIM_DeConfigPWMChannel
 (
 	TIM_TypeDef* const		TIMx,
 	const tim_channel_t	channel
@@ -742,9 +751,9 @@ driver_status_t TIM_DeConfigPWM
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, NULL, NULL));
-	ccrRegImage = _TIM_PWM_ReadCCR(TIMx, channel);
+	ccrRegImage = _TIM_PWM_ReadCaptureCompareRegister(TIMx, channel);
 	stagedCcmrRegImage = ccmrRegImage;
 	stagedCcerRegImage = ccerRegImage;
 	stagedCcrRegImage = ccrRegImage;
@@ -774,14 +783,14 @@ driver_status_t TIM_DeConfigPWM
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageCompareValue(&stagedCcrRegImage, (tim_compare_value_t) 0U));
 
 	//! Disable preload before clearing CCR so the stopped channel reaches reset state immediately.
-	_TIM_PWM_WriteCCMRIfChanged(TIMx, channel, ccmrRegImage, stagedCcmrRegImage);
+	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, ccmrRegImage, stagedCcmrRegImage);
 	if (ccerRegImage != stagedCcerRegImage)
 	{
 		LL_TIM_WriteCCER(TIMx, stagedCcerRegImage);
 	}
 	if (ccrRegImage != stagedCcrRegImage)
 	{
-		_TIM_PWM_WriteCCR(TIMx, channel, stagedCcrRegImage);
+		_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -791,7 +800,7 @@ driver_status_t TIM_DeConfigPWM
 //									Timer PWM Duty-Cycle APIs									//
 // ==================================================================================================== //
 
-driver_status_t TIM_SetPWMDutyCycle
+driver_status_t TIM_SetPWMChannelDutyCycle
 (
 	TIM_TypeDef* const				TIMx,
 	const tim_channel_t				channel,
@@ -806,7 +815,7 @@ driver_status_t TIM_SetPWMDutyCycle
 	reg ccerRegImage = 0x00000000UL;
 	reg ccrRegImage = 0x00000000UL;
 	reg stagedCcrRegImage = 0x00000000UL;
-	tim_channel_mode_t mode = TIMx_CHANNEL_MODE_FREEZE;
+	tim_channel_mode_t channelMode = TIMx_CHANNEL_MODE_FREEZE;
 	tim_auto_reload_t autoReload = 0U;
 	tim_counter_value_t counterValue = 0U;
 	tim_compare_value_t compareValue = 0U;
@@ -818,12 +827,12 @@ driver_status_t TIM_SetPWMDutyCycle
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateDutyCycle(dutyCycle));
 
 	//! Validate the channel before reading CCR so input-capture flags cannot be consumed.
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, &mode, NULL));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, &channelMode, NULL));
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
 	arrRegImage = LL_TIM_ReadARR(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateBaseImages(cr1RegImage, arrRegImage));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateTimerBaseImages(cr1RegImage, arrRegImage));
 	if (Codec_TIM_ExtractAutoReload(arrRegImage, &autoReload) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
@@ -855,9 +864,9 @@ driver_status_t TIM_SetPWMDutyCycle
 		}
 	}
 
-	ccrRegImage = _TIM_PWM_ReadCCR(TIMx, channel);
+	ccrRegImage = _TIM_PWM_ReadCaptureCompareRegister(TIMx, channel);
 	stagedCcrRegImage = ccrRegImage;
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ComputeCompareValue(autoReload, mode, dutyCycle, &compareValue));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ComputeCompareValue(autoReload, channelMode, dutyCycle, &compareValue));
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageCompareValue(&stagedCcrRegImage, compareValue));
 
 	if (counterState == DRIVER_STATUS_OFF)
@@ -870,7 +879,7 @@ driver_status_t TIM_SetPWMDutyCycle
 				&directCcmrRegImage,
 				channel,
 				TIMx_CHANNEL_OC_CLEAR_DISABLE,
-				mode,
+				channelMode,
 				TIMx_CHANNEL_OC_PRELOAD_DISABLE,
 				TIMx_CHANNEL_OC_FAST_DISABLE
 			)
@@ -880,19 +889,19 @@ driver_status_t TIM_SetPWMDutyCycle
 	//! A stopped update loads only the selected active CCR; a running update stages its preload.
 	if (counterState == DRIVER_STATUS_OFF)
 	{
-		_TIM_PWM_WriteCCMRIfChanged(TIMx, channel, ccmrRegImage, directCcmrRegImage);
-		_TIM_PWM_WriteCCR(TIMx, channel, stagedCcrRegImage);
-		_TIM_PWM_WriteCCMRIfChanged(TIMx, channel, directCcmrRegImage, ccmrRegImage);
+		_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, ccmrRegImage, directCcmrRegImage);
+		_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
+		_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, directCcmrRegImage, ccmrRegImage);
 	}
 	else if (ccrRegImage != stagedCcrRegImage)
 	{
-		_TIM_PWM_WriteCCR(TIMx, channel, stagedCcrRegImage);
+		_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
 	}
 
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_GetPWMDutyCycle
+driver_status_t TIM_GetPWMChannelDutyCycle
 (
 	TIM_TypeDef* const				TIMx,
 	const tim_channel_t			channel,
@@ -904,7 +913,7 @@ driver_status_t TIM_GetPWMDutyCycle
 	reg ccmrRegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
 	reg ccrRegImage = 0x00000000UL;
-	tim_channel_mode_t mode = TIMx_CHANNEL_MODE_FREEZE;
+	tim_channel_mode_t channelMode = TIMx_CHANNEL_MODE_FREEZE;
 	tim_auto_reload_t autoReload = 0U;
 	tim_compare_value_t compareValue = 0U;
 	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
@@ -917,36 +926,36 @@ driver_status_t TIM_GetPWMDutyCycle
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
 	//! Establish output-compare interpretation before performing the potentially consuming CCR read.
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, &mode, NULL));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, &channelMode, NULL));
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
 	arrRegImage = LL_TIM_ReadARR(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateBaseImages(cr1RegImage, arrRegImage));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateTimerBaseImages(cr1RegImage, arrRegImage));
 	if (Codec_TIM_ExtractAutoReload(arrRegImage, &autoReload) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
-	ccrRegImage = _TIM_PWM_ReadCCR(TIMx, channel);
+	ccrRegImage = _TIM_PWM_ReadCaptureCompareRegister(TIMx, channel);
 	if (Codec_TIM_ExtractCompareValue(ccrRegImage, &compareValue) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ComputeDutyCycle(autoReload, mode, compareValue, &dutyCycle));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ComputeDutyCycle(autoReload, channelMode, compareValue, &dutyCycle));
 
 	*pDutyCycle = dutyCycle;
 	return DRIVER_STATUS_SUCCESS;
 }
 
 // ==================================================================================================== //
-//									Timer PWM Output-State APIs									//
+//								Timer PWM Output-Enable-State APIs								//
 // ==================================================================================================== //
 
-driver_status_t TIM_SetPWMOutputState
+driver_status_t TIM_SetPWMChannelOutputEnableState
 (
 	TIM_TypeDef* const			TIMx,
 	const tim_channel_t		channelMask,
-	const driver_status_t		outputState
+	const driver_status_t		outputEnableState
 )
 {
 	reg ccmr1RegImage = 0x00000000UL;
@@ -959,11 +968,11 @@ driver_status_t TIM_SetPWMOutputState
 
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMask(channelMask));
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateState(outputState));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateOutputEnableState(outputEnableState));
 
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
 	stagedCcerRegImage = ccerRegImage;
-	if (outputState == DRIVER_STATUS_ON)
+	if (outputEnableState == DRIVER_STATUS_ON)
 	{
 		if ((((uint32_t) channelMask) & ((uint32_t) (TIMx_CHANNEL_1 | TIMx_CHANNEL_2))) != 0x00000000UL)
 		{
@@ -983,7 +992,7 @@ driver_status_t TIM_SetPWMOutputState
 		{
 			continue;
 		}
-		if (outputState == DRIVER_STATUS_ON)
+		if (outputEnableState == DRIVER_STATUS_ON)
 		{
 			if ((((uint32_t) channel) & ((uint32_t) (TIMx_CHANNEL_1 | TIMx_CHANNEL_2))) != 0x00000000UL)
 			{
@@ -1005,7 +1014,7 @@ driver_status_t TIM_SetPWMOutputState
 				)
 			);
 		}
-		ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, outputState));
+		ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, outputEnableState));
 	}
 
 	if (ccerRegImage != stagedCcerRegImage)
@@ -1015,7 +1024,7 @@ driver_status_t TIM_SetPWMOutputState
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_GetPWMOutputState
+driver_status_t TIM_GetPWMChannelOutputEnableState
 (
 	TIM_TypeDef* const		TIMx,
 	const tim_channel_t	channel
@@ -1027,7 +1036,7 @@ driver_status_t TIM_GetPWMOutputState
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
 
-	ccmrRegImage = _TIM_PWM_ReadCCMR(TIMx, channel);
+	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, NULL, NULL));
 	return Codec_TIM_ExtractChannelEnableState(ccerRegImage, channel);

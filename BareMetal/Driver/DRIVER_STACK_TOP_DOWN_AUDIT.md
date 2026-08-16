@@ -24,8 +24,9 @@ The subsequently approved
 [`Timer/TIMER_PWM_ARCHITECTURE.md`](Timer/TIMER_PWM_ARCHITECTURE.md) supersedes
 this worked example's earlier PWM ownership proposals. Timer PWM is now a
 cohesive Timer-driver subdomain in `Timer/Inc/timer_pwm.h` and
-`Timer/Src/timer_pwm.c`: Timer base APIs own frequency, PWM owns channel
-mode/polarity/duty/output state, and the application owns GPIO/AFIO. The
+`Timer/Src/timer_pwm.c`: Timer base APIs own frequency, PWM owns channel mode,
+channel polarity, duty cycle, and channel output-enable state, and the
+application owns GPIO/AFIO. The
 approved scalar API deliberately has no PWM config structure, heap handle,
 endpoint registry, or separate `Driver/PWM` module. Historical findings below
 remain useful evidence but are not competing PWM API authority. The PWM

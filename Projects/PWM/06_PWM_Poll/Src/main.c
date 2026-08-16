@@ -9,7 +9,7 @@
  * Demonstrates two channels sharing one Timer timebase without a heap, handle,
  * frequency registry, or GPIO ownership inside the Timer driver. The
  * application owns RCC, GPIO/AFIO, Timer base configuration, PWM channel
- * configuration, channel output state, and final counter start order.
+ * configuration, channel output-enable state, and final counter start order.
  */
 
 // ==================================================================================================== //
@@ -80,7 +80,7 @@ static driver_status_t App_ConfigPWM(void)
 	//! Exercise PWM1/high and PWM2/low only after the shared Timer base is valid.
 	ASSERT_DRIVER_STATUS
 	(
-		TIM_ConfigPWM
+		TIM_ConfigPWMChannel
 		(
 			APP_PWM_TIMER,
 			TIMx_CHANNEL_3,
@@ -90,7 +90,7 @@ static driver_status_t App_ConfigPWM(void)
 	);
 	ASSERT_DRIVER_STATUS
 	(
-		TIM_ConfigPWM
+		TIM_ConfigPWMChannel
 		(
 			APP_PWM_TIMER,
 			TIMx_CHANNEL_4,
@@ -100,11 +100,11 @@ static driver_status_t App_ConfigPWM(void)
 	);
 
 	//! Duty remains a separate lifecycle operation from channel mode configuration.
-	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, TIM_PWM_DUTY_CYCLE_MIN));
-	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, TIM_PWM_DUTY_CYCLE_MIN));
+	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, TIM_PWM_DUTY_CYCLE_MIN));
+	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, TIM_PWM_DUTY_CYCLE_MIN));
 
 	//! Enable both channel outputs coherently while CEN remains disabled.
-	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelOutputEnableState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_ON));
 
 	//! Starting the shared counter is the final independent Timer operation.
 	return TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_ON);
@@ -113,8 +113,8 @@ static driver_status_t App_ConfigPWM(void)
 /** @brief Programs one duty value into both PWM channel preloads */
 static driver_status_t App_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
 {
-	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, dutyCycle));
-	return TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
+	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, dutyCycle));
+	return TIM_SetPWMChannelDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
 }
 
 /**
@@ -125,9 +125,9 @@ static driver_status_t App_DeConfigPWM(void)
 {
 	//! Stop the shared counter before disconnecting and resetting either channel.
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(TIM_DeConfigPWM(APP_PWM_TIMER, TIMx_CHANNEL_3));
-	return TIM_DeConfigPWM(APP_PWM_TIMER, TIMx_CHANNEL_4);
+	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelOutputEnableState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_OFF));
+	ASSERT_DRIVER_STATUS(TIM_DeConfigPWMChannel(APP_PWM_TIMER, TIMx_CHANNEL_3));
+	return TIM_DeConfigPWMChannel(APP_PWM_TIMER, TIMx_CHANNEL_4);
 }
 
 // ==================================================================================================== //
