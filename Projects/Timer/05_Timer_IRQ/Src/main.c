@@ -34,11 +34,11 @@ static volatile uint8_t isActionRequired = 0U;
  */
 static void APP_ErrorHandler(void)
 {
+	//! Indicate the error state by turning on the on-board LED
 	OB_LED_Set();
-	while (1)
-	{
-		//! Preserve the visible error state until the board is reset.
-	}
+
+	//! Infinite loop to preserve the error state until the board is reset
+	while (1);
 }
 
 /**
@@ -113,13 +113,14 @@ int main(void)
 		//! All visible work is performed by the TIM3 interrupt handler.
 		if (isActionRequired != 0U)
 		{
+			//! Toggle GPIO to indicate timer expiration
 			GPIO_PinToggle(APP_GPIO_LED_PORT, APP_GPIO_LED_PIN);
 			//! Clear the action-required flag so the main loop can wait for the next interrupt
 			isActionRequired = 0U;
 		}
 
 		//! Blocking delay to prevent the main loop from running too fast
-		TIM_BlockingDelayMs(DELAY_TIMER, 10U);
+		TIM_BlockingDelayMs(DELAY_TIMER, 1U);
 	}
 
 	return 0;

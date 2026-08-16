@@ -28,7 +28,7 @@
 /** @brief Application Timer Prescaler @def APP_TIMER_PRESCALER */
 #define APP_TIMER_PRESCALER			((tim_prescaler_t) 7199U)
 /** @brief Application Timer Auto-Reload @def APP_TIMER_AUTO_RELOAD */
-#define APP_TIMER_AUTO_RELOAD		((tim_auto_reload_t) 9999U)
+#define APP_TIMER_AUTO_RELOAD		((tim_auto_reload_t) 999U)
 /** @brief Application Timer Interrupt Handler @def APP_TIMER_IRQHandler */
 #define APP_TIMER_IRQHandler		(TIM3_IRQHandler)
 
