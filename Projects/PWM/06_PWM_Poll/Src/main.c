@@ -77,25 +77,15 @@ static driver_status_t App_ConfigPWM(void)
 	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_PWM_TIMER_CLOCK_MASK));
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_PWM_TIMER, &timerConfig));
 
-	//! Exercise PWM1/high and PWM2/low only after the shared Timer base is valid.
+	//! Configure both channels coherently only after the shared Timer base is valid.
 	ASSERT_DRIVER_STATUS
 	(
-		TIM_ConfigPWMChannel
+		TIM_ConfigPWMChannels
 		(
 			APP_PWM_TIMER,
-			TIMx_CHANNEL_3,
+			APP_PWM_CHANNEL_MASK,
 			TIMx_CHANNEL_MODE_PWM1,
 			TIMx_CHANNEL_POLARITY_HIGH
-		)
-	);
-	ASSERT_DRIVER_STATUS
-	(
-		TIM_ConfigPWMChannel
-		(
-			APP_PWM_TIMER,
-			TIMx_CHANNEL_4,
-			TIMx_CHANNEL_MODE_PWM2,
-			TIMx_CHANNEL_POLARITY_LOW
 		)
 	);
 
@@ -126,8 +116,7 @@ static driver_status_t App_DeConfigPWM(void)
 	//! Stop the shared counter before disconnecting and resetting either channel.
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_OFF));
 	ASSERT_DRIVER_STATUS(TIM_SetPWMChannelOutputEnableState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(TIM_DeConfigPWMChannel(APP_PWM_TIMER, TIMx_CHANNEL_3));
-	return TIM_DeConfigPWMChannel(APP_PWM_TIMER, TIMx_CHANNEL_4);
+	return TIM_DeConfigPWMChannels(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK);
 }
 
 // ==================================================================================================== //

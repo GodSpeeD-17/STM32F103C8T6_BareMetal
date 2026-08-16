@@ -82,7 +82,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannel(const tim_channel_
  */
 __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ValidateChannelMask(const tim_channel_t channelMask)
 {
-	//! Output-state batching accepts any non-empty subset of the four channels.
+	//! Multi-channel operations accept any non-empty subset of the four channels.
 	if (TIM_CHANNEL_MASK_IS_VALID(channelMask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -546,10 +546,10 @@ __STATIC_FORCEINLINE driver_status_t _TIM_PWM_ComputeDutyCycle
 //										Timer PWM Configuration APIs									//
 // ==================================================================================================== //
 
-driver_status_t TIM_ConfigPWMChannel
+driver_status_t TIM_ConfigPWMChannels
 (
 	TIM_TypeDef* const				TIMx,
-	const tim_channel_t				channel,
+	const tim_channel_t				channelMask,
 	const tim_channel_mode_t		channelMode,
 	const tim_channel_polarity_t	channelPolarity
 )
@@ -558,21 +558,29 @@ driver_status_t TIM_ConfigPWMChannel
 	reg cr1RegImage = 0x00000000UL;
 	reg arrRegImage = 0x00000000UL;
 	reg cntRegImage = 0x00000000UL;
-	reg ccmrRegImage = 0x00000000UL;
-	reg directCcmrRegImage = 0x00000000UL;
-	reg stagedCcmrRegImage = 0x00000000UL;
+	reg ccmr1RegImage = 0x00000000UL;
+	reg ccmr2RegImage = 0x00000000UL;
+	reg directCcmr1RegImage = 0x00000000UL;
+	reg directCcmr2RegImage = 0x00000000UL;
+	reg stagedCcmr1RegImage = 0x00000000UL;
+	reg stagedCcmr2RegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
 	reg stagedCcerRegImage = 0x00000000UL;
 	reg stagedCcrRegImage = 0x00000000UL;
+	reg* pDirectCcmrRegImage = NULL;
+	reg* pStagedCcmrRegImage = NULL;
 	tim_auto_reload_t autoReload = 0U;
 	tim_counter_value_t counterValue = 0U;
 	tim_compare_value_t compareValue = 0U;
+	tim_channel_t remainingChannels = channelMask;
+	tim_channel_t channel = TIMx_CHANNEL_NONE;
+	tim_channel_index_t channelIndex = TIM_CHANNEL_INDEX_FIRST;
 	driver_status_t counterState = DRIVER_STATUS_ERROR;
 	driver_status_t channelState = DRIVER_STATUS_ERROR;
 
 	//! Complete argument validation precedes Timer MMIO.
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMask(channelMask));
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMode(channelMode));
 	if (TIM_CHANNEL_POLARITY_IS_VALID(channelPolarity) == 0x00U)
 	{
@@ -606,49 +614,77 @@ driver_status_t TIM_ConfigPWMChannel
 		return DRIVER_STATUS_ERROR_STATE;
 	}
 
-	//! Require the selected output disabled and snapshot only its owned channel images.
+	//! Snapshot each shared channel register at most once before staging any mutation.
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
-	channelState = Codec_TIM_ExtractChannelEnableState(ccerRegImage, channel);
-	if (channelState == DRIVER_STATUS_ON)
-	{
-		return DRIVER_STATUS_ERROR_BUSY;
-	}
-	if (channelState != DRIVER_STATUS_OFF)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
-	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
-	stagedCcmrRegImage = ccmrRegImage;
 	stagedCcerRegImage = ccerRegImage;
+	if ((channelMask & (TIMx_CHANNEL_1 | TIMx_CHANNEL_2)) != TIMx_CHANNEL_NONE)
+	{
+		ccmr1RegImage = LL_TIM_ReadCCMR1(TIMx);
+		directCcmr1RegImage = ccmr1RegImage;
+		stagedCcmr1RegImage = ccmr1RegImage;
+	}
+	if ((channelMask & (TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) != TIMx_CHANNEL_NONE)
+	{
+		ccmr2RegImage = LL_TIM_ReadCCMR2(TIMx);
+		directCcmr2RegImage = ccmr2RegImage;
+		stagedCcmr2RegImage = ccmr2RegImage;
+	}
 
-	//! Stage the complete admitted PWM channel shape and exact mode-correct zero duty.
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageOutputCompareConfig
+	//! Validate and stage every selected lane before any Timer register is written.
+	while (remainingChannels != TIMx_CHANNEL_NONE)
+	{
+		channel = TIM_ChannelMaskExtractLowestChannel(remainingChannels);
+		channelState = Codec_TIM_ExtractChannelEnableState(ccerRegImage, channel);
+		if (channelState == DRIVER_STATUS_ON)
+		{
+			return DRIVER_STATUS_ERROR_BUSY;
+		}
+		if (channelState != DRIVER_STATUS_OFF)
+		{
+			return DRIVER_STATUS_ERROR_STATE;
+		}
+
+		if ((channel & (TIMx_CHANNEL_1 | TIMx_CHANNEL_2)) != TIMx_CHANNEL_NONE)
+		{
+			pDirectCcmrRegImage = &directCcmr1RegImage;
+			pStagedCcmrRegImage = &stagedCcmr1RegImage;
+		}
+		else
+		{
+			pDirectCcmrRegImage = &directCcmr2RegImage;
+			pStagedCcmrRegImage = &stagedCcmr2RegImage;
+		}
+
+		ASSERT_DRIVER_STATUS
 		(
-			&stagedCcmrRegImage,
-			channel,
-			TIMx_CHANNEL_OC_CLEAR_DISABLE,
-			channelMode,
-			TIMx_CHANNEL_OC_PRELOAD_ENABLE,
-			TIMx_CHANNEL_OC_FAST_DISABLE
-		)
-	);
-	directCcmrRegImage = stagedCcmrRegImage;
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageOutputCompareConfig
+			Codec_TIM_StageOutputCompareConfig
+			(
+				pDirectCcmrRegImage,
+				channel,
+				TIMx_CHANNEL_OC_CLEAR_DISABLE,
+				channelMode,
+				TIMx_CHANNEL_OC_PRELOAD_DISABLE,
+				TIMx_CHANNEL_OC_FAST_DISABLE
+			)
+		);
+		ASSERT_DRIVER_STATUS
 		(
-			&directCcmrRegImage,
-			channel,
-			TIMx_CHANNEL_OC_CLEAR_DISABLE,
-			channelMode,
-			TIMx_CHANNEL_OC_PRELOAD_DISABLE,
-			TIMx_CHANNEL_OC_FAST_DISABLE
-		)
-	);
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelPolarity(&stagedCcerRegImage, channel, channelPolarity));
+			Codec_TIM_StageOutputCompareConfig
+			(
+				pStagedCcmrRegImage,
+				channel,
+				TIMx_CHANNEL_OC_CLEAR_DISABLE,
+				channelMode,
+				TIMx_CHANNEL_OC_PRELOAD_ENABLE,
+				TIMx_CHANNEL_OC_FAST_DISABLE
+			)
+		);
+		ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, DRIVER_STATUS_OFF));
+		ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelPolarity(&stagedCcerRegImage, channel, channelPolarity));
+		ASSERT_DRIVER_STATUS(TIM_ChannelMaskRemoveChannel(&remainingChannels, channel));
+	}
+
+	//! Derive one shared mode-correct zero-duty image for every selected channel.
 	ASSERT_DRIVER_STATUS
 	(
 		_TIM_PWM_ComputeCompareValue
@@ -661,14 +697,35 @@ driver_status_t TIM_ConfigPWMChannel
 	);
 	ASSERT_DRIVER_STATUS(Codec_TIM_StageCompareValue(&stagedCcrRegImage, compareValue));
 
-	//! Point of no return: load the active CCR directly while the channel and counter are disabled.
+	//! Point of no return: commit each shared image once and each selected CCR once.
 	if (ccerRegImage != stagedCcerRegImage)
 	{
 		LL_TIM_WriteCCER(TIMx, stagedCcerRegImage);
 	}
-	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, ccmrRegImage, directCcmrRegImage);
-	_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
-	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, directCcmrRegImage, stagedCcmrRegImage);
+	if (ccmr1RegImage != directCcmr1RegImage)
+	{
+		LL_TIM_WriteCCMR1(TIMx, directCcmr1RegImage);
+	}
+	if (ccmr2RegImage != directCcmr2RegImage)
+	{
+		LL_TIM_WriteCCMR2(TIMx, directCcmr2RegImage);
+	}
+	for (channelIndex = TIM_CHANNEL_INDEX_FIRST; channelIndex < TIM_CHANNEL_COUNT; ++channelIndex)
+	{
+		channel = TIM_CHANNEL_INDEX_TO_MASK(channelIndex);
+		if ((channelMask & channel) != TIMx_CHANNEL_NONE)
+		{
+			_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
+		}
+	}
+	if (directCcmr1RegImage != stagedCcmr1RegImage)
+	{
+		LL_TIM_WriteCCMR1(TIMx, stagedCcmr1RegImage);
+	}
+	if (directCcmr2RegImage != stagedCcmr2RegImage)
+	{
+		LL_TIM_WriteCCMR2(TIMx, stagedCcmr2RegImage);
+	}
 
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -712,24 +769,31 @@ driver_status_t TIM_GetPWMChannelConfig
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_DeConfigPWMChannel
+driver_status_t TIM_DeConfigPWMChannels
 (
 	TIM_TypeDef* const		TIMx,
-	const tim_channel_t	channel
+	const tim_channel_t	channelMask
 )
 {
 	reg cr1RegImage = 0x00000000UL;
-	reg ccmrRegImage = 0x00000000UL;
-	reg stagedCcmrRegImage = 0x00000000UL;
+	reg ccmr1RegImage = 0x00000000UL;
+	reg ccmr2RegImage = 0x00000000UL;
+	reg stagedCcmr1RegImage = 0x00000000UL;
+	reg stagedCcmr2RegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
 	reg stagedCcerRegImage = 0x00000000UL;
-	reg ccrRegImage = 0x00000000UL;
-	reg stagedCcrRegImage = 0x00000000UL;
+	reg ccrRegImages[TIM_CHANNEL_COUNT] = { 0x00000000UL };
+	reg stagedCcrRegImages[TIM_CHANNEL_COUNT] = { 0x00000000UL };
+	reg* pStagedCcmrRegImage = NULL;
+	const reg* pCcmrRegImage = NULL;
+	tim_channel_t remainingChannels = channelMask;
+	tim_channel_t channel = TIMx_CHANNEL_NONE;
+	tim_channel_index_t channelIndex = TIM_CHANNEL_INDEX_FIRST;
 	driver_status_t counterState = DRIVER_STATUS_ERROR;
 	driver_status_t channelState = DRIVER_STATUS_ERROR;
 
 	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateInstance(TIMx));
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannel(channel));
+	ASSERT_DRIVER_STATUS(_TIM_PWM_ValidateChannelMask(channelMask));
 
 	cr1RegImage = LL_TIM_ReadCR1(TIMx);
 	counterState = Codec_TIM_ExtractCounterEnableState(cr1RegImage);
@@ -741,56 +805,116 @@ driver_status_t TIM_DeConfigPWMChannel
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
+
+	//! Snapshot each shared register once, then validate every selected PWM lane.
 	ccerRegImage = LL_TIM_ReadCCER(TIMx);
-	channelState = Codec_TIM_ExtractChannelEnableState(ccerRegImage, channel);
-	if (channelState == DRIVER_STATUS_ON)
-	{
-		return DRIVER_STATUS_ERROR_BUSY;
-	}
-	if (channelState != DRIVER_STATUS_OFF)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
-	ccmrRegImage = _TIM_PWM_ReadCaptureCompareModeRegister(TIMx, channel);
-	ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(ccmrRegImage, ccerRegImage, channel, NULL, NULL));
-	ccrRegImage = _TIM_PWM_ReadCaptureCompareRegister(TIMx, channel);
-	stagedCcmrRegImage = ccmrRegImage;
 	stagedCcerRegImage = ccerRegImage;
-	stagedCcrRegImage = ccrRegImage;
+	if ((channelMask & (TIMx_CHANNEL_1 | TIMx_CHANNEL_2)) != TIMx_CHANNEL_NONE)
+	{
+		ccmr1RegImage = LL_TIM_ReadCCMR1(TIMx);
+		stagedCcmr1RegImage = ccmr1RegImage;
+	}
+	if ((channelMask & (TIMx_CHANNEL_3 | TIMx_CHANNEL_4)) != TIMx_CHANNEL_NONE)
+	{
+		ccmr2RegImage = LL_TIM_ReadCCMR2(TIMx);
+		stagedCcmr2RegImage = ccmr2RegImage;
+	}
 
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageOutputCompareConfig
-		(
-			&stagedCcmrRegImage,
-			channel,
-			TIMx_CHANNEL_OC_CLEAR_DISABLE,
-			TIMx_CHANNEL_MODE_FREEZE,
-			TIMx_CHANNEL_OC_PRELOAD_DISABLE,
-			TIMx_CHANNEL_OC_FAST_DISABLE
-		)
-	);
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageChannelPolarity
-		(
-			&stagedCcerRegImage,
-			channel,
-			TIMx_CHANNEL_POLARITY_HIGH
-		)
-	);
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageCompareValue(&stagedCcrRegImage, (tim_compare_value_t) 0U));
+	while (remainingChannels != TIMx_CHANNEL_NONE)
+	{
+		channel = TIM_ChannelMaskExtractLowestChannel(remainingChannels);
+		channelState = Codec_TIM_ExtractChannelEnableState(ccerRegImage, channel);
+		if (channelState == DRIVER_STATUS_ON)
+		{
+			return DRIVER_STATUS_ERROR_BUSY;
+		}
+		if (channelState != DRIVER_STATUS_OFF)
+		{
+			return DRIVER_STATUS_ERROR_STATE;
+		}
 
-	//! Disable preload before clearing CCR so the stopped channel reaches reset state immediately.
-	_TIM_PWM_WriteCaptureCompareModeRegisterIfChanged(TIMx, channel, ccmrRegImage, stagedCcmrRegImage);
+		if ((channel & (TIMx_CHANNEL_1 | TIMx_CHANNEL_2)) != TIMx_CHANNEL_NONE)
+		{
+			pCcmrRegImage = &ccmr1RegImage;
+			pStagedCcmrRegImage = &stagedCcmr1RegImage;
+		}
+		else
+		{
+			pCcmrRegImage = &ccmr2RegImage;
+			pStagedCcmrRegImage = &stagedCcmr2RegImage;
+		}
+
+		ASSERT_DRIVER_STATUS(_TIM_PWM_ExtractChannelConfig(*pCcmrRegImage, ccerRegImage, channel, NULL, NULL));
+		ASSERT_DRIVER_STATUS
+		(
+			Codec_TIM_StageOutputCompareConfig
+			(
+				pStagedCcmrRegImage,
+				channel,
+				TIMx_CHANNEL_OC_CLEAR_DISABLE,
+				TIMx_CHANNEL_MODE_FREEZE,
+				TIMx_CHANNEL_OC_PRELOAD_DISABLE,
+				TIMx_CHANNEL_OC_FAST_DISABLE
+			)
+		);
+		ASSERT_DRIVER_STATUS(Codec_TIM_StageChannelEnableState(&stagedCcerRegImage, channel, DRIVER_STATUS_OFF));
+		ASSERT_DRIVER_STATUS
+		(
+			Codec_TIM_StageChannelPolarity
+			(
+				&stagedCcerRegImage,
+				channel,
+				TIMx_CHANNEL_POLARITY_HIGH
+			)
+		);
+		ASSERT_DRIVER_STATUS(TIM_ChannelMaskRemoveChannel(&remainingChannels, channel));
+	}
+
+	//! Read and stage CCR reset images only after every selected lane is proven to be PWM output.
+	for (channelIndex = TIM_CHANNEL_INDEX_FIRST; channelIndex < TIM_CHANNEL_COUNT; ++channelIndex)
+	{
+		channel = TIM_CHANNEL_INDEX_TO_MASK(channelIndex);
+		if ((channelMask & channel) == TIMx_CHANNEL_NONE)
+		{
+			continue;
+		}
+
+		ccrRegImages[channelIndex] = _TIM_PWM_ReadCaptureCompareRegister(TIMx, channel);
+		stagedCcrRegImages[channelIndex] = ccrRegImages[channelIndex];
+		ASSERT_DRIVER_STATUS
+		(
+			Codec_TIM_StageCompareValue
+			(
+				&stagedCcrRegImages[channelIndex],
+				(tim_compare_value_t) 0U
+			)
+		);
+	}
+
+	//! Point of no return: disable preload before clearing every selected active CCR.
+	if (ccmr1RegImage != stagedCcmr1RegImage)
+	{
+		LL_TIM_WriteCCMR1(TIMx, stagedCcmr1RegImage);
+	}
+	if (ccmr2RegImage != stagedCcmr2RegImage)
+	{
+		LL_TIM_WriteCCMR2(TIMx, stagedCcmr2RegImage);
+	}
 	if (ccerRegImage != stagedCcerRegImage)
 	{
 		LL_TIM_WriteCCER(TIMx, stagedCcerRegImage);
 	}
-	if (ccrRegImage != stagedCcrRegImage)
+	for (channelIndex = TIM_CHANNEL_INDEX_FIRST; channelIndex < TIM_CHANNEL_COUNT; ++channelIndex)
 	{
-		_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImage);
+		channel = TIM_CHANNEL_INDEX_TO_MASK(channelIndex);
+		if
+		(
+			((channelMask & channel) != TIMx_CHANNEL_NONE) &&
+			(ccrRegImages[channelIndex] != stagedCcrRegImages[channelIndex])
+		)
+		{
+			_TIM_PWM_WriteCaptureCompareRegister(TIMx, channel, stagedCcrRegImages[channelIndex]);
+		}
 	}
 
 	return DRIVER_STATUS_SUCCESS;

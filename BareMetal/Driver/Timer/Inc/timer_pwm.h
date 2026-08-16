@@ -8,7 +8,7 @@
  * @details
  * This header exposes the PWM channel surface owned by the Timer driver.
  * Applications configure the Timer base through @ref TIM_Config first,
- * configure each PWM channel through this interface second, and start the
+ * configure the required PWM channel set through this interface second, and start the
  * shared counter through @ref TIM_SetOperationState last.
  *
  * Timer PWM APIs do not query or mutate RCC state. Successful completion of
@@ -61,27 +61,23 @@ extern "C" {
 // ==================================================================================================== //
 
 /**
- * @brief Configures one stopped Timer channel for PWM operation
+ * @brief Configures selected stopped Timer channels for PWM operation
  * @details
  * Requires an already-configured, stopped, edge-aligned, up-counting Timer
- * with auto-reload preload and update events enabled. The function configures
- * output compare, disables fast/clear behavior, and stages the requested
- * channel polarity. It loads exact 0 percent duty directly while CCR preload
- * is disabled, and then
- * enables CCR preload. It never generates a Timer-wide update event and never
- * enables `CCxE` or `CR1.CEN`.
+ * with auto-reload preload and update events enabled. The function atomically
+ * applies one PWM mode and polarity to every selected channel, disables
+ * fast/clear behavior, loads exact 0 percent duty directly while CCR preload
+ * is disabled, and then enables CCR preload. It never generates a Timer-wide
+ * update event and never enables any `CCxE` or `CR1.CEN`.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - `TIM2`
  * - `TIM3`
  * - `TIM4`
- * @param[in] channel Timer single-channel selector
+ * @param[in] channelMask Timer channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Timer channel 1
- * - @ref `TIMx_CHANNEL_2`: Timer channel 2
- * - @ref `TIMx_CHANNEL_3`: Timer channel 3
- * - @ref `TIMx_CHANNEL_4`: Timer channel 4
+ * - One or more OR-combined values from @ref `TIMx_CHANNEL_1` through @ref `TIMx_CHANNEL_4`
  * @param[in] channelMode Timer PWM channel-mode selector
  * Accepted values:
  * - @ref `TIMx_CHANNEL_MODE_PWM1`: PWM mode 1
@@ -90,20 +86,21 @@ extern "C" {
  * Accepted values:
  * - @ref `TIMx_CHANNEL_POLARITY_HIGH`: Active-high output
  * - @ref `TIMx_CHANNEL_POLARITY_LOW`: Active-low output
- * @returns @ref driver_status_t "PWM-channel configuration status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: PWM channel was configured and remains disabled
+ * @returns @ref driver_status_t "PWM-channel-set configuration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every selected PWM channel was configured and remains disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel mode, channel polarity, or programmed ARR is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel mask, channel mode, channel polarity, or programmed ARR is invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer base configuration does not satisfy the PWM contract
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or at least one selected channel output is enabled
  * @pre The application successfully completed @ref TIM_Config and left `CNT` at zero
- * @pre The selected channel output is disabled
+ * @pre Every selected channel output is disabled
  * @note GPIO and AFIO state are never read or modified
+ * @note A failure before the first hardware write leaves all Timer state unchanged
  */
-driver_status_t TIM_ConfigPWMChannel
+driver_status_t TIM_ConfigPWMChannels
 (
 	TIM_TypeDef* const				TIMx,
-	const tim_channel_t				channel,
+	const tim_channel_t				channelMask,
 	const tim_channel_mode_t		channelMode,
 	const tim_channel_polarity_t	channelPolarity
 );
@@ -149,34 +146,34 @@ driver_status_t TIM_GetPWMChannelConfig
 );
 
 /**
- * @brief Restores one disabled Timer PWM channel to its channel reset state
+ * @brief Restores selected disabled Timer PWM channels to their channel reset state
  * @details
- * Clears only the selected channel's CCMR lane, `CCxE`, `CCxP`, and `CCRx`.
- * Every other Timer channel, the Timer timebase, RCC, IRQ, DMA, GPIO, AFIO,
- * and NVIC state is preserved.
+ * Validates and stages the complete selected channel set before the first
+ * hardware write, then clears only each selected channel's CCMR lane, `CCxE`,
+ * `CCxP`, and `CCRx`. Every unselected Timer channel, the Timer timebase, RCC,
+ * IRQ, DMA, GPIO, AFIO, and NVIC state is preserved.
  *
  * @param[in] TIMx Timer peripheral instance
  * Accepted values:
  * - `TIM2`
  * - `TIM3`
  * - `TIM4`
- * @param[in] channel Timer single-channel selector
+ * @param[in] channelMask Timer channel mask
  * Accepted values:
- * - @ref `TIMx_CHANNEL_1`: Timer channel 1
- * - @ref `TIMx_CHANNEL_2`: Timer channel 2
- * - @ref `TIMx_CHANNEL_3`: Timer channel 3
- * - @ref `TIMx_CHANNEL_4`: Timer channel 4
- * @returns @ref driver_status_t "PWM-channel deconfiguration status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected channel-owned state was reset
+ * - One or more OR-combined values from @ref `TIMx_CHANNEL_1` through @ref `TIMx_CHANNEL_4`
+ * @returns @ref driver_status_t "PWM-channel-set deconfiguration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every selected channel-owned state was reset
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p TIMx is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The selected channel is not configured for PWM
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or selected channel output is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance or channel mask is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: At least one selected channel is not configured for PWM
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Counter or at least one selected channel output is enabled
+ * @pre Every selected channel output is disabled
+ * @note A failure before the first hardware write leaves all Timer state unchanged
  */
-driver_status_t TIM_DeConfigPWMChannel
+driver_status_t TIM_DeConfigPWMChannels
 (
 	TIM_TypeDef* const		TIMx,
-	const tim_channel_t	channel
+	const tim_channel_t	channelMask
 );
 
 // ==================================================================================================== //

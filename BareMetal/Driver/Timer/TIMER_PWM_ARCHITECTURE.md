@@ -39,12 +39,12 @@ The following decisions are fixed for the first implementation:
 | --- | --- |
 | Repository placement | Add `Inc/timer_pwm.h` and `Src/timer_pwm.c` directly to the existing `Timer` module; do not create a new PWM folder or module. |
 | Public identity | Pass `TIMx` and `tim_channel_t` explicitly. Do not hide them in an endpoint enum, group enum, handle, or configuration object. |
-| API terminology | Use `PWMChannel` as the public subject. Lifecycle conjugates are `TIM_ConfigPWMChannel()` / `TIM_DeConfigPWMChannel()`; readable domains use symmetric `TIM_GetPWMChannel*()` / `TIM_SetPWMChannel*()` names. `OutputEnableState` names `CCxE` control and must not be shortened to the ambiguous physical-signal term `OutputState`. |
+| API terminology | Use `PWMChannels` for mask-based lifecycle conjugates: `TIM_ConfigPWMChannels()` / `TIM_DeConfigPWMChannels()`. Readable single-channel domains use symmetric `TIM_GetPWMChannel*()` / `TIM_SetPWMChannel*()` names. `OutputEnableState` names `CCxE` control and must not be shortened to the ambiguous physical-signal term `OutputState`. |
 | Timer lifecycle | The application successfully configures the Timer first, configures PWM second, and enables the Timer last. |
 | RCC boundary | Timer PWM neither queries nor mutates the Timer clock gate; successful `TIM_Config()` is its lifecycle prerequisite. |
 | Frequency ownership | Timer timebase APIs own PSC, ARR, counter mode, and resulting PWM frequency. Timer PWM does not accept or set frequency. |
 | GPIO ownership | The application owns GPIO mode, output speed, alternate-function selection, AFIO remap, and pin lifecycle. |
-| PWM-channel configuration | `TIM_ConfigPWMChannel()` accepts channel mode and channel polarity as independent scalar parameters. |
+| PWM-channel configuration | `TIM_ConfigPWMChannels()` accepts a non-empty OR-combined channel mask plus one channel mode and polarity applied atomically to the complete selection. |
 | Duty configuration | `TIM_SetPWMChannelDutyCycle()` is a separate operation using the already-programmed ARR. |
 | Output-enable state | Timer PWM controls selected `CCxE` channel-output-enable bits; `TIM_SetOperationState()` independently controls `CR1.CEN`. |
 | Layering | `timer_pwm.c` is a Timer Driver source unit and follows the existing Timer Driver -> Codec -> LL stack. |
@@ -63,7 +63,7 @@ Application configures GPIO/AFIO for the selected physical output pin
         ↓
 Application configures TIMx counter and timebase through TIM_Config()
         ↓
-Application configures each PWM channel through TIM_ConfigPWMChannel()
+Application configures selected PWM channels through TIM_ConfigPWMChannels()
         ↓
 Application assigns each channel duty through TIM_SetPWMChannelDutyCycle()
         ↓
@@ -77,7 +77,7 @@ The architectural precondition is therefore:
 ```text
 TIM_Config() succeeds
         before
-TIM_ConfigPWMChannel() / TIM_SetPWMChannelDutyCycle()
+TIM_ConfigPWMChannels() / TIM_SetPWMChannelDutyCycle()
         before
 TIM_SetOperationState(TIMx, DRIVER_STATUS_ON)
 ```
@@ -110,7 +110,7 @@ Timer timebase concerns. The PWM channel layer reads the already-programmed
 period but does not choose or mutate the frequency.
 
 The application must configure an edge-aligned, up-counting, continuous Timer
-timebase suitable for PWM before calling `TIM_ConfigPWMChannel()`.
+timebase suitable for PWM before calling `TIM_ConfigPWMChannels()`.
 
 ### Compare value and active time
 
@@ -185,7 +185,7 @@ CCR:          0..65535
 
 `ARR=0` is not a usable PWM period. `ARR=65535` produces 65536 period ticks,
 which cannot be written to a 16-bit CCR for the mode-dependent exact endpoint.
-`TIM_ConfigPWMChannel()` rejects either boundary instead of silently approximating or
+`TIM_ConfigPWMChannels()` rejects either boundary instead of silently approximating or
 clamping it.
 
 ### Polarity
@@ -433,10 +433,10 @@ handle type is introduced.
 The admitted base API is:
 
 ```c
-driver_status_t TIM_ConfigPWMChannel
+driver_status_t TIM_ConfigPWMChannels
 (
 	TIM_TypeDef* const TIMx,
-	const tim_channel_t channel,
+	const tim_channel_t channelMask,
 	const tim_channel_mode_t channelMode,
 	const tim_channel_polarity_t channelPolarity
 );
@@ -449,10 +449,10 @@ driver_status_t TIM_GetPWMChannelConfig
 	tim_channel_polarity_t* const pChannelPolarity
 );
 
-driver_status_t TIM_DeConfigPWMChannel
+driver_status_t TIM_DeConfigPWMChannels
 (
 	TIM_TypeDef* const TIMx,
-	const tim_channel_t channel
+	const tim_channel_t channelMask
 );
 
 driver_status_t TIM_SetPWMChannelDutyCycle
@@ -486,14 +486,15 @@ driver_status_t TIM_GetPWMChannelOutputEnableState
 Identity is never embedded in configuration state:
 
 - `TIMx` selects the Timer instance.
-- `channel` selects exactly one Timer channel for configuration and getters.
-- `channelMask` selects one or more already-configured PWM channels for one
-  coherent output-enable-state update.
+- `channelMask` selects one or more Timer channels for one coherent
+  configuration, deconfiguration, or output-enable-state transaction.
+- `channel` selects exactly one Timer channel for getters and duty-cycle
+  operations, because those domains can differ independently per channel.
 
 ### Why there is no PWM configuration structure
 
 Channel mode and channel polarity form the narrow PWM-channel configuration
-transaction and are passed directly to `TIM_ConfigPWMChannel()`. Duty has a
+transaction and are passed directly to `TIM_ConfigPWMChannels()`. Duty has a
 distinct lifecycle and preload/update contract, so it is configured separately.
 
 Frequency and GPIO output speed are deliberately absent:
@@ -505,10 +506,12 @@ A structure containing those values would cross ownership boundaries and
 allow independent fields to imply an orchestration policy that Timer PWM does
 not own.
 
-### `TIM_ConfigPWMChannel()` contract
+### `TIM_ConfigPWMChannels()` contract
 
-`TIM_ConfigPWMChannel()` configures one Timer channel for PWM but never enables the
-channel or starts the counter.
+`TIM_ConfigPWMChannels()` configures one or more Timer channels for PWM but
+never enables a channel or starts the counter. The same `channelMode` and
+`channelPolarity` are applied to every selected channel as one atomic
+transaction.
 
 Required preconditions:
 
@@ -516,32 +519,37 @@ Required preconditions:
 - The application successfully completed `TIM_Config()` and has not
   invalidated the admitted Timer lifecycle.
 - `TIMx_CR1.CEN` is clear.
-- The selected `CCxE` bit is clear.
+- Every selected `CCxE` bit is clear.
 - The Timer is edge-aligned and up-counting.
 - One-pulse mode is disabled.
 - ARR preload and update-event operation satisfy the admitted PWM contract.
 - `CNT` is zero.
 - ARR is in `1..65534`.
-- `channel` contains exactly one of `TIMx_CHANNEL_1` through
-  `TIMx_CHANNEL_4`.
+- `channelMask` contains one or more OR-combined values from
+  `TIMx_CHANNEL_1` through `TIMx_CHANNEL_4`.
 - `channelMode` is PWM mode 1 or PWM mode 2.
 - `channelPolarity` is active-high or active-low.
 
 The transaction:
 
 1. Validates every argument and all required Timer state.
-2. Reads each required CCMR, CCER, CR1, ARR, and CNT image once. It does not
-   read CCR; the operation replaces the selected channel's compare state, and
+2. Reads each touched CCMR plus CCER, CR1, ARR, and CNT once. It does not read
+   CCR; the operation replaces every selected channel's compare state, and
    an input-mode CCR read could consume capture notification state.
-3. Stages `CCxS` as output, the requested PWM mode, CCR preload enabled,
-   output-compare fast disabled, and output-compare clear disabled.
-4. Stages the requested polarity while keeping `CCxE` disabled.
-5. Derives the mode-correct exact 0% CCR value from the programmed period.
-6. Stages every prospective register image before the first hardware write.
-7. Writes the selected CCMR lane with CCR preload temporarily disabled.
-8. Writes the selected CCR directly into its active compare state.
-9. Writes the final selected CCMR lane with CCR preload enabled.
-10. Returns with the channel disabled and Timer counter stopped.
+3. Validates every selected `CCxE` before staging any channel mutation.
+4. Stages every selected `CCxS` as output, the shared requested PWM mode, CCR
+   preload enabled, output-compare fast disabled, and output-compare clear
+   disabled.
+5. Stages the shared requested polarity while keeping every selected `CCxE`
+   disabled.
+6. Derives one mode-correct exact 0% CCR value from the programmed period.
+7. Stages every prospective register image before the first hardware write.
+8. Writes each touched shared CCMR once with selected CCR preloads temporarily
+   disabled.
+9. Writes each selected CCR directly into its active compare state.
+10. Writes each touched final shared CCMR once with selected CCR preloads
+    enabled.
+11. Returns with every selected channel disabled and Timer counter stopped.
 
 An error before the first write leaves Timer state unchanged. After the first
 write, no further fallible validation or Codec operation is permitted.
@@ -549,8 +557,9 @@ write, no further fallible validation or Codec operation is permitted.
 When converting an input-capture lane, the Driver writes CCR only after CCMR
 establishes output interpretation. This preserves unread input-capture
 notification state during validation and avoids a mode-dependent consuming
-read. The direct-load window is safe because CEN and selected CCxE are both
-clear; the final image restores the mandatory PWM preload before return.
+read. The direct-load window is safe because CEN and every selected CCxE are
+clear; the final images restore mandatory PWM preload before return. Unselected
+lanes in a touched CCMR are preserved from the single register snapshot.
 
 ### `TIM_GetPWMChannelConfig()` contract
 
@@ -634,19 +643,25 @@ channels before starting the shared counter.
 `TIM_GetPWMChannelOutputEnableState()` accepts exactly one channel and returns
 `DRIVER_STATUS_OFF`, `DRIVER_STATUS_ON`, or a detailed error status directly.
 
-### `TIM_DeConfigPWMChannel()` contract
+### `TIM_DeConfigPWMChannels()` contract
 
-Deconfiguration requires both the Timer counter and selected channel output to
-be disabled. It resets only the selected channel's owned fields:
+Deconfiguration accepts the same non-empty OR-combined channel-mask domain as
+configuration. It requires both the Timer counter and every selected channel
+output to be disabled. It validates the complete selection before reading any
+selected CCR or writing hardware, then resets only the selected channels'
+owned fields:
 
 - output-compare mode and selection;
 - preload, fast, and clear selectors;
 - polarity;
 - channel enable;
-- selected CCR value.
+- selected CCR values.
 
-It preserves all other channels, the Timer timebase, IRQ/DMA state, RCC clock
-gate, NVIC state, GPIO configuration, and AFIO routing.
+It snapshots each touched shared register once, stages every selected lane,
+writes each touched CCMR and CCER at most once, and clears each selected CCR.
+It preserves all unselected channels, the Timer timebase, IRQ/DMA state, RCC
+clock gate, NVIC state, GPIO configuration, and AFIO routing. Any failure before
+the first write leaves all Timer state unchanged.
 
 ### Status behavior
 
@@ -660,7 +675,7 @@ All fallible public APIs return `driver_status_t`.
 | `DRIVER_STATUS_ERROR_NULL_PTR` | `TIMx` or required output storage is `NULL`. |
 | `DRIVER_STATUS_ERROR_INVALID_ARG` | Instance, channel, mask, channel mode, channel polarity, duty cycle, or admitted ARR range is invalid. |
 | `DRIVER_STATUS_ERROR_STATE` | Timer base state is incompatible or the channel does not have the admitted PWM shape. |
-| `DRIVER_STATUS_ERROR_BUSY` | Configuration/deconfiguration requires a stopped counter or disabled channel, or stopped-duty loading requires selected CCxE clear. |
+| `DRIVER_STATUS_ERROR_BUSY` | Configuration/deconfiguration requires a stopped counter and every selected channel disabled, or stopped-duty loading requires selected CCxE clear. |
 
 Peer and lower-layer statuses are propagated rather than collapsed into a
 Boolean result.
@@ -698,7 +713,7 @@ guide before changing source behavior.
 Timer PWM keeps no hidden group state:
 
 - Multiple channels share whatever PSC/ARR the application programmed.
-- Configuring a channel does not claim the Timer or alter another channel.
+- Configuring a channel set does not claim the Timer or alter an unselected channel.
 - Duty setters derive their result from the current readable ARR.
 - Channel output-enable state never starts or stops the shared counter.
 - The application decides which channels are enabled before starting TIMx.
@@ -767,16 +782,25 @@ Pure and Driver-level tests must cover:
 
 Tests must demonstrate:
 
-- `TIM_ConfigPWMChannel()` rejects a running Timer;
-- `TIM_ConfigPWMChannel()` rejects an enabled channel;
+- `TIM_ConfigPWMChannels()` rejects an empty or unsupported channel mask;
+- `TIM_ConfigPWMChannels()` rejects a running Timer;
+- `TIM_ConfigPWMChannels()` rejects the complete transaction when any selected
+  channel is enabled and performs no hardware write;
 - Timer timebase fields are preserved;
 - IRQ, DMA, RCC, and NVIC state are preserved;
-- `TIM_ConfigPWMChannel()` returns with channel and counter disabled;
+- a mask spanning CCMR1 and CCMR2 preserves every unselected lane and snapshots
+  and commits each touched shared register only as required;
+- `TIM_ConfigPWMChannels()` returns with every selected channel and the counter
+  disabled;
 - stopped duty updates require selected CCxE clear and load only the selected
   active CCR without writing EGR, SR, CR1, or another channel;
 - running duty updates wait for the next natural update event;
 - multi-channel output-enable-state updates use one staged CCER write;
-- deconfiguring one channel preserves every other channel;
+- `TIM_DeConfigPWMChannels()` rejects the complete transaction when any selected
+  channel is enabled or does not have the admitted PWM shape and performs no
+  hardware write;
+- multi-channel deconfiguration resets every selected lane and CCR while
+  preserving every unselected channel;
 - getters leave caller output unchanged on failure.
 
 ### Build and documentation validation
@@ -801,14 +825,13 @@ The first board reference must demonstrate:
 
 - application-owned PA2 and PA3 alternate-function configuration;
 - TIM2 configured before either PWM channel;
-- TIM2 CH3 and CH4 configured while TIM2 is stopped;
+- TIM2 CH3 and CH4 configured in one mask transaction while TIM2 is stopped;
 - both channel outputs enabled before TIM2 is started;
 - both outputs running from the same Timer timebase;
 - exact 0% and 100%;
 - representative intermediate duties;
 - a running duty ramp using CCR preload;
-- PWM mode 1 and PWM mode 2 behavior;
-- active-high and active-low behavior;
+- PWM mode and polarity behavior for the shared selected-channel configuration;
 - stopping and deconfiguring without hidden GPIO, RCC, IRQ, or NVIC changes.
 
 ## Deferred scope
@@ -831,7 +854,7 @@ The following work is explicitly deferred from the base implementation:
 - dynamic allocation and opaque handles.
 
 Deferred features require a new top-down ownership and transaction review. They
-must not be added by enlarging `TIM_ConfigPWMChannel()` with unrelated fields.
+must not be added by enlarging `TIM_ConfigPWMChannels()` with unrelated fields.
 
 ## Implementation admission gates
 
