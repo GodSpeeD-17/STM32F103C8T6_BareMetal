@@ -23,6 +23,67 @@ been checked for an exact matching `@def` name and the audit reports zero
 omissions. This applies equally to public, private, object-like, function-like,
 and one-line macros; header guards without Doxygen blocks are excluded.
 
+## Two-Part Peripheral Documentation Model
+
+Every canonical peripheral `.md` page must be self-explanatory and contain
+exactly two primary teaching parts in this order:
+
+1. **Theory with Register Mapping Bridge**
+2. **Implementation with Theory Bridge**
+
+The **Theory with Register Mapping Bridge** part explains the peripheral
+without requiring source-code knowledge. It must cover the peripheral's
+purpose, terminology, state model, hardware flow, peer interactions, and the
+significance of every register in the supported scope. Its register mapping
+must state the owner, address/offset, width, implemented range, access class,
+special read/write semantics, side effects, and relationships between
+registers.
+
+The **Implementation with Theory Bridge** part maps that complete hardware
+model into the repository. It must trace each theoretical state or action
+through its Core C member, LL access, Codec transformation or documented
+no-Codec reason, Driver transaction, public API, volatile access width,
+ordering, validation, preservation, synchronization, concurrency, and
+shared-resource rules. It must also explain deliberately omitted access
+directions or lower-layer functions.
+
+The first part answers **what the hardware means and which registers express
+it**. The second answers **how this project implements that theory and why the
+implementation has its present shape**. Do not interleave these parts in a way
+that forces a reader to understand source symbols before learning the hardware
+model.
+
+The peripheral `.md` file is the single canonical long-form page for that
+peripheral's theory, architecture, register model, layer ownership, and
+implementation mapping. Give its top-level Markdown heading a stable explicit
+Doxygen page identifier. The peripheral's public Driver and LL Doxygen groups
+must link to that page with `@ref`. Source Doxygen must not duplicate the
+peripheral theory. File/group comments summarize scope and ownership, while
+individual API comments document only their local parameters, results,
+preconditions, side effects, exact hardware transaction, and safety warnings.
+
+The generated project documentation must use a concise Markdown main page as a
+navigation index. That page references each documentation-ready peripheral
+`.md` page and directs readers to the generated module/API reference; it does
+not duplicate the peripheral guides. `Doxyfile` must include canonical
+peripheral pages in `INPUT` and configure the navigation index through
+`USE_MDFILE_AS_MAINPAGE`.
+
+Only current, reviewed peripheral guides belong in the generated project
+documentation. Mutable audit scratchpads, TODO files, superseded architecture
+snapshots, and internal planning records remain excluded unless they are
+explicitly promoted to current user-facing documentation. A new peripheral is
+not documentation-complete until its page is linked from both the project
+navigation index and the relevant generated Doxygen groups.
+
+For special registers, explicitly distinguish stored state from an action
+port in the canonical peripheral `.md`. Explain write-one-to-set,
+write-one-to-clear, write-zero-to-clear, read-clear, FIFO, data-port,
+keyed-write, and write-only behavior before describing the corresponding C
+access. Source Doxygen repeats only the operation-specific warning required to
+use an accessor safely. A C `volatile` declaration communicates access
+generation but does not, by itself, document these hardware semantics.
+
 Use the repository's status-reference layout exactly:
 
 ```c
@@ -592,6 +653,15 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-16: Established the initial theory-to-implementation documentation
+  bridge; the later two-part single-source rule below supersedes duplication of
+  theory in function-local LL Doxygen.
+- 2026-08-16: Made reviewed peripheral `.md` files the canonical long-form
+  Doxygen pages, required public Driver/LL groups and the generated project
+  navigation page to reference them, and kept planning/TODO material excluded.
+- 2026-08-16: Required each canonical peripheral guide to contain Theory with
+  Register Mapping Bridge followed by Implementation with Theory Bridge, and
+  prohibited duplicating that theory in source Doxygen.
 - 2026-08-15: Required every macro or symbolic constant used as a Doxygen
   `@ref` target to be enclosed in backticks in all documentation contexts.
 - 2026-08-15: Assigned peripheral clock-gate query/mutation to RCC/application,

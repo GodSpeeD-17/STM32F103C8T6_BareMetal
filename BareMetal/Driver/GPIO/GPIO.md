@@ -1,4 +1,4 @@
-# GPIO Implementation Guide
+# GPIO Implementation Guide {#GPIO_Peripheral_Guide}
 
 This directory contains the STM32F1 GPIO driver family. Use this file as the
 implementation entry point before editing GPIO code.
