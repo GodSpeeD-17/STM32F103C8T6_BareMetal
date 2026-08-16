@@ -2,25 +2,17 @@
  * @file	nvic.h
  * @author	Shrey Shah
  * @brief	NVIC Driver Interface
- * @version	v2.0
- * @date	06-06-2026
+ * @version	v3.0
+ * @date	16-08-2026
  *
  * @details
- * This header implements the Cortex-M3 NVIC driver as static inline functions.
- * It owns direct NVIC and SCB register access for external IRQ enable/disable,
- * software pending, priority field staging, and AIRCR priority grouping.
+ * This header exposes the application-facing STM32F103C8T6 NVIC contract.
+ * Implementations live in the NVIC Driver, Codec, and LL source files; this
+ * public header contains no register helpers or inline implementations.
  *
- * Practical model:
- * - Lower numerical priority values have higher interrupt priority.
- * - STM32F1 implements four priority bits inside each 8-bit IPR field.
- * - @ref `NVIC_SetPriority` writes a raw 8-bit IPR field image.
- * - @ref `NVIC_ConfigPriority` accepts logical preemption/sub-priority values
- *   and packs them according to the current priority grouping.
- *
- * Authority:
- * - `nvic_data_types.h` owns NVIC scalar aliases.
- * - `nvic_defines.h` owns IRQ numbers, priority selectors, and helper macros.
- * - `nvic.h` owns direct NVIC/SCB register operations.
+ * The application or integration layer owns global NVIC vector delivery.
+ * Peripheral drivers own only their peripheral-local interrupt sources and
+ * flags. Lower numerical priority values have higher interrupt urgency.
  */
 
 // Header Guards
@@ -30,7 +22,6 @@
 // ==================================================================================================== //
 //												Includes												//
 // ==================================================================================================== //
-#include "stm32f1xx.h"
 #include "nvic_defines.h"
 
 // --- C++ Compatibility ---
@@ -44,283 +35,195 @@ extern "C" {
  */
 
 // ==================================================================================================== //
-//											Local NVIC Helpers											//
+//									NVIC Priority Group APIs									//
 // ==================================================================================================== //
 
 /**
- * @brief Builds the NVIC register bit mask for one external IRQ number
- * @param[in] IRQn External IRQ number
- * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @returns Register-local IRQ bit mask
- * @retval - `0x00000001UL..0x80000000UL`: Mask for @p IRQn inside its NVIC register
- * @note Caller owns IRQ number validation.
- */
-__STATIC_FORCEINLINE uint32_t _NVIC_GetIRQBitMask(const irq_t IRQn)
-{
-	//! Convert IRQn to a local bit position inside the selected 32-bit NVIC register
-	return REG_BIT_MASK(NVIC_IRQ_GET_LOCAL_BIT_POS(IRQn));
-}
-
-/**
- * @brief Packs logical preemption/sub-priority values into one raw NVIC priority field
- * @param[in] preemptPriority Logical preemption priority selector
- * @param[in] subPriority Logical sub-priority selector
- * @param[in] priorityGroup Logical priority group selector
- * @returns Raw 8-bit NVIC IPR priority field image
- * @retval - `0x00U..0xF0U`: Priority value aligned to implemented STM32F1 priority bits
- * @note Only the upper four bits of the returned 8-bit field are implemented
- * by STM32F1 Cortex-M3 hardware.
- */
-__STATIC_FORCEINLINE nvic_priority_t _NVIC_BuildPriorityField
-(
-	const nvic_priority_t			preemptPriority,
-	const nvic_sub_priority_t		subPriority,
-	const nvic_priority_group_t		priorityGroup
-)
-{
-	// Local Variables
-	const uint8_t preemptBits = (uint8_t) priorityGroup;
-	const uint8_t subBits = (uint8_t) (NVIC_PRIORITY_IMPLEMENTED_BITS - preemptBits);
-	const uint8_t preemptMask = (preemptBits == 0x00U) ? 0x00U : (uint8_t) ((0x01U << preemptBits) - 0x01U);
-	const uint8_t subMask = (subBits == 0x00U) ? 0x00U : (uint8_t) ((0x01U << subBits) - 0x01U);
-	uint8_t priorityNibble = 0x00U;
-
-	//! Pack preemption priority into the upper part of the implemented four-bit priority field
-	priorityNibble = (uint8_t) ((((uint8_t) preemptPriority) & preemptMask) << subBits);
-	//! Pack sub-priority into the lower part of the implemented four-bit priority field
-	priorityNibble |= (uint8_t) (((uint8_t) subPriority) & subMask);
-
-	//! Align implemented STM32F1 priority bits to the upper nibble of the 8-bit IPR field
-	return (nvic_priority_t) (priorityNibble << NVIC_PRIORITY_UNIMPLEMENTED_BITS);
-}
-
-// ==================================================================================================== //
-//										SCB Priority Group APIs											//
-// ==================================================================================================== //
-
-/**
- * @brief Sets the NVIC priority grouping in `SCB->AIRCR`
- * @param[in] priorityGroup Logical priority group selector
+ * @brief Sets the global NVIC priority grouping
+ * @param[in] priorityGroup Logical priority-group selector
  * Accepted values:
  * - @ref `NVIC_PRIO_GROUP_0`
  * - @ref `NVIC_PRIO_GROUP_1`
  * - @ref `NVIC_PRIO_GROUP_2`
  * - @ref `NVIC_PRIO_GROUP_3`
  * - @ref `NVIC_PRIO_GROUP_4`
- * @returns Void.
- * @note `AIRCR` writes require @ref `SCB_AIRCR_WRITE_KEY` in `VECTKEY`.
- * @note This function preserves all `AIRCR` bits except `VECTKEY` and `PRIGROUP`.
+ * @returns @ref driver_status_t "Priority-group configuration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Priority grouping was configured
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p priorityGroup is invalid
+ * @warning Priority grouping is global. Changing it reinterprets every IRQ
+ * priority already stored in the NVIC and must be application-init owned.
  */
-__STATIC_FORCEINLINE void NVIC_SetPriorityGrouping(const nvic_priority_group_t priorityGroup)
-{
-	// Local Variables
-	uint32_t aircrRegImage = SCB->AIRCR;
-	const nvic_priority_group_t aircrPriorityGroup = NVIC_PRIO_GROUP_TO_AIRCR(priorityGroup);
-
-	//! Clear the read-only VECTKEYSTAT image and the existing priority-group field
-	aircrRegImage &= ~(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk);
-	//! Write the required AIRCR key and the raw PRIGROUP field
-	aircrRegImage |= REG_FIELD_VALUE(SCB_AIRCR_VECTKEY_Pos, SCB_AIRCR_WRITE_KEY);
-	aircrRegImage |= REG_FIELD_VALUE(SCB_AIRCR_PRIGROUP_Pos, aircrPriorityGroup);
-
-	SCB->AIRCR = aircrRegImage;
-}
+driver_status_t NVIC_SetPriorityGroup(const nvic_priority_group_t priorityGroup);
 
 /**
  * @brief Gets the current logical NVIC priority grouping
- * @returns Logical priority group selector
- * @retval - @ref `NVIC_PRIO_GROUP_0`
- * @retval - @ref `NVIC_PRIO_GROUP_1`
- * @retval - @ref `NVIC_PRIO_GROUP_2`
- * @retval - @ref `NVIC_PRIO_GROUP_3`
- * @retval - @ref `NVIC_PRIO_GROUP_4`
+ * @param[out] pPriorityGroup Destination for the logical priority-group selector
+ * Expected values:
+ * - @ref `NVIC_PRIO_GROUP_0` through @ref `NVIC_PRIO_GROUP_4`
+ * @returns @ref driver_status_t "Priority-group query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Priority grouping was returned
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPriorityGroup is `NULL`
+ * @note Raw AIRCR PRIGROUP values `0U..3U` are hardware-equivalent on this
+ * four-priority-bit target and are reported canonically as @ref `NVIC_PRIO_GROUP_4`.
  */
-__STATIC_FORCEINLINE nvic_priority_group_t NVIC_GetPriorityGrouping(void)
-{
-	// Local Variable
-	nvic_priority_group_t aircrPriorityGroup = (nvic_priority_group_t) 0x00U;
-	//! Extract the raw AIRCR PRIGROUP field and convert it to the logical driver selector
-	aircrPriorityGroup = (nvic_priority_group_t) ((SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos);
-	return NVIC_AIRCR_TO_PRIO_GROUP(aircrPriorityGroup);
-}
-
-/**
- * @brief Enables one configurable SCB system exception
- * @param[in] exception SCB `SHCSR` exception enable bit mask
- * Accepted values:
- * - @ref `SCB_SHCSR_MEMFAULTENA_Msk`
- * - @ref `SCB_SHCSR_BUSFAULTENA_Msk`
- * - @ref `SCB_SHCSR_USGFAULTENA_Msk`
- * @returns Void.
- * @note This function only sets bits in `SCB->SHCSR`; it does not configure
- * exception priority.
- */
-__STATIC_FORCEINLINE void SCB_EnableException(const scb_exception_t exception)
-{
-	//! Enable the requested configurable system exception bit(s)
-	SCB->SHCSR |= exception;
-}
+driver_status_t NVIC_GetPriorityGroup(nvic_priority_group_t* const pPriorityGroup);
 
 // ==================================================================================================== //
-//										NVIC Priority APIs												//
+//										NVIC IRQ Priority APIs										//
 // ==================================================================================================== //
 
 /**
- * @brief Gets the raw 8-bit priority field for one external IRQ
+ * @brief Configures one external IRQ logical priority
  * @param[in] IRQn External IRQ number
  * Accepted values:
  * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @returns Raw NVIC IPR priority field image
- * @retval - `0x00U..0xFFU`: Right-aligned 8-bit priority field
- * @note On STM32F1 only the upper four bits of this field are implemented.
- */
-__STATIC_FORCEINLINE nvic_priority_t NVIC_GetPriority(const irq_t IRQn)
-{
-	// Local Variables
-	uint32_t iprRegImage = NVIC->IPR[_NVIC_IRQn_GET_IPR_REG(IRQn)];
-
-	//! Shift the selected 8-bit priority field down to bit 0 and mask unrelated fields
-	iprRegImage >>= _NVIC_IRQn_GET_IPR_REG_INDEX(IRQn);
-	iprRegImage &= NVIC_PRIORITY_FIELD_MASK;
-
-	return (nvic_priority_t) iprRegImage;
-}
-
-/**
- * @brief Sets the raw 8-bit priority field for one external IRQ
- * @param[in] IRQn External IRQ number
+ * @param[in] preemptPriority Logical preemption-priority selector
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @param[in] priority Raw NVIC IPR priority field image
- * Accepted values:
- * - `0x00U..0xFFU`
- * @returns Void.
- * @note Lower numerical priority values have higher effective priority.
- * @note On STM32F1 only the upper four bits of @p priority are implemented.
- */
-__STATIC_FORCEINLINE void NVIC_SetPriority(const irq_t IRQn, const nvic_priority_t priority)
-{
-	// Local Variables
-	const uint8_t iprRegIndex = _NVIC_IRQn_GET_IPR_REG(IRQn);
-	const uint8_t priorityFieldPos = _NVIC_IRQn_GET_IPR_REG_INDEX(IRQn);
-	uint32_t iprRegImage = NVIC->IPR[iprRegIndex];
-
-	//! Replace only the selected IRQ priority field inside the IPR register image
-	iprRegImage = RegOps_StageFieldValue
-	(
-		iprRegImage,
-		priorityFieldPos,
-		priority,
-		NVIC_PRIORITY_FIELD_WIDTH
-	);
-
-	NVIC->IPR[iprRegIndex] = iprRegImage;
-}
-
-/**
- * @brief Configures one IRQ priority from logical preemption and sub-priority selectors
- * @param[in] IRQn External IRQ number
- * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @param[in] priority Logical preemption priority selector
- * Accepted values:
- * - `0U..15U`; effective range depends on current priority grouping
+ * - `0U..15U`; the effective range depends on the current priority group
  * @param[in] subPriority Logical sub-priority selector
  * Accepted values:
- * - @ref `NVIC_SUB_PRIO_0` through @ref `NVIC_SUB_PRIO_15`; effective range
- * depends on current priority grouping
- * @returns Void.
- * @details
- * The current priority group decides how the four implemented STM32F1 priority
- * bits split between preemption priority and sub-priority. Values outside the
- * effective bit width are masked.
+ * - `0U..15U`; the effective range depends on the current priority group
+ * @returns @ref driver_status_t "IRQ priority configuration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ priority was configured
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: The IRQ number or a priority
+ * selector is invalid for the current priority group
+ * @note Valid selector ranges depend on the current global priority group.
  */
-__STATIC_FORCEINLINE void NVIC_ConfigPriority
+driver_status_t NVIC_SetIRQPriority
 (
 	const irq_t					IRQn,
-	const nvic_priority_t		priority,
-	const nvic_sub_priority_t	subPriority
-)
-{
-	// Local Variables
-	const nvic_priority_group_t priorityGroup = NVIC_GetPriorityGrouping();
-	const nvic_priority_t priorityField = _NVIC_BuildPriorityField(priority, subPriority, priorityGroup);
-	NVIC_SetPriority(IRQn, priorityField);
-}
-
-// ==================================================================================================== //
-//										NVIC IRQ State APIs												//
-// ==================================================================================================== //
+	const nvic_preempt_priority_t	preemptPriority,
+	const nvic_sub_priority_t		subPriority
+);
 
 /**
- * @brief Enables one external IRQ in NVIC
+ * @brief Gets one external IRQ logical priority
  * @param[in] IRQn External IRQ number
  * Accepted values:
  * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @returns Void.
- * @note This writes the corresponding `ISER` bit. It does not configure
- * peripheral-side interrupt masks or pending flags.
+ * @param[out] pPreemptPriority Destination for the decoded preemption priority
+ * Expected values:
+ * - `0U..15U`; the effective range depends on the current priority group
+ * @param[out] pSubPriority Destination for the decoded sub-priority
+ * Expected values:
+ * - `0U..15U`; the effective range depends on the current priority group
+ * @returns @ref driver_status_t "IRQ priority query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Both priority values were returned
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An output pointer is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @note Neither output is modified when the operation fails.
  */
-__STATIC_FORCEINLINE void NVIC_IRQ_Enable(const irq_t IRQn)
-{
-	//! Write-one-to-set the selected interrupt enable bit
-	NVIC->ISER[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
-}
+driver_status_t NVIC_GetIRQPriority
+(
+	const irq_t						IRQn,
+	nvic_preempt_priority_t* const	pPreemptPriority,
+	nvic_sub_priority_t* const		pSubPriority
+);
+
+// ==================================================================================================== //
+//										NVIC IRQ State APIs										//
+// ==================================================================================================== //
 
 /**
- * @brief Disables one external IRQ in NVIC
+ * @brief Enables delivery of one external IRQ
  * @param[in] IRQn External IRQ number
  * Accepted values:
  * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @returns Void.
- * @note This writes the corresponding `ICER` bit. It does not change
- * peripheral-side interrupt masks or pending flags.
+ * @returns @ref driver_status_t "IRQ enable status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ISER write-one-to-set action was issued
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @note This does not enable any peripheral-local interrupt source.
  */
-__STATIC_FORCEINLINE void NVIC_IRQ_Disable(const irq_t IRQn)
-{
-	//! Write-one-to-clear the selected interrupt enable bit
-	NVIC->ICER[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
-}
+driver_status_t NVIC_EnableIRQ(const irq_t IRQn);
+
+/**
+ * @brief Disables delivery of one external IRQ
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns @ref driver_status_t "IRQ disable status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ICER write-one-to-clear action was synchronized
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @warning Disabling delivery does not clear pending state, silence the
+ * peripheral source, or terminate an already active handler.
+ */
+driver_status_t NVIC_DisableIRQ(const irq_t IRQn);
 
 /**
  * @brief Gets one external IRQ enable state
  * @param[in] IRQn External IRQ number
- * @returns IRQ enable state
- * @retval - @ref `DRIVER_STATUS_OFF`: IRQ is disabled.
- * @retval - @ref `DRIVER_STATUS_ON`: IRQ is enabled.
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @param[out] pIRQState Destination for the enable state
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: IRQ delivery is disabled
+ * - @ref `DRIVER_STATUS_ON`: IRQ delivery is enabled
+ * @returns @ref driver_status_t "IRQ enable-state query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Enable state was returned
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIRQState is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
  */
-__STATIC_FORCEINLINE driver_status_t NVIC_IRQ_GetState(const irq_t IRQn)
-{
-	return ((NVIC->ISER[NVIC_IRQ_GET_REG_INDEX(IRQn)] & _NVIC_GetIRQBitMask(IRQn)) != 0x00000000UL) ?
-		DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
-}
+driver_status_t NVIC_GetIRQState(const irq_t IRQn, driver_status_t* const pIRQState);
+
+/**
+ * @brief Gets one external IRQ pending state
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @param[out] pPendingState Destination for the pending state
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: IRQ is not pending
+ * - @ref `DRIVER_STATUS_ON`: IRQ is pending
+ * @returns @ref driver_status_t "IRQ pending-state query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pending state was returned
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPendingState is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ */
+driver_status_t NVIC_GetPendingIRQState(const irq_t IRQn, driver_status_t* const pPendingState);
 
 /**
  * @brief Clears one external IRQ pending state
  * @param[in] IRQn External IRQ number
- * @returns Void.
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @returns @ref driver_status_t "IRQ pending-clear status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ICPR write-one-to-clear action was issued
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @note This does not clear the corresponding peripheral source flag. An
+ * asserted source can immediately pend the IRQ again.
  */
-__STATIC_FORCEINLINE void NVIC_IRQ_ClearPending(const irq_t IRQn)
-{
-	//! Write-one-to-clear the selected pending bit.
-	NVIC->ICPR[NVIC_IRQ_GET_REG_INDEX(IRQn)] = _NVIC_GetIRQBitMask(IRQn);
-}
+driver_status_t NVIC_ClearPendingIRQ(const irq_t IRQn);
 
 /**
  * @brief Triggers one external IRQ from software
  * @param[in] IRQn External IRQ number
  * Accepted values:
  * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
- * @returns Void.
- * @note This writes `NVIC->STIR`, which sets the selected interrupt pending
- * from software when privileged access permits it.
+ * @returns @ref driver_status_t "Software-trigger status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The STIR action was issued
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @note Delivery remains subject to NVIC enable, priority, and processor masks.
+ * @warning Unprivileged callers require `SCB->CCR.USERSETMPEND`; privileged
+ * firmware can issue the request directly.
  */
-__STATIC_FORCEINLINE void NVIC_IRQ_SoftwareTrigger(const irq_t IRQn)
-{
-	//! Request a software-generated interrupt through STIR
-	NVIC->STIR = (uint32_t) IRQn;
-}
+driver_status_t NVIC_SoftwareTriggerIRQ(const irq_t IRQn);
+
+/**
+ * @brief Gets one external IRQ active state
+ * @param[in] IRQn External IRQ number
+ * Accepted values:
+ * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * @param[out] pActiveState Destination for the active state
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: IRQ handler is not active
+ * - @ref `DRIVER_STATUS_ON`: IRQ handler is active or preempted and stacked
+ * @returns @ref driver_status_t "IRQ active-state query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Active state was returned
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pActiveState is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @note The returned state is a hardware snapshot and can change immediately.
+ */
+driver_status_t NVIC_GetActiveIRQState(const irq_t IRQn, driver_status_t* const pActiveState);
 
 /** @} */ // NVIC_Driver
 

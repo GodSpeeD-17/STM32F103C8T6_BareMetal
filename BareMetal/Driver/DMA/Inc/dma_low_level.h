@@ -52,17 +52,6 @@ __STATIC_FORCEINLINE DMA_Channel_TypeDef* _DMA_getChannel(const dma_channel_t ch
 }
 
 /**
- * @brief DMA Channel IRQ Mapping Helper API
- * @param channel DMA Channel `DMA_x_Channel_Y`
- * @return IRQ Number. Refer `irq_t` 
- */
-__STATIC_FORCEINLINE irq_t _DMA_getIRQ(const dma_channel_t channel)
-{
-	extern const irq_t _driverDMAIRQMapping[];
-	return _driverDMAIRQMapping[channel];
-}
-
-/**
  * @brief DMA Clock Enable Helper API
  * @param channel DMA Channel `DMA_x_Channel_Y`
  */
@@ -277,7 +266,7 @@ void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, ui
 void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* const dmaTransfer);
 
 /**
- * @brief Enables IRQ for DMA 
+ * @brief Enables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
@@ -287,7 +276,7 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* c
 void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ);
 
 /**
- * @brief Disables IRQ for DMA 
+ * @brief Disables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`

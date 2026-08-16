@@ -84,8 +84,8 @@ static driver_status_t APP_Init(void)
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_TIMER, &config));
 	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.
 	ASSERT_DRIVER_STATUS(TIM_SetIRQSources(APP_TIMER, TIMx_IRQ_SOURCE_UPDATE, DRIVER_STATUS_ON));
-	NVIC_IRQ_ClearPending(APP_TIMER_IRQn);
-	NVIC_IRQ_Enable(APP_TIMER_IRQn);
+	ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(APP_TIMER_IRQn));
+	ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(APP_TIMER_IRQn));
 	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_TIMER, DRIVER_STATUS_ON));
 
 	return DRIVER_STATUS_SUCCESS;

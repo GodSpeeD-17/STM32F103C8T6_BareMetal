@@ -109,7 +109,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /*********************************************** Includes ***********************************************/
-#include "nvic.h"
+#include "stm32f1xx_data_types.h"
 
 /*********************************************** Data Type Definitions ***********************************************/
 typedef uint8_t dma_channel_nvic_priority_t;

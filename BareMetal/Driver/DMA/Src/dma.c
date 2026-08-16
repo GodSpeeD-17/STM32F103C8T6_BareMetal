@@ -133,10 +133,6 @@ void DMA_Config(dma_config_t* instance){
 	reg |= (uint32_t)(((instance->interrupt.TEIE) << DMA_CCR_TEIE_Pos) |
 					  ((instance->interrupt.HTIE) << DMA_CCR_HTIE_Pos) |
 					  ((instance->interrupt.TCIE) << DMA_CCR_TCIE_Pos));
-	// Enable NVIC IRQ
-	if((instance->interrupt.TEIE) || (instance->interrupt.TCIE) || (instance->interrupt.HTIE)){
-		NVIC_IRQ_Enable(DMA_CH_get_IRQn(instance->DMA_Channel));
-	}
 	// Update the CCR Register
 	instance->DMA_Channel->CCR.REG = reg;
 }

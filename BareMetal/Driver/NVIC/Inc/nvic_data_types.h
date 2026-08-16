@@ -2,13 +2,12 @@
  * @file	nvic_data_types.h
  * @author	Shrey Shah
  * @brief	NVIC Driver Data Types
- * @version	v1.0
- * @date	06-06-2026
+ * @version	v2.0
+ * @date	16-08-2026
  *
  * @details
- * This header owns only NVIC driver scalar aliases. It deliberately contains
- * no IRQ number macros, priority selectors, or register helper macros; those
- * belong in @ref `nvic_defines.h`.
+ * This header owns only scalar aliases used by the NVIC driver. Logical
+ * preemption and sub-priority values remain separate scalar parameters.
  */
 
 // Header Guards
@@ -27,7 +26,7 @@ extern "C" {
 
 /**
  * @defgroup NVIC_Driver NVIC Driver
- * @brief Cortex-M3 NVIC driver layer
+ * @brief Cortex-M3 external-interrupt controller driver
  */
 
 /**
@@ -41,12 +40,10 @@ extern "C" {
 typedef uint8_t									irq_t;
 /** @brief Logical priority-group selector type @typedef nvic_priority_group_t */
 typedef uint8_t									nvic_priority_group_t;
-/** @brief Raw 8-bit NVIC priority field image type @typedef nvic_priority_t */
-typedef uint8_t									nvic_priority_t;
+/** @brief Logical preemption-priority selector type @typedef nvic_preempt_priority_t */
+typedef uint8_t									nvic_preempt_priority_t;
 /** @brief Logical sub-priority selector type @typedef nvic_sub_priority_t */
 typedef uint8_t									nvic_sub_priority_t;
-/** @brief SCB system-exception bit-mask type @typedef scb_exception_t */
-typedef uint32_t								scb_exception_t;
 
 /** @} */ // NVIC_01_DataTypes
 

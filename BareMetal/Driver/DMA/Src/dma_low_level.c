@@ -29,25 +29,6 @@ const DMA_Channel_TypeDef* _driverDMAChannelMapping[] =
 	[DMA_2_Channel_5] = DMA2_Channel5
 };
 
-// --- Driver DMA IRQ Mapping --- //
-const irq_t _driverDMAIRQMapping[] = 
-{
-	[DMA_1_Channel_1] = DMA1_Channel1_IRQn,
-	[DMA_1_Channel_2] = DMA1_Channel2_IRQn,
-	[DMA_1_Channel_3] = DMA1_Channel2_IRQn,
-	[DMA_1_Channel_4] = DMA1_Channel4_IRQn,
-	[DMA_1_Channel_5] = DMA1_Channel5_IRQn,
-	[DMA_1_Channel_6] = DMA1_Channel6_IRQn,
-	[DMA_1_Channel_7] = DMA1_Channel7_IRQn
-	#ifndef STM32F103C8T6__
-	,[DMA_2_Channel_1] = DMA2_Channel1_IRQn,
-	[DMA_2_Channel_2] = DMA2_Channel2_IRQn,
-	[DMA_2_Channel_3] = DMA2_Channel3_IRQn,
-	[DMA_2_Channel_4] = DMA2_Channel4_5_IRQn,
-	[DMA_2_Channel_5] = DMA2_Channel4_5_IRQn
-	#endif /* STM32F103C8T6__ */
-};
-
 /*********************************************** Helper Low Level Driver APIs ***********************************************/
 /**
  * @brief DMA Endpoint Configuration
@@ -157,7 +138,7 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* c
 }
 
 /**
- * @brief Enables IRQ for DMA
+ * @brief Enables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
@@ -166,16 +147,13 @@ void _DMA_configTransfer(const dma_channel_t dmaChannel, const dma_transfer_t* c
  */
 void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
-	// DMA Level
 	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg |= (uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
-	// Global Level
-	NVIC_IRQ_Enable(_driverDMAIRQMapping[dmaChannel]);
 }
 
 /**
- * @brief Disables IRQ for DMA 
+ * @brief Disables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
@@ -184,11 +162,7 @@ void _DMA_enableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
  */
 void _DMA_disableIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
-	// DMA Level
 	uint32_t reg = __DMA_getChannelCCR(_DMA_getChannel(dmaChannel));
 	reg &= ~(uint32_t) ((dmaIRQ & 0x07) << DMA_CCR_TCIE_Pos);
 	__DMA_setChannelCCR(_DMA_getChannel(dmaChannel), reg);
-	// Global Level
-	NVIC_IRQ_Disable(_driverDMAIRQMapping[dmaChannel]);
 }
-

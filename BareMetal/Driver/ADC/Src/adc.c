@@ -55,8 +55,6 @@ void ADC_config(adc_config_t* ADC_CONFIGx){
 	if(ADC_CONFIGx->enable_IRQ == (ADCx_IRQ_ENABLE)){
 		// Enable the IQR Bit
 		ADC_CONFIGx->ADCx->CR1.REG |= (1 << 5);
-		// Enable NVIC IRQ
-		NVIC_IRQ_Enable(ADC_get_IRQn(ADC_CONFIGx));
 	}
 	// Starts the ADC
 	ADC_start(ADC_CONFIGx->ADCx);

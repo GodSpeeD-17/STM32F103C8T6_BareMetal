@@ -25,12 +25,10 @@
 #endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------------------- MACROS ----------------------------------*/
-/** @brief ARM IRQ count @def ARM_IRQ */
-#define ARM_IRQ									((uint8_t) 11U)
-/** @brief Reserved IRQ count @def RESERVED */
-#define RESERVED								((uint8_t) 6U)
-/** @brief STM32F103C8 IRQ count @def STM32F103C8_IRQ */
-#define STM32F103C8_IRQ							((uint8_t) 59U)
+/** @brief Number of Cortex-M3 core vector-table entries @def CORTEX_M3_VECTOR_COUNT */
+#define CORTEX_M3_VECTOR_COUNT					((uint8_t) 16U)
+/** @brief Number of STM32F103C8T6 external IRQ vectors @def STM32F103C8_IRQ_COUNT */
+#define STM32F103C8_IRQ_COUNT					((uint8_t) 43U)
 
 /*----------------------------------- Linker Script --------------------------------------------*/
 // Start address of initialized data in Flash
@@ -138,24 +136,8 @@ __attribute__((weak, alias("Default_Handler"))) void USART1_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void USART2_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void USART3_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void EXTI15_10_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void RTC_Alarm_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM8_BRK_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM8_UP_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM8_TRG_COM_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM8_CC_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void ADC3_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void FSMC_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void SDIO_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM5_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void SPI3_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void UART4_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void UART5_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM6_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void TIM7_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void DMA2_Channel1_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void DMA2_Channel2_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void DMA2_Channel3_IRQHandler(void);
-__attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(void);
+__attribute__((weak, alias("Default_Handler"))) void RTCAlarm_IRQHandler(void);
+__attribute__((weak, alias("Default_Handler"))) void USBWakeUp_IRQHandler(void);
 
 /*-------------------------------- Vector Table ------------------------*/
 /**
@@ -163,7 +145,7 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(
  * @note Placed in ".isr_vector" section
  * @ref Reference Manual
  */
-__attribute__((section(".isr_vector"))) static const volatile uint32_t _vectorIRQTable[ARM_IRQ + RESERVED + STM32F103C8_IRQ] =
+__attribute__((section(".isr_vector"))) static const volatile uint32_t _vectorIRQTable[CORTEX_M3_VECTOR_COUNT + STM32F103C8_IRQ_COUNT] =
 {
 	(uint32_t)(&_estack),
 	(uint32_t)Reset_Handler,
@@ -222,25 +204,8 @@ __attribute__((section(".isr_vector"))) static const volatile uint32_t _vectorIR
 	(uint32_t)USART2_IRQHandler,
 	(uint32_t)USART3_IRQHandler,
 	(uint32_t)EXTI15_10_IRQHandler,
-	(uint32_t)RTC_Alarm_IRQHandler,
-	(uint32_t)0, // Reserved (STM32F103C8 Datasheet NVIC Section)
-	(uint32_t)TIM8_BRK_IRQHandler,
-	(uint32_t)TIM8_UP_IRQHandler,
-	(uint32_t)TIM8_TRG_COM_IRQHandler,
-	(uint32_t)TIM8_CC_IRQHandler,
-	(uint32_t)ADC3_IRQHandler,
-	(uint32_t)FSMC_IRQHandler,
-	(uint32_t)SDIO_IRQHandler,
-	(uint32_t)TIM5_IRQHandler,
-	(uint32_t)SPI3_IRQHandler,
-	(uint32_t)UART4_IRQHandler,
-	(uint32_t)UART5_IRQHandler,
-	(uint32_t)TIM6_IRQHandler,
-	(uint32_t)TIM7_IRQHandler,
-	(uint32_t)DMA2_Channel1_IRQHandler,
-	(uint32_t)DMA2_Channel2_IRQHandler,
-	(uint32_t)DMA2_Channel3_IRQHandler,
-	(uint32_t)DMA2_Channel4_5_IRQHandler
+	(uint32_t)RTCAlarm_IRQHandler,
+	(uint32_t)USBWakeUp_IRQHandler
 };
 
 /*-------------------------------- Main Entry -----------------------------*/

@@ -16,7 +16,6 @@
 #include "gpio.h"
 #include "gpio_irq_codec.h"
 #include "gpio_irq_ll.h"
-#include "nvic.h"
 
 // ==================================================================================================== //
 //                                              Local Macros                                            //
@@ -26,10 +25,6 @@
 #define GPIO_IRQ_AFIO_EXTICR_COUNT						((uint8_t) 0x04U)
 /** @brief Pin-index shift used to select EXTICR register index @def GPIO_IRQ_EXTICR_REG_INDEX_SHIFT */
 #define GPIO_IRQ_EXTICR_REG_INDEX_SHIFT					((uint8_t) 0x02U)
-/** @brief Shared NVIC line mask for EXTI5..EXTI9 @def GPIO_IRQ_GROUP_05_09_MASK */
-#define GPIO_IRQ_GROUP_05_09_MASK						((reg) 0x000003E0UL)
-/** @brief Shared NVIC line mask for EXTI10..EXTI15 @def GPIO_IRQ_GROUP_10_15_MASK */
-#define GPIO_IRQ_GROUP_10_15_MASK						((reg) 0x0000FC00UL)
 
 // ==================================================================================================== //
 //                                           Local Driver Utilities                                     //
@@ -106,108 +101,6 @@ __STATIC _IO* _GPIO_IRQ_GetRoutingRegisterAddress
 	}
 
 	return pRegisterAddress;
-}
-
-/**
- * @brief Enables NVIC IRQ groups touched by the selected GPIO IRQ lines
- * @param[in] pinMask GPIO pin mask identifying GPIO IRQ lines being initialized
- * @details
- * EXTI0..EXTI4 own dedicated NVIC IRQs. EXTI5..EXTI9 and EXTI10..EXTI15 share
- * grouped NVIC IRQs, so those groups are enabled once when any selected line in
- * the group is initialized.
- */
-__STATIC void _GPIO_IRQ_UnmaskIRQForPin(const gpio_pin_t pinMask)
-{
-	if (((reg) pinMask & (reg) GPIO_PIN_0) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI0_IRQn);
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_1) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI1_IRQn);
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_2) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI2_IRQn);
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_3) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI3_IRQn);
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_4) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI4_IRQn);
-	}
-	if (((reg) pinMask & GPIO_IRQ_GROUP_05_09_MASK) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI9_5_IRQn);
-	}
-	if (((reg) pinMask & GPIO_IRQ_GROUP_10_15_MASK) != 0x00000000UL)
-	{
-		NVIC_IRQ_Enable((uint8_t) EXTI15_10_IRQn);
-	}
-}
-
-/**
- * @brief Disables NVIC IRQ groups whose selected GPIO IRQ lines are no longer interrupt-masked
- * @param[in] pinMask GPIO pin mask identifying GPIO IRQ lines being deinitialized
- * @param[in] imrRegImage Updated EXTI IMR image after selected lines were cleared
- * @details
- * EXTI0..EXTI4 own dedicated NVIC IRQs. EXTI5..EXTI9 and EXTI10..EXTI15 share
- * grouped NVIC IRQs, so those groups are disabled only when no line in the group
- * remains enabled in @p imrRegImage.
- */
-static void _GPIO_IRQ_MaskIRQForPin(const gpio_pin_t pinMask, const reg imrRegImage)
-{
-	if (((reg) pinMask & (reg) GPIO_PIN_0) != 0x00000000UL)
-	{
-		if ((imrRegImage & (reg) GPIO_PIN_0) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI0_IRQn);
-		}
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_1) != 0x00000000UL)
-	{
-		if ((imrRegImage & (reg) GPIO_PIN_1) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI1_IRQn);
-		}
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_2) != 0x00000000UL)
-	{
-		if ((imrRegImage & (reg) GPIO_PIN_2) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI2_IRQn);
-		}
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_3) != 0x00000000UL)
-	{
-		if ((imrRegImage & (reg) GPIO_PIN_3) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI3_IRQn);
-		}
-	}
-	if (((reg) pinMask & (reg) GPIO_PIN_4) != 0x00000000UL)
-	{
-		if ((imrRegImage & (reg) GPIO_PIN_4) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI4_IRQn);
-		}
-	}
-	if (((reg) pinMask & GPIO_IRQ_GROUP_05_09_MASK) != 0x00000000UL)
-	{
-		if ((imrRegImage & GPIO_IRQ_GROUP_05_09_MASK) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI9_5_IRQn);
-		}
-	}
-	if (((reg) pinMask & GPIO_IRQ_GROUP_10_15_MASK) != 0x00000000UL)
-	{
-		if ((imrRegImage & GPIO_IRQ_GROUP_10_15_MASK) == 0x00000000UL)
-		{
-			NVIC_IRQ_Disable((uint8_t) EXTI15_10_IRQn);
-		}
-	}
 }
 
 // ==================================================================================================== //
@@ -350,8 +243,6 @@ driver_status_t GPIO_IRQ_Init
 	{
 		LL_GPIO_IRQ_WriteIMR(extiImrRegImage);
 	}
-	_GPIO_IRQ_UnmaskIRQForPin(pinMask);
-
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -470,8 +361,6 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 	{
 		LL_GPIO_IRQ_WritePR(extiPrRegImage & ((reg) pinMask));
 	}
-	_GPIO_IRQ_MaskIRQForPin(pinMask, extiImrRegImage);
-
 	return DRIVER_STATUS_SUCCESS;
 }
 

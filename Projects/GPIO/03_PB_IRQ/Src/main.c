@@ -64,6 +64,8 @@ static driver_status_t APP_Init(void)
 			PUSH_BUTTON_IRQ_TRIGGER
 		)
 	);
+	ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(EXTI1_IRQn));
+	ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(EXTI1_IRQn));
 	return DRIVER_STATUS_SUCCESS;
 }
 

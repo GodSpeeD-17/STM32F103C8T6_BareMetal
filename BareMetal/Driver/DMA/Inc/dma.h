@@ -194,7 +194,7 @@ __STATIC_FORCEINLINE void DMA_PollForTransferCompletion(const dma_channel_t dmaC
 }
 
 /**
- * @brief Enable IRQ for DMA Channel
+ * @brief Enables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
@@ -203,6 +203,8 @@ __STATIC_FORCEINLINE void DMA_PollForTransferCompletion(const dma_channel_t dmaC
  * @return Status of Driver Operation
  * @returns - `DRIVER_STATUS_ERROR_FAIL`: Failure
  * @returns - `DRIVER_STATUS_SUCCESS`: Success
+ * @note This API does not enable the corresponding NVIC vector. The
+ * application or integration layer owns global IRQ delivery.
  */
 __STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
@@ -211,7 +213,7 @@ __STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dm
 }
 
 /**
- * @brief Disable IRQ for DMA Channel
+ * @brief Disables DMA channel-local interrupt sources
  * @param dmaChannel DMA Channel
  * @param dmaIRQ Any logical combination of:
  * 				 - `DMA_IRQ_TRANSFER_COMPLETE`
@@ -220,6 +222,8 @@ __STATIC_FORCEINLINE driver_status_t DMA_EnableChannelIRQ(const dma_channel_t dm
  * @return Status of Driver Operation
  * @returns - `DRIVER_STATUS_ERROR_FAIL`: Failure
  * @returns - `DRIVER_STATUS_SUCCESS`: Success
+ * @note This API does not disable the corresponding NVIC vector. The
+ * application or integration layer owns shared delivery state.
  */
 __STATIC_FORCEINLINE driver_status_t DMA_DisableChannelIRQ(const dma_channel_t dmaChannel, dma_irq_t dmaIRQ)
 {
@@ -437,48 +441,6 @@ __STATIC_FORCEINLINE void DMA_CH_enable(DMA_Channel_TypeDef* DMA_channelX){
 __STATIC_FORCEINLINE void DMA_CH_disable(DMA_Channel_TypeDef* DMA_channelX){
 	// Disable the Channel
 	DMA_channelX->CCR.REG &= ~DMA_CCR_EN;
-}
-
-/**
- * @brief Get the DMA Channel IRQ Number
- * @param[in] DMA_channelX DMA Channel Number
- * @returns The DMA Channel IRQ Number
- */
-__STATIC_FORCEINLINE uint8_t DMA_CH_get_IRQn(DMA_Channel_TypeDef* DMA_channelX){
-	// Return the IRQn
-	if(DMA_channelX == DMA1_Channel1){
-		return DMA1_Channel1_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel2){
-		return DMA1_Channel2_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel3){
-		return DMA1_Channel3_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel4){
-		return DMA1_Channel4_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel5){
-		return DMA1_Channel5_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel6){
-		return DMA1_Channel6_IRQn;
-	}
-	else if(DMA_channelX == DMA1_Channel7){
-		return DMA1_Channel7_IRQn;
-	}
-	else if(DMA_channelX == DMA2_Channel1){
-		return DMA2_Channel1_IRQn;
-	}
-	else if(DMA_channelX == DMA2_Channel2){
-		return DMA2_Channel2_IRQn;
-	}
-	else if(DMA_channelX == DMA2_Channel3){
-		return DMA2_Channel3_IRQn;
-	}
-	else if((DMA_channelX == DMA2_Channel4) || (DMA_channelX == DMA2_Channel5)){
-		return DMA2_Channel4_5_IRQn;
-	}
 }
 
 /**

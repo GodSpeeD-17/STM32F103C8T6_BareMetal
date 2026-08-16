@@ -112,12 +112,6 @@ static const usart_gpio_t __usartDriverGPIOMapping__[] = {
 		}
 	},
 };
-// IRQ Mapping
-const irq_t __usartDriverIRQnMapping__[] = {
-	[USART_1] = USART1_IRQn,
-	[USART_2] = USART2_IRQn,
-	[USART_3] = USART3_IRQn
-};
 // USART Mapping
 const USART_TypeDef* __usartDriverRegisterMapping__[] = {
 	[USART_1] = USART1,

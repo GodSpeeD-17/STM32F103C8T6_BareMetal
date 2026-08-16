@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "stm32f1xx_data_types.h"
 
 /*********************************************** NVIC Register Structure ***********************************************/
 
@@ -47,7 +47,7 @@ extern "C" {
  * @brief NVIC Register Structure
  * 
  * @details This structure maps the complete NVIC register set in memory.
- *          The NVIC supports up to 240 external interrupts with 8 priority levels
+ *          The NVIC supports up to 240 external interrupts with 16 priority levels
  *
  * @note Array sizes are designed for maximum STM32F1xx interrupt count
  * @see Reference Manual RM0008 - Table 63 for STM32F1xx interrupt mapping
@@ -72,7 +72,7 @@ typedef volatile struct __NVIC_TypeDef
 	
 	/**
 	 * @brief Reserved space between ISER and ICER
-	 * @details 24 reserved words (0x060 - 0x0BC)
+	 * @details 24 reserved words (0x020 - 0x07C)
 	 */
 	uint32_t RESERVED_0[24];
 	
@@ -93,7 +93,7 @@ typedef volatile struct __NVIC_TypeDef
 	
 	/**
 	 * @brief Reserved space between ICER and ISPR
-	 * @details 24 reserved words (0x120 - 0x17C)
+	 * @details 24 reserved words (0x0A0 - 0x0FC)
 	 */
 	uint32_t RESERVED_1[24];
 	
@@ -114,7 +114,7 @@ typedef volatile struct __NVIC_TypeDef
 	
 	/**
 	 * @brief Reserved space between ISPR and ICPR
-	 * @details 24 reserved words (0x1E0 - 0x23C)
+	 * @details 24 reserved words (0x120 - 0x17C)
 	 */
 	uint32_t RESERVED_2[24];
 	
@@ -135,7 +135,7 @@ typedef volatile struct __NVIC_TypeDef
 	
 	/**
 	 * @brief Reserved space between ICPR and IABR
-	 * @details 24 reserved words (0x2A0 - 0x2FC)
+	 * @details 24 reserved words (0x1A0 - 0x1FC)
 	 */
 	uint32_t RESERVED_3[24];
 	
@@ -156,7 +156,7 @@ typedef volatile struct __NVIC_TypeDef
 	
 	/**
 	 * @brief Reserved space between IABR and IPR
-	 * @details 56 reserved words (0x320 - 0x3FC)
+	 * @details 56 reserved words (0x220 - 0x2FC)
 	 */
 	uint32_t RESERVED_4[56];
 	
@@ -164,21 +164,21 @@ typedef volatile struct __NVIC_TypeDef
 	 * @brief Interrupt Priority Registers (IPR)
 	 * @details Configure priority levels for each interrupt
 	 * 
-	 * - Each IPR register contains 4 interrupt priorities
-	 * - Each priority field is 8 bits, but only top 4 bits are implemented
+	 * - Each IPR array element contains one interrupt priority byte
+	 * - Each priority byte is 8 bits, but only the top 4 bits are implemented
 	 * - Priority levels: 0 (highest) to 15 (lowest)
-	 * - IPR[0]: Priorities for interrupts 0-3
-	 * - IPR[1]: Priorities for interrupts 4-7
-	 * - ... up to IPR[59] for interrupts 236-239
+	 * - IPR[0]: Priority for interrupt 0
+	 * - IPR[1]: Priority for interrupt 1
+	 * - ... up to IPR[239] for interrupt 239
 	 * 
 	 * @note Only bits [7:4] are implemented in Cortex-M3
 	 * @see Cortex-M3 TRM - Section 4.3.8 Interrupt Priority Registers
 	 */
-	volatile uint32_t IPR[60];
+	volatile uint8_t IPR[240];
 	
 	/**
 	 * @brief Reserved space between IPR and STIR
-	 * @details 644 reserved words (0x4F0 - 0xBF8)
+	 * @details 644 reserved words (0x3F0 - 0xDFC)
 	 */
 	uint32_t RESERVED_5[644];
 	
@@ -187,13 +187,13 @@ typedef volatile struct __NVIC_TypeDef
 	 * @details Generate software interrupts by writing interrupt number
 	 * 
 	 * - Write interrupt number (0-239) to generate software interrupt
-	 * - Interrupt must be enabled and prioritized
+	 * - The request can become pending while interrupt delivery is disabled
 	 * - Useful for testing and software synchronization
 	 * 
 	 * @note Only bits [8:0] are used for interrupt number
 	 * @warning Requires privileged access to write
 	 */
-	volatile uint32_t STIR;
+	_O STIR;
 
 } NVIC_TypeDef;
 

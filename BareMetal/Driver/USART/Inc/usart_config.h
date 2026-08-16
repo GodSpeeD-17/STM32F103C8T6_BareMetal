@@ -12,7 +12,6 @@
 
 /*********************************************** Includes ***********************************************/
 #include "gpio.h"
-#include "nvic_defines.h"
 
 /*********************************************** USART MACROs ***********************************************/
 #define USART_MIN						USART_1
@@ -216,7 +215,6 @@ typedef struct {
 } usart_config_t;
 
 /*********************************************** USART Lookup Table ***********************************************/
-extern const irq_t __usartDriverIRQnMapping__[];
 extern const USART_TypeDef* __usartDriverRegisterMapping__[];
 /*********************************************** USART Clock APIs ***********************************************/
 /**
@@ -319,16 +317,6 @@ __STATIC_FORCEINLINE void USART_DMA_RX_Disable(const usart_t usart){
 	// Disable the DMA RX
 	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
 	thisUsart->CR3.REG &= ~USART_CR3_DMAR;
-}
-
-/**
- * @brief Retrieves the USART IRQn Number
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return irq_t IRQ Number
- */
-__STATIC_FORCEINLINE irq_t USART_Get_IRQn(const usart_t usart){
-	// USART IRQn
-	return __usartDriverIRQnMapping__[usart];
 }
 
 /*********************************************** USART Configuration Retrieving APIs ***********************************************/

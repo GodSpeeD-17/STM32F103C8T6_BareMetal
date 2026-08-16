@@ -15,8 +15,6 @@
 #include "rcc.h"
 // GPIO Struct
 #include "gpio.h"
-// NVIC Enable
-#include "nvic.h"
 // va_list
 #include <stdarg.h>
 /*************************************** Dependency ********************************************/
@@ -139,21 +137,6 @@ __STATIC_FORCEINLINE void USART_Enable(usart_config_t* USART_CONFIGx) {
 __STATIC_FORCEINLINE void USART_Disable(usart_config_t* USART_CONFIGx) {
 	// Disable USART
 	USART_CONFIGx->USARTx->CR1.REG &= ~USART_CR1_UE;
-}
-
-/**
- * @brief Retrieves the IRQn of USART
- * @param[in] USARTx USART Instance: `USART1`, `USART2`, `USART3`
- * @return IRQn for the corresponding USART
- */
-__STATIC_FORCEINLINE uint8_t USART_get_IRQn(USART_TypeDef* USARTx){
-	// Retrieves the IRQ Number for NVIC
-	if(USARTx == USART1)
-		return USART1_IRQn;
-	else if(USARTx == USART2)
-		return USART2_IRQn;
-	else if(USARTx == USART3)
-		return USART3_IRQn;
 }
 
 /**
@@ -293,8 +276,6 @@ void USART_RX_Buffer_Append(const char* str, uint8_t length);
 #include "usart_config.h"
 // Clocks (APB1/APB2)
 #include "rcc.h"
-// NVIC Enable
-#include "nvic.h"
 // va_list
 #include <stdarg.h>
 
@@ -450,22 +431,25 @@ driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_e
 driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig);
 
 /**
- * @brief Enable USART Interrupts
+ * @brief Enables USART-local interrupt sources
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
  * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
+ * @note This API does not enable the corresponding NVIC vector. The
+ * application or integration layer owns global IRQ delivery.
  */
 driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
 
 /**
- * @brief Disables USART Interrupts
+ * @brief Disables USART-local interrupt sources
  * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
  * @param irq USART IRQ Combinations. Refer `usart_irq_t`
  * @return Status of Driver Operation
  * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
  * @returns - DRIVER_STATUS_SUCCESS: Success
+ * @note This API does not disable the corresponding NVIC vector.
  */
 driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq);
 

@@ -17,8 +17,8 @@
  * - Layer 3 (`gpio_irq_codec.h` / `gpio_irq_codec.c`) bridges GPIO pin masks
  *   and raw route/trigger selectors to staged EXTI and AFIO EXTICR images.
  * - Layer 4 (`gpio_irq.h` / `gpio_irq.c`) owns the public GPIO IRQ API, validation,
- *   GPIOx-to-route conversion, GPIO integration, NVIC policy, orchestration,
- *   and batched register writes.
+ *   GPIOx-to-route conversion, GPIO integration, EXTI orchestration, and
+ *   batched register writes.
  */
 
 #ifndef GPIO_IRQ_H_
@@ -107,6 +107,8 @@ extern "C" {
  * before routing and unmasking the EXTI line(s).
  * @note Use @ref `GPIO_PIN_CONFIG_INPUT_FLOATING` when the board already has
  * an external pull-up or pull-down resistor.
+ * @note This API does not enable any NVIC vector. The application or
+ * integration layer owns global delivery, especially for shared EXTI vectors.
  */
 driver_status_t GPIO_IRQ_Init
 (
@@ -144,6 +146,7 @@ driver_status_t GPIO_IRQ_Init
  * not disable AFIO after deinitialization.
  * @note Each selected line must currently be routed to @p GPIOx; this prevents
  * accidental deinitialization of another port sharing the same EXTI line number.
+ * @note This API does not disable any NVIC vector.
  */
 driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
 

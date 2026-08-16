@@ -36,9 +36,6 @@ void USART_Config(usart_config_t* USART_CONFIGx){
 									   ((USART_CONFIGx->RXNEIE & 0x01) << USART_CR1_RXNEIE_Pos) | 
 									   ((USART_CONFIGx->TXE & 0x01) << USART_CR1_TE_Pos) | 
 									   ((USART_CONFIGx->RXE & 0x01) << USART_CR1_RE_Pos));
-	// IRQ Enable
-	if(USART_CONFIGx->TCIE || USART_CONFIGx->TXEIE || USART_CONFIGx->RXNEIE)
-		NVIC_IRQ_Enable(USART_get_IRQn(USART_CONFIGx->USARTx));
 }
 
 /**
@@ -482,7 +479,6 @@ driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq){
 	// Status
 	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	USART_Get_Mapping(usart)->CR1.REG |= (uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos);
-	NVIC_IRQ_Enable(USART_Get_IRQn(usart));
 	// Return Status
 	status = DRIVER_STATUS_SUCCESS;
 	return status;
@@ -500,7 +496,6 @@ driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq){
 	// Status
 	driver_status_t status = DRIVER_STATUS_ERROR_FAIL;
 	USART_Get_Mapping(usart)->CR1.REG &= ~((uint32_t)((irq & 0x1F) << USART_CR1_IDLEIE_Pos));
-	NVIC_IRQ_Enable(USART_Get_IRQn(usart));
 	// Return status
 	status = DRIVER_STATUS_SUCCESS;
 	return status;

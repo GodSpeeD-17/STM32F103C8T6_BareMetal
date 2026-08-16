@@ -20,6 +20,7 @@
 #include "bsp.h"
 #include "gpio.h"
 #include "gpio_irq.h"
+#include "nvic.h"
 #include "systick.h"
 
 // ==================================================================================================== //

@@ -13,7 +13,6 @@
 // Dependency
 #include "stm32f1xx.h"
 #include "gpio.h"			// For Configuration
-#include "nvic.h"			// For IRQ Handling
 
 // Wait time for stabilize (tSTAB)
 #define ADC_ON_DELAY						((uint16_t) 10)
@@ -186,19 +185,6 @@ __STATIC_FORCEINLINE uint8_t ADC_data_ready(adc_config_t* ADC_CONFIGx){
 }
 
 /**
- * @brief Returns the IRQn of ADCx 
- * @param[in] ADC_CONFIGx ADC configuration structure
- * @returns IRQn of ADCx
- */
-__STATIC_FORCEINLINE uint8_t ADC_get_IRQn(adc_config_t* ADC_CONFIGx){
-	// Return the value based upon the ADC Number
-	if((ADC_CONFIGx->ADCx == ADC1) || (ADC_CONFIGx->ADCx == ADC2))
-		return ADC1_2_IRQn;
-	else if(ADC_CONFIGx->ADCx == ADC3)
-		return ADC3_IRQn;
-}
-
-/**
  * @brief Retrieves the 12-bit ADC Raw Data
  * @param[in] ADC_CONFIGx ADC configuration structure
  * @returns ADC Raw Data
@@ -209,11 +195,6 @@ uint16_t ADC_get_data(adc_config_t* ADC_CONFIGx);
  * @brief ADC1/ADC2 IRQ Handler
  */
 void ADC1_2_IRQHandler(void);
-
-/**
- * @brief ADC3 IRQ Handler
- */
-void ADC3_IRQHandler(void);
 
 /**
  * @brief Configures the default parameters for ADC
