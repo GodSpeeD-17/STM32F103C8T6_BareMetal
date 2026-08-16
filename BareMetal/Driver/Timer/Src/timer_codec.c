@@ -2624,6 +2624,47 @@ driver_status_t Codec_TIM_StageChannelPolarity
 }
 
 // ==================================================================================================== //
+//									Timer CCR Compare Value Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_TIM_ExtractCompareValue
+(
+	const reg							ccrRegImage,
+	tim_compare_value_t* const		pCompareValue
+)
+{
+	if (pCompareValue == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Every general-purpose Timer output CCR lane is a 16-bit scalar field at bit zero.
+	*pCompareValue = (tim_compare_value_t) RegOps_ExtractFieldValue
+	(
+		ccrRegImage,
+		TIM_CCR1_CCR1,
+		TIM_CCR1_CCR1_Pos
+	);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_TIM_StageCompareValue
+(
+	reg* const							pCcrRegImage,
+	const tim_compare_value_t		compareValue
+)
+{
+	//! Stage the common 16-bit output CCR field without choosing a channel or transfer policy.
+	return Codec_TIM_StageScalarField
+	(
+		pCcrRegImage,
+		TIM_CCR1_CCR1,
+		TIM_CCR1_CCR1_Pos,
+		(reg) compareValue
+	);
+}
+
+// ==================================================================================================== //
 //										Timer DIER Request Codecs										//
 // ==================================================================================================== //
 

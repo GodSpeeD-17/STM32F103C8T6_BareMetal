@@ -91,6 +91,10 @@ typedef uint16_t								tim_prescaler_t;
 typedef uint16_t								tim_auto_reload_t;
 /** @brief Timer counter value type @typedef tim_counter_value_t */
 typedef uint16_t								tim_counter_value_t;
+/** @brief Timer output-compare register value type @typedef tim_compare_value_t */
+typedef uint16_t								tim_compare_value_t;
+/** @brief Timer PWM duty-cycle value in permille units @typedef tim_pwm_duty_cycle_t */
+typedef uint16_t								tim_pwm_duty_cycle_t;
 /** @} */ // TIM_03_Driver_01_Types
 
 /** @} */ // TIM_03_Driver

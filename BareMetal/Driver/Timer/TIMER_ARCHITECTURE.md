@@ -622,11 +622,14 @@ Completed:
   sub-banner order, and the file overview uses Doxygen `@section` blocks for
   scope, field ownership, and source layout.
 
-Remaining:
-- Channel/PWM public APIs are deferred and must be rebuilt on top of codec/LL
-  boundaries.
-- PWM examples remain blocked on that channel API rebuild; Timer polling and
-  IRQ examples plus shared startup delay users have been migrated.
+Completed PWM extension:
+- `timer_pwm.h/.c` implement the Timer-owned PWM channel surface directly in
+  this module using the existing Timer Codec and LL. Stopped PWM transactions
+  directly load only the selected active CCR and do not generate `EGR.UG`.
+- `TIMER_PWM_ARCHITECTURE.md` is the normative PWM ownership, lifecycle,
+  arithmetic, transaction, and application-boundary contract.
+- `Projects/PWM/06_PWM_Poll` uses the Timer-first, PWM-second, CEN-last
+  lifecycle; the legacy heap/handle PWM module has been removed.
 
 ## Compatibility Boundary
 

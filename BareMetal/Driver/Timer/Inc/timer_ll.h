@@ -58,6 +58,8 @@ extern "C" {
  * This layer exposes direct full-register image reads and writes. It does not
  * encode public selectors, validate Timer configurations, choose mode-specific
  * behavior, or decide when a register should be read or written.
+ *
+ * @see @ref TIM_PWM_Peripheral_Guide "STM32F103C8T6 Timer PWM Architecture"
  */
 
 /**

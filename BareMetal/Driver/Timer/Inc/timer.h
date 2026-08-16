@@ -17,8 +17,9 @@
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
- * Channel/PWM, DMA, and master/slave APIs remain outside this public header
- * scope. Timer IRQ source/event APIs, the fixed @ref TIM_ConfigForBlockingDelay
+ * Timer PWM channel APIs live in the sibling `timer_pwm.h` public header.
+ * DMA and master/slave APIs remain outside this public header scope. Timer IRQ
+ * source/event APIs, the fixed @ref TIM_ConfigForBlockingDelay
  * service bootstrap, and the blocking @ref TIM_BlockingDelayUs and @ref TIM_BlockingDelayMs
  * APIs are provided. RCC clock-gate control and NVIC delivery remain explicit
  * application responsibilities.

@@ -1,91 +1,218 @@
-/*-------------------------------------------------------------------------------*/
-// Header Files
+/**
+ * @file	main.c
+ * @author	Shrey Shah
+ * @brief	Timer PWM Polling Demonstration
+ * @version	v1.0
+ * @date	16-08-2026
+ *
+ * @details
+ * Demonstrates two channels sharing one Timer timebase without a heap, handle,
+ * frequency registry, or GPIO ownership inside the Timer driver. The
+ * application owns RCC, GPIO/AFIO, Timer base configuration, PWM channel
+ * configuration, channel output state, and final counter start order.
+ */
+
+// ==================================================================================================== //
+//												Includes											//
+// ==================================================================================================== //
 #include "main.h"
-/*-------------------------------------------------------------------------------*/
-// Macros
-#define RED_LED
-#define YELLOW_LED
-#define PWM_DUTY_UPDATE				(10)
-/*-------------------------------------------------------------------------------*/
-#ifdef YELLOW_LED
-	// Yellow LED PWM Configuration Structure
-	pwm_config_t yellow_led = {
-		.GPIOx_CONFIG = {
-			.GPIO = GPIOA,
-			.PIN = GPIOx_PIN_3,
-		},
-	};
-	// PWM Handle Structure
-	pwm_handle_t yellow_led_handle;
-#endif /* YELLOW_LED */
-#ifdef RED_LED
-	// Red LED PWM Configuration Structure
-	pwm_config_t red_led = {
-		.GPIOx_CONFIG = {
-			.GPIO = GPIOA,
-			.PIN = GPIOx_PIN_2,
-		},
-	};
-	// PWM Handle Structure
-	pwm_handle_t red_led_handle;
-#endif /* RED_LED */
-/*-------------------------------------------------------------------------------*/
-// Main Entry Point
-int main(){
-	// Initialisation
-	#ifdef RED_LED
-		PWM_Default_Configuration(&red_led);
-		red_led_handle = PWM_Config(&red_led);
-		PWM_Enable(red_led_handle);
-	#endif /* RED_LED */
-	#ifdef YELLOW_LED
-		PWM_Default_Configuration(&yellow_led);
-		yellow_led_handle = PWM_Config(&yellow_led);
-		PWM_Enable(yellow_led_handle);
-	#endif /* YELLOW_LED */
-	// Duty Cycle Variable
-	int16_t duty_cycle = PWM_MIN_DUTY_CYCLE;
-	// Infinite Loop
-	while(1){
-		// Increase Duty Cycle
-		for(duty_cycle; duty_cycle < PWM_MAX_DUTY_CYCLE; duty_cycle += PWM_DUTY_UPDATE){
-			#ifdef RED_LED
-				PWM_Update_Duty_Cycle(red_led_handle, duty_cycle);
-			#endif /* RED LED*/
-			#ifdef YELLOW_LED
-				PWM_Update_Duty_Cycle(yellow_led_handle, duty_cycle);
-			#endif /* YELLOW LED*/
-			delay_ms(PWM_DUTY_UPDATE << 1);
-		}
-		
-		// Toggle OB LED
-		OB_LED_Toggle();
 
-		// Decrease Duty Cycle
-		for(duty_cycle; duty_cycle > PWM_MIN_DUTY_CYCLE; duty_cycle -= PWM_DUTY_UPDATE){
-			#ifdef RED_LED
-				PWM_Update_Duty_Cycle(red_led_handle, duty_cycle);
-			#endif /* RED LED*/
-			#ifdef YELLOW_LED
-				PWM_Update_Duty_Cycle(yellow_led_handle, duty_cycle);
-			#endif /* YELLOW LED*/
-			delay_ms(PWM_DUTY_UPDATE << 1);
-		}
+// ==================================================================================================== //
+//										Local Helpers										//
+// ==================================================================================================== //
 
-		// Toggle OB LED
-		OB_LED_Toggle();
-		// Loop Delay
-		delay_ms(LOOP_DELAY_MS);
+/** @brief Enters the application error-indication loop */
+static void App_ErrorHandler(void)
+{
+	OB_LED_Set();
+	while (1)
+	{
+		//! Preserve the visible active-low error indication until reset.
 	}
-	// Free PWM Handle
-	#ifdef RED_LED
-		PWM_DeConfig(red_led_handle);
-	#endif /* RED_LED */
-	#ifdef YELLOW_LED
-		PWM_DeConfig(yellow_led_handle);
-	#endif /* YELLOW_LED */
+}
 
-	// Return Value
+/**
+ * @brief Configures application-owned GPIO routing for TIM2 channels 3 and 4
+ * @returns @ref driver_status_t "GPIO configuration status"
+ */
+static driver_status_t App_ConfigPWMGPIO(void)
+{
+	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
+	ASSERT_DRIVER_STATUS(RCC_APB2_ClockEnable(APP_PWM_GPIO_CLOCK_MASK));
+	return GPIO_SetPinModeConfig
+	(
+		APP_PWM_GPIO_PORT,
+		APP_PWM_GPIO_PIN_MASK,
+		GPIO_PIN_MODE_OUTPUT_10MHZ,
+		GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL
+	);
+}
+
+/**
+ * @brief Configures the shared Timer base followed by both PWM channels
+ * @returns @ref driver_status_t "PWM initialization status"
+ */
+static driver_status_t App_ConfigPWM(void)
+{
+	const tim_config_t timerConfig =
+	{
+		.timebase =
+		{
+			.prescaler = APP_PWM_PRESCALER,
+			.auto_reload = APP_PWM_AUTO_RELOAD,
+			.initial_count = 0U
+		},
+		.counter =
+		{
+			.digital_filter_clock_division = TIMx_DIGITAL_FILTER_CLOCK_DIV_1,
+			.alignment = TIMx_MODE_NORMAL,
+			.direction = TIMx_DIR_COUNT_UP,
+			.one_pulse = TIMx_OPM_DISABLE,
+			.auto_reload_preload = TIMx_ARPE_ENABLE,
+			.update_source = TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY
+		}
+	};
+
+	//! The application owns the Timer clock gate and complete base timebase.
+	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_PWM_TIMER_CLOCK_MASK));
+	ASSERT_DRIVER_STATUS(TIM_Config(APP_PWM_TIMER, &timerConfig));
+
+	//! Exercise PWM1/high and PWM2/low only after the shared Timer base is valid.
+	ASSERT_DRIVER_STATUS
+	(
+		TIM_ConfigPWM
+		(
+			APP_PWM_TIMER,
+			TIMx_CHANNEL_3,
+			TIMx_CHANNEL_MODE_PWM1,
+			TIMx_CHANNEL_POLARITY_HIGH
+		)
+	);
+	ASSERT_DRIVER_STATUS
+	(
+		TIM_ConfigPWM
+		(
+			APP_PWM_TIMER,
+			TIMx_CHANNEL_4,
+			TIMx_CHANNEL_MODE_PWM2,
+			TIMx_CHANNEL_POLARITY_LOW
+		)
+	);
+
+	//! Duty remains a separate lifecycle operation from channel mode configuration.
+	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, TIM_PWM_DUTY_CYCLE_MIN));
+	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, TIM_PWM_DUTY_CYCLE_MIN));
+
+	//! Enable both channel outputs coherently while CEN remains disabled.
+	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_ON));
+
+	//! Starting the shared counter is the final independent Timer operation.
+	return TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_ON);
+}
+
+/** @brief Programs one duty value into both PWM channel preloads */
+static driver_status_t App_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
+{
+	ASSERT_DRIVER_STATUS(TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_3, dutyCycle));
+	return TIM_SetPWMDutyCycle(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
+}
+
+/**
+ * @brief Stops and deconfigures both PWM channels without changing GPIO/RCC ownership
+ * @returns @ref driver_status_t "PWM deconfiguration status"
+ */
+static driver_status_t App_DeConfigPWM(void)
+{
+	//! Stop the shared counter before disconnecting and resetting either channel.
+	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_OFF));
+	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputState(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_OFF));
+	ASSERT_DRIVER_STATUS(TIM_DeConfigPWM(APP_PWM_TIMER, TIMx_CHANNEL_3));
+	return TIM_DeConfigPWM(APP_PWM_TIMER, TIMx_CHANNEL_4);
+}
+
+// ==================================================================================================== //
+//										Main Entry Point										//
+// ==================================================================================================== //
+
+/**
+ * @brief Runs the two-channel Timer PWM duty ramp
+ * @returns Process status
+ * @retval 0 The function returned normally, which is not expected
+ */
+int main(void)
+{
+	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
+
+	//! Physical output configuration is intentionally outside the Timer PWM driver.
+	if (App_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
+	{
+		App_ErrorHandler();
+	}
+	if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+	{
+		App_ErrorHandler();
+	}
+
+	while (1)
+	{
+		for
+		(
+			dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
+			dutyCycle < TIM_PWM_DUTY_CYCLE_MAX;
+			dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle + APP_PWM_DUTY_STEP)
+		)
+		{
+			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			{
+				App_ErrorHandler();
+			}
+			if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+			{
+				App_ErrorHandler();
+			}
+		}
+		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MAX) != DRIVER_STATUS_SUCCESS)
+		{
+			App_ErrorHandler();
+		}
+		OB_LED_Toggle();
+
+		for
+		(
+			dutyCycle = TIM_PWM_DUTY_CYCLE_MAX;
+			dutyCycle > TIM_PWM_DUTY_CYCLE_MIN;
+			dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP)
+		)
+		{
+			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			{
+				App_ErrorHandler();
+			}
+			if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+			{
+				App_ErrorHandler();
+			}
+		}
+		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MIN) != DRIVER_STATUS_SUCCESS)
+		{
+			App_ErrorHandler();
+		}
+		OB_LED_Toggle();
+		if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+		{
+			App_ErrorHandler();
+		}
+
+		//! Exercise the explicit stop/deconfigure/reconfigure lifecycle at zero duty.
+		if (App_DeConfigPWM() != DRIVER_STATUS_SUCCESS)
+		{
+			App_ErrorHandler();
+		}
+		if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+		{
+			App_ErrorHandler();
+		}
+	}
+
 	return 0;
 }
-/*-------------------------------------------------------------------------------*/

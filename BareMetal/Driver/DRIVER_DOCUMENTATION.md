@@ -14,6 +14,7 @@ theory has one maintained source.
 
 - @ref GPIO_Peripheral_Guide "GPIO Implementation Guide"
 - @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture"
+- @ref TIM_PWM_Peripheral_Guide "STM32F103C8T6 Timer PWM Architecture"
 
 Additional peripheral guides are added here only after their architecture page
 is current, reviewed, included by Doxygen, and linked from the peripheral's

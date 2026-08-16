@@ -18,6 +18,22 @@
 | Timer implementation snapshot | [`Timer/TIMER_ARCHITECTURE.md`](Timer/TIMER_ARCHITECTURE.md) is historical/current-state context, not a competing planning authority |
 | Doxygen processing | Excluded from generated API documentation; this is a mutable planning and evidence artifact |
 
+### Later Timer PWM decision authority
+
+The subsequently approved
+[`Timer/TIMER_PWM_ARCHITECTURE.md`](Timer/TIMER_PWM_ARCHITECTURE.md) supersedes
+this worked example's earlier PWM ownership proposals. Timer PWM is now a
+cohesive Timer-driver subdomain in `Timer/Inc/timer_pwm.h` and
+`Timer/Src/timer_pwm.c`: Timer base APIs own frequency, PWM owns channel
+mode/polarity/duty/output state, and the application owns GPIO/AFIO. The
+approved scalar API deliberately has no PWM config structure, heap handle,
+endpoint registry, or separate `Driver/PWM` module. Historical findings below
+remain useful evidence but are not competing PWM API authority. The PWM
+subdomain also avoids the worked example's open cross-feature `EGR.UG` hazard:
+stopped configuration/duty transactions load only the selected active CCR
+through a temporary selected-lane preload bypass while CEN and CCxE are clear.
+Open Timer-base and future-feature findings remain open.
+
 ## Start Here
 
 1. Read **Architectural Invariants** and **Repeatable Top-Down Audit
@@ -271,7 +287,7 @@ final planning conclusions follow in the remaining sections.
 | Raw Timer register map | [`stm32f1xx_timer.h`](../Core/Inc/stm32f1xx_timer.h) | Raw fields, aliases, access qualifiers, register layout |
 | Generic register operations | [`stm32f1xx_utils.h`](../Core/Inc/stm32f1xx_utils.h) | Image staging, MMIO transfer, dirty/RMW semantic restrictions |
 | Historical verification record — non-gating | Timer Codec host-test result recorded in [`Timer/TODO.md`](Timer/TODO.md) | Eight unique exported Codec entry points were invoked directly, with additional transitive scalar execution; no retained repository-local executable test evidence |
-| Dormant legacy migration target | [`PWM/Inc/pwm.h`](PWM/Inc/pwm.h) and [`PWM/Src/pwm.c`](PWM/Src/pwm.c) | PWM ownership and migration intent; the current implementation is disabled behind `__OLD_TIMER_METHOD__` |
+| Removed legacy migration target | Historical `Driver/PWM` heap/handle implementation | Superseded by the Timer-owned scalar API in `Timer/TIMER_PWM_ARCHITECTURE.md`; legacy sources were removed after consumer migration |
 | Concrete part/package | [`STM32F103C8T6 Datasheet`](../../Reference_Docs/STM32F103C8T6_Datasheet.pdf), DS5319 ordering and LQFP48 pinout | Package-bonded Timer remap routes and SWJ pin conflicts |
 | Hardware semantics | [`STM32F103C Reference Manual`](../../Reference_Docs/STM32F103C_Reference_Manual.pdf), especially RM0008 Chapter 15 | CEN/CMS/DIR, preload/UG, CCMR/CCER, CCR read-clear, SR W0C, EGR action, DCR/DMAR |
 
@@ -320,7 +336,7 @@ rg -n "^driver_status_t Codec_TIM_" BareMetal/Driver/Timer/Inc/timer_codec.h
 rg -n "^__STATIC_FORCEINLINE .* Codec_TIM_" BareMetal/Driver/Timer/Src/timer_codec.c
 rg -n "^__STATIC_FORCEINLINE .*LL_TIM_(Read|Write)" BareMetal/Driver/Timer/Inc/timer_ll.h
 rg -n "^#define LL_TIM_(REG|SCALAR_REG)" BareMetal/Driver/Timer/Inc/timer_ll.h
-rg -n "TIM_|Codec_TIM_|LL_TIM" Projects BareMetal/Driver/PWM -g "*.[ch]"
+rg -n "TIM_|Codec_TIM_|LL_TIM" Projects/PWM BareMetal/Driver/Timer -g "*.[ch]"
 ```
 
 Record the new command output, commit/date, and reviewer in the canonical gate

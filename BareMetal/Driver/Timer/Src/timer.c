@@ -19,8 +19,9 @@
  * - `TIMx_ARR` auto-reload value
  * - `TIMx_CNT` counter value
  *
- * Channel/PWM, DMA, and master/slave behavior remain deferred. This driver also
- * owns Timer DIER interrupt-request sources, SR event observation/acknowledgement,
+ * Timer PWM channel behavior is implemented by the cohesive sibling
+ * `timer_pwm.c` source unit. DMA and master/slave behavior remain deferred.
+ * This source also owns Timer DIER interrupt-request sources, SR event observation/acknowledgement,
  * and the fixed @ref TIM_ConfigForBlockingDelay service bootstrap plus bounded
  * blocking @ref TIM_BlockingDelayUs / @ref TIM_BlockingDelayMs helpers. Generic
  * Clock-gate mutation and NVIC delivery remain under RCC/application and

@@ -45,7 +45,6 @@ deviate.
 │       ├── GPIO
 │       ├── I2C
 │       ├── NVIC
-│       ├── PWM
 │       ├── RCC
 │       ├── Ring_Buffer
 │       ├── SSD1306

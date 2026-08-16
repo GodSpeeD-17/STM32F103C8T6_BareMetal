@@ -3,10 +3,11 @@
 This checklist tracks the commit-sized Timer refactor sequence. Complete one
 item, verify it, commit it, then move to the next item.
 
-The normative plan and closure gates now live in
-[`../DRIVER_STACK_TOP_DOWN_AUDIT.md`](../DRIVER_STACK_TOP_DOWN_AUDIT.md). The
-completed entries below record historical implementation milestones; they do
-not override safety gaps reopened by the top-down audit.
+The reusable plan and closure gates live in
+[`../DRIVER_STACK_TOP_DOWN_AUDIT.md`](../DRIVER_STACK_TOP_DOWN_AUDIT.md).
+The later approved Timer PWM decisions live in
+[`TIMER_PWM_ARCHITECTURE.md`](TIMER_PWM_ARCHITECTURE.md) and supersede the
+audit's historical PWM API proposals.
 
 ## Scope
 
@@ -102,7 +103,17 @@ not override safety gaps reopened by the top-down audit.
 
 ## Reopened P0 Safety Work
 
-These items must close before channel/PWM implementation begins:
+These items were originally recorded as gates before channel/PWM expansion:
+
+The later Timer PWM contract closes its own channel transaction gates without
+claiming that every Timer-base item below is complete. In particular,
+`timer_pwm.c` performs no EGR/SR update transaction: stopped mode/duty loading
+temporarily bypasses only the selected lane's CCR preload while CEN and CCxE
+are clear. Programmed versus active CCR semantics, exclusive application
+ownership, mode-dependent CCR reads, and the applicable ES096 Timer errata are
+therefore resolved for the admitted PWM subdomain. Unchecked items below still
+govern Timer base APIs, other lifecycle/action paths, exact deployed-silicon
+revision identification, and future feature admission.
 
 - [x] Split `_TIM_ApplyCounterConfig()` and `_TIM_ApplyTimeBaseConfig()` so
   grouped and root transactions reuse the existing grouped Codec staging paths
@@ -141,10 +152,10 @@ These items must close before channel/PWM implementation begins:
 
 ## Remaining Deviations To Remove
 
-- [ ] After the reopened P0 gates pass, rebuild TIM2/TIM3/TIM4 channel/PWM public APIs on the admitted narrow PWM-output surface.
-- [ ] Channel masks must be validated when channel APIs are reintroduced.
+- [x] Rebuild TIM2/TIM3/TIM4 channel/PWM public APIs on the admitted narrow PWM-output surface documented by `TIMER_PWM_ARCHITECTURE.md`.
+- [x] Validate single-channel selectors and non-empty channel masks at the public PWM boundary.
 - [ ] A final Timer-wide style audit is still required for tabs, banners, and single-argument function layout.
-- [ ] PWM examples remain on the legacy API until channel/PWM public APIs are rebuilt.
+- [x] Migrate `Projects/PWM/06_PWM_Poll` to `timer_pwm.h` and remove the legacy heap/handle PWM module.
 
 ## Verification Targets
 
@@ -160,6 +171,9 @@ These items must close before channel/PWM implementation begins:
 - [x] `git diff --check` passes.
 - [x] `Projects/Timer/04_Timer_Poll`, `Projects/Timer/05_Timer_IRQ`, and `Projects/GPIO/03_PB_IRQ` configure and build successfully.
 - [x] The then-current host Timer codec test built with `-Wall -Wextra -Werror` and passed through CTest; its repository-local test artifact is intentionally not retained.
+- [x] `timer_pwm.c` and the extended `timer_codec.c` pass strict ARM syntax checks without diagnostics.
+- [x] `Projects/PWM/06_PWM_Poll`, both Timer examples, and `Projects/Template` configure and build successfully with the Timer PWM source included.
+- [x] The temporary `/tmp` Timer PWM host test passes PWM1/PWM2 endpoint, boundary, atomicity, isolation, and failure-path checks.
 
 ## Notes
 

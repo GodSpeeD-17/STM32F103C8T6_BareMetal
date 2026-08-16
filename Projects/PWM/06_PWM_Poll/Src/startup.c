@@ -95,8 +95,22 @@ void delay_us(uint32_t delayUs)
 {
 	while (delayUs != 0UL)
 	{
-		const uint16_t chunkUs = (delayUs > 0xFFFFUL) ? 0xFFFFU : (uint16_t) delayUs;
-		(void) TIM_BlockingDelayUs(DELAY_TIMER, chunkUs);
+		uint16_t chunkUs;
+
+		//! Bound each public delay request to the Timer API's 16-bit duration contract.
+		if (delayUs > 0xFFFFUL)
+		{
+			chunkUs = 0xFFFFU;
+		}
+		else
+		{
+			chunkUs = (uint16_t) delayUs;
+		}
+
+		if (TIM_BlockingDelayUs(DELAY_TIMER, chunkUs) != DRIVER_STATUS_SUCCESS)
+		{
+			Default_Handler();
+		}
 		delayUs -= (uint32_t) chunkUs;
 	}
 }
@@ -105,7 +119,10 @@ void delay_ms(uint32_t delayMs)
 {
 	if (delayMs != 0UL)
 	{
-		(void) TIM_BlockingDelayMs(DELAY_TIMER, delayMs);
+		if (TIM_BlockingDelayMs(DELAY_TIMER, delayMs) != DRIVER_STATUS_SUCCESS)
+		{
+			Default_Handler();
+		}
 	}
 }
 

@@ -640,6 +640,56 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 	(((tim_channel_polarity_t) (polarity)) == TIMx_CHANNEL_POLARITY_LOW)		\
 )
 
+// --------------------------------------- Timer PWM Defines ---------------------------------------- //
+
+/** @brief Minimum Timer PWM duty cycle, representing 0.0 percent @def TIM_PWM_DUTY_CYCLE_MIN */
+#define TIM_PWM_DUTY_CYCLE_MIN					((tim_pwm_duty_cycle_t) 0U)
+/** @brief Maximum Timer PWM duty cycle, representing 100.0 percent @def TIM_PWM_DUTY_CYCLE_MAX */
+#define TIM_PWM_DUTY_CYCLE_MAX					((tim_pwm_duty_cycle_t) 1000U)
+/** @brief Minimum auto-reload value admitted by Timer PWM @def TIM_PWM_AUTO_RELOAD_MIN */
+#define TIM_PWM_AUTO_RELOAD_MIN					((tim_auto_reload_t) 1U)
+/** @brief Maximum auto-reload value admitted by Timer PWM @def TIM_PWM_AUTO_RELOAD_MAX */
+#define TIM_PWM_AUTO_RELOAD_MAX					((tim_auto_reload_t) 65534U)
+
+/**
+ * @brief Checks whether a Timer PWM duty-cycle value is valid
+ * @param[in]	dutyCycle	Timer PWM duty cycle in permille units
+ * @returns Duty-cycle validity status
+ * @retval 0x00U @p dutyCycle is outside `0..1000`
+ * @retval 0x01U @p dutyCycle is inside `0..1000`
+ * @def TIM_PWM_DUTY_CYCLE_IS_VALID
+ */
+#define TIM_PWM_DUTY_CYCLE_IS_VALID(dutyCycle)	\
+	(((tim_pwm_duty_cycle_t) (dutyCycle)) <= TIM_PWM_DUTY_CYCLE_MAX)
+
+/**
+ * @brief Checks whether a Timer auto-reload value admits exact PWM endpoints
+ * @param[in]	autoReload	Timer auto-reload value
+ * @returns PWM auto-reload validity status
+ * @retval 0x00U @p autoReload is outside `1..65534`
+ * @retval 0x01U @p autoReload is inside `1..65534`
+ * @def TIM_PWM_AUTO_RELOAD_IS_VALID
+ */
+#define TIM_PWM_AUTO_RELOAD_IS_VALID(autoReload)						\
+(																\
+	(((tim_auto_reload_t) (autoReload)) >= TIM_PWM_AUTO_RELOAD_MIN) &&	\
+	(((tim_auto_reload_t) (autoReload)) <= TIM_PWM_AUTO_RELOAD_MAX)	\
+)
+
+/**
+ * @brief Checks whether a Timer channel mode is an admitted PWM mode
+ * @param[in]	mode	Timer channel mode selector
+ * @returns PWM-mode validity status
+ * @retval 0x00U @p mode is not PWM mode 1 or PWM mode 2
+ * @retval 0x01U @p mode is PWM mode 1 or PWM mode 2
+ * @def TIM_PWM_MODE_IS_VALID
+ */
+#define TIM_PWM_MODE_IS_VALID(mode)							\
+(													\
+	(((tim_channel_mode_t) (mode)) == TIMx_CHANNEL_MODE_PWM1) ||	\
+	(((tim_channel_mode_t) (mode)) == TIMx_CHANNEL_MODE_PWM2)		\
+)
+
 /** @} */ // TIM_03_Driver_02_Defines_05_ChannelConfig
 
 // ==================================================================================================== //
