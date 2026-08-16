@@ -716,11 +716,10 @@ The application must:
 - retain the GPIO configuration while PWM output is required;
 - restore or repurpose the GPIO after Timer PWM deconfiguration.
 
-For the initial `Projects/PWM/06_PWM_Poll` reference, the application will use
-the default non-remapped routes:
+For the initial `Projects/PWM/06_PWM_Poll` reference, the application uses the
+default non-remapped route:
 
 ```text
-TIM2 CH3 -> PA2
 TIM2 CH4 -> PA3
 ```
 
@@ -849,17 +848,16 @@ Temporary host test artifacts remain under `/tmp`; no repository `Test/` or
 
 The first board reference must demonstrate:
 
-- application-owned PA2 and PA3 alternate-function configuration;
-- TIM2 configured before either PWM channel;
-- TIM2 CH3 and CH4 configured in one mask transaction while TIM2 is stopped;
-- both channel outputs enabled before TIM2 is started;
-- both outputs running from the same Timer timebase;
+- application-owned PA3 alternate-function configuration;
+- TIM2 configured before its PWM channel;
+- TIM2 CH4 configured while TIM2 is stopped;
+- the channel output enabled before TIM2 is started;
+- PWM output running from the configured Timer timebase;
 - exact 0% and 100%;
 - representative intermediate duties;
 - a running duty ramp using caller-selected CCR preload;
 - PWM mode, polarity, preload, and fast-mode behavior for the shared
-  selected-channel configuration;
-- stopping and deconfiguring without hidden GPIO, RCC, IRQ, or NVIC changes.
+  selected-channel configuration.
 
 ## Deferred scope
 

@@ -6,10 +6,10 @@
  * @date	16-08-2026
  *
  * @details
- * Demonstrates two channels sharing one Timer timebase without a heap, handle,
- * frequency registry, or GPIO ownership inside the Timer driver. The
- * application owns RCC, GPIO/AFIO, Timer base configuration, PWM channel
- * configuration, channel output-enable state, and final counter start order.
+ * Demonstrates TIM2 channel 4 PWM on PA3 without a heap, handle, frequency
+ * registry, or GPIO ownership inside the Timer driver. The application owns
+ * RCC, GPIO/AFIO, Timer base configuration, PWM channel configuration,
+ * channel output-enable state, and final counter start order.
  */
 
 // ==================================================================================================== //
@@ -32,7 +32,7 @@ static void App_ErrorHandler(void)
 }
 
 /**
- * @brief Configures application-owned GPIO routing for TIM2 channels 3 and 4
+ * @brief Configures application-owned PA3 routing for TIM2 channel 4
  * @returns @ref driver_status_t "GPIO configuration status"
  */
 static driver_status_t App_ConfigPWMGPIO(void)
@@ -49,7 +49,7 @@ static driver_status_t App_ConfigPWMGPIO(void)
 }
 
 /**
- * @brief Configures the shared Timer base followed by both PWM channels
+ * @brief Configures the Timer base followed by TIM2 channel 4 PWM
  * @returns @ref driver_status_t "PWM initialization status"
  */
 static driver_status_t App_ConfigPWM(void)
@@ -77,48 +77,33 @@ static driver_status_t App_ConfigPWM(void)
 	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_PWM_TIMER_CLOCK_MASK));
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_PWM_TIMER, &timerConfig));
 
-	//! Configure both channels coherently only after the shared Timer base is valid.
+	//! Configure TIM2 channel 4 only after the Timer base is valid.
 	ASSERT_DRIVER_STATUS
 	(
 		TIM_ConfigPWM
 		(
 			APP_PWM_TIMER,
 			APP_PWM_CHANNEL_MASK,
-			TIMx_CHANNEL_MODE_PWM1,
-			TIMx_CHANNEL_POLARITY_HIGH,
-			TIMx_CHANNEL_OC_PRELOAD_ENABLE,
-			TIMx_CHANNEL_OC_FAST_DISABLE
+			APP_PWM_CHANNEL_MODE,
+			APP_PWM_CHANNEL_POLARITY,
+			APP_PWM_CHANNEL_PRELOAD,
+			APP_PWM_CHANNEL_FAST
 		)
 	);
 
 	//! Duty remains a separate lifecycle operation from channel mode configuration.
-	ASSERT_DRIVER_STATUS(TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_3, TIM_PWM_DUTY_CYCLE_MIN));
 	ASSERT_DRIVER_STATUS(TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_4, TIM_PWM_DUTY_CYCLE_MIN));
-
-	//! Enable both channel outputs coherently while CEN remains disabled.
+	//! Connect the PA3 PWM channel while CEN remains disabled.
 	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputEnable(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_ON));
 
 	//! Starting the shared counter is the final independent Timer operation.
 	return TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_ON);
 }
 
-/** @brief Programs one duty value into both PWM channel preloads */
+/** @brief Programs one duty value into the TIM2 channel 4 preload */
 static driver_status_t App_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
 {
-	ASSERT_DRIVER_STATUS(TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_3, dutyCycle));
 	return TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
-}
-
-/**
- * @brief Stops and deconfigures both PWM channels without changing GPIO/RCC ownership
- * @returns @ref driver_status_t "PWM deconfiguration status"
- */
-static driver_status_t App_DeConfigPWM(void)
-{
-	//! Stop the shared counter before disconnecting and resetting either channel.
-	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_PWM_TIMER, DRIVER_STATUS_OFF));
-	ASSERT_DRIVER_STATUS(TIM_SetPWMOutputEnable(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, DRIVER_STATUS_OFF));
-	return TIM_DeConfigPWM(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK);
 }
 
 // ==================================================================================================== //
@@ -126,7 +111,7 @@ static driver_status_t App_DeConfigPWM(void)
 // ==================================================================================================== //
 
 /**
- * @brief Runs the two-channel Timer PWM duty ramp
+ * @brief Runs the PA3 Timer PWM duty ramp
  * @returns Process status
  * @retval 0 The function returned normally, which is not expected
  */
@@ -144,14 +129,11 @@ int main(void)
 		App_ErrorHandler();
 	}
 
+	//! Infinite Loop
 	while (1)
 	{
-		for
-		(
-			dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
-			dutyCycle < TIM_PWM_DUTY_CYCLE_MAX;
-			dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle + APP_PWM_DUTY_STEP)
-		)
+		//! Increase the Duty Cycle from 0% to 100% in APP_PWM_DUTY_STEP increments, then decrease back to 0%.
+		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MIN; dutyCycle < TIM_PWM_DUTY_CYCLE_MAX; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle + APP_PWM_DUTY_STEP))
 		{
 			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
@@ -166,14 +148,12 @@ int main(void)
 		{
 			App_ErrorHandler();
 		}
+
+		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
 		OB_LED_Toggle();
 
-		for
-		(
-			dutyCycle = TIM_PWM_DUTY_CYCLE_MAX;
-			dutyCycle > TIM_PWM_DUTY_CYCLE_MIN;
-			dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP)
-		)
+		//! Decrease the Duty Cycle from 100% to 0% in APP_PWM_DUTY_STEP decrements, then increase back to 100%.
+		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MAX; dutyCycle > TIM_PWM_DUTY_CYCLE_MIN; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP))
 		{
 			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
@@ -188,18 +168,12 @@ int main(void)
 		{
 			App_ErrorHandler();
 		}
-		OB_LED_Toggle();
-		if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
-		{
-			App_ErrorHandler();
-		}
 
-		//! Exercise the explicit stop/deconfigure/reconfigure lifecycle at zero duty.
-		if (App_DeConfigPWM() != DRIVER_STATUS_SUCCESS)
-		{
-			App_ErrorHandler();
-		}
-		if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
+		OB_LED_Toggle();
+
+		//! Block for a moment before the next ramp begins to allow the user to see the completed ramp.
+		if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
 			App_ErrorHandler();
 		}

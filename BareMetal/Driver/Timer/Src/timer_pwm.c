@@ -834,6 +834,58 @@ driver_status_t TIM_ConfigPWM
 //									Timer PWM Duty-Cycle APIs									//
 // ==================================================================================================== //
 
+driver_status_t TIM_GetPWMDuty
+(
+	TIM_TypeDef* const				TIMx,
+	const tim_channel_t				channel,
+	tim_pwm_duty_cycle_t* const		pDutyCycle
+)
+{
+	// Local Variables
+	reg arrRegImage = 0x00000000UL;
+	reg ccmrRegImage = 0x00000000UL;
+	reg ccerRegImage = 0x00000000UL;
+	reg ccrRegImage = 0x00000000UL;
+	tim_channel_mode_t channelMode = TIMx_CHANNEL_MODE_FREEZE;
+	tim_auto_reload_t autoReload = 0U;
+	tim_compare_value_t compareValue = 0U;
+	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
+
+	//! Protect the caller destination until the complete duty reconstruction succeeds.
+	if (pDutyCycle == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! Validate identity before reading shared or channel-specific Timer state.
+	ASSERT_DRIVER_STATUS(_TIM_ValidatePWMInstance(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidatePWMChannel(channel));
+
+	//! Establish output-compare interpretation before performing the potentially consuming CCR read.
+	ccmrRegImage = _TIM_ReadPWMChannelCCMR(TIMx, channel);
+	ccerRegImage = LL_TIM_ReadCCER(TIMx);
+	ASSERT_DRIVER_STATUS(_TIM_ExtractPWMConfig(ccmrRegImage, ccerRegImage, channel, &channelMode, NULL, NULL, NULL));
+
+	//! Read ARR only because the programmed period is the duty denominator.
+	arrRegImage = LL_TIM_ReadARR(TIMx);
+	if (Codec_TIM_ExtractAutoReload(arrRegImage, &autoReload) != DRIVER_STATUS_SUCCESS)
+	{
+		return DRIVER_STATUS_ERROR_STATE;
+	}
+
+	//! Decode CCR only after proving that the lane is output compare rather than capture.
+	ccrRegImage = _TIM_ReadPWMChannelCCR(TIMx, channel);
+	if (Codec_TIM_ExtractCompareValue(ccrRegImage, &compareValue) != DRIVER_STATUS_SUCCESS)
+	{
+		return DRIVER_STATUS_ERROR_STATE;
+	}
+	ASSERT_DRIVER_STATUS(_TIM_ComputePWMDuty(autoReload, channelMode, compareValue, &dutyCycle));
+
+	//! Publish the reconstructed permille duty only after every decode and calculation succeeds.
+	*pDutyCycle = dutyCycle;
+	return DRIVER_STATUS_SUCCESS;
+}
+
 driver_status_t TIM_SetPWMDuty
 (
 	TIM_TypeDef* const				TIMx,
@@ -841,6 +893,7 @@ driver_status_t TIM_SetPWMDuty
 	const tim_pwm_duty_cycle_t		dutyCycle
 )
 {
+	// Local Variables
 	reg cr1RegImage = 0x00000000UL;
 	reg arrRegImage = 0x00000000UL;
 	reg ccmrRegImage = 0x00000000UL;
@@ -946,57 +999,6 @@ driver_status_t TIM_SetPWMDuty
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t TIM_GetPWMDuty
-(
-	TIM_TypeDef* const				TIMx,
-	const tim_channel_t			channel,
-	tim_pwm_duty_cycle_t* const	pDutyCycle
-)
-{
-	reg arrRegImage = 0x00000000UL;
-	reg ccmrRegImage = 0x00000000UL;
-	reg ccerRegImage = 0x00000000UL;
-	reg ccrRegImage = 0x00000000UL;
-	tim_channel_mode_t channelMode = TIMx_CHANNEL_MODE_FREEZE;
-	tim_auto_reload_t autoReload = 0U;
-	tim_compare_value_t compareValue = 0U;
-	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
-
-	//! Protect the caller destination until the complete duty reconstruction succeeds.
-	if (pDutyCycle == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	//! Validate identity before reading shared or channel-specific Timer state.
-	ASSERT_DRIVER_STATUS(_TIM_ValidatePWMInstance(TIMx));
-	ASSERT_DRIVER_STATUS(_TIM_ValidatePWMChannel(channel));
-
-	//! Establish output-compare interpretation before performing the potentially consuming CCR read.
-	ccmrRegImage = _TIM_ReadPWMChannelCCMR(TIMx, channel);
-	ccerRegImage = LL_TIM_ReadCCER(TIMx);
-	ASSERT_DRIVER_STATUS(_TIM_ExtractPWMConfig(ccmrRegImage, ccerRegImage, channel, &channelMode, NULL, NULL, NULL));
-
-	//! Read ARR only because the programmed period is the duty denominator.
-	arrRegImage = LL_TIM_ReadARR(TIMx);
-	if (Codec_TIM_ExtractAutoReload(arrRegImage, &autoReload) != DRIVER_STATUS_SUCCESS)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
-
-	//! Decode CCR only after proving that the lane is output compare rather than capture.
-	ccrRegImage = _TIM_ReadPWMChannelCCR(TIMx, channel);
-	if (Codec_TIM_ExtractCompareValue(ccrRegImage, &compareValue) != DRIVER_STATUS_SUCCESS)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
-	ASSERT_DRIVER_STATUS(_TIM_ComputePWMDuty(autoReload, channelMode, compareValue, &dutyCycle));
-
-	//! Publish the reconstructed permille duty only after every decode and calculation succeeds.
-	*pDutyCycle = dutyCycle;
-	return DRIVER_STATUS_SUCCESS;
-}
-
 // ==================================================================================================== //
 //								Timer PWM Output-Enable-State APIs								//
 // ==================================================================================================== //
@@ -1008,6 +1010,7 @@ driver_status_t TIM_SetPWMOutputEnable
 	const driver_status_t		outputEnableState
 )
 {
+	// Local Variables
 	reg ccmr1RegImage = 0x00000000UL;
 	reg ccmr2RegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
@@ -1088,6 +1091,7 @@ driver_status_t TIM_GetPWMOutputEnable
 	const tim_channel_t		channel
 )
 {
+	// Local Variables
 	reg ccmrRegImage = 0x00000000UL;
 	reg ccerRegImage = 0x00000000UL;
 
