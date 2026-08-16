@@ -11,6 +11,7 @@
  * belong in @ref `nvic_defines.h`.
  */
 
+// Header Guards
 #ifndef NVIC_DATA_TYPES_H_
 #define NVIC_DATA_TYPES_H_
 

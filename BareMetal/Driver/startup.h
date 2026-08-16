@@ -21,22 +21,16 @@
 #include "bsp.h"
 // Use Timer for Delay
 #ifndef SYSTICK_DELAY__
-	#include "timer.h"
+#include "timer.h"
 #endif /* SYSTICK_DELAY__ */
 
 /*-------------------------------------------- MACROS ----------------------------------*/
-#define ARM_IRQ									((uint8_t) 11)
-#define RESERVED								((uint8_t) 6)
-#define STM32F103C8_IRQ							((uint8_t) 59)
-
-// #define SYSTICK_DELAY__			// Uncomment this to achieve delay from SysTick
-// Use Timer for Delay
-#ifndef SYSTICK_DELAY__
-	/** @brief Dedicated Timer instance used by the startup blocking-delay service @def DELAY_TIMER */
-	#define DELAY_TIMER					TIM4
-	/** @brief APB1 clock-enable mask owned by the startup blocking-delay service @def DELAY_TIMER_CLOCK_ENABLE_MASK */
-	#define DELAY_TIMER_CLOCK_ENABLE_MASK		RCC_APB1ENR_TIM4EN
-#endif /* SYSTICK_DELAY__ */
+/** @brief ARM IRQ count @def ARM_IRQ */
+#define ARM_IRQ									((uint8_t) 11U)
+/** @brief Reserved IRQ count @def RESERVED */
+#define RESERVED								((uint8_t) 6U)
+/** @brief STM32F103C8 IRQ count @def STM32F103C8_IRQ */
+#define STM32F103C8_IRQ							((uint8_t) 59U)
 
 /*----------------------------------- Linker Script --------------------------------------------*/
 // Start address of initialized data in Flash
@@ -169,7 +163,8 @@ __attribute__((weak, alias("Default_Handler"))) void DMA2_Channel4_5_IRQHandler(
  * @note Placed in ".isr_vector" section
  * @ref Reference Manual
  */
-__attribute__((section(".isr_vector"))) static const volatile uint32_t _vectorIRQTable[ARM_IRQ + RESERVED + STM32F103C8_IRQ] = {
+__attribute__((section(".isr_vector"))) static const volatile uint32_t _vectorIRQTable[ARM_IRQ + RESERVED + STM32F103C8_IRQ] =
+{
 	(uint32_t)(&_estack),
 	(uint32_t)Reset_Handler,
 	(uint32_t)NMI_Handler,
@@ -253,6 +248,7 @@ extern int main(void);
 
 /*-------------------------------- Delay Function Prototypes ---------------------*/
 #ifndef SYSTICK_DELAY__
+	
 	/**
 	 * @brief Provides a blocking delay in microseconds using TIMx
 	 * @param delayUs Delay time in microseconds

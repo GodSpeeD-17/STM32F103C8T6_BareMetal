@@ -23,6 +23,7 @@
  * - `nvic.h` owns direct NVIC/SCB register operations.
  */
 
+// Header Guards
 #ifndef NVIC_H_
 #define NVIC_H_
 

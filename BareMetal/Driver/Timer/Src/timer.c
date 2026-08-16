@@ -22,7 +22,7 @@
  * Channel/PWM, DMA, and master/slave behavior remain deferred. This driver also
  * owns Timer DIER interrupt-request sources, SR event observation/acknowledgement,
  * and the fixed @ref TIM_ConfigForBlockingDelay service bootstrap plus bounded
- * blocking @ref TIM_DelayUs / @ref TIM_BlockingDelayMs helpers. Generic
+ * blocking @ref TIM_BlockingDelayUs / @ref TIM_BlockingDelayMs helpers. Generic
  * Clock-gate mutation and NVIC delivery remain under RCC/application and
  * NVIC/application ownership respectively. Timer configuration APIs require
  * the application to enable the matching APB1 clock gate before entry.
@@ -2036,7 +2036,7 @@ driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx)
 
 // ---------------------------------- Timer Microsecond Delay Helper ---------------------------------- //
 
-driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs)
+driver_status_t TIM_BlockingDelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs)
 {
 	// Local Variables
 	tim_auto_reload_t delayReload = 0U;
@@ -2106,7 +2106,7 @@ driver_status_t TIM_BlockingDelayMs(TIM_TypeDef* const TIMx, const uint32_t dela
 	//! Compose the millisecond delay from bounded 1000-us primitive operations.
 	for (elapsedMs = 0UL; elapsedMs < delayMs; elapsedMs++)
 	{
-		ASSERT_DRIVER_STATUS(TIM_DelayUs(TIMx, TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US));
+		ASSERT_DRIVER_STATUS(TIM_BlockingDelayUs(TIMx, TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US));
 	}
 
 	return DRIVER_STATUS_SUCCESS;

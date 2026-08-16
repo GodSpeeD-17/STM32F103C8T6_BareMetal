@@ -111,7 +111,7 @@ void delay_us(uint32_t delayUs)
 			chunkUs = (uint16_t) delayUs;
 		}
 
-		if (TIM_DelayUs(DELAY_TIMER, chunkUs) != DRIVER_STATUS_SUCCESS)
+		if (TIM_BlockingDelayUs(DELAY_TIMER, chunkUs) != DRIVER_STATUS_SUCCESS)
 		{
 			Default_Handler();
 		}

@@ -11,6 +11,7 @@
  * type aliases remain in @ref `nvic_data_types.h`.
  */
 
+// Header Guards
 #ifndef NVIC_DEFINES_H_
 #define NVIC_DEFINES_H_
 

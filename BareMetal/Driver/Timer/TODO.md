@@ -36,8 +36,8 @@ not override safety gaps reopened by the top-down audit.
 - [x] Add `TIM_ConfigForBlockingDelay()` as the single service-specific fixed-frequency
   exception for a validated 72 MHz Timer kernel clock and dedicated blocking
   polling-delay ownership.
-- [x] Add public `TIM_DelayUs()` blocking polling helper for Timers explicitly configured with a 1 MHz programmed tick.
-- [x] Add public `TIM_BlockingDelayMs()` blocking polling wrapper over `TIM_DelayUs(TIMx, 1000U)`.
+- [x] Add public `TIM_BlockingDelayUs()` blocking polling helper for Timers explicitly configured with a 1 MHz programmed tick.
+- [x] Add public `TIM_BlockingDelayMs()` blocking polling wrapper over `TIM_BlockingDelayUs(TIMx, 1000U)`.
 - [x] Reorganize `timer.c` public implementations under the same banner and sub-banner order used by `timer.h`.
 - [x] Add file-level Doxygen `@section` blocks to `timer.c` for scope, field ownership, and source layout.
 - [x] Implement the first-pass Timer IRQ APIs with codec-owned DIER/SR mapping and Timer-owned NVIC coordination (source/event/delivery ownership is reopened below).
@@ -79,10 +79,10 @@ not override safety gaps reopened by the top-down audit.
   sequence `TIM_SetIRQSources()`, NVIC delivery, and the active-state transition.
 - [x] Stage all timebase/commit images and validate the stopped-counter precondition before the first MMIO write.
 - [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
-- [x] `TIM_DelayUs()` requires application-owned allocation through
+- [x] `TIM_BlockingDelayUs()` requires application-owned allocation through
   `TIM_ConfigForBlockingDelay()`, avoids redundant runtime base-configuration
   validation, and uses bounded polling with cleanup on timeout.
-- [x] `TIM_BlockingDelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
+- [x] `TIM_BlockingDelayMs()` now provides a minimum blocking millisecond delay by composing repeated `TIM_BlockingDelayUs(TIMx, 1000U)` chunks.
 - [x] Shared startup delay consumers use `TIM_ConfigForBlockingDelay()` instead of duplicating the canonical delay configuration object.
 - [x] `timer.c` public implementation order now mirrors `timer.h`, including conjugate getter/setter sub-banners and final blocking-delay helpers.
 - [x] `timer.c` file overview now uses Doxygen `@section` blocks for scope, field ownership, and source layout.

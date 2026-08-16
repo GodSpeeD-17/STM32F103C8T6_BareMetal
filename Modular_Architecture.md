@@ -181,7 +181,7 @@ Acceptable `startup.c` responsibilities:
 Not acceptable in `startup.c`:
 
 - direct Timer configuration such as `TIM_Config()`
-- `TIM_DelayUs()`
+- `TIM_BlockingDelayUs()`
 - `TIM_BlockingDelayMs()`
 - raw `TIMx->ARR` / `TIMx->CNT` / `TIMx->SR` access
 - Timer IRQ delay completion state
@@ -315,7 +315,7 @@ driver_status_t Project_DelayInit(void)
 
 driver_status_t Project_DelayUs(const uint16_t delayUs)
 {
-	return TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
+	return TIM_BlockingDelayUs(PROJECT_DELAY_TIMER, delayUs);
 }
 
 driver_status_t Project_DelayMs(const uint32_t delayMs)
@@ -445,7 +445,7 @@ Implement the Timer backend using the current Timer driver APIs:
 ```c
 RCC_APB1_ClockEnable(PROJECT_DELAY_TIMER_CLOCK_ENABLE_MASK);
 TIM_ConfigForBlockingDelay(PROJECT_DELAY_TIMER);
-TIM_DelayUs(PROJECT_DELAY_TIMER, delayUs);
+TIM_BlockingDelayUs(PROJECT_DELAY_TIMER, delayUs);
 TIM_BlockingDelayMs(PROJECT_DELAY_TIMER, delayMs);
 ```
 
@@ -536,7 +536,7 @@ needed by the modular project delay facade:
 ```c
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig);
 driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx);
-driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
+driver_status_t TIM_BlockingDelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
 driver_status_t TIM_BlockingDelayMs(TIM_TypeDef* const TIMx, const uint32_t delayMs);
 ```
 
@@ -546,9 +546,9 @@ Important constraints:
 - Applications explicitly enable the selected Timer clock through the RCC
   driver before Timer configuration; Timer APIs validate but never change the
   clock gate.
-- `TIM_DelayUs()` accepts `1U..0xFFFFU`.
-- `TIM_DelayUs()` is a minimum blocking delay, not a cycle-exact delay.
-- `TIM_BlockingDelayMs()` composes repeated `TIM_DelayUs(TIMx, 1000U)` chunks.
+- `TIM_BlockingDelayUs()` accepts `1U..0xFFFFU`.
+- `TIM_BlockingDelayUs()` is a minimum blocking delay, not a cycle-exact delay.
+- `TIM_BlockingDelayMs()` composes repeated `TIM_BlockingDelayUs(TIMx, 1000U)` chunks.
 - Blocking-delay helpers require a Timer successfully allocated through
   `TIM_ConfigForBlockingDelay()`. The application preserves that dedicated
   configuration; delay calls do not revalidate the programmed timebase.

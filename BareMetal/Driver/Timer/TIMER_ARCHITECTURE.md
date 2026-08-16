@@ -261,7 +261,7 @@ Current first-pass public API scope:
 - `TIM_GetIRQEvents()` / `TIM_AckIRQEvents()` for Timer-owned SR state
 - dedicated 72 MHz-to-1 MHz blocking polling-delay configuration through
   `TIM_ConfigForBlockingDelay()`
-- blocking polling delay helpers `TIM_DelayUs()` / `TIM_BlockingDelayMs()`
+- blocking polling delay helpers `TIM_BlockingDelayUs()` / `TIM_BlockingDelayMs()`
 - grouped `TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()`
 - grouped `TIM_GetCounterConfig()` / `TIM_SetCounterConfig()`
 - scalar `Get`/`Set` APIs for `prescaler`, `auto_reload`, `counter_value`,
@@ -445,14 +445,14 @@ Timer kernel clock, then delegates the canonical configuration to
 `TIM_GetProgrammedTickFrequency()` remains as an observational calculation
 from the live Timer kernel clock and programmed PSC value.
 
-`TIM_DelayUs()` is a blocking polling helper for a dedicated Timer that the
+`TIM_BlockingDelayUs()` is a blocking polling helper for a dedicated Timer that the
 application successfully allocated through `TIM_ConfigForBlockingDelay()` and has not
 subsequently reconfigured. It does not create a general delay service and does
 not use IRQ/NVIC state. The helper verifies only the Timer access preconditions;
 it deliberately does not revalidate PSC or the remaining base configuration.
 `TIM_ConfigForBlockingDelay()` permanently enables OPM and update events, disables
 ARPE, clears `SR.UIF`, and leaves the counter stopped for the duration of the
-application-owned allocation. Each `TIM_DelayUs()` call updates
+application-owned allocation. Each `TIM_BlockingDelayUs()` call updates
 `ARR = delayUs - 1`, resets `CNT`, clears `SR.UIF`, starts `CEN`, and blocks
 while polling `SR.UIF` until the one-pulse update event completes or the
 bounded budget expires. One cleanup path stops the counter when necessary and
@@ -461,8 +461,8 @@ delay because software setup, polling, and cleanup can add a small positive
 overhead. The public `uint16_t` input bounds the accepted range to
 `1U..0xFFFFU`, so the maximum requested delay is `65535 us`.
 
-`TIM_BlockingDelayMs()` is a thin blocking wrapper over `TIM_DelayUs()`. It rejects
-`0U`, then performs one `TIM_DelayUs(TIMx, 1000U)` chunk for each requested
+`TIM_BlockingDelayMs()` is a thin blocking wrapper over `TIM_BlockingDelayUs()`. It rejects
+`0U`, then performs one `TIM_BlockingDelayUs(TIMx, 1000U)` chunk for each requested
 millisecond. Because the wrapper composes repeated microsecond-delay calls, its
 delay is also a minimum delay and accumulates the per-chunk software overhead.
 
@@ -608,7 +608,7 @@ Completed:
 - `TIM_ConfigForBlockingDelay()` validates a 72 MHz Timer kernel clock and applies the
   canonical dedicated blocking polling-delay configuration through
   `TIM_Config()`.
-- `TIM_DelayUs()` and `TIM_BlockingDelayMs()` exist as blocking polling helpers for
+- `TIM_BlockingDelayUs()` and `TIM_BlockingDelayMs()` exist as blocking polling helpers for
   Timers explicitly allocated through `TIM_ConfigForBlockingDelay()`. The application
   preserves that dedicated configuration; delay calls do not revalidate it and
   retain bounded polling.

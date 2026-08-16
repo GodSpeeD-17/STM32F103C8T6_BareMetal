@@ -93,7 +93,7 @@ void delay_us(uint32_t delayUs)
 	while (delayUs != 0UL)
 	{
 		const uint16_t chunkUs = (delayUs > 0xFFFFUL) ? 0xFFFFU : (uint16_t) delayUs;
-		(void) TIM_DelayUs(DELAY_TIMER, chunkUs);
+		(void) TIM_BlockingDelayUs(DELAY_TIMER, chunkUs);
 		delayUs -= (uint32_t) chunkUs;
 	}
 }

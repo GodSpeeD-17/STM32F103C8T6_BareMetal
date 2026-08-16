@@ -19,7 +19,7 @@
  *
  * Channel/PWM, DMA, and master/slave APIs remain outside this public header
  * scope. Timer IRQ source/event APIs, the fixed @ref TIM_ConfigForBlockingDelay
- * service bootstrap, and the blocking @ref TIM_DelayUs and @ref TIM_BlockingDelayMs
+ * service bootstrap, and the blocking @ref TIM_BlockingDelayUs and @ref TIM_BlockingDelayMs
  * APIs are provided. RCC clock-gate control and NVIC delivery remain explicit
  * application responsibilities.
  */
@@ -1011,14 +1011,14 @@ driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx);
  * the Timer base configuration, and the resulting blocking duration is
  * unspecified
  */
-driver_status_t TIM_DelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
+driver_status_t TIM_BlockingDelayUs(TIM_TypeDef* const TIMx, const uint16_t delayUs);
 
 // ---------------------------------- Timer Millisecond Delay Helper ---------------------------------- //
 
 /**
  * @brief Provides a minimum blocking delay in milliseconds using a 1 MHz Timer
  * @details
- * Uses @ref TIM_DelayUs as the primitive delay operation and performs one
+ * Uses @ref TIM_BlockingDelayUs as the primitive delay operation and performs one
  * `1000 us` delay chunk for each requested millisecond. Because each
  * millisecond is composed from the microsecond helper, the final delay is a
  * minimum delay and includes the accumulated software overhead of each chunk.

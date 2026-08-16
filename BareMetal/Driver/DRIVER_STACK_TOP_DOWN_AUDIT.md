@@ -514,7 +514,7 @@ primary public surface; the six legacy IRQ compatibility wrappers are removed.
 | Counter behavior scalar access | DIR, CMS, OPM, ARPE, URS, and digital-filter clock-division pairs | Complete for represented CR1 fields; cross-field compatibility and live-state constraints need strengthening. |
 | IRQ/event handling | `TIM_GetIRQSources`, `TIM_SetIRQSources`, `TIM_GetIRQEvents`, `TIM_AckIRQEvents` | Separate DIER-source and SR-event types cover trigger and overcapture vocabulary; NVIC delivery is independent. Generic acknowledgement rejects input-capture lanes until capture consumption is admitted. |
 | Former IRQ compatibility | six `TIM_IRQ_*` wrappers | Removed after consumer migration; no Boolean error-collapsing wrapper remains. |
-| Blocking delay | `TIM_DelayUs`, `TIM_BlockingDelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. Applications must allocate the instance through `TIM_ConfigForBlockingDelay` and preserve its configuration; delay calls do not revalidate base configuration. |
+| Blocking delay | `TIM_BlockingDelayUs`, `TIM_BlockingDelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. Applications must allocate the instance through `TIM_ConfigForBlockingDelay` and preserve its configuration; delay calls do not revalidate base configuration. |
 | Channel/output compare | none | Accepted-next primitives for the dormant PWM migration are absent despite partial Codec/LL groundwork. |
 | Input capture | none | Deferred candidate; consuming-read and overcapture semantics would be required if a named consumer admits it. |
 | Master/slave/encoder | none | Deferred candidates; partial selector groundwork does not constitute admitted public scope. |
@@ -533,7 +533,7 @@ Driver API candidates.
 | Former frequency-setting configuration functions | Removed | `TIM_ConfigTickFrequency`, `TIM_Config1MHz`, `TIM_ConfigBaseTickFrequency`, and `TIM_ConfigBase1MHz` have no canonical replacement; use explicit `tim_config_t` data. |
 | `TIM_ConfigForBlockingDelay` | Dedicated service bootstrap | Retain only for the admitted blocking polling-delay service; it validates the fixed 72 MHz kernel-clock contract before delegating `TIM_Config`. |
 | Timer IRQ source/event functions | Implemented; evidence open | Retain the four canonical functions and separate source/event types; add retained Codec/MMIO traces before closing the evidence gate. |
-| `TIM_DelayUs`, `TIM_BlockingDelayMs` | Compatibility/service | Move behind dedicated-Timer ownership while retaining temporary wrappers; application-owned allocation through `TIM_ConfigForBlockingDelay` is a precondition rather than runtime configuration discovery. |
+| `TIM_BlockingDelayUs`, `TIM_BlockingDelayMs` | Compatibility/service | Move behind dedicated-Timer ownership while retaining temporary wrappers; application-owned allocation through `TIM_ConfigForBlockingDelay` is a precondition rather than runtime configuration discovery. |
 | Channel/output selectors and Codecs | Candidate/partly admitted | Admit only the subset required by the dormant PWM migration; keep other selectors dormant. |
 | `tim_remap_t` and TIM1/TIM2/TIM3/TIM4 remap selectors | Misowned compatibility debt | Move to AFIO/pin-routing ownership. TIM1 selectors are outside the current Timer instance scope. |
 | Frequency-specific default constants | Explicit configuration data | Retain only where a project establishes the documented Timer kernel clock before using the constant; they do not justify frequency-setting functions. |
@@ -682,7 +682,7 @@ wrappers that turn invalid access into a legitimate OFF result.
 
 #### 6. Move dedicated-Timer conveniences above the core surface
 
-Preserve `TIM_DelayUs()` and `TIM_BlockingDelayMs()` until consumers migrate, but plan a
+Preserve `TIM_BlockingDelayUs()` and `TIM_BlockingDelayMs()` until consumers migrate, but plan a
 `timer_delay` service whose contract explicitly owns a dedicated Timer. The
 core Timer API must not imply that a blocking delay preserves an arbitrary
 caller's channel, trigger, DMA, or synchronization configuration.

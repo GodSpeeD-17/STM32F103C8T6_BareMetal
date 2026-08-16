@@ -16,6 +16,7 @@
  * which board-specific convenience functions should exist.
  */
 
+// Header Guards
 #ifndef BSP_H_
 #define BSP_H_
 
@@ -62,6 +63,17 @@ extern "C" {
  * latch turns the LED on, while a set output latch turns it off.
  */
 #define GPIO_OB_LED_PIN							GPIO_PIN_13
+
+// Uncomment this to achieve delay from SysTick
+// #define SYSTICK_DELAY__
+
+// Use Timer for Delay
+#ifndef SYSTICK_DELAY__
+/** @brief Dedicated Timer instance used by the startup blocking-delay service @def DELAY_TIMER */
+#define DELAY_TIMER								(TIM4)
+/** @brief APB1 clock-enable mask owned by the startup blocking-delay service @def DELAY_TIMER_CLOCK_ENABLE_MASK */
+#define DELAY_TIMER_CLOCK_ENABLE_MASK			(RCC_APB1ENR_TIM4EN)
+#endif /* SYSTICK_DELAY__ */
 
 // ==================================================================================================== //
 //										On-Board LED APIs												//

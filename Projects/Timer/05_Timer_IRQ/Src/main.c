@@ -17,7 +17,13 @@
 #include "main.h"
 
 // ==================================================================================================== //
-//										Local Helpers											//
+//											Local Variables												//
+// ==================================================================================================== //
+/** @brief Flag indicating whether an action is required */
+static volatile uint8_t isActionRequired = 0U;
+
+// ==================================================================================================== //
+//											Local Helpers												//
 // ==================================================================================================== //
 
 /**
@@ -49,6 +55,10 @@ static void APP_ErrorHandler(void)
  */
 static driver_status_t APP_Init(void)
 {
+	//! Configure GPIO for LED
+	ASSERT_DRIVER_STATUS(GPIO_LED_Init(APP_GPIO_LED_PORT, APP_GPIO_LED_PIN));
+
+	//! Configure TIM3
 	const tim_config_t config =
 	{
 		.timebase =
@@ -69,14 +79,14 @@ static driver_status_t APP_Init(void)
 	};
 
 	//! Explicitly enable the application-owned TIM3 clock before Timer configuration.
-	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM3EN));
+	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_TIMER_ENABLE_MASK));
 	//! Apply only TIM3 base configuration; IRQ-source intent remains a separate application decision.
-	ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
+	ASSERT_DRIVER_STATUS(TIM_Config(APP_TIMER, &config));
 	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.
-	ASSERT_DRIVER_STATUS(TIM_SetIRQSources(TIM3, TIMx_IRQ_SOURCE_UPDATE, DRIVER_STATUS_ON));
-	NVIC_IRQ_ClearPending(TIM3_IRQn);
-	NVIC_IRQ_Enable(TIM3_IRQn);
-	ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIM3, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS(TIM_SetIRQSources(APP_TIMER, TIMx_IRQ_SOURCE_UPDATE, DRIVER_STATUS_ON));
+	NVIC_IRQ_ClearPending(APP_TIMER_IRQn);
+	NVIC_IRQ_Enable(APP_TIMER_IRQn);
+	ASSERT_DRIVER_STATUS(TIM_SetOperationState(APP_TIMER, DRIVER_STATUS_ON));
 
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -101,6 +111,15 @@ int main(void)
 	while (1)
 	{
 		//! All visible work is performed by the TIM3 interrupt handler.
+		if (isActionRequired != 0U)
+		{
+			GPIO_PinToggle(APP_GPIO_LED_PORT, APP_GPIO_LED_PIN);
+			//! Clear the action-required flag so the main loop can wait for the next interrupt
+			isActionRequired = 0U;
+		}
+
+		//! Blocking delay to prevent the main loop from running too fast
+		TIM_BlockingDelayMs(DELAY_TIMER, 10U);
 	}
 
 	return 0;
@@ -117,21 +136,23 @@ int main(void)
  * acknowledges that flag through the public W0C-aware Timer path. A failure
  * is terminal so execution cannot return into an unacknowledged IRQ storm.
  */
-void TIM3_IRQHandler(void)
+void APP_TIMER_IRQHandler(void)
 {
+	// Local Variable
 	tim_event_flag_t irqEvents = TIMx_IRQ_EVENT_NONE;
-
-	if (TIM_GetIRQEvents(TIM3, &irqEvents) != DRIVER_STATUS_SUCCESS)
+	//! Read the public pending-event mask
+	if (TIM_GetIRQEvents(APP_TIMER, &irqEvents) != DRIVER_STATUS_SUCCESS)
 	{
 		APP_ErrorHandler();
 	}
-
+	//! Service only the update flag
 	if ((irqEvents & TIMx_IRQ_EVENT_UPDATE) != TIMx_IRQ_EVENT_NONE)
 	{
-		OB_LED_Toggle();
+		//! Ask the main loop to perform the visible action
+		isActionRequired = 1U;
 
 		//! Acknowledge only the serviced update flag and preserve unrelated Timer flags.
-		if (TIM_AckIRQEvents(TIM3, TIMx_IRQ_EVENT_UPDATE) != DRIVER_STATUS_SUCCESS)
+		if (TIM_AckIRQEvents(APP_TIMER, TIMx_IRQ_EVENT_UPDATE) != DRIVER_STATUS_SUCCESS)
 		{
 			APP_ErrorHandler();
 		}
