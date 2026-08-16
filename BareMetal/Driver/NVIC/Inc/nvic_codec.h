@@ -73,17 +73,17 @@ extern "C" {
  * @details
  * Decodes `AIRCR.PRIGROUP` without hardware access. Raw values `0U..3U` are
  * equivalent when four priority bits are implemented and are canonicalized to
- * @ref `NVIC_PRIO_GROUP_4`.
+ * @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`".
  *
  * @param[in] aircrRegImage Caller-owned complete AIRCR image
  * Accepted values:
  * - `0x00000000UL..0xFFFFFFFFUL` : Any captured AIRCR image
  * @param[out] pPriorityGroup Destination for the decoded logical group
  * Expected values:
- * - @ref `NVIC_PRIO_GROUP_0` through @ref `NVIC_PRIO_GROUP_4`
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`" through @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @returns @ref driver_status_t "Priority-group extraction status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Logical priority group was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPriorityGroup is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Logical priority group was extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPriorityGroup is `NULL`
  * @note @p pPriorityGroup is not modified when extraction fails
  */
 driver_status_t Codec_NVIC_ExtractPriorityGroup
@@ -105,15 +105,15 @@ driver_status_t Codec_NVIC_ExtractPriorityGroup
  * - Non-`NULL` : Local Driver-owned @ref reg image, never live MMIO
  * @param[in] priorityGroup Logical priority-group selector
  * Accepted values:
- * - @ref `NVIC_PRIO_GROUP_0`
- * - @ref `NVIC_PRIO_GROUP_1`
- * - @ref `NVIC_PRIO_GROUP_2`
- * - @ref `NVIC_PRIO_GROUP_3`
- * - @ref `NVIC_PRIO_GROUP_4`
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`"
+ * - @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`"
+ * - @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`"
+ * - @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`"
+ * - @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @returns @ref driver_status_t "Priority-group staging status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Priority group and AIRCR write key were staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pAircrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p priorityGroup is invalid
+ * @retval DRIVER_STATUS_SUCCESS Priority group and AIRCR write key were staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pAircrRegImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p priorityGroup is invalid
  * @note @p pAircrRegImage is not modified when staging fails
  * @warning The staged image is suitable for an AIRCR priority-group write; the
  * reset/action request bits are deliberately cleared to prevent side effects
@@ -150,7 +150,7 @@ driver_status_t Codec_NVIC_StagePriorityGroup
  * - `0x00U..0xFFU` : Any captured IPR byte image
  * @param[in] priorityGroup Logical priority group used for decoding
  * Accepted values:
- * - @ref `NVIC_PRIO_GROUP_0` through @ref `NVIC_PRIO_GROUP_4`
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`" through @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @param[out] pPreemptPriority Destination for the decoded preemption priority
  * Expected values:
  * - `0U..15U` constrained by @p priorityGroup
@@ -158,9 +158,9 @@ driver_status_t Codec_NVIC_StagePriorityGroup
  * Expected values:
  * - `0U..15U` constrained by @p priorityGroup
  * @returns @ref driver_status_t "IRQ-priority extraction status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Both logical priority selectors were extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An output pointer is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p priorityGroup is invalid
+ * @retval DRIVER_STATUS_SUCCESS Both logical priority selectors were extracted
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR An output pointer is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p priorityGroup is invalid
  * @note Neither output is modified when extraction fails
  */
 driver_status_t Codec_NVIC_ExtractIRQPriority
@@ -183,7 +183,7 @@ driver_status_t Codec_NVIC_ExtractIRQPriority
  * - Non-`NULL` : Local Driver-owned @ref reg_field_t image, never live MMIO
  * @param[in] priorityGroup Logical priority group used for encoding
  * Accepted values:
- * - @ref `NVIC_PRIO_GROUP_0` through @ref `NVIC_PRIO_GROUP_4`
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`" through @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @param[in] preemptPriority Logical preemption priority
  * Accepted values:
  * - `0U..15U` constrained by @p priorityGroup
@@ -191,9 +191,9 @@ driver_status_t Codec_NVIC_ExtractIRQPriority
  * Accepted values:
  * - `0U..15U` constrained by @p priorityGroup
  * @returns @ref driver_status_t "IRQ-priority staging status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete IPR byte image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIprFieldImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A group or priority selector is invalid
+ * @retval DRIVER_STATUS_SUCCESS Complete IPR byte image was staged
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pIprFieldImage is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG A group or priority selector is invalid
  * @note @p pIprFieldImage is not modified when staging fails
  */
 driver_status_t Codec_NVIC_StageIRQPriority

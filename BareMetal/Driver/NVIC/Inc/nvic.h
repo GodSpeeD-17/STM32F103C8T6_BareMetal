@@ -53,14 +53,14 @@ extern "C" {
  *
  * @param[in] priorityGroup Logical NVIC priority-group selector
  * Accepted values:
- * - @ref `NVIC_PRIO_GROUP_0` : Zero preemption bits and four sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_1` : One preemption bit and three sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_2` : Two preemption bits and two sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_3` : Three preemption bits and one sub-priority bit
- * - @ref `NVIC_PRIO_GROUP_4` : Four preemption bits and zero sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`" : Zero preemption bits and four sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`" : One preemption bit and three sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`" : Two preemption bits and two sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`" : Three preemption bits and one sub-priority bit
+ * - @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`" : Four preemption bits and zero sub-priority bits
  * @returns @ref driver_status_t "Priority-group configuration status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Priority grouping was configured
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p priorityGroup is invalid
+ * @retval DRIVER_STATUS_SUCCESS Priority grouping was configured
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p priorityGroup is invalid
  * @pre The application has exclusive ownership of global priority configuration
  * @warning Changing the global group immediately reinterprets every IRQ
  * priority already stored in the NVIC. Configure grouping during platform
@@ -77,16 +77,16 @@ driver_status_t NVIC_SetPriorityGroup(const nvic_priority_group_t priorityGroup)
  *
  * @param[out] pPriorityGroup Destination for the logical priority-group selector
  * Expected values:
- * - @ref `NVIC_PRIO_GROUP_0` : Zero preemption bits and four sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_1` : One preemption bit and three sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_2` : Two preemption bits and two sub-priority bits
- * - @ref `NVIC_PRIO_GROUP_3` : Three preemption bits and one sub-priority bit
- * - @ref `NVIC_PRIO_GROUP_4` : Four preemption bits and zero sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`" : Zero preemption bits and four sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`" : One preemption bit and three sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`" : Two preemption bits and two sub-priority bits
+ * - @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`" : Three preemption bits and one sub-priority bit
+ * - @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`" : Four preemption bits and zero sub-priority bits
  * @returns @ref driver_status_t "Priority-group query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Priority grouping was returned
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPriorityGroup is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Priority grouping was returned
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPriorityGroup is `NULL`
  * @note Raw AIRCR `PRIGROUP` values `0U..3U` are hardware-equivalent on this
- * four-priority-bit target and are reported canonically as @ref `NVIC_PRIO_GROUP_4`
+ * four-priority-bit target and are reported canonically as @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @note @p pPriorityGroup is not modified when the operation fails
  * @warning The result is a hardware snapshot and can become stale if another
  * owner changes global grouping concurrently
@@ -109,24 +109,24 @@ driver_status_t NVIC_GetPriorityGroup(nvic_priority_group_t* const pPriorityGrou
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[in] preemptPriority Logical preemption-priority selector
  * Accepted values:
- * - `0U` for @ref `NVIC_PRIO_GROUP_0`
- * - `0U..1U` for @ref `NVIC_PRIO_GROUP_1`
- * - `0U..3U` for @ref `NVIC_PRIO_GROUP_2`
- * - `0U..7U` for @ref `NVIC_PRIO_GROUP_3`
- * - `0U..15U` for @ref `NVIC_PRIO_GROUP_4`
+ * - `0U` for @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`"
+ * - `0U..1U` for @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`"
+ * - `0U..3U` for @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`"
+ * - `0U..7U` for @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`"
+ * - `0U..15U` for @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @param[in] subPriority Logical sub-priority selector
  * Accepted values:
- * - `0U..15U` for @ref `NVIC_PRIO_GROUP_0`
- * - `0U..7U` for @ref `NVIC_PRIO_GROUP_1`
- * - `0U..3U` for @ref `NVIC_PRIO_GROUP_2`
- * - `0U..1U` for @ref `NVIC_PRIO_GROUP_3`
- * - `0U` for @ref `NVIC_PRIO_GROUP_4`
+ * - `0U..15U` for @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`"
+ * - `0U..7U` for @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`"
+ * - `0U..3U` for @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`"
+ * - `0U..1U` for @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`"
+ * - `0U` for @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @returns @ref driver_status_t "IRQ-priority configuration status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: IRQ priority was configured
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn or a priority selector is invalid for the active group
+ * @retval DRIVER_STATUS_SUCCESS IRQ priority was configured
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn or a priority selector is invalid for the active group
  * @pre Global priority grouping is configured and remains stable for the transaction
  * @note Lower numerical priority values have higher interrupt urgency
  * @warning Concurrent priority-group mutation can make the encoded priority
@@ -148,7 +148,7 @@ driver_status_t NVIC_SetIRQPriority
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[out] pPreemptPriority Destination for the decoded preemption priority
  * Expected values:
  * - `0U`, `0U..1U`, `0U..3U`, `0U..7U`, or `0U..15U` according to the active group
@@ -156,9 +156,9 @@ driver_status_t NVIC_SetIRQPriority
  * Expected values:
  * - `0U..15U`, `0U..7U`, `0U..3U`, `0U..1U`, or `0U` according to the active group
  * @returns @ref driver_status_t "IRQ-priority query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Both priority selectors were returned
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An output pointer is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS Both priority selectors were returned
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR An output pointer is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note Neither output is modified when the operation fails
  * @warning The two hardware reads are not an atomic snapshot relative to a
  * concurrent global priority-group change
@@ -184,10 +184,10 @@ driver_status_t NVIC_GetIRQPriority
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref driver_status_t "IRQ-delivery enable status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ISER write-one-to-set action was issued
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS The ISER write-one-to-set action was issued
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note This operation does not enable any peripheral-local interrupt source
  * or clear stale peripheral/NVIC pending state
  */
@@ -201,10 +201,10 @@ driver_status_t NVIC_EnableIRQ(const irq_t IRQn);
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref driver_status_t "IRQ-delivery disable status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ICER action and barriers completed
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS The ICER action and barriers completed
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @warning Disabling delivery does not clear pending state, silence the
  * peripheral source, terminate an already active handler, or prove that an
  * already accepted exception has quiesced
@@ -219,15 +219,15 @@ driver_status_t NVIC_DisableIRQ(const irq_t IRQn);
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[out] pIRQState Destination for the enable state
  * Expected values:
- * - @ref `DRIVER_STATUS_OFF` : IRQ delivery is disabled
- * - @ref `DRIVER_STATUS_ON` : IRQ delivery is enabled
+ * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : IRQ delivery is disabled
+ * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : IRQ delivery is enabled
  * @returns @ref driver_status_t "IRQ-delivery state query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Enable state was returned
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pIRQState is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS Enable state was returned
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pIRQState is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note @p pIRQState is not modified when the operation fails
  * @note The returned state is a hardware snapshot and can change immediately
  */
@@ -247,15 +247,15 @@ driver_status_t NVIC_GetIRQState(const irq_t IRQn, driver_status_t* const pIRQSt
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[out] pPendingState Destination for the pending state
  * Expected values:
- * - @ref `DRIVER_STATUS_OFF` : IRQ is not pending
- * - @ref `DRIVER_STATUS_ON` : IRQ is pending
+ * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : IRQ is not pending
+ * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : IRQ is pending
  * @returns @ref driver_status_t "IRQ-pending state query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pending state was returned
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPendingState is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS Pending state was returned
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pPendingState is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note @p pPendingState is not modified when the operation fails
  * @note The returned state is a hardware snapshot and can change immediately
  */
@@ -269,10 +269,10 @@ driver_status_t NVIC_GetPendingIRQState(const irq_t IRQn, driver_status_t* const
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref driver_status_t "IRQ-pending clear status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The ICPR write-one-to-clear action was issued
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS The ICPR write-one-to-clear action was issued
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note This operation does not acknowledge the corresponding peripheral
  * source flag. An asserted source can immediately pend the IRQ again
  */
@@ -292,12 +292,12 @@ driver_status_t NVIC_ClearPendingIRQ(const irq_t IRQn);
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref driver_status_t "Software-trigger action status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The STIR action was issued
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS The STIR action was issued
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note Delivery remains subject to NVIC enable, priority, and processor masks
- * @warning Unprivileged callers require the `USERSETMPEND` bit in `SCB->CCR`;
+ * @warning Unprivileged callers require `SCB->CCR.BIT.USERSETMPEND` to be set;
  * privileged firmware can issue the request directly
  */
 driver_status_t NVIC_SoftwareTriggerIRQ(const irq_t IRQn);
@@ -317,15 +317,15 @@ driver_status_t NVIC_SoftwareTriggerIRQ(const irq_t IRQn);
  *
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[out] pActiveState Destination for the active state
  * Expected values:
- * - @ref `DRIVER_STATUS_OFF` : IRQ handler is not active
- * - @ref `DRIVER_STATUS_ON` : IRQ handler is active or preempted and stacked
+ * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : IRQ handler is not active
+ * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : IRQ handler is active or preempted and stacked
  * @returns @ref driver_status_t "IRQ-active state query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Active state was returned
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pActiveState is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS Active state was returned
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR @p pActiveState is `NULL`
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  * @note @p pActiveState is not modified when the operation fails
  * @note The returned state is a hardware snapshot and can change immediately
  */

@@ -2,7 +2,7 @@
  * @file stm32f1xx_nvic.h
  * @author Shrey Shah
  * @brief STM32F1 NVIC Register-Layer Definitions
- * @version v1.4
+ * @version v1.5
  * @date 16-08-2026
  * @see @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture"
  */
@@ -56,166 +56,125 @@ extern "C" {
 /**
  * @defgroup NVIC_01_RegisterLayer_01_RegisterMap NVIC Register Block Map
  * @ingroup NVIC_01_RegisterLayer
- * @brief Memory-mapped NVIC register block and practical register layout
+ * @brief Memory-mapped Cortex-M3 NVIC architectural register layout
+ * @details
+ * The structure preserves the complete Cortex-M3 NVIC address aperture so
+ * every architectural register retains its documented offset through STIR at
+ * `0xE00`. These architectural array lengths do not claim that every slot is
+ * implemented by STM32F103C8T6. The exact target implements external IRQs
+ * `0..42`: all of bank 0, bits `0..10` of bank 1, and IPR bytes `0..42`.
  *
- * @details Complete register mapping for the Nested Vectored Interrupt Controller.
- *          The NVIC provides flexible interrupt management with hardware nesting support.
- *
- * @note 	Register addresses are relative to the NVIC base address (`NVIC_BASE_ADDR`)
- * @warning Some registers are read-only or have specific access requirements
- * @see 	Cortex-M3 TRM - Section 4.3.4 NVIC register descriptions
+ * Register action semantics are summarized locally; the complete theory and
+ * Driver mapping remain in @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture".
+ * @see Arm DDI 0337G, Table 8-1 NVIC registers
+ * @see RM0008, Table 63 STM32F103xx interrupt vector table
  * @{
  */
 
 /**
- * @brief NVIC Register Structure
- * 
- * @details This structure maps the complete NVIC register set in memory.
- *          The NVIC supports up to 240 external interrupts with 16 priority levels
+ * @brief Cortex-M3 NVIC architectural register block structure
+ * @details
+ * Maps the NVIC register window beginning at `0xE000E100`. Bitmap families
+ * retain eight architectural banks and IPR retains 240 architectural byte
+ * slots solely to preserve the register map and STIR offset. Exact-target
+ * Driver validation prevents access beyond STM32F103C8T6 IRQ 42.
  *
- * @note Array sizes are designed for maximum STM32F1xx interrupt count
- * @see Reference Manual RM0008 - Table 63 for STM32F1xx interrupt mapping
+ * @note STM32F103C8T6 implements priority bits `[7:4]` in each addressed IPR
+ * byte, giving 16 encoded priority levels. The number of implemented priority
+ * bits is implementation-defined by the Cortex-M3 architecture.
  */
-typedef volatile struct __NVIC_TypeDef 
+typedef volatile struct __NVIC_TypeDef
 {
 	/**
-	 * @brief Interrupt Set-Enable Registers (ISER)
-	 * @details Enable interrupts by setting corresponding bits
-	 * 
-	 * - ISER[0]: Enables interrupts 0 to 31
-	 * - ISER[1]: Enables interrupts 32 to 63  
-	 * - ISER[2]: Enables interrupts 64 to 95
-	 * - ISER[3]: Enables interrupts 96 to 127
-	 * - ISER[4-7]: Reserved for future use
-	 * 
-	 * @note - 1: Enable
-	 * @note - 0: Disable
-	 * @see Cortex-M3 TRM - Section 4.3.6 NVIC register map
+	 * @section NVIC_TypeDef_ISER Interrupt Set-Enable Registers (ISER)
+	 * @brief [R/W1S] Delivery-enable state and enable actions
+	 * @details
+	 * Reading returns enable state. Writing one enables the corresponding IRQ;
+	 * writing zero has no effect. Each 32-bit bank represents 32 external IRQs.
+	 * @note Offset: `0x000`
 	 */
 	volatile uint32_t ISER[8];
-	
-	/**
-	 * @brief Reserved space between ISER and ICER
-	 * @details 24 reserved words (0x020 - 0x07C)
-	 */
+
+	/** @brief Reserved words from offsets `0x020` through `0x07C` */
 	uint32_t RESERVED_0[24];
-	
+
 	/**
-	 * @brief Interrupt Clear-Enable Registers (ICER)
-	 * @details Disable interrupts by setting corresponding bits
-	 * 
-	 * - ICER[0]: Disables interrupts 0 to 31
-	 * - ICER[1]: Disables interrupts 32 to 63
-	 * - ICER[2]: Disables interrupts 64 to 95
-	 * - ICER[3]: Disables interrupts 96 to 127
-	 * - ICER[4-7]: Reserved for future use
-	 * 
-	 * @note - 1: Acknowledge
-	 * @note - 0: No Effect
+	 * @section NVIC_TypeDef_ICER Interrupt Clear-Enable Registers (ICER)
+	 * @brief [R/W1C] Delivery-enable state and disable actions
+	 * @details
+	 * Reading returns enable state. Writing one disables the corresponding IRQ;
+	 * writing zero has no effect.
+	 * @note Offset: `0x080`
 	 */
 	volatile uint32_t ICER[8];
-	
-	/**
-	 * @brief Reserved space between ICER and ISPR
-	 * @details 24 reserved words (0x0A0 - 0x0FC)
-	 */
+
+	/** @brief Reserved words from offsets `0x0A0` through `0x0FC` */
 	uint32_t RESERVED_1[24];
-	
+
 	/**
-	 * @brief Interrupt Set-Pending Registers (ISPR)
-	 * @details Force interrupts into pending state
-	 * 
-	 * - ISPR[0]: Sets pending for interrupts 0 to 31
-	 * - ISPR[1]: Sets pending for interrupts 32 to 63
-	 * - ISPR[2]: Sets pending for interrupts 64 to 95
-	 * - ISPR[3]: Sets pending for interrupts 96 to 127
-	 * - ISPR[4-7]: Reserved for future use
-	 * 
-	 * @note - 1: Software Trigger
-	 * @note - 0: No Effect
+	 * @section NVIC_TypeDef_ISPR Interrupt Set-Pending Registers (ISPR)
+	 * @brief [R/W1S] Pending state and software-pend actions
+	 * @details
+	 * Reading returns pending state. Writing one pends the corresponding IRQ;
+	 * writing zero has no effect.
+	 * @note Offset: `0x100`
 	 */
 	volatile uint32_t ISPR[8];
-	
-	/**
-	 * @brief Reserved space between ISPR and ICPR
-	 * @details 24 reserved words (0x120 - 0x17C)
-	 */
+
+	/** @brief Reserved words from offsets `0x120` through `0x17C` */
 	uint32_t RESERVED_2[24];
-	
+
 	/**
-	 * @brief Interrupt Clear-Pending Registers (ICPR)
-	 * @details Remove pending status from interrupts
-	 * 
-	 * - ICPR[0]: Clears pending for interrupts 0 to 31
-	 * - ICPR[1]: Clears pending for interrupts 32 to 63
-	 * - ICPR[2]: Clears pending for interrupts 64 to 95
-	 * - ICPR[3]: Clears pending for interrupts 96 to 127
-	 * - ICPR[4-7]: Reserved for future use
-	 * 
-	 * @note - 1: Acknowledge Software Trigger
-	 * @note - 0: No Effect
+	 * @section NVIC_TypeDef_ICPR Interrupt Clear-Pending Registers (ICPR)
+	 * @brief [R/W1C] Pending state and pending-clear actions
+	 * @details
+	 * Reading returns pending state. Writing one clears the corresponding
+	 * pending latch; writing zero has no effect. This action does not
+	 * acknowledge a peripheral-owned source flag.
+	 * @note Offset: `0x180`
 	 */
 	volatile uint32_t ICPR[8];
-	
-	/**
-	 * @brief Reserved space between ICPR and IABR
-	 * @details 24 reserved words (0x1A0 - 0x1FC)
-	 */
+
+	/** @brief Reserved words from offsets `0x1A0` through `0x1FC` */
 	uint32_t RESERVED_3[24];
-	
+
 	/**
-	 * @brief Interrupt Active Bit Registers (IABR)
-	 * @details Read-only registers showing currently active interrupts
-	 * 
-	 * - IABR[0]: Active status for interrupts 0 to 31
-	 * - IABR[1]: Active status for interrupts 32 to 63
-	 * - IABR[2]: Active status for interrupts 64 to 95
-	 * - IABR[3]: Active status for interrupts 96 to 127
-	 * - IABR[4-7]: Reserved for future use
-	 * 
-	 * @note Read-only
-	 * @note Set when interrupt is active
+	 * @section NVIC_TypeDef_IABR Interrupt Active Bit Registers (IABR)
+	 * @brief [R] Processor-owned active exception state
+	 * @details
+	 * A set bit means the corresponding handler is executing or remains active
+	 * while preempted and stacked. Software cannot clear active state.
+	 * @note Offset: `0x200`
 	 */
 	volatile const uint32_t IABR[8];
-	
-	/**
-	 * @brief Reserved space between IABR and IPR
-	 * @details 56 reserved words (0x220 - 0x2FC)
-	 */
+
+	/** @brief Reserved words from offsets `0x220` through `0x2FC` */
 	uint32_t RESERVED_4[56];
-	
+
 	/**
-	 * @brief Interrupt Priority Registers (IPR)
-	 * @details Configure priority levels for each interrupt
-	 * 
-	 * - Each IPR array element contains one interrupt priority byte
-	 * - Each priority byte is 8 bits, but only the top 4 bits are implemented
-	 * - Priority levels: 0 (highest) to 15 (lowest)
-	 * - IPR[0]: Priority for interrupt 0
-	 * - IPR[1]: Priority for interrupt 1
-	 * - ... up to IPR[239] for interrupt 239
-	 * 
-	 * @note Only bits [7:4] are implemented in Cortex-M3
-	 * @see Cortex-M3 TRM - Section 4.3.8 Interrupt Priority Registers
+	 * @section NVIC_TypeDef_IPR Interrupt Priority Registers (IPR)
+	 * @brief [R/W] Independently addressable per-IRQ priority bytes
+	 * @details
+	 * The architectural aperture contains 240 byte slots so `IPR[n]` is the
+	 * priority byte for external IRQ `n`. STM32F103C8T6 implements slots `0..42`
+	 * and the upper nibble `[7:4]` of each implemented slot.
+	 * @note Offset: `0x300`
+	 * @note Element access width: 8 bits
 	 */
 	volatile uint8_t IPR[240];
-	
-	/**
-	 * @brief Reserved space between IPR and STIR
-	 * @details 644 reserved words (0x3F0 - 0xDFC)
-	 */
+
+	/** @brief Reserved words from offsets `0x3F0` through `0xDFC` */
 	uint32_t RESERVED_5[644];
-	
+
 	/**
-	 * @brief Software Trigger Interrupt Register (STIR)
-	 * @details Generate software interrupts by writing interrupt number
-	 * 
-	 * - Write interrupt number (0-239) to generate software interrupt
-	 * - The request can become pending while interrupt delivery is disabled
-	 * - Useful for testing and software synchronization
-	 * 
-	 * @note Only bits [8:0] are used for interrupt number
-	 * @warning Requires privileged access to write
+	 * @section NVIC_TypeDef_STIR Software Trigger Interrupt Register (STIR)
+	 * @brief [W] Software-generated external IRQ request action
+	 * @details
+	 * Writing a valid external IRQ number sets its pending state. The
+	 * STM32F103C8T6 Driver restricts the architectural payload field to `0..42`.
+	 * @note Offset: `0xE00`
+	 * @warning Unprivileged writes require `SCB_CCR.USERSETMPEND`; otherwise the
+	 * caller must execute with privileged access
 	 */
 	_O STIR;
 

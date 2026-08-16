@@ -59,14 +59,14 @@
  * @brief Validates one logical NVIC priority-group selector
  * @param[in] priorityGroup Logical priority-group selector
  * Accepted values:
- * - @ref `NVIC_PRIO_GROUP_0`
- * - @ref `NVIC_PRIO_GROUP_1`
- * - @ref `NVIC_PRIO_GROUP_2`
- * - @ref `NVIC_PRIO_GROUP_3`
- * - @ref `NVIC_PRIO_GROUP_4`
+ * - @ref NVIC_PRIO_GROUP_0 "`NVIC_PRIO_GROUP_0`"
+ * - @ref NVIC_PRIO_GROUP_1 "`NVIC_PRIO_GROUP_1`"
+ * - @ref NVIC_PRIO_GROUP_2 "`NVIC_PRIO_GROUP_2`"
+ * - @ref NVIC_PRIO_GROUP_3 "`NVIC_PRIO_GROUP_3`"
+ * - @ref NVIC_PRIO_GROUP_4 "`NVIC_PRIO_GROUP_4`"
  * @returns @ref driver_status_t "Priority-group validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `priorityGroup` is valid
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `priorityGroup` is invalid
+ * @retval DRIVER_STATUS_SUCCESS @p `priorityGroup` is valid
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p `priorityGroup` is invalid
  */
 static driver_status_t _Codec_NVIC_ValidatePriorityGroup(const nvic_priority_group_t priorityGroup)
 {
@@ -87,7 +87,7 @@ static driver_status_t _Codec_NVIC_ValidatePriorityGroup(const nvic_priority_gro
  * Accepted values:
  * - `0U..4U`
  * @returns Maximum right-aligned selector value
- * @retval - `0U..15U`: Maximum value representable by @p bitCount
+ * @retval 0U..15U Maximum value representable by @p bitCount
  * @pre Caller constrains @p bitCount to the four implemented priority bits
  */
 static uint8_t _Codec_NVIC_GetPriorityLimit(const uint8_t bitCount)

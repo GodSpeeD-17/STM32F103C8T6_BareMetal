@@ -84,44 +84,49 @@ access. Source Doxygen repeats only the operation-specific warning required to
 use an accessor safely. A C `volatile` declaration communicates access
 generation but does not, by itself, document these hardware semantics.
 
-Use the repository's status-reference layout exactly:
+Use Doxygen's native return-value layout exactly:
 
 ```c
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was captured
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer is `NULL`
+ * @retval DRIVER_STATUS_SUCCESS Register image was captured
+ * @retval DRIVER_STATUS_ERROR_NULL_PTR An input pointer is `NULL`
 ```
 
-Keep the list marker, `@ref`, backticks, colon, and single separating space in
-this order for every documented driver status. Do not column-align `@retval`
-descriptions with tabs or extra spaces, and do not terminate status
-descriptions with a period.
+The first token after `@retval` is Doxygen's parser-visible return value. Keep
+that symbolic constant bare and place its description after one separating
+space. Do not insert a list marker, `@ref`, backticks, a colon, tabs, or extra
+alignment whitespace between `@retval` and its description, and do not
+terminate status descriptions with a period.
 
-Use the same list/value/colon layout for non-status return values, omitting
-`@ref` when the value is a literal or range rather than a documented status:
+Use the same native layout for non-status return values:
 
 ```c
- * @retval - `0x00U`: The selector is not supported
- * @retval - `0x01U`: The selector is supported
+ * @retval 0x00U The selector is not supported
+ * @retval 0x01U The selector is supported
 ```
 
-Do not use the legacy `@retval VALUE Description` form.
+Do not use `@retval - ...`: Doxygen treats the hyphen as the return-value
+argument, collapses every entry onto the same value, and emits duplicate
+documentation warnings. Do not place `@ref` where `@retval` expects its value
+argument; use the ordinary two-part `@ref` form only in prose and lists.
 
-Every macro or symbolic constant used as a Doxygen `@ref` target must be
-enclosed in backticks. Apply this consistently in accepted/expected-value
-lists, parameter descriptions, return descriptions, notes, warnings, and
-ordinary Doxygen prose. Keep the backticks immediately around the referenced
-identifier:
+Every macro or symbolic constant used as a Doxygen `@ref` must use Doxygen's
+valid two-part reference form: a bare parser-visible target followed by a
+quoted display label whose identifier is enclosed in backticks. Apply this
+consistently in accepted/expected-value lists, parameter descriptions, return
+descriptions, notes, warnings, and ordinary Doxygen prose:
 
 ```c
- * - @ref `PERIPH_EVENT_UPDATE`: Update event
- * - Any non-empty combination contained by @ref `PERIPH_EVENT_ALL`
- * @note Start operation with @ref `DRIVER_STATUS_ON`
+ * - @ref PERIPH_EVENT_UPDATE "`PERIPH_EVENT_UPDATE`": Update event
+ * - Any non-empty combination contained by @ref PERIPH_EVENT_ALL "`PERIPH_EVENT_ALL`"
+ * @note Start operation with @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`"
 ```
 
-Do not leave macro or symbolic-constant reference targets unquoted. This
-backtick rule does not apply to referenced types, structures, members, groups,
-or functions unless another formatting rule explicitly requires code styling
-for them.
+Do not wrap the parser-visible target itself in backticks. A backtick
+immediately after `@ref` becomes part of the target token and causes Doxygen
+parse warnings. The quoted display label preserves the required code styling without invalidating
+the reference. This display-label rule does not apply to referenced types,
+structures, members, groups, or functions unless another formatting rule
+explicitly requires code styling for them.
 
 ## Function Doxygen Layout
 
@@ -142,23 +147,23 @@ Use this status-returning function format:
 ```c
  * @param[in] operationState Requested Timer operation state
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF` : Stop Timer counter operation.
- * - @ref `DRIVER_STATUS_ON` : Start Timer counter operation.
+ * - @ref DRIVER_STATUS_OFF "`DRIVER_STATUS_OFF`" : Stop Timer counter operation.
+ * - @ref DRIVER_STATUS_ON "`DRIVER_STATUS_ON`" : Start Timer counter operation.
  * @returns @ref driver_status_t "Operation-state operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer counter operation state was updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `operationState` was invalid
+ * @retval DRIVER_STATUS_SUCCESS Timer counter operation state was updated
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p `TIMx` / @p `operationState` was invalid
 ```
 
 Validation helpers use an action-oriented `@brief` beginning with
 `Validates`, a referenced `driver_status_t` return line whose quoted text names
-the specific validation, and the same exact status-reference layout:
+the specific validation, and the same exact native return-value layout:
 
 ```c
  * @brief Validates that the Timer counter is stopped
  * @param[in] TIMx Timer peripheral instance
  * @returns @ref driver_status_t "Counter-state validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer clock is enabled and the counter is stopped
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running
+ * @retval DRIVER_STATUS_SUCCESS Timer clock is enabled and the counter is stopped
+ * @retval DRIVER_STATUS_ERROR_BUSY Timer counter is running
 ```
 
 Parameter documentation must be specific to that parameter. Do not combine
@@ -350,6 +355,21 @@ consumes that field. For example, `SCB_AIRCR_xxx` symbols belong in
 or duplicating its definitions. Compatibility headers may include the owner
 header to preserve macro visibility, but they must not redeclare the macros.
 
+When a Core register structure models named register fields, expose the
+hardware word as a register-member union with a full-width `.REG` image and a
+named `.BIT` field view, following the Timer register-map pattern. Keep the
+fields in least-significant-bit-first order and represent every gap explicitly
+with a reserved field so the view totals exactly 32 bits. If one physical bit
+range has different read and write meanings, place named views such as
+`.BIT.READ` and `.BIT.WRITE` inside the register union rather than selecting
+one misleading interpretation.
+
+Use `.REG` as the canonical LL transaction path. A `.BIT` view documents and
+exposes field placement, but it does not authorize compiler-generated
+read-modify-write accesses where the hardware contract requires a staged
+full-register transfer. Keyed, action, write-only, and write-one-to-clear
+register transactions must use the appropriate full-register operation.
+
 Do not centralize peripheral instance/capability predicates or
 peripheral-specific operating limits in `stm32f1xx_defines.h`. Introduce them
 only when required and keep them inside the respective peripheral stack; for
@@ -417,8 +437,8 @@ ASSERT_DRIVER_STATUS
 		DRIVER_STATUS_ON
 	)
 );
-NVIC_IRQ_ClearPending(PERIPH1_IRQn);
-NVIC_IRQ_Enable(PERIPH1_IRQn);
+ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
+ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
 ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
 ```
 
@@ -683,6 +703,14 @@ programmed state without mutating configuration.
 
 ## Preference Log
 
+- 2026-08-16: Replaced invalid backtick-wrapped Doxygen `@ref` targets with
+  bare targets plus quoted backtick-styled display labels, and replaced the
+  invalid `@retval - @ref ...` list form with Doxygen's native
+  `@retval VALUE Description` form.
+- 2026-08-16: Required Timer-style `.REG` and `.BIT` views for Core register
+  structures with named fields, explicit reserved gaps, nested views for
+  overlapping read/write meanings, and full-register LL transactions for
+  keyed, action, write-only, or write-one-to-clear semantics.
 - 2026-08-16: Required register-scoped macro banners, least-significant-bit
   first field order, `BLOCK_REGISTER_FIELD` roots, and complete
   `_Pos`/`_Width`/`_Msk`/mask-alias families matching the Timer register
@@ -785,4 +813,4 @@ programmed state without mutating configuration.
   macros, to carry an explicit `@def MACRO_NAME` tag.
 - 2026-08-15: Defined the complete public-function Doxygen order, per-parameter
   Accepted/Expected Values blocks, referenced return type, exhaustive status
-  list, and tab-aligned `@retval` descriptions.
+  list, and consistently formatted `@retval` descriptions.

@@ -668,9 +668,10 @@ extern "C" {
  * @brief Memory-mapped Cortex-M3 System Control Block register layout
  * @details
  * The member order, access qualifiers, and offsets follow Arm DDI 0337G,
- * Table 8-1, from CPUID through ISAR4. Mixed-access and action fields remain
- * represented by their containing 32-bit register; field-specific access
- * semantics are expressed by the register macros and higher-layer contracts.
+ * Table 8-1, from CPUID through ISAR4. Every register exposes a full-width
+ * `.REG` image and a named `.BIT` field view. AIRCR additionally separates
+ * its overlapping read-key and write-key meanings into `.BIT.READ` and
+ * `.BIT.WRITE` views.
  * @{
  */
 
@@ -678,8 +679,11 @@ extern "C" {
  * @brief Cortex-M3 System Control Block register structure
  * @details
  * Maps the SCB register window beginning at `0xE000ED00`. Read-only feature
- * and identification registers use `_I`; registers containing writable state
- * or actions use `_IO`.
+ * and identification views use `_I`; registers containing writable state or
+ * actions use `_IO`. The `.REG` member is the canonical LL transaction path.
+ * `.BIT` documents and exposes individual hardware fields, but must not be
+ * used for read-modify-write operations on keyed, action, or write-one-to-clear
+ * registers.
  * @see Arm DDI 0337G, Table 8-1 NVIC registers
  */
 typedef volatile struct __SCB_TypeDef
@@ -689,147 +693,451 @@ typedef volatile struct __SCB_TypeDef
 	 * @brief [R] Processor implementer, variant, architecture, part, and revision identification
 	 * @note Offset: `0x00`
 	 */
-	_I CPUID;
+	union
+	{
+		/** @brief Full 32-bit read-only `SCB_CPUID` register image */
+		_I REG;
+		/** @brief Named read-only `SCB_CPUID` bitfield view */
+		struct
+		{
+			_I REVISION : 4;		/**< Processor revision number */
+			_I PARTNO : 12;		/**< Processor part number */
+			_I ARCHITECTURE : 4;	/**< Architecture identifier */
+			_I VARIANT : 4;		/**< Processor variant number */
+			_I IMPLEMENTER : 8;	/**< Implementer code */
+		} BIT;
+	} CPUID;
 
 	/**
 	 * @section SCB_TypeDef_ICSR Interrupt Control and State Register (ICSR)
-	 * @brief [R/W or R] Exception active/pending state and PendSV, SysTick, and NMI actions
+	 * @brief [Mixed] Exception active/pending state and PendSV, SysTick, and NMI actions
 	 * @note Offset: `0x04`
 	 */
-	_IO ICSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_ICSR` register image */
+		_IO REG;
+		/** @brief Named mixed-access `SCB_ICSR` bitfield view */
+		struct
+		{
+			_I VECTACTIVE : 9;		/**< Active exception number */
+			_I reserved_1 : 2;		/**< Reserved */
+			_I RETTOBASE : 1;		/**< Return-to-base status */
+			_I VECTPENDING : 9;	/**< Highest-priority pending exception */
+			_I reserved_2 : 1;		/**< Reserved */
+			_I ISRPENDING : 1;		/**< External interrupt pending status */
+			_I ISRPREEMPT : 1;		/**< Pending exception preemption status */
+			_I reserved_3 : 1;		/**< Reserved */
+			_O PENDSTCLR : 1;		/**< SysTick pending clear action */
+			_IO PENDSTSET : 1;		/**< SysTick pending state/set action */
+			_O PENDSVCLR : 1;		/**< PendSV pending clear action */
+			_IO PENDSVSET : 1;		/**< PendSV pending state/set action */
+			_I reserved_4 : 2;		/**< Reserved */
+			_IO NMIPENDSET : 1;		/**< NMI pending state/set action */
+		} BIT;
+	} ICSR;
 
 	/**
 	 * @section SCB_TypeDef_VTOR Vector Table Offset Register (VTOR)
 	 * @brief [R/W] Vector table base selection and alignment-constrained offset
 	 * @note Offset: `0x08`
 	 */
-	_IO VTOR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_VTOR` register image */
+		_IO REG;
+		/** @brief Named `SCB_VTOR` bitfield view for the selected Cortex-M3 revision */
+		struct
+		{
+			_IO reserved_1 : 7;		/**< Reserved; vector-table alignment */
+#if !defined(__CM3_REV) || (__CM3_REV < 0x0201U)
+			_IO TBLOFF : 22;		/**< Vector table offset on Cortex-M3 r2p0 and earlier */
+			_IO TBLBASE : 1;		/**< Code/SRAM region selection on Cortex-M3 r2p0 and earlier */
+			_IO reserved_2 : 2;		/**< Reserved */
+#else
+			_IO TBLOFF : 25;		/**< Vector table offset on Cortex-M3 r2p1 and later */
+#endif
+		} BIT;
+	} VTOR;
 
 	/**
 	 * @section SCB_TypeDef_AIRCR Application Interrupt and Reset Control Register (AIRCR)
-	 * @brief [R/W] Keyed priority grouping, endianness status, and reset actions
+	 * @brief [R/W, keyed] Priority grouping, endianness status, and reset actions
 	 * @note Offset: `0x0C`
 	 */
-	_IO AIRCR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_AIRCR` register image and canonical keyed transaction view */
+		_IO REG;
+		/** @brief Read-side and write-side field interpretations of `SCB_AIRCR` */
+		union
+		{
+			/** @brief Read-side `SCB_AIRCR` field view */
+			struct
+			{
+				_I VECTRESET : 1;		/**< Local reset state */
+				_I VECTCLRACTIVE : 1;	/**< Exception active-state clear action field */
+				_I SYSRESETREQ : 1;		/**< System reset request field */
+				_I reserved_1 : 5;		/**< Reserved */
+				_I PRIGROUP : 3;		/**< Interrupt priority grouping */
+				_I reserved_2 : 4;		/**< Reserved */
+				_I ENDIANESS : 1;		/**< Data endianness status */
+				_I VECTKEYSTAT : 16;	/**< Read-side key status */
+			} READ;
+			/** @brief Write-side `SCB_AIRCR` field view */
+			struct
+			{
+				_O VECTRESET : 1;		/**< Local reset request */
+				_O VECTCLRACTIVE : 1;	/**< Exception active-state clear request */
+				_O SYSRESETREQ : 1;		/**< System reset request */
+				_O reserved_1 : 5;		/**< Reserved */
+				_O PRIGROUP : 3;		/**< Interrupt priority grouping */
+				_O reserved_2 : 5;		/**< Reserved and read-only endianness position */
+				_O VECTKEY : 16;		/**< Write authorization key */
+			} WRITE;
+		} BIT;
+	} AIRCR;
 
 	/**
 	 * @section SCB_TypeDef_SCR System Control Register (SCR)
 	 * @brief [R/W] Sleep, deep-sleep, and event-on-pend behavior
 	 * @note Offset: `0x10`
 	 */
-	_IO SCR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_SCR` register image */
+		_IO REG;
+		/** @brief Named `SCB_SCR` bitfield view */
+		struct
+		{
+			_IO reserved_1 : 1;		/**< Reserved */
+			_IO SLEEPONEXIT : 1;	/**< Sleep on exception return */
+			_IO SLEEPDEEP : 1;		/**< Deep-sleep selection */
+			_IO reserved_2 : 1;		/**< Reserved */
+			_IO SEVONPEND : 1;		/**< Send event on pending transition */
+			_IO reserved_3 : 27;	/**< Reserved */
+		} BIT;
+	} SCR;
 
 	/**
 	 * @section SCB_TypeDef_CCR Configuration and Control Register (CCR)
 	 * @brief [R/W] Trap, stack alignment, fault handling, and unprivileged trigger controls
 	 * @note Offset: `0x14`
 	 */
-	_IO CCR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_CCR` register image */
+		_IO REG;
+		/** @brief Named `SCB_CCR` bitfield view */
+		struct
+		{
+			_IO NONBASETHRDENA : 1;	/**< Thread entry from non-base level enable */
+			_IO USERSETMPEND : 1;		/**< Unprivileged software trigger enable */
+			_IO reserved_1 : 1;			/**< Reserved */
+			_IO UNALIGN_TRP : 1;		/**< Unaligned access trap enable */
+			_IO DIV_0_TRP : 1;			/**< Divide-by-zero trap enable */
+			_IO reserved_2 : 3;			/**< Reserved */
+			_IO BFHFNMIGN : 1;			/**< BusFault ignore during priority -1 handlers */
+			_IO STKALIGN : 1;			/**< Eight-byte exception stack alignment */
+			_IO reserved_3 : 22;		/**< Reserved */
+		} BIT;
+	} CCR;
 
 	/**
 	 * @section SCB_TypeDef_SHPR1 System Handler Priority Register 1 (SHPR1)
 	 * @brief [R/W] Priorities for system handlers 4 through 7
 	 * @note Offset: `0x18`
 	 */
-	_IO SHPR1;
+	union
+	{
+		/** @brief Full 32-bit `SCB_SHPR1` register image */
+		_IO REG;
+		/** @brief Named `SCB_SHPR1` priority-byte view */
+		struct
+		{
+			_IO PRI_4 : 8;		/**< MemManage priority */
+			_IO PRI_5 : 8;		/**< BusFault priority */
+			_IO PRI_6 : 8;		/**< UsageFault priority */
+			_IO reserved : 8;	/**< Reserved priority byte 7 */
+		} BIT;
+	} SHPR1;
 
 	/**
 	 * @section SCB_TypeDef_SHPR2 System Handler Priority Register 2 (SHPR2)
 	 * @brief [R/W] Priorities for system handlers 8 through 11
 	 * @note Offset: `0x1C`
 	 */
-	_IO SHPR2;
+	union
+	{
+		/** @brief Full 32-bit `SCB_SHPR2` register image */
+		_IO REG;
+		/** @brief Named `SCB_SHPR2` priority-byte view */
+		struct
+		{
+			_IO reserved_1 : 8;	/**< Reserved priority byte 8 */
+			_IO reserved_2 : 8;	/**< Reserved priority byte 9 */
+			_IO reserved_3 : 8;	/**< Reserved priority byte 10 */
+			_IO PRI_11 : 8;		/**< SVCall priority */
+		} BIT;
+	} SHPR2;
 
 	/**
 	 * @section SCB_TypeDef_SHPR3 System Handler Priority Register 3 (SHPR3)
 	 * @brief [R/W] Priorities for system handlers 12 through 15
 	 * @note Offset: `0x20`
 	 */
-	_IO SHPR3;
+	union
+	{
+		/** @brief Full 32-bit `SCB_SHPR3` register image */
+		_IO REG;
+		/** @brief Named `SCB_SHPR3` priority-byte view */
+		struct
+		{
+			_IO PRI_12 : 8;		/**< Debug monitor priority */
+			_IO reserved : 8;	/**< Reserved priority byte 13 */
+			_IO PRI_14 : 8;		/**< PendSV priority */
+			_IO PRI_15 : 8;		/**< SysTick priority */
+		} BIT;
+	} SHPR3;
 
 	/**
 	 * @section SCB_TypeDef_SHCSR System Handler Control and State Register (SHCSR)
 	 * @brief [R/W] Configurable-fault enables and system-handler active/pending state
 	 * @note Offset: `0x24`
 	 */
-	_IO SHCSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_SHCSR` register image */
+		_IO REG;
+		/** @brief Named mixed-access `SCB_SHCSR` bitfield view */
+		struct
+		{
+			_I MEMFAULTACT : 1;		/**< MemManage active status */
+			_I BUSFAULTACT : 1;		/**< BusFault active status */
+			_I reserved_1 : 1;		/**< Reserved */
+			_I USGFAULTACT : 1;		/**< UsageFault active status */
+			_I reserved_2 : 3;		/**< Reserved */
+			_I SVCALLACT : 1;		/**< SVCall active status */
+			_I MONITORACT : 1;		/**< Debug monitor active status */
+			_I reserved_3 : 1;		/**< Reserved */
+			_I PENDSVACT : 1;		/**< PendSV active status */
+			_I SYSTICKACT : 1;		/**< SysTick active status */
+			_IO USGFAULTPENDED : 1;	/**< UsageFault pending state */
+			_IO MEMFAULTPENDED : 1;	/**< MemManage pending state */
+			_IO BUSFAULTPENDED : 1;	/**< BusFault pending state */
+			_IO SVCALLPENDED : 1;	/**< SVCall pending state */
+			_IO MEMFAULTENA : 1;		/**< MemManage enable */
+			_IO BUSFAULTENA : 1;		/**< BusFault enable */
+			_IO USGFAULTENA : 1;		/**< UsageFault enable */
+			_I reserved_4 : 13;		/**< Reserved */
+		} BIT;
+	} SHCSR;
 
 	/**
 	 * @section SCB_TypeDef_CFSR Configurable Fault Status Register (CFSR)
-	 * @brief [R/W] MemManage, BusFault, and UsageFault cause and validity status
+	 * @brief [R/W1C] MemManage, BusFault, and UsageFault cause and validity status
 	 * @note Offset: `0x28`
 	 */
-	_IO CFSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_CFSR` register image and canonical W1C transaction view */
+		_IO REG;
+		/** @brief Named write-one-to-clear `SCB_CFSR` status view */
+		struct
+		{
+			_IO IACCVIOL : 1;		/**< Instruction access violation */
+			_IO DACCVIOL : 1;		/**< Data access violation */
+			_IO reserved_1 : 1;		/**< Reserved */
+			_IO MUNSTKERR : 1;		/**< MemManage exception unstacking fault */
+			_IO MSTKERR : 1;		/**< MemManage exception stacking fault */
+			_IO reserved_2 : 2;		/**< Reserved */
+			_IO MMARVALID : 1;		/**< MMFAR validity */
+			_IO IBUSERR : 1;		/**< Instruction bus error */
+			_IO PRECISERR : 1;		/**< Precise data bus error */
+			_IO IMPRECISERR : 1;	/**< Imprecise data bus error */
+			_IO UNSTKERR : 1;		/**< BusFault exception unstacking fault */
+			_IO STKERR : 1;		/**< BusFault exception stacking fault */
+			_IO reserved_3 : 2;		/**< Reserved */
+			_IO BFARVALID : 1;		/**< BFAR validity */
+			_IO UNDEFINSTR : 1;		/**< Undefined instruction */
+			_IO INVSTATE : 1;		/**< Invalid execution state */
+			_IO INVPC : 1;			/**< Invalid exception return PC */
+			_IO NOCP : 1;			/**< Coprocessor access fault */
+			_IO reserved_4 : 4;		/**< Reserved */
+			_IO UNALIGNED : 1;		/**< Unaligned access */
+			_IO DIVBYZERO : 1;		/**< Divide by zero */
+			_IO reserved_5 : 6;		/**< Reserved */
+		} BIT;
+	} CFSR;
 
 	/**
 	 * @section SCB_TypeDef_HFSR HardFault Status Register (HFSR)
-	 * @brief [R/W] Vector-table, escalated-fault, and debug-event HardFault status
+	 * @brief [R/W1C] Vector-table, escalated-fault, and debug-event HardFault status
 	 * @note Offset: `0x2C`
 	 */
-	_IO HFSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_HFSR` register image and canonical W1C transaction view */
+		_IO REG;
+		/** @brief Named write-one-to-clear `SCB_HFSR` status view */
+		struct
+		{
+			_IO reserved_1 : 1;		/**< Reserved */
+			_IO VECTTBL : 1;		/**< Vector-table read HardFault */
+			_IO reserved_2 : 28;	/**< Reserved */
+			_IO FORCED : 1;		/**< Escalated configurable fault */
+			_IO DEBUGEVT : 1;		/**< Escalated debug event */
+		} BIT;
+	} HFSR;
 
 	/**
 	 * @section SCB_TypeDef_DFSR Debug Fault Status Register (DFSR)
-	 * @brief [R/W] Halt, breakpoint, watchpoint, vector-catch, and external debug status
+	 * @brief [R/W1C] Halt, breakpoint, watchpoint, vector-catch, and external debug status
 	 * @note Offset: `0x30`
 	 */
-	_IO DFSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_DFSR` register image and canonical W1C transaction view */
+		_IO REG;
+		/** @brief Named write-one-to-clear `SCB_DFSR` status view */
+		struct
+		{
+			_IO HALTED : 1;		/**< Halt request debug event */
+			_IO BKPT : 1;			/**< Breakpoint debug event */
+			_IO DWTTRAP : 1;		/**< DWT match debug event */
+			_IO VCATCH : 1;		/**< Vector-catch debug event */
+			_IO EXTERNAL : 1;		/**< External debug request event */
+			_IO reserved : 27;	/**< Reserved */
+		} BIT;
+	} DFSR;
 
 	/**
 	 * @section SCB_TypeDef_MMFAR MemManage Fault Address Register (MMFAR)
 	 * @brief [R/W] Address associated with a valid MemManage data-access fault
 	 * @note Offset: `0x34`
 	 */
-	_IO MMFAR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_MMFAR` register image */
+		_IO REG;
+		/** @brief Named `SCB_MMFAR` address view */
+		struct
+		{
+			_IO ADDRESS : 32;	/**< MemManage fault address */
+		} BIT;
+	} MMFAR;
 
 	/**
 	 * @section SCB_TypeDef_BFAR BusFault Address Register (BFAR)
 	 * @brief [R/W] Address associated with a valid precise BusFault
 	 * @note Offset: `0x38`
 	 */
-	_IO BFAR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_BFAR` register image */
+		_IO REG;
+		/** @brief Named `SCB_BFAR` address view */
+		struct
+		{
+			_IO ADDRESS : 32;	/**< BusFault address */
+		} BIT;
+	} BFAR;
 
 	/**
 	 * @section SCB_TypeDef_AFSR Auxiliary Fault Status Register (AFSR)
 	 * @brief [R/W] Implementation-defined auxiliary fault status
 	 * @note Offset: `0x3C`
 	 */
-	_IO AFSR;
+	union
+	{
+		/** @brief Full 32-bit `SCB_AFSR` register image */
+		_IO REG;
+		/** @brief Named `SCB_AFSR` implementation-defined status view */
+		struct
+		{
+			_IO IMPDEF : 32;	/**< Implementation-defined auxiliary fault status */
+		} BIT;
+	} AFSR;
 
 	/**
 	 * @section SCB_TypeDef_PFR Processor Feature Registers (PFR0-PFR1)
 	 * @brief [R] Processor feature identification
 	 * @note Offsets: `0x40` through `0x44`
 	 */
-	_I PFR[2];
+	union
+	{
+		/** @brief Full 32-bit read-only processor feature register image */
+		_I REG;
+		/** @brief Read-only processor feature field view */
+		struct
+		{
+			_I FEATURES : 32;	/**< Processor feature encoding */
+		} BIT;
+	} PFR[2];
 
 	/**
 	 * @section SCB_TypeDef_DFR Debug Feature Register (DFR0)
 	 * @brief [R] Debug-model feature identification
 	 * @note Offset: `0x48`
 	 */
-	_I DFR;
+	union
+	{
+		/** @brief Full 32-bit read-only `SCB_DFR0` register image */
+		_I REG;
+		/** @brief Read-only `SCB_DFR0` feature field view */
+		struct
+		{
+			_I FEATURES : 32;	/**< Debug feature encoding */
+		} BIT;
+	} DFR;
 
 	/**
 	 * @section SCB_TypeDef_AFR Auxiliary Feature Register (AFR0)
 	 * @brief [R] Auxiliary processor feature identification
 	 * @note Offset: `0x4C`
 	 */
-	_I AFR;
+	union
+	{
+		/** @brief Full 32-bit read-only `SCB_AFR0` register image */
+		_I REG;
+		/** @brief Read-only `SCB_AFR0` feature field view */
+		struct
+		{
+			_I FEATURES : 32;	/**< Auxiliary feature encoding */
+		} BIT;
+	} AFR;
 
 	/**
 	 * @section SCB_TypeDef_MMFR Memory Model Feature Registers (MMFR0-MMFR3)
 	 * @brief [R] Memory-system architecture feature identification
 	 * @note Offsets: `0x50` through `0x5C`
 	 */
-	_I MMFR[4];
+	union
+	{
+		/** @brief Full 32-bit read-only memory-model feature register image */
+		_I REG;
+		/** @brief Read-only memory-model feature field view */
+		struct
+		{
+			_I FEATURES : 32;	/**< Memory-model feature encoding */
+		} BIT;
+	} MMFR[4];
 
 	/**
 	 * @section SCB_TypeDef_ISAR Instruction Set Attribute Registers (ISAR0-ISAR4)
 	 * @brief [R] Implemented instruction-set feature identification
 	 * @note Offsets: `0x60` through `0x70`
 	 */
-	_I ISAR[5];
+	union
+	{
+		/** @brief Full 32-bit read-only instruction-set attribute register image */
+		_I REG;
+		/** @brief Read-only instruction-set attribute field view */
+		struct
+		{
+			_I FEATURES : 32;	/**< Instruction-set attribute encoding */
+		} BIT;
+	} ISAR[5];
 
 } SCB_TypeDef;
 

@@ -56,10 +56,10 @@
  * @brief Validates one exact-target external IRQ number
  * @param[in] IRQn External IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref driver_status_t "External-IRQ validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p IRQn is supported
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p IRQn is unsupported
+ * @retval DRIVER_STATUS_SUCCESS @p IRQn is supported
+ * @retval DRIVER_STATUS_ERROR_INVALID_ARG @p IRQn is unsupported
  */
 static driver_status_t _NVIC_ValidateIRQ(const irq_t IRQn)
 {
@@ -78,10 +78,10 @@ static driver_status_t _NVIC_ValidateIRQ(const irq_t IRQn)
  * @brief Returns the NVIC register-bank index for one validated IRQ number
  * @param[in] IRQn Validated external IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns Zero-based NVIC register-bank index
- * @retval - `0U`: @p IRQn is in external IRQ range 0 through 31
- * @retval - `1U`: @p IRQn is in external IRQ range 32 through 42
+ * @retval 0U @p IRQn is in external IRQ range 0 through 31
+ * @retval 1U @p IRQn is in external IRQ range 32 through 42
  * @pre Caller validated @p IRQn through _NVIC_ValidateIRQ
  */
 __STATIC_FORCEINLINE uint8_t _NVIC_GetIRQRegisterIndex(const irq_t IRQn)
@@ -94,9 +94,9 @@ __STATIC_FORCEINLINE uint8_t _NVIC_GetIRQRegisterIndex(const irq_t IRQn)
  * @brief Returns the bank-local action mask for one validated IRQ number
  * @param[in] IRQn Validated external IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref reg "Register-positioned single-IRQ action mask"
- * @retval - `0x00000001UL..0x80000000UL`: Bank-local bit for @p IRQn
+ * @retval 0x00000001UL..0x80000000UL Bank-local bit for @p IRQn
  * @pre Caller validated @p IRQn through _NVIC_ValidateIRQ
  */
 __STATIC_FORCEINLINE reg _NVIC_GetIRQActionMask(const irq_t IRQn)
@@ -118,8 +118,8 @@ __STATIC_FORCEINLINE reg _NVIC_GetIRQActionMask(const irq_t IRQn)
  * Accepted values:
  * - Exactly one bank-local IRQ bit
  * @returns @ref driver_status_t "Decoded IRQ state"
- * @retval - @ref `DRIVER_STATUS_OFF`: Selected state bit is clear
- * @retval - @ref `DRIVER_STATUS_ON`: Selected state bit is set
+ * @retval DRIVER_STATUS_OFF Selected state bit is clear
+ * @retval DRIVER_STATUS_ON Selected state bit is set
  * @pre Caller supplies a single-bit @p irqActionMask for the selected bank
  */
 __STATIC_FORCEINLINE driver_status_t _NVIC_DecodeIRQState(const reg registerImage, const reg irqActionMask)
@@ -355,11 +355,7 @@ driver_status_t NVIC_ClearPendingIRQ(const irq_t IRQn)
 	ASSERT_DRIVER_STATUS(_NVIC_ValidateIRQ(IRQn));
 
 	//! Issue one direct ICPR write-one-to-clear action without reading pending state.
-	LL_NVIC_WriteICPR
-	(
-		_NVIC_GetIRQRegisterIndex(IRQn),
-		_NVIC_GetIRQActionMask(IRQn)
-	);
+	LL_NVIC_WriteICPR(_NVIC_GetIRQRegisterIndex(IRQn), _NVIC_GetIRQActionMask(IRQn));
 
 	return DRIVER_STATUS_SUCCESS;
 }

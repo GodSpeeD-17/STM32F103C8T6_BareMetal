@@ -211,9 +211,9 @@ __STATIC_FORCEINLINE reg LL_NVIC_ReadIABR(const uint8_t registerIndex)
  * @brief Reads exactly one external IRQ priority byte
  * @param[in] IRQn Validated external IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns @ref reg_field_t "Complete raw IPR byte image"
- * @retval - `0x00U..0xFFU`: Captured byte image; only bits 7 through 4 are implemented
+ * @retval 0x00U..0xFFU Captured byte image; only bits 7 through 4 are implemented
  * @pre Caller validated @p IRQn for the exact target
  * @note Performs exactly one 8-bit volatile read and does not access neighboring priorities
  */
@@ -227,7 +227,7 @@ __STATIC_FORCEINLINE reg_field_t LL_NVIC_ReadIPR(const irq_t IRQn)
  * @brief Writes exactly one external IRQ priority byte
  * @param[in] IRQn Validated external IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @param[in] priorityFieldImage Complete raw IPR byte image
  * Accepted values:
  * - Multiples of `0x10U` from `0x00U` through `0xF0U` : Implemented priority
@@ -252,7 +252,7 @@ __STATIC_FORCEINLINE void LL_NVIC_WriteIPR(const irq_t IRQn, const reg_field_t p
  * @brief Issues one direct NVIC STIR software-trigger action
  * @param[in] IRQn Validated external IRQ number
  * Accepted values:
- * - @ref `NVIC_IRQ_NUMBER_FIRST` through @ref `NVIC_IRQ_NUMBER_LAST`
+ * - @ref NVIC_IRQ_NUMBER_FIRST "`NVIC_IRQ_NUMBER_FIRST`" through @ref NVIC_IRQ_NUMBER_LAST "`NVIC_IRQ_NUMBER_LAST`"
  * @returns Void.
  * @pre Caller validated @p IRQn and owns privilege policy
  * @note Performs exactly one 32-bit volatile action write
@@ -280,7 +280,7 @@ __STATIC_FORCEINLINE void LL_NVIC_WriteSTIR(const irq_t IRQn)
 __STATIC_FORCEINLINE reg LL_SCB_ReadAIRCR(void)
 {
 	//! Capture the complete AIRCR image for caller-owned Codec staging.
-	return SCB->AIRCR;
+	return SCB->AIRCR.REG;
 }
 
 /**
@@ -298,7 +298,7 @@ __STATIC_FORCEINLINE reg LL_SCB_ReadAIRCR(void)
 __STATIC_FORCEINLINE void LL_SCB_WriteAIRCR(const reg aircrRegImage)
 {
 	//! Commit the caller-staged keyed AIRCR image in one transfer.
-	SCB->AIRCR = aircrRegImage;
+	SCB->AIRCR.REG = aircrRegImage;
 }
 
 /** @} */ // NVIC_02_LL_01_RegisterOps
