@@ -2,13 +2,14 @@
  * @file	rcc.c
  * @author	Shrey Shah
  * @brief	RCC Driver Source File
- * @version	v2.3
- * @date	22-03-2026
+ * @version	v3.0
+ * @date	22-08-2026
  *
  * @details
  * This source file implements the RCC driver orchestration layer.
- * It sits above the LL layer and converts validated driver-level selections into
- * safe RCC hardware sequences while maintaining derived frequency snapshots.
+ * It sits above the Codec and LL layers and converts validated driver-level
+ * selections into safe RCC hardware sequences while maintaining derived
+ * frequency snapshots.
  */
 
 // ==================================================================================================== //
@@ -48,10 +49,10 @@ static volatile rcc_clock_frequencies_t _rccClockFrequenciesSnapshot =
  * @brief Waits until the supplied source status getter reports the requested state.
  * @param pReadyGetter Status getter used to poll the hardware source state.
  * @param targetStatus Target driver status expected from the ready getter.
- * @returns - @ref driver_status_t Status of the wait operation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The source reached the requested status before timeout.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The ready getter callback is NULL.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested status was not reached within the timeout window.
+ * @returns @ref driver_status_t "Status of the wait operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The source reached the requested status before timeout
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The ready getter callback is NULL
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested status was not reached within the timeout window
  */
 static driver_status_t _RCC_WaitForClockSourceReady(_rcc_ready_status_getter_t const pReadyGetter, const driver_status_t targetStatus)
 {
@@ -78,10 +79,10 @@ static driver_status_t _RCC_WaitForClockSourceReady(_rcc_ready_status_getter_t c
 /**
  * @brief Waits until the selected system clock source becomes active in hardware.
  * @param source Requested system clock source.
- * @returns - @ref driver_status_t Status of the wait operation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested source became the active system clock.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Reading the system clock status failed.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested source did not become active before timeout.
+ * @returns @ref driver_status_t "Status of the wait operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested source became the active system clock
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Reading the system clock status failed
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested source did not become active before timeout
  */
 static driver_status_t _RCC_WaitForSystemClockSwitch(const rcc_system_clock_t source)
 {
@@ -294,9 +295,9 @@ static frequency_t _RCC_GetUSBClockFrequency(const rcc_clock_tree_config_t* cons
  * @brief Computes the derived frequencies for the supplied clock tree configuration.
  * @param pClockTreeConfig Pointer to the clock tree configuration.
  * @param pClockFrequencies Pointer to the destination clock-frequency snapshot.
- * @returns - @ref driver_status_t Status of the snapshot load.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The snapshot was loaded successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Either input pointer is `NULL`.
+ * @returns @ref driver_status_t "Status of the snapshot load"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The snapshot was loaded successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: Either input pointer is `NULL`
  */
 static driver_status_t _RCC_LoadClockFrequenciesFromConfig(const rcc_clock_tree_config_t* const pClockTreeConfig, rcc_clock_frequencies_t* const pClockFrequencies)
 {
@@ -317,10 +318,10 @@ static driver_status_t _RCC_LoadClockFrequenciesFromConfig(const rcc_clock_tree_
 /**
  * @brief Validates PLL-specific selections inside the supplied clock tree configuration.
  * @param pClockTreeConfig Pointer to the clock tree configuration to validate.
- * @returns - @ref driver_status_t Status of PLL configuration validation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The PLL configuration is valid.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more PLL selections are invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @c pClockTreeConfig is `NULL`.
+ * @returns @ref driver_status_t "Status of PLL configuration validation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The PLL configuration is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more PLL selections are invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @c pClockTreeConfig is `NULL`
  */
 static driver_status_t _RCC_ValidatePLLConfig(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
@@ -363,10 +364,10 @@ static driver_status_t _RCC_ValidatePLLConfig(const rcc_clock_tree_config_t* con
 /**
  * @brief Validates the basic field selections provided to the RCC driver.
  * @param pRCCConfig Pointer to the top-level RCC configuration.
- * @returns - @ref driver_status_t Status of field validation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: All requested field selections are valid.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The configuration pointer is NULL.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more requested field selections are invalid.
+ * @returns @ref driver_status_t "Status of field validation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: All requested field selections are valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The configuration pointer is NULL
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more requested field selections are invalid
  */
 static driver_status_t _RCC_ValidateClockTreeConfig(const rcc_config_t* const pRCCConfig)
 {
@@ -447,18 +448,18 @@ __STATIC_FORCEINLINE void _RCC_UpdateClockFrequenciesCache(const rcc_clock_frequ
 /**
  * @brief Builds the current clock frequency snapshot directly from RCC hardware state.
  * @param pClockFrequencies Pointer to @ref rcc_clock_frequencies_t.
- * @returns - @ref driver_status_t Status of the snapshot build.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The snapshot was built successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
+ * @returns @ref driver_status_t "Status of the snapshot build"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The snapshot was built successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot
  */
 static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequencies_t* const pClockFrequencies);
 
 /**
  * @brief Refreshes the RCC driver clock-frequency snapshot cache from current hardware state.
- * @returns - @ref driver_status_t Status of the cache refresh operation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The cache snapshot was refreshed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while rebuilding the snapshot.
+ * @returns @ref driver_status_t "Status of the cache refresh operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The cache snapshot was refreshed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while rebuilding the snapshot
  */
 static driver_status_t _RCC_RefreshClockFrequenciesCache(void)
 {
@@ -480,10 +481,10 @@ static driver_status_t _RCC_RefreshClockFrequenciesCache(void)
 /**
  * @brief Applies bus prescaler configuration without refreshing the public cache.
  * @param[in] pBusConfig Pointer to bus prescaler configuration.
- * @returns - @ref driver_status_t Status of bus prescaler programming.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Bus prescaler fields were programmed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pBusConfig` was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler selectors were invalid.
+ * @returns @ref driver_status_t "Status of bus prescaler programming"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Bus prescaler fields were programmed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pBusConfig` was `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler selectors were invalid
  */
 static driver_status_t _RCC_ApplyBusPrescalerConfig(const rcc_bus_config_t* const pBusConfig)
 {
@@ -516,10 +517,10 @@ static driver_status_t _RCC_ApplyBusPrescalerConfig(const rcc_bus_config_t* cons
 /**
  * @brief Applies component prescaler configuration without refreshing the public cache.
  * @param[in] pComponentConfig Pointer to component prescaler configuration.
- * @returns - @ref driver_status_t Status of component prescaler programming.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Component prescaler fields were programmed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pComponentConfig` was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler selectors were invalid.
+ * @returns @ref driver_status_t "Status of component prescaler programming"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Component prescaler fields were programmed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pComponentConfig` was `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler selectors were invalid
  */
 static driver_status_t _RCC_ApplyComponentPrescalerConfig(const rcc_component_config_t* const pComponentConfig)
 {
@@ -641,10 +642,10 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 /**
  * @brief Validates the maximum allowed derived clock frequencies.
  * @param pClockFreqSnapshot Pointer to the derived clock frequency snapshot.
- * @returns - @ref driver_status_t Status of frequency-limit validation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: All derived frequencies are within device limits.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The snapshot pointer is NULL.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more derived frequencies exceed the supported limits.
+ * @returns @ref driver_status_t "Status of frequency-limit validation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: All derived frequencies are within device limits
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: The snapshot pointer is NULL
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more derived frequencies exceed the supported limits
  */
 static driver_status_t _RCC_ValidateClockFrequencies(const rcc_clock_frequencies_t* const pClockFreqSnapshot)
 {
@@ -685,10 +686,10 @@ static driver_status_t _RCC_ValidateClockFrequencies(const rcc_clock_frequencies
  * @brief Validates inter-parameter dependencies across the RCC configuration.
  * @param pRCCConfig Pointer to the top-level RCC configuration.
  * @param pClockFreqSnapshot Pointer to the derived clock frequency snapshot.
- * @returns - @ref driver_status_t Status of dependency validation.
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: All inter-parameter dependencies are satisfied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more input pointers are NULL.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more dependent configuration constraints are violated.
+ * @returns @ref driver_status_t "Status of dependency validation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: All inter-parameter dependencies are satisfied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: One or more input pointers are NULL
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more dependent configuration constraints are violated
  */
 static driver_status_t _RCC_ValidateClockConfigDependencies(const rcc_config_t* const pRCCConfig, const rcc_clock_frequencies_t* const pClockFreqSnapshot)
 {

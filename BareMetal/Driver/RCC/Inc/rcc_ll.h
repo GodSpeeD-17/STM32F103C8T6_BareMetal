@@ -479,9 +479,9 @@ __STATIC_FORCEINLINE void LL_RCC_DisableHSI(void)
  * @details
  * Reads the `HSIRDY` bit from `RCC_CR` and reports whether HSI is stable
  * and ready for use.
- * @returns	@ref driver_status_t Status of HSI ready state
- * @retval	`DRIVER_STATUS_READY`: HSI clock source is ready
- * @retval	`DRIVER_STATUS_OFF`: HSI clock source is not ready
+ * @returns @ref driver_status_t "Status of HSI ready state"
+ * @retval - @ref `DRIVER_STATUS_READY`: HSI clock source is ready
+ * @retval - @ref `DRIVER_STATUS_OFF`: HSI clock source is not ready
  */
 __STATIC_FORCEINLINE driver_status_t LL_RCC_GetHSIReadyStatus(void)
 {
@@ -557,9 +557,9 @@ __STATIC_FORCEINLINE void LL_RCC_DisableHSEBypass(void)
  * @details
  * Reads the `HSERDY` bit from `RCC_CR` and reports whether HSE is stable
  * and ready for use.
- * @returns	@ref driver_status_t Status of HSE ready state
- * @retval	`DRIVER_STATUS_READY`: HSE clock source is ready
- * @retval	`DRIVER_STATUS_OFF`: HSE clock source is not ready
+ * @returns @ref driver_status_t "Status of HSE ready state"
+ * @retval - @ref `DRIVER_STATUS_READY`: HSE clock source is ready
+ * @retval - @ref `DRIVER_STATUS_OFF`: HSE clock source is not ready
  */
 __STATIC_FORCEINLINE driver_status_t LL_RCC_GetHSEReadyStatus(void)
 {
@@ -602,9 +602,9 @@ __STATIC_FORCEINLINE void LL_RCC_DisablePLL(void)
  * @details
  * Reads the `PLLRDY` bit from `RCC_CR` and reports whether PLL is stable
  * and ready for use.
- * @returns	@ref driver_status_t Status of PLL ready state
- * @retval	`DRIVER_STATUS_READY`: PLL is ready
- * @retval	`DRIVER_STATUS_OFF`: PLL is not ready
+ * @returns @ref driver_status_t "Status of PLL ready state"
+ * @retval - @ref `DRIVER_STATUS_READY`: PLL is ready
+ * @retval - @ref `DRIVER_STATUS_OFF`: PLL is not ready
  */
 __STATIC_FORCEINLINE driver_status_t LL_RCC_GetPLLReadyStatus(void)
 {
@@ -618,9 +618,13 @@ __STATIC_FORCEINLINE driver_status_t LL_RCC_GetPLLReadyStatus(void)
  * Programs the `SW` field in `RCC_CFGR` using the supplied raw hardware
  * field value.
  * @param[in] sysClkSrcField	Raw hardware field value for `RCC_CFGR_SW`
- * @returns	@ref driver_status_t Status of system clock source update
- * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `sysClkSrcField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_SW_HSI`: Selects HSI as SYSCLK
+ * - `RCC_CFGR_SW_HSE`: Selects HSE as SYSCLK
+ * - `RCC_CFGR_SW_PLL`: Selects PLL as SYSCLK
+ * @returns @ref driver_status_t "Status of system clock source update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: System clock source field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `sysClkSrcField` is invalid
  */
 driver_status_t LL_RCC_SetSystemClockSource(const uint32_t sysClkSrcField);
 
@@ -630,9 +634,9 @@ driver_status_t LL_RCC_SetSystemClockSource(const uint32_t sysClkSrcField);
  * Reads the `SW` field from `RCC_CFGR` and stores the raw hardware field
  * value in the supplied output pointer.
  * @param[out] pSysClkSrcField	Pointer to destination variable for `RCC_CFGR_SW` field value
- * @returns	@ref driver_status_t Status of system clock source read
- * @retval	`DRIVER_STATUS_SUCCESS`: System clock source field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkSrcField` is `NULL`
+ * @returns @ref driver_status_t "Status of system clock source read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: System clock source field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkSrcField` is `NULL`
  */
 driver_status_t LL_RCC_GetSystemClockSource(uint32_t* const pSysClkSrcField);
 
@@ -642,9 +646,9 @@ driver_status_t LL_RCC_GetSystemClockSource(uint32_t* const pSysClkSrcField);
  * Reads the `SWS` field from `RCC_CFGR` and stores the raw hardware field
  * value in the supplied output pointer.
  * @param[out] pSysClkStatusField	Pointer to destination variable for `RCC_CFGR_SWS` field value
- * @returns	@ref driver_status_t Status of system clock status read
- * @retval	`DRIVER_STATUS_SUCCESS`: System clock status field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkStatusField` is `NULL`
+ * @returns @ref driver_status_t "Status of system clock status read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: System clock status field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pSysClkStatusField` is `NULL`
  */
 driver_status_t LL_RCC_GetSystemClockStatus(uint32_t* const pSysClkStatusField);
 
@@ -654,9 +658,12 @@ driver_status_t LL_RCC_GetSystemClockStatus(uint32_t* const pSysClkStatusField);
  * Programs the `PLLSRC` field in `RCC_CFGR` using the supplied raw
  * hardware field value.
  * @param[in] pllSrcField	Raw hardware field value for `RCC_CFGR_PLLSRC`
- * @returns	@ref driver_status_t Status of PLL source field update
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllSrcField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_PLLSRC_HSI_DIV2`: Selects HSI/2 as the PLL input
+ * - `RCC_CFGR_PLLSRC_HSE`: Selects HSE as the PLL input
+ * @returns @ref driver_status_t "Status of PLL source field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL source field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `pllSrcField` is invalid
  */
 driver_status_t LL_RCC_SetPLLSource(const uint32_t pllSrcField);
 
@@ -666,9 +673,9 @@ driver_status_t LL_RCC_SetPLLSource(const uint32_t pllSrcField);
  * Reads the `PLLSRC` field from `RCC_CFGR` and stores the raw hardware
  * field value in the supplied output pointer.
  * @param[out] pPllSrcField	Pointer to destination variable for `RCC_CFGR_PLLSRC` field value
- * @returns	@ref driver_status_t Status of PLL source field read
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL source field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllSrcField` is `NULL`
+ * @returns @ref driver_status_t "Status of PLL source field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL source field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pPllSrcField` is `NULL`
  */
 driver_status_t LL_RCC_GetPLLSource(uint32_t* const pPllSrcField);
 
@@ -678,9 +685,12 @@ driver_status_t LL_RCC_GetPLLSource(uint32_t* const pPllSrcField);
  * Programs the `PLLXTPRE` field in `RCC_CFGR` using the supplied raw
  * hardware field value.
  * @param[in] pllHseDividerField	Raw hardware field value for `RCC_CFGR_PLLXTPRE`
- * @returns	@ref driver_status_t Status of PLL HSE divider field update
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllHseDividerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_PLLXTPRE_HSE`: HSE feeds the PLL undivided
+ * - `RCC_CFGR_PLLXTPRE_HSE_DIV2`: HSE/2 feeds the PLL
+ * @returns @ref driver_status_t "Status of PLL HSE divider field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL HSE divider field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `pllHseDividerField` is invalid
  */
 driver_status_t LL_RCC_SetPLLHSEDivider(const uint32_t pllHseDividerField);
 
@@ -690,9 +700,9 @@ driver_status_t LL_RCC_SetPLLHSEDivider(const uint32_t pllHseDividerField);
  * Reads the `PLLXTPRE` field from `RCC_CFGR` and stores the raw hardware
  * field value in the supplied output pointer.
  * @param[out] pPllHseDividerField	Pointer to destination variable for `RCC_CFGR_PLLXTPRE` field value
- * @returns	@ref driver_status_t Status of PLL HSE divider field read
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL HSE divider field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllHseDividerField` is `NULL`
+ * @returns @ref driver_status_t "Status of PLL HSE divider field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL HSE divider field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pPllHseDividerField` is `NULL`
  */
 driver_status_t LL_RCC_GetPLLHSEDivider(uint32_t* const pPllHseDividerField);
 
@@ -702,9 +712,11 @@ driver_status_t LL_RCC_GetPLLHSEDivider(uint32_t* const pPllHseDividerField);
  * Programs the `PLLMUL` field in `RCC_CFGR` using the supplied raw
  * hardware field value.
  * @param[in] pllMulField	Raw hardware field value for `RCC_CFGR_PLLMUL`
- * @returns	@ref driver_status_t Status of PLL multiplier field update
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `pllMulField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_PLLMUL_2` through `RCC_CFGR_PLLMUL_16`: PLL multiplication factors x2 through x16
+ * @returns @ref driver_status_t "Status of PLL multiplier field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL multiplier field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `pllMulField` is invalid
  */
 driver_status_t LL_RCC_SetPLLMultiplier(const uint32_t pllMulField);
 
@@ -714,9 +726,9 @@ driver_status_t LL_RCC_SetPLLMultiplier(const uint32_t pllMulField);
  * Reads the `PLLMUL` field from `RCC_CFGR` and stores the raw hardware
  * field value in the supplied output pointer.
  * @param[out] pPllMulField	Pointer to destination variable for `RCC_CFGR_PLLMUL` field value
- * @returns	@ref driver_status_t Status of PLL multiplier field read
- * @retval	`DRIVER_STATUS_SUCCESS`: PLL multiplier field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pPllMulField` is `NULL`
+ * @returns @ref driver_status_t "Status of PLL multiplier field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL multiplier field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pPllMulField` is `NULL`
  */
 driver_status_t LL_RCC_GetPLLMultiplier(uint32_t* const pPllMulField);
 
@@ -740,9 +752,11 @@ driver_status_t LL_RCC_GetPLLMultiplier(uint32_t* const pPllMulField);
  * @brief	Sets AHB Prescaler Field
  * @details Programs the `HPRE` field in `RCC_CFGR`.
  * @param[in] ahbPrescalerField	Raw hardware field value for `RCC_CFGR_HPRE`
- * @returns	@ref driver_status_t Status of AHB prescaler field update
- * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `ahbPrescalerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_HPRE_DIV1` through `RCC_CFGR_HPRE_DIV512`: AHB divide-by-1 through divide-by-512
+ * @returns @ref driver_status_t "Status of AHB prescaler field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB prescaler field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `ahbPrescalerField` is invalid
  */
 driver_status_t LL_RCC_SetAHBPrescaler(const uint32_t ahbPrescalerField);
 
@@ -750,9 +764,9 @@ driver_status_t LL_RCC_SetAHBPrescaler(const uint32_t ahbPrescalerField);
  * @brief	Gets AHB Prescaler Field
  * @details Reads the `HPRE` field from `RCC_CFGR`.
  * @param[out] pAhbPrescalerField	Pointer to destination variable for `RCC_CFGR_HPRE` field value
- * @returns	@ref driver_status_t Status of AHB prescaler field read
- * @retval	`DRIVER_STATUS_SUCCESS`: AHB prescaler field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAhbPrescalerField` is `NULL`
+ * @returns @ref driver_status_t "Status of AHB prescaler field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB prescaler field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pAhbPrescalerField` is `NULL`
  */
 driver_status_t LL_RCC_GetAHBPrescaler(uint32_t* const pAhbPrescalerField);
 
@@ -760,9 +774,11 @@ driver_status_t LL_RCC_GetAHBPrescaler(uint32_t* const pAhbPrescalerField);
  * @brief	Sets APB1 Prescaler Field
  * @details Programs the `PPRE1` field in `RCC_CFGR`.
  * @param[in] apb1PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE1`
- * @returns	@ref driver_status_t Status of APB1 prescaler field update
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb1PrescalerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_PPRE1_DIV1` through `RCC_CFGR_PPRE1_DIV16`: APB1 divide-by-1 through divide-by-16
+ * @returns @ref driver_status_t "Status of APB1 prescaler field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 prescaler field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `apb1PrescalerField` is invalid
  */
 driver_status_t LL_RCC_SetAPB1Prescaler(const uint32_t apb1PrescalerField);
 
@@ -770,9 +786,9 @@ driver_status_t LL_RCC_SetAPB1Prescaler(const uint32_t apb1PrescalerField);
  * @brief	Gets APB1 Prescaler Field
  * @details Reads the `PPRE1` field from `RCC_CFGR`.
  * @param[out] pApb1PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE1` field value
- * @returns	@ref driver_status_t Status of APB1 prescaler field read
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 prescaler field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb1PrescalerField` is `NULL`
+ * @returns @ref driver_status_t "Status of APB1 prescaler field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 prescaler field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pApb1PrescalerField` is `NULL`
  */
 driver_status_t LL_RCC_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField);
 
@@ -780,9 +796,11 @@ driver_status_t LL_RCC_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField);
  * @brief	Sets APB2 Prescaler Field
  * @details Programs the `PPRE2` field in `RCC_CFGR`.
  * @param[in] apb2PrescalerField	Raw hardware field value for `RCC_CFGR_PPRE2`
- * @returns	@ref driver_status_t Status of APB2 prescaler field update
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `apb2PrescalerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_PPRE2_DIV1` through `RCC_CFGR_PPRE2_DIV16`: APB2 divide-by-1 through divide-by-16
+ * @returns @ref driver_status_t "Status of APB2 prescaler field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 prescaler field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `apb2PrescalerField` is invalid
  */
 driver_status_t LL_RCC_SetAPB2Prescaler(const uint32_t apb2PrescalerField);
 
@@ -790,9 +808,9 @@ driver_status_t LL_RCC_SetAPB2Prescaler(const uint32_t apb2PrescalerField);
  * @brief	Gets APB2 Prescaler Field
  * @details Reads the `PPRE2` field from `RCC_CFGR`.
  * @param[out] pApb2PrescalerField	Pointer to destination variable for `RCC_CFGR_PPRE2` field value
- * @returns	@ref driver_status_t Status of APB2 prescaler field read
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 prescaler field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pApb2PrescalerField` is `NULL`
+ * @returns @ref driver_status_t "Status of APB2 prescaler field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 prescaler field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pApb2PrescalerField` is `NULL`
  */
 driver_status_t LL_RCC_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField);
 
@@ -800,9 +818,11 @@ driver_status_t LL_RCC_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField);
  * @brief	Sets ADC Prescaler Field
  * @details Programs the `ADCPRE` field in `RCC_CFGR`.
  * @param[in] adcPrescalerField	Raw hardware field value for `RCC_CFGR_ADCPRE`
- * @returns	@ref driver_status_t Status of ADC prescaler field update
- * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `adcPrescalerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_ADCPRE_DIV2` through `RCC_CFGR_ADCPRE_DIV8`: ADC divide-by-2 through divide-by-8
+ * @returns @ref driver_status_t "Status of ADC prescaler field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: ADC prescaler field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `adcPrescalerField` is invalid
  */
 driver_status_t LL_RCC_SetADCPrescaler(const uint32_t adcPrescalerField);
 
@@ -810,9 +830,9 @@ driver_status_t LL_RCC_SetADCPrescaler(const uint32_t adcPrescalerField);
  * @brief	Gets ADC Prescaler Field
  * @details Reads the `ADCPRE` field from `RCC_CFGR`.
  * @param[out] pAdcPrescalerField	Pointer to destination variable for `RCC_CFGR_ADCPRE` field value
- * @returns	@ref driver_status_t Status of ADC prescaler field read
- * @retval	`DRIVER_STATUS_SUCCESS`: ADC prescaler field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pAdcPrescalerField` is `NULL`
+ * @returns @ref driver_status_t "Status of ADC prescaler field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: ADC prescaler field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pAdcPrescalerField` is `NULL`
  */
 driver_status_t LL_RCC_GetADCPrescaler(uint32_t* const pAdcPrescalerField);
 
@@ -820,9 +840,12 @@ driver_status_t LL_RCC_GetADCPrescaler(uint32_t* const pAdcPrescalerField);
  * @brief	Sets USB Prescaler Field
  * @details Programs the `USBPRE` field in `RCC_CFGR`.
  * @param[in] usbPrescalerField	Raw hardware field value for `RCC_CFGR_USBPRE`
- * @returns	@ref driver_status_t Status of USB prescaler field update
- * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field updated successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `usbPrescalerField` is invalid
+ * Accepted values:
+ * - `RCC_CFGR_USBPRE_DIV1_5`: USB clock equals PLL divided by 1.5
+ * - `RCC_CFGR_USBPRE_DIRECT`: USB clock equals PLL directly
+ * @returns @ref driver_status_t "Status of USB prescaler field update"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: USB prescaler field updated successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `usbPrescalerField` is invalid
  */
 driver_status_t LL_RCC_SetUSBPrescaler(const uint32_t usbPrescalerField);
 
@@ -830,9 +853,9 @@ driver_status_t LL_RCC_SetUSBPrescaler(const uint32_t usbPrescalerField);
  * @brief	Gets USB Prescaler Field
  * @details Reads the `USBPRE` field from `RCC_CFGR`.
  * @param[out] pUsbPrescalerField	Pointer to destination variable for `RCC_CFGR_USBPRE` field value
- * @returns	@ref driver_status_t Status of USB prescaler field read
- * @retval	`DRIVER_STATUS_SUCCESS`: USB prescaler field read successfully
- * @retval	`DRIVER_STATUS_ERROR_NULL_PTR`: `pUsbPrescalerField` is `NULL`
+ * @returns @ref driver_status_t "Status of USB prescaler field read"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: USB prescaler field read successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: `pUsbPrescalerField` is `NULL`
  */
 driver_status_t LL_RCC_GetUSBPrescaler(uint32_t* const pUsbPrescalerField);
 
@@ -853,9 +876,9 @@ driver_status_t LL_RCC_GetUSBPrescaler(uint32_t* const pUsbPrescalerField);
  * @brief	Enables AHB Peripheral Clock
  * @details Sets the requested enable bits in `RCC_AHBENR`.
  * @param[in] mask	Raw hardware bit mask for AHB peripheral clock enable
- * @returns	@ref driver_status_t Status of AHB clock enable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock enabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of AHB clock enable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB peripheral clock enabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_EnableAHBClock(const uint32_t mask);
 
@@ -863,9 +886,9 @@ driver_status_t LL_RCC_EnableAHBClock(const uint32_t mask);
  * @brief	Disables AHB Peripheral Clock
  * @details Clears the requested enable bits in `RCC_AHBENR`.
  * @param[in] mask	Raw hardware bit mask for AHB peripheral clock disable
- * @returns	@ref driver_status_t Status of AHB clock disable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: AHB peripheral clock disabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of AHB clock disable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: AHB peripheral clock disabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_DisableAHBClock(const uint32_t mask);
 
@@ -873,9 +896,9 @@ driver_status_t LL_RCC_DisableAHBClock(const uint32_t mask);
  * @brief	Enables APB2 Peripheral Clock
  * @details Sets the requested enable bits in `RCC_APB2ENR`.
  * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock enable
- * @returns	@ref driver_status_t Status of APB2 clock enable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock enabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB2 clock enable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 peripheral clock enabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_EnableAPB2Clock(const uint32_t mask);
 
@@ -883,9 +906,9 @@ driver_status_t LL_RCC_EnableAPB2Clock(const uint32_t mask);
  * @brief	Disables APB2 Peripheral Clock
  * @details Clears the requested enable bits in `RCC_APB2ENR`.
  * @param[in] mask	Raw hardware bit mask for APB2 peripheral clock disable
- * @returns	@ref driver_status_t Status of APB2 clock disable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 peripheral clock disabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB2 clock disable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 peripheral clock disabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_DisableAPB2Clock(const uint32_t mask);
 
@@ -893,9 +916,9 @@ driver_status_t LL_RCC_DisableAPB2Clock(const uint32_t mask);
  * @brief	Enables APB1 Peripheral Clock
  * @details Sets the requested enable bits in `RCC_APB1ENR`.
  * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock enable
- * @returns	@ref driver_status_t Status of APB1 clock enable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock enabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB1 clock enable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 peripheral clock enabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_EnableAPB1Clock(const uint32_t mask);
 
@@ -903,9 +926,9 @@ driver_status_t LL_RCC_EnableAPB1Clock(const uint32_t mask);
  * @brief	Disables APB1 Peripheral Clock
  * @details Clears the requested enable bits in `RCC_APB1ENR`.
  * @param[in] mask	Raw hardware bit mask for APB1 peripheral clock disable
- * @returns	@ref driver_status_t Status of APB1 clock disable operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 peripheral clock disabled successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB1 clock disable operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 peripheral clock disabled successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_DisableAPB1Clock(const uint32_t mask);
 
@@ -913,9 +936,9 @@ driver_status_t LL_RCC_DisableAPB1Clock(const uint32_t mask);
  * @brief	Forces APB2 Peripheral Reset
  * @details Sets the requested reset bits in `RCC_APB2RSTR`.
  * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset
- * @returns	@ref driver_status_t Status of APB2 reset force operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset asserted successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB2 reset force operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset asserted successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_ForceAPB2Reset(const uint32_t mask);
 
@@ -923,9 +946,9 @@ driver_status_t LL_RCC_ForceAPB2Reset(const uint32_t mask);
  * @brief	Releases APB2 Peripheral Reset
  * @details Clears the requested reset bits in `RCC_APB2RSTR`.
  * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset release
- * @returns	@ref driver_status_t Status of APB2 reset release operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset released successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB2 reset release operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset released successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_ReleaseAPB2Reset(const uint32_t mask);
 
@@ -933,9 +956,9 @@ driver_status_t LL_RCC_ReleaseAPB2Reset(const uint32_t mask);
  * @brief	Forces APB1 Peripheral Reset
  * @details Sets the requested reset bits in `RCC_APB1RSTR`.
  * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset
- * @returns	@ref driver_status_t Status of APB1 reset force operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset asserted successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB1 reset force operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset asserted successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_ForceAPB1Reset(const uint32_t mask);
 
@@ -943,9 +966,9 @@ driver_status_t LL_RCC_ForceAPB1Reset(const uint32_t mask);
  * @brief	Releases APB1 Peripheral Reset
  * @details Clears the requested reset bits in `RCC_APB1RSTR`.
  * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset release
- * @returns	@ref driver_status_t Status of APB1 reset release operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset released successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB1 reset release operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset released successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_ReleaseAPB1Reset(const uint32_t mask);
 
@@ -953,9 +976,9 @@ driver_status_t LL_RCC_ReleaseAPB1Reset(const uint32_t mask);
  * @brief	Pulses APB2 Peripheral Reset
  * @details Asserts and then releases the requested APB2 reset bits.
  * @param[in] mask	Raw hardware bit mask for APB2 peripheral reset pulse
- * @returns	@ref driver_status_t Status of APB2 reset pulse operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB2 reset pulsed successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB2 reset pulse operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB2 reset pulsed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_PulseAPB2Reset(const uint32_t mask);
 
@@ -963,9 +986,9 @@ driver_status_t LL_RCC_PulseAPB2Reset(const uint32_t mask);
  * @brief	Pulses APB1 Peripheral Reset
  * @details Asserts and then releases the requested APB1 reset bits.
  * @param[in] mask	Raw hardware bit mask for APB1 peripheral reset pulse
- * @returns	@ref driver_status_t Status of APB1 reset pulse operation
- * @retval	`DRIVER_STATUS_SUCCESS`: APB1 reset pulsed successfully
- * @retval	`DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
+ * @returns @ref driver_status_t "Status of APB1 reset pulse operation"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: APB1 reset pulsed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `mask` is invalid
  */
 driver_status_t LL_RCC_PulseAPB1Reset(const uint32_t mask);
 

@@ -2,15 +2,17 @@
  * @file	rcc.h
  * @author	Shrey Shah
  * @brief	RCC Driver Public Interface
- * @version	v2.4
- * @date	22-03-2026
+ * @version	v3.0
+ * @date	22-08-2026
  *
  * @details
- * This header defines the RCC driver layer built on top of `rcc_ll.h`.
+ * This header defines the RCC driver layer built on top of @ref rcc_ll.h and
+ * @ref rcc_codec.h.
  *
  * Theory:
  * - The RCC hardware exposes clock sources, prescalers, and gate/reset control.
  * - The LL layer performs direct register-near actions.
+ * - The Codec layer translates driver-facing selectors into raw hardware fields.
  * - The driver layer validates requested policies, sequences safe transitions,
  *   and exposes frequency-oriented runtime queries.
  */
@@ -368,9 +370,9 @@ typedef struct _rcc_config_t
 /**
  * @brief	Enables AHB peripheral clock gates
  * @param[in] clockMask	AHB clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
 {
@@ -380,9 +382,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMas
 /**
  * @brief	Disables AHB peripheral clock gates
  * @param[in] clockMask	AHB clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were disabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
 {
@@ -393,9 +395,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMa
  * @brief	Gets AHB peripheral clock gate state
  * @param[in] clockMask	AHB clock enable mask from RCC register definitions
  * @returns AHB clock gate state or driver error status
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested AHB clock gates are disabled.
- * @retval - @ref `DRIVER_STATUS_ON`: Requested AHB clock gates are enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested AHB clock gates are disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested AHB clock gates are enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockGetState(const uint32_t clockMask)
 {
@@ -421,9 +423,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockGetState(const uint32_t clockM
 /**
  * @brief	Enables APB2 peripheral clock gates
  * @param[in] clockMask	APB2 clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
 {
@@ -433,9 +435,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMa
 /**
  * @brief	Disables APB2 peripheral clock gates
  * @param[in] clockMask	APB2 clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were disabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
 {
@@ -446,9 +448,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockM
  * @brief	Gets APB2 peripheral clock gate state
  * @param[in] clockMask	APB2 clock enable mask from RCC register definitions
  * @returns APB2 clock gate state or driver error status
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB2 clock gates are disabled.
- * @retval - @ref `DRIVER_STATUS_ON`: Requested APB2 clock gates are enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB2 clock gates are disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested APB2 clock gates are enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockGetState(const uint32_t clockMask)
 {
@@ -474,9 +476,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockGetState(const uint32_t clock
 /**
  * @brief	Enables APB1 peripheral clock gates
  * @param[in] clockMask	APB1 clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
 {
@@ -486,9 +488,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMa
 /**
  * @brief	Disables APB1 peripheral clock gates
  * @param[in] clockMask	APB1 clock enable mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were disabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
 {
@@ -499,9 +501,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockM
  * @brief	Gets APB1 peripheral clock gate state
  * @param[in] clockMask	APB1 clock enable mask from RCC register definitions
  * @returns APB1 clock gate state or driver error status
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB1 clock gates are disabled.
- * @retval - @ref `DRIVER_STATUS_ON`: Requested APB1 clock gates are enabled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB1 clock gates are disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested APB1 clock gates are enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockGetState(const uint32_t clockMask)
 {
@@ -527,9 +529,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockGetState(const uint32_t clock
 /**
  * @brief	Pulses APB2 peripheral reset bits
  * @param[in] resetMask	APB2 reset mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 peripherals were reset-pulsed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 peripherals were reset-pulsed
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
 {
@@ -539,9 +541,9 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMas
 /**
  * @brief	Pulses APB1 peripheral reset bits
  * @param[in] resetMask	APB1 reset mask from RCC register definitions
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 peripherals were reset-pulsed.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 peripherals were reset-pulsed
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero or invalid
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
 {
@@ -568,6 +570,10 @@ frequency_t RCC_GetCoreClockFreq(void);
 /**
  * @brief	Returns the current frequency of a requested bus
  * @param[in] bus	Target bus selector of @ref rcc_bus_t
+ * Accepted values:
+ * - @ref `RCC_AHB_BUS`: AHB bus
+ * - @ref `RCC_APB1_BUS`: APB1 bus
+ * - @ref `RCC_APB2_BUS`: APB2 bus
  * @returns @ref frequency_t "Bus clock frequency in hertz"
  */
 frequency_t RCC_GetBusFreq(const rcc_bus_t bus);
@@ -587,10 +593,10 @@ frequency_t RCC_GetUSBFreq(void);
 /**
  * @brief	Returns the cached or current derived RCC clock frequencies snapshot
  * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The clock frequency snapshot was returned successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The clock frequency snapshot was returned successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockFrequencies was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read while building the snapshot
  */
 driver_status_t RCC_GetClockFrequencies(rcc_clock_frequencies_t* const pClockFrequencies);
 
@@ -608,10 +614,10 @@ driver_status_t RCC_GetClockFrequencies(rcc_clock_frequencies_t* const pClockFre
 /**
  * @brief	Applies Flash latency and prefetch configuration
  * @param[in] pFlashConfig	Pointer to @ref rcc_flash_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash latency and prefetch configuration were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pFlashConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Flash configuration fields were invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash latency and prefetch configuration were applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pFlashConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Flash configuration fields were invalid
  */
 driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const pFlashConfig);
 
@@ -645,11 +651,11 @@ rcc_system_clock_t RCC_GetSystemClockSource(void);
  * - @ref `RCC_SYS_CLK_HSE`: Enables HSE and switches SYSCLK to HSE
  * - @ref `RCC_SYS_CLK_PLL`: Switches SYSCLK to the already-configured PLL
  * @returns @ref driver_status_t "System clock source selection status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested source became ready and SYSCLK switched successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a supported selector.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `RCC_SYS_CLK_PLL` was requested while the PLL was not ready.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested source did not become ready, or SYSCLK did not switch, within the timeout window.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested source became ready and SYSCLK switched successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a supported selector
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `RCC_SYS_CLK_PLL` was requested while the PLL was not ready
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested source did not become ready, or SYSCLK did not switch, within the timeout window
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition
  * @note Selecting @ref `RCC_SYS_CLK_PLL` requires the PLL to already be configured and ready; this
  * function does not program PLL source, divider, or multiplier fields.
  */
@@ -687,26 +693,30 @@ rcc_pll_mul_t RCC_GetPLLMultiplier(void);
 /**
  * @brief	Applies AHB, APB1, and APB2 prescaler configuration
  * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested bus prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested bus prescalers were applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBusConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more bus prescaler values were invalid
  */
 driver_status_t RCC_ConfigBusPrescalers(const rcc_bus_config_t* const pBusConfig);
 
 /**
  * @brief	Applies ADC and USB prescaler configuration
  * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested component prescalers were applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested component prescalers were applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pComponentConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more component prescaler values were invalid
  */
 driver_status_t RCC_ConfigComponentPrescalers(const rcc_component_config_t* const pComponentConfig);
 
 /**
  * @brief	Returns the configured prescaler selector for a requested bus
  * @param[in] bus	Target bus selector of @ref rcc_bus_t
+ * Accepted values:
+ * - @ref `RCC_AHB_BUS`: AHB bus
+ * - @ref `RCC_APB1_BUS`: APB1 bus
+ * - @ref `RCC_APB2_BUS`: APB2 bus
  * @returns	Configured bus prescaler selector value
  */
 rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
@@ -725,34 +735,34 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus);
 /**
  * @brief	Validates a complete RCC configuration descriptor
  * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
- * @returns - @ref driver_status_t Validation result
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Configuration is valid and internally consistent.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contains an invalid source, divider, multiplier, or limit violation.
+ * @returns @ref driver_status_t "Validation result"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Configuration is valid and internally consistent
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contains an invalid source, divider, multiplier, or limit violation
  */
 driver_status_t RCC_ValidateConfig(const rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies a complete clock-tree configuration through the RCC driver orchestrator
  * @param[in] pClockTreeConfig	Pointer to @ref rcc_clock_tree_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-tree sequencing completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockTreeConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid clock-tree values.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock-tree sequencing completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pClockTreeConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid clock-tree values
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing
  */
 driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockTreeConfig);
 
 /**
  * @brief	Applies a complete RCC configuration descriptor
  * @param[in] pRCCConfig	Pointer to @ref rcc_config_t
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash and clock-tree configuration completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid fields or violated frequency limits.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Flash and clock-tree configuration completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Configuration contained invalid fields or violated frequency limits
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing
  */
 driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig);
 
@@ -764,11 +774,11 @@ void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig);
 
 /**
  * @brief	Applies the default 72 MHz Blue Pill RCC configuration
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Default 72 MHz configuration completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Default configuration validation failed.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing.
+ * @returns @ref driver_status_t "Driver operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Default 72 MHz configuration completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Default configuration validation failed
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A source ready-state or switch confirmation timed out
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during sequencing
  */
 driver_status_t RCC_Config72MHz(void);
 
