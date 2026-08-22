@@ -219,44 +219,44 @@ __STATIC_FORCEINLINE void _DMA_ackIRQStatus(const dma_channel_t dmaChannel, cons
  * @brief DMA Endpoint Configuration
  * @param dmaPeripheralConfig Peripheral Configuration Structure. Refer `dma_endpoint_t`
  * @param dmaMemoryConfig Memory Configuration Structure. Refer `dma_endpoint_t`
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_endpoint_t dmaMemoryConfig, uint32_t* reg);
+void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_endpoint_t dmaMemoryConfig, uint32_t* pReg);
 
 /**
  * @brief DMA Channel Priority Configuration
  * @param priority Channel Priority. Refer `DMA_CHANNEL_PRIORITY_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* reg);
+void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* pReg);
 
 /**
  * @brief DMA Channel Direction Configuration
  * @param direction Channel Direction. Refer `DMA_CHANNEL_DIR_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelDirection(const dma_transfer_dir_t direction, uint32_t* reg);
+void _DMA_configChannelDirection(const dma_transfer_dir_t direction, uint32_t* pReg);
 
 /**
  * @brief DMA Channel Circular Mode Configuration
  * @param circular Circular Mode. Refer `DMA_CHANNEL_CIRCULAR_MODE_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelCircularMode(const dma_circular_mode_t circular, uint32_t* reg);
+void _DMA_configChannelCircularMode(const dma_circular_mode_t circular, uint32_t* pReg);
 
 /**
  * @brief DMA Channel MEM2MEM Configuration
  * @param circular MEM2MEM . Refer `DMA_CHANNEL_MEM2MEM_MODE_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* reg);
+void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* pReg);
 
 /**
  * @brief DMA Channel Mode Configuration
  * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_properties_t` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* reg);
+void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* pReg);
 
 /**
  * @brief Configures the transfer for DMA

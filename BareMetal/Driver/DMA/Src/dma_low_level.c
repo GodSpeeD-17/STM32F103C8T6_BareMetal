@@ -34,17 +34,17 @@ const DMA_Channel_TypeDef* _driverDMAChannelMapping[] =
  * @brief DMA Endpoint Configuration
  * @param dmaPeripheralConfig Peripheral Configuration Structure. Refer `dma_endpoint_t`
  * @param dmaMemoryConfig Memory Configuration Structure. Refer `dma_endpoint_t`
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_endpoint_t dmaMemoryConfig, uint32_t* reg)
+void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_endpoint_t dmaMemoryConfig, uint32_t* pReg)
 {
-	*reg &= ~(uint32_t) (
+	*pReg &= ~(uint32_t) (
 		DMA_CCR_MSIZE_Msk |
 		DMA_CCR_PSIZE_Msk |
 		DMA_CCR_MINC_Msk |
 		DMA_CCR_PINC_Msk
 	);
-	*reg |= (uint32_t)(
+	*pReg |= (uint32_t)(
 		((dmaMemoryConfig.size & 0x03) << DMA_CCR_MSIZE_Pos) |
 		((dmaPeripheralConfig.size & 0x03) << DMA_CCR_PSIZE_Pos) |
 		((dmaMemoryConfig.increment & 0x01) << DMA_CCR_MINC_Pos) |
@@ -55,62 +55,62 @@ void _DMA_configEndPoint(const dma_endpoint_t dmaPeripheralConfig, const dma_end
 /**
  * @brief DMA Channel Priority Configuration
  * @param priority Channel Priority. Refer `DMA_CHANNEL_PRIORITY_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* reg)
+void _DMA_configChannelPriority(const dma_channel_nvic_priority_t priority, uint32_t* pReg)
 {
-	*reg &= ~(uint32_t)(DMA_CCR_PL_Msk);
-	*reg |= (uint32_t)((priority & 0x03) << DMA_CCR_PL_Pos);
+	*pReg &= ~(uint32_t)(DMA_CCR_PL_Msk);
+	*pReg |= (uint32_t)((priority & 0x03) << DMA_CCR_PL_Pos);
 }
 
 /**
  * @brief DMA Channel Direction Configuration
  * @param direction Channel Direction. Refer `DMA_CHANNEL_DIR_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelDirection(const dma_transfer_dir_t direction, uint32_t* reg)
+void _DMA_configChannelDirection(const dma_transfer_dir_t direction, uint32_t* pReg)
 {
-	*reg &= ~(uint32_t)(DMA_CCR_DIR_Msk);
-	*reg |= (uint32_t)((direction & 0x01) << DMA_CCR_DIR_Pos);
+	*pReg &= ~(uint32_t)(DMA_CCR_DIR_Msk);
+	*pReg |= (uint32_t)((direction & 0x01) << DMA_CCR_DIR_Pos);
 }
 
 /**
  * @brief DMA Channel Circular Mode Configuration
  * @param circular Circular Mode. Refer `DMA_CHANNEL_CIRCULAR_MODE_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelCircularMode(const dma_circular_mode_t circular, uint32_t* reg)
+void _DMA_configChannelCircularMode(const dma_circular_mode_t circular, uint32_t* pReg)
 {
-	*reg &= ~(uint32_t)(DMA_CCR_CIRC_Msk);
-	*reg |= (uint32_t)((circular & 0x01) << DMA_CCR_CIRC_Pos);
+	*pReg &= ~(uint32_t)(DMA_CCR_CIRC_Msk);
+	*pReg |= (uint32_t)((circular & 0x01) << DMA_CCR_CIRC_Pos);
 }
 
 /**
  * @brief DMA Channel MEM2MEM Configuration
  * @param circular MEM2MEM . Refer `DMA_CHANNEL_MEM2MEM_MODE_*` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* reg)
+void _DMA_configChannelMEM2MEM(const dma_circular_mode_t mem2mem, uint32_t* pReg)
 {
-	*reg &= ~(uint32_t)(DMA_CCR_MEM2MEM_Msk);
-	*reg |= (uint32_t)((mem2mem & 0x01) << DMA_CCR_MEM2MEM_Pos);
+	*pReg &= ~(uint32_t)(DMA_CCR_MEM2MEM_Msk);
+	*pReg |= (uint32_t)((mem2mem & 0x01) << DMA_CCR_MEM2MEM_Pos);
 }
 
 /**
  * @brief DMA Channel Mode Configuration
  * @param mode Pointer to Channel Mode Configuration Structure. Refer `dma_channel_properties_t` 
- * @param reg Pointer to Register where the updated configuration needs to be written
+ * @param pReg Pointer to Register where the updated configuration needs to be written
  */
-void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* reg)
+void _DMA_configChannelProperties(const dma_channel_properties_t* const mode, uint32_t* pReg)
 {
 	// Priority
-	_DMA_configChannelPriority(mode->priority, reg);
+	_DMA_configChannelPriority(mode->priority, pReg);
 	// Direction
-	_DMA_configChannelDirection(mode->direction, reg);
+	_DMA_configChannelDirection(mode->direction, pReg);
 	// Circular Mode
-	_DMA_configChannelCircularMode(mode->circular, reg);
+	_DMA_configChannelCircularMode(mode->circular, pReg);
 	// MEM2MEM
-	_DMA_configChannelMEM2MEM(mode->mem2mem, reg);
+	_DMA_configChannelMEM2MEM(mode->mem2mem, pReg);
 }
 
 /**
