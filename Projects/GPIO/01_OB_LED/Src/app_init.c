@@ -46,7 +46,7 @@ driver_status_t App_Init(void)
 
 #if (APP_ENABLE_SYSTICK_TIMEBASE == 1U)
 	//! Initialize the monotonic service only after its AHB input clock is final.
-	ASSERT_DRIVER_STATUS(App_TimeInit(RCC_GetBusFreq(RCC_AHB_BUS)));
+	ASSERT_DRIVER_STATUS(App_TimeInit(RCC_GetBusFrequency(RCC_AHB_BUS)));
 #endif
 
 #if (APP_ENABLE_TIMER_US_DELAY == 1U)

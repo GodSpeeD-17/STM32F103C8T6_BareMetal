@@ -245,6 +245,10 @@ typedef struct _rcc_sys_clk_config_t
 #define RCC_APB1_BUS							((rcc_bus_t) 1U)
 /** @brief APB2 bus selector @def RCC_APB2_BUS */
 #define RCC_APB2_BUS							((rcc_bus_t) 2U)
+/** @brief ADC bus selector @def RCC_ADC_BUS */
+#define RCC_ADC_BUS								((rcc_bus_t) 3U)
+/** @brief USB bus selector @def RCC_USB_BUS */
+#define RCC_USB_BUS								((rcc_bus_t) 4U)
 
 /**
  * @brief	Bus prescaler configuration descriptor
@@ -583,7 +587,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMas
  * @brief	Returns the current core clock frequency before AHB division
  * @returns @ref frequency_t "Core clock frequency in hertz"
  */
-frequency_t RCC_GetCoreClockFreq(void);
+frequency_t RCC_GetCoreClockFrequency(void);
 
 /**
  * @brief	Returns the current frequency of a requested bus
@@ -592,21 +596,11 @@ frequency_t RCC_GetCoreClockFreq(void);
  * - @ref `RCC_AHB_BUS`: AHB bus
  * - @ref `RCC_APB1_BUS`: APB1 bus
  * - @ref `RCC_APB2_BUS`: APB2 bus
+ * - @ref `RCC_ADC_BUS`: ADC clock
+ * - @ref `RCC_USB_BUS`: USB clock
  * @returns @ref frequency_t "Bus clock frequency in hertz"
  */
-frequency_t RCC_GetBusFreq(const rcc_bus_t bus);
-
-/**
- * @brief	Returns the current ADC clock frequency
- * @returns @ref frequency_t "ADC clock frequency in hertz"
- */
-frequency_t RCC_GetADCFreq(void);
-
-/**
- * @brief	Returns the current USB clock frequency
- * @returns @ref frequency_t "USB clock frequency in hertz"
- */
-frequency_t RCC_GetUSBFreq(void);
+frequency_t RCC_GetBusFrequency(const rcc_bus_t bus);
 
 /**
  * @brief	Returns the cached or current derived RCC clock frequencies snapshot

@@ -1184,7 +1184,7 @@ driver_status_t RCC_GetClockFrequencies(rcc_clock_frequencies_t* const pClockFre
 	return DRIVER_STATUS_SUCCESS;
 }
 
-frequency_t RCC_GetCoreClockFreq(void)
+frequency_t RCC_GetCoreClockFrequency(void)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{
@@ -1248,7 +1248,7 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 	}
 }
 
-frequency_t RCC_GetBusFreq(const rcc_bus_t bus)
+frequency_t RCC_GetBusFrequency(const rcc_bus_t bus)
 {
 	rcc_clock_frequencies_t clockFrequencies =
 	{
@@ -1265,6 +1265,7 @@ frequency_t RCC_GetBusFreq(const rcc_bus_t bus)
 		return RCC_FREQ_ZERO;
 	}
 
+	//! Fold the former standalone ADC/USB getters in here: same snapshot, same fields, one selector switch.
 	switch (bus)
 	{
 		case RCC_AHB_BUS:
@@ -1279,49 +1280,17 @@ frequency_t RCC_GetBusFreq(const rcc_bus_t bus)
 		{
 			return clockFrequencies.pclk2;
 		}
+		case RCC_ADC_BUS:
+		{
+			return clockFrequencies.adcclk;
+		}
+		case RCC_USB_BUS:
+		{
+			return clockFrequencies.usbclk;
+		}
 		default:
 		{
 			return clockFrequencies.hclk;
 		}
 	}
-}
-
-frequency_t RCC_GetADCFreq(void)
-{
-	rcc_clock_frequencies_t clockFrequencies =
-	{
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO
-	};
-
-	if (RCC_GetClockFrequencies(&clockFrequencies) != DRIVER_STATUS_SUCCESS)
-	{
-		return RCC_FREQ_ZERO;
-	}
-
-	return clockFrequencies.adcclk;
-}
-
-frequency_t RCC_GetUSBFreq(void)
-{
-	rcc_clock_frequencies_t clockFrequencies =
-	{
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO,
-		RCC_FREQ_ZERO
-	};
-
-	if (RCC_GetClockFrequencies(&clockFrequencies) != DRIVER_STATUS_SUCCESS)
-	{
-		return RCC_FREQ_ZERO;
-	}
-
-	return clockFrequencies.usbclk;
 }

@@ -472,7 +472,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_GetInputClockFrequency(const TIM_TypeD
 	ASSERT_DRIVER_STATUS(_TIM_GetClockBus(TIMx, &timerClockBus));
 
 	//! Derive the peripheral clock from the bus selected by the instance LUT.
-	timerInputClock = RCC_GetBusFreq(timerClockBus);
+	timerInputClock = RCC_GetBusFrequency(timerClockBus);
 	if (timerInputClock == 0UL)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
