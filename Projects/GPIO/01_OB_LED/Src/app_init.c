@@ -30,9 +30,10 @@
 #include "app_delay.h"
 #include "app_time.h"
 #include "rcc.h"
+
 #if (APP_ENABLE_ONBOARD_LED == 1U)
 #include "bsp.h"
-#endif /* APP_ENABLE_ONBOARD_LED */
+#endif
 
 // ==================================================================================================== //
 // Public API

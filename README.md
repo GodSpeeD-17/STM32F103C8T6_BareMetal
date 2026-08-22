@@ -30,6 +30,10 @@ public driver orchestration, and project/application code. Driver development
 should follow those rules unless a peripheral has a clearly documented reason to
 deviate.
 
+The target-oriented build system, project-facing CMake contract, Driver
+dependency graph, generated tooling, and current migration state are documented
+in [`CMAKE_ARCHITECTURE.md`](./CMAKE_ARCHITECTURE.md).
+
 ## Repository Layout
 
 ```text
@@ -41,6 +45,7 @@ deviate.
 │   │   └── Src
 │   └── Driver
 │       ├── ADC
+│       ├── BSP
 │       ├── DMA
 │       ├── GPIO
 │       ├── I2C
@@ -48,6 +53,7 @@ deviate.
 │       ├── RCC
 │       ├── Ring_Buffer
 │       ├── SSD1306
+│       ├── SysTick
 │       ├── Timer
 │       └── USART
 ├── Projects
@@ -59,25 +65,37 @@ deviate.
 │   └── USART
 ├── Reference_Docs
 ├── ARCHITECTURE.md
+├── CMAKE_ARCHITECTURE.md
 ├── Doxyfile
 └── README.md
 ```
 
 ## Project Layout
 
-Each example project follows the same shape:
+New applications copied from `Projects/Template` follow this modular shape:
 
 ```text
 <Project_Name>
 ├── CMakeLists.txt
 ├── Inc
-│   ├── main.h
-│   └── systick.h
+│   ├── app_config.h
+│   ├── app_delay.h
+│   ├── app_init.h
+│   ├── app_startup.h
+│   ├── app_time.h
+│   └── main.h
 └── Src
+    ├── app_delay.c
+    ├── app_init.c
+    ├── app_startup.c
+    ├── app_time.c
     ├── main.c
-    ├── startup.c
-    └── systick.c
+    └── syscalls.c
 ```
+
+Some existing examples still retain the legacy project-local `startup.c` and
+`systick.c` layout while they are migrated. Their source layout does not change
+the shared target-oriented CMake contract described below.
 
 Project `CMakeLists.txt` files call:
 

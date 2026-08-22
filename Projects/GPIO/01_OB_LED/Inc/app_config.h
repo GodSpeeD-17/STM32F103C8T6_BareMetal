@@ -56,7 +56,6 @@
 // ==================================================================================================== //
 
 #ifndef APP_ENABLE_SYSTICK_TIMEBASE
-
 /**
  * @brief Selects the SysTick-backed application millisecond timebase
  * @def APP_ENABLE_SYSTICK_TIMEBASE
@@ -115,7 +114,6 @@
 // ==================================================================================================== //
 
 #ifndef APP_ENABLE_TIMER_US_DELAY
-
 /**
  * @brief Selects the optional dedicated-Timer microsecond delay capability
  * @def APP_ENABLE_TIMER_US_DELAY
@@ -145,12 +143,12 @@
  * @def APP_ENABLE_ONBOARD_LED
  * @details
  * CMake normally defines this macro from `APP_ENABLE_ONBOARD_LED`. When it is
- * `1U`, the build adds the BSP Driver, and App_Init() configures the board
- * on-board LED GPIO and forces it to a deterministic off state. This fallback
- * definition supports builds that do not inject the CMake option.
+ * `1U`, App_Init() configures the board on-board LED GPIO and forces it to a
+ * deterministic off state. This fallback definition supports builds that do
+ * not inject the CMake option.
  * Accepted values:
- * - `0U`: Leave the on-board LED GPIO untouched by the Template
- * - `1U`: Initialize the on-board LED GPIO and force it off; Template default
+ * - `0U`: Leave the on-board LED GPIO untouched by App_Init()
+ * - `1U`: Initialize the on-board LED GPIO and force it off; project default
  * @note Application code still owns every OB_LED_Set() / OB_LED_Reset() /
  * OB_LED_Toggle() call; this switch only guarantees the pin is configured
  * and starts from a known state
@@ -160,7 +158,6 @@
 #endif /* APP_ENABLE_ONBOARD_LED */
 
 #if (APP_ENABLE_TIMER_US_DELAY == 1U)
-
 /**
  * @brief Selects the Timer instance reserved for microsecond blocking delays
  * @def APP_DELAY_TIMER

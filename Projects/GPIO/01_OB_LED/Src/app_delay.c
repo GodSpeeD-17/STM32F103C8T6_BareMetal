@@ -24,13 +24,16 @@
 // ==================================================================================================== //
 // Includes
 // ==================================================================================================== //
+
 #include "app_delay.h"
+
 #include "app_time.h"
 #include "stm32f1xx.h"
+
 #if (APP_ENABLE_TIMER_US_DELAY == 1U)
 #include "rcc.h"
 #include "timer.h"
-#endif /* APP_ENABLE_TIMER_US_DELAY */
+#endif
 
 // ==================================================================================================== //
 // Private Defines
@@ -54,7 +57,9 @@ driver_status_t App_DelayMs(const uint32_t delayMs)
 
 #if (APP_ENABLE_SYSTICK_TIMEBASE == 1U)
 	//! WFI-based waiting requires a running timebase and interrupt delivery from thread mode.
-	if ((App_TimeGetOperationState() != DRIVER_STATUS_ON) || (__get_IPSR() != 0UL) || (__get_PRIMASK() != 0UL))
+	if ((App_TimeGetOperationState() != DRIVER_STATUS_ON) ||
+		(__get_IPSR() != 0UL) ||
+		(__get_PRIMASK() != 0UL))
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
@@ -118,4 +123,4 @@ driver_status_t App_DelayUs(const uint32_t delayUs)
 
 	return DRIVER_STATUS_SUCCESS;
 }
-#endif /* APP_ENABLE_TIMER_US_DELAY */
+#endif

@@ -1,36 +1,60 @@
-// Header Guards
+/**
+ * @file	main.h
+ * @author	Shrey Shah
+ * @brief	Declares the GPIO on-board LED demo entry point
+ * @version	v1.0
+ * @date	22-08-2026
+ *
+ * @details
+ * @section MAIN_H_HIERARCHY Hierarchy
+ * - Position: Layer 3 - Application behavior
+ * - Invoked by: Layer 4 `app_startup` after initialization succeeds
+ * - Uses: Layer 2 `app_delay` and Layer 1 BSP/GPIO Drivers through `main.c`
+ *
+ * @section MAIN_H_RESPONSIBILITY Responsibility
+ * This header declares the application entry point only. LED pattern policy
+ * and timing constants live in `main.c` as they are private to this demo.
+ *
+ * @section MAIN_H_BOUNDARY Dependency Boundary
+ * This header is standalone so startup does not acquire application-service or
+ * hardware dependencies through `main.h`.
+ */
+
+// Header Guard
 #ifndef MAIN_H_
 #define MAIN_H_
 
-/*-------------------------------------------------------------------------------*/
-// Headers
-#include "gpio.h"
-#include "bsp.h"
-#include "systick.h"
-#include "startup.h"
-/*-------------------------------------------------------------------------------*/
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-/*-------------------------------------------------------------------------------*/
-// MACROS
 /**
- * @brief GPIO 01_OB_LED project-local LED configuration
- * @details These macros define the demo timing and external LED GPIO mappings
- * used by the 01_OB_LED project. Board on-board LED ownership remains in BSP.
+ * @brief GPIO on-board LED demo application
+ * @defgroup APP_Main Application Control Loop
  * @{
  */
-/** @brief Lamp-test blink delay in milliseconds @def LED_LAMP_TEST_DELAY_MS */
-#define LED_LAMP_TEST_DELAY_MS				(250UL)
-/** @brief Normal LED sequence step delay in milliseconds @def LED_STEP_DELAY_MS */
-#define LED_STEP_DELAY_MS					(700UL)
-/** @brief Red LED GPIO port instance @def RED_LED_PORT */
-#define RED_LED_PORT						GPIOA
-/** @brief Red LED GPIO pin mask @def RED_LED_PIN */
-#define RED_LED_PIN							GPIO_PIN_2
-/** @brief Yellow LED GPIO port instance @def YELLOW_LED_PORT */
-#define YELLOW_LED_PORT						GPIOA
-/** @brief Yellow LED GPIO pin mask @def YELLOW_LED_PIN */
-#define YELLOW_LED_PIN						GPIO_PIN_3
+
+// ==================================================================================================== //
+// Entry Point
+// ==================================================================================================== //
+
+/**
+ * @brief Executes the GPIO on-board LED demo control loop
+ * @details
+ * Initializes the red, yellow, and on-board LEDs, runs a lamp-test sequence,
+ * then continuously drives a three-bit LED counter, repeating the lamp test
+ * on every counter wrap.
+ * @returns Does not return
+ * @note This implementation does not return
+ */
+int main(void);
+
 /** @} */
-/*-------------------------------------------------------------------------------*/
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* MAIN_H_ */

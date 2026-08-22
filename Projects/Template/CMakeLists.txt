@@ -85,16 +85,21 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 # through the compile definitions published at the end of this file.
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
+option(APP_ENABLE_ONBOARD_LED "Enable the optional BSP on-board LED initialization" ON)
 
 # RCC is required by the base clock initialization path. Optional services add
 # only their owning Driver module; disabled peripherals contribute no sources
-# or public Driver include directory to this application target.
+# or public Driver include directory to this application target. BSP resolves
+# GPIO -> RCC automatically through the shared component graph.
 set(app_driver_modules RCC)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()
 if(APP_ENABLE_TIMER_US_DELAY)
     list(APPEND app_driver_modules Timer)
+endif()
+if(APP_ENABLE_ONBOARD_LED)
+    list(APPEND app_driver_modules BSP)
 endif()
 
 # ====================================================================================================
@@ -125,4 +130,5 @@ stm32f103_configure_project(
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
+    APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
 )

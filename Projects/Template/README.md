@@ -148,3 +148,19 @@ enables the TIM4 clock during `App_Init()`, and configures TIM4 as the dedicated
 Leave the option disabled when the application does not require microsecond
 blocking delays. Millisecond timing continues to use SysTick and does not
 reserve a general-purpose Timer.
+
+## Optional on-board LED
+
+The on-board LED is initialized by default. Disable it at configure time when
+an application does not use the board LED:
+
+```sh
+cmake -S . -B Build -DAPP_ENABLE_ONBOARD_LED=OFF
+```
+
+When enabled, this option adds the BSP Driver module (which resolves GPIO and
+RCC automatically) and has `App_Init()` configure the on-board LED GPIO and
+force it to a deterministic off state before `main` runs. Application code
+still owns every `OB_LED_Set()` / `OB_LED_Reset()` / `OB_LED_Toggle()` call;
+this switch only guarantees the pin is configured and starts from a known
+state.
