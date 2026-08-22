@@ -1,112 +1,171 @@
-/*-------------------------------- Includes ---------------------------*/
-#include "startup.h"
-/*-------------------------------- Heap Pointer ---------------------------*/
-static uint8_t *heap_ptr = &_sheap;
+#include "app_startup.h"
 
-/*-------------------------------- Dynamic Memory Management ---------------------*/
-/**
- * @brief Requests additional heap memory from the system
- *
- * @param increment Number of bytes to increase the heap by
- * @return void*
- *   - On success: Pointer to the start of the newly allocated memory block
- *   - On failure: (void*)-1 with errno set to ENOMEM (heap overflow)
- *
- * @note This is the low-level memory allocator used by malloc()/calloc()
- * @warning The heap grows upward while stack grows downward - ensure they don't collide!
- * @warning Not thread-safe - use in single-threaded environments only
- *
- * Memory layout:
- *
- * RAM: [.data][.bss][heap → ... ← stack]
- *            _sheap   heap_ptr   _eheap
- *                   (grows up)
- */
-void *_sbrk(intptr_t increment)
+#include "app_init.h"
+#include "main.h"
+#include "stm32f1xx.h"
+
+/** @brief Number of Cortex-M3 core vector entries @def APP_CORE_VECTOR_COUNT */
+#define APP_CORE_VECTOR_COUNT				((uint32_t) 16UL)
+/** @brief Number of STM32F103C8T6 external interrupt vectors @def APP_EXTERNAL_VECTOR_COUNT */
+#define APP_EXTERNAL_VECTOR_COUNT			((uint32_t) 43UL)
+
+void NMI_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void HardFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void MemManage_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void BusFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void UsageFault_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void SVC_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void DebugMon_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void PendSV_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void SysTick_Handler(void) __attribute__((weak, alias("Default_Handler")));
+void WWDG_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void PVD_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TAMPER_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void RTC_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void FLASH_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void RCC_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI0_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI1_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI3_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI4_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel1_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel3_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel4_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel5_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel6_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void DMA1_Channel7_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void ADC1_2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USB_HP_CAN_TX_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USB_LP_CAN_RX0_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void CAN_RX1_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void CAN_SCE_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI9_5_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM1_BRK_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM1_UP_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM1_TRG_COM_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM1_CC_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM3_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void TIM4_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void I2C1_EV_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void I2C1_ER_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void I2C2_EV_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void I2C2_ER_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void SPI1_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void SPI2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USART1_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USART2_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USART3_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void EXTI15_10_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void RTCAlarm_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+void USBWakeUp_IRQHandler(void) __attribute__((weak, alias("Default_Handler")));
+
+__attribute__((used, section(".isr_vector")))
+static const uintptr_t appVectorTable[APP_CORE_VECTOR_COUNT + APP_EXTERNAL_VECTOR_COUNT] =
 {
-	// Check for heap overflow
-	if (heap_ptr + increment > &_eheap)
+	(uintptr_t) &_estack,
+	(uintptr_t) Reset_Handler,
+	(uintptr_t) NMI_Handler,
+	(uintptr_t) HardFault_Handler,
+	(uintptr_t) MemManage_Handler,
+	(uintptr_t) BusFault_Handler,
+	(uintptr_t) UsageFault_Handler,
+	0UL,
+	0UL,
+	0UL,
+	0UL,
+	(uintptr_t) SVC_Handler,
+	(uintptr_t) DebugMon_Handler,
+	0UL,
+	(uintptr_t) PendSV_Handler,
+	(uintptr_t) SysTick_Handler,
+	(uintptr_t) WWDG_IRQHandler,
+	(uintptr_t) PVD_IRQHandler,
+	(uintptr_t) TAMPER_IRQHandler,
+	(uintptr_t) RTC_IRQHandler,
+	(uintptr_t) FLASH_IRQHandler,
+	(uintptr_t) RCC_IRQHandler,
+	(uintptr_t) EXTI0_IRQHandler,
+	(uintptr_t) EXTI1_IRQHandler,
+	(uintptr_t) EXTI2_IRQHandler,
+	(uintptr_t) EXTI3_IRQHandler,
+	(uintptr_t) EXTI4_IRQHandler,
+	(uintptr_t) DMA1_Channel1_IRQHandler,
+	(uintptr_t) DMA1_Channel2_IRQHandler,
+	(uintptr_t) DMA1_Channel3_IRQHandler,
+	(uintptr_t) DMA1_Channel4_IRQHandler,
+	(uintptr_t) DMA1_Channel5_IRQHandler,
+	(uintptr_t) DMA1_Channel6_IRQHandler,
+	(uintptr_t) DMA1_Channel7_IRQHandler,
+	(uintptr_t) ADC1_2_IRQHandler,
+	(uintptr_t) USB_HP_CAN_TX_IRQHandler,
+	(uintptr_t) USB_LP_CAN_RX0_IRQHandler,
+	(uintptr_t) CAN_RX1_IRQHandler,
+	(uintptr_t) CAN_SCE_IRQHandler,
+	(uintptr_t) EXTI9_5_IRQHandler,
+	(uintptr_t) TIM1_BRK_IRQHandler,
+	(uintptr_t) TIM1_UP_IRQHandler,
+	(uintptr_t) TIM1_TRG_COM_IRQHandler,
+	(uintptr_t) TIM1_CC_IRQHandler,
+	(uintptr_t) TIM2_IRQHandler,
+	(uintptr_t) TIM3_IRQHandler,
+	(uintptr_t) TIM4_IRQHandler,
+	(uintptr_t) I2C1_EV_IRQHandler,
+	(uintptr_t) I2C1_ER_IRQHandler,
+	(uintptr_t) I2C2_EV_IRQHandler,
+	(uintptr_t) I2C2_ER_IRQHandler,
+	(uintptr_t) SPI1_IRQHandler,
+	(uintptr_t) SPI2_IRQHandler,
+	(uintptr_t) USART1_IRQHandler,
+	(uintptr_t) USART2_IRQHandler,
+	(uintptr_t) USART3_IRQHandler,
+	(uintptr_t) EXTI15_10_IRQHandler,
+	(uintptr_t) RTCAlarm_IRQHandler,
+	(uintptr_t) USBWakeUp_IRQHandler
+};
+
+void Default_Handler(void)
+{
+	while (1)
 	{
-		// Set standard `errno` for `malloc` compatibility
-		errno = ENOMEM;
-		return (void *)-1;
+		__WFI();
 	}
-	// Update Previous Heap Pointer
-	uint8_t *prev_heap_ptr = heap_ptr;
-	// Update heap pointer
-	heap_ptr += increment;
-	// Return previous heap pointer
-	return (void *)prev_heap_ptr;
 }
 
-/*-------------------------------- Reset Handler ------------------------*/
-/**
- * @brief Function executed upon Reset
- * @note This function is called only when the processor is reset
- */
-void Reset_Handler(void)
+__attribute__((noreturn)) void Reset_Handler(void)
 {
-	// Step 1: Copy ".data" [FLASH] -> ".data" [RAM]
-	volatile uint32_t *pSrc = (uint32_t *)&_sidata;
-	volatile uint32_t *pDst = (uint32_t *)&_sdata;
-	// Memory barrier to prevent reordering
-	__asm__ volatile ("" ::: "memory");	
-	while (pDst < &_edata) *pDst++ = *pSrc++;
-	// Step 2: Initialise .bss to 0 in RAM
-	pDst = (uint32_t *)&_sbss;
-	while (pDst < &_ebss) *pDst++ = 0;
-	// Memory barrier to prevent reordering
-	__asm__ volatile ("" ::: "memory");		
-	// Step 3: Configure SysClock at 72MHz
-	if (RCC_Config_72MHz() != DRIVER_STATUS_SUCCESS)
+	uint32_t* pSource = &_sidata;
+	uint32_t* pDestination = &_sdata;
+
+	//! Copy initialized application data from its Flash load image into RAM.
+	while (pDestination < &_edata)
+	{
+		*pDestination = *pSource;
+		pDestination++;
+		pSource++;
+	}
+
+	//! Clear every application zero-initialized object before invoking C code.
+	pDestination = &_sbss;
+	while (pDestination < &_ebss)
+	{
+		*pDestination = 0UL;
+		pDestination++;
+	}
+
+	if (App_Init() != DRIVER_STATUS_SUCCESS)
+	{
+		while (1)
+		{
+			Default_Handler();
+		}
+	}
+
+	(void) main();
+	while (1)
 	{
 		Default_Handler();
 	}
-// Step 4: Configure SysTick & Timer
-#ifdef SYSTICK_DELAY__
-	// SysTick: Resolution 1us
-	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / FREQ_1MHz));
-#else
-	// SysTick: Resolution 1ms
-	SysTick_Config(((RCC_GetBusFreq(RCC_AHB_BUS)) / RCC_FREQ_1kHz));
-	//! Enable the dedicated blocking-delay Timer clock, then apply the canonical 72 MHz-to-1 MHz configuration.
-	if (RCC_APB1_ClockEnable(DELAY_TIMER_CLOCK_ENABLE_MASK) != DRIVER_STATUS_SUCCESS)
-	{
-		Default_Handler();
-	}
-	if (TIM_ConfigForBlockingDelay(DELAY_TIMER) != DRIVER_STATUS_SUCCESS)
-	{
-		Default_Handler();
-	}
-#endif /* SYSTICK_DELAY__ */
-	SysTick_Enable();
-	// Step 5: Configure OB LED & Enable SysTick
-	OB_LED_Init();
-	OB_LED_Reset();
-	// Step 6: Call main()
-	main();
-	// Step 7: Default Handler (Should never be reached)
-	Default_Handler();
 }
-
-// Timer Blocking Delay Functions
-#ifndef SYSTICK_DELAY__
-void delay_us(uint32_t delayUs)
-{
-	while (delayUs != 0UL)
-	{
-		const uint16_t chunkUs = (delayUs > 0xFFFFUL) ? 0xFFFFU : (uint16_t) delayUs;
-		(void) TIM_BlockingDelayUs(DELAY_TIMER, chunkUs);
-		delayUs -= (uint32_t) chunkUs;
-	}
-}
-
-void delay_ms(uint32_t delayMs)
-{
-	if (delayMs != 0UL)
-	{
-		(void) TIM_BlockingDelayMs(DELAY_TIMER, delayMs);
-	}
-}
-
-#endif /* SYSTICK_DELAY__ */

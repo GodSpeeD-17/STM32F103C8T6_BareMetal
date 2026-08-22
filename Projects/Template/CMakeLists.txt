@@ -11,21 +11,29 @@ endwhile()
 
 include("${_stm32_repo_search_dir}/BareMetal/CMake/STM32F103Project.cmake")
 
-# Shared toolchain bootstrap.
 stm32f103_setup_toolchain()
 
 get_filename_component(_stm32_project_name "${CMAKE_CURRENT_LIST_DIR}" NAME)
-project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
+project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C ASM)
 
-# Project-specific configuration stays here.
+# Application feature selection. Enabling the Timer delay adds the Timer
+# module to the build and exposes the matching app_delay API.
+option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
+
+set(app_driver_modules RCC)
+if(APP_ENABLE_TIMER_US_DELAY)
+    list(APPEND app_driver_modules Timer)
+endif()
+
 stm32f103_configure_project(
+    BUILD_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Artifacts"
     DRIVER_MODULE_TREE SHOW_FILENAME_ONLY
     DRIVER_MODULES
-        RCC
-        GPIO
-        BSP
-        NVIC
-        Timer
+        ${app_driver_modules}
     OPTIMIZATION_LEVEL 1
     FLASH_ADDRESS 0x08000000
+)
+
+target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+    APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
 )

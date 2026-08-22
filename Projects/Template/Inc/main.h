@@ -1,18 +1,11 @@
-// Header Guards
 #ifndef MAIN_H_
 #define MAIN_H_
 
-/*-------------------------------------------------------------------------------*/
-// Headers
-#include "gpio.h"
-#include "bsp.h"
-#include "systick.h"
-#include "startup.h"
-/*-------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------*/
-// MACROS
-#define LOOP_DELAY_MS						(1000UL)
-/*-------------------------------------------------------------------------------*/
+/**
+ * @brief Executes the application entry point
+ * @returns Application exit status
+ * @retval - `0`: Application completed successfully
+ */
+int main(void);
 
 #endif /* MAIN_H_ */

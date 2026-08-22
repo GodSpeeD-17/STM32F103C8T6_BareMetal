@@ -83,11 +83,11 @@ SECTIONS
     _ebss = .;
   } > RAM
 
-  /* Heap section: required for dynamic allocation */
-  .heap (COPY):
+  /* Reserve one contiguous heap/stack floor so the linker validates RAM capacity. */
+  .heap_stack (NOLOAD):
   {
-    /* Align word to 4-byte boundary */
-    . = ALIGN(4);
+    /* Keep both heap and Cortex-M stack boundaries 8-byte aligned. */
+    . = ALIGN(8);
 
     /* Mark start of heap */
     _sheap = .;
@@ -95,20 +95,13 @@ SECTIONS
     /* Reserve minimum heap space */
     . = . + _Min_Heap_Size;
 
-    /* Align word to 4-byte boundary */
-    . = ALIGN(4);
+    /* Align the heap limit before reserving the minimum stack floor. */
+    . = ALIGN(8);
 
     /* Mark end of heap */
     _eheap = .;
-  } > RAM
 
-  /* Stack section: grows downward from end of RAM */
-  .stack (COPY):
-  {
-    /* Align stack to 8 bytes */
-    . = ALIGN(8);
-
-    /* Mark start of stack */
+    /* Mark the lower boundary of the minimum stack reservation. */
     _sstack = .;
 
     /* Reserve minimum stack space */
@@ -117,12 +110,15 @@ SECTIONS
     /* Align stack to 8 bytes */
     . = ALIGN(8);
 
-    /* Mark end of stack (top of RAM) */
-    _estack = ORIGIN(RAM) + LENGTH(RAM);
+    /* Mark the end of the combined reservation used for link-time validation. */
+    _eheap_stack = .;
   } > RAM
 
-  /* Optional symbol marking end of memory layout */
-  _end = .;
-  /* For dynamic memory allocation */
-  PROVIDE(end = _eheap);
+  /* Reject images that cannot retain the requested heap and stack floor. */
+  ASSERT(_eheap_stack <= _estack, "RAM overflow: heap and minimum stack collide")
+
+  /* Optional symbol marking the allocator-owned heap start. */
+  _end = _sheap;
+  /* Standard allocator alias for the first heap address. */
+  PROVIDE(end = _sheap);
 }

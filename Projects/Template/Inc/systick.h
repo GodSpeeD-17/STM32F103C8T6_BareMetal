@@ -1,107 +1,63 @@
-// Header Guards
 #ifndef SYSTICK_H_
 #define SYSTICK_H_
 
-// Register Mapping
-#include "stm32f1xx.h"
-// RCC Configuration
-#include "rcc.h"
-// Delay Substitute
-#ifndef SYSTICK_DELAY__
-#include "timer.h"
-#endif
+#include <stdint.h>
 
-// SysTick Wrap Value Macro
-#define SYSTICK_WRAP_VAL(X) ((X) & 0x00FFFFFF)
-
-// Future Usage for SysTick
-#ifdef __SYSTICK_CONFIG__
-// SysTick Configuration Structure
-typedef struct
-{
-	// SysTick Clock Source
-	// - 0: External Reference Clock
-	// - 1: Core Clock (AHB Clock)
-	uint32_t CLK_SRC : 1;
-	// SysTick Interrupt
-	// - 0: Counting Down to 0 does not pend the `SysTick_Handler`
-	// - 1: Counting Down to 0 pends the `SysTick_Handler`
-	uint32_t TICK_INT : 1;
-	// SysTick Reload Value Register
-	// - 24-bit value that is loaded into the counter register
-	uint32_t LOAD : 24;
-	// SysTick Current Value Register
-	uint32_t VAL;
-} systick_config_t;
-#endif
+#include "stm32f1xx_data_types.h"
 
 /**
- * @brief Enables SysTick Counter
+ * @brief Configures SysTick as an interrupt-driven application timebase
+ * @details
+ * Leaves the counter disabled after programming the clock source, interrupt
+ * source, reload value, and current counter state.
+ * @param[in] inputClockHz SysTick core-clock input frequency in hertz
+ * Accepted values:
+ * - `1U..0xFFFFFFFFU`: Non-zero core-clock frequency
+ * @param[in] tickFrequencyHz Requested application tick frequency in hertz
+ * Accepted values:
+ * - `1U..inputClockHz`: Exact divisor producing a reload value of `1U..0x1000000U`
+ * @returns @ref driver_status_t "SysTick configuration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: SysTick was configured and left disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A frequency was zero, inexact, or outside the 24-bit reload range
  */
-__STATIC_FORCEINLINE void SysTick_Enable(void)
-{
-	// Disable Interrupts
-	__disable_irq();
-	// Enable SysTick
-	SysTick->CTRL.REG |= SysTick_CTRL_ENABLE_Msk;
-	// Enable Interrupts
-	__enable_irq();
-}
+driver_status_t SysTick_Config
+(
+	const frequency_t inputClockHz,
+	const frequency_t tickFrequencyHz
+);
+
+/** @brief Enables the configured SysTick counter @returns Nothing */
+void SysTick_Enable(void);
+
+/** @brief Disables the SysTick counter @returns Nothing */
+void SysTick_Disable(void);
 
 /**
- * @brief Disables SysTick Counter
+ * @brief Returns the application tick count accumulated by SysTick
+ * @returns Current 32-bit application tick count
+ * @note An aligned 32-bit read is atomic on the Cortex-M3
  */
-__STATIC_FORCEINLINE void SysTick_Disable(void)
-{
-	// Disable Interrupts
-	__disable_irq();
-	// Disable SysTick
-	SysTick->CTRL.REG &= ~SysTick_CTRL_ENABLE_Msk;
-	// Enable Interrupts
-	__enable_irq();
-}
+uint32_t SysTick_GetTicks(void);
 
 /**
- * @brief Returns the current number of ticks
- * @note The ticks are dependent on Core Clock Frequency
+ * @brief Resets the application tick count and current SysTick counter value
+ * @returns Nothing
+ * @pre SysTick is disabled
  */
-uint32_t SysTick_Get_Ticks(void);
+void SysTick_ResetTicks(void);
 
 /**
- * @brief Sets the current number of ticks
- * @param tick_value The number of ticks to be set
- * @note The ticks are dependent on Core Clock Frequency
+ * @brief Returns the current SysTick counter-operation state
+ * @returns @ref driver_status_t "SysTick operation state"
+ * @retval - @ref `DRIVER_STATUS_OFF`: SysTick counter operation is disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: SysTick counter operation is enabled
  */
-void SysTick_Set_Ticks(uint32_t tick_value);
+driver_status_t SysTick_GetOperationState(void);
 
 /**
- * @brief Configures the SysTick Timer based upon the input count value
- * @param reloadValue Number of Ticks
- * @note Value should be within the range of 24-bit unsigned integer
- * @note Call `SysTick_Enable()` to start the SysTick Timer
- */
-void SysTick_Config(uint32_t reloadValue);
-
-// Delay using SysTick
-#ifdef SYSTICK_DELAY__
-/**
- * @brief Accurate us delay generation
- * @param delayTime Delay in microseconds (us)
- * @note Based upon SysTick Timer
- */
-void delay_us(uint32_t delayTime);
-
-/**
- * @brief Accurate ms delay generation
- * @param delayTime Delay in milliseconds (ms)
- * @note Based upon SysTick Timer
- */
-void delay_ms(uint32_t delayTime);
-#endif /* SYSTICK_DELAY__ */
-
-/**
- * @brief ISR for SysTick
- * @note Used for Delay Generation and Getting the total Number of Ticks
+ * @brief Advances the application timebase by one tick
+ * @returns Nothing
+ * @note Interrupt work is intentionally limited to the tick increment
  */
 void SysTick_Handler(void);
 
