@@ -1,39 +1,79 @@
-/*-------------------------------------------------------------------------------*/
-// Header Files
-#include "main.h"
-/*-------------------------------------------------------------------------------*/
+/**
+ * @file	main.c
+ * @author	Shrey Shah
+ * @brief	Implements the GPIO push-button poll demo application behavior
+ * @version	v1.0
+ * @date	22-08-2026
+ *
+ * @details
+ * @section MAIN_C_HIERARCHY Hierarchy
+ * - Position: Layer 3 - Application behavior implementation
+ * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
+ * - Uses: Layer 2 `app_delay` and Layer 1 GPIO/BSP Drivers
+ *
+ * @section MAIN_C_RESPONSIBILITY Responsibility
+ * The application polls an externally pulled-up push button and toggles the
+ * red/yellow LEDs while it is pressed.
+ *
+ * @section MAIN_C_BOUNDARY Dependency Boundary
+ * Application behavior belongs here. Processor startup, clock configuration,
+ * and service initialization do not.
+ */
 
-/*-------------------------------------------------------------------------------*/
-// Main Entry Point
+// ==================================================================================================== //
+// Includes
+// ==================================================================================================== //
+#include "main.h"
+#include "app_delay.h"
+#include "bsp.h"
+#include "gpio.h"
+
+// ==================================================================================================== //
+// Private Defines
+// ==================================================================================================== //
+
+/** @brief Main-loop poll delay in milliseconds @def LOOP_DELAY_MS */
+#define LOOP_DELAY_MS					(10UL)
+/** @brief Red LED GPIO port instance @def RED_LED_PORT */
+#define RED_LED_PORT					GPIOA
+/** @brief Red LED GPIO pin mask @def RED_LED_PIN */
+#define RED_LED_PIN						GPIO_PIN_2
+/** @brief Yellow LED GPIO port instance @def YELLOW_LED_PORT */
+#define YELLOW_LED_PORT					GPIOA
+/** @brief Yellow LED GPIO pin mask @def YELLOW_LED_PIN */
+#define YELLOW_LED_PIN					GPIO_PIN_3
+/** @brief Push-button GPIO port instance @def PUSH_BUTTON_PORT */
+#define PUSH_BUTTON_PORT				GPIOA
+/** @brief Push-button GPIO pin mask (externally pulled-up) @def PUSH_BUTTON_PIN */
+#define PUSH_BUTTON_PIN					GPIO_PIN_1
+
+// ==================================================================================================== //
+// Application Entry Point
+// ==================================================================================================== //
+
 int main(void)
 {
-	//! Initialisation of LEDs
 	if (GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)) != DRIVER_STATUS_SUCCESS)
 	{
 		OB_LED_Set();
-		while(1);
+		while (1);
 	}
-	//! Initialization of Push Button (External Pull-Up)
+
 	if (GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING) != DRIVER_STATUS_SUCCESS)
 	{
 		OB_LED_Set();
-		while(1);
+		while (1);
 	}
 
-	// Infinite Loop
-	while(1)
+	while (1)
 	{
-		//! Poll Push Button State (External Pull-Up)
+		//! Externally pulled-up button reads DRIVER_STATUS_OFF while pressed.
 		if (GPIO_PinGet(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN) == DRIVER_STATUS_OFF)
 		{
 			GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);
 			GPIO_PinToggle(YELLOW_LED_PORT, YELLOW_LED_PIN);
 		}
-		
-		// Loop Delay
-		delay_ms(LOOP_DELAY_MS);
+
+		(void) App_DelayMs(LOOP_DELAY_MS);
 	}
-	// Return Value
-	return 0;
 }
-/*-------------------------------------------------------------------------------*/
