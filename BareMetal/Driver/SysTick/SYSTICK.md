@@ -112,8 +112,8 @@ or circular dependency.
 | Hardware theory | Public operation | LL/Core path | Preservation rule |
 | --- | --- | --- | --- |
 | Complete reset state | `SysTick_DeConfig()` | full writes to `CTRL`, `LOAD`, then the `VAL` clear action | Resets operation, IRQ source, configuration, and current hardware state; cannot reset application data |
-| Root configuration | `SysTick_GetConfig()` / `SysTick_SetConfig()` | `LL_SysTick_Read/WriteCTRL`, `LL_SysTick_Read/WriteLOAD` | Set requires stopped operation and preserves `TICKINT`; current value is unchanged |
-| Exception source | `SysTick_GetIRQState()` / `SysTick_SetIRQState()` | staged `CTRL.TICKINT` update | Preserves `ENABLE` and `CLKSOURCE` |
+| Root configuration | `SysTick_GetConfig()` / `SysTick_SetConfig()` with explicit clock-source and reload values | `LL_SysTick_Read/WriteCTRL`, `LL_SysTick_Read/WriteLOAD` | Set requires stopped operation and preserves `TICKINT`; current value is unchanged |
+| Exception source | `SysTick_GetIRQSourceState()` / `SysTick_SetIRQSourceState()` | staged `CTRL.TICKINT` update | Preserves `ENABLE` and `CLKSOURCE` |
 | Counter operation | `SysTick_GetOperationState()` / `SysTick_SetOperationState()` | staged `CTRL.ENABLE` update | Preserves `TICKINT` and `CLKSOURCE` |
 | Current-value origin | `SysTick_ResetCurrentValue()` | `LL_SysTick_ResetVAL()` | Models the asymmetric write-to-clear action; no misleading arbitrary setter exists |
 
@@ -121,6 +121,11 @@ Root configuration uses raw register-semantic values. It does not accept an
 arbitrary frequency request. The application time service converts its known
 clock and fixed time-unit policy into a reload value before calling the Driver.
 This keeps reusable hardware semantics below and application units above.
+
+The two values are passed directly rather than wrapped in a configuration
+structure. They form one small, single-use hardware transaction but do not
+define a reusable nested domain, independent lifecycle, or cross-field object
+invariant that would justify an argument-container type.
 
 ### Documented no-Codec decision
 

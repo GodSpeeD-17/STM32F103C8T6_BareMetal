@@ -408,6 +408,14 @@ visibly orchestrate each domain represented by the root structure; do not hide
 the entire operation behind a private `_PERIPH_ApplyConfig()` helper that merely
 duplicates the public function's authority.
 
+Do not create a configuration structure merely because one function accepts
+more than one value. Prefer explicit typed parameters when a small set of
+single-use scalar values has no independently reusable domain, lifecycle, or
+cross-field object invariant. SysTick clock-source and reload configuration is
+the canonical two-scalar example. A structure remains appropriate when its
+members form a stable domain that is passed, stored, returned, nested, or
+validated as one reusable object.
+
 Every nested configuration structure that represents an independently useful
 and admitted operation must normally have a symmetric public grouped `Get` /
 `Set` pair. Deliberately asymmetric hardware actions remain exceptions and
@@ -817,6 +825,9 @@ that must remain consistent.
 
 ## Preference Log
 
+- 2026-08-22: Prohibited configuration structures that only bundle a small
+  set of single-use scalar function arguments; required explicit typed
+  parameters unless the values form a reusable domain object or invariant.
 - 2026-08-22: Centralized peripheral LL register mechanics in generic
   pointer-based read/write primitives and required named accessors to delegate
   register selection while preserving hardware-defined access asymmetry.

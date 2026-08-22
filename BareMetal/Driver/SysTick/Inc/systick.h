@@ -61,18 +61,6 @@ typedef reg								systick_clock_source_t;
 /** @brief SysTick 24-bit reload-register value type @typedef systick_reload_value_t */
 typedef reg								systick_reload_value_t;
 
-/**
- * @brief Complete supported SysTick root configuration
- * @details
- * The object represents every hardware configuration domain admitted by the
- * Driver. IRQ-source and operation states remain deliberately separate.
- */
-typedef struct _systick_config_t
-{
-	systick_clock_source_t	clock_source;	/**< `SysTick_CTRL.CLKSOURCE` selector */
-	systick_reload_value_t	reload_value;	/**< `SysTick_LOAD.RELOAD` value */
-} systick_config_t;
-
 // ==================================================================================================== //
 // SysTick Driver Defines
 // ==================================================================================================== //
@@ -105,38 +93,44 @@ driver_status_t SysTick_DeConfig(void);
 // ---------------------------------------------------------------------------------------------------- //
 
 /**
- * @brief Returns the complete supported SysTick root configuration
- * @param[out] pConfig Destination for the observed SysTick configuration
+ * @brief Returns the supported SysTick root-configuration values
+ * @param[out]	pClockSource	Destination for the observed clock-source selector
  * Expected values:
- * - Non-`NULL`: Current clock-source and reload values are published
+ * - Non-`NULL`: Current @ref systick_clock_source_t value is published
+ * @param[out]	pReloadValue	Destination for the observed reload-register value
+ * Expected values:
+ * - Non-`NULL`: Current @ref systick_reload_value_t value is published
  * @returns @ref driver_status_t "SysTick configuration extraction status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: SysTick configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pConfig` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Both SysTick configuration values were extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An output pointer is `NULL`
  * @note Reading `SysTick_CTRL` clears the hardware `COUNTFLAG`; the Driver does
  * not expose `COUNTFLAG` as persistent state
  */
-driver_status_t SysTick_GetConfig(systick_config_t* const pConfig);
+driver_status_t SysTick_GetConfig(systick_clock_source_t* const pClockSource, systick_reload_value_t* const pReloadValue);
 
 /**
- * @brief Applies the complete supported SysTick root configuration
+ * @brief Applies the supported SysTick root-configuration values
  * @details
- * Validates the complete object before writing `SysTick_LOAD.RELOAD` and
+ * Validates both scalar inputs before writing `SysTick_LOAD.RELOAD` and
  * `SysTick_CTRL.CLKSOURCE`. Counter operation and exception-request state are
  * preserved. The current counter value is not cleared; call
  * SysTick_ResetCurrentValue() explicitly when establishing a new origin.
- * @param[in] pConfig Complete SysTick root configuration
+ * @param[in]	clockSource	SysTick clock-source selector
  * Accepted values:
- * - Non-`NULL`: Valid clock-source selector and reload value in `0U..0xFFFFFFU`
+ * - @ref `SYSTICK_CLOCK_SOURCE_PROCESSOR_DIV8`
+ * - @ref `SYSTICK_CLOCK_SOURCE_PROCESSOR`
+ * @param[in]	reloadValue	SysTick reload-register value
+ * Accepted values:
+ * - `0x00000000UL..0x00FFFFFFUL`
  * @returns @ref driver_status_t "SysTick configuration operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: SysTick configuration was applied
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pConfig` is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A configuration field is invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Both SysTick configuration values were applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `clockSource` or @p `reloadValue` is invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: SysTick counter operation is enabled
  * @pre Counter operation is @ref `DRIVER_STATUS_OFF`
  * @note This API never enables the SysTick exception request
  * @note Internal `SysTick_CTRL` reads clear the hardware `COUNTFLAG`
  */
-driver_status_t SysTick_SetConfig(const systick_config_t* const pConfig);
+driver_status_t SysTick_SetConfig(const systick_clock_source_t clockSource, const systick_reload_value_t reloadValue);
 
 // ==================================================================================================== //
 // SysTick IRQ Source State APIs
@@ -148,27 +142,31 @@ driver_status_t SysTick_SetConfig(const systick_config_t* const pConfig);
 
 /**
  * @brief Returns the SysTick exception-request source state
+ * @details Reads only `SysTick_CTRL.TICKINT`. Root configuration, counter
+ * operation, and any application-owned software tick remain independent.
  * @returns @ref driver_status_t "SysTick IRQ-source state"
  * @retval - @ref `DRIVER_STATUS_OFF`: SysTick exception requests are disabled
  * @retval - @ref `DRIVER_STATUS_ON`: SysTick exception requests are enabled
  * @note SysTick is a Core exception and has no separate NVIC enable bit
  * @note Reading `SysTick_CTRL` clears the hardware `COUNTFLAG`
  */
-driver_status_t SysTick_GetIRQState(void);
+driver_status_t SysTick_GetIRQSourceState(void);
 
 /**
  * @brief Sets the SysTick exception-request source state
- * @param[in] irqState Requested SysTick exception-request source state
+ * @details Updates only `SysTick_CTRL.TICKINT`. SysTick exception delivery has
+ * no separate NVIC enable transaction, priority setting, or pending-state API.
+ * @param[in]	sourceState	Requested SysTick exception-request source state
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`: Disable SysTick exception requests
  * - @ref `DRIVER_STATUS_ON`: Enable SysTick exception requests
  * @returns @ref driver_status_t "SysTick IRQ-source state operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: SysTick IRQ-source state was updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `irqState` is invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `sourceState` is invalid
  * @note Counter operation remains unchanged
  * @note The `SysTick_CTRL` read-modify-write clears the hardware `COUNTFLAG`
  */
-driver_status_t SysTick_SetIRQState(const driver_status_t irqState);
+driver_status_t SysTick_SetIRQSourceState(const driver_status_t sourceState);
 
 // ==================================================================================================== //
 // SysTick Operation State APIs

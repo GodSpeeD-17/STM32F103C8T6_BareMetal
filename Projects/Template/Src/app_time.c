@@ -47,7 +47,6 @@ static volatile uint32_t appTickMs = 0UL;
 driver_status_t App_TimeInit(const frequency_t inputClockHz)
 {
 	frequency_t reloadPeriod = 0UL;
-	systick_config_t config = {0};
 
 	//! Reject an inexact millisecond period before changing any hardware state.
 	if
@@ -69,17 +68,21 @@ driver_status_t App_TimeInit(const frequency_t inputClockHz)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	config.clock_source = SYSTICK_CLOCK_SOURCE_PROCESSOR;
-	config.reload_value = (systick_reload_value_t) (reloadPeriod - 1UL);
-
 	//! Teardown precedes setup so stale IRQ, operation, and partial-period state cannot leak forward.
 	ASSERT_DRIVER_STATUS(SysTick_DeConfig());
-	ASSERT_DRIVER_STATUS(SysTick_SetConfig(&config));
+	ASSERT_DRIVER_STATUS
+	(
+		SysTick_SetConfig
+		(
+			SYSTICK_CLOCK_SOURCE_PROCESSOR,
+			(systick_reload_value_t) (reloadPeriod - 1UL)
+		)
+	);
 
 	//! Establish both software and hardware origins before exception delivery begins.
 	appTickMs = 0UL;
 	SysTick_ResetCurrentValue();
-	ASSERT_DRIVER_STATUS(SysTick_SetIRQState(DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS(SysTick_SetIRQSourceState(DRIVER_STATUS_ON));
 	ASSERT_DRIVER_STATUS(SysTick_SetOperationState(DRIVER_STATUS_ON));
 
 	return DRIVER_STATUS_SUCCESS;

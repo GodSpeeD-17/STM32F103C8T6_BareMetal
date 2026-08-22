@@ -119,9 +119,9 @@ SysTick hardware and application time are intentionally separated:
 Configuration path
 App_TimeInit
 └── SysTick_DeConfig
-    SysTick_SetConfig
+    SysTick_SetConfig(clockSource, reloadValue)
     SysTick_ResetCurrentValue
-    SysTick_SetIRQState(ON)
+    SysTick_SetIRQSourceState(ON)
     SysTick_SetOperationState(ON)
 
 Interrupt path
@@ -198,10 +198,10 @@ guard. Template code obtains fixed-width and shared repository types through
 The shared Driver exposes four cohesive domains:
 
 1. complete hardware reset through `SysTick_DeConfig()`,
-2. register-semantic root configuration through the
-   `SysTick_GetConfig()` / `SysTick_SetConfig()` pair,
+2. explicit clock-source and reload-value root configuration through the
+   scalar `SysTick_GetConfig()` / `SysTick_SetConfig()` pair,
 3. exception-source state through the
-   `SysTick_GetIRQState()` / `SysTick_SetIRQState()` pair,
+   `SysTick_GetIRQSourceState()` / `SysTick_SetIRQSourceState()` pair,
 4. counter-operation state through the
    `SysTick_GetOperationState()` / `SysTick_SetOperationState()` pair.
 
@@ -214,7 +214,8 @@ No Codec layer is present because the admitted clock selector and reload value
 are already exact register-semantic payloads. LL centralizes mechanical access
 through one generic read/write pair; named accessors select registers, Driver
 performs validation and preservation, and application code provides time units
-and interrupt policy.
+and interrupt policy. No configuration structure exists because these two
+single-use scalar values do not form a reusable domain object or invariant.
 
 ## Audit order for a new project
 

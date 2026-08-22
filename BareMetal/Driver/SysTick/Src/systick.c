@@ -45,11 +45,7 @@
 __STATIC_FORCEINLINE driver_status_t _SysTick_ValidateClockSource(const systick_clock_source_t clockSource)
 {
 	//! Admit only complete raw values of the one-bit `CLKSOURCE` field.
-	if
-	(
-		(clockSource == SYSTICK_CLOCK_SOURCE_PROCESSOR_DIV8) ||
-		(clockSource == SYSTICK_CLOCK_SOURCE_PROCESSOR)
-	)
+	if((clockSource == SYSTICK_CLOCK_SOURCE_PROCESSOR_DIV8) || (clockSource == SYSTICK_CLOCK_SOURCE_PROCESSOR))
 	{
 		return DRIVER_STATUS_SUCCESS;
 	}
@@ -60,27 +56,25 @@ __STATIC_FORCEINLINE driver_status_t _SysTick_ValidateClockSource(const systick_
 }
 
 /**
- * @brief Validates a complete SysTick root configuration
- * @param[in] pConfig SysTick root configuration
+ * @brief Validates the supported SysTick root-configuration values
+ * @param[in]	clockSource	SysTick clock-source selector
  * Accepted values:
- * - Non-`NULL`: Valid clock-source selector and 24-bit reload value
+ * - @ref `SYSTICK_CLOCK_SOURCE_PROCESSOR_DIV8`
+ * - @ref `SYSTICK_CLOCK_SOURCE_PROCESSOR`
+ * @param[in]	reloadValue	SysTick reload-register value
+ * Accepted values:
+ * - `0x00000000UL..0x00FFFFFFUL`
  * @returns @ref driver_status_t "SysTick root-configuration validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pConfig` is valid
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pConfig` is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: A configuration field is invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `clockSource` and @p `reloadValue` are valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `clockSource` or @p `reloadValue` is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _SysTick_ValidateConfig(const systick_config_t* const pConfig)
+__STATIC_FORCEINLINE driver_status_t _SysTick_ValidateConfig(const systick_clock_source_t clockSource, const systick_reload_value_t	reloadValue)
 {
-	//! Reject the pointer before inspecting either caller-owned configuration field.
-	if (pConfig == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-
-	ASSERT_DRIVER_STATUS(_SysTick_ValidateClockSource(pConfig->clock_source));
+	//! Validate the selector before checking the independent reload payload.
+	ASSERT_DRIVER_STATUS(_SysTick_ValidateClockSource(clockSource));
 
 	//! Reject bits outside the implemented 24-bit reload field.
-	if ((pConfig->reload_value & ~SYSTICK_RELOAD_VALUE_MAX) != 0x00000000UL)
+	if ((reloadValue & ~SYSTICK_RELOAD_VALUE_MAX) != 0x00000000UL)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -89,19 +83,19 @@ __STATIC_FORCEINLINE driver_status_t _SysTick_ValidateConfig(const systick_confi
 }
 
 /**
- * @brief Validates a binary Driver state selector
- * @param[in] requestedState Requested binary Driver state
+ * @brief Validates a SysTick ON/OFF state selector
+ * @param[in]	state	SysTick state selector
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`
  * - @ref `DRIVER_STATUS_ON`
- * @returns @ref driver_status_t "Binary-state validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `requestedState` is valid
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `requestedState` is invalid
+ * @returns @ref driver_status_t "SysTick state validation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `state` is valid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `state` is invalid
  */
-__STATIC_FORCEINLINE driver_status_t _SysTick_ValidateBinaryState(const driver_status_t requestedState)
+__STATIC_FORCEINLINE driver_status_t _SysTick_ValidateState(const driver_status_t state)
 {
 	//! Share one exact OFF/ON vocabulary across IRQ-source and operation domains.
-	if ((requestedState == DRIVER_STATUS_OFF) || (requestedState == DRIVER_STATUS_ON))
+	if ((state == DRIVER_STATUS_OFF) || (state == DRIVER_STATUS_ON))
 	{
 		return DRIVER_STATUS_SUCCESS;
 	}
@@ -129,45 +123,48 @@ driver_status_t SysTick_DeConfig(void)
 // SysTick Configuration Pair
 // ---------------------------------------------------------------------------------------------------- //
 
-driver_status_t SysTick_GetConfig(systick_config_t* const pConfig)
+driver_status_t SysTick_GetConfig(systick_clock_source_t* const pClockSource, systick_reload_value_t* const pReloadValue)
 {
 	reg controlRegister = 0x00000000UL;
-	systick_config_t config = {0};
+	systick_clock_source_t clockSource = SYSTICK_CLOCK_SOURCE_PROCESSOR_DIV8;
+	systick_reload_value_t reloadValue = 0x00000000UL;
 
-	//! Validate the destination before the destructive `CTRL` read clears `COUNTFLAG`.
-	if (pConfig == NULL)
+	//! Validate both destinations before the destructive `CTRL` read clears `COUNTFLAG`.
+	if ((pClockSource == NULL) || (pReloadValue == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
 	controlRegister = LL_SysTick_ReadCTRL();
-	config.clock_source = (systick_clock_source_t) (controlRegister & SysTick_CTRL_CLKSOURCE);
-	config.reload_value = (systick_reload_value_t) (LL_SysTick_ReadLOAD() & SysTick_LOAD_RELOAD);
+	clockSource = (systick_clock_source_t) (controlRegister & SysTick_CTRL_CLKSOURCE);
+	reloadValue = (systick_reload_value_t) (LL_SysTick_ReadLOAD() & SysTick_LOAD_RELOAD);
 
-	//! Publish only the complete extracted object to avoid partially updated output.
-	*pConfig = config;
+	//! Complete every hardware observation before publishing either scalar result.
+	*pClockSource = clockSource;
+	*pReloadValue = reloadValue;
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t SysTick_SetConfig(const systick_config_t* const pConfig)
+driver_status_t SysTick_SetConfig(const systick_clock_source_t clockSource, const systick_reload_value_t reloadValue)
 {
+	// Local Variable
 	reg controlRegister = 0x00000000UL;
 
 	//! Complete validation precedes the first hardware read or write.
-	ASSERT_DRIVER_STATUS(_SysTick_ValidateConfig(pConfig));
+	ASSERT_DRIVER_STATUS(_SysTick_ValidateConfig(clockSource, reloadValue));
+	controlRegister = LL_SysTick_ReadCTRL();
 
-	//! Configuration is rejected while the counter is consuming the current state.
-	if (SysTick_GetOperationState() == DRIVER_STATUS_ON)
+	//! Reuse the one CTRL snapshot for the busy guard and final field-preserving image.
+	if ((controlRegister & SysTick_CTRL_ENABLE) != 0x00000000UL)
 	{
 		return DRIVER_STATUS_ERROR_BUSY;
 	}
 
-	controlRegister = LL_SysTick_ReadCTRL();
 	controlRegister &= ~SysTick_CTRL_CLKSOURCE;
-	controlRegister |= pConfig->clock_source;
+	controlRegister |= clockSource;
 
 	//! Commit only represented root fields while preserving the separate IRQ-source domain.
-	LL_SysTick_WriteLOAD(pConfig->reload_value);
+	LL_SysTick_WriteLOAD(reloadValue);
 	LL_SysTick_WriteCTRL(controlRegister);
 
 	return DRIVER_STATUS_SUCCESS;
@@ -181,7 +178,7 @@ driver_status_t SysTick_SetConfig(const systick_config_t* const pConfig)
 // SysTick IRQ Source State Pair
 // ---------------------------------------------------------------------------------------------------- //
 
-driver_status_t SysTick_GetIRQState(void)
+driver_status_t SysTick_GetIRQSourceState(void)
 {
 	//! Interpret only `TICKINT`; configuration and operation bits are independent domains.
 	if ((LL_SysTick_ReadCTRL() & SysTick_CTRL_TICKINT) == 0x00000000UL)
@@ -194,15 +191,17 @@ driver_status_t SysTick_GetIRQState(void)
 	}
 }
 
-driver_status_t SysTick_SetIRQState(const driver_status_t irqState)
+driver_status_t SysTick_SetIRQSourceState(const driver_status_t sourceState)
 {
+	// Local Variable
 	reg controlRegister = 0x00000000UL;
 
 	//! Reject invalid state before the `CTRL` read can clear `COUNTFLAG`.
-	ASSERT_DRIVER_STATUS(_SysTick_ValidateBinaryState(irqState));
+	ASSERT_DRIVER_STATUS(_SysTick_ValidateState(sourceState));
 	controlRegister = LL_SysTick_ReadCTRL();
 
-	if (irqState == DRIVER_STATUS_OFF)
+	//! Decide the relevant action based on the requested state
+	if (sourceState == DRIVER_STATUS_OFF)
 	{
 		controlRegister &= ~SysTick_CTRL_TICKINT;
 	}
@@ -213,6 +212,8 @@ driver_status_t SysTick_SetIRQState(const driver_status_t irqState)
 
 	//! Preserve root configuration and counter operation in the staged control image.
 	LL_SysTick_WriteCTRL(controlRegister);
+
+	// Return Status
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -239,10 +240,11 @@ driver_status_t SysTick_GetOperationState(void)
 
 driver_status_t SysTick_SetOperationState(const driver_status_t operationState)
 {
+	// Local Variable
 	reg controlRegister = 0x00000000UL;
 
 	//! Reject invalid state before the `CTRL` read can clear `COUNTFLAG`.
-	ASSERT_DRIVER_STATUS(_SysTick_ValidateBinaryState(operationState));
+	ASSERT_DRIVER_STATUS(_SysTick_ValidateState(operationState));
 	controlRegister = LL_SysTick_ReadCTRL();
 
 	if (operationState == DRIVER_STATUS_OFF)
