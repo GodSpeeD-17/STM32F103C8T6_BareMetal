@@ -720,10 +720,13 @@ own or inject a project's startup implementation.
 
 Name project-owned Template service modules `app_*.*`, including
 `app_startup.[ch]`. Retain conventional filenames only for `main.[ch]` and
-`syscalls.c`. SysTick is an explicit hardware-service exception and retains
-`systick.[ch]` plus the direct `SysTick_` public-function prefix. Symbols called
-by the processor, linker, or C library retain their required ABI names; other
-project-owned public service functions use the `App_` prefix.
+`syscalls.c`. Reusable SysTick hardware access belongs to the shared
+`BareMetal/Driver/SysTick` stack and retains `systick.[ch]` plus the direct
+`SysTick_` public-function prefix. Application time state and the strong
+`SysTick_Handler()` definition belong to the project-owned `app_time` service;
+the handler performs only the minimum state publication needed by main context.
+Symbols called by the processor, linker, or C library retain their required ABI
+names; other project-owned public service functions use the `App_` prefix.
 
 Project include directories take precedence over shared Driver include
 directories so a project-local `startup.h` cannot resolve to legacy shared
@@ -831,6 +834,9 @@ that must remain consistent.
   precedence.
 - 2026-08-22: Kept project-owned SysTick as an explicit `systick.[ch]` and
   `SysTick_` naming exception beneath the application time service.
+- 2026-08-22: Superseded project-local SysTick ownership: moved reusable
+  SysTick hardware state into a shared Driver/LL stack while keeping the
+  software tick and minimal strong `SysTick_Handler()` in `app_time`.
 - 2026-08-22: Required C++ linkage guards in every Template header that
   declares externally linked functions or objects.
 - 2026-08-22: Named the project-owned startup module `app_startup.[ch]` while

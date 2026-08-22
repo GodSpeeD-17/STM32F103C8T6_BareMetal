@@ -11,7 +11,7 @@ Runtime dependencies move downward through four layers:
 Layer 4: Entry              app_startup
 Layer 3: Orchestration      app_init, main
 Layer 2: Services           app_time, app_delay
-Layer 1: Hardware access    systick, RCC Driver, Timer Driver
+Layer 1: Hardware access    shared SysTick, RCC, and Timer Drivers
 ```
 
 Layer numbering always begins at the hardware boundary. Layer 1 owns direct
@@ -29,25 +29,37 @@ Template/
 │   ├── app_delay.h         Blocking millisecond and optional microsecond APIs
 │   ├── app_init.h          Application-service initialization contract
 │   ├── app_startup.h       Reset ABI and linker-symbol declarations
-│   ├── app_time.h          Monotonic millisecond observation APIs
-│   ├── main.h              Application entry-point declaration
-│   └── systick.h           Project-owned SysTick hardware service
+│   ├── app_time.h          Timebase state, observation, and handler ABI
+│   └── main.h              Application entry-point declaration
 └── Src/
     ├── app_delay.c         SysTick millisecond wait and optional Timer wait
     ├── app_init.c          Clock and explicitly enabled service initialization
     ├── app_startup.c       Vector table, RAM initialization, App_Init, main
-    ├── app_time.c          Wrap-safe application time calculations
+    ├── app_time.c          Millisecond state, calculations, and minimal ISR
     ├── main.c              Application behavior only
-    ├── syscalls.c          C-library heap adapter
-    └── systick.c           SysTick configuration and minimal tick ISR
+    └── syscalls.c          C-library heap adapter
+```
+
+Reusable SysTick hardware lives outside the copied project:
+
+```text
+BareMetal/Driver/SysTick/
+├── Inc/
+│   ├── systick.h           Public hardware configuration and state API
+│   └── systick_ll.h        Full-width register access only
+├── Src/
+│   └── systick.c           Validation and register transaction orchestration
+└── SYSTICK.md              Hardware and implementation guide
 ```
 
 ## Default timing policy
 
-SysTick runs at 1 kHz and increments one 32-bit millisecond counter. It supports
-both non-blocking elapsed-time checks and `App_DelayMs()`. The blocking API
-sleeps with `WFI` between interrupts; it must not be called from an exception
-or while global interrupts are disabled.
+The shared SysTick Driver configures hardware, but `app_time.c` owns the strong
+`SysTick_Handler()` and one 32-bit millisecond counter. The interrupt performs
+one increment only. Main context uses the counter for non-blocking elapsed-time
+checks, while `App_DelayMs()` provides an optional blocking wait that sleeps
+with `WFI` between interrupts. The blocking API must not be called from an
+exception or while global interrupts are disabled.
 
 TIM2, TIM3, and TIM4 remain unconfigured in the default application.
 
@@ -62,7 +74,6 @@ app_startup.h          -> shared Core scalar/status types
 app_time.h             -> app_config.h + shared Core scalar/status types
 app_delay.h            -> app_config.h + shared Core scalar/status types
 app_init.h             -> shared Core status types
-systick.h              -> shared Core scalar/status types
 ```
 
 Peer implementation files may compose these public contracts, but public
@@ -85,7 +96,7 @@ Processor reset
     ├── app_init.c
     │   ├── RCC Driver
     │   ├── app_time.c
-    │   │   └── systick.c -> Core SysTick register map
+    │   │   └── shared SysTick Driver -> SysTick LL -> Core register map
     │   └── app_delay.c [optional Timer initialization]
     │       ├── RCC Driver
     │       └── Timer Driver
@@ -101,11 +112,26 @@ C library allocation
 └── syscalls.c -> linker heap symbols
 ```
 
-Lower services never include their consumers: SysTick does not include
-`app_time`, `app_time` does not include `app_delay`, and Drivers do not include
-application headers. Every C and header file states its hierarchy position,
-responsibility, direct users/dependencies, and prohibited ownership at the top
-so its boundary remains understandable when the file is read by itself.
+Lower services never include their consumers: the SysTick Driver does not
+include `app_time`, `app_time` does not include `app_delay`, and no Driver
+includes an application header. The vector table refers to the handler ABI,
+while the enabled application time service supplies its strong definition.
+Every C and header file states its hierarchy position, responsibility, direct
+users/dependencies, and prohibited ownership at the top so its boundary remains
+understandable when the file is read by itself.
+
+## Optional SysTick timebase
+
+The timebase is enabled by default. Disable it at configure time when an
+application does not need elapsed milliseconds or `App_DelayMs()`:
+
+```sh
+cmake -S . -B Build -DAPP_ENABLE_SYSTICK_TIMEBASE=OFF
+```
+
+This removes the SysTick Driver module, the strong application handler, and all
+timebase APIs from the build. Startup retains only its weak fallback handler;
+SysTick hardware remains untouched.
 
 ## Optional microsecond delay
 

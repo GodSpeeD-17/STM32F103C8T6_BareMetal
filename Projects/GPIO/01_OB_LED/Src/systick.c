@@ -30,7 +30,7 @@ void SysTick_Set_Ticks(uint32_t tick_value)
 	// Set the Current number of Ticks as `tick_value`
 	tickCount = tick_value;
 	// Update the SysTick Current Value Register (24-bit)
-	SysTick->VAL = SYSTICK_WRAP_VAL(tick_value - 1);
+	SysTick->VAL.REG = SYSTICK_WRAP_VAL(tick_value - 1);
 	// SysTick Enable
 	SysTick_Enable();
 }
@@ -46,9 +46,9 @@ void SysTick_Config(uint32_t reloadValue)
 	// Reset Value
 	SysTick->CTRL.REG = 0x00;
 	// Set Reload Value
-	SysTick->LOAD = SYSTICK_WRAP_VAL(reloadValue - 1);
+	SysTick->LOAD.REG = SYSTICK_WRAP_VAL(reloadValue - 1);
 	// Set Current Value as `reloadValue`
-	SysTick->VAL = SYSTICK_WRAP_VAL(reloadValue - 1);
+	SysTick->VAL.REG = SYSTICK_WRAP_VAL(reloadValue - 1);
 	// Set Core as Reference Clock & enable SysTick Interrupt
 	SysTick->CTRL.REG = (SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk);
 }

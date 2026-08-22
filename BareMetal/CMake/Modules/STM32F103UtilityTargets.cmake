@@ -187,8 +187,6 @@ function(stm32_add_maintenance_targets)
 
     add_replace_target(replace_main_h "main.h" "${PROJ_DIR}/Inc")
     add_replace_target(replace_app_startup_h "app_startup.h" "${PROJ_DIR}/Inc")
-    add_replace_target(replace_systick_h "systick.h" "${PROJ_DIR}/Inc")
-    add_replace_target(replace_systick_c "systick.c" "${PROJ_DIR}/Src")
     add_replace_target(replace_app_startup_c "app_startup.c" "${PROJ_DIR}/Src")
     add_replace_target(replace_cmake "CMakeLists.txt" "${PROJ_DIR}")
 endfunction()

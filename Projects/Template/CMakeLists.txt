@@ -16,11 +16,15 @@ stm32f103_setup_toolchain()
 get_filename_component(_stm32_project_name "${CMAKE_CURRENT_LIST_DIR}" NAME)
 project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C ASM)
 
-# Application feature selection. Enabling the Timer delay adds the Timer
-# module to the build and exposes the matching app_delay API.
+# Application feature selection. Each enabled hardware-backed service adds
+# only its owning Driver module and the matching application API.
+option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 
 set(app_driver_modules RCC)
+if(APP_ENABLE_SYSTICK_TIMEBASE)
+    list(APPEND app_driver_modules SysTick)
+endif()
 if(APP_ENABLE_TIMER_US_DELAY)
     list(APPEND app_driver_modules Timer)
 endif()
@@ -35,5 +39,6 @@ stm32f103_configure_project(
 )
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+    APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
 )

@@ -12,7 +12,7 @@
  * - Layer 3 - Orchestration: `app_init` initializes services and `main` runs
  *   application behavior
  * - Layer 2 - Services: `app_time` and `app_delay` provide reusable operations
- * - Layer 1 - Hardware access: `systick` and shared RCC/Timer Drivers
+ * - Layer 1 - Hardware access: shared SysTick, RCC, and Timer Drivers
  * Layer 1 is always closest to hardware. Increasing layer numbers represent
  * progressively more software-only behavior, policy, and orchestration.
  *
@@ -25,7 +25,8 @@
  *
  * @section APP_CONFIG_H_BOUNDARY Dependency Boundary
  * This file includes no project, Core, or Driver header. It selects features
- * and publishes constants only; hardware initialization belongs to Layer 3.
+ * and publishes constants only. Layer 3 orders enabled services; Layer 2
+ * services request their Layer 1 hardware transactions.
  */
 
 // Header Guard
@@ -45,7 +46,8 @@
  * These macros select which timing capabilities are compiled, define the
  * application timebase contract, and map an optional dedicated Timer service
  * to its hardware instance and RCC clock gate. Defining a macro publishes
- * policy only; Layer 3 initialization performs every hardware transaction.
+ * policy only; Layer 3 orders initialization while each Layer 2 service owns
+ * its cohesive Layer 1 hardware transaction.
  * @{
  */
 
@@ -53,14 +55,16 @@
 // SysTick Timebase Configuration
 // ==================================================================================================== //
 
+#ifndef APP_ENABLE_SYSTICK_TIMEBASE
 /**
  * @brief Selects the SysTick-backed application millisecond timebase
  * @def APP_ENABLE_SYSTICK_TIMEBASE
  * @details
- * This is the master compile-time switch for monotonic application time.
- * App_Init() starts SysTick, `app_time` exposes tick/elapsed APIs, `main`
+ * CMake normally defines this master switch from
+ * `APP_ENABLE_SYSTICK_TIMEBASE`. When enabled, the build adds the shared
+ * SysTick Driver, App_Init() starts the application time service, `main`
  * enables its non-blocking periodic example, and App_DelayMs() becomes
- * operational only when this value is `1U`.
+ * operational. This fallback supports builds that do not inject the option.
  * Accepted values:
  * - `0U`: Omit application timebase initialization and time-dependent behavior
  * - `1U`: Compile and initialize the SysTick-backed millisecond capability
@@ -71,13 +75,15 @@
  */
 #define APP_ENABLE_SYSTICK_TIMEBASE		(1U)
 
+#endif /* APP_ENABLE_SYSTICK_TIMEBASE */
+
 /**
  * @brief Defines the SysTick interrupt rate that represents milliseconds
  * @def APP_SYSTICK_TICK_HZ
  * @details
- * App_TimeInit() passes this frequency to SysTick_SetConfig(). At `1000UL`, one
- * interrupt represents one millisecond, so the software tick count can be
- * returned directly by App_TimeGetTickMs() without conversion or division.
+ * App_TimeInit() converts this frequency and the processor clock into the
+ * register-semantic SysTick reload value. At `1000UL`, one interrupt
+ * represents one millisecond, so App_TimeGetTickMs() requires no conversion.
  * Accepted values:
  * - `1000UL`: Required rate for the current one-tick-equals-one-millisecond contract
  * @note The configured AHB clock must be exactly divisible by this frequency

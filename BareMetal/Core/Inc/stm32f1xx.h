@@ -66,9 +66,6 @@ extern "C" {
 #define SCB										((SCB_TypeDef*) SCB_BASE_ADDR)
 /** @brief Nested Vectored Interrupt Controller  (Cortex-M3 Core Peripheral) @def NVIC */
 #define NVIC									((NVIC_TypeDef*) NVIC_BASE_ADDR)
-/** @brief System Timer  (Cortex-M3 Core Peripheral) @def SysTick */
-#define SysTick									((SysTick_TypeDef*) SysTick_BASE_ADDR)
-
 // ------------------------------------------------------------------------------------------
 // AHB Peripherals
 // ------------------------------------------------------------------------------------------
