@@ -390,6 +390,35 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMa
 }
 
 /**
+ * @brief	Gets AHB peripheral clock gate state
+ * @param[in] clockMask	AHB clock enable mask from RCC register definitions
+ * @returns AHB clock gate state or driver error status
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested AHB clock gates are disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested AHB clock gates are enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockGetState(const uint32_t clockMask)
+{
+	reg regImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! Read the full gate register once through the named LL accessor, matching every other RCC gate query.
+	regImage = LL_RCC_ReadAHBENR();
+	if ((regImage & clockMask) == clockMask)
+	{
+		return DRIVER_STATUS_ON;
+	}
+	else
+	{
+		return DRIVER_STATUS_OFF;
+	}
+}
+
+/**
  * @brief	Enables APB2 peripheral clock gates
  * @param[in] clockMask	APB2 clock enable mask from RCC register definitions
  * @returns - @ref driver_status_t Driver operation status
@@ -411,6 +440,35 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMa
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
 {
 	return LL_RCC_DisableAPB2Clock(clockMask);
+}
+
+/**
+ * @brief	Gets APB2 peripheral clock gate state
+ * @param[in] clockMask	APB2 clock enable mask from RCC register definitions
+ * @returns APB2 clock gate state or driver error status
+ * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB2 clock gates are disabled.
+ * @retval - @ref `DRIVER_STATUS_ON`: Requested APB2 clock gates are enabled.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero or invalid.
+ */
+__STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockGetState(const uint32_t clockMask)
+{
+	reg regImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! Read the full gate register once through the named LL accessor, matching every other RCC gate query.
+	regImage = LL_RCC_ReadAPB2ENR();
+	if ((regImage & clockMask) == clockMask)
+	{
+		return DRIVER_STATUS_ON;
+	}
+	else
+	{
+		return DRIVER_STATUS_OFF;
+	}
 }
 
 /**
@@ -569,38 +627,33 @@ driver_status_t RCC_ConfigFlash(const rcc_flash_config_t* const pFlashConfig);
  */
 
 /**
- * @brief	Switches SYSCLK to HSI and validates the transition with a timeout
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: HSI became ready and SYSCLK switched to HSI successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: HSI did not become ready or SYSCLK did not switch within the timeout window.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
- */
-driver_status_t RCC_SwitchClockSourceToHSI(void);
-
-/**
- * @brief	Switches SYSCLK to HSE and validates the transition with a timeout
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: HSE became ready and SYSCLK switched to HSE successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: HSE did not become ready or SYSCLK did not switch within the timeout window.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
- */
-driver_status_t RCC_SwitchClockSourceToHSE(void);
-
-/**
- * @brief	Switches SYSCLK to PLL and validates the transition with a timeout
- * @returns - @ref driver_status_t Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: PLL was ready and SYSCLK switched to PLL successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: PLL was not ready when the switch was requested.
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: SYSCLK did not switch to PLL within the timeout window.
- * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
- */
-driver_status_t RCC_SwitchClockSourceToPLL(void);
-
-/**
  * @brief	Returns the active system clock source
  * @returns	Current system clock source as @ref rcc_system_clock_t
  */
-rcc_system_clock_t RCC_GetSysClkSrc(void);
+rcc_system_clock_t RCC_GetSystemClockSource(void);
+
+/**
+ * @brief	Selects SYSCLK and validates the transition with a timeout
+ * @details
+ * Dispatches to the HSI, HSE, or PLL enable-and-switch sequence required by
+ * @p source. Every path enables the requested oscillator/PLL, waits for its
+ * ready flag, programs `CFGR.SW`, and waits for `CFGR.SWS` to confirm the
+ * switch before refreshing the cached frequency snapshot.
+ * @param[in] source	Requested system clock source
+ * Accepted values:
+ * - @ref `RCC_SYS_CLK_HSI`: Enables HSI and switches SYSCLK to HSI
+ * - @ref `RCC_SYS_CLK_HSE`: Enables HSE and switches SYSCLK to HSE
+ * - @ref `RCC_SYS_CLK_PLL`: Switches SYSCLK to the already-configured PLL
+ * @returns @ref driver_status_t "System clock source selection status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested source became ready and SYSCLK switched successfully.
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a supported selector.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `RCC_SYS_CLK_PLL` was requested while the PLL was not ready.
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: The requested source did not become ready, or SYSCLK did not switch, within the timeout window.
+ * @retval - @ref `DRIVER_STATUS_ERROR`: Hardware status could not be read during the transition.
+ * @note Selecting @ref `RCC_SYS_CLK_PLL` requires the PLL to already be configured and ready; this
+ * function does not program PLL source, divider, or multiplier fields.
+ */
+driver_status_t RCC_SetSystemClockSource(const rcc_system_clock_t source);
 
 /**
  * @brief	Returns the active PLL source selection
@@ -720,95 +773,6 @@ void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig);
 driver_status_t RCC_Config72MHz(void);
 
 /** @} */ // RCC_03_Driver_06_Config
-
-// ==================================================================================================== //
-//                                  RCC Legacy Compatibility Wrappers                                   //
-// ==================================================================================================== //
-
-/**
- * @brief	Legacy inline compatibility wrappers
- * @defgroup RCC_03_Driver_08_Legacy RCC Driver Legacy Compatibility Wrappers
- * @ingroup	RCC_03_Driver
- * @{
- */
-
-/**
- * @brief	Legacy wrapper that returns the current AHB clock frequency
- * @returns @ref frequency_t "AHB clock frequency in hertz"
- */
-__STATIC_FORCEINLINE frequency_t RCC_GetAHBClock(void)
-{
-	return RCC_GetBusFreq(RCC_AHB_BUS);
-}
-
-/**
- * @brief	Legacy wrapper that returns the current APB1 clock frequency
- * @returns @ref frequency_t "APB1 clock frequency in hertz"
- */
-__STATIC_FORCEINLINE frequency_t RCC_GetAPB1Clock(void)
-{
-	return RCC_GetBusFreq(RCC_APB1_BUS);
-}
-
-/**
- * @brief	Legacy wrapper that returns the current APB2 clock frequency
- * @returns @ref frequency_t "APB2 clock frequency in hertz"
- */
-__STATIC_FORCEINLINE frequency_t RCC_GetAPB2Clock(void)
-{
-	return RCC_GetBusFreq(RCC_APB2_BUS);
-}
-
-/**
- * @brief	Legacy wrapper for @ref RCC_GetClockFrequencies
- * @param[out] pClockFrequencies	Pointer to @ref rcc_clock_frequencies_t
- * @returns	@ref driver_status_t Driver operation status
- */
-__STATIC_FORCEINLINE driver_status_t RCC_ClockFrequenciesGet(rcc_clock_frequencies_t* const pClockFrequencies)
-{
-	return RCC_GetClockFrequencies(pClockFrequencies);
-}
-
-/**
- * @brief	Legacy wrapper for @ref RCC_ConfigBusPrescalers
- * @param[in] pBusConfig	Pointer to @ref rcc_bus_config_t
- * @returns	@ref driver_status_t Driver operation status
- */
-__STATIC_FORCEINLINE driver_status_t RCC_ConfigBusPrescaler(const rcc_bus_config_t* const pBusConfig)
-{
-	return RCC_ConfigBusPrescalers(pBusConfig);
-}
-
-/**
- * @brief	Legacy wrapper for @ref RCC_ConfigComponentPrescalers
- * @param[in] pComponentConfig	Pointer to @ref rcc_component_config_t
- * @returns	@ref driver_status_t Driver operation status
- */
-__STATIC_FORCEINLINE driver_status_t RCC_ConfigComponentPrescaler(const rcc_component_config_t* const pComponentConfig)
-{
-	return RCC_ConfigComponentPrescalers(pComponentConfig);
-}
-
-/**
- * @brief	Legacy wrapper for @ref RCC_Load72MHzDefaultConfig
- * @param[out] pRCCConfig	Pointer to @ref rcc_config_t
- * @returns	Void
- */
-__STATIC_FORCEINLINE void RCC_72MHz_LoadDefaultConfig(rcc_config_t* const pRCCConfig)
-{
-	RCC_Load72MHzDefaultConfig(pRCCConfig);
-}
-
-/**
- * @brief	Legacy wrapper for @ref RCC_Config72MHz
- * @returns	@ref driver_status_t Driver operation status
- */
-__STATIC_FORCEINLINE driver_status_t RCC_Config_72MHz(void)
-{
-	return RCC_Config72MHz();
-}
-
-/** @} */ // RCC_03_Driver_08_Legacy
 
 /** @} */ // RCC_03_Driver
 

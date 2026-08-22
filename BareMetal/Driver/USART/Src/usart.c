@@ -22,7 +22,7 @@ void USART_Config(usart_config_t* USART_CONFIGx){
 	USART_clk_enable(USART_CONFIGx);
 	// Configure Baud Rate
 	if(USART_CONFIGx->USARTx == USART1)
-		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetAPB2Clock()/(USART_CONFIGx->baud_rate));
+		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusFreq(RCC_APB2_BUS)/(USART_CONFIGx->baud_rate));
 	else
 		USART_CONFIGx->USARTx->BRR.REG = (uint32_t)(RCC_GetBusFreq(RCC_APB1_BUS)/(USART_CONFIGx->baud_rate));
 	// Configure Stop Bits
@@ -336,7 +336,7 @@ driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudR
 	frequency_t clockFrequency = RCC_FREQ_ZERO;
 	if (usart == USART_1)
 	{
-		clockFrequency = RCC_GetAPB2Clock();
+		clockFrequency = RCC_GetBusFreq(RCC_APB2_BUS);
 	}
 	else
 	{

@@ -42,7 +42,7 @@
 driver_status_t App_Init(void)
 {
 	//! Establish the application clock tree before initializing clock-dependent services.
-	ASSERT_DRIVER_STATUS(RCC_Config_72MHz());
+	ASSERT_DRIVER_STATUS(RCC_Config72MHz());
 
 #if (APP_ENABLE_SYSTICK_TIMEBASE == 1U)
 	//! Initialize the monotonic service only after its AHB input clock is final.

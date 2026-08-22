@@ -558,7 +558,7 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	systemClockSource = RCC_GetSysClkSrc();
+	systemClockSource = RCC_GetSystemClockSource();
 
 	switch (systemClockSource)
 	{
@@ -817,35 +817,43 @@ driver_status_t RCC_ConfigComponentPrescalers(const rcc_component_config_t* cons
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_SwitchClockSourceToHSI(void)
+driver_status_t RCC_SetSystemClockSource(const rcc_system_clock_t source)
 {
-	LL_RCC_EnableHSI();
-	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSIReadyStatus, DRIVER_STATUS_READY));
-	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSI));
-	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_HSI));
-	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_SwitchClockSourceToHSE(void)
-{
-	LL_RCC_EnableHSE();
-	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSEReadyStatus, DRIVER_STATUS_READY));
-	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSE));
-	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_HSE));
-	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
-	return DRIVER_STATUS_SUCCESS;
-}
-
-driver_status_t RCC_SwitchClockSourceToPLL(void)
-{
-	if (LL_RCC_GetPLLReadyStatus() != DRIVER_STATUS_READY)
+	//! Dispatch to the exact per-source enable/ready/switch sequence formerly split across three functions.
+	switch (source)
 	{
-		return DRIVER_STATUS_ERROR_STATE;
+		case RCC_SYS_CLK_HSI:
+		{
+			LL_RCC_EnableHSI();
+			ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSIReadyStatus, DRIVER_STATUS_READY));
+			ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSI));
+			break;
+		}
+		case RCC_SYS_CLK_HSE:
+		{
+			LL_RCC_EnableHSE();
+			ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSEReadyStatus, DRIVER_STATUS_READY));
+			ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSE));
+			break;
+		}
+		case RCC_SYS_CLK_PLL:
+		{
+			//! PLL selection never enables the PLL itself; the caller must have already configured and started it.
+			if (LL_RCC_GetPLLReadyStatus() != DRIVER_STATUS_READY)
+			{
+				return DRIVER_STATUS_ERROR_STATE;
+			}
+
+			ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_PLL));
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
 	}
 
-	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_PLL));
-	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_PLL));
+	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(source));
 	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -861,13 +869,13 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	activeSource = RCC_GetSysClkSrc();
+	activeSource = RCC_GetSystemClockSource();
 	LL_RCC_EnableHSI();
 	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSIReadyStatus, DRIVER_STATUS_READY));
 
 	if (activeSource == RCC_SYS_CLK_PLL)
 	{
-		ASSERT_DRIVER_STATUS(RCC_SwitchClockSourceToHSI());
+		ASSERT_DRIVER_STATUS(RCC_SetSystemClockSource(RCC_SYS_CLK_HSI));
 		activeSource = RCC_SYS_CLK_HSI;
 	}
 
@@ -922,7 +930,7 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 		{
 			if (activeSource != RCC_SYS_CLK_HSI)
 			{
-				ASSERT_DRIVER_STATUS(RCC_SwitchClockSourceToHSI());
+				ASSERT_DRIVER_STATUS(RCC_SetSystemClockSource(RCC_SYS_CLK_HSI));
 			}
 			break;
 		}
@@ -930,13 +938,13 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 		{
 			if (activeSource != RCC_SYS_CLK_HSE)
 			{
-				ASSERT_DRIVER_STATUS(RCC_SwitchClockSourceToHSE());
+				ASSERT_DRIVER_STATUS(RCC_SetSystemClockSource(RCC_SYS_CLK_HSE));
 			}
 			break;
 		}
 		case RCC_SYS_CLK_PLL:
 		{
-			ASSERT_DRIVER_STATUS(RCC_SwitchClockSourceToPLL());
+			ASSERT_DRIVER_STATUS(RCC_SetSystemClockSource(RCC_SYS_CLK_PLL));
 			break;
 		}
 		default:
@@ -1027,7 +1035,7 @@ driver_status_t RCC_Config72MHz(void)
 //                                   Driver Status and Frequency APIs                                   //
 // ==================================================================================================== //
 
-rcc_system_clock_t RCC_GetSysClkSrc(void)
+rcc_system_clock_t RCC_GetSystemClockSource(void)
 {
 	uint32_t			status = RCC_CFGR_SWS_HSI;
 	rcc_system_clock_t	source = RCC_SYS_CLK_HSI;
