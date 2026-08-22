@@ -81,9 +81,17 @@ Each example project follows the same shape:
 
 Project `CMakeLists.txt` files call:
 
-- `stm32f103_setup_toolchain()` before `project(...)`.
-- `stm32f103_configure_project(...)` after `project(...)`.
-- `DRIVER_MODULES` to select only the required driver modules.
+- `stm32f103_setup_toolchain()` before `project(...)` to select the canonical
+  Arm GNU toolchain file.
+- `stm32f103_configure_project(...)` after `project(...)` to create the
+  firmware and utility targets.
+- `DRIVER_MODULES` to select application capabilities. Direct Driver
+  dependencies are resolved by the shared component graph.
+
+The shared pipeline represents build policy, Core, and every selected Driver
+as separate CMake targets. Each component owns its sources, include directory,
+and direct dependencies; the application target owns only application sources,
+feature definitions, and the final linker transaction.
 
 ## Build Workflow
 
@@ -108,7 +116,28 @@ cmake --build Build --target info
 
 The shared CMake pipeline generates `.elf`, `.bin`, `.hex`, a memory report, and
 optional VS Code debug metadata. The default Arm GNU toolchain path is configured
-in `BareMetal/CMake/STM32F103Project.cmake`.
+by `BareMetal/CMake/Toolchains/arm-none-eabi-gcc.cmake`.
+
+Generate VS Code metadata only when it is required:
+
+```bash
+cmake --build Build --target vscode_files
+```
+
+The generated editor configuration reads `Build/compile_commands.json`, so
+IntelliSense observes the exact compiler definitions, include paths, and flags
+used by the active application configuration.
+
+Projects stored inside this repository locate the shared `BareMetal` build
+infrastructure automatically. A project copied outside the repository can select
+that infrastructure explicitly:
+
+```bash
+cmake -S . -B Build \
+    -DSTM32F103_REPO_ROOT=/absolute/path/to/STM32F103C8T6
+```
+
+`STM32F103_REPO_ROOT` must identify the directory that contains `BareMetal`.
 
 ## Device Notes
 

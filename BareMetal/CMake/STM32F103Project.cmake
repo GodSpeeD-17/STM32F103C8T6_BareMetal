@@ -1,9 +1,8 @@
 include_guard(GLOBAL)
 
-# Public project-facing entrypoints.
-# `stm32f103_setup_toolchain()` is called before `project(...)`, while
-# `stm32f103_configure_project()` is called after `project(...)` to push
-# project-specific options into the shared template pipeline.
+# Public project-facing entrypoints. `stm32f103_setup_toolchain()` selects the
+# canonical toolchain file before `project(...)`, while
+# `stm32f103_configure_project()` applies application policy afterward.
 
 set(STM32F103_PROJECT_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -12,25 +11,34 @@ macro(stm32f103_setup_toolchain)
     set(one_value_args TOOLCHAIN_PATH)
     cmake_parse_arguments(STM32_TOOLCHAIN "${options}" "${one_value_args}" "" ${ARGN})
 
-    # Allow per-project override, but keep the common workstation path as
-    # the default so most example projects stay zero-config.
+    # Preserve a command-line cache override, then let an explicit function
+    # argument take final precedence over the workstation default.
     set(_toolchain_path "/opt/arm-gnu-toolchain-14.3/bin")
+    if(DEFINED TOOLCHAIN_PATH AND NOT "${TOOLCHAIN_PATH}" STREQUAL "")
+        set(_toolchain_path "${TOOLCHAIN_PATH}")
+    endif()
     if(STM32_TOOLCHAIN_TOOLCHAIN_PATH)
         set(_toolchain_path "${STM32_TOOLCHAIN_TOOLCHAIN_PATH}")
     endif()
-    set(TOOLCHAIN_PATH "${_toolchain_path}" CACHE PATH "Arm GNU toolchain binary directory")
+    set(TOOLCHAIN_PATH "${_toolchain_path}" CACHE PATH "Arm GNU toolchain binary directory" FORCE)
 
-    # These cache/toolchain variables must be established before `project()`
-    # so CMake does not probe the host compiler first.
-    set(CMAKE_SYSTEM_NAME Generic)
-    set(CMAKE_SYSTEM_PROCESSOR arm)
-    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-    set(CMAKE_SYSTEM_TOOLCHAIN_PREFIX "${CMAKE_SYSTEM_PROCESSOR}-none-eabi")
+    # Select the standard CMake toolchain entrypoint before project() performs
+    # compiler identification. Existing projects retain one simple bootstrap
+    # call while tool selection is no longer implemented inside that call.
+    set(
+        CMAKE_TOOLCHAIN_FILE
+        "${STM32F103_PROJECT_MODULE_DIR}/Toolchains/arm-none-eabi-gcc.cmake"
+        CACHE FILEPATH
+        "STM32F103 Arm GNU toolchain file"
+        FORCE
+    )
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compiler commands for tooling" FORCE)
+
+    # An existing binary directory does not reload a newly selected toolchain
+    # file after compiler identification. Mirror its non-compiler prefix state
+    # so legacy Build directories can migrate without requiring deletion.
+    set(CMAKE_SYSTEM_TOOLCHAIN_PREFIX "arm-none-eabi")
     set(TOOLCHAIN_PREFIX "${TOOLCHAIN_PATH}/${CMAKE_SYSTEM_TOOLCHAIN_PREFIX}")
-    set(CMAKE_C_COMPILER "${TOOLCHAIN_PREFIX}-gcc")
-    set(CMAKE_ASM_COMPILER "${TOOLCHAIN_PREFIX}-gcc")
-    set(CMAKE_CXX_COMPILER "${TOOLCHAIN_PREFIX}-g++")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endmacro()
 
 macro(stm32f103_configure_project)
@@ -59,7 +67,7 @@ macro(stm32f103_configure_project)
     # on the same canonical paths.
     get_filename_component(PROJ_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
     get_filename_component(BAREMETAL_ROOT "${STM32F103_PROJECT_MODULE_DIR}/.." ABSOLUTE)
-    set(CMAKE_ROOT "${BAREMETAL_ROOT}/CMake")
+    set(STM32_CMAKE_ROOT "${BAREMETAL_ROOT}/CMake")
     get_filename_component(CORE_ROOT "${BAREMETAL_ROOT}/Core" ABSOLUTE)
     get_filename_component(REPO_ROOT "${BAREMETAL_ROOT}/.." ABSOLUTE)
     set(DRIVER_ROOT "${BAREMETAL_ROOT}/Driver")
@@ -67,7 +75,7 @@ macro(stm32f103_configure_project)
     # Everything below remains project-specific on purpose. These are the
     # knobs a project may reasonably change for bootloaders, custom linkers,
     # alternate tool paths, or different output locations.
-    set(_build_output_dir "${PROJ_DIR}/Build")
+    set(_build_output_dir "${CMAKE_CURRENT_BINARY_DIR}/Artifacts")
     if(STM32_BUILD_OUTPUT_DIR)
         set(_build_output_dir "${STM32_BUILD_OUTPUT_DIR}")
     endif()
@@ -136,5 +144,5 @@ macro(stm32f103_configure_project)
     set(DRIVER_MODULES ${STM32_DRIVER_MODULES})
 
     # Hand off to the shared build pipeline once the project config is ready.
-    include("${CMAKE_ROOT}/CMake_Template.cmake")
+    include("${STM32_CMAKE_ROOT}/CMake_Template.cmake")
 endmacro()

@@ -1,7 +1,24 @@
 include_guard(GLOBAL)
 
-# Source discovery and module-tree rendering live together because they both
-# derive from the selected driver module list.
+# This module converts the requested Driver names into target-owned components.
+# Applications retain the compact DRIVER_MODULES interface while every Core and
+# Driver target owns its sources, include directories, and direct dependencies.
+
+# Direct Driver dependencies form one downward build graph. Transitive modules
+# are resolved automatically, so an application selects capabilities instead of
+# repeating the implementation dependencies of each capability.
+set(STM32_DRIVER_ADC_DEPENDENCIES GPIO)
+set(STM32_DRIVER_BSP_DEPENDENCIES GPIO)
+set(STM32_DRIVER_DMA_DEPENDENCIES "")
+set(STM32_DRIVER_GPIO_DEPENDENCIES RCC)
+set(STM32_DRIVER_I2C_DEPENDENCIES RCC)
+set(STM32_DRIVER_NVIC_DEPENDENCIES "")
+set(STM32_DRIVER_RCC_DEPENDENCIES "")
+set(STM32_DRIVER_Ring_Buffer_DEPENDENCIES "")
+set(STM32_DRIVER_SSD1306_DEPENDENCIES I2C Ring_Buffer)
+set(STM32_DRIVER_SysTick_DEPENDENCIES "")
+set(STM32_DRIVER_Timer_DEPENDENCIES RCC)
+set(STM32_DRIVER_USART_DEPENDENCIES RCC GPIO)
 
 function(stm32_tree_emit_line prefix is_last label)
     if(is_last)
@@ -11,145 +28,220 @@ function(stm32_tree_emit_line prefix is_last label)
     endif()
 endfunction()
 
-function(add_driver_module)
-    # The first optional argument controls whether the tree shows full paths
-    # or just filenames. Everything else is interpreted as a driver module.
-    set(show_full_path OFF)
-    set(module_names "")
+function(stm32_resolve_driver_modules output_variable)
+    set(resolved_modules ${DRIVER_MODULES})
+    set(module_index 0)
+    list(LENGTH resolved_modules module_count)
 
-    foreach(arg IN LISTS ARGN)
-        if(arg STREQUAL "SHOW_FULL_PATH")
-            set(show_full_path ON)
-        elseif(arg STREQUAL "SHOW_FILENAME_ONLY")
-            set(show_full_path OFF)
+    # Process appended dependencies in the same loop until the complete
+    # transitive closure is known. list(FIND) preserves first-requested order.
+    while(module_index LESS module_count)
+        list(GET resolved_modules ${module_index} module_name)
+        set(module_directory "${DRIVER_ROOT}/${module_name}")
+        if(NOT IS_DIRECTORY "${module_directory}")
+            message(FATAL_ERROR "Unknown Driver module '${module_name}': ${module_directory}")
+        endif()
+
+        set(dependency_variable "STM32_DRIVER_${module_name}_DEPENDENCIES")
+        foreach(dependency_name IN LISTS ${dependency_variable})
+            list(FIND resolved_modules "${dependency_name}" dependency_index)
+            if(dependency_index EQUAL -1)
+                list(APPEND resolved_modules "${dependency_name}")
+            endif()
+        endforeach()
+
+        math(EXPR module_index "${module_index} + 1")
+        list(LENGTH resolved_modules module_count)
+    endwhile()
+
+    set(${output_variable} "${resolved_modules}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_register_core_target)
+    file(GLOB_RECURSE core_sources CONFIGURE_DEPENDS
+        "${CORE_ROOT}/Src/*.c"
+        "${CORE_ROOT}/Src/*.cpp"
+        "${CORE_ROOT}/Src/*.cxx"
+        "${CORE_ROOT}/Src/*.s"
+        "${CORE_ROOT}/Src/*.S"
+    )
+
+    # Core is currently header-only, but the OBJECT/INTERFACE split allows a
+    # future shared Core source to remain owned by this same stable target.
+    if(core_sources)
+        add_library(stm32_core OBJECT ${core_sources})
+        target_include_directories(stm32_core PUBLIC "${CORE_ROOT}/Inc")
+        target_link_libraries(stm32_core PUBLIC stm32::build_options)
+    else()
+        add_library(stm32_core INTERFACE)
+        target_include_directories(stm32_core INTERFACE "${CORE_ROOT}/Inc")
+        target_link_libraries(stm32_core INTERFACE stm32::build_options)
+    endif()
+    add_library(stm32::core ALIAS stm32_core)
+
+    set(CORE_SOURCES "${core_sources}" PARENT_SCOPE)
+endfunction()
+
+function(stm32_print_driver_tree module_name module_index module_count module_headers module_sources)
+    if(module_index EQUAL module_count)
+        set(module_is_last TRUE)
+        set(module_child_prefix "    ")
+    else()
+        set(module_is_last FALSE)
+        set(module_child_prefix "│   ")
+    endif()
+
+    stm32_tree_emit_line("  " ${module_is_last} "${module_name}")
+
+    set(section_names Inc Src)
+    foreach(section_name IN LISTS section_names)
+        if(section_name STREQUAL "Inc")
+            set(section_items ${module_headers})
+            set(section_is_last FALSE)
         else()
-            list(APPEND module_names ${arg})
+            set(section_items ${module_sources})
+            set(section_is_last TRUE)
+        endif()
+
+        stm32_tree_emit_line("  ${module_child_prefix}" ${section_is_last} "${section_name}")
+        if(section_is_last)
+            set(item_prefix "  ${module_child_prefix}    ")
+        else()
+            set(item_prefix "  ${module_child_prefix}│   ")
+        endif()
+
+        if(section_items)
+            list(LENGTH section_items section_item_count)
+            set(section_item_index 0)
+            foreach(item IN LISTS section_items)
+                math(EXPR section_item_index "${section_item_index} + 1")
+                if(DRIVER_MODULE_TREE STREQUAL "SHOW_FULL_PATH")
+                    set(display_item "${item}")
+                else()
+                    get_filename_component(display_item "${item}" NAME)
+                endif()
+
+                if(section_item_index EQUAL section_item_count)
+                    set(item_is_last TRUE)
+                else()
+                    set(item_is_last FALSE)
+                endif()
+                stm32_tree_emit_line("${item_prefix}" ${item_is_last} "${display_item}")
+            endforeach()
+        else()
+            stm32_tree_emit_line("${item_prefix}" TRUE "<none>")
         endif()
     endforeach()
+endfunction()
 
-    # These are collected locally first and then exported back to the parent
-    # scope once all modules have been processed.
+function(stm32_register_driver_targets)
+    stm32_resolve_driver_modules(resolved_driver_modules)
     set(selected_driver_sources "")
     set(selected_driver_includes "")
-    list(LENGTH module_names module_count)
+    set(selected_driver_targets "")
+
+    stm32_join_list(requested_driver_text ${DRIVER_MODULES})
+    stm32_join_list(resolved_driver_text ${resolved_driver_modules})
+    list(LENGTH resolved_driver_modules module_count)
     stm32_print_section("Driver Modules")
+    stm32_print_kv("Requested" "${requested_driver_text}")
+    stm32_print_kv("Resolved" "${resolved_driver_text}")
     stm32_print_kv("Module Count" "${module_count}")
 
     set(module_index 0)
-    list(LENGTH module_names total_modules)
-
-    foreach(module_name IN LISTS module_names)
+    foreach(module_name IN LISTS resolved_driver_modules)
         math(EXPR module_index "${module_index} + 1")
-        set(DRIVER_MODULE_DIR ${DRIVER_ROOT}/${module_name})
-        if(EXISTS ${DRIVER_MODULE_DIR})
-            file(GLOB module_sources CONFIGURE_DEPENDS ${DRIVER_MODULE_DIR}/Src/*.c)
-            list(APPEND selected_driver_sources ${module_sources})
+        set(module_directory "${DRIVER_ROOT}/${module_name}")
+        set(module_include_directory "${module_directory}/Inc")
+        set(module_target "stm32_driver_${module_name}")
 
-            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-                list(APPEND selected_driver_includes ${DRIVER_MODULE_DIR}/Inc)
+        file(GLOB module_headers CONFIGURE_DEPENDS "${module_include_directory}/*.h")
+        file(GLOB module_sources CONFIGURE_DEPENDS
+            "${module_directory}/Src/*.c"
+            "${module_directory}/Src/*.cpp"
+            "${module_directory}/Src/*.cxx"
+            "${module_directory}/Src/*.s"
+            "${module_directory}/Src/*.S"
+        )
+        list(SORT module_headers)
+        list(SORT module_sources)
+
+        # A component with sources becomes an OBJECT library so every selected
+        # object reaches the firmware link. Header-only components retain the
+        # same usage contract through an INTERFACE library.
+        if(module_sources)
+            add_library(${module_target} OBJECT ${module_sources})
+            target_link_libraries(${module_target} PUBLIC stm32::core)
+            if(IS_DIRECTORY "${module_include_directory}")
+                target_include_directories(${module_target} PUBLIC "${module_include_directory}")
             endif()
-
-            # The tree printer needs to know whether this module is the last
-            # sibling so vertical connectors are drawn correctly.
-            if(module_index EQUAL total_modules)
-                set(module_is_last TRUE)
-                set(module_child_prefix "    ")
-            else()
-                set(module_is_last FALSE)
-                set(module_child_prefix "│   ")
-            endif()
-
-            stm32_tree_emit_line("  " ${module_is_last} "${module_name}")
-
-            if(EXISTS ${DRIVER_MODULE_DIR}/Inc)
-                file(GLOB module_headers CONFIGURE_DEPENDS ${DRIVER_MODULE_DIR}/Inc/*.h)
-                list(SORT module_headers)
-            else()
-                set(module_headers "")
-            endif()
-
-            if(EXISTS ${DRIVER_MODULE_DIR}/Src)
-                file(GLOB module_sources CONFIGURE_DEPENDS ${DRIVER_MODULE_DIR}/Src/*.c)
-                list(SORT module_sources)
-            else()
-                set(module_sources "")
-            endif()
-
-            # Render header and source subtrees separately to mirror the on-disk
-            # structure under each driver module.
-            set(section_names Inc Src)
-            foreach(section_name IN LISTS section_names)
-                if(section_name STREQUAL "Inc")
-                    set(section_items ${module_headers})
-                    set(section_is_last FALSE)
-                else()
-                    set(section_items ${module_sources})
-                    set(section_is_last TRUE)
-                endif()
-
-                stm32_tree_emit_line("  ${module_child_prefix}" ${section_is_last} "${section_name}")
-
-                if(section_is_last)
-                    set(item_prefix "  ${module_child_prefix}    ")
-                else()
-                    set(item_prefix "  ${module_child_prefix}│   ")
-                endif()
-
-                if(section_items)
-                    list(LENGTH section_items section_item_count)
-                    set(section_item_index 0)
-                    foreach(item IN LISTS section_items)
-                        math(EXPR section_item_index "${section_item_index} + 1")
-                        if(show_full_path)
-                            set(display_item "${item}")
-                        else()
-                            get_filename_component(display_item "${item}" NAME)
-                        endif()
-
-                        if(section_item_index EQUAL section_item_count)
-                            set(item_is_last TRUE)
-                        else()
-                            set(item_is_last FALSE)
-                        endif()
-
-                        stm32_tree_emit_line("${item_prefix}" ${item_is_last} "${display_item}")
-                    endforeach()
-                else()
-                    stm32_tree_emit_line("${item_prefix}" TRUE "<none>")
-                endif()
-            endforeach()
         else()
-            message(WARNING "Driver module ${module_name} not found at ${DRIVER_MODULE_DIR}")
+            add_library(${module_target} INTERFACE)
+            target_link_libraries(${module_target} INTERFACE stm32::core)
+            if(IS_DIRECTORY "${module_include_directory}")
+                target_include_directories(${module_target} INTERFACE "${module_include_directory}")
+            endif()
         endif()
+        add_library(stm32::driver::${module_name} ALIAS ${module_target})
+
+        list(APPEND selected_driver_targets ${module_target})
+        list(APPEND selected_driver_sources ${module_sources})
+        if(IS_DIRECTORY "${module_include_directory}")
+            list(APPEND selected_driver_includes "${module_include_directory}")
+        endif()
+
+        stm32_print_driver_tree(
+            "${module_name}"
+            ${module_index}
+            ${module_count}
+            "${module_headers}"
+            "${module_sources}"
+        )
     endforeach()
+
+    # Attach direct component relationships after all targets exist. The final
+    # executable links every resolved target directly, so dependency objects and
+    # their transitive include requirements are both retained exactly once.
+    foreach(module_name IN LISTS resolved_driver_modules)
+        set(module_target "stm32_driver_${module_name}")
+        set(dependency_variable "STM32_DRIVER_${module_name}_DEPENDENCIES")
+        get_target_property(module_target_type ${module_target} TYPE)
+        foreach(dependency_name IN LISTS ${dependency_variable})
+            if(module_target_type STREQUAL "INTERFACE_LIBRARY")
+                target_link_libraries(${module_target} INTERFACE stm32_driver_${dependency_name})
+            else()
+                target_link_libraries(${module_target} PUBLIC stm32_driver_${dependency_name})
+            endif()
+        endforeach()
+    endforeach()
+
+    set(RESOLVED_DRIVER_MODULES "${resolved_driver_modules}" PARENT_SCOPE)
+    set(SELECTED_DRIVER_TARGETS "${selected_driver_targets}" PARENT_SCOPE)
     set(SELECTED_DRIVER_SOURCES "${selected_driver_sources}" PARENT_SCOPE)
     set(SELECTED_DRIVER_INCLUDES "${selected_driver_includes}" PARENT_SCOPE)
 endfunction()
 
 function(stm32_collect_sources)
-    # Project sources override nothing here; we simply aggregate project,
-    # selected-driver, and core files into a single firmware target list.
-    set(SELECTED_DRIVER_SOURCES "")
-    set(SELECTED_DRIVER_INCLUDES "")
-
-    add_driver_module(
-        ${DRIVER_MODULE_TREE}
-        ${DRIVER_MODULES}
+    file(GLOB_RECURSE project_sources CONFIGURE_DEPENDS
+        "${PROJ_DIR}/Src/*.c"
+        "${PROJ_DIR}/Src/*.cpp"
+        "${PROJ_DIR}/Src/*.cxx"
+        "${PROJ_DIR}/Src/*.s"
+        "${PROJ_DIR}/Src/*.S"
     )
+    if(NOT project_sources)
+        message(FATAL_ERROR "No application sources found under ${PROJ_DIR}/Src")
+    endif()
 
-    file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${PROJ_DIR}/Src/*.c")
-    file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS "${CORE_ROOT}/Src/*.c")
-    set(ALL_SOURCE_FILES
-        ${PROJECT_SOURCES}
-        ${SELECTED_DRIVER_SOURCES}
-        ${CORE_SOURCES}
-    )
-
+    set(PROJECT_SOURCES "${project_sources}")
+    stm32_register_core_target()
+    stm32_register_driver_targets()
     stm32_print_source_summary()
 
     set(PROJECT_SOURCES "${PROJECT_SOURCES}" PARENT_SCOPE)
     set(CORE_SOURCES "${CORE_SOURCES}" PARENT_SCOPE)
+    set(RESOLVED_DRIVER_MODULES "${RESOLVED_DRIVER_MODULES}" PARENT_SCOPE)
+    set(SELECTED_DRIVER_TARGETS "${SELECTED_DRIVER_TARGETS}" PARENT_SCOPE)
     set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
     set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
-    set(ALL_SOURCE_FILES "${ALL_SOURCE_FILES}" PARENT_SCOPE)
 endfunction()

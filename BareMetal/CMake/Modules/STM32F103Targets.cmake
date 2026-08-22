@@ -1,25 +1,25 @@
 include_guard(GLOBAL)
 
-# Firmware target creation is intentionally minimal here: one ELF target plus
-# post-build artifact generation and reporting.
+# Firmware target creation composes application sources with target-owned Core
+# and Driver components, then attaches final-link and artifact operations.
 
 function(stm32_add_firmware_target)
-    add_executable(${PROJECT_NAME}.elf ${ALL_SOURCE_FILES})
+    add_executable(${PROJECT_NAME}.elf ${PROJECT_SOURCES})
 
-    # Driver include directories are filtered earlier, so by this point the
-    # target can receive the final merged include path list directly.
-    set(ALL_INCLUDE_DIRS
+    # Application headers retain first lookup priority. DRIVER_ROOT remains a
+    # private compatibility path for legacy examples that include startup.h;
+    # new Template projects consume only their selected component interfaces.
+    target_include_directories(${PROJECT_NAME}.elf BEFORE PRIVATE
         ${PROJ_DIR}/Inc
-        ${CORE_ROOT}/Inc
         ${DRIVER_ROOT}
-        ${SELECTED_DRIVER_INCLUDES}
     )
-    target_include_directories(${PROJECT_NAME}.elf PRIVATE ${ALL_INCLUDE_DIRS})
 
-    target_compile_options(${PROJECT_NAME}.elf PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:${C_FLAGS}>
-        $<$<COMPILE_LANGUAGE:CXX>:${CXX_FLAGS}>
-        $<$<COMPILE_LANGUAGE:ASM>:${ASM_FLAGS}>
+    # Linking resolved component targets supplies their object files and usage
+    # requirements without flattening all sources into the application target.
+    target_link_libraries(${PROJECT_NAME}.elf PRIVATE
+        stm32::core
+        ${SELECTED_DRIVER_TARGETS}
+        ${STM32_LINK_LIBRARIES}
     )
 
     target_link_options(${PROJECT_NAME}.elf PRIVATE
@@ -44,7 +44,7 @@ function(stm32_add_firmware_target)
             -DPROJECT_LABEL=${PROJECT_NAME}.elf
             -DFLASH_SIZE_BYTES=${FLASH_SIZE_BYTES}
             -DRAM_SIZE_BYTES=${RAM_SIZE_BYTES}
-            -P ${CMAKE_ROOT}/STM32F103MemoryReport.cmake
+            -P ${STM32_CMAKE_ROOT}/STM32F103MemoryReport.cmake
         COMMENT "Generating binary artifacts and memory report..."
     )
 endfunction()

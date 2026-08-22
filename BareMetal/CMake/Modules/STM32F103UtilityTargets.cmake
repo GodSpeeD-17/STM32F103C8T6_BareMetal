@@ -4,109 +4,74 @@ include_guard(GLOBAL)
 # erase helpers, and repository maintenance shortcuts.
 
 function(stm32_add_vscode_targets)
-    # Generate VS Code launch.json for Cortex-Debug / OpenOCD flows.
-    add_custom_target(vscode_launch
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": \\\"0.2.0\\\","          >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"configurations\\\": ["                >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"name\\\": \\\"Debug: ${PROJECT_NAME}\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"executable\\\": \\\"${BUILD_OUTPUT_DIR}/${PROJECT_NAME}.elf\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"request\\\": \\\"launch\\\","     >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"cortex-debug\\\","  >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"servertype\\\": \\\"openocd\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"device\\\": \\\"STM32F103C8\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"configFiles\\\": ["               >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stlink.cfg\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Src/stm32f1x.cfg\\\""  >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // main.c" >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    //   \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // app_startup.c" >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": ["         >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\","         >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"load\\\","                       >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset halt\\\""          >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      ]"                                    >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  ]"                                        >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/launch.json
-      COMMENT "----------------------------------- launch.json -----------------------------------"
+    # Materialize valid JSON from reviewed templates inside the binary tree.
+    # @ONLY substitution preserves VS Code tokens such as the $gcc matcher.
+    file(MAKE_DIRECTORY "${VSCODE_GENERATED_DIR}")
+    configure_file(
+        "${STM32_CMAKE_ROOT}/Templates/launch.json.in"
+        "${VSCODE_GENERATED_DIR}/launch.json"
+        @ONLY
+    )
+    configure_file(
+        "${STM32_CMAKE_ROOT}/Templates/settings.json.in"
+        "${VSCODE_GENERATED_DIR}/settings.json"
+        @ONLY
+    )
+    configure_file(
+        "${STM32_CMAKE_ROOT}/Templates/tasks.json.in"
+        "${VSCODE_GENERATED_DIR}/tasks.json"
+        @ONLY
+    )
+    configure_file(
+        "${STM32_CMAKE_ROOT}/Templates/c_cpp_properties.json.in"
+        "${VSCODE_GENERATED_DIR}/c_cpp_properties.json"
+        @ONLY
     )
 
-    # Tool paths are written separately so local workstation differences can be
-    # regenerated from CMake instead of hand-editing JSON files.
+    # Copy debugger metadata only when explicitly requested, keeping ordinary
+    # firmware configuration free from source-tree editor side effects.
+    add_custom_target(vscode_launch
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${VSCODE_GENERATED_DIR}/launch.json"
+            "${VSCODE_DIR}/launch.json"
+        COMMENT "Generating launch.json"
+    )
+
+    # Settings include the active compile database, making IntelliSense consume
+    # the same definitions, include paths, and flags as the real compiler.
     add_custom_target(vscode_settings
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/settings.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.gdbPath\\\": \\\"${GDB_PATH_MULTIARCH_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.openocdPath\\\": \\\"${OPENOCD_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.stutilPath\\\": \\\"${ST_UTIL_PATH}\\\"," >> ${VSCODE_DIR}/settings.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"cortex-debug.variableUseNaturalFormat\\\": true" >> ${VSCODE_DIR}/settings.json
-      COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/settings.json
-      COMMENT "----------------------------------- settings.json -----------------------------------"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${VSCODE_GENERATED_DIR}/settings.json"
+            "${VSCODE_DIR}/settings.json"
+        COMMENT "Generating settings.json"
     )
 
     # Keep VS Code tasks aligned with the same CMake build entrypoints the
     # terminal workflow already uses.
     add_custom_target(vscode_tasks
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": \\\"2.0.0\\\","          >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"tasks\\\": ["                         >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"label\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"shell\\\","         >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"command\\\": \\\"cmake\\\","      >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\"]," >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"group\\\": { \\\"kind\\\": \\\"build\\\", \\\"isDefault\\\": true }," >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"problemMatcher\\\": [\\\"$gcc\\\"]" >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    },"                                     >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"label\\\": \\\"Clean Project\\\"," >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"type\\\": \\\"shell\\\","         >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"command\\\": \\\"cmake\\\","      >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"args\\\": [\\\"--build\\\", \\\"${BUILD_OUTPUT_DIR}\\\", \\\"--target\\\", \\\"clean_all\\\"]," >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"group\\\": \\\"build\\\","        >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"problemMatcher\\\": [],"          >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"detail\\\": \\\"Clean the build directory\\\"" >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "  ]"                                        >> ${VSCODE_DIR}/tasks.json
-      COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> ${VSCODE_DIR}/tasks.json
-      COMMENT "----------------------------------- tasks.json -----------------------------------"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${VSCODE_GENERATED_DIR}/tasks.json"
+            "${VSCODE_DIR}/tasks.json"
+        COMMENT "Generating tasks.json"
     )
 
-    # IntelliSense settings mirror the active build configuration so headers
-    # and MCU defines stay consistent in the editor.
+    # c_cpp_properties points to compile_commands.json instead of duplicating
+    # include paths and macros that would drift from target configuration.
     add_custom_target(vscode_c_cpp_properties
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${VSCODE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E echo "{"                                          >  "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"configurations\\\": ["                >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "    {"                                      >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"name\\\": \\\"Linux\\\","         >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"includePath\\\": ["               >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${CORE_ROOT}/Inc/**\\\","       >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${DRIVER_ROOT}/**\\\","         >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "        \\\"${PROJ_DIR}/Inc/**\\\""         >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"defines\\\": [\\\"${MCU_DEFINE}\\\", \\\"${MCU_CPU_DEFINE}\\\"]," >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"compilerPath\\\": \\\"${CMAKE_C_COMPILER}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"cStandard\\\": \\\"${C_STD}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"cppStandard\\\": \\\"${CXX_STD}\\\"," >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "      \\\"intelliSenseMode\\\": \\\"linux-gcc-arm\\\"" >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "    }"                                      >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "  ],"                                       >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "  \\\"version\\\": 4"                       >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMAND ${CMAKE_COMMAND} -E echo "}"                                          >> "${VSCODE_DIR}/c_cpp_properties.json"
-      COMMENT "----------------------------------- c_cpp_properties.json -----------------------------------"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${VSCODE_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${VSCODE_GENERATED_DIR}/c_cpp_properties.json"
+            "${VSCODE_DIR}/c_cpp_properties.json"
+        COMMENT "Generating c_cpp_properties.json"
     )
 
     add_custom_target(vscode_files
         DEPENDS
             vscode_launch
+            vscode_settings
             vscode_tasks
             vscode_c_cpp_properties
         COMMENT "----------------------------------- Generating vscode files -----------------------------------"
@@ -138,7 +103,7 @@ function(stm32_add_flash_targets)
             -DST_FLASH=${ST_FLASH}
             -DBINARY_FILE=${BINARY_FILE}
             -DFLASH_ADDRESS=${FLASH_ADDRESS}
-            -P ${CMAKE_ROOT}/STM32F103Flash.cmake
+            -P ${STM32_CMAKE_ROOT}/STM32F103Flash.cmake
         COMMENT "Flashing ${PROJECT_NAME}.bin to STM32 via ST-Link v2 (SWD) with automatic recovery"
     )
 
@@ -156,7 +121,7 @@ function(stm32_add_flash_targets)
     add_custom_target(erase_flash
         COMMAND ${CMAKE_COMMAND}
             -DST_FLASH=${ST_FLASH}
-            -P ${CMAKE_ROOT}/STM32F103EraseFlash.cmake
+            -P ${STM32_CMAKE_ROOT}/STM32F103EraseFlash.cmake
         COMMENT "Erasing entire STM32 flash memory via ST-Link with automatic recovery"
     )
 

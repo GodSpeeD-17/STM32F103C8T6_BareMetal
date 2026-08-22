@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Project",
+      "type": "process",
+      "command": "@CMAKE_COMMAND@",
+      "args": ["--build", "@CMAKE_BINARY_DIR@"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Clean Project",
+      "type": "process",
+      "command": "@CMAKE_COMMAND@",
+      "args": ["--build", "@CMAKE_BINARY_DIR@", "--target", "clean_all"],
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Remove firmware artifacts and generated VS Code metadata"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ function(stm32_validate_project_inputs)
         PROJ_DIR
         REPO_ROOT
         BAREMETAL_ROOT
-        CMAKE_ROOT
+        STM32_CMAKE_ROOT
         CORE_ROOT
         DRIVER_ROOT
         LINKER_FILE

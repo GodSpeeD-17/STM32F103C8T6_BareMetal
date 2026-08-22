@@ -24,8 +24,8 @@ stm32f103_configure_project(
         RCC
         GPIO
         BSP
-        NVIC
         Timer
+        DMA
     OPTIMIZATION_LEVEL 1
     FLASH_ADDRESS 0x08000000
 )

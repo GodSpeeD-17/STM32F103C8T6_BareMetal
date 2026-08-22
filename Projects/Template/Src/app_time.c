@@ -51,10 +51,9 @@ driver_status_t App_TimeInit(const frequency_t inputClockHz)
 	//! Reject an inexact millisecond period before changing any hardware state.
 	if
 	(
-		(inputClockHz == 0UL) ||
-		(APP_SYSTICK_TICK_HZ == 0UL) ||
-		(APP_SYSTICK_TICK_HZ > inputClockHz) ||
-		((inputClockHz % APP_SYSTICK_TICK_HZ) != 0UL)
+		(inputClockHz == 0UL) || (APP_SYSTICK_TICK_HZ == 0UL) ||
+		(APP_SYSTICK_TICK_HZ > inputClockHz) || ((inputClockHz % APP_SYSTICK_TICK_HZ) != 0UL
+	)
 	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -70,14 +69,7 @@ driver_status_t App_TimeInit(const frequency_t inputClockHz)
 
 	//! Teardown precedes setup so stale IRQ, operation, and partial-period state cannot leak forward.
 	ASSERT_DRIVER_STATUS(SysTick_DeConfig());
-	ASSERT_DRIVER_STATUS
-	(
-		SysTick_SetConfig
-		(
-			SYSTICK_CLOCK_SOURCE_PROCESSOR,
-			(systick_reload_value_t) (reloadPeriod - 1UL)
-		)
-	);
+	ASSERT_DRIVER_STATUS(SysTick_SetConfig(SYSTICK_CLOCK_SOURCE_PROCESSOR, (systick_reload_value_t) (reloadPeriod - 1UL)));
 
 	//! Establish both software and hardware origins before exception delivery begins.
 	appTickMs = 0UL;
