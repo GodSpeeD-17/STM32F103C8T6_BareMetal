@@ -15,94 +15,19 @@
 //													Includes											  //
 // ==================================================================================================== //
 #include "rcc.h"
+#include "rcc_codec.h"
 
 // ==================================================================================================== //
 //													Macros												//
 // ==================================================================================================== //
 /** @brief Timeout used while validating switch clock @def RCC_READY_TIMEOUT */
 #define RCC_READY_TIMEOUT					((uint32_t) 1000UL)
-#define RCC_DRIVER_INVALID_FIELD			((uint32_t) 0xFFFFFFFFUL)
-#define RCC_DRIVER_INVALID_INDEX			((uint32_t) 0xFFFFFFFFUL)
 
 // ==================================================================================================== //
 //												Typedefs												//
 // ==================================================================================================== //
 /** @brief Function to be executed inside validating system clock switch @typedef _rcc_ready_status_getter_t */
 typedef driver_status_t (*_rcc_ready_status_getter_t)(void);
-
-// ==================================================================================================== //
-//											Look Up Tables (LUTs)										//
-// ==================================================================================================== //
-/**  Internal field-to-value lookup descriptor  _rcc_field_value_map_t */
-typedef struct _rcc_field_value_map_t
-{
-	uint32_t	ll_field;
-	uint32_t	value;
-} _rcc_field_value_map_t;
-
-static const _rcc_field_value_map_t _RCC_AHBPrescalerLUT[] =
-{
-	{ RCC_CFGR_HPRE_DIV1,	1UL   },
-	{ RCC_CFGR_HPRE_DIV2,	2UL   },
-	{ RCC_CFGR_HPRE_DIV4,	4UL   },
-	{ RCC_CFGR_HPRE_DIV8,	8UL   },
-	{ RCC_CFGR_HPRE_DIV16,	16UL  },
-	{ RCC_CFGR_HPRE_DIV64,	64UL  },
-	{ RCC_CFGR_HPRE_DIV128,	128UL },
-	{ RCC_CFGR_HPRE_DIV256,	256UL },
-	{ RCC_CFGR_HPRE_DIV512,	512UL }
-};
-
-static const _rcc_field_value_map_t _RCC_APBPrescalerLUT[] =
-{
-	{ RCC_CFGR_PPRE1_DIV1,	1UL  },
-	{ RCC_CFGR_PPRE1_DIV2,	2UL  },
-	{ RCC_CFGR_PPRE1_DIV4,	4UL  },
-	{ RCC_CFGR_PPRE1_DIV8,	8UL  },
-	{ RCC_CFGR_PPRE1_DIV16,	16UL }
-};
-
-static const _rcc_field_value_map_t _RCC_APB2PrescalerLUT[] =
-{
-	{ RCC_CFGR_PPRE2_DIV1,	1UL  },
-	{ RCC_CFGR_PPRE2_DIV2,	2UL  },
-	{ RCC_CFGR_PPRE2_DIV4,	4UL  },
-	{ RCC_CFGR_PPRE2_DIV8,	8UL  },
-	{ RCC_CFGR_PPRE2_DIV16,	16UL }
-};
-
-static const _rcc_field_value_map_t _RCC_ADCPrescalerLUT[] =
-{
-	{ RCC_CFGR_ADCPRE_DIV2,	2UL },
-	{ RCC_CFGR_ADCPRE_DIV4,	4UL },
-	{ RCC_CFGR_ADCPRE_DIV6,	6UL },
-	{ RCC_CFGR_ADCPRE_DIV8,	8UL }
-};
-
-static const _rcc_field_value_map_t _RCC_USBPrescalerLUT[] =
-{
-	{ RCC_CFGR_USBPRE_DIV1_5,	RCC_USB_DIV_1_5 },
-	{ RCC_CFGR_USBPRE_DIRECT,	RCC_USB_DIV_1   }
-};
-
-static const _rcc_field_value_map_t _RCC_PLLMultiplierLUT[] =
-{
-	{ RCC_CFGR_PLLMUL_2,	RCC_PLL_MUL_2  },
-	{ RCC_CFGR_PLLMUL_3,	RCC_PLL_MUL_3  },
-	{ RCC_CFGR_PLLMUL_4,	RCC_PLL_MUL_4  },
-	{ RCC_CFGR_PLLMUL_5,	RCC_PLL_MUL_5  },
-	{ RCC_CFGR_PLLMUL_6,	RCC_PLL_MUL_6  },
-	{ RCC_CFGR_PLLMUL_7,	RCC_PLL_MUL_7  },
-	{ RCC_CFGR_PLLMUL_8,	RCC_PLL_MUL_8  },
-	{ RCC_CFGR_PLLMUL_9,	RCC_PLL_MUL_9  },
-	{ RCC_CFGR_PLLMUL_10,	RCC_PLL_MUL_10 },
-	{ RCC_CFGR_PLLMUL_11,	RCC_PLL_MUL_11 },
-	{ RCC_CFGR_PLLMUL_12,	RCC_PLL_MUL_12 },
-	{ RCC_CFGR_PLLMUL_13,	RCC_PLL_MUL_13 },
-	{ RCC_CFGR_PLLMUL_14,	RCC_PLL_MUL_14 },
-	{ RCC_CFGR_PLLMUL_15,	RCC_PLL_MUL_15 },
-	{ RCC_CFGR_PLLMUL_16,	RCC_PLL_MUL_16 }
-};
 
 /** @brief Cached RCC clock frequencies snapshot maintained by the driver. */
 static volatile rcc_clock_frequencies_t _rccClockFrequenciesSnapshot =
@@ -184,436 +109,17 @@ static driver_status_t _RCC_WaitForSystemClockSwitch(const rcc_system_clock_t so
 }
 
 /**
- * @brief Finds the LUT index whose LL field matches the requested field value.
- * @param[in] pLUT Pointer to the LUT to scan.
- * @param[in] itemCount Number of valid items in the LUT.
- * @param[in] fieldValue LL field value to search for.
- * @returns Matching LUT index when found, otherwise @ref `RCC_DRIVER_INVALID_INDEX`.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_FindFieldValueMapIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t fieldValue)
-{
-	uint32_t index = RCC_DRIVER_INVALID_INDEX;
-
-	for (index = 0x00UL; index < itemCount; index++)
-	{
-		if (pLUT[index].ll_field == fieldValue)
-		{
-			return index;
-		}
-	}
-
-	return RCC_DRIVER_INVALID_INDEX;
-}
-
-/**
- * @brief Returns the logical value stored at the requested LUT index.
- * @param[in] pLUT Pointer to the LUT to read.
- * @param[in] itemCount Number of valid items in the LUT.
- * @param[in] index Requested LUT index.
- * @param[in] defaultValue Fallback value used when the index is outside the LUT range.
- * @returns Logical value stored in the LUT, or @p defaultValue when the index is invalid.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapValueByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultValue)
-{
-	if (index >= itemCount)
-	{
-		return defaultValue;
-	}
-
-	return pLUT[index].value;
-}
-
-/**
- * @brief Returns the LL field stored at the requested LUT index.
- * @param[in] pLUT Pointer to the LUT to read.
- * @param[in] itemCount Number of valid items in the LUT.
- * @param[in] index Requested LUT index.
- * @param[in] defaultField Fallback LL field used when the index is outside the LUT range.
- * @returns LL field stored in the LUT, or @p defaultField when the index is invalid.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetFieldValueMapLLFieldByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultField)
-{
-	if (index >= itemCount)
-	{
-		return defaultField;
-	}
-
-	return pLUT[index].ll_field;
-}
-
-/**
- * @brief Returns the effective AHB divider for the supplied driver selector.
- * @param[in] prescalerSelector The AHB prescaler selector.
- * @returns The effective divider value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
-{
-	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
-	(
-		_RCC_AHBPrescalerLUT,
-		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		1UL
-	);
-}
-
-/**
- * @brief Returns the effective APB divider for the supplied driver selector.
- * @param[in] prescalerSelector The APB prescaler selector.
- * @returns The effective divider value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetAPBBusPrescalerDividerBySelector(const rcc_bus_prescaler_t prescalerSelector)
-{
-	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
-	(
-		_RCC_APBPrescalerLUT,
-		ARRAY_SIZE(_RCC_APBPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		1UL
-	);
-}
-
-/**
- * @brief Returns the effective ADC divider for the supplied driver selector.
- * @param[in] prescalerSelector The ADC prescaler selector.
- * @returns The effective divider value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerDividerBySelector(const rcc_component_prescaler_t prescalerSelector)
-{
-	return (uint32_t) _RCC_GetFieldValueMapValueByIndex
-	(
-		_RCC_ADCPrescalerLUT,
-		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		2UL
-	);
-}
-
-/**
- * @brief Resolves the public system clock selection to the LL field encoding.
- * @param[in] source The system clock source selection.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetSystemClockSourceLLField(const rcc_system_clock_t source)
-{
-	switch (source)
-	{
-		case RCC_SYS_CLK_HSI:
-		{
-			return RCC_CFGR_SW_HSI;
-		}
-		case RCC_SYS_CLK_HSE:
-		{
-			return RCC_CFGR_SW_HSE;
-		}
-		case RCC_SYS_CLK_PLL:
-		{
-			return RCC_CFGR_SW_PLL;
-		}
-		default:
-		{
-			return RCC_DRIVER_INVALID_FIELD;
-		}
-	}
-}
-
-/**
- * @brief Resolves the public PLL source selection to the LL field encoding.
- * @param[in] source The PLL source selection.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetPLLSourceLLField(const rcc_pll_src_t source)
-{
-	switch (source)
-	{
-		case RCC_PLL_SRC_HSI:
-		{
-			return RCC_CFGR_PLLSRC_HSI_DIV2;
-		}
-		case RCC_PLL_SRC_HSE:
-		{
-			return RCC_CFGR_PLLSRC_HSE;
-		}
-		default:
-		{
-			return RCC_DRIVER_INVALID_FIELD;
-		}
-	}
-}
-
-/**
- * @brief Resolves the public HSE PLL divider selection to the LL field encoding.
- * @param[in] divider The HSE PLL divider selection.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetPLLHSEDividerLLField(const rcc_pll_src_psc_t divider)
-{
-	switch (divider)
-	{
-		case RCC_PLL_SRC_HSE_DIV_1:
-		{
-			return RCC_CFGR_PLLXTPRE_HSE;
-		}
-		case RCC_PLL_SRC_HSE_DIV_2:
-		{
-			return RCC_CFGR_PLLXTPRE_HSE_DIV2;
-		}
-		default:
-		{
-			return RCC_DRIVER_INVALID_FIELD;
-		}
-	}
-}
-
-/**
- * @brief Resolves the public PLL multiplier selection to the LL field encoding.
- * @param[in] multiplier The PLL multiplier selection.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetPLLMultiplierLLField(const rcc_pll_mul_t multiplier)
-{
-	if ((multiplier < RCC_PLL_MUL_2) || (multiplier > RCC_PLL_MUL_16))
-	{
-		return RCC_DRIVER_INVALID_FIELD;
-	}
-
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_PLLMultiplierLUT,
-		ARRAY_SIZE(_RCC_PLLMultiplierLUT),
-		(uint32_t) (multiplier - RCC_PLL_MUL_2),
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Resolves the public AHB prescaler selector to the LL field encoding.
- * @param[in] prescalerSelector The AHB prescaler selector.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetAHBPrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
-{
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_AHBPrescalerLUT,
-		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Resolves the public APB prescaler selector to the LL field encoding.
- * @param[in] prescalerSelector The APB prescaler selector.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetAPB1PrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
-{
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_APBPrescalerLUT,
-		ARRAY_SIZE(_RCC_APBPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Resolves the public APB2 prescaler selector to the LL field encoding.
- * @param[in] prescalerSelector The APB2 prescaler selector.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetAPB2PrescalerLLField(const rcc_bus_prescaler_t prescalerSelector)
-{
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_APB2PrescalerLUT,
-		ARRAY_SIZE(_RCC_APB2PrescalerLUT),
-		(uint32_t) prescalerSelector,
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Resolves the public ADC prescaler selector to the LL field encoding.
- * @param[in] prescalerSelector The ADC prescaler selector.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetADCPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
-{
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_ADCPrescalerLUT,
-		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Resolves the public USB prescaler selector to the LL field encoding.
- * @param[in] prescalerSelector The USB prescaler selector.
- * @returns The corresponding LL field value.
- */
-__STATIC_FORCEINLINE uint32_t _RCC_GetUSBPrescalerLLField(const rcc_component_prescaler_t prescalerSelector)
-{
-	return _RCC_GetFieldValueMapLLFieldByIndex
-	(
-		_RCC_USBPrescalerLUT,
-		ARRAY_SIZE(_RCC_USBPrescalerLUT),
-		(uint32_t) prescalerSelector,
-		RCC_DRIVER_INVALID_FIELD
-	);
-}
-
-/**
- * @brief Decodes the LL system clock status field to the public driver value.
- * @param[in] status The LL system clock status field.
- * @returns The corresponding public driver value.
- */
-__STATIC_FORCEINLINE rcc_system_clock_t _RCC_GetSystemClockSourceFromLLStatus(const uint32_t status)
-{
-	switch (status)
-	{
-		case RCC_CFGR_SWS_HSI:
-		{
-			return RCC_SYS_CLK_HSI;
-		}
-		case RCC_CFGR_SWS_HSE:
-		{
-			return RCC_SYS_CLK_HSE;
-		}
-		case RCC_CFGR_SWS_PLL:
-		{
-			return RCC_SYS_CLK_PLL;
-		}
-		default:
-		{
-			return RCC_SYS_CLK_HSI;
-		}
-	}
-}
-
-/**
- * @brief Decodes the LL AHB prescaler field to the public selector value.
- * @param[in] prescalerField The LL AHB prescaler field.
- * @returns The corresponding public selector value.
- */
-__STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAHBPrescalerSelectorFromLLField(const uint32_t prescalerField)
-{
-	const uint32_t index = _RCC_FindFieldValueMapIndex
-	(
-		_RCC_AHBPrescalerLUT,
-		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
-		(uint32_t) prescalerField
-	);
-
-	if (index == RCC_DRIVER_INVALID_INDEX)
-	{
-		return RCC_AHB_DIV_1;
-	}
-
-	return (rcc_bus_prescaler_t) index;
-}
-
-/**
- * @brief Decodes the LL APB prescaler field to the public selector value.
- * @param[in] prescalerField The LL APB prescaler field.
- * @returns The corresponding public selector value.
- */
-__STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAPB1PrescalerSelectorFromLLField(const uint32_t prescalerField)
-{
-	const uint32_t index = _RCC_FindFieldValueMapIndex
-	(
-		_RCC_APBPrescalerLUT,
-		ARRAY_SIZE(_RCC_APBPrescalerLUT),
-		(uint32_t) prescalerField
-	);
-
-	if (index == RCC_DRIVER_INVALID_INDEX)
-	{
-		return RCC_APB1_DIV_1;
-	}
-
-	return (rcc_bus_prescaler_t) index;
-}
-
-/**
- * @brief Decodes the LL APB2 prescaler field to the public selector value.
- * @param[in] prescalerField The LL APB2 prescaler field.
- * @returns The corresponding public selector value.
- */
-__STATIC_FORCEINLINE rcc_bus_prescaler_t _RCC_GetAPB2PrescalerSelectorFromLLField(const uint32_t prescalerField)
-{
-	const uint32_t index = _RCC_FindFieldValueMapIndex
-	(
-		_RCC_APB2PrescalerLUT,
-		ARRAY_SIZE(_RCC_APB2PrescalerLUT),
-		(uint32_t) prescalerField
-	);
-
-	if (index == RCC_DRIVER_INVALID_INDEX)
-	{
-		return RCC_APB2_DIV_1;
-	}
-
-	return (rcc_bus_prescaler_t) index;
-}
-
-/**
- * @brief Decodes the LL ADC prescaler field to the public selector value.
- * @param[in] prescalerField The LL ADC prescaler field.
- * @returns The corresponding public selector value.
- */
-__STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetADCPrescalerSelectorFromLLField(const uint32_t prescalerField)
-{
-	const uint32_t index = _RCC_FindFieldValueMapIndex
-	(
-		_RCC_ADCPrescalerLUT,
-		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
-		(uint32_t) prescalerField
-	);
-
-	if (index == RCC_DRIVER_INVALID_INDEX)
-	{
-		return RCC_ADC_DIV_2;
-	}
-
-	return (rcc_component_prescaler_t) index;
-}
-
-/**
- * @brief Decodes the LL USB prescaler field to the public selector value.
- * @param[in] prescalerField The LL USB prescaler field.
- * @returns The corresponding public selector value.
- */
-__STATIC_FORCEINLINE rcc_component_prescaler_t _RCC_GetUSBPrescalerSelectorFromLLField(const uint32_t prescalerField)
-{
-	const uint32_t index = _RCC_FindFieldValueMapIndex
-	(
-		_RCC_USBPrescalerLUT,
-		ARRAY_SIZE(_RCC_USBPrescalerLUT),
-		(uint32_t) prescalerField
-	);
-
-	if (index == RCC_DRIVER_INVALID_INDEX)
-	{
-		return RCC_USB_DIV_1_5;
-	}
-
-	return (rcc_component_prescaler_t) index;
-}
-
-/**
  * @brief Returns the effective divider currently programmed for the requested bus.
  * @param[in] bus Target bus selector.
  * @returns Effective divider value for the requested bus.
  */
 static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 {
-	uint32_t ahbPrescalerField = RCC_CFGR_HPRE_DIV1;
-	uint32_t apb1PrescalerField = RCC_CFGR_PPRE1_DIV1;
-	uint32_t apb2PrescalerField = RCC_CFGR_PPRE2_DIV1;
+	uint32_t				ahbPrescalerField = RCC_CFGR_HPRE_DIV1;
+	uint32_t				apb1PrescalerField = RCC_CFGR_PPRE1_DIV1;
+	uint32_t				apb2PrescalerField = RCC_CFGR_PPRE2_DIV1;
+	rcc_bus_prescaler_t		prescalerSelector = RCC_AHB_DIV_1;
+	uint32_t				divider = 1UL;
 
 	switch (bus)
 	{
@@ -624,7 +130,10 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 				return 1UL;
 			}
 
-			return _RCC_GetAHBPrescalerDividerBySelector(_RCC_GetAHBPrescalerSelectorFromLLField(ahbPrescalerField));
+			//! Decode/resolve failures cannot occur here; both Codec calls always publish a safe default.
+			(void) Codec_RCC_DecodeAHBPrescaler(ahbPrescalerField, &prescalerSelector);
+			(void) Codec_RCC_GetAHBPrescalerDivider(prescalerSelector, &divider);
+			return divider;
 		}
 		case RCC_APB1_BUS:
 		{
@@ -633,7 +142,9 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 				return 1UL;
 			}
 
-			return _RCC_GetAPBBusPrescalerDividerBySelector(_RCC_GetAPB1PrescalerSelectorFromLLField(apb1PrescalerField));
+			(void) Codec_RCC_DecodeAPB1Prescaler(apb1PrescalerField, &prescalerSelector);
+			(void) Codec_RCC_GetAPBPrescalerDivider(prescalerSelector, &divider);
+			return divider;
 		}
 		case RCC_APB2_BUS:
 		{
@@ -642,7 +153,9 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 				return 1UL;
 			}
 
-			return _RCC_GetAPBBusPrescalerDividerBySelector(_RCC_GetAPB2PrescalerSelectorFromLLField(apb2PrescalerField));
+			(void) Codec_RCC_DecodeAPB2Prescaler(apb2PrescalerField, &prescalerSelector);
+			(void) Codec_RCC_GetAPBPrescalerDivider(prescalerSelector, &divider);
+			return divider;
 		}
 		default:
 		{
@@ -706,7 +219,11 @@ __STATIC_FORCEINLINE frequency_t _RCC_GetSystemClockFrequency(const rcc_clock_tr
  */
 __STATIC_FORCEINLINE frequency_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
-	return (_RCC_GetSystemClockFrequency(pClockTreeConfig) / _RCC_GetAHBPrescalerDividerBySelector(pClockTreeConfig->bus.AHB));
+	uint32_t divider = 1UL;
+
+	//! Codec divider resolution cannot fail; a `1UL` fallback is published even for a stray selector.
+	(void) Codec_RCC_GetAHBPrescalerDivider(pClockTreeConfig->bus.AHB, &divider);
+	return (_RCC_GetSystemClockFrequency(pClockTreeConfig) / divider);
 }
 
 /**
@@ -716,7 +233,11 @@ __STATIC_FORCEINLINE frequency_t _RCC_GetAHBClockFrequency(const rcc_clock_tree_
  */
 __STATIC_FORCEINLINE frequency_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
-	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB1));
+	uint32_t divider = 1UL;
+
+	//! Codec divider resolution cannot fail; a `1UL` fallback is published even for a stray selector.
+	(void) Codec_RCC_GetAPBPrescalerDivider(pClockTreeConfig->bus.APB1, &divider);
+	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / divider);
 }
 
 /**
@@ -726,7 +247,11 @@ __STATIC_FORCEINLINE frequency_t _RCC_GetAPB1ClockFrequency(const rcc_clock_tree
  */
 __STATIC_FORCEINLINE frequency_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
-	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / _RCC_GetAPBBusPrescalerDividerBySelector(pClockTreeConfig->bus.APB2));
+	uint32_t divider = 1UL;
+
+	//! Codec divider resolution cannot fail; a `1UL` fallback is published even for a stray selector.
+	(void) Codec_RCC_GetAPBPrescalerDivider(pClockTreeConfig->bus.APB2, &divider);
+	return (_RCC_GetAHBClockFrequency(pClockTreeConfig) / divider);
 }
 
 /**
@@ -736,7 +261,11 @@ __STATIC_FORCEINLINE frequency_t _RCC_GetAPB2ClockFrequency(const rcc_clock_tree
  */
 __STATIC_FORCEINLINE frequency_t _RCC_GetADCClockFrequency(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
-	return (_RCC_GetAPB2ClockFrequency(pClockTreeConfig) / _RCC_GetADCPrescalerDividerBySelector(pClockTreeConfig->component.ADC));
+	uint32_t divider = 2UL;
+
+	//! Codec divider resolution cannot fail; a `2UL` fallback is published even for a stray selector.
+	(void) Codec_RCC_GetADCPrescalerDivider(pClockTreeConfig->component.ADC, &divider);
+	return (_RCC_GetAPB2ClockFrequency(pClockTreeConfig) / divider);
 }
 
 /**
@@ -795,17 +324,20 @@ static driver_status_t _RCC_LoadClockFrequenciesFromConfig(const rcc_clock_tree_
  */
 static driver_status_t _RCC_ValidatePLLConfig(const rcc_clock_tree_config_t* const pClockTreeConfig)
 {
+	uint32_t llField = 0x00UL;
+
 	if (pClockTreeConfig == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	if (_RCC_GetPLLSourceLLField(pClockTreeConfig->system.pll.source) == RCC_DRIVER_INVALID_FIELD)
+	//! A failed Codec encode means the selector has no hardware field; surface it as invalid input.
+	if (Codec_RCC_EncodePLLSource(pClockTreeConfig->system.pll.source, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetPLLMultiplierLLField(pClockTreeConfig->system.pll.multiplication_factor) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodePLLMultiplier(pClockTreeConfig->system.pll.multiplication_factor, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -819,7 +351,7 @@ static driver_status_t _RCC_ValidatePLLConfig(const rcc_clock_tree_config_t* con
 	}
 	else
 	{
-		if (_RCC_GetPLLHSEDividerLLField(pClockTreeConfig->system.pll.source_prescaler) == RCC_DRIVER_INVALID_FIELD)
+		if (Codec_RCC_EncodePLLHSEDivider(pClockTreeConfig->system.pll.source_prescaler, &llField) != DRIVER_STATUS_SUCCESS)
 		{
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
@@ -839,6 +371,7 @@ static driver_status_t _RCC_ValidatePLLConfig(const rcc_clock_tree_config_t* con
 static driver_status_t _RCC_ValidateClockTreeConfig(const rcc_config_t* const pRCCConfig)
 {
 	const rcc_clock_tree_config_t* pClockTreeConfig = NULL;
+	uint32_t llField = 0x00UL;
 
 	if (pRCCConfig == NULL)
 	{
@@ -847,32 +380,33 @@ static driver_status_t _RCC_ValidateClockTreeConfig(const rcc_config_t* const pR
 
 	pClockTreeConfig = &(pRCCConfig->clock_tree);
 
-	if (_RCC_GetSystemClockSourceLLField(pClockTreeConfig->system.clk_src) == RCC_DRIVER_INVALID_FIELD)
+	//! Every failed Codec encode below means the selector has no hardware field; surface it as invalid input.
+	if (Codec_RCC_EncodeSystemClockSource(pClockTreeConfig->system.clk_src, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetAHBPrescalerLLField(pClockTreeConfig->bus.AHB) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodeAHBPrescaler(pClockTreeConfig->bus.AHB, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetAPB1PrescalerLLField(pClockTreeConfig->bus.APB1) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodeAPB1Prescaler(pClockTreeConfig->bus.APB1, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetAPB2PrescalerLLField(pClockTreeConfig->bus.APB2) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodeAPB2Prescaler(pClockTreeConfig->bus.APB2, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetADCPrescalerLLField(pClockTreeConfig->component.ADC) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodeADCPrescaler(pClockTreeConfig->component.ADC, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	if (_RCC_GetUSBPrescalerLLField(pClockTreeConfig->component.USB) == RCC_DRIVER_INVALID_FIELD)
+	if (Codec_RCC_EncodeUSBPrescaler(pClockTreeConfig->component.USB, &llField) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -962,15 +496,12 @@ static driver_status_t _RCC_ApplyBusPrescalerConfig(const rcc_bus_config_t* cons
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	ahbPrescalerField = _RCC_GetAHBPrescalerLLField(pBusConfig->AHB);
-	apb1PrescalerField = _RCC_GetAPB1PrescalerLLField(pBusConfig->APB1);
-	apb2PrescalerField = _RCC_GetAPB2PrescalerLLField(pBusConfig->APB2);
-
+	//! Reject the whole request before any LL write if any single selector fails to encode.
 	if
 	(
-		(ahbPrescalerField == RCC_DRIVER_INVALID_FIELD)		||
-		(apb1PrescalerField == RCC_DRIVER_INVALID_FIELD)	||
-		(apb2PrescalerField == RCC_DRIVER_INVALID_FIELD)
+		(Codec_RCC_EncodeAHBPrescaler(pBusConfig->AHB, &ahbPrescalerField) != DRIVER_STATUS_SUCCESS)		||
+		(Codec_RCC_EncodeAPB1Prescaler(pBusConfig->APB1, &apb1PrescalerField) != DRIVER_STATUS_SUCCESS)	||
+		(Codec_RCC_EncodeAPB2Prescaler(pBusConfig->APB2, &apb2PrescalerField) != DRIVER_STATUS_SUCCESS)
 	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
@@ -1000,10 +531,12 @@ static driver_status_t _RCC_ApplyComponentPrescalerConfig(const rcc_component_co
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	adcPrescalerField = _RCC_GetADCPrescalerLLField(pComponentConfig->ADC);
-	usbPrescalerField = _RCC_GetUSBPrescalerLLField(pComponentConfig->USB);
-
-	if ((adcPrescalerField == RCC_DRIVER_INVALID_FIELD) || (usbPrescalerField == RCC_DRIVER_INVALID_FIELD))
+	//! Reject the whole request before any LL write if either selector fails to encode.
+	if
+	(
+		(Codec_RCC_EncodeADCPrescaler(pComponentConfig->ADC, &adcPrescalerField) != DRIVER_STATUS_SUCCESS) ||
+		(Codec_RCC_EncodeUSBPrescaler(pComponentConfig->USB, &usbPrescalerField) != DRIVER_STATUS_SUCCESS)
+	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -1065,8 +598,15 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 		return DRIVER_STATUS_ERROR;
 	}
 
-	pClockFrequencies->adcclk =
-		(pClockFrequencies->pclk2 / _RCC_GetADCPrescalerDividerBySelector(_RCC_GetADCPrescalerSelectorFromLLField(adcPrescaler)));
+	{
+		rcc_component_prescaler_t	adcSelector = RCC_ADC_DIV_2;
+		uint32_t					adcDivider = 2UL;
+
+		//! Decode/resolve failures cannot occur here; both Codec calls always publish a safe default.
+		(void) Codec_RCC_DecodeADCPrescaler(adcPrescaler, &adcSelector);
+		(void) Codec_RCC_GetADCPrescalerDivider(adcSelector, &adcDivider);
+		pClockFrequencies->adcclk = (pClockFrequencies->pclk2 / adcDivider);
+	}
 
 	if (systemClockSource != RCC_SYS_CLK_PLL)
 	{
@@ -1079,13 +619,20 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 		return DRIVER_STATUS_ERROR;
 	}
 
-	if (_RCC_GetUSBPrescalerSelectorFromLLField(usbPrescaler) == RCC_USB_DIV_1)
 	{
-		pClockFrequencies->usbclk = pClockFrequencies->sysclk;
-	}
-	else
-	{
-		pClockFrequencies->usbclk = ((pClockFrequencies->sysclk << 1) / 3U);
+		rcc_component_prescaler_t usbSelector = RCC_USB_DIV_1_5;
+
+		//! Decode failure cannot occur here; the Codec call always publishes a safe default.
+		(void) Codec_RCC_DecodeUSBPrescaler(usbPrescaler, &usbSelector);
+
+		if (usbSelector == RCC_USB_DIV_1)
+		{
+			pClockFrequencies->usbclk = pClockFrequencies->sysclk;
+		}
+		else
+		{
+			pClockFrequencies->usbclk = ((pClockFrequencies->sysclk << 1) / 3U);
+		}
 	}
 
 	return DRIVER_STATUS_SUCCESS;
@@ -1342,10 +889,12 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 
 	if (pClockTreeConfig->system.clk_src == RCC_SYS_CLK_PLL)
 	{
-		pllSource = _RCC_GetPLLSourceLLField(pClockTreeConfig->system.pll.source);
-		pllMultiplier = _RCC_GetPLLMultiplierLLField(pClockTreeConfig->system.pll.multiplication_factor);
-
-		if ((pllSource == RCC_DRIVER_INVALID_FIELD) || (pllMultiplier == RCC_DRIVER_INVALID_FIELD))
+		//! Encode both PLL fields before any LL write so an invalid selector never leaves a partial commit.
+		if
+		(
+			(Codec_RCC_EncodePLLSource(pClockTreeConfig->system.pll.source, &pllSource) != DRIVER_STATUS_SUCCESS) ||
+			(Codec_RCC_EncodePLLMultiplier(pClockTreeConfig->system.pll.multiplication_factor, &pllMultiplier) != DRIVER_STATUS_SUCCESS)
+		)
 		{
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
@@ -1354,8 +903,7 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 
 		if (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSE)
 		{
-			pllDivider = _RCC_GetPLLHSEDividerLLField(pClockTreeConfig->system.pll.source_prescaler);
-			if (pllDivider == RCC_DRIVER_INVALID_FIELD)
+			if (Codec_RCC_EncodePLLHSEDivider(pClockTreeConfig->system.pll.source_prescaler, &pllDivider) != DRIVER_STATUS_SUCCESS)
 			{
 				return DRIVER_STATUS_ERROR_INVALID_ARG;
 			}
@@ -1481,14 +1029,17 @@ driver_status_t RCC_Config72MHz(void)
 
 rcc_system_clock_t RCC_GetSysClkSrc(void)
 {
-	uint32_t status = RCC_CFGR_SWS_HSI;
+	uint32_t			status = RCC_CFGR_SWS_HSI;
+	rcc_system_clock_t	source = RCC_SYS_CLK_HSI;
 
 	if (RCC_LL_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_SYS_CLK_HSI;
 	}
 
-	return _RCC_GetSystemClockSourceFromLLStatus(status);
+	//! Decode failure cannot occur here; the Codec call always publishes a safe default.
+	(void) Codec_RCC_DecodeSystemClockSource(status, &source);
+	return source;
 }
 
 rcc_pll_src_t RCC_GetPLLSource(void)
@@ -1646,9 +1197,10 @@ frequency_t RCC_GetCoreClockFreq(void)
 
 rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 {
-	uint32_t ahbPrescaler = RCC_CFGR_HPRE_DIV1;
-	uint32_t apb1Prescaler = RCC_CFGR_PPRE1_DIV1;
-	uint32_t apb2Prescaler = RCC_CFGR_PPRE2_DIV1;
+	uint32_t				ahbPrescaler = RCC_CFGR_HPRE_DIV1;
+	uint32_t				apb1Prescaler = RCC_CFGR_PPRE1_DIV1;
+	uint32_t				apb2Prescaler = RCC_CFGR_PPRE2_DIV1;
+	rcc_bus_prescaler_t		selector = RCC_AHB_DIV_1;
 
 	switch (bus)
 	{
@@ -1658,7 +1210,9 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 			{
 				return RCC_AHB_DIV_1;
 			}
-			return _RCC_GetAHBPrescalerSelectorFromLLField(ahbPrescaler);
+			//! Decode failure cannot occur here; the Codec call always publishes a safe default.
+			(void) Codec_RCC_DecodeAHBPrescaler(ahbPrescaler, &selector);
+			return selector;
 		}
 		case RCC_APB1_BUS:
 		{
@@ -1666,7 +1220,8 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 			{
 				return RCC_APB1_DIV_1;
 			}
-			return _RCC_GetAPB1PrescalerSelectorFromLLField(apb1Prescaler);
+			(void) Codec_RCC_DecodeAPB1Prescaler(apb1Prescaler, &selector);
+			return selector;
 		}
 		case RCC_APB2_BUS:
 		{
@@ -1674,7 +1229,8 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 			{
 				return RCC_APB2_DIV_1;
 			}
-			return _RCC_GetAPB2PrescalerSelectorFromLLField(apb2Prescaler);
+			(void) Codec_RCC_DecodeAPB2Prescaler(apb2Prescaler, &selector);
+			return selector;
 		}
 		default:
 		{
