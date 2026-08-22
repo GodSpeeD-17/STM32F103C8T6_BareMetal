@@ -1,32 +1,54 @@
 /**
  * @file	main.c
  * @author	Shrey Shah
- * @brief	Timer Polling Delay Demo
+ * @brief	Implements the Timer polling-delay demo application behavior
  * @version	v1.0
- * @date	15-08-2026
+ * @date	22-08-2026
  *
  * @details
- * Configures TIM2 as a dedicated 1 MHz blocking polling-delay source. The application
- * toggles the on-board LED once per blocking delay interval and treats any
- * Timer status failure as terminal.
+ * @section MAIN_C_HIERARCHY Hierarchy
+ * - Position: Layer 3 - Application behavior implementation
+ * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
+ * - Uses: Layer 1 Timer/BSP Drivers directly
+ *
+ * @section MAIN_C_RESPONSIBILITY Responsibility
+ * Configures TIM2 as a dedicated 1 MHz blocking polling-delay source. The
+ * application toggles the on-board LED once per blocking delay interval and
+ * treats any Timer status failure as terminal. TIM2 is owned directly by this
+ * demo rather than through `app_delay`, since demonstrating the Timer
+ * driver's own blocking-delay API is the point of this project.
+ *
+ * @section MAIN_C_BOUNDARY Dependency Boundary
+ * Application behavior belongs here. Processor startup, clock configuration,
+ * and service initialization do not.
  */
 
 // ==================================================================================================== //
-//												Includes												//
+// Includes
 // ==================================================================================================== //
 #include "main.h"
+#include "bsp.h"
+#include "rcc.h"
+#include "timer.h"
 
 // ==================================================================================================== //
-//										Local Helpers											//
+// Private Defines
+// ==================================================================================================== //
+
+/** @brief Polling-delay demonstration interval in milliseconds @def LOOP_DELAY_MS */
+#define LOOP_DELAY_MS		((uint32_t) 1000UL)
+
+// ==================================================================================================== //
+// Local Helpers
 // ==================================================================================================== //
 
 /**
  * @brief Enters the application error-indication loop
  * @details
- * The Blue Pill on-board LED is active-low. The handler switches it on and
- * stops application progress after a Timer operation fails.
+ * App_Init() already configures and forces off the BSP on-board LED, so this
+ * handler only needs to set it once after a Timer operation fails.
  */
-static void App_ErrorHandler(void)
+static void APP_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -45,7 +67,7 @@ static void App_ErrorHandler(void)
  * @note The application explicitly enables the TIM2 clock gate before Timer
  * configuration, which leaves counter operation disabled for @ref TIM_BlockingDelayMs
  */
-static driver_status_t App_Init(void)
+static driver_status_t APP_ConfigTimer(void)
 {
 	//! Explicitly enable the application-owned TIM2 clock before configuring the blocking-delay service.
 	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM2EN));
@@ -54,20 +76,14 @@ static driver_status_t App_Init(void)
 }
 
 // ==================================================================================================== //
-//										Main Entry Point										//
+// Application Entry Point
 // ==================================================================================================== //
 
-/**
- * @brief Runs the TIM2 blocking polling-delay demonstration
- * @returns Process status
- * @retval - `0`: The function returned normally, which is not expected in this
- * bare-metal application.
- */
 int main(void)
 {
-	if (App_Init() != DRIVER_STATUS_SUCCESS)
+	if (APP_ConfigTimer() != DRIVER_STATUS_SUCCESS)
 	{
-		App_ErrorHandler();
+		APP_ErrorHandler();
 	}
 
 	while (1)
@@ -78,9 +94,7 @@ int main(void)
 		//! Stop the demo on timeout or lost Timer ownership instead of hiding the status.
 		if (TIM_BlockingDelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
-			App_ErrorHandler();
+			APP_ErrorHandler();
 		}
 	}
-
-	return 0;
 }
