@@ -51,6 +51,7 @@ extern "C" {
  * never perform volatile I/O; they only translate between the driver-facing
  * selector vocabulary and the raw hardware field values from
  * @ref stm32f1xx_rcc.h.
+ * @see @ref RCC_Peripheral_Guide "STM32F103C8T6 RCC Architecture"
  * @{
  */
 

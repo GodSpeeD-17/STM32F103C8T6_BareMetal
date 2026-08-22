@@ -14,6 +14,7 @@ theory has one maintained source.
 
 - @ref GPIO_Peripheral_Guide "GPIO Implementation Guide"
 - @ref NVIC_Peripheral_Guide "STM32F103C8T6 NVIC Architecture"
+- @ref RCC_Peripheral_Guide "STM32F103C8T6 RCC Architecture"
 - @ref SYSTICK_Peripheral_Guide "Cortex-M3 SysTick Implementation Guide"
 - @ref TIM_PWM_Peripheral_Guide "STM32F103C8T6 Timer PWM Architecture"
 

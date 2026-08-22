@@ -31,6 +31,8 @@
  *
  * @note Functions in this file do not validate clock-tree policy or hardware
  * readiness; they only apply the raw field or mask the caller supplies.
+ *
+ * @see @ref RCC_Peripheral_Guide "STM32F103C8T6 RCC Architecture"
  */
 
 #ifndef RCC_LL_H_

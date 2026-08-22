@@ -15,6 +15,8 @@
  * - The Codec layer translates driver-facing selectors into raw hardware fields.
  * - The driver layer validates requested policies, sequences safe transitions,
  *   and exposes frequency-oriented runtime queries.
+ *
+ * @see @ref RCC_Peripheral_Guide "STM32F103C8T6 RCC Architecture"
  */
 
 #ifndef RCC_H_

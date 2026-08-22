@@ -99,7 +99,7 @@ Processor reset
 └── Reset_Handler                         Layer 4
     ├── copy .data / clear .bss
     ├── App_Init                          Layer 3
-    │   ├── RCC_Config_72MHz              Layer 1
+    │   ├── RCC_Config72MHz               Layer 1
     │   ├── App_TimeInit [optional]       Layer 2
     │   │   └── SysTick Driver            Layer 1
     │   └── App_DelayTimerInit [optional] Layer 2
