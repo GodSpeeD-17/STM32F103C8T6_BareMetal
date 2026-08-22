@@ -180,6 +180,13 @@ ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 Comments should explain why the operation exists or what invariant it protects.
 Avoid comments that merely translate the following C statement into English.
 
+Every function body must contain at least one meaningful `//!` logic comment,
+including one-line adapters, getters, setters, startup handlers, and minimal
+interrupt handlers. For a thin function, explain why direct delegation, an
+atomic read, or a bounded interrupt-side operation is the correct ownership
+choice. Function-level Doxygen does not replace this implementation-local
+explanation.
+
 ## Function and Macro Call Layout
 
 Keep a call on one line when it remains readable:
@@ -673,6 +680,15 @@ the same subject in both names, such as `TIM_Config()` / `TIM_DeConfig()` or
 pair when one owns only a narrow subdomain and the other resets or mutates the
 complete peripheral.
 
+Every public getter for a mutable operation state must have its symmetric
+setter, such as `PERIPH_GetOperationState()` /
+`PERIPH_SetOperationState(operationState)`. When one state domain accepts both
+`DRIVER_STATUS_OFF` and `DRIVER_STATUS_ON`, prefer that single Get/Set pair over
+combining a getter with separate public `Disable()` and `Enable()` functions.
+Separate action verbs remain appropriate only when the hardware actions are
+genuinely asymmetric and cannot be represented truthfully as one state setter;
+document that exception explicitly.
+
 A root configuration type such as `tim_config_t` represents every currently
 admitted base-configuration domain intentionally included in that object. Its
 root configuration API applies that whole object, while preserving explicitly
@@ -696,8 +712,129 @@ kernel clock; it must not become a general frequency setter.
 Calculated-frequency getters are acceptable because they observe and report
 programmed state without mutating configuration.
 
+## Application Template Ownership and Naming
+
+Keep startup declarations, linker-symbol declarations, the vector table, and
+application-service policy inside each project. The shared Driver root must not
+own or inject a project's startup implementation.
+
+Name project-owned Template service modules `app_*.*`, including
+`app_startup.[ch]`. Retain conventional filenames only for `main.[ch]` and
+`syscalls.c`. SysTick is an explicit hardware-service exception and retains
+`systick.[ch]` plus the direct `SysTick_` public-function prefix. Symbols called
+by the processor, linker, or C library retain their required ABI names; other
+project-owned public service functions use the `App_` prefix.
+
+Project include directories take precedence over shared Driver include
+directories so a project-local `startup.h` cannot resolve to legacy shared
+startup content.
+
+Every application Template header that declares a function or object with
+external linkage must wrap those declarations in an `extern "C"` guard for C++
+consumers. Macro-only configuration headers do not require a linkage guard.
+
+Application Template files use `stm32f1xx_data_types.h` as their direct source
+of fixed-width integers, shared physical quantities, register vocabulary, and
+driver statuses. Do not include `<stdint.h>` or another standard scalar-type
+header directly from a Template file. Standard headers that provide a distinct
+service, such as `<errno.h>`, remain direct dependencies where that service is
+used.
+
+## Section Banner Formatting
+
+Write section-banner titles left-aligned without decorative whitespace
+padding. Keep ordinary section titles between the existing border lines:
+
+```c
+// ==================================================================================================== //
+// Public API
+// ==================================================================================================== //
+```
+
+Do not center section titles with runs of spaces or tabs. Follow the established
+Timer-header style for structural boundaries: use one `// Header Guard` line
+immediately before the opening `#ifndef` / `#define`, use
+`// --- C++ Compatibility ---` at both C++ linkage boundaries, and close the
+file directly with `#endif /* HEADER_GUARD */`. Do not add redundant
+`Header Guard End`, `C++ Compatibility End`, or `Documentation Group` banner
+sections.
+
+Use banners to express logical API hierarchy, not merely to divide a long file.
+A major `=` banner owns one coherent domain such as configuration, operation
+control, state observation, tick storage, or interrupt handling. When a domain
+contains distinct pairs or subdomains, place each beneath a left-aligned `-`
+sub-banner. Do not club unrelated control, state, and data APIs beneath one
+generic banner. Header and source files must use the same banner names and API
+order.
+
+Within every lifecycle or operation-control conjugate pair, place the
+teardown/release operation before the setup/acquire operation: `Destroy` before
+`Create`, `DeConfig` before `Config`, `Disable` before `Enable`, and `Stop`
+before `Start`. Apply this order consistently to declarations, definitions, and
+documentation.
+
+## Application Template File Documentation
+
+Use the Timer module as the concrete Doxygen and file-layout reference for
+application Template files, subject to later explicit repository-owner
+preferences such as left-aligned section titles. Every file begins with the
+standard `@file`, `@author`, `@brief`, `@version`, `@date`, and `@details`
+metadata layout.
+
+The `@details` block must make the file's architectural position understandable
+without reading another file. Use uniquely identified `@section` blocks for
+hierarchy, responsibility, and dependency boundary. State the file's layer or
+cross-cutting role, its direct users, its direct dependencies, and its
+prohibited ownership. Never use an unexplained arrow as a substitute for a
+named `includes`, `calls`, `uses`, or `is invoked by` relationship.
+
+Number application architecture layers from hardware upward. Layer 1 is always
+the hardware-nearest project/Driver access layer. Increasing layer numbers must
+represent progressively more software-only service, policy, behavior, and
+orchestration responsibility. A higher numbered layer may depend downward; a
+lower numbered layer must not depend upward.
+
+Every application configuration macro must explain more than its literal
+value. Its Doxygen documents its architectural significance, the capability or
+behavior it controls, its direct consumers, every accepted value, relevant
+cross-macro or hardware constraints, and what defining it does not perform.
+Feature flags must document both enabled and disabled behavior. Hardware
+selection macros must document exclusive ownership and every companion mapping
+that must remain consistent.
+
 ## Preference Log
 
+- 2026-08-22: Required at least one meaningful implementation-local `//!`
+  comment inside every function body, including thin wrappers, state accessors,
+  startup handlers, and minimal IRQ handlers.
+- 2026-08-22: Required every public mutable operation-state getter to have a
+  symmetric setter and preferred one OFF/ON Get/Set pair over redundant public
+  Disable/Enable functions.
+- 2026-08-22: Required hierarchical logical API banners mirrored between
+  headers and sources, and ordered lifecycle/control conjugates teardown-first
+  (`Destroy`/`DeConfig`/`Disable`/`Stop` before their constructive counterparts).
+- 2026-08-22: Fixed application layer numbering from hardware upward, with
+  Layer 1 always hardware-nearest and higher layers owning progressively more
+  software orchestration; required capability-oriented configuration-macro
+  Doxygen with accepted values, consumers, constraints, and non-effects.
+- 2026-08-22: Made `stm32f1xx_data_types.h` the sole Template-facing gateway
+  for standard fixed-width and repository-wide scalar types; prohibited direct
+  Template `<stdint.h>` includes.
+- 2026-08-22: Adopted Timer-style Template file metadata and structural guard
+  markers, prohibited redundant end/group banners, and required explicit
+  per-file hierarchy, responsibility, and dependency-boundary documentation.
+- 2026-08-22: Required left-aligned, unpadded ordinary section-banner titles
+  and an explicit `Header Guard` marker before every header guard.
+- 2026-08-22: Assigned startup ownership to each project, standardized
+  reusable Template filenames on `app_*.*`, retained conventional platform and
+  ABI entry filenames, and required project-local headers to take include-path
+  precedence.
+- 2026-08-22: Kept project-owned SysTick as an explicit `systick.[ch]` and
+  `SysTick_` naming exception beneath the application time service.
+- 2026-08-22: Required C++ linkage guards in every Template header that
+  declares externally linked functions or objects.
+- 2026-08-22: Named the project-owned startup module `app_startup.[ch]` while
+  retaining processor-mandated reset and exception ABI symbol names.
 - 2026-08-16: Restored the repository-owner Doxygen style using
   backtick-wrapped `@ref` targets and list-style referenced `@retval` status
   entries. This later decision supersedes the earlier same-day native Doxygen

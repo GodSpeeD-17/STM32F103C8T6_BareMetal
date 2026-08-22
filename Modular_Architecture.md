@@ -340,11 +340,9 @@ SysTick peripheral only.
 
 Good `systick.c` responsibilities:
 
-- `SysTick_Config(...)`
-- `SysTick_Enable()`
-- `SysTick_Disable()`
-- `SysTick_Get_Ticks()`
-- `SysTick_Set_Ticks(...)`
+- `SysTick_SetConfig(...)`
+- `SysTick_GetOperationState()` / `SysTick_SetOperationState(...)`
+- `SysTick_ResetTicks()` / `SysTick_GetTicks()`
 - `SysTick_Handler()`
 - raw SysTick register access
 

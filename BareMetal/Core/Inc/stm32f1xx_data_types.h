@@ -1,118 +1,153 @@
 /**
  * @file	stm32f1xx_data_types.h
  * @author	Shrey Shah
- * @brief	STM32F1xx Custom Data Types
- * @version v1.0
- * @date 01-03-2026
+ * @brief	Defines shared Core scalar, register, and Driver-status types
+ * @version	v1.1
+ * @date	22-08-2026
+ *
+ * @details
+ * @section STM32F1XX_DATA_TYPES_H_HIERARCHY Hierarchy
+ * - Position: Foundational Core type layer
+ * - Included by: Core register models, peripheral Drivers, and applications
+ * - Uses: Standard C type and library declarations only
+ *
+ * @section STM32F1XX_DATA_TYPES_H_RESPONSIBILITY Responsibility
+ * This header is the repository gateway for fixed-width integer types,
+ * memory-mapped register qualifiers, register-image vocabulary, shared
+ * physical quantities, Driver statuses, and intentionally shared scalar
+ * selector aliases.
+ *
+ * @section STM32F1XX_DATA_TYPES_H_DEPENDENCIES Standard C Dependencies
+ * `<stdint.h>` supplies fixed-width integers, `<stdbool.h>` supplies the C
+ * Boolean vocabulary, `<stdlib.h>` supplies common library declarations, and
+ * `<string.h>` supplies byte/string operation declarations used by existing
+ * repository modules through this shared Core gateway.
+ *
+ * @section STM32F1XX_DATA_TYPES_H_BOUNDARY Dependency Boundary
+ * This header includes no project, peripheral, register-map, Driver, Codec, or
+ * LL header. It defines vocabulary only and performs no hardware access,
+ * validation, allocation, string operation, or peripheral policy.
  */
+
+// Header Guard
 #ifndef STM32F1XX_DATA_TYPES_H_
 #define STM32F1XX_DATA_TYPES_H_
 
 // ==================================================================================================== //
-//												Includes												//
+// Includes
 // ==================================================================================================== //
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 
-// --- C++ Safeguards ---
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @brief Shared STM32F1 Core type vocabulary
+ * @defgroup STM32F1xx_DataTypes STM32F1 Shared Data Types
+ * @ingroup STM32F1xx
+ * @{
+ */
+
 // ==================================================================================================== //
-//										Register Modification Type										//
+// Register Access and Image Types
 // ==================================================================================================== //
 
 /**
- * @brief Read/Write access type
+ * @brief Declares a volatile read/write 32-bit hardware register word
  * @typedef _IO
  * @details
- * - Used for registers that support both read and write operations
- * - Qualifies the register as volatile to prevent compiler optimizations
- * - Ensures each access is performed as specified in code
- * 
- * @note This is the most commonly used type for peripheral registers
+ * The `volatile` qualifier forces every C read and write expression to perform
+ * an observable access to the represented memory-mapped register.
+ * @warning `volatile` does not provide atomicity, ordering between agents, or
+ * register-specific read/modify/write safety
  */
 typedef volatile uint32_t						_IO;
 
 /**
- * @brief Read-only access type
+ * @brief Declares a volatile read-only 32-bit hardware register word
  * @typedef _I
  * @details
- * - Used for registers that are read-only (status registers, flags)
- * - Qualifies as volatile to ensure fresh read on each access
- * - Writing to these registers may have undefined behavior
- * 
- * @note Hardware may update these registers asynchronously
+ * The `const volatile` qualifiers require a fresh hardware read while
+ * preventing writes through the qualified C lvalue.
+ * @note Hardware may update the represented register asynchronously
  */
 typedef volatile const uint32_t					_I;
 
 /**
- * @brief Write-only access type
+ * @brief Declares a volatile write-only 32-bit hardware register word
  * @typedef _O
  * @details
- * - Used for registers that are write-only (data output, control)
- * - Qualifies as volatile to ensure write is not optimized away
- * - Reading from these registers may return garbage values
- * 
- * @note Common for FIFO buffers and output-only control registers
+ * The C type remains readable because C has no write-only qualifier; the
+ * register-map contract prohibits reads through this semantic alias.
+ * @warning Reading a hardware register declared with this alias may return an
+ * undefined value or trigger a device-specific side effect
  */
 typedef volatile uint32_t						_O;
 
 /**
- * @brief Register type
+ * @brief Defines a non-volatile 32-bit register image
  * @typedef reg
+ * @details
+ * Use this type for local register snapshots, staged register images, masks,
+ * and complete register values. Use `_IO`, `_I`, or `_O` only in hardware
+ * register-map structures.
  */
 typedef uint32_t								reg;
 
 /**
- * @brief Raw register field value type
+ * @brief Defines a right-aligned raw register-field value
  * @typedef reg_field_t
  */
 typedef uint8_t									reg_field_t;
 
 /**
- * @brief Raw register bit position type
+ * @brief Defines a zero-based register bit position
  * @typedef reg_bit_pos_t
+ * @note Valid positions for a 32-bit register are `0U..31U`
  */
 typedef uint8_t									reg_bit_pos_t;
 
 /**
- * @brief Raw register field width type
+ * @brief Defines the width of a register field in bits
  * @typedef reg_field_width_t
+ * @note Individual register helpers define whether width `0U` is admitted
  */
 typedef uint8_t									reg_field_width_t;
 
 // ==================================================================================================== //
-//									Shared Physical Quantity Types									//
-// ==================================================================================================== //
-
-/** @brief Frequency value in hertz shared by every peripheral driver @typedef frequency_t */
-typedef uint32_t								frequency_t;
-
-// ==================================================================================================== //
-//										Driver Operation Status Type									//
+// Shared Physical Quantity Types
 // ==================================================================================================== //
 
 /**
- * @brief Driver Operation Status Type
+ * @brief Defines a frequency value in hertz shared by every peripheral stack
+ * @typedef frequency_t
+ */
+typedef uint32_t								frequency_t;
+
+// ==================================================================================================== //
+// Driver Operation Status Type
+// ==================================================================================================== //
+
+/**
+ * @brief Driver operation status vocabulary and propagation utilities
  * @defgroup 01_STM32F1xx_Utilities_03_DriverStatus Driver Status Definitions
  * @ingroup 01_STM32F1xx_Utilities
  * @{
  */
 
 /**
- * @brief Driver status codes enumeration
- * @enum driver_status_t
- * @note Link individual codes using @ref `DRIVER_STATUS_xxx`.
- * 
+ * @brief Defines common Driver operation results and observable states
+ * @typedef driver_status_t
  * @details
- * Contract:
- *  - Values <= DRIVER_STATUS_ERROR (0) indicate an error.
- *  - DRIVER_STATUS_SUCCESS (1) indicates success.
- *  - Values >= DRIVER_STATUS_OFF (2) indicate non-error states. 
+ * Numeric ranges preserve three result classes:
+ * - Values through @ref `DRIVER_STATUS_ERROR` indicate errors
+ * - @ref `DRIVER_STATUS_SUCCESS` indicates successful completion
+ * - Values from @ref `DRIVER_STATUS_OFF` indicate observable non-error states
  */
 typedef enum _driver_status_t
 {
@@ -141,20 +176,17 @@ typedef enum _driver_status_t
 } driver_status_t;
 
 /**
- * @brief Asserts Driver Status
- * @param[in] expr Expression that evaluates to @ref `driver_status_t`
- * @returns Returns the evaluated status only when @p expr is not @ref `DRIVER_STATUS_SUCCESS`
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: @p expr reported busy state
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @p expr reported invalid state
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: @p expr reported timeout
- * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: @p expr reported generic failure
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p expr reported invalid argument
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p expr reported null pointer
- * @retval - @ref `DRIVER_STATUS_ERROR`: @p expr reported baseline error
- * @retval - @ref `DRIVER_STATUS_OFF`: @p expr reported off state
- * @retval - @ref `DRIVER_STATUS_ON`: @p expr reported on state
- * @retval - @ref `DRIVER_STATUS_READY`: @p expr reported ready state
- * @note @ref `DRIVER_STATUS_SUCCESS` does not return from this macro; execution continues.
+ * @brief Propagates an unsuccessful Driver status from the enclosing function
+ * @def ASSERT_DRIVER_STATUS
+ * @details
+ * Evaluates @p expr exactly once. Execution continues when it produces
+ * @ref `DRIVER_STATUS_SUCCESS`; every other status is returned unchanged from
+ * the enclosing function.
+ * @param[in] expr Expression that produces @ref driver_status_t
+ * Expected values:
+ * - Any value representable by @ref driver_status_t
+ * @warning Use this macro only inside a function whose return type admits every
+ * value in @ref driver_status_t
  */
 #define ASSERT_DRIVER_STATUS(expr)				\
 do												\
@@ -163,32 +195,35 @@ do												\
 	if (_st != DRIVER_STATUS_SUCCESS)			\
 	{											\
 		return _st;								\
-	}									 		\
+	}											\
 } while (0)
 
-/** 
- * @brief Calculates the number of elements in an array
+/**
+ * @brief Calculates the compile-time element count of an array object
  * @def ARRAY_SIZE
- * @param[in] arr The array
- * @returns Number of elements in the array
+ * @param[in] arr Complete array object
+ * Accepted values:
+ * - Any complete array object visible at the expansion site
+ * @returns Number of elements in @p arr
+ * @warning A pointer argument produces the pointer-size ratio, not the number
+ * of elements in the pointed-to storage
  */
 #define ARRAY_SIZE(arr)							(sizeof(arr) / sizeof((arr)[0]))
 
 /** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
 
 /**
- * @brief RCC Shared Scalar Aliases
+ * @brief RCC shared scalar aliases
  * @defgroup RCC_03_Driver_01_DataTypes RCC Driver Data Types
  * @ingroup RCC_03_Driver
  * @details
  * This group owns the scalar aliases shared by the RCC driver stack.
  *
- * Dependency route:
- * - `stm32f1xx_data_types.h` defines portable scalar aliases.
- * - `stm32f1xx_rcc.h` defines the RCC register model and bit fields.
- * - `stm32f1xx.h` publishes board-level RCC operating limits.
- * - `rcc_ll.h` and `rcc_ll.c` implement register-near control.
- * - `rcc.h` and `rcc.c` implement policy, validation, and orchestration.
+ * Dependency ownership:
+ * - This header defines the shared scalar aliases
+ * - `stm32f1xx_rcc.h` defines the RCC register model and bit fields
+ * - `rcc_ll` consumes the aliases for register-near control
+ * - `rcc` consumes the aliases for public policy and orchestration
  *
  * Keeping these aliases here allows every RCC layer to share the same type
  * names without introducing circular header dependencies.
@@ -215,7 +250,9 @@ typedef uint8_t									rcc_pll_src_psc_t;
 typedef uint8_t									rcc_pll_mul_t;
 /** @} */ // RCC_03_Driver_01_DataTypes
 
-// --- C++ Safeguards ---
+/** @} */ // STM32F1xx_DataTypes
+
+// --- C++ Compatibility ---
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

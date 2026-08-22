@@ -1,79 +1,98 @@
+/**
+ * @file	app_startup.h
+ * @author	Shrey Shah
+ * @brief	Declares the application-owned processor startup contract
+ * @version	v1.0
+ * @date	22-08-2026
+ *
+ * @details
+ * @section APP_STARTUP_H_HIERARCHY Hierarchy
+ * - Position: Layer 4 - Processor entry
+ * - Invoked by: Processor reset and exception vectors
+ * - Uses: Layer 3 `app_init` and `main` through `app_startup.c`
+ *
+ * @section APP_STARTUP_H_RESPONSIBILITY Responsibility
+ * This contract declares linker symbols plus the reset and fallback entry
+ * points. Its source owns the vector table, initializes C runtime memory,
+ * calls App_Init(), and transfers control to main().
+ *
+ * @section APP_STARTUP_H_BOUNDARY Dependency Boundary
+ * This header includes only `stm32f1xx_data_types.h`. It owns no peripheral
+ * policy, heap adaptation, or application service, and no lower layer includes
+ * it.
+ */
+
+// Header Guard
 #ifndef APP_STARTUP_H_
 #define APP_STARTUP_H_
 
-#include <stdint.h>
+// ==================================================================================================== //
+// Includes
+// ==================================================================================================== //
+#include "stm32f1xx_data_types.h"
 
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+/**
+ * @brief Application-owned processor startup contract
+ * @defgroup APP_Startup Application Startup
+ * @ingroup APP_Template
+ * @{
+ */
+
+// ==================================================================================================== //
+// Linker Symbols
+// ==================================================================================================== //
+
+/** @brief Flash load address of the initialized `.data` image supplied by the linker */
 extern uint32_t _sidata;
+/** @brief First `.data` address in RAM supplied by the linker */
 extern uint32_t _sdata;
+/** @brief One-past-last `.data` address in RAM supplied by the linker */
 extern uint32_t _edata;
+/** @brief First `.bss` address in RAM supplied by the linker */
 extern uint32_t _sbss;
+/** @brief One-past-last `.bss` address in RAM supplied by the linker */
 extern uint32_t _ebss;
+/** @brief Initial main-stack address supplied by the linker */
 extern uint32_t _estack;
+
+// ==================================================================================================== //
+// Processor Entry Points
+// ==================================================================================================== //
 
 /**
  * @brief Initializes C runtime memory and transfers control to the application
+ * @details
+ * Copies `.data` from its Flash load image into RAM, clears `.bss`, invokes
+ * @ref App_Init, then transfers control to @ref main. Any initialization
+ * failure or unexpected return from @ref main enters @ref Default_Handler.
  * @returns Nothing
- * @note Reset handling never returns to the processor reset sequence
+ * @pre The linker provides valid ordered `_sidata`, `_sdata`, `_edata`, `_sbss`, `_ebss`, and `_estack` symbols
+ * @note This processor reset entry point is the second vector-table entry and never returns
  */
 __attribute__((noreturn)) void Reset_Handler(void);
 
 /**
- * @brief Holds execution after an unimplemented exception or fatal startup error
+ * @brief Contains execution after an unimplemented exception or fatal startup error
+ * @details
+ * Repeatedly executes `WFI` so the processor remains contained without a busy
+ * loop. The handler performs no peripheral cleanup and publishes no recovery
+ * state.
  * @returns Nothing
+ * @note This fallback entry point never returns
+ * @warning Attach a debugger and inspect the active exception state to identify the originating fault
  */
 void Default_Handler(void);
 
-void NMI_Handler(void);
-void HardFault_Handler(void);
-void MemManage_Handler(void);
-void BusFault_Handler(void);
-void UsageFault_Handler(void);
-void SVC_Handler(void);
-void DebugMon_Handler(void);
-void PendSV_Handler(void);
-void SysTick_Handler(void);
-void WWDG_IRQHandler(void);
-void PVD_IRQHandler(void);
-void TAMPER_IRQHandler(void);
-void RTC_IRQHandler(void);
-void FLASH_IRQHandler(void);
-void RCC_IRQHandler(void);
-void EXTI0_IRQHandler(void);
-void EXTI1_IRQHandler(void);
-void EXTI2_IRQHandler(void);
-void EXTI3_IRQHandler(void);
-void EXTI4_IRQHandler(void);
-void DMA1_Channel1_IRQHandler(void);
-void DMA1_Channel2_IRQHandler(void);
-void DMA1_Channel3_IRQHandler(void);
-void DMA1_Channel4_IRQHandler(void);
-void DMA1_Channel5_IRQHandler(void);
-void DMA1_Channel6_IRQHandler(void);
-void DMA1_Channel7_IRQHandler(void);
-void ADC1_2_IRQHandler(void);
-void USB_HP_CAN_TX_IRQHandler(void);
-void USB_LP_CAN_RX0_IRQHandler(void);
-void CAN_RX1_IRQHandler(void);
-void CAN_SCE_IRQHandler(void);
-void EXTI9_5_IRQHandler(void);
-void TIM1_BRK_IRQHandler(void);
-void TIM1_UP_IRQHandler(void);
-void TIM1_TRG_COM_IRQHandler(void);
-void TIM1_CC_IRQHandler(void);
-void TIM2_IRQHandler(void);
-void TIM3_IRQHandler(void);
-void TIM4_IRQHandler(void);
-void I2C1_EV_IRQHandler(void);
-void I2C1_ER_IRQHandler(void);
-void I2C2_EV_IRQHandler(void);
-void I2C2_ER_IRQHandler(void);
-void SPI1_IRQHandler(void);
-void SPI2_IRQHandler(void);
-void USART1_IRQHandler(void);
-void USART2_IRQHandler(void);
-void USART3_IRQHandler(void);
-void EXTI15_10_IRQHandler(void);
-void RTCAlarm_IRQHandler(void);
-void USBWakeUp_IRQHandler(void);
+/** @} */
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* APP_STARTUP_H_ */

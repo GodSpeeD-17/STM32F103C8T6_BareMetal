@@ -9,10 +9,10 @@ function(stm32_add_firmware_target)
     # Driver include directories are filtered earlier, so by this point the
     # target can receive the final merged include path list directly.
     set(ALL_INCLUDE_DIRS
+        ${PROJ_DIR}/Inc
         ${CORE_ROOT}/Inc
         ${DRIVER_ROOT}
         ${SELECTED_DRIVER_INCLUDES}
-        ${PROJ_DIR}/Inc
     )
     target_include_directories(${PROJECT_NAME}.elf PRIVATE ${ALL_INCLUDE_DIRS})
 

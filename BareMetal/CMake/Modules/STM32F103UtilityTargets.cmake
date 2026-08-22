@@ -23,7 +23,7 @@ function(stm32_add_vscode_targets)
       COMMAND ${CMAKE_COMMAND} -E echo "      ],"                                   >> ${VSCODE_DIR}/launch.json
       COMMAND ${CMAKE_COMMAND} -E echo "      \\\"svdFile\\\": \\\"${CORE_ROOT}/Src/stm32f103c8t6.svd\\\"," >> ${VSCODE_DIR}/launch.json
       COMMAND ${CMAKE_COMMAND} -E echo "      \\\"runToEntryPoint\\\": \\\"main\\\", // main.c" >> ${VSCODE_DIR}/launch.json
-      COMMAND ${CMAKE_COMMAND} -E echo "    //   \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // startup.c" >> ${VSCODE_DIR}/launch.json
+      COMMAND ${CMAKE_COMMAND} -E echo "    //   \\\"runToEntryPoint\\\": \\\"Reset_Handler\\\", // app_startup.c" >> ${VSCODE_DIR}/launch.json
       COMMAND ${CMAKE_COMMAND} -E echo "      \\\"preLaunchTask\\\": \\\"Build Project\\\"," >> ${VSCODE_DIR}/launch.json
       COMMAND ${CMAKE_COMMAND} -E echo "      \\\"postLaunchCommands\\\": ["         >> ${VSCODE_DIR}/launch.json
       COMMAND ${CMAKE_COMMAND} -E echo "        \\\"monitor reset init\\\","         >> ${VSCODE_DIR}/launch.json
@@ -186,8 +186,9 @@ function(stm32_add_maintenance_targets)
     endfunction()
 
     add_replace_target(replace_main_h "main.h" "${PROJ_DIR}/Inc")
+    add_replace_target(replace_app_startup_h "app_startup.h" "${PROJ_DIR}/Inc")
     add_replace_target(replace_systick_h "systick.h" "${PROJ_DIR}/Inc")
     add_replace_target(replace_systick_c "systick.c" "${PROJ_DIR}/Src")
-    add_replace_target(replace_startup_c "startup.c" "${PROJ_DIR}/Src")
+    add_replace_target(replace_app_startup_c "app_startup.c" "${PROJ_DIR}/Src")
     add_replace_target(replace_cmake "CMakeLists.txt" "${PROJ_DIR}")
 endfunction()
