@@ -372,6 +372,16 @@ read-modify-write accesses where the hardware contract requires a staged
 full-register transfer. Keyed, action, write-only, and write-one-to-clear
 register transactions must use the appropriate full-register operation.
 
+Centralize each peripheral LL's ordinary full-width volatile access in one
+generic pointer-based read primitive and one generic pointer-based write
+primitive. Named register accessors select the appropriate `.REG` pointer and
+delegate to those primitives; they must not repeat direct dereference or
+`RegOps_Read()` / `RegOps_Write()` mechanics. Keep the named surface symmetric
+where hardware permits. Preserve truthful asymmetry for read-only, write-only,
+and action-port registers, and document why an unavailable direction or
+conjugate does not exist. Semantic helpers such as a write-to-clear reset may
+delegate through the corresponding named register writer.
+
 Do not centralize peripheral instance/capability predicates or
 peripheral-specific operating limits in `stm32f1xx_defines.h`. Introduce them
 only when required and keep them inside the respective peripheral stack; for
@@ -807,6 +817,9 @@ that must remain consistent.
 
 ## Preference Log
 
+- 2026-08-22: Centralized peripheral LL register mechanics in generic
+  pointer-based read/write primitives and required named accessors to delegate
+  register selection while preserving hardware-defined access asymmetry.
 - 2026-08-22: Required at least one meaningful implementation-local `//!`
   comment inside every function body, including thin wrappers, state accessors,
   startup handlers, and minimal IRQ handlers.

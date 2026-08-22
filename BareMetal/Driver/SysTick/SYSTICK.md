@@ -96,7 +96,8 @@ Application handler/service
 ```
 
 - `stm32f1xx_systick.h` owns raw field macros and `SysTick_TypeDef`.
-- `systick_ll.h` owns dumb full-width `.REG` reads and writes.
+- `systick_ll.h` owns one generic full-width `.REG` read/write primitive pair;
+  named register accessors only select and forward register pointers.
 - `systick.c` owns public validation, field preservation, and transaction
   sequencing.
 - a consuming application owns `SysTick_Handler()` and any software tick,

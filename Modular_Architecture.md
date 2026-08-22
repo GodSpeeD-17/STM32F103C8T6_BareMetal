@@ -211,9 +211,10 @@ configuration preserves the separate IRQ-source domain and never performs
 deconfiguration implicitly. The application owns teardown-before-setup order.
 
 No Codec layer is present because the admitted clock selector and reload value
-are already exact register-semantic payloads. LL performs one named mechanical
-register access; Driver performs validation and preservation; application code
-provides time units and interrupt policy.
+are already exact register-semantic payloads. LL centralizes mechanical access
+through one generic read/write pair; named accessors select registers, Driver
+performs validation and preservation, and application code provides time units
+and interrupt policy.
 
 ## Audit order for a new project
 
