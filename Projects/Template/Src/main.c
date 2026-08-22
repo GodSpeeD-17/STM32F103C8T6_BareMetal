@@ -34,22 +34,12 @@
 
 int main(void)
 {
-#if (APP_ENABLE_SYSTICK_TIMEBASE == 1U)
-	uint32_t previousTickMs = App_TimeGetTickMs();
-#endif
+	//! Application Initialization
+	
 
+	//! Infinite Loop
 	while (1)
 	{
-#if (APP_ENABLE_SYSTICK_TIMEBASE == 1U)
-		//! Keep periodic application work non-blocking by observing the shared monotonic timebase.
-		if (App_TimeGetElapsedMs(previousTickMs) >= APP_MAIN_PERIOD_MS)
-		{
-			previousTickMs += APP_MAIN_PERIOD_MS;
-			/* Add periodic application work here. */
-		}
-#endif
-
-		//! Sleep until an enabled interrupt produces work for the application loop.
-		__WFI();
+		//! Application Logic
 	}
 }

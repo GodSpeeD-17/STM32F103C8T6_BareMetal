@@ -708,36 +708,36 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  */
 
 /** @brief No Timer interrupt-request source selected @def TIMx_IRQ_SOURCE_NONE */
-#define TIMx_IRQ_SOURCE_NONE			((tim_irq_source_t) 0x00U)
+#define TIMx_IRQ_SOURCE_NONE				((tim_irq_source_t) 0x00U)
 /** @brief Timer update interrupt-request source @def TIMx_IRQ_SOURCE_UPDATE */
-#define TIMx_IRQ_SOURCE_UPDATE			((tim_irq_source_t) 0x01U)
+#define TIMx_IRQ_SOURCE_UPDATE				((tim_irq_source_t) 0x01U)
 /** @brief Timer capture/compare channel 1 interrupt-request source @def TIMx_IRQ_SOURCE_CC1 */
-#define TIMx_IRQ_SOURCE_CC1			((tim_irq_source_t) 0x02U)
+#define TIMx_IRQ_SOURCE_CC1					((tim_irq_source_t) 0x02U)
 /** @brief Timer capture/compare channel 2 interrupt-request source @def TIMx_IRQ_SOURCE_CC2 */
-#define TIMx_IRQ_SOURCE_CC2			((tim_irq_source_t) 0x04U)
+#define TIMx_IRQ_SOURCE_CC2					((tim_irq_source_t) 0x04U)
 /** @brief Timer capture/compare channel 3 interrupt-request source @def TIMx_IRQ_SOURCE_CC3 */
-#define TIMx_IRQ_SOURCE_CC3			((tim_irq_source_t) 0x08U)
+#define TIMx_IRQ_SOURCE_CC3					((tim_irq_source_t) 0x08U)
 /** @brief Timer capture/compare channel 4 interrupt-request source @def TIMx_IRQ_SOURCE_CC4 */
-#define TIMx_IRQ_SOURCE_CC4			((tim_irq_source_t) 0x10U)
+#define TIMx_IRQ_SOURCE_CC4					((tim_irq_source_t) 0x10U)
 /** @brief Timer trigger interrupt-request source @def TIMx_IRQ_SOURCE_TRIGGER */
-#define TIMx_IRQ_SOURCE_TRIGGER			((tim_irq_source_t) 0x20U)
+#define TIMx_IRQ_SOURCE_TRIGGER				((tim_irq_source_t) 0x20U)
 /** @brief All supported Timer interrupt-request sources @def TIMx_IRQ_SOURCE_ALL */
-#define TIMx_IRQ_SOURCE_ALL			((tim_irq_source_t) 0x3FU)
+#define TIMx_IRQ_SOURCE_ALL					((tim_irq_source_t) 0x3FU)
 
 /** @brief No Timer event flag selected @def TIMx_IRQ_EVENT_NONE */
-#define TIMx_IRQ_EVENT_NONE			((tim_event_flag_t) 0x0000U)
+#define TIMx_IRQ_EVENT_NONE					((tim_event_flag_t) 0x0000U)
 /** @brief Timer update event flag @def TIMx_IRQ_EVENT_UPDATE */
-#define TIMx_IRQ_EVENT_UPDATE			((tim_event_flag_t) 0x0001U)
+#define TIMx_IRQ_EVENT_UPDATE				((tim_event_flag_t) 0x0001U)
 /** @brief Timer capture/compare channel 1 event flag @def TIMx_IRQ_EVENT_CC1 */
-#define TIMx_IRQ_EVENT_CC1			((tim_event_flag_t) 0x0002U)
+#define TIMx_IRQ_EVENT_CC1					((tim_event_flag_t) 0x0002U)
 /** @brief Timer capture/compare channel 2 event flag @def TIMx_IRQ_EVENT_CC2 */
-#define TIMx_IRQ_EVENT_CC2			((tim_event_flag_t) 0x0004U)
+#define TIMx_IRQ_EVENT_CC2					((tim_event_flag_t) 0x0004U)
 /** @brief Timer capture/compare channel 3 event flag @def TIMx_IRQ_EVENT_CC3 */
-#define TIMx_IRQ_EVENT_CC3			((tim_event_flag_t) 0x0008U)
+#define TIMx_IRQ_EVENT_CC3					((tim_event_flag_t) 0x0008U)
 /** @brief Timer capture/compare channel 4 event flag @def TIMx_IRQ_EVENT_CC4 */
-#define TIMx_IRQ_EVENT_CC4			((tim_event_flag_t) 0x0010U)
+#define TIMx_IRQ_EVENT_CC4					((tim_event_flag_t) 0x0010U)
 /** @brief Timer trigger event flag @def TIMx_IRQ_EVENT_TRIGGER */
-#define TIMx_IRQ_EVENT_TRIGGER			((tim_event_flag_t) 0x0020U)
+#define TIMx_IRQ_EVENT_TRIGGER				((tim_event_flag_t) 0x0020U)
 /** @brief Timer channel 1 overcapture event flag @def TIMx_IRQ_EVENT_CC1_OVERCAPTURE */
 #define TIMx_IRQ_EVENT_CC1_OVERCAPTURE		((tim_event_flag_t) 0x0040U)
 /** @brief Timer channel 2 overcapture event flag @def TIMx_IRQ_EVENT_CC2_OVERCAPTURE */
@@ -747,7 +747,7 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 /** @brief Timer channel 4 overcapture event flag @def TIMx_IRQ_EVENT_CC4_OVERCAPTURE */
 #define TIMx_IRQ_EVENT_CC4_OVERCAPTURE		((tim_event_flag_t) 0x0200U)
 /** @brief All supported Timer event flags @def TIMx_IRQ_EVENT_ALL */
-#define TIMx_IRQ_EVENT_ALL			((tim_event_flag_t) 0x03FFU)
+#define TIMx_IRQ_EVENT_ALL					((tim_event_flag_t) 0x03FFU)
 
 /** @} */ // TIM_03_Driver_02_Defines_06_IRQ
 
@@ -763,17 +763,17 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  */
 
 /** @brief Timer update DMA selector @def TIMx_DMA_UPDATE */
-#define TIMx_DMA_UPDATE							((tim_dma_t) 0x01U)
+#define TIMx_DMA_UPDATE						((tim_dma_t) 0x01U)
 /** @brief Timer capture/compare channel 1 DMA selector @def TIMx_DMA_CC1DE */
-#define TIMx_DMA_CC1DE							((tim_dma_t) 0x02U)
+#define TIMx_DMA_CC1DE						((tim_dma_t) 0x02U)
 /** @brief Timer capture/compare channel 2 DMA selector @def TIMx_DMA_CC2DE */
-#define TIMx_DMA_CC2DE							((tim_dma_t) 0x04U)
+#define TIMx_DMA_CC2DE						((tim_dma_t) 0x04U)
 /** @brief Timer capture/compare channel 3 DMA selector @def TIMx_DMA_CC3DE */
-#define TIMx_DMA_CC3DE							((tim_dma_t) 0x08U)
+#define TIMx_DMA_CC3DE						((tim_dma_t) 0x08U)
 /** @brief Timer capture/compare channel 4 DMA selector @def TIMx_DMA_CC4DE */
-#define TIMx_DMA_CC4DE							((tim_dma_t) 0x10U)
+#define TIMx_DMA_CC4DE						((tim_dma_t) 0x10U)
 /** @brief All supported Timer DMA selectors @def TIMx_DMA_ALL */
-#define TIMx_DMA_ALL							((tim_dma_t) 0x1FU)
+#define TIMx_DMA_ALL						((tim_dma_t) 0x1FU)
 
 /**
  * @brief Checks whether a Timer DMA mask is valid and non-empty
@@ -800,21 +800,21 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
  */
 
 /** @brief Master mode reset trigger output @def TIMx_MMS_RESET */
-#define TIMx_MMS_RESET								((tim_master_mode_t) 0x00U)
+#define TIMx_MMS_RESET						((tim_master_mode_t) 0x00U)
 /** @brief Master mode counter enable trigger output @def TIMx_MMS_ENABLE */
-#define TIMx_MMS_ENABLE								((tim_master_mode_t) 0x01U)
+#define TIMx_MMS_ENABLE						((tim_master_mode_t) 0x01U)
 /** @brief Master mode update trigger output @def TIMx_MMS_UPDATE */
-#define TIMx_MMS_UPDATE								((tim_master_mode_t) 0x02U)
+#define TIMx_MMS_UPDATE						((tim_master_mode_t) 0x02U)
 /** @brief Master mode compare pulse trigger output @def TIMx_MMS_CMP_PULSE */
-#define TIMx_MMS_CMP_PULSE							((tim_master_mode_t) 0x03U)
+#define TIMx_MMS_CMP_PULSE					((tim_master_mode_t) 0x03U)
 /** @brief Master mode output compare 1 reference trigger output @def TIMx_MMS_CMP_OC1REF */
-#define TIMx_MMS_CMP_OC1REF							((tim_master_mode_t) 0x04U)
+#define TIMx_MMS_CMP_OC1REF					((tim_master_mode_t) 0x04U)
 /** @brief Master mode output compare 2 reference trigger output @def TIMx_MMS_CMP_OC2REF */
-#define TIMx_MMS_CMP_OC2REF							((tim_master_mode_t) 0x05U)
+#define TIMx_MMS_CMP_OC2REF					((tim_master_mode_t) 0x05U)
 /** @brief Master mode output compare 3 reference trigger output @def TIMx_MMS_CMP_OC3REF */
-#define TIMx_MMS_CMP_OC3REF							((tim_master_mode_t) 0x06U)
+#define TIMx_MMS_CMP_OC3REF					((tim_master_mode_t) 0x06U)
 /** @brief Master mode output compare 4 reference trigger output @def TIMx_MMS_CMP_OC4REF */
-#define TIMx_MMS_CMP_OC4REF							((tim_master_mode_t) 0x07U)
+#define TIMx_MMS_CMP_OC4REF					((tim_master_mode_t) 0x07U)
 
 /**
  * @brief Checks whether a Timer master-mode selector is valid
@@ -828,13 +828,13 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 	(((uint32_t) ((tim_master_mode_t) (masterMode))) <= ((uint32_t) TIMx_MMS_CMP_OC4REF))
 
 /** @brief Slave mode disabled @def TIMx_SMS_DISABLE */
-#define TIMx_SMS_DISABLE							((tim_slave_mode_t) 0x00U)
+#define TIMx_SMS_DISABLE					((tim_slave_mode_t) 0x00U)
 /** @brief Encoder mode 1 @def TIMx_SMS_ENC_MODE1 */
-#define TIMx_SMS_ENC_MODE1							((tim_slave_mode_t) 0x01U)
+#define TIMx_SMS_ENC_MODE1					((tim_slave_mode_t) 0x01U)
 /** @brief Encoder mode 2 @def TIMx_SMS_ENC_MODE2 */
-#define TIMx_SMS_ENC_MODE2							((tim_slave_mode_t) 0x02U)
+#define TIMx_SMS_ENC_MODE2					((tim_slave_mode_t) 0x02U)
 /** @brief Encoder mode 3 @def TIMx_SMS_ENC_MODE3 */
-#define TIMx_SMS_ENC_MODE3							((tim_slave_mode_t) 0x03U)
+#define TIMx_SMS_ENC_MODE3					((tim_slave_mode_t) 0x03U)
 
 /**
  * @brief Checks whether a Timer slave-mode selector is valid for the current public vocabulary
@@ -873,11 +873,11 @@ __STATIC_FORCEINLINE driver_status_t TIM_ChannelMaskRemoveChannel
 /** @brief TIM2 partial remap 1 selector @def TIM2_PARTIAL1_REMAP */
 #define TIM2_PARTIAL1_REMAP							((tim_remap_t) 0x01U)
 /** @brief TIM2 partial remap 1 compatibility alias @def TIM2_PARTIAL_REMAP_1 */
-#define TIM2_PARTIAL_REMAP_1							TIM2_PARTIAL1_REMAP
+#define TIM2_PARTIAL_REMAP_1						TIM2_PARTIAL1_REMAP
 /** @brief TIM2 partial remap 2 selector @def TIM2_PARTIAL2_REMAP */
 #define TIM2_PARTIAL2_REMAP							((tim_remap_t) 0x02U)
 /** @brief TIM2 partial remap 2 compatibility alias @def TIM2_PARTIAL_REMAP_2 */
-#define TIM2_PARTIAL_REMAP_2							TIM2_PARTIAL2_REMAP
+#define TIM2_PARTIAL_REMAP_2						TIM2_PARTIAL2_REMAP
 /** @brief TIM2 full remap selector @def TIM2_FULL_REMAP */
 #define TIM2_FULL_REMAP								((tim_remap_t) 0x03U)
 /** @brief TIM3 no remap selector @def TIM3_NO_REMAP */
