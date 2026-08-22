@@ -135,7 +135,7 @@ driver_status_t TIM_GetPWMConfig
 	tim_channel_mode_t* const		pChannelMode,
 	tim_channel_polarity_t* const	pChannelPolarity,
 	tim_channel_oc_preload_t* const	pOutputComparePreload,
-	tim_channel_oc_fast_t* const		pOutputCompareFast
+	tim_channel_oc_fast_t* const	pOutputCompareFast
 );
 
 /**
@@ -178,12 +178,12 @@ driver_status_t TIM_GetPWMConfig
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Instance, channel mask, mode, polarity, preload, or fast-mode selector is invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: At least one selected channel-enable state is undecodable
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: At least one selected channel output is enabled
- * @pre The application successfully completed @ref TIM_Config and has not enabled the Timer
- * @pre Every selected channel output is disabled
- * @pre The application calls @ref TIM_SetPWMDuty for every selected channel before enabling its output
- * @note GPIO and AFIO state are never read or modified
- * @note Timer PWM trusts the application to preserve the Timer base established by @ref TIM_Config
- * @note Fast mode controls the hardware trigger-to-output response; it does not change PWM frequency
+ * @pre - The application successfully completed @ref TIM_Config and has not enabled the Timer
+ * @pre - Every selected channel output is disabled
+ * @pre - The application calls @ref TIM_SetPWMDuty for every selected channel before enabling its output
+ * @note - GPIO and AFIO state are never read or modified
+ * @note - Timer PWM trusts the application to preserve the Timer base established by @ref TIM_Config
+ * @note - Fast mode controls the hardware trigger-to-output response; it does not change PWM frequency
  * @warning With preload disabled, a running duty update changes the active
  * compare value immediately and may alter the current PWM period
  * @note A failure before the first hardware write leaves all Timer state unchanged
