@@ -1,56 +1,53 @@
 /**
  * @file	main.h
  * @author	Shrey Shah
- * @brief	Timer PWM Polling Demonstration Configuration
+ * @brief	Declares the Timer PWM polling demo entry point
  * @version	v1.0
- * @date	16-08-2026
+ * @date	22-08-2026
+ *
+ * @details
+ * @section MAIN_H_HIERARCHY Hierarchy
+ * - Position: Layer 3 - Application behavior
+ * - Invoked by: Layer 4 `app_startup` after initialization succeeds
+ * - Uses: Layer 2 `app_delay` and Layer 1 Timer/GPIO/BSP Drivers through `main.c`
+ *
+ * @section MAIN_H_RESPONSIBILITY Responsibility
+ * This header declares the application entry point only. PWM channel
+ * configuration and timing constants live in `main.c` as they are private
+ * to this demo.
+ *
+ * @section MAIN_H_BOUNDARY Dependency Boundary
+ * This header is standalone so startup does not acquire application-service or
+ * hardware dependencies through `main.h`.
  */
 
+// Header Guard
 #ifndef MAIN_H_
 #define MAIN_H_
 
-// ==================================================================================================== //
-//												Includes											//
-// ==================================================================================================== //
-#include "bsp.h"
-#include "gpio.h"
-#include "rcc.h"
-#include "systick.h"
-#include "timer_pwm.h"
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 // ==================================================================================================== //
-//									Application PWM Configuration									//
+// Entry Point
 // ==================================================================================================== //
 
-/** @brief Timer instance used by the PWM demonstration @def APP_PWM_TIMER */
-#define APP_PWM_TIMER					(TIM2)
-/** @brief Application-owned Timer clock gate @def APP_PWM_TIMER_CLOCK_MASK */
-#define APP_PWM_TIMER_CLOCK_MASK		(RCC_APB1ENR_TIM2EN)
-/** @brief Application-owned GPIO and AFIO clock gates @def APP_PWM_GPIO_CLOCK_MASK */
-#define APP_PWM_GPIO_CLOCK_MASK			(RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
-/** @brief GPIO port carrying default-remap TIM2 channel 4 @def APP_PWM_GPIO_PORT */
-#define APP_PWM_GPIO_PORT				(GPIOA)
-/** @brief PA3 carrying default-remap TIM2 channel 4 @def APP_PWM_GPIO_PIN_MASK */
-#define APP_PWM_GPIO_PIN_MASK			((gpio_pin_t) GPIO_PIN_3)
-/** @brief TIM2 channel 4 exercised by the demonstration @def APP_PWM_CHANNEL_MASK */
-#define APP_PWM_CHANNEL_MASK			((tim_channel_t) TIMx_CHANNEL_4)
-/** @brief PWM mode applied to the demonstration channel @def APP_PWM_CHANNEL_MODE */
-#define APP_PWM_CHANNEL_MODE			(TIMx_CHANNEL_MODE_PWM1)
-/** @brief Active polarity applied to the demonstration channel @def APP_PWM_CHANNEL_POLARITY */
-#define APP_PWM_CHANNEL_POLARITY		(TIMx_CHANNEL_POLARITY_HIGH)
-/** @brief CCR preload policy applied to the demonstration channel @def APP_PWM_CHANNEL_PRELOAD */
-#define APP_PWM_CHANNEL_PRELOAD			(TIMx_CHANNEL_OC_PRELOAD_ENABLE)
-/** @brief Output-compare fast-mode policy applied to the demonstration channel @def APP_PWM_CHANNEL_FAST */
-#define APP_PWM_CHANNEL_FAST			(TIMx_CHANNEL_OC_FAST_DISABLE)
-/** @brief Timer prescaler producing a 1 MHz counter tick from 72 MHz @def APP_PWM_PRESCALER */
-#define APP_PWM_PRESCALER				((tim_prescaler_t) 71U)
-/** @brief Timer auto-reload producing a 1 kHz PWM period @def APP_PWM_AUTO_RELOAD */
-#define APP_PWM_AUTO_RELOAD				((tim_auto_reload_t) 999U)
-/** @brief PWM ramp increment in permille units @def APP_PWM_DUTY_STEP */
-#define APP_PWM_DUTY_STEP				((tim_pwm_duty_cycle_t) 1U)
-/** @brief Delay between PWM ramp updates in milliseconds @def APP_PWM_STEP_DELAY_MS */
-#define APP_PWM_STEP_DELAY_MS			((uint32_t) 20UL)
-/** @brief Delay between completed ramps in milliseconds @def APP_PWM_LOOP_DELAY_MS */
-#define APP_PWM_LOOP_DELAY_MS			((uint32_t) 1000UL)
+/**
+ * @brief Runs the PA3 Timer PWM duty ramp
+ * @details
+ * Demonstrates TIM2 channel 4 PWM on PA3 without a heap, handle, frequency
+ * registry, or GPIO ownership inside the Timer driver. The application owns
+ * RCC, GPIO/AFIO, Timer base configuration, PWM channel configuration,
+ * channel output-enable state, and final counter start order.
+ * @returns Does not return
+ */
+int main(void);
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* MAIN_H_ */

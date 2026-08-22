@@ -1,28 +1,83 @@
 /**
  * @file	main.c
  * @author	Shrey Shah
- * @brief	Timer PWM Polling Demonstration
+ * @brief	Implements the Timer PWM polling demo application behavior
  * @version	v1.0
- * @date	16-08-2026
+ * @date	22-08-2026
  *
  * @details
+ * @section MAIN_C_HIERARCHY Hierarchy
+ * - Position: Layer 3 - Application behavior implementation
+ * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
+ * - Uses: Layer 2 `app_delay` and Layer 1 Timer/GPIO/BSP Drivers
+ *
+ * @section MAIN_C_RESPONSIBILITY Responsibility
  * Demonstrates TIM2 channel 4 PWM on PA3 without a heap, handle, frequency
  * registry, or GPIO ownership inside the Timer driver. The application owns
  * RCC, GPIO/AFIO, Timer base configuration, PWM channel configuration,
  * channel output-enable state, and final counter start order.
+ *
+ * @section MAIN_C_BOUNDARY Dependency Boundary
+ * Application behavior belongs here. Processor startup, clock configuration,
+ * and service initialization do not.
  */
 
 // ==================================================================================================== //
-//												Includes											//
+// Includes
 // ==================================================================================================== //
 #include "main.h"
+#include "app_delay.h"
+#include "bsp.h"
+#include "gpio.h"
+#include "rcc.h"
+#include "timer_pwm.h"
 
 // ==================================================================================================== //
-//										Local Helpers										//
+// Private Defines
 // ==================================================================================================== //
 
-/** @brief Enters the application error-indication loop */
-static void App_ErrorHandler(void)
+/** @brief Timer instance used by the PWM demonstration @def APP_PWM_TIMER */
+#define APP_PWM_TIMER					(TIM2)
+/** @brief Application-owned Timer clock gate @def APP_PWM_TIMER_CLOCK_MASK */
+#define APP_PWM_TIMER_CLOCK_MASK		(RCC_APB1ENR_TIM2EN)
+/** @brief Application-owned GPIO and AFIO clock gates @def APP_PWM_GPIO_CLOCK_MASK */
+#define APP_PWM_GPIO_CLOCK_MASK			(RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
+/** @brief GPIO port carrying default-remap TIM2 channel 4 @def APP_PWM_GPIO_PORT */
+#define APP_PWM_GPIO_PORT				(GPIOA)
+/** @brief PA3 carrying default-remap TIM2 channel 4 @def APP_PWM_GPIO_PIN_MASK */
+#define APP_PWM_GPIO_PIN_MASK			((gpio_pin_t) GPIO_PIN_3)
+/** @brief TIM2 channel 4 exercised by the demonstration @def APP_PWM_CHANNEL_MASK */
+#define APP_PWM_CHANNEL_MASK			((tim_channel_t) TIMx_CHANNEL_4)
+/** @brief PWM mode applied to the demonstration channel @def APP_PWM_CHANNEL_MODE */
+#define APP_PWM_CHANNEL_MODE			(TIMx_CHANNEL_MODE_PWM1)
+/** @brief Active polarity applied to the demonstration channel @def APP_PWM_CHANNEL_POLARITY */
+#define APP_PWM_CHANNEL_POLARITY		(TIMx_CHANNEL_POLARITY_HIGH)
+/** @brief CCR preload policy applied to the demonstration channel @def APP_PWM_CHANNEL_PRELOAD */
+#define APP_PWM_CHANNEL_PRELOAD			(TIMx_CHANNEL_OC_PRELOAD_ENABLE)
+/** @brief Output-compare fast-mode policy applied to the demonstration channel @def APP_PWM_CHANNEL_FAST */
+#define APP_PWM_CHANNEL_FAST			(TIMx_CHANNEL_OC_FAST_DISABLE)
+/** @brief Timer prescaler producing a 1 MHz counter tick from 72 MHz @def APP_PWM_PRESCALER */
+#define APP_PWM_PRESCALER				((tim_prescaler_t) 71U)
+/** @brief Timer auto-reload producing a 1 kHz PWM period @def APP_PWM_AUTO_RELOAD */
+#define APP_PWM_AUTO_RELOAD				((tim_auto_reload_t) 999U)
+/** @brief PWM ramp increment in permille units @def APP_PWM_DUTY_STEP */
+#define APP_PWM_DUTY_STEP				((tim_pwm_duty_cycle_t) 1U)
+/** @brief Delay between PWM ramp updates in milliseconds @def APP_PWM_STEP_DELAY_MS */
+#define APP_PWM_STEP_DELAY_MS			((uint32_t) 20UL)
+/** @brief Delay between completed ramps in milliseconds @def APP_PWM_LOOP_DELAY_MS */
+#define APP_PWM_LOOP_DELAY_MS			((uint32_t) 1000UL)
+
+// ==================================================================================================== //
+// Local Helpers
+// ==================================================================================================== //
+
+/**
+ * @brief Enters the application error-indication loop
+ * @details
+ * App_Init() already configures and forces off the BSP on-board LED, so this
+ * handler only needs to set it once.
+ */
+static void APP_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -35,7 +90,7 @@ static void App_ErrorHandler(void)
  * @brief Configures application-owned PA3 routing for TIM2 channel 4
  * @returns @ref driver_status_t "GPIO configuration status"
  */
-static driver_status_t App_ConfigPWMGPIO(void)
+static driver_status_t APP_ConfigPWMGPIO(void)
 {
 	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
 	ASSERT_DRIVER_STATUS(RCC_APB2_ClockEnable(APP_PWM_GPIO_CLOCK_MASK));
@@ -52,7 +107,7 @@ static driver_status_t App_ConfigPWMGPIO(void)
  * @brief Configures the Timer base followed by TIM2 channel 4 PWM
  * @returns @ref driver_status_t "PWM initialization status"
  */
-static driver_status_t App_ConfigPWM(void)
+static driver_status_t APP_ConfigPWM(void)
 {
 	const tim_config_t timerConfig =
 	{
@@ -101,32 +156,27 @@ static driver_status_t App_ConfigPWM(void)
 }
 
 /** @brief Programs one duty value into the TIM2 channel 4 preload */
-static driver_status_t App_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
+static driver_status_t APP_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
 {
 	return TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
 }
 
 // ==================================================================================================== //
-//										Main Entry Point										//
+// Application Entry Point
 // ==================================================================================================== //
 
-/**
- * @brief Runs the PA3 Timer PWM duty ramp
- * @returns Process status
- * @retval 0 The function returned normally, which is not expected
- */
 int main(void)
 {
 	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
 
 	//! Physical output configuration is intentionally outside the Timer PWM driver.
-	if (App_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
+	if (APP_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
 	{
-		App_ErrorHandler();
+		APP_ErrorHandler();
 	}
-	if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+	if (APP_ConfigPWM() != DRIVER_STATUS_SUCCESS)
 	{
-		App_ErrorHandler();
+		APP_ErrorHandler();
 	}
 
 	//! Infinite Loop
@@ -135,18 +185,18 @@ int main(void)
 		//! Increase the Duty Cycle from 0% to 100% in APP_PWM_DUTY_STEP increments, then decrease back to 0%.
 		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MIN; dutyCycle < TIM_PWM_DUTY_CYCLE_MAX; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle + APP_PWM_DUTY_STEP))
 		{
-			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			if (APP_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
-				App_ErrorHandler();
+				APP_ErrorHandler();
 			}
-			if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+			if (App_DelayMs(APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 			{
-				App_ErrorHandler();
+				APP_ErrorHandler();
 			}
 		}
-		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MAX) != DRIVER_STATUS_SUCCESS)
+		if (APP_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MAX) != DRIVER_STATUS_SUCCESS)
 		{
-			App_ErrorHandler();
+			APP_ErrorHandler();
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
@@ -155,29 +205,27 @@ int main(void)
 		//! Decrease the Duty Cycle from 100% to 0% in APP_PWM_DUTY_STEP decrements, then increase back to 100%.
 		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MAX; dutyCycle > TIM_PWM_DUTY_CYCLE_MIN; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP))
 		{
-			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			if (APP_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
-				App_ErrorHandler();
+				APP_ErrorHandler();
 			}
-			if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+			if (App_DelayMs(APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 			{
-				App_ErrorHandler();
+				APP_ErrorHandler();
 			}
 		}
-		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MIN) != DRIVER_STATUS_SUCCESS)
+		if (APP_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MIN) != DRIVER_STATUS_SUCCESS)
 		{
-			App_ErrorHandler();
+			APP_ErrorHandler();
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
 		OB_LED_Toggle();
 
 		//! Block for a moment before the next ramp begins to allow the user to see the completed ramp.
-		if (TIM_BlockingDelayMs(DELAY_TIMER, APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
+		if (App_DelayMs(APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
-			App_ErrorHandler();
+			APP_ErrorHandler();
 		}
 	}
-
-	return 0;
 }
