@@ -90,7 +90,7 @@ static driver_status_t _RCC_WaitForSystemClockSwitch(const rcc_system_clock_t so
 
 	while (timeout > 0x00UL)
 	{
-		if (RCC_LL_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
+		if (LL_RCC_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
 		{
 			return DRIVER_STATUS_ERROR;
 		}
@@ -125,7 +125,7 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 	{
 		case RCC_AHB_BUS:
 		{
-			if (RCC_LL_GetAHBPrescaler(&ahbPrescalerField) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAHBPrescaler(&ahbPrescalerField) != DRIVER_STATUS_SUCCESS)
 			{
 				return 1UL;
 			}
@@ -137,7 +137,7 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 		}
 		case RCC_APB1_BUS:
 		{
-			if (RCC_LL_GetAPB1Prescaler(&apb1PrescalerField) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAPB1Prescaler(&apb1PrescalerField) != DRIVER_STATUS_SUCCESS)
 			{
 				return 1UL;
 			}
@@ -148,7 +148,7 @@ static uint32_t _RCC_GetBusPrescalerDivider(const rcc_bus_t bus)
 		}
 		case RCC_APB2_BUS:
 		{
-			if (RCC_LL_GetAPB2Prescaler(&apb2PrescalerField) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAPB2Prescaler(&apb2PrescalerField) != DRIVER_STATUS_SUCCESS)
 			{
 				return 1UL;
 			}
@@ -507,9 +507,9 @@ static driver_status_t _RCC_ApplyBusPrescalerConfig(const rcc_bus_config_t* cons
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	ASSERT_DRIVER_STATUS(RCC_LL_SetAHBPrescaler(ahbPrescalerField));
-	ASSERT_DRIVER_STATUS(RCC_LL_SetAPB1Prescaler(apb1PrescalerField));
-	ASSERT_DRIVER_STATUS(RCC_LL_SetAPB2Prescaler(apb2PrescalerField));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetAHBPrescaler(ahbPrescalerField));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetAPB1Prescaler(apb1PrescalerField));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetAPB2Prescaler(apb2PrescalerField));
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -541,8 +541,8 @@ static driver_status_t _RCC_ApplyComponentPrescalerConfig(const rcc_component_co
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	ASSERT_DRIVER_STATUS(RCC_LL_SetADCPrescaler(adcPrescalerField));
-	ASSERT_DRIVER_STATUS(RCC_LL_SetUSBPrescaler(usbPrescalerField));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetADCPrescaler(adcPrescalerField));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetUSBPrescaler(usbPrescalerField));
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -593,7 +593,7 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 	pClockFrequencies->pclk1 = (pClockFrequencies->hclk / _RCC_GetBusPrescalerDivider(RCC_APB1_BUS));
 	pClockFrequencies->pclk2 = (pClockFrequencies->hclk / _RCC_GetBusPrescalerDivider(RCC_APB2_BUS));
 
-	if (RCC_LL_GetADCPrescaler(&adcPrescaler) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetADCPrescaler(&adcPrescaler) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR;
 	}
@@ -614,7 +614,7 @@ static driver_status_t _RCC_LoadClockFrequenciesFromHardware(rcc_clock_frequenci
 		return DRIVER_STATUS_SUCCESS;
 	}
 
-	if (RCC_LL_GetUSBPrescaler(&usbPrescaler) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetUSBPrescaler(&usbPrescaler) != DRIVER_STATUS_SUCCESS)
 	{
 		return DRIVER_STATUS_ERROR;
 	}
@@ -819,9 +819,9 @@ driver_status_t RCC_ConfigComponentPrescalers(const rcc_component_config_t* cons
 
 driver_status_t RCC_SwitchClockSourceToHSI(void)
 {
-	RCC_LL_EnableHSI();
-	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetHSIReadyStatus, DRIVER_STATUS_READY));
-	ASSERT_DRIVER_STATUS(RCC_LL_SetSystemClockSource(RCC_CFGR_SW_HSI));
+	LL_RCC_EnableHSI();
+	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSIReadyStatus, DRIVER_STATUS_READY));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSI));
 	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_HSI));
 	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
 	return DRIVER_STATUS_SUCCESS;
@@ -829,9 +829,9 @@ driver_status_t RCC_SwitchClockSourceToHSI(void)
 
 driver_status_t RCC_SwitchClockSourceToHSE(void)
 {
-	RCC_LL_EnableHSE();
-	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetHSEReadyStatus, DRIVER_STATUS_READY));
-	ASSERT_DRIVER_STATUS(RCC_LL_SetSystemClockSource(RCC_CFGR_SW_HSE));
+	LL_RCC_EnableHSE();
+	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSEReadyStatus, DRIVER_STATUS_READY));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_HSE));
 	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_HSE));
 	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
 	return DRIVER_STATUS_SUCCESS;
@@ -839,12 +839,12 @@ driver_status_t RCC_SwitchClockSourceToHSE(void)
 
 driver_status_t RCC_SwitchClockSourceToPLL(void)
 {
-	if (RCC_LL_GetPLLReadyStatus() != DRIVER_STATUS_READY)
+	if (LL_RCC_GetPLLReadyStatus() != DRIVER_STATUS_READY)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
 
-	ASSERT_DRIVER_STATUS(RCC_LL_SetSystemClockSource(RCC_CFGR_SW_PLL));
+	ASSERT_DRIVER_STATUS(LL_RCC_SetSystemClockSource(RCC_CFGR_SW_PLL));
 	ASSERT_DRIVER_STATUS(_RCC_WaitForSystemClockSwitch(RCC_SYS_CLK_PLL));
 	ASSERT_DRIVER_STATUS(_RCC_RefreshClockFrequenciesCache());
 	return DRIVER_STATUS_SUCCESS;
@@ -862,8 +862,8 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 	}
 
 	activeSource = RCC_GetSysClkSrc();
-	RCC_LL_EnableHSI();
-	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetHSIReadyStatus, DRIVER_STATUS_READY));
+	LL_RCC_EnableHSI();
+	ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSIReadyStatus, DRIVER_STATUS_READY));
 
 	if (activeSource == RCC_SYS_CLK_PLL)
 	{
@@ -874,14 +874,14 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 	if ((pClockTreeConfig->system.clk_src == RCC_SYS_CLK_HSE) ||
 		((pClockTreeConfig->system.clk_src == RCC_SYS_CLK_PLL) && (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSE)))
 	{
-		RCC_LL_EnableHSE();
-		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetHSEReadyStatus, DRIVER_STATUS_READY));
+		LL_RCC_EnableHSE();
+		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetHSEReadyStatus, DRIVER_STATUS_READY));
 	}
 
-	if (RCC_LL_GetPLLReadyStatus() == DRIVER_STATUS_READY)
+	if (LL_RCC_GetPLLReadyStatus() == DRIVER_STATUS_READY)
 	{
-		RCC_LL_DisablePLL();
-		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetPLLReadyStatus, DRIVER_STATUS_OFF));
+		LL_RCC_DisablePLL();
+		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetPLLReadyStatus, DRIVER_STATUS_OFF));
 	}
 
 	ASSERT_DRIVER_STATUS(_RCC_ApplyBusPrescalerConfig(&pClockTreeConfig->bus));
@@ -899,7 +899,7 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 			return DRIVER_STATUS_ERROR_INVALID_ARG;
 		}
 
-		ASSERT_DRIVER_STATUS(RCC_LL_SetPLLSource(pllSource));
+		ASSERT_DRIVER_STATUS(LL_RCC_SetPLLSource(pllSource));
 
 		if (pClockTreeConfig->system.pll.source == RCC_PLL_SRC_HSE)
 		{
@@ -908,12 +908,12 @@ driver_status_t RCC_ConfigClockTree(const rcc_clock_tree_config_t* const pClockT
 				return DRIVER_STATUS_ERROR_INVALID_ARG;
 			}
 
-			ASSERT_DRIVER_STATUS(RCC_LL_SetPLLHSEDivider(pllDivider));
+			ASSERT_DRIVER_STATUS(LL_RCC_SetPLLHSEDivider(pllDivider));
 		}
 
-		ASSERT_DRIVER_STATUS(RCC_LL_SetPLLMultiplier(pllMultiplier));
-		RCC_LL_EnablePLL();
-		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(RCC_LL_GetPLLReadyStatus, DRIVER_STATUS_READY));
+		ASSERT_DRIVER_STATUS(LL_RCC_SetPLLMultiplier(pllMultiplier));
+		LL_RCC_EnablePLL();
+		ASSERT_DRIVER_STATUS(_RCC_WaitForClockSourceReady(LL_RCC_GetPLLReadyStatus, DRIVER_STATUS_READY));
 	}
 
 	switch (pClockTreeConfig->system.clk_src)
@@ -1032,7 +1032,7 @@ rcc_system_clock_t RCC_GetSysClkSrc(void)
 	uint32_t			status = RCC_CFGR_SWS_HSI;
 	rcc_system_clock_t	source = RCC_SYS_CLK_HSI;
 
-	if (RCC_LL_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetSystemClockStatus(&status) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_SYS_CLK_HSI;
 	}
@@ -1046,7 +1046,7 @@ rcc_pll_src_t RCC_GetPLLSource(void)
 {
 	uint32_t source = RCC_CFGR_PLLSRC_HSI_DIV2;
 
-	if (RCC_LL_GetPLLSource(&source) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetPLLSource(&source) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_PLL_SRC_HSI;
 	}
@@ -1068,7 +1068,7 @@ rcc_pll_src_psc_t RCC_GetPLLSourcePrescaler(void)
 		return RCC_PLL_SRC_HSI_DIV_2;
 	}
 
-	if (RCC_LL_GetPLLHSEDivider(&divider) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetPLLHSEDivider(&divider) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_PLL_SRC_HSE_DIV_1;
 	}
@@ -1085,7 +1085,7 @@ rcc_pll_mul_t RCC_GetPLLMultiplier(void)
 {
 	uint32_t multiplier = RCC_CFGR_PLLMUL_2;
 
-	if (RCC_LL_GetPLLMultiplier(&multiplier) != DRIVER_STATUS_SUCCESS)
+	if (LL_RCC_GetPLLMultiplier(&multiplier) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_PLL_MUL_2;
 	}
@@ -1206,7 +1206,7 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 	{
 		case RCC_AHB_BUS:
 		{
-			if (RCC_LL_GetAHBPrescaler(&ahbPrescaler) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAHBPrescaler(&ahbPrescaler) != DRIVER_STATUS_SUCCESS)
 			{
 				return RCC_AHB_DIV_1;
 			}
@@ -1216,7 +1216,7 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 		}
 		case RCC_APB1_BUS:
 		{
-			if (RCC_LL_GetAPB1Prescaler(&apb1Prescaler) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAPB1Prescaler(&apb1Prescaler) != DRIVER_STATUS_SUCCESS)
 			{
 				return RCC_APB1_DIV_1;
 			}
@@ -1225,7 +1225,7 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 		}
 		case RCC_APB2_BUS:
 		{
-			if (RCC_LL_GetAPB2Prescaler(&apb2Prescaler) != DRIVER_STATUS_SUCCESS)
+			if (LL_RCC_GetAPB2Prescaler(&apb2Prescaler) != DRIVER_STATUS_SUCCESS)
 			{
 				return RCC_APB2_DIV_1;
 			}

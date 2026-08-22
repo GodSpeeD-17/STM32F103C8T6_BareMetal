@@ -374,7 +374,7 @@ typedef struct _rcc_config_t
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_EnableAHBClock(clockMask);
+	return LL_RCC_EnableAHBClock(clockMask);
 }
 
 /**
@@ -386,7 +386,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockEnable(const uint32_t clockMas
  */
 __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_DisableAHBClock(clockMask);
+	return LL_RCC_DisableAHBClock(clockMask);
 }
 
 /**
@@ -398,7 +398,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_AHB_ClockDisable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_EnableAPB2Clock(clockMask);
+	return LL_RCC_EnableAPB2Clock(clockMask);
 }
 
 /**
@@ -410,7 +410,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockEnable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_DisableAPB2Clock(clockMask);
+	return LL_RCC_DisableAPB2Clock(clockMask);
 }
 
 /**
@@ -422,7 +422,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ClockDisable(const uint32_t clockM
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMask)
 {
-	return RCC_LL_EnableAPB1Clock(clockMask);
+	return LL_RCC_EnableAPB1Clock(clockMask);
 }
 
 /**
@@ -434,7 +434,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockEnable(const uint32_t clockMa
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockDisable(const uint32_t clockMask)
 {
-	return RCC_LL_DisableAPB1Clock(clockMask);
+	return LL_RCC_DisableAPB1Clock(clockMask);
 }
 
 /**
@@ -449,13 +449,21 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockGetState(const uint32_t clock
 {
 	reg regImage = 0x00000000UL;
 
-	if (RCC_LL_IS_MASK_VALID(clockMask) == 0x00U)
+	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_READ_REG(APB1ENR, regImage);
-	return ((regImage & clockMask) == clockMask) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
+	//! Read the full gate register once through the named LL accessor, matching every other RCC gate query.
+	regImage = LL_RCC_ReadAPB1ENR();
+	if ((regImage & clockMask) == clockMask)
+	{
+		return DRIVER_STATUS_ON;
+	}
+	else
+	{
+		return DRIVER_STATUS_OFF;
+	}
 }
 
 /**
@@ -467,7 +475,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB1_ClockGetState(const uint32_t clock
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMask)
 {
-	return RCC_LL_PulseAPB2Reset(resetMask);
+	return LL_RCC_PulseAPB2Reset(resetMask);
 }
 
 /**
@@ -479,7 +487,7 @@ __STATIC_FORCEINLINE driver_status_t RCC_APB2_ResetPulse(const uint32_t resetMas
  */
 __STATIC_FORCEINLINE driver_status_t RCC_APB1_ResetPulse(const uint32_t resetMask)
 {
-	return RCC_LL_PulseAPB1Reset(resetMask);
+	return LL_RCC_PulseAPB1Reset(resetMask);
 }
 
 /** @} */ // RCC_03_Driver_07_ClockReset

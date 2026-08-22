@@ -653,7 +653,7 @@ __STATIC_FORCEINLINE void __I2C_ToggleTRISE(I2C_TypeDef* const I2Cx, const uint3
  */	
 __STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
 {
-	(void) RCC_LL_EnableAPB1Clock(I2C_CLK_MASK(I2Cx));
+	(void) LL_RCC_EnableAPB1Clock(I2C_CLK_MASK(I2Cx));
 }
 
 /**
@@ -662,7 +662,7 @@ __STATIC_FORCEINLINE _I2C_EnableClock(I2C_TypeDef* const I2Cx)
  */	
 __STATIC_FORCEINLINE _I2C_DisableClock(I2C_TypeDef* const I2Cx)
 {
-	(void) RCC_LL_DisableAPB1Clock(I2C_CLK_MASK(I2Cx));
+	(void) LL_RCC_DisableAPB1Clock(I2C_CLK_MASK(I2Cx));
 }
 
 /** @} */ // I2C_02_LL_01_Clock

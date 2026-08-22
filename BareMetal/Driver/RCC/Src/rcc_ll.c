@@ -1,14 +1,17 @@
 /**
  * @file	rcc_ll.c
  * @author	Shrey Shah
- * @brief	RCC Low-Level Control Implementation
- * @version	v3.0
- * @date	22-03-2026
+ * @brief	RCC Low-Level Register Access Implementation
+ * @version	v4.0
+ * @date	22-08-2026
  *
  * @details
  * This source file implements the thin RCC low-level wrapper declared in
- * @ref rcc_ll.h. The implementation stays register-near and validates only
- * raw LL selector legality and basic mask sanity.
+ * @ref rcc_ll.h. Every field-level accessor stages its read-modify-write
+ * sequence through the named full-register accessors, which in turn delegate
+ * to the shared @ref LL_RCC_ReadRegister / @ref LL_RCC_WriteRegister primitive
+ * pair. The implementation stays register-near and validates only raw LL
+ * selector legality and basic mask sanity.
  */
 
 // ==================================================================================================== //
@@ -21,364 +24,488 @@
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_02_SystemClock
+ * @addtogroup RCC_02_LL_03_SystemClock
  * @{
  */
 
-driver_status_t RCC_LL_SetSystemClockSource(const uint32_t sysClkSrcField)
+driver_status_t LL_RCC_SetSystemClockSource(const uint32_t sysClkSrcField)
 {
-	if (RCC_LL_IS_SYSTEM_CLOCK_SOURCE_VALID(sysClkSrcField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_SYSTEM_CLOCK_SOURCE_VALID(sysClkSrcField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_SW_Msk, sysClkSrcField);
+	//! Replace only the SW field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_SW_Msk) | (sysClkSrcField & RCC_CFGR_SW_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetSystemClockSource(uint32_t* const pSysClkSrcField)
+driver_status_t LL_RCC_GetSystemClockSource(uint32_t* const pSysClkSrcField)
 {
 	if (pSysClkSrcField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pSysClkSrcField);
-	*pSysClkSrcField &= RCC_CFGR_SW_Msk;
+	//! Isolate the SW field from a single coherent CFGR snapshot.
+	*pSysClkSrcField = (LL_RCC_ReadCFGR() & RCC_CFGR_SW_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetSystemClockStatus(uint32_t* const pSysClkStatusField)
+driver_status_t LL_RCC_GetSystemClockStatus(uint32_t* const pSysClkStatusField)
 {
 	if (pSysClkStatusField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pSysClkStatusField);
-	*pSysClkStatusField &= RCC_CFGR_SWS_Msk;
+	//! Isolate the SWS field from a single coherent CFGR snapshot.
+	*pSysClkStatusField = (LL_RCC_ReadCFGR() & RCC_CFGR_SWS_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLSource(const uint32_t pllSrcField)
+driver_status_t LL_RCC_SetPLLSource(const uint32_t pllSrcField)
 {
-	if (RCC_LL_IS_PLL_SOURCE_VALID(pllSrcField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_PLL_SOURCE_VALID(pllSrcField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLSRC_Msk, pllSrcField);
+	//! Replace only the PLLSRC field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_PLLSRC_Msk) | (pllSrcField & RCC_CFGR_PLLSRC_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLSource(uint32_t* const pPllSrcField)
+driver_status_t LL_RCC_GetPLLSource(uint32_t* const pPllSrcField)
 {
 	if (pPllSrcField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pPllSrcField);
-	*pPllSrcField &= RCC_CFGR_PLLSRC_Msk;
+	//! Isolate the PLLSRC field from a single coherent CFGR snapshot.
+	*pPllSrcField = (LL_RCC_ReadCFGR() & RCC_CFGR_PLLSRC_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLHSEDivider(const uint32_t pllHseDividerField)
+driver_status_t LL_RCC_SetPLLHSEDivider(const uint32_t pllHseDividerField)
 {
-	if (RCC_LL_IS_PLL_HSE_DIVIDER_VALID(pllHseDividerField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_PLL_HSE_DIVIDER_VALID(pllHseDividerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLXTPRE_Msk, pllHseDividerField);
+	//! Replace only the PLLXTPRE field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_PLLXTPRE_Msk) | (pllHseDividerField & RCC_CFGR_PLLXTPRE_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLHSEDivider(uint32_t* const pPllHseDividerField)
+driver_status_t LL_RCC_GetPLLHSEDivider(uint32_t* const pPllHseDividerField)
 {
 	if (pPllHseDividerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pPllHseDividerField);
-	*pPllHseDividerField &= RCC_CFGR_PLLXTPRE_Msk;
+	//! Isolate the PLLXTPRE field from a single coherent CFGR snapshot.
+	*pPllHseDividerField = (LL_RCC_ReadCFGR() & RCC_CFGR_PLLXTPRE_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetPLLMultiplier(const uint32_t pllMulField)
+driver_status_t LL_RCC_SetPLLMultiplier(const uint32_t pllMulField)
 {
-	if (RCC_LL_IS_PLL_MULTIPLIER_VALID(pllMulField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_PLL_MULTIPLIER_VALID(pllMulField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PLLMUL_Msk, pllMulField);
+	//! Replace only the PLLMUL field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_PLLMUL_Msk) | (pllMulField & RCC_CFGR_PLLMUL_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetPLLMultiplier(uint32_t* const pPllMulField)
+driver_status_t LL_RCC_GetPLLMultiplier(uint32_t* const pPllMulField)
 {
 	if (pPllMulField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pPllMulField);
-	*pPllMulField &= RCC_CFGR_PLLMUL_Msk;
+	//! Isolate the PLLMUL field from a single coherent CFGR snapshot.
+	*pPllMulField = (LL_RCC_ReadCFGR() & RCC_CFGR_PLLMUL_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @} */ // RCC_02_LL_02_SystemClock
+/** @} */ // RCC_02_LL_03_SystemClock
 
 // ==================================================================================================== //
 //                                    RCC LL Prescaler Implementation                                   //
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_03_Prescalers
+ * @addtogroup RCC_02_LL_04_Prescalers
  * @{
  */
 
-driver_status_t RCC_LL_SetAHBPrescaler(const uint32_t ahbPrescalerField)
+driver_status_t LL_RCC_SetAHBPrescaler(const uint32_t ahbPrescalerField)
 {
-	if (RCC_LL_IS_AHB_PRESCALER_VALID(ahbPrescalerField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_AHB_PRESCALER_VALID(ahbPrescalerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_HPRE_Msk, ahbPrescalerField);
+	//! Replace only the HPRE field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_HPRE_Msk) | (ahbPrescalerField & RCC_CFGR_HPRE_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetAHBPrescaler(uint32_t* const pAhbPrescalerField)
+driver_status_t LL_RCC_GetAHBPrescaler(uint32_t* const pAhbPrescalerField)
 {
 	if (pAhbPrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pAhbPrescalerField);
-	*pAhbPrescalerField &= RCC_CFGR_HPRE_Msk;
+	//! Isolate the HPRE field from a single coherent CFGR snapshot.
+	*pAhbPrescalerField = (LL_RCC_ReadCFGR() & RCC_CFGR_HPRE_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetAPB1Prescaler(const uint32_t apb1PrescalerField)
+driver_status_t LL_RCC_SetAPB1Prescaler(const uint32_t apb1PrescalerField)
 {
-	if (RCC_LL_IS_APB1_PRESCALER_VALID(apb1PrescalerField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_APB1_PRESCALER_VALID(apb1PrescalerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PPRE1_Msk, apb1PrescalerField);
+	//! Replace only the PPRE1 field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_PPRE1_Msk) | (apb1PrescalerField & RCC_CFGR_PPRE1_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField)
+driver_status_t LL_RCC_GetAPB1Prescaler(uint32_t* const pApb1PrescalerField)
 {
 	if (pApb1PrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pApb1PrescalerField);
-	*pApb1PrescalerField &= RCC_CFGR_PPRE1_Msk;
+	//! Isolate the PPRE1 field from a single coherent CFGR snapshot.
+	*pApb1PrescalerField = (LL_RCC_ReadCFGR() & RCC_CFGR_PPRE1_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetAPB2Prescaler(const uint32_t apb2PrescalerField)
+driver_status_t LL_RCC_SetAPB2Prescaler(const uint32_t apb2PrescalerField)
 {
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	//! Preserve the historical stricter check that also rejects stray bits outside PPRE2.
 	if (((apb2PrescalerField & ~RCC_CFGR_PPRE2_Msk) != 0x00UL) ||
-		(RCC_LL_IS_APB2_PRESCALER_VALID((apb2PrescalerField & RCC_CFGR_PPRE2_Msk)) == 0x00U))
+		(LL_RCC_IS_APB2_PRESCALER_VALID((apb2PrescalerField & RCC_CFGR_PPRE2_Msk)) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_PPRE2_Msk, (apb2PrescalerField & RCC_CFGR_PPRE2_Msk));
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_PPRE2_Msk) | (apb2PrescalerField & RCC_CFGR_PPRE2_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField)
+driver_status_t LL_RCC_GetAPB2Prescaler(uint32_t* const pApb2PrescalerField)
 {
 	if (pApb2PrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pApb2PrescalerField);
-	*pApb2PrescalerField &= RCC_CFGR_PPRE2_Msk;
+	//! Isolate the PPRE2 field from a single coherent CFGR snapshot.
+	*pApb2PrescalerField = (LL_RCC_ReadCFGR() & RCC_CFGR_PPRE2_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetADCPrescaler(const uint32_t adcPrescalerField)
+driver_status_t LL_RCC_SetADCPrescaler(const uint32_t adcPrescalerField)
 {
-	if (RCC_LL_IS_ADC_PRESCALER_VALID(adcPrescalerField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_ADC_PRESCALER_VALID(adcPrescalerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_ADCPRE_Msk, adcPrescalerField);
+	//! Replace only the ADCPRE field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_ADCPRE_Msk) | (adcPrescalerField & RCC_CFGR_ADCPRE_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetADCPrescaler(uint32_t* const pAdcPrescalerField)
+driver_status_t LL_RCC_GetADCPrescaler(uint32_t* const pAdcPrescalerField)
 {
 	if (pAdcPrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pAdcPrescalerField);
-	*pAdcPrescalerField &= RCC_CFGR_ADCPRE_Msk;
+	//! Isolate the ADCPRE field from a single coherent CFGR snapshot.
+	*pAdcPrescalerField = (LL_RCC_ReadCFGR() & RCC_CFGR_ADCPRE_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_SetUSBPrescaler(const uint32_t usbPrescalerField)
+driver_status_t LL_RCC_SetUSBPrescaler(const uint32_t usbPrescalerField)
 {
-	if (RCC_LL_IS_USB_PRESCALER_VALID(usbPrescalerField) == 0x00U)
+	// Local Variable
+	reg cfgrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_USB_PRESCALER_VALID(usbPrescalerField) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	RCC_LL_MODIFY_REG(CFGR, RCC_CFGR_USBPRE_Msk, usbPrescalerField);
+	//! Replace only the USBPRE field so every other CFGR selector remains untouched.
+	cfgrImage = LL_RCC_ReadCFGR();
+	cfgrImage = (cfgrImage & ~RCC_CFGR_USBPRE_Msk) | (usbPrescalerField & RCC_CFGR_USBPRE_Msk);
+	LL_RCC_WriteCFGR(cfgrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_GetUSBPrescaler(uint32_t* const pUsbPrescalerField)
+driver_status_t LL_RCC_GetUSBPrescaler(uint32_t* const pUsbPrescalerField)
 {
 	if (pUsbPrescalerField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	RCC_LL_READ_REG(CFGR, *pUsbPrescalerField);
-	*pUsbPrescalerField &= RCC_CFGR_USBPRE_Msk;
+	//! Isolate the USBPRE field from a single coherent CFGR snapshot.
+	*pUsbPrescalerField = (LL_RCC_ReadCFGR() & RCC_CFGR_USBPRE_Msk);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @} */ // RCC_02_LL_03_Prescalers
+/** @} */ // RCC_02_LL_04_Prescalers
 
 // ==================================================================================================== //
 //                                   RCC LL Clock Reset Implementation                                  //
 // ==================================================================================================== //
 
 /**
- * @addtogroup RCC_02_LL_04_ClockReset
+ * @addtogroup RCC_02_LL_05_ClockReset
  * @{
  */
 
-driver_status_t RCC_LL_EnableAHBClock(const uint32_t mask)
+driver_status_t LL_RCC_EnableAHBClock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg ahbenrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_SET_BITS(AHBENR, mask);
+
+	//! Preserve every other AHB clock gate while setting only the requested mask.
+	ahbenrImage = LL_RCC_ReadAHBENR();
+	ahbenrImage |= mask;
+	LL_RCC_WriteAHBENR(ahbenrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_DisableAHBClock(const uint32_t mask)
+driver_status_t LL_RCC_DisableAHBClock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg ahbenrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_CLEAR_BITS(AHBENR, mask);
+
+	//! Preserve every other AHB clock gate while clearing only the requested mask.
+	ahbenrImage = LL_RCC_ReadAHBENR();
+	ahbenrImage &= ~mask;
+	LL_RCC_WriteAHBENR(ahbenrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_EnableAPB2Clock(const uint32_t mask)
+driver_status_t LL_RCC_EnableAPB2Clock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb2enrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_SET_BITS(APB2ENR, mask);
+
+	//! Preserve every other APB2 clock gate while setting only the requested mask.
+	apb2enrImage = LL_RCC_ReadAPB2ENR();
+	apb2enrImage |= mask;
+	LL_RCC_WriteAPB2ENR(apb2enrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_DisableAPB2Clock(const uint32_t mask)
+driver_status_t LL_RCC_DisableAPB2Clock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb2enrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_CLEAR_BITS(APB2ENR, mask);
+
+	//! Preserve every other APB2 clock gate while clearing only the requested mask.
+	apb2enrImage = LL_RCC_ReadAPB2ENR();
+	apb2enrImage &= ~mask;
+	LL_RCC_WriteAPB2ENR(apb2enrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_EnableAPB1Clock(const uint32_t mask)
+driver_status_t LL_RCC_EnableAPB1Clock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb1enrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_SET_BITS(APB1ENR, mask);
+
+	//! Preserve every other APB1 clock gate while setting only the requested mask.
+	apb1enrImage = LL_RCC_ReadAPB1ENR();
+	apb1enrImage |= mask;
+	LL_RCC_WriteAPB1ENR(apb1enrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_DisableAPB1Clock(const uint32_t mask)
+driver_status_t LL_RCC_DisableAPB1Clock(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb1enrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_CLEAR_BITS(APB1ENR, mask);
+
+	//! Preserve every other APB1 clock gate while clearing only the requested mask.
+	apb1enrImage = LL_RCC_ReadAPB1ENR();
+	apb1enrImage &= ~mask;
+	LL_RCC_WriteAPB1ENR(apb1enrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_ForceAPB2Reset(const uint32_t mask)
+driver_status_t LL_RCC_ForceAPB2Reset(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb2rstrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_SET_BITS(APB2RSTR, mask);
+
+	//! Preserve every other APB2 reset bit while asserting only the requested mask.
+	apb2rstrImage = LL_RCC_ReadAPB2RSTR();
+	apb2rstrImage |= mask;
+	LL_RCC_WriteAPB2RSTR(apb2rstrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_ReleaseAPB2Reset(const uint32_t mask)
+driver_status_t LL_RCC_ReleaseAPB2Reset(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb2rstrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_CLEAR_BITS(APB2RSTR, mask);
+
+	//! Preserve every other APB2 reset bit while releasing only the requested mask.
+	apb2rstrImage = LL_RCC_ReadAPB2RSTR();
+	apb2rstrImage &= ~mask;
+	LL_RCC_WriteAPB2RSTR(apb2rstrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_ForceAPB1Reset(const uint32_t mask)
+driver_status_t LL_RCC_ForceAPB1Reset(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb1rstrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_SET_BITS(APB1RSTR, mask);
+
+	//! Preserve every other APB1 reset bit while asserting only the requested mask.
+	apb1rstrImage = LL_RCC_ReadAPB1RSTR();
+	apb1rstrImage |= mask;
+	LL_RCC_WriteAPB1RSTR(apb1rstrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_ReleaseAPB1Reset(const uint32_t mask)
+driver_status_t LL_RCC_ReleaseAPB1Reset(const uint32_t mask)
 {
-	if (RCC_LL_IS_MASK_VALID(mask) == 0x00U)
+	// Local Variable
+	reg apb1rstrImage = 0x00000000UL;
+
+	if (LL_RCC_IS_MASK_VALID(mask) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	RCC_LL_CLEAR_BITS(APB1RSTR, mask);
+
+	//! Preserve every other APB1 reset bit while releasing only the requested mask.
+	apb1rstrImage = LL_RCC_ReadAPB1RSTR();
+	apb1rstrImage &= ~mask;
+	LL_RCC_WriteAPB1RSTR(apb1rstrImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_PulseAPB2Reset(const uint32_t mask)
+driver_status_t LL_RCC_PulseAPB2Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(RCC_LL_ForceAPB2Reset(mask));
-	ASSERT_DRIVER_STATUS(RCC_LL_ReleaseAPB2Reset(mask));
+	ASSERT_DRIVER_STATUS(LL_RCC_ForceAPB2Reset(mask));
+	ASSERT_DRIVER_STATUS(LL_RCC_ReleaseAPB2Reset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t RCC_LL_PulseAPB1Reset(const uint32_t mask)
+driver_status_t LL_RCC_PulseAPB1Reset(const uint32_t mask)
 {
-	ASSERT_DRIVER_STATUS(RCC_LL_ForceAPB1Reset(mask));
-	ASSERT_DRIVER_STATUS(RCC_LL_ReleaseAPB1Reset(mask));
+	ASSERT_DRIVER_STATUS(LL_RCC_ForceAPB1Reset(mask));
+	ASSERT_DRIVER_STATUS(LL_RCC_ReleaseAPB1Reset(mask));
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/** @} */ // RCC_02_LL_04_ClockReset
+/** @} */ // RCC_02_LL_05_ClockReset

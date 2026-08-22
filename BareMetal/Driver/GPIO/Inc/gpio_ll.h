@@ -351,49 +351,49 @@ __STATIC_FORCEINLINE reg LL_GPIO_GetPortClockMask(const GPIO_TypeDef* const GPIO
 /**
  * @brief Enables the APB2 clock gate for one GPIO port
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref `RCC_LL_EnableAPB2Clock`
+ * @returns Status forwarded from @ref `LL_RCC_EnableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableClock(const GPIO_TypeDef* const GPIOx)
 {
 	const reg clockMask = LL_GPIO_GetPortClockMask(GPIOx);
-	return RCC_LL_EnableAPB2Clock(clockMask);
+	return LL_RCC_EnableAPB2Clock(clockMask);
 }
 
 /**
  * @brief Disables the APB2 clock gate for one GPIO port
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref `RCC_LL_DisableAPB2Clock`
+ * @returns Status forwarded from @ref `LL_RCC_DisableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_DisableClock(const GPIO_TypeDef* const GPIOx)
 {
 	const reg clockMask = LL_GPIO_GetPortClockMask(GPIOx);
-	return RCC_LL_DisableAPB2Clock(clockMask);
+	return LL_RCC_DisableAPB2Clock(clockMask);
 }
 
 /**
  * @brief Enables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref `RCC_LL_EnableAPB2Clock`
+ * @returns Status forwarded from @ref `LL_RCC_EnableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableAFIOClock(void)
 {
-	return RCC_LL_EnableAPB2Clock(RCC_APB2ENR_AFIOEN);
+	return LL_RCC_EnableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 
 /**
  * @brief Disables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref `RCC_LL_DisableAPB2Clock`
+ * @returns Status forwarded from @ref `LL_RCC_DisableAPB2Clock`
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_DisableAFIOClock(void)
 {
-	return RCC_LL_DisableAPB2Clock(RCC_APB2ENR_AFIOEN);
+	return LL_RCC_DisableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 
 /** @} */ // GPIO_02_LL_02_Clock
