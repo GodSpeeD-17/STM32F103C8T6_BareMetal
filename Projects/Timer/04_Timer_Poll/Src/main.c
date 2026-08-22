@@ -70,7 +70,7 @@ static void APP_ErrorHandler(void)
 static driver_status_t APP_ConfigTimer(void)
 {
 	//! Explicitly enable the application-owned TIM2 clock before configuring the blocking-delay service.
-	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(RCC_APB1ENR_TIM2EN));
+	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(RCC_APB1ENR_TIM2EN, DRIVER_STATUS_ON));
 	//! Apply the canonical dedicated blocking-delay configuration for the established 72 MHz clock tree.
 	return TIM_ConfigForBlockingDelay(TIM2);
 }

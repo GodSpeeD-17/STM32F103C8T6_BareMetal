@@ -83,7 +83,7 @@ driver_status_t App_DelayMs(const uint32_t delayMs)
 driver_status_t App_DelayTimerInit(void)
 {
 	//! Clock-gate ownership remains explicit at the application-service boundary.
-	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_DELAY_TIMER_CLOCK_MASK));
+	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(APP_DELAY_TIMER_CLOCK_MASK, DRIVER_STATUS_ON));
 	//! Configure the dedicated Timer once so delay calls only perform bounded polling transactions.
 	return TIM_ConfigForBlockingDelay(APP_DELAY_TIMER);
 }

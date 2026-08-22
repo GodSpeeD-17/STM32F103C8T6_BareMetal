@@ -117,7 +117,7 @@ static driver_status_t APP_ConfigTimerIRQ(void)
 	};
 
 	//! Explicitly enable the application-owned TIM3 clock before Timer configuration.
-	ASSERT_DRIVER_STATUS(RCC_APB1_ClockEnable(APP_TIMER_ENABLE_MASK));
+	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(APP_TIMER_ENABLE_MASK, DRIVER_STATUS_ON));
 	//! Apply only TIM3 base configuration; IRQ-source intent remains a separate application decision.
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_TIMER, &config));
 	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.

@@ -505,7 +505,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockEnabled(TIM_TypeDef* cons
 	ASSERT_DRIVER_STATUS(_TIM_DecodeAPB1ClockEnableMask(TIMx, &clockEnableMask));
 
 	//! Read the RCC APB1 clock-enable bit for the requested Timer
-	clockState = RCC_APB1_ClockGetState(clockEnableMask);
+	clockState = RCC_GetAPB1ClockState(clockEnableMask);
 	if (clockState != DRIVER_STATUS_ERROR_INVALID_ARG)
 	{
 		if (clockState == DRIVER_STATUS_ON)
