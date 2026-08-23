@@ -1,35 +1,57 @@
 /**
  * @file	rcc_codec.c
  * @author	Shrey Shah
- * @brief	RCC Selector Codec Implementation
- * @version	v1.0
- * @date	22-08-2026
+ * @brief	Implements pure RCC selector and field transformations
+ * @version	v2.0
+ * @date	23-08-2026
  *
  * @details
- * This source file implements the pure selector/field translation helpers
- * declared in @ref rcc_codec.h. Every function here is a deterministic
- * transformation with no peripheral pointer and no volatile I/O; the RCC
- * driver layer owns every hardware read/write around these calls.
+ * @section RCC_CODEC_C_HIERARCHY Hierarchy
+ * This Layer 2 implementation is called only by the RCC Driver and consumes
+ * semantic configuration selectors plus raw Core field constants.
+ *
+ * @section RCC_CODEC_C_RESPONSIBILITY Responsibility
+ * Lookup tables provide deterministic selector/field and selector/divider
+ * mappings with output publication after pointer validation.
+ *
+ * @section RCC_CODEC_C_BOUNDARY Dependency Boundary
+ * No function in this file accepts a peripheral pointer, performs volatile
+ * I/O, changes hardware state, waits, or owns Driver policy.
  */
 
 // ==================================================================================================== //
-//													Includes											  //
+// Includes
 // ==================================================================================================== //
 #include "rcc_codec.h"
 
 // ==================================================================================================== //
-//												Typedefs												//
+// Typedefs
 // ==================================================================================================== //
 
-/** @brief Internal field-to-value lookup descriptor @typedef _rcc_field_value_map_t */
+/**
+ * @brief Maps one raw RCC field image to its semantic numeric value
+ * @struct _rcc_field_value_map_t
+ */
 typedef struct _rcc_field_value_map_t
 {
-	uint32_t	ll_field;
+	/**
+	 * @brief Raw RCC register-field image admitted by the owning lookup table
+	 * Expected Values:
+	 * - A `RCC_CFGR_*` field constant valid for the lookup table's register field
+	 * @memberof _rcc_field_value_map_t
+	 */
+	reg			ll_field;
+	/**
+	 * @brief Semantic selector or arithmetic value represented by the raw field
+	 * Expected Values:
+	 * - An RCC selector value or numeric divider valid for the owning lookup table
+	 * @memberof _rcc_field_value_map_t
+	 */
 	uint32_t	value;
 } _rcc_field_value_map_t;
 
 // ==================================================================================================== //
-//											Look Up Tables (LUTs)										//
+// Look Up Tables (LUTs)
 // ==================================================================================================== //
 
 static const _rcc_field_value_map_t _RCC_AHBPrescalerLUT[] =
@@ -97,17 +119,28 @@ static const _rcc_field_value_map_t _RCC_PLLMultiplierLUT[] =
 };
 
 // ==================================================================================================== //
-//                                       Local LUT Search Helpers                                       //
+// Local LUT Search Helpers
 // ==================================================================================================== //
 
 /**
  * @brief Finds the LUT index whose LL field matches the requested field value
- * @param[in] pLUT Pointer to the LUT to scan
+ * @param[in] pLUT Lookup table to scan
+ * Expected values:
+ * - Non-`NULL`: Table containing @p itemCount initialized rows
  * @param[in] itemCount Number of valid items in the LUT
+ * Accepted values:
+ * - `1UL..16UL`: Number of initialized rows reachable through @p pLUT
  * @param[in] fieldValue LL field value to search for
+ * Accepted values:
+ * - Any raw RCC field image admitted by the owning lookup table
  * @returns Matching LUT index when found, otherwise `itemCount`
  */
-__STATIC_FORCEINLINE uint32_t Codec_RCC_FindFieldValueMapIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t fieldValue)
+__STATIC_FORCEINLINE uint32_t Codec_RCC_FindFieldValueMapIndex
+(
+	const _rcc_field_value_map_t* const	pLUT,
+	const uint32_t						itemCount,
+	const reg							fieldValue
+)
 {
 	// Local Variable
 	uint32_t index = 0x00UL;
@@ -126,13 +159,27 @@ __STATIC_FORCEINLINE uint32_t Codec_RCC_FindFieldValueMapIndex(const _rcc_field_
 
 /**
  * @brief Returns the logical value stored at the requested LUT index
- * @param[in] pLUT Pointer to the LUT to read
+ * @param[in] pLUT Lookup table to read
+ * Expected values:
+ * - Non-`NULL`: Table containing @p itemCount initialized rows
  * @param[in] itemCount Number of valid items in the LUT
+ * Accepted values:
+ * - `1UL..16UL`: Number of initialized rows reachable through @p pLUT
  * @param[in] index Requested LUT index
+ * Accepted values:
+ * - `0UL..itemCount`: In-range row index or the not-found sentinel
  * @param[in] defaultValue Fallback value used when the index is outside the LUT range
+ * Accepted values:
+ * - Any semantic selector or arithmetic fallback valid for the caller's domain
  * @returns Logical value stored in the LUT, or @p defaultValue when the index is invalid
  */
-__STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapValueByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultValue)
+__STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapValueByIndex
+(
+	const _rcc_field_value_map_t* const	pLUT,
+	const uint32_t						itemCount,
+	const uint32_t						index,
+	const uint32_t						defaultValue
+)
 {
 	//! Preserve the historical safe-default fallback instead of surfacing an out-of-range error.
 	if (index >= itemCount)
@@ -145,13 +192,27 @@ __STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapValueByIndex(const _rcc_
 
 /**
  * @brief Returns the LL field stored at the requested LUT index
- * @param[in] pLUT Pointer to the LUT to read
+ * @param[in] pLUT Lookup table to read
+ * Expected values:
+ * - Non-`NULL`: Table containing @p itemCount initialized rows
  * @param[in] itemCount Number of valid items in the LUT
+ * Accepted values:
+ * - `1UL..16UL`: Number of initialized rows reachable through @p pLUT
  * @param[in] index Requested LUT index
+ * Accepted values:
+ * - `0UL..itemCount`: In-range row index or the not-found sentinel
  * @param[in] defaultField Fallback LL field used when the index is outside the LUT range
+ * Accepted values:
+ * - A valid raw field default or @ref `RCC_CODEC_INVALID_FIELD`
  * @returns LL field stored in the LUT, or @p defaultField when the index is invalid
  */
-__STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapLLFieldByIndex(const _rcc_field_value_map_t* const pLUT, const uint32_t itemCount, const uint32_t index, const uint32_t defaultField)
+__STATIC_FORCEINLINE reg Codec_RCC_GetFieldValueMapLLFieldByIndex
+(
+	const _rcc_field_value_map_t* const	pLUT,
+	const uint32_t						itemCount,
+	const uint32_t						index,
+	const reg							defaultField
+)
 {
 	//! Signal "not encodable" by returning the caller-supplied sentinel field.
 	if (index >= itemCount)
@@ -162,11 +223,11 @@ __STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapLLFieldByIndex(const _rc
 	return pLUT[index].ll_field;
 }
 
-/** @brief Sentinel LL field returned by an encode helper when the selector has no hardware encoding */
-#define RCC_CODEC_INVALID_FIELD				((uint32_t) 0xFFFFFFFFUL)
+/** @brief Sentinel LL field returned when a selector has no hardware encoding @def RCC_CODEC_INVALID_FIELD */
+#define RCC_CODEC_INVALID_FIELD		((reg) 0xFFFFFFFFUL)
 
 // ==================================================================================================== //
-//                                    RCC System Clock Source Codec                                     //
+// RCC System Clock Source Codec
 // ==================================================================================================== //
 
 /**
@@ -174,8 +235,9 @@ __STATIC_FORCEINLINE uint32_t Codec_RCC_GetFieldValueMapLLFieldByIndex(const _rc
  * @{
  */
 
-driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t source, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t source, reg* const pField)
 {
+	//! Validate the destination before translating the selector or publishing a raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -205,7 +267,7 @@ driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t sourc
 	}
 }
 
-driver_status_t Codec_RCC_DecodeSystemClockSource(const uint32_t statusField, rcc_system_clock_t* const pSource)
+driver_status_t Codec_RCC_DecodeSystemClockSource(const reg statusField, rcc_system_clock_t* const pSource)
 {
 	if (pSource == NULL)
 	{
@@ -237,11 +299,12 @@ driver_status_t Codec_RCC_DecodeSystemClockSource(const uint32_t statusField, rc
 }
 
 // ==================================================================================================== //
-//                                          RCC PLL Field Codec                                         //
+// RCC PLL Field Codec
 // ==================================================================================================== //
 
-driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, reg* const pField)
 {
+	//! Validate the destination before translating the selector or publishing a raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -266,8 +329,9 @@ driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, uint32_t* 
 	}
 }
 
-driver_status_t Codec_RCC_EncodePLLHSEDivider(const rcc_pll_src_psc_t divider, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodePLLHSEDivider(const rcc_pll_src_psc_t divider, reg* const pField)
 {
+	//! Validate the destination before translating the selector or publishing a raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -292,9 +356,9 @@ driver_status_t Codec_RCC_EncodePLLHSEDivider(const rcc_pll_src_psc_t divider, u
 	}
 }
 
-driver_status_t Codec_RCC_EncodePLLMultiplier(const rcc_pll_mul_t multiplier, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodePLLMultiplier(const rcc_pll_mul_t multiplier, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
 	if (pField == NULL)
 	{
@@ -325,13 +389,14 @@ driver_status_t Codec_RCC_EncodePLLMultiplier(const rcc_pll_mul_t multiplier, ui
 }
 
 // ==================================================================================================== //
-//                                       RCC Bus Prescaler Codec                                        //
+// RCC Bus Prescaler Codec
 // ==================================================================================================== //
 
-driver_status_t Codec_RCC_EncodeAHBPrescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeAHBPrescaler(const rcc_bus_prescaler_t selector, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
+	//! Validate the destination before resolving and publishing the selector's raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -354,7 +419,7 @@ driver_status_t Codec_RCC_EncodeAHBPrescaler(const rcc_bus_prescaler_t selector,
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_DecodeAHBPrescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector)
+driver_status_t Codec_RCC_DecodeAHBPrescaler(const reg field, rcc_bus_prescaler_t* const pSelector)
 {
 	uint32_t index = 0x00UL;
 
@@ -378,10 +443,11 @@ driver_status_t Codec_RCC_DecodeAHBPrescaler(const uint32_t field, rcc_bus_presc
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_EncodeAPB1Prescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeAPB1Prescaler(const rcc_bus_prescaler_t selector, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
+	//! Validate the destination before resolving and publishing the selector's raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -404,7 +470,7 @@ driver_status_t Codec_RCC_EncodeAPB1Prescaler(const rcc_bus_prescaler_t selector
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_DecodeAPB1Prescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector)
+driver_status_t Codec_RCC_DecodeAPB1Prescaler(const reg field, rcc_bus_prescaler_t* const pSelector)
 {
 	uint32_t index = 0x00UL;
 
@@ -428,10 +494,11 @@ driver_status_t Codec_RCC_DecodeAPB1Prescaler(const uint32_t field, rcc_bus_pres
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_EncodeAPB2Prescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeAPB2Prescaler(const rcc_bus_prescaler_t selector, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
+	//! Validate the destination before resolving and publishing the selector's raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -454,7 +521,7 @@ driver_status_t Codec_RCC_EncodeAPB2Prescaler(const rcc_bus_prescaler_t selector
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_DecodeAPB2Prescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector)
+driver_status_t Codec_RCC_DecodeAPB2Prescaler(const reg field, rcc_bus_prescaler_t* const pSelector)
 {
 	uint32_t index = 0x00UL;
 
@@ -479,13 +546,14 @@ driver_status_t Codec_RCC_DecodeAPB2Prescaler(const uint32_t field, rcc_bus_pres
 }
 
 // ==================================================================================================== //
-//                                     RCC Component Prescaler Codec                                    //
+// RCC Component Prescaler Codec
 // ==================================================================================================== //
 
-driver_status_t Codec_RCC_EncodeADCPrescaler(const rcc_component_prescaler_t selector, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeADCPrescaler(const rcc_component_prescaler_t selector, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
+	//! Validate the destination before resolving and publishing the selector's raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -508,7 +576,7 @@ driver_status_t Codec_RCC_EncodeADCPrescaler(const rcc_component_prescaler_t sel
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_DecodeADCPrescaler(const uint32_t field, rcc_component_prescaler_t* const pSelector)
+driver_status_t Codec_RCC_DecodeADCPrescaler(const reg field, rcc_component_prescaler_t* const pSelector)
 {
 	uint32_t index = 0x00UL;
 
@@ -532,10 +600,11 @@ driver_status_t Codec_RCC_DecodeADCPrescaler(const uint32_t field, rcc_component
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t selector, uint32_t* const pField)
+driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t selector, reg* const pField)
 {
-	uint32_t llField = RCC_CODEC_INVALID_FIELD;
+	reg llField = RCC_CODEC_INVALID_FIELD;
 
+	//! Validate the destination before resolving and publishing the selector's raw field.
 	if (pField == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -558,7 +627,7 @@ driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t sel
 	return DRIVER_STATUS_SUCCESS;
 }
 
-driver_status_t Codec_RCC_DecodeUSBPrescaler(const uint32_t field, rcc_component_prescaler_t* const pSelector)
+driver_status_t Codec_RCC_DecodeUSBPrescaler(const reg field, rcc_component_prescaler_t* const pSelector)
 {
 	uint32_t index = 0x00UL;
 
@@ -583,7 +652,7 @@ driver_status_t Codec_RCC_DecodeUSBPrescaler(const uint32_t field, rcc_component
 }
 
 // ==================================================================================================== //
-//                                    RCC Prescaler Divider Resolution                                  //
+// RCC Prescaler Divider Resolution
 // ==================================================================================================== //
 
 driver_status_t Codec_RCC_GetAHBPrescalerDivider(const rcc_bus_prescaler_t selector, uint32_t* const pDivider)
@@ -594,7 +663,13 @@ driver_status_t Codec_RCC_GetAHBPrescalerDivider(const rcc_bus_prescaler_t selec
 	}
 
 	//! Preserve the historical 1UL fallback for a selector outside the LUT range.
-	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex(_RCC_AHBPrescalerLUT, ARRAY_SIZE(_RCC_AHBPrescalerLUT), (uint32_t) selector, 1UL);
+	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex
+	(
+		_RCC_AHBPrescalerLUT,
+		ARRAY_SIZE(_RCC_AHBPrescalerLUT),
+		(uint32_t) selector,
+		1UL
+	);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -606,7 +681,13 @@ driver_status_t Codec_RCC_GetAPBPrescalerDivider(const rcc_bus_prescaler_t selec
 	}
 
 	//! Shared APB1/APB2 LUT: preserve the historical 1UL fallback for an out-of-range selector.
-	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex(_RCC_APBPrescalerLUT, ARRAY_SIZE(_RCC_APBPrescalerLUT), (uint32_t) selector, 1UL);
+	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex
+	(
+		_RCC_APBPrescalerLUT,
+		ARRAY_SIZE(_RCC_APBPrescalerLUT),
+		(uint32_t) selector,
+		1UL
+	);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -618,7 +699,13 @@ driver_status_t Codec_RCC_GetADCPrescalerDivider(const rcc_component_prescaler_t
 	}
 
 	//! Preserve the historical 2UL fallback for a selector outside the LUT range.
-	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex(_RCC_ADCPrescalerLUT, ARRAY_SIZE(_RCC_ADCPrescalerLUT), (uint32_t) selector, 2UL);
+	*pDivider = Codec_RCC_GetFieldValueMapValueByIndex
+	(
+		_RCC_ADCPrescalerLUT,
+		ARRAY_SIZE(_RCC_ADCPrescalerLUT),
+		(uint32_t) selector,
+		2UL
+	);
 	return DRIVER_STATUS_SUCCESS;
 }
 

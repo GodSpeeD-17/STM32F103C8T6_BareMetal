@@ -229,34 +229,6 @@ extern "C" {
 /** @brief ADC3  @def ADC3 */
 #define ADC3									((ADC_TypeDef*) ADC3_BASE_ADDRESS)
 
-/**
- * @addtogroup RCC_03_Driver_02_Frequency
- * @brief STM32F103C8T6 RCC Operating Limits and Board Assumptions
- * @details
- * These constants capture the practical operating assumptions used by the RCC
- * driver for the Blue Pill target.
- *
- * Theory:
- * - RM0008 Section 7 defines the clock tree rooted at HSI, HSE, and PLL.
- * - AHB derives HCLK from SYSCLK.
- * - APB1 and APB2 derive PCLK1 and PCLK2 from HCLK.
- * - ADC clock derives from PCLK2.
- * - USB clock derives from the PLL output.
- *
- * Implementation:
- * - `rcc.c` uses these limits while validating requested clock trees.
- * - Query helpers and presets use these values as the board-level reference.
- * @{
- */
-/** @brief Zero frequency constant @def RCC_FREQ_ZERO */
-#define RCC_FREQ_ZERO							((frequency_t) 0UL)
-/** @brief 1 kHz frequency constant @def RCC_FREQ_1kHz */
-#define RCC_FREQ_1kHz							((frequency_t) 1000UL)
-/** @brief 1 MHz frequency constant @def RCC_FREQ_1MHz */
-#define RCC_FREQ_1MHz							((frequency_t) 1000000UL)
-
-/** @} */ // RCC_03_Driver_02_Frequency
-
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed
 #define I2Cx_SPEED_STD							(FREQ_100kHz)
@@ -299,7 +271,7 @@ extern "C" {
 // SysTick Delay
 #define SYSTICK_DELAY_1_US (RCC_GetBusFrequency(RCC_AHB_BUS) / FREQ_1MHz)
 #define SYSTICK_DELAY_2_US (SYSTICK_DELAY_1_US << 1)
-#define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / RCC_FREQ_1kHz)
+#define SYSTICK_DELAY_1_MS (SYSTICK_DELAY_1_US / FREQ_1kHz)
 #define SYSTICK_DELAYS_2_MS (SYSTICK_DELAY_1_MS << 1)
 
 /*----------------------------------------------- PWM MACROS -----------------------------------------------*/
@@ -444,30 +416,6 @@ extern "C" {
 #define DMA_TIM2_CH2 (DMA1_Channel7)
 #define DMA_TIM2_CH4 (DMA1_Channel7)
 #define DMA_TIM4_UP (DMA1_Channel7)
-
-#ifdef STM32F103C8T6__
-/** @brief Internal high-speed oscillator nominal frequency @def RCC_HSI_FREQ */
-#define RCC_HSI_FREQ							((frequency_t) 8000000UL)
-/** @brief External high-speed oscillator nominal frequency @def RCC_HSE_FREQ */
-#define RCC_HSE_FREQ							((frequency_t) 8000000UL)
-/** @brief Maximum SYSCLK frequency @def RCC_SYSCLK_MAX_FREQ */
-#define RCC_SYSCLK_MAX_FREQ						((frequency_t) 72000000UL)
-/** @brief Maximum HCLK frequency @def RCC_HCLK_MAX_FREQ */
-#define RCC_HCLK_MAX_FREQ						(RCC_SYSCLK_MAX_FREQ)
-/** @brief Maximum APB1 frequency @def RCC_PCLK1_MAX_FREQ */
-#define RCC_PCLK1_MAX_FREQ						((frequency_t) 36000000UL)
-/** @brief Maximum APB2 frequency @def RCC_PCLK2_MAX_FREQ */
-#define RCC_PCLK2_MAX_FREQ						((frequency_t) 72000000UL)
-/** @brief Maximum ADC clock frequency @def RCC_ADCCLK_MAX_FREQ */
-#define RCC_ADCCLK_MAX_FREQ						((frequency_t) 14000000UL)
-/** @brief Target USB clock frequency @def RCC_USBCLK_TARGET_FREQ */
-#define RCC_USBCLK_TARGET_FREQ					((frequency_t) 48000000UL)
-/** @brief Maximum SYSCLK allowed with Flash latency 0 @def RCC_FLASH_LATENCY_0_MAX_FREQ */
-#define RCC_FLASH_LATENCY_0_MAX_FREQ			((frequency_t) 24000000UL)
-/** @brief Maximum SYSCLK allowed with Flash latency 1 @def RCC_FLASH_LATENCY_1_MAX_FREQ */
-#define RCC_FLASH_LATENCY_1_MAX_FREQ			((frequency_t) 48000000UL)
-
-#endif /* STM32F103C8T6__ */
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus

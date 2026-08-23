@@ -2,8 +2,8 @@
  * @file	stm32f1xx_data_types.h
  * @author	Shrey Shah
  * @brief	Defines shared Core scalar, register, and Driver-status types
- * @version	v1.1
- * @date	22-08-2026
+ * @version	v1.2
+ * @date	23-08-2026
  *
  * @details
  * @section STM32F1XX_DATA_TYPES_H_HIERARCHY Hierarchy
@@ -14,8 +14,7 @@
  * @section STM32F1XX_DATA_TYPES_H_RESPONSIBILITY Responsibility
  * This header is the repository gateway for fixed-width integer types,
  * memory-mapped register qualifiers, register-image vocabulary, shared
- * physical quantities, Driver statuses, and intentionally shared scalar
- * selector aliases.
+ * physical quantities, and Driver statuses.
  *
  * @section STM32F1XX_DATA_TYPES_H_DEPENDENCIES Standard C Dependencies
  * `<stdint.h>` supplies fixed-width integers, `<stdbool.h>` supplies the C
@@ -129,6 +128,13 @@ typedef uint8_t									reg_field_width_t;
  */
 typedef uint32_t								frequency_t;
 
+/** @brief Zero-valued frequency used for inactive or unavailable clocks @def FREQ_ZERO */
+#define FREQ_ZERO		((frequency_t) 0UL)
+/** @brief One-kilohertz frequency scaling constant @def FREQ_1kHz */
+#define FREQ_1kHz		((frequency_t) 1000UL)
+/** @brief One-megahertz frequency scaling constant @def FREQ_1MHz */
+#define FREQ_1MHz		((frequency_t) 1000000UL)
+
 // ==================================================================================================== //
 // Driver Operation Status Type
 // ==================================================================================================== //
@@ -188,7 +194,7 @@ typedef enum _driver_status_t
  * @warning Use this macro only inside a function whose return type admits every
  * value in @ref driver_status_t
  */
-#define ASSERT_DRIVER_STATUS(expr)				\
+#define ASSERT_DRIVER_STATUS(expr)		\
 do												\
 {												\
 	driver_status_t _st = (expr);				\
@@ -208,47 +214,9 @@ do												\
  * @warning A pointer argument produces the pointer-size ratio, not the number
  * of elements in the pointed-to storage
  */
-#define ARRAY_SIZE(arr)							(sizeof(arr) / sizeof((arr)[0]))
+#define ARRAY_SIZE(arr)				(sizeof(arr) / sizeof((arr)[0]))
 
 /** @} */ // 01_STM32F1xx_Utilities_03_DriverStatus
-
-/**
- * @brief RCC shared scalar aliases
- * @defgroup RCC_03_Driver_01_DataTypes RCC Driver Data Types
- * @ingroup RCC_03_Driver
- * @details
- * This group owns the scalar aliases shared by the RCC driver stack.
- *
- * Dependency ownership:
- * - This header defines the shared scalar aliases
- * - `stm32f1xx_rcc.h` defines the RCC register model and bit fields
- * - `rcc_ll` consumes the aliases for register-near control
- * - `rcc` consumes the aliases for public policy and orchestration
- *
- * Keeping these aliases here allows every RCC layer to share the same type
- * names without introducing circular header dependencies.
- * @{
- */
-
-/** @brief RCC bus selector type @typedef rcc_bus_t */
-typedef uint8_t									rcc_bus_t;
-/** @brief Bus prescaler divider selector type @typedef rcc_bus_prescaler_t */
-typedef uint8_t									rcc_bus_prescaler_t;
-/** @brief Component prescaler selector type @typedef rcc_component_prescaler_t */
-typedef uint8_t									rcc_component_prescaler_t;
-/** @brief Flash latency type @typedef rcc_flash_latency_t */
-typedef uint8_t									rcc_flash_latency_t;
-/** @brief Flash prefetch selector type @typedef rcc_flash_prefetch_t */
-typedef uint8_t									rcc_flash_prefetch_t;
-/** @brief System clock source selector type @typedef rcc_system_clock_t */
-typedef uint8_t									rcc_system_clock_t;
-/** @brief PLL source selector type @typedef rcc_pll_src_t */
-typedef uint8_t									rcc_pll_src_t;
-/** @brief PLL input prescaler selector type @typedef rcc_pll_src_psc_t */
-typedef uint8_t									rcc_pll_src_psc_t;
-/** @brief PLL multiplication factor type @typedef rcc_pll_mul_t */
-typedef uint8_t									rcc_pll_mul_t;
-/** @} */ // RCC_03_Driver_01_DataTypes
 
 /** @} */ // STM32F1xx_DataTypes
 

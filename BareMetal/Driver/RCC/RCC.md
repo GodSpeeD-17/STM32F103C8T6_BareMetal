@@ -1,6 +1,6 @@
 # STM32F103C8T6 RCC Architecture {#RCC_Peripheral_Guide}
 
-## Scope and reading order
+**Scope and reading order.**
 
 This page describes the Reset and Clock Control block implemented by the
 STM32F103C8T6 and then traces that hardware model into this repository's RCC
@@ -250,35 +250,66 @@ with Core underneath all three, matching the Timer and NVIC stacks:
 Application intent
       |
       v
-Public Driver API and transaction                rcc.h / rcc.c
-      |                          \
-      v                           v
+Public operations and observations                       rcc.h
+      |                    |                    |
+      v                    v                    v
+Configuration input   Query constants       Shared/output types
+rcc_config.h          rcc_defines.h         rcc_data_types.h
+      |                    |                    |
+      +--------------------+--------------------+
+                           |
+                           v
+Driver policy, validation, and sequencing                 rcc.c
+                           |
+             +-------------+-------------+
+             |                           |
+             v                           v
 Pure selector/field transformation        Mechanical MMIO
 rcc_codec.h / rcc_codec.c                 rcc_ll.h / rcc_ll.c
-      \                           /
-       v                         v
-       Driver-facing selector vocabulary
-       rcc_defines.h
-              |
-              v
-       Core register types, addresses, and raw fields
-       stm32f1xx_rcc.h
+             |                           |
+             +-------------+-------------+
+                           |
+                           v
+Core register types and raw fields                        stm32f1xx_rcc.h
+                           |
+                           v
+Repository-wide Core vocabulary
+stm32f1xx_data_types.h
 ```
 
 | Layer | Owns | Deliberately excludes |
 | --- | --- | --- |
-| Core (`stm32f1xx_rcc.h`) | `RCC_TypeDef` register union/`.BIT` layout, base address, raw `Pos`/`Msk`/selector field macros | Selector vocabulary, validation, sequencing |
-| Defines (`rcc_defines.h`) | Driver-facing selector value macros (`RCC_SYS_CLK_*`, `RCC_PLL_*`, `RCC_*_DIV_*`) built on Core-owned `rcc_*_t` typedefs | Root/nested configuration structures, MMIO, sequencing |
+| Core types (`stm32f1xx_data_types.h`) | Repository-wide integer, register-image, physical-frequency, and Driver-status vocabulary | RCC-specific selectors, register fields, or policy |
+| RCC data types (`rcc_data_types.h`) | Scalar RCC selector types and the read-only `rcc_clock_frequencies_t` observation shared by public RCC interfaces | Selector values, writable configuration structures, raw fields, MMIO, sequencing |
+| Core register model (`stm32f1xx_rcc.h`) | `RCC_TypeDef` register union/`.BIT` layout, base address, raw `Pos`/`Msk`/selector field macros | Driver-facing selector vocabulary, validation, sequencing |
+| Configuration (`rcc_config.h`) | Every accepted configuration selector and every writable nested/root RCC descriptor | Query selectors, observations, raw register fields, MMIO, sequencing |
+| Defines (`rcc_defines.h`) | Non-configuration constants used by observational APIs, including bus-query selectors and the zero-frequency alias | Configuration selectors or structures, raw register fields, MMIO, sequencing |
 | LL (`rcc_ll.h`/`rcc_ll.c`) | One generic pointer-based read/write primitive pair; named full-register `CR`/`CFGR`/`AHBENR`/`APB2ENR`/`APB1ENR`/`APB2RSTR`/`APB1RSTR` accessors built on it; single-field set/get wrappers; raw field-legality predicates | Selector-to-field translation, sequencing/timeout policy, derived-frequency math |
 | Codec (`rcc_codec.h`/`rcc_codec.c`) | Pure selector⇄field encode/decode and prescaler→divider resolution over scalar values via small LUTs | Peripheral pointers, volatile I/O, hardware sequencing, public status policy |
-| Driver (`rcc.h`/`rcc.c`) | Public validation, clock-tree sequencing (enable→ready→switch→confirm), root `RCC_Config()`/`RCC_ConfigClockTree()`/`RCC_ConfigFlash()` orchestration, derived-frequency cache, clock-gate Get/Set, reset-pulse | Direct raw field placement when Codec owns it; NVIC/GPIO/AFIO concerns |
+| Driver (`rcc.h`/`rcc.c`) | Public validation, clock-tree sequencing (enable→ready→switch→confirm), root `RCC_Config()`/`RCC_ConfigClockTree()`/`RCC_ConfigFlash()` orchestration, derived-frequency cache, clock-gate Get/Set, reset-pulse | Public exposure of Codec, LL, raw register fields, or NVIC/GPIO/AFIO concerns |
 | Application | Deciding which peripherals need which bus gate enabled, and when, relative to RCC and other peripheral configuration | Direct register access that bypasses Driver validation |
 
-The `rcc_defines.h` selector layer exists specifically so `rcc_codec.h` can
-translate selectors without including the public `rcc.h` Driver header —
-Codec strictly sits below Driver in the dependency direction, and root/nested
-configuration structures (which Codec never consumes directly) stay in
-`rcc.h` instead.
+The `rcc_data_types.h` vocabulary layer prevents RCC-specific aliases from
+leaking into the repository-wide Core type gateway. It also owns the
+read-only frequency snapshot because that structure reports Driver state; it
+does not request a configuration. `rcc_config.h` separately builds all
+accepted configuration values and writable descriptors on those aliases.
+Codec consumes that configuration vocabulary directly without including the
+public `rcc.h` Driver header. `rcc_defines.h` remains intentionally smaller:
+it owns only selectors and constants used by observational APIs.
+
+`rcc.h` includes these three public vocabulary headers, but it does not
+include `rcc_codec.h`, `rcc_ll.h`, or a Core RCC register header. The gate and
+reset APIs are normal Driver functions implemented in `rcc.c`; keeping their
+small forwarding bodies out of the public header prevents LL and raw Core
+details from leaking transitively into application translation units.
+
+`rcc_ll.h` includes only the RCC register model and Core base-address
+vocabulary required for RCC MMIO; it does not include the repository-wide
+`stm32f1xx.h` peripheral umbrella. `rcc.c` includes the Flash register model,
+Flash field definitions, and base-address vocabulary directly because the
+root RCC transaction owns the documented Flash-latency coupling. This keeps
+unrelated peripheral register models outside the RCC include graph.
 
 There is no `rcc_ll.c` for the register-access primitive pair or the named
 full-register accessors — those are `__STATIC_FORCEINLINE` functions in
@@ -347,7 +378,7 @@ Every named RCC LL accessor is built on exactly one generic pointer-based
 read primitive and one write primitive:
 
 ```c
-LL_RCC_REG(_REG)                       // &(RCC->_REG.REG), a reg* pointer
+LL_RCC_REG(_REG)                       // &(((RCC_TypeDef*) RCC_BASE_ADDRESS)->_REG.REG)
 LL_RCC_ReadRegister(const _IO* const pRegister)   -> reg
 LL_RCC_WriteRegister(_IO* const pRegister, const reg regImage) -> void
 ```
@@ -363,8 +394,8 @@ access width and ordering identical across all seven registers LL exposes.
 
 ### Driver-facing selector vocabulary and Codec translation
 
-`rcc_defines.h` defines every selector the Driver and Codec share as a plain
-value on a Core-owned scalar typedef — for example `RCC_SYS_CLK_HSI`,
+`rcc_config.h` defines every configuration selector the Driver and Codec share as a plain
+value on an RCC-owned scalar typedef — for example `RCC_SYS_CLK_HSI`,
 `RCC_PLL_MUL_9`, and `RCC_APB1_DIV_2` are all `uint8_t`-backed values
 (`rcc_system_clock_t`, `rcc_pll_mul_t`, `rcc_bus_prescaler_t`). These
 selectors are small ordinal indices, not raw hardware field values; they
@@ -518,8 +549,9 @@ This directly implements the Flash latency/prefetch ordering rule from
 Part I: the core never executes from flash at a frequency the currently
 programmed `LATENCY` value does not support, in either direction of change.
 
-`RCC_ValidateConfig()` performs three checks in order before any hardware is
-touched: field-level validity (`_RCC_ValidateClockTreeConfig()`, which
+`RCC_ValidateConfig()` performs four checks in order before any hardware is
+touched: complete Flash-policy validity (`_RCC_ValidateFlashConfig()`),
+field-level clock-tree validity (`_RCC_ValidateClockTreeConfig()`, which
 Codec-encodes every selector and rejects the whole request if any one fails
 to encode, plus a PLL-specific consistency check), derived-frequency limit
 validity (`_RCC_ValidateClockFrequencies()`, comparing the same
@@ -529,6 +561,14 @@ against `RCC_SYSCLK_MAX_FREQ`/`RCC_HCLK_MAX_FREQ`/`RCC_PCLK1_MAX_FREQ`/
 validity (`_RCC_ValidateClockConfigDependencies()`, which enforces the exact
 48 MHz USB-clock constraint and the three Flash-latency/SYSCLK bands from
 Part I).
+
+The domain entry points preserve the same validation-before-mutation rule
+when called independently. `RCC_ConfigFlash()` validates both Flash members
+before its first `FLASH_ACR` write, and `RCC_ConfigClockTree()` validates the
+entire clock-tree descriptor before enabling, disabling, reprogramming, or
+switching any clock source. A later hardware-ready timeout can leave the
+system in a documented safe intermediate state, but invalid input cannot
+cause a partial transaction.
 
 `RCC_Config72MHz()` is a narrowly named, fixed-configuration bootstrap
 helper: `RCC_Load72MHzDefaultConfig()` populates the documented Blue Pill
@@ -589,12 +629,11 @@ documented restoration mechanism, while leaving that peripheral's clock gate
 and NVIC delivery state untouched — the same lifecycle boundary the Timer
 stack documents for its own `DeConfig()`.
 
-Because `RCC_SetAHBClockState()`/`RCC_SetAPB2ClockState()`/
-`RCC_SetAPB1ClockState()` and the reset-pulse functions are declared
-`__STATIC_FORCEINLINE` directly in `rcc.h`, they add no call overhead beyond
-the LL function they immediately forward to; only the sequencing-heavy
-system-clock, prescaler, and root-configuration APIs are non-inline
-functions in `rcc.c`.
+The gate and reset functions are implemented in `rcc.c`, not inline in
+`rcc.h`. This costs one ordinary Driver call at the application boundary but
+keeps `rcc_ll.h`, Core registers, and raw field vocabulary out of the public
+include chain. Each implementation still delegates to exactly one matching
+LL operation, so register ownership remains singular.
 
 ### Concurrency and ownership rules
 
@@ -621,6 +660,8 @@ through:
 - `BareMetal/Core/Inc/stm32f1xx_rcc.h`
 - `BareMetal/Core/Inc/stm32f1xx_base_address.h`
 - `BareMetal/Core/Inc/stm32f1xx_defines.h` (Flash `ACR` field macros)
+- `BareMetal/Driver/RCC/Inc/rcc_data_types.h`
+- `BareMetal/Driver/RCC/Inc/rcc_config.h`
 - `BareMetal/Driver/RCC/Inc/rcc_defines.h`
 - `BareMetal/Driver/RCC/Inc/rcc_ll.h`
 - `BareMetal/Driver/RCC/Src/rcc_ll.c`

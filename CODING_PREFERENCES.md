@@ -101,6 +101,13 @@ warnings are an accepted consequence of the repository display convention;
 do not rewrite the documented house style to silence them. All other Doxygen
 warnings remain subject to the normal validation pass.
 
+The configured Doxygen 1.9 parser may also report `unexpected token TK_EOF as
+the argument of ref` for the required backtick-wrapped `@ref` form. Those
+exact parser warnings are accepted when the referenced symbol exists and the
+source follows the required `@ref \`SYMBOL\`` layout. Missing targets,
+undocumented symbols, malformed commands, and every other warning remain
+validation failures.
+
 Use the corresponding list layout for non-status return values:
 
 ```c
@@ -166,6 +173,44 @@ several parameters into one Accepted Values block, and do not omit a finite
 selector/range list when the API defines one. Status lists must match the
 implementation, including distinct null-pointer, invalid-argument, state,
 busy, and timeout paths.
+
+## Structure Doxygen Layout
+
+Document every public and private structure with `@struct` using the public
+typedef name, followed by one complete Doxygen block per member. Every member
+block must contain:
+
+1. A focused `@brief` explaining the member's semantic role.
+2. An `Accepted Values:` list for writable configuration/input members, or an
+   `Expected Values:` list for observation/output members.
+3. Explicit symbolic values when the vocabulary is finite; do not hide the
+   valid set behind vague prose.
+4. `@memberof` naming the public typedef that owns the member.
+
+Use this layout:
+
+```c
+/**
+ * @brief Describes one coherent peripheral configuration domain
+ * @struct peripheral_config_t
+ */
+typedef struct _peripheral_config_t
+{
+	/**
+	 * @brief Operation-mode selector
+	 * Accepted Values:
+	 * - @ref `PERIPHERAL_MODE_A`
+	 * - @ref `PERIPHERAL_MODE_B`
+	 * @memberof peripheral_config_t
+	 */
+	peripheral_mode_t	mode;
+} peripheral_config_t;
+```
+
+Do not use a trailing `/**< ... */` member comment when a complete member
+contract can be documented. Keep accepted/expected lists directly inside the
+owning member block so the structure can be audited without following its
+consumers.
 
 ## Function-Local Logic Comments
 

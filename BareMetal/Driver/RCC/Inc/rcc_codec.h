@@ -1,31 +1,36 @@
 /**
  * @file	rcc_codec.h
  * @author	Shrey Shah
- * @brief	RCC Selector Codec Interface
- * @version	v1.0
- * @date	22-08-2026
+ * @brief	Declares pure RCC selector and field transformations
+ * @version	v2.0
+ * @date	23-08-2026
  *
  * @details
- * This header defines the RCC codec layer between RCC LL and the public RCC
- * driver. Codec APIs encode driver-facing selectors into raw STM32F1 RCC
- * fields, decode raw fields back into driver-facing selectors, and resolve
- * the effective divider represented by a driver-facing prescaler selector.
+ * @section RCC_CODEC_H_HIERARCHY Hierarchy
+ * - Position: Layer 2 RCC pure transformation layer
+ * - Used by: Layer 3 RCC Driver implementation
+ * - Uses: Configuration selectors and Core-owned raw RCC field definitions
  *
- * Codec APIs do not read or write peripheral hardware, do not dereference a
- * peripheral instance, and do not decide public driver orchestration. Every
- * transformation here operates on scalar selector and field values rather
- * than caller-owned full register images, because the RCC driver already
- * isolates the single relevant field through @ref rcc_ll.h before invoking
- * the codec.
+ * @section RCC_CODEC_H_RESPONSIBILITY Responsibility
+ * Codec APIs encode configuration selectors into raw STM32F1 fields, decode
+ * raw fields into semantic selectors, and resolve prescaler selectors into
+ * arithmetic dividers.
+ *
+ * @section RCC_CODEC_H_BOUNDARY Dependency Boundary
+ * This layer has no peripheral pointer, volatile I/O, sequencing, timeout,
+ * cache, or application policy. It never includes `rcc.h` or `rcc_ll.h` and
+ * publishes an output only after validating its caller-owned destination.
  */
 
+// Header Guard
 #ifndef RCC_CODEC_H_
 #define RCC_CODEC_H_
 
 // ==================================================================================================== //
-//                                               Includes                                               //
+// Includes
 // ==================================================================================================== //
-#include "rcc_defines.h"
+#include "rcc_config.h"
+#include "stm32f1xx_rcc.h"
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus
@@ -38,9 +43,9 @@ extern "C" {
  */
 
 /**
- * @brief	RCC Codec Selector Translation APIs
+ * @brief RCC Codec Selector Translation APIs
  * @defgroup RCC_03_Driver_08_Codec RCC Codec Selector Translation APIs
- * @ingroup	RCC_03_Driver
+ * @ingroup RCC_03_Driver
  * @details
  * These APIs own selector-to-field encoding, field-to-selector decoding, and
  * prescaler-selector-to-divider resolution for the RCC driver. They assume
@@ -56,7 +61,7 @@ extern "C" {
  */
 
 // ==================================================================================================== //
-//                                    RCC System Clock Source Codec                                     //
+// RCC System Clock Source Codec
 // ==================================================================================================== //
 
 /**
@@ -67,16 +72,20 @@ extern "C" {
  * - @ref `RCC_SYS_CLK_HSE`: Encodes to `RCC_CFGR_SW_HSE`
  * - @ref `RCC_SYS_CLK_PLL`: Encodes to `RCC_CFGR_SW_PLL`
  * @param[out] pField Destination for the encoded `RCC_CFGR_SW` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p source is validated
  * @returns @ref driver_status_t "System clock source encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p source was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t source, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t source, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_SWS` status field into a system clock source selector
  * @param[in] statusField Raw `RCC_CFGR_SWS` hardware status field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSource Destination for the decoded system clock source selector
  * Expected values:
  * - @ref `RCC_SYS_CLK_HSI`: Decoded from `RCC_CFGR_SWS_HSI` or any unrecognized field
@@ -88,10 +97,10 @@ driver_status_t Codec_RCC_EncodeSystemClockSource(const rcc_system_clock_t sourc
  * @note An unrecognized @p statusField decodes to @ref `RCC_SYS_CLK_HSI` and still
  * returns @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeSystemClockSource(const uint32_t statusField, rcc_system_clock_t* const pSource);
+driver_status_t Codec_RCC_DecodeSystemClockSource(const reg statusField, rcc_system_clock_t* const pSource);
 
 // ==================================================================================================== //
-//                                          RCC PLL Field Codec                                         //
+// RCC PLL Field Codec
 // ==================================================================================================== //
 
 /**
@@ -101,12 +110,14 @@ driver_status_t Codec_RCC_DecodeSystemClockSource(const uint32_t statusField, rc
  * - @ref `RCC_PLL_SRC_HSI`: Encodes to `RCC_CFGR_PLLSRC_HSI_DIV2`
  * - @ref `RCC_PLL_SRC_HSE`: Encodes to `RCC_CFGR_PLLSRC_HSE`
  * @param[out] pField Destination for the encoded `RCC_CFGR_PLLSRC` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p source is validated
  * @returns @ref driver_status_t "PLL source encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p source was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p source is not a supported selector
  */
-driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, reg* const pField);
 
 /**
  * @brief Encodes an HSE PLL input divider selector into its `RCC_CFGR_PLLXTPRE` field
@@ -115,145 +126,213 @@ driver_status_t Codec_RCC_EncodePLLSource(const rcc_pll_src_t source, uint32_t* 
  * - @ref `RCC_PLL_SRC_HSE_DIV_1`: Encodes to `RCC_CFGR_PLLXTPRE_HSE`
  * - @ref `RCC_PLL_SRC_HSE_DIV_2`: Encodes to `RCC_CFGR_PLLXTPRE_HSE_DIV2`
  * @param[out] pField Destination for the encoded `RCC_CFGR_PLLXTPRE` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p divider is validated
  * @returns @ref driver_status_t "PLL HSE divider encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p divider was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p divider is not a supported selector
  */
-driver_status_t Codec_RCC_EncodePLLHSEDivider(const rcc_pll_src_psc_t divider, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodePLLHSEDivider(const rcc_pll_src_psc_t divider, reg* const pField);
 
 /**
  * @brief Encodes a PLL multiplication factor into its `RCC_CFGR_PLLMUL` field
  * @param[in] multiplier PLL multiplication factor to encode
  * Accepted values:
- * - @ref `RCC_PLL_MUL_2` through @ref `RCC_PLL_MUL_16`: Encodes to the matching `RCC_CFGR_PLLMUL_x` field
+ * - @ref `RCC_PLL_MUL_2`
+ * - @ref `RCC_PLL_MUL_3`
+ * - @ref `RCC_PLL_MUL_4`
+ * - @ref `RCC_PLL_MUL_5`
+ * - @ref `RCC_PLL_MUL_6`
+ * - @ref `RCC_PLL_MUL_7`
+ * - @ref `RCC_PLL_MUL_8`
+ * - @ref `RCC_PLL_MUL_9`
+ * - @ref `RCC_PLL_MUL_10`
+ * - @ref `RCC_PLL_MUL_11`
+ * - @ref `RCC_PLL_MUL_12`
+ * - @ref `RCC_PLL_MUL_13`
+ * - @ref `RCC_PLL_MUL_14`
+ * - @ref `RCC_PLL_MUL_15`
+ * - @ref `RCC_PLL_MUL_16`
  * @param[out] pField Destination for the encoded `RCC_CFGR_PLLMUL` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p multiplier is validated
  * @returns @ref driver_status_t "PLL multiplier encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p multiplier was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p multiplier is outside `RCC_PLL_MUL_2..RCC_PLL_MUL_16`
  */
-driver_status_t Codec_RCC_EncodePLLMultiplier(const rcc_pll_mul_t multiplier, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodePLLMultiplier(const rcc_pll_mul_t multiplier, reg* const pField);
 
 // ==================================================================================================== //
-//                                       RCC Bus Prescaler Codec                                        //
+// RCC Bus Prescaler Codec
 // ==================================================================================================== //
 
 /**
  * @brief Encodes an AHB prescaler selector into its `RCC_CFGR_HPRE` field
  * @param[in] selector AHB prescaler selector to encode
  * Accepted values:
- * - @ref `RCC_AHB_DIV_1` through @ref `RCC_AHB_DIV_512`: Encodes to the matching `RCC_CFGR_HPRE_DIVx` field
+ * - @ref `RCC_AHB_DIV_1`
+ * - @ref `RCC_AHB_DIV_2`
+ * - @ref `RCC_AHB_DIV_4`
+ * - @ref `RCC_AHB_DIV_8`
+ * - @ref `RCC_AHB_DIV_16`
+ * - @ref `RCC_AHB_DIV_64`
+ * - @ref `RCC_AHB_DIV_128`
+ * - @ref `RCC_AHB_DIV_256`
+ * - @ref `RCC_AHB_DIV_512`
  * @param[out] pField Destination for the encoded `RCC_CFGR_HPRE` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p selector is validated
  * @returns @ref driver_status_t "AHB prescaler encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p selector was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p selector is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeAHBPrescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeAHBPrescaler(const rcc_bus_prescaler_t selector, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_HPRE` field into an AHB prescaler selector
  * @param[in] field Raw `RCC_CFGR_HPRE` hardware field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSelector Destination for the decoded AHB prescaler selector
  * Expected values:
- * - @ref `RCC_AHB_DIV_1` through @ref `RCC_AHB_DIV_512`: Decoded from a matching field
- * - @ref `RCC_AHB_DIV_1`: Decoded from any unrecognized field
+ * - @ref `RCC_AHB_DIV_1`: Decoded from divide-by-one or any unrecognized field
+ * - @ref `RCC_AHB_DIV_2`
+ * - @ref `RCC_AHB_DIV_4`
+ * - @ref `RCC_AHB_DIV_8`
+ * - @ref `RCC_AHB_DIV_16`
+ * - @ref `RCC_AHB_DIV_64`
+ * - @ref `RCC_AHB_DIV_128`
+ * - @ref `RCC_AHB_DIV_256`
+ * - @ref `RCC_AHB_DIV_512`
  * @returns @ref driver_status_t "AHB prescaler decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p field was decoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSelector is `NULL`
  * @note An unrecognized @p field decodes to @ref `RCC_AHB_DIV_1` and still returns
  * @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeAHBPrescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector);
+driver_status_t Codec_RCC_DecodeAHBPrescaler(const reg field, rcc_bus_prescaler_t* const pSelector);
 
 /**
  * @brief Encodes an APB1 prescaler selector into its `RCC_CFGR_PPRE1` field
  * @param[in] selector APB1 prescaler selector to encode
  * Accepted values:
- * - @ref `RCC_APB1_DIV_1` through @ref `RCC_APB1_DIV_16`: Encodes to the matching `RCC_CFGR_PPRE1_DIVx` field
+ * - @ref `RCC_APB1_DIV_1`
+ * - @ref `RCC_APB1_DIV_2`
+ * - @ref `RCC_APB1_DIV_4`
+ * - @ref `RCC_APB1_DIV_8`
+ * - @ref `RCC_APB1_DIV_16`
  * @param[out] pField Destination for the encoded `RCC_CFGR_PPRE1` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p selector is validated
  * @returns @ref driver_status_t "APB1 prescaler encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p selector was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p selector is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeAPB1Prescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeAPB1Prescaler(const rcc_bus_prescaler_t selector, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_PPRE1` field into an APB1 prescaler selector
  * @param[in] field Raw `RCC_CFGR_PPRE1` hardware field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSelector Destination for the decoded APB1 prescaler selector
  * Expected values:
- * - @ref `RCC_APB1_DIV_1` through @ref `RCC_APB1_DIV_16`: Decoded from a matching field
- * - @ref `RCC_APB1_DIV_1`: Decoded from any unrecognized field
+ * - @ref `RCC_APB1_DIV_1`: Decoded from divide-by-one or any unrecognized field
+ * - @ref `RCC_APB1_DIV_2`
+ * - @ref `RCC_APB1_DIV_4`
+ * - @ref `RCC_APB1_DIV_8`
+ * - @ref `RCC_APB1_DIV_16`
  * @returns @ref driver_status_t "APB1 prescaler decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p field was decoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSelector is `NULL`
  * @note An unrecognized @p field decodes to @ref `RCC_APB1_DIV_1` and still returns
  * @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeAPB1Prescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector);
+driver_status_t Codec_RCC_DecodeAPB1Prescaler(const reg field, rcc_bus_prescaler_t* const pSelector);
 
 /**
  * @brief Encodes an APB2 prescaler selector into its `RCC_CFGR_PPRE2` field
  * @param[in] selector APB2 prescaler selector to encode
  * Accepted values:
- * - @ref `RCC_APB2_DIV_1` through @ref `RCC_APB2_DIV_16`: Encodes to the matching `RCC_CFGR_PPRE2_DIVx` field
+ * - @ref `RCC_APB2_DIV_1`
+ * - @ref `RCC_APB2_DIV_2`
+ * - @ref `RCC_APB2_DIV_4`
+ * - @ref `RCC_APB2_DIV_8`
+ * - @ref `RCC_APB2_DIV_16`
  * @param[out] pField Destination for the encoded `RCC_CFGR_PPRE2` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p selector is validated
  * @returns @ref driver_status_t "APB2 prescaler encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p selector was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p selector is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeAPB2Prescaler(const rcc_bus_prescaler_t selector, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeAPB2Prescaler(const rcc_bus_prescaler_t selector, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_PPRE2` field into an APB2 prescaler selector
  * @param[in] field Raw `RCC_CFGR_PPRE2` hardware field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSelector Destination for the decoded APB2 prescaler selector
  * Expected values:
- * - @ref `RCC_APB2_DIV_1` through @ref `RCC_APB2_DIV_16`: Decoded from a matching field
- * - @ref `RCC_APB2_DIV_1`: Decoded from any unrecognized field
+ * - @ref `RCC_APB2_DIV_1`: Decoded from divide-by-one or any unrecognized field
+ * - @ref `RCC_APB2_DIV_2`
+ * - @ref `RCC_APB2_DIV_4`
+ * - @ref `RCC_APB2_DIV_8`
+ * - @ref `RCC_APB2_DIV_16`
  * @returns @ref driver_status_t "APB2 prescaler decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p field was decoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSelector is `NULL`
  * @note An unrecognized @p field decodes to @ref `RCC_APB2_DIV_1` and still returns
  * @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeAPB2Prescaler(const uint32_t field, rcc_bus_prescaler_t* const pSelector);
+driver_status_t Codec_RCC_DecodeAPB2Prescaler(const reg field, rcc_bus_prescaler_t* const pSelector);
 
 // ==================================================================================================== //
-//                                     RCC Component Prescaler Codec                                    //
+// RCC Component Prescaler Codec
 // ==================================================================================================== //
 
 /**
  * @brief Encodes an ADC prescaler selector into its `RCC_CFGR_ADCPRE` field
  * @param[in] selector ADC prescaler selector to encode
  * Accepted values:
- * - @ref `RCC_ADC_DIV_2` through @ref `RCC_ADC_DIV_8`: Encodes to the matching `RCC_CFGR_ADCPRE_DIVx` field
+ * - @ref `RCC_ADC_DIV_2`
+ * - @ref `RCC_ADC_DIV_4`
+ * - @ref `RCC_ADC_DIV_6`
+ * - @ref `RCC_ADC_DIV_8`
  * @param[out] pField Destination for the encoded `RCC_CFGR_ADCPRE` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p selector is validated
  * @returns @ref driver_status_t "ADC prescaler encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p selector was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p selector is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeADCPrescaler(const rcc_component_prescaler_t selector, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeADCPrescaler(const rcc_component_prescaler_t selector, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_ADCPRE` field into an ADC prescaler selector
  * @param[in] field Raw `RCC_CFGR_ADCPRE` hardware field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSelector Destination for the decoded ADC prescaler selector
  * Expected values:
- * - @ref `RCC_ADC_DIV_2` through @ref `RCC_ADC_DIV_8`: Decoded from a matching field
- * - @ref `RCC_ADC_DIV_2`: Decoded from any unrecognized field
+ * - @ref `RCC_ADC_DIV_2`: Decoded from divide-by-two or any unrecognized field
+ * - @ref `RCC_ADC_DIV_4`
+ * - @ref `RCC_ADC_DIV_6`
+ * - @ref `RCC_ADC_DIV_8`
  * @returns @ref driver_status_t "ADC prescaler decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p field was decoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSelector is `NULL`
  * @note An unrecognized @p field decodes to @ref `RCC_ADC_DIV_2` and still returns
  * @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeADCPrescaler(const uint32_t field, rcc_component_prescaler_t* const pSelector);
+driver_status_t Codec_RCC_DecodeADCPrescaler(const reg field, rcc_component_prescaler_t* const pSelector);
 
 /**
  * @brief Encodes a USB prescaler selector into its `RCC_CFGR_USBPRE` field
@@ -262,16 +341,20 @@ driver_status_t Codec_RCC_DecodeADCPrescaler(const uint32_t field, rcc_component
  * - @ref `RCC_USB_DIV_1_5`: Encodes to `RCC_CFGR_USBPRE_DIV1_5`
  * - @ref `RCC_USB_DIV_1`: Encodes to `RCC_CFGR_USBPRE_DIRECT`
  * @param[out] pField Destination for the encoded `RCC_CFGR_USBPRE` field value
+ * Expected values:
+ * - Non-`NULL`: Encoded field is published only after @p selector is validated
  * @returns @ref driver_status_t "USB prescaler encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p selector was encoded successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pField is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p selector is not a supported selector
  */
-driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t selector, uint32_t* const pField);
+driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t selector, reg* const pField);
 
 /**
  * @brief Decodes an `RCC_CFGR_USBPRE` field into a USB prescaler selector
  * @param[in] field Raw `RCC_CFGR_USBPRE` hardware field to decode
+ * Accepted values:
+ * - Any @ref reg image; an unrecognized field uses the documented reset-state fallback
  * @param[out] pSelector Destination for the decoded USB prescaler selector
  * Expected values:
  * - @ref `RCC_USB_DIV_1_5`: Decoded from `RCC_CFGR_USBPRE_DIV1_5` or any unrecognized field
@@ -282,15 +365,26 @@ driver_status_t Codec_RCC_EncodeUSBPrescaler(const rcc_component_prescaler_t sel
  * @note An unrecognized @p field decodes to @ref `RCC_USB_DIV_1_5` and still returns
  * @ref `DRIVER_STATUS_SUCCESS`, matching the reset-state hardware default.
  */
-driver_status_t Codec_RCC_DecodeUSBPrescaler(const uint32_t field, rcc_component_prescaler_t* const pSelector);
+driver_status_t Codec_RCC_DecodeUSBPrescaler(const reg field, rcc_component_prescaler_t* const pSelector);
 
 // ==================================================================================================== //
-//                                    RCC Prescaler Divider Resolution                                  //
+// RCC Prescaler Divider Resolution
 // ==================================================================================================== //
 
 /**
  * @brief Resolves the effective numeric divider represented by an AHB prescaler selector
  * @param[in] selector AHB prescaler selector to resolve
+ * Accepted values:
+ * - @ref `RCC_AHB_DIV_1`
+ * - @ref `RCC_AHB_DIV_2`
+ * - @ref `RCC_AHB_DIV_4`
+ * - @ref `RCC_AHB_DIV_8`
+ * - @ref `RCC_AHB_DIV_16`
+ * - @ref `RCC_AHB_DIV_64`
+ * - @ref `RCC_AHB_DIV_128`
+ * - @ref `RCC_AHB_DIV_256`
+ * - @ref `RCC_AHB_DIV_512`
+ * - Any other value resolves to the documented fallback
  * @param[out] pDivider Destination for the resolved divider value
  * Expected values:
  * - `1UL`, `2UL`, `4UL`, `8UL`, `16UL`, `64UL`, `128UL`, `256UL`, `512UL`: Divider for a recognized selector
@@ -309,7 +403,12 @@ driver_status_t Codec_RCC_GetAHBPrescalerDivider(const rcc_bus_prescaler_t selec
  * five-selector divider progression.
  * @param[in] selector APB1 or APB2 prescaler selector to resolve
  * Accepted values:
- * - @ref `RCC_APB1_DIV_1` / @ref `RCC_APB2_DIV_1` through @ref `RCC_APB1_DIV_16` / @ref `RCC_APB2_DIV_16`
+ * - @ref `RCC_APB1_DIV_1` or @ref `RCC_APB2_DIV_1`
+ * - @ref `RCC_APB1_DIV_2` or @ref `RCC_APB2_DIV_2`
+ * - @ref `RCC_APB1_DIV_4` or @ref `RCC_APB2_DIV_4`
+ * - @ref `RCC_APB1_DIV_8` or @ref `RCC_APB2_DIV_8`
+ * - @ref `RCC_APB1_DIV_16` or @ref `RCC_APB2_DIV_16`
+ * - Any other value resolves to the documented fallback
  * @param[out] pDivider Destination for the resolved divider value
  * Expected values:
  * - `1UL`, `2UL`, `4UL`, `8UL`, `16UL`: Divider for a recognized selector
@@ -325,6 +424,12 @@ driver_status_t Codec_RCC_GetAPBPrescalerDivider(const rcc_bus_prescaler_t selec
 /**
  * @brief Resolves the effective numeric divider represented by an ADC prescaler selector
  * @param[in] selector ADC prescaler selector to resolve
+ * Accepted values:
+ * - @ref `RCC_ADC_DIV_2`
+ * - @ref `RCC_ADC_DIV_4`
+ * - @ref `RCC_ADC_DIV_6`
+ * - @ref `RCC_ADC_DIV_8`
+ * - Any other value resolves to the documented fallback
  * @param[out] pDivider Destination for the resolved divider value
  * Expected values:
  * - `2UL`, `4UL`, `6UL`, `8UL`: Divider for a recognized selector
