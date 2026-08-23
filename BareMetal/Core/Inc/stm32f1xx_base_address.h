@@ -23,6 +23,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // Cortex-M3 Core Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
+
 /** @brief System Timer Base (Cortex-M3 Core Peripheral) @def SysTick_BASE_ADDR */
 #define SysTick_BASE_ADDR						((uintptr_t) 0xE000E010UL)
 /** @brief Nested Vectored Interrupt Controller Base @def NVIC_BASE_ADDR */
@@ -35,6 +36,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // Bus Base Address
 // ------------------------------------------------------------------------------------------
+
 /** @brief APB1 Peripheral Base (Low-speed peripherals) @def APB1_BASE_ADDR @def APB1_BASE_ADDR */
 #define APB1_BASE_ADDR							((uintptr_t) 0x40000000UL)
 /** @brief APB2 Peripheral Base (High-speed peripherals) @def APB2_BASE_ADDR @def APB2_BASE_ADDR */
@@ -45,6 +47,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // AHB Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
+
 /** @brief DMA1 Controller Base @def DMA1_BASE_ADDR */
 #define DMA1_BASE_ADDR							((uintptr_t) (AHB_BASE_ADDR + DMA1_OFFSET))
 /** @brief DMA2 Controller Base @def DMA2_BASE_ADDR */
@@ -57,6 +60,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // APB1 Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
+
 /** @brief General-purpose Timer 2 Base Memory Address @def TIM2_BASE_ADDRESS */
 #define TIM2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + TIM2_OFFSET))
 /** @brief General-purpose Timer 3 Base Memory Address @def TIM3_BASE_ADDRESS */
@@ -83,6 +87,7 @@ extern "C" {
 #define I2C1_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C1_OFFSET))
 /** @brief I2C2 Base Memory Address @def I2C2_BASE_ADDRESS */
 #define I2C2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C2_OFFSET))
+
 // ------------------------------------------------------------------------------------------
 // APB2 Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
@@ -116,8 +121,6 @@ extern "C" {
 #define TIM8_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + TIM8_OFFSET))
 /** @brief USART1 Base Memory Address @def USART1_BASE_ADDRESS */
 #define USART1_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + USART1_OFFSET))
-/** @brief ADC3 Base Memory Address @def ADC3_BASE_ADDRESS */
-#define ADC3_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + ADC3_OFFSET))
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus

@@ -23,6 +23,7 @@ extern "C" {
 // ------------------------------------------------------------------------------------------
 // AHB Peripheral Offset
 // ------------------------------------------------------------------------------------------
+
 /** @brief DMA1 Peripheral Offset from @def `AHB_BASE_ADDR` @def DMA1_OFFSET */
 #define DMA1_OFFSET								((uintptr_t) 0x00008000UL)
 /** @brief DMA2 Peripheral Offset from @def `AHB_BASE_ADDR` @def DMA2_OFFSET */
@@ -99,8 +100,6 @@ extern "C" {
 #define TIM8_OFFSET								((uintptr_t) 0x00003400UL)
 /** @brief USART1 offset from @ref `APB2_BASE_ADDR` @def USART1_OFFSET */
 #define USART1_OFFSET							((uintptr_t) 0x00003800UL)
-/** @brief ADC3 offset from @ref `APB2_BASE_ADDR` @def ADC3_OFFSET */
-#define ADC3_OFFSET								((uintptr_t) 0x00003C00UL)
 
 // --- C++ Safeguards ---
 #ifdef __cplusplus

@@ -231,9 +231,6 @@ extern "C" {
 #define TIM8									((Adv_TIM_TypeDef*) TIM8_BASE_ADDRESS)
 /** @brief USART1  @def USART1 */
 #define USART1									((USART_TypeDef*) USART1_BASE_ADDRESS)
-/** @brief ADC3  @def ADC3 */
-#define ADC3									((ADC_TypeDef*) ADC3_BASE_ADDRESS)
-
 /*----------------------------------------------- I2C MACROS -----------------------------------------------*/
 // I2C Speed
 #define I2Cx_SPEED_STD							(FREQ_100kHz)
