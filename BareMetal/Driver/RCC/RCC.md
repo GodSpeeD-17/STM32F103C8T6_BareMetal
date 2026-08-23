@@ -668,7 +668,7 @@ through:
 
 - `BareMetal/Core/Inc/stm32f1xx_rcc.h`
 - `BareMetal/Core/Inc/stm32f1xx_base_address.h`
-- `BareMetal/Core/Inc/stm32f1xx_defines.h` (Flash `ACR` field macros)
+- `BareMetal/Core/Inc/stm32f1xx_flash.h` (Flash register map and `ACR` field macros)
 - `BareMetal/Driver/RCC/Inc/rcc_data_types.h`
 - `BareMetal/Driver/RCC/Inc/rcc_config.h`
 - `BareMetal/Driver/RCC/Inc/rcc_defines.h`
