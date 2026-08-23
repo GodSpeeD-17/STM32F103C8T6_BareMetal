@@ -49,12 +49,13 @@ step below.
     `CTS` only); the driver owns the actual read-SR-then-read-DR hardware
     sequence for `PE/FE/NE/ORE/IDLE/RXNE` since that requires live register
     access, which the codec does not perform. `TXE` is never acknowledged.
-- [ ] Refactor `Inc/usart_config.h`/`Src/usart_config.c` into the
-  instance-independent `usart_config_t` root structure (hardware-enable,
-  data config, preset baud rate) only. No GPIO pin table: GPIO/AFIO pin
-  routing, configuration, and clocking are entirely application-owned,
-  matching Timer PWM, so `__usartDriverGPIOMapping__[]` is removed rather
-  than re-keyed.
+- [ ] Refactor `Inc/usart_config.h` into the instance-independent
+  `usart_config_t` root structure (hardware-enable, frame format, preset
+  baud rate) only. No GPIO pin table and no `Src/usart_config.c`:
+  GPIO/AFIO pin routing, configuration, and clocking are entirely
+  application-owned, matching Timer PWM, so `__usartDriverGPIOMapping__[]`
+  is removed rather than re-keyed, and the file is deleted (mirroring
+  Timer's `.h`-only config layer).
 - [ ] Refactor `Inc/usart.h` into public API only, no inline hardware
   access: `USART_GetOperationState`/`SetOperationState` (`CR1.UE`),
   `USART_Config`/`USART_DeConfig`, `USART_GetIRQSources`/`SetIRQSources`,

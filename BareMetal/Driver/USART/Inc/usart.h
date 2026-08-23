@@ -59,7 +59,7 @@ extern "C" {
  * @returns @ref driver_status_t "USART operation-state observation"
  * @retval - @ref `DRIVER_STATUS_OFF`: The USART peripheral is disabled
  * @retval - @ref `DRIVER_STATUS_ON`: The USART peripheral is enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
  */
 driver_status_t USART_GetOperationState(const USART_TypeDef* const USARTx);
 
@@ -79,7 +79,7 @@ driver_status_t USART_GetOperationState(const USART_TypeDef* const USARTx);
  * - @ref `DRIVER_STATUS_ON`: Enable the USART peripheral
  * @returns @ref driver_status_t "USART operation-state operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested operation state was applied
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx or @p operationState was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` or @p `operationState` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @pre The application enabled the USART peripheral clock gate through RCC
  * before calling this API.
@@ -102,7 +102,7 @@ driver_status_t USART_SetOperationState(USART_TypeDef* const USARTx, const drive
  * - @ref `USART3`
  * @returns @ref driver_status_t "USART de-configuration operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested USART instance was reset-pulsed
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @pre The application enabled the USART peripheral clock gate through RCC
  * before calling this API.
@@ -110,14 +110,14 @@ driver_status_t USART_SetOperationState(USART_TypeDef* const USARTx, const drive
 driver_status_t USART_DeConfig(USART_TypeDef* const USARTx);
 
 /**
- * @brief Applies one complete USART line/hardware/baud-rate configuration
+ * @brief Applies one complete USART hardware/frame-format/baud-rate configuration
  * @details
- * Validates @p USARTx and every field in @p pConfig, verifies the USART
- * peripheral clock gate is already enabled, enables the GPIO/AFIO clock
- * gate(s) required by this instance's private pin table and configures
- * those pins, then stages and commits the hardware-enable, line-format, and
- * baud-rate domains. This API never enables the USART peripheral's own
- * clock gate.
+ * Validates @p `USARTx` and every field in @p `pConfig`, verifies the USART
+ * peripheral clock gate is already enabled, then stages and commits the
+ * hardware-enable, frame-format, and baud-rate domains. This API never
+ * touches GPIO/AFIO or the USART peripheral's own clock gate; pin selection,
+ * pin configuration, and both clock gates are entirely application-owned,
+ * matching Timer PWM's GPIO ownership model.
  * @param[in] USARTx Target USART peripheral instance
  * Accepted values:
  * - @ref `USART1`
@@ -125,18 +125,17 @@ driver_status_t USART_DeConfig(USART_TypeDef* const USARTx);
  * - @ref `USART3`
  * @param[in] pConfig USART configuration to apply
  * Expected values:
- * - Non-`NULL`: Complete hardware, line-format, and baud-rate policy
+ * - Non-`NULL`: Complete hardware, frame-format, and baud-rate policy
  * @returns @ref driver_status_t "USART configuration operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration was applied
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig was a null pointer
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid, or @p pConfig
- * contained an invalid hardware, line-format, or baud-rate selector
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
- * @pre The application enabled the USART peripheral clock gate through RCC
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pConfig` was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid, or @p `pConfig`
+ * contained an invalid hardware, frame-format, or baud-rate selector
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled,
+ * or the resolved RCC bus frequency is zero
+ * @pre The application enabled the USART peripheral clock gate through RCC,
+ * and configured any required GPIO/AFIO pins and their clock gates itself,
  * before calling this API.
- * @note This API enables the GPIO port clock gate, and the AFIO clock gate
- * for alternate-function pins, for its own private pin table only. It never
- * enables the USART peripheral's own clock gate.
  */
 driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* const pConfig);
 
@@ -155,9 +154,9 @@ driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* 
  * Expected values:
  * - Any OR-combination of @ref `USART_IRQ_SOURCE_IDLE` through @ref `USART_IRQ_SOURCE_ERROR`
  * @returns @ref driver_status_t "USART interrupt-request source query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pSources was published successfully
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSources was a null pointer
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pSources` was published successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pSources` was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  */
 driver_status_t USART_GetIRQSources(const USART_TypeDef* const USARTx, usart_irq_source_t* const pSources);
@@ -167,7 +166,7 @@ driver_status_t USART_GetIRQSources(const USART_TypeDef* const USARTx, usart_irq
  * @details
  * Sources span two registers (`CR1` for `IDLE`/`RXNE`/`TC`/`TXE`/`PE`, `CR3`
  * for `CTS`/error); this API stages and writes only the registers touched
- * by @p sources. It does not enable the matching NVIC vector.
+ * by @p `sources`. It does not enable the matching NVIC vector.
  * @param[in] USARTx Target USART peripheral instance
  * Accepted values:
  * - @ref `USART1`
@@ -182,7 +181,7 @@ driver_status_t USART_GetIRQSources(const USART_TypeDef* const USARTx, usart_irq
  * - @ref `DRIVER_STATUS_ON`: Enable every selected interrupt-request source
  * @returns @ref driver_status_t "USART interrupt-request source operation status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested sources were updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx, @p sources, or @p sourceState was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx`, @p `sources`, or @p `sourceState` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @note This API does not enable or disable the corresponding NVIC vector.
  * The application or integration layer owns global IRQ delivery.
@@ -209,9 +208,9 @@ driver_status_t USART_SetIRQSources
  * Expected values:
  * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
  * @returns @ref driver_status_t "USART event-flag query status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pEvents was published successfully
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pEvents was a null pointer
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pEvents` was published successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pEvents` was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @note Reading `SR` through this API participates in the hardware
  * error-flag clearing sequence documented for `USART_AckIRQEvents()`.
@@ -236,7 +235,7 @@ driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_even
  * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
  * @returns @ref driver_status_t "USART event-flag acknowledgement status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected event flag(s) were acknowledged
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx or @p events was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` or @p `events` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @warning Acknowledging `PE`/`FE`/`NE`/`ORE`/`IDLE`/`RXNE` reads and discards
  * the buffered `DR` value as part of the hardware clearing sequence.

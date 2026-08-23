@@ -81,8 +81,8 @@ static const uint32_t __usartCodecBaudRatePresetTable__[USART_CODEC_BAUD_RATE_PR
  * @brief Validates whether a state selector is an accepted ON/OFF state
  * @param[in] state Driver state selector
  * @returns @ref driver_status_t "Binary-state validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is accepted
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `state` is accepted
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `state` is not @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
  */
 __STATIC_FORCEINLINE driver_status_t Codec_USART_ValidateState(const driver_status_t state)
 {
@@ -100,8 +100,8 @@ __STATIC_FORCEINLINE driver_status_t Codec_USART_ValidateState(const driver_stat
  * @param[in] regImage Caller-owned register image
  * @param[in] bitMask Register-positioned bit mask
  * @returns @ref driver_status_t "Decoded state"
- * @retval - @ref `DRIVER_STATUS_OFF`: @p bitMask is clear in @p regImage
- * @retval - @ref `DRIVER_STATUS_ON`: @p bitMask is set in @p regImage
+ * @retval - @ref `DRIVER_STATUS_OFF`: @p `bitMask` is clear in @p `regImage`
+ * @retval - @ref `DRIVER_STATUS_ON`: @p `bitMask` is set in @p `regImage`
  */
 __STATIC_FORCEINLINE driver_status_t Codec_USART_ExtractBitStateFromImage(const reg regImage, const reg bitMask)
 {
@@ -122,9 +122,9 @@ __STATIC_FORCEINLINE driver_status_t Codec_USART_ExtractBitStateFromImage(const 
  * @param[in] bitMask Register-positioned bit mask
  * @param[in] state Requested ON/OFF state
  * @returns @ref driver_status_t "Staging status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p bitMask was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not an accepted state
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `bitMask` was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pRegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `state` is not an accepted state
  */
 __STATIC_FORCEINLINE driver_status_t Codec_USART_StageBitStateInImage
 (
@@ -205,6 +205,7 @@ driver_status_t Codec_USART_StageHardwareEnableState
 	const usart_hardware_enable_t	hardware
 )
 {
+	// Validate Input
 	if ((pCr1RegImage == NULL) || (pCr3RegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -255,8 +256,11 @@ driver_status_t Codec_USART_StageHardwareEnableState
 		updatedCr3RegImage &= ~USART_CR3_CTSE;
 	}
 
+	//! Update the caller-owned register images with the staged values.
 	*pCr1RegImage = updatedCr1RegImage;
 	*pCr3RegImage = updatedCr3RegImage;
+
+	// Return Status
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -271,6 +275,7 @@ driver_status_t Codec_USART_ExtractDataConfig
 	usart_frame_format_t* const	pFrameFormat
 )
 {
+	// Validate Input
 	if (pFrameFormat == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;

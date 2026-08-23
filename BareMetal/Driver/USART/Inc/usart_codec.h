@@ -67,7 +67,7 @@ extern "C" {
  *   @ref `USART_HARDWARE_ENABLE_RTS`, @ref `USART_HARDWARE_ENABLE_CTS`
  * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Hardware-enable bitmask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pHardware is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pHardware` is `NULL`
  */
 driver_status_t Codec_USART_ExtractHardwareEnableState
 (
@@ -86,8 +86,8 @@ driver_status_t Codec_USART_ExtractHardwareEnableState
  *   @ref `USART_HARDWARE_ENABLE_RTS`, @ref `USART_HARDWARE_ENABLE_CTS`
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Hardware-enable bitmask was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage or @p pCr3RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p hardware selects an unsupported bit
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pCr1RegImage` or @p `pCr3RegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `hardware` selects an unsupported bit
  */
 driver_status_t Codec_USART_StageHardwareEnableState
 (
@@ -112,7 +112,7 @@ driver_status_t Codec_USART_StageHardwareEnableState
  *   @ref `USART_STOP_BIT_2`, or @ref `USART_STOP_BIT_1_5`
  * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Frame-format configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pFrameFormat is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pFrameFormat` is `NULL`
  */
 driver_status_t Codec_USART_ExtractDataConfig
 (
@@ -132,7 +132,7 @@ driver_status_t Codec_USART_ExtractDataConfig
  * - @ref usart_frame_format_t::stopBits : Any value accepted by @ref `USART_STOP_BITS_IS_VALID`
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Frame-format configuration was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage, @p pCr2RegImage, or @p pFrameFormat is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pCr1RegImage`, @p `pCr2RegImage`, or @p `pFrameFormat` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more frame-format fields cannot be encoded
  */
 driver_status_t Codec_USART_StageDataConfig
@@ -164,8 +164,8 @@ driver_status_t Codec_USART_ExtractOperationState(const reg cr1RegImage);
  * - @ref `DRIVER_STATUS_ON` : Set `CR1.UE`
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Operation state was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p operationState is not an accepted state
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pCr1RegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `operationState` is not an accepted state
  */
 driver_status_t Codec_USART_StageOperationState
 (
@@ -186,8 +186,8 @@ driver_status_t Codec_USART_StageOperationState
  * - Any value in @ref `USART_BAUD_RATE_9600` through @ref `USART_BAUD_RATE_921600`
  * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Baud-rate preset was resolved
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBaudRate is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p busFrequency is zero or @p brrRegImage divides to zero
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pBaudRate` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `busFrequency` is zero or @p `brrRegImage` divides to zero
  * @note The resolved preset is the closest supported rate to the raw
  * divider; `BRR` quantizes to 1/16th-bit-period steps, so this is not
  * guaranteed to round-trip exactly against a prior @ref Codec_USART_StageBaudRate call.
@@ -209,8 +209,8 @@ driver_status_t Codec_USART_ExtractBaudRate
  * - Any value in @ref `USART_BAUD_RATE_9600` through @ref `USART_BAUD_RATE_921600`
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `BRR` divider was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBrrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p baudRate is not a supported preset, or @p busFrequency is zero
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pBrrRegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `baudRate` is not a supported preset, or @p `busFrequency` is zero
  * @see RM0008 Section 27.3.4 Fractional baud rate generation
  */
 driver_status_t Codec_USART_StageBaudRate
@@ -233,7 +233,7 @@ driver_status_t Codec_USART_StageBaudRate
  * - Any OR-combination of @ref `USART_IRQ_SOURCE_IDLE` through @ref `USART_IRQ_SOURCE_ERROR`
  * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Interrupt-request source bitmask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSources is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pSources` is `NULL`
  */
 driver_status_t Codec_USART_ExtractIRQSources
 (
@@ -255,8 +255,8 @@ driver_status_t Codec_USART_ExtractIRQSources
  * - @ref `DRIVER_STATUS_ON` : Set every selected source's enable bit
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Interrupt-request sources were staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage or @p pCr3RegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p sources selects an unsupported bit, or @p sourceState is not an accepted state
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pCr1RegImage` or @p `pCr3RegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `sources` selects an unsupported bit, or @p `sourceState` is not an accepted state
  */
 driver_status_t Codec_USART_StageIRQSources
 (
@@ -278,7 +278,7 @@ driver_status_t Codec_USART_StageIRQSources
  * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
  * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Event-flag bitmask was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pEvents is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pEvents` is `NULL`
  * @note `USARTx_SR`'s status bits are positioned identically to their
  * matching @ref usart_event_flag_t bits, so this is a direct masked copy.
  */
@@ -296,9 +296,9 @@ driver_status_t Codec_USART_ExtractIRQEvents
  * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
  * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Write-0-to-clear image was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSrRegImage is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p events selects an unsupported bit
- * @note This API only clears `TC`/`CTS`; every other flag in @p events is
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pSrRegImage` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `events` selects an unsupported bit
+ * @note This API only clears `TC`/`CTS`; every other flag in @p `events` is
  * ignored here because `PE/FE/NE/ORE/IDLE/RXNE` require a live read-`SR`-
  * then-read-`DR` hardware sequence, and `TXE` is never acknowledged. The
  * driver layer owns performing that sequence.

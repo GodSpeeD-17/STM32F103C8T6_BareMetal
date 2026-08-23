@@ -48,7 +48,7 @@ removed as part of this migration.
 | `Inc/usart_defines.h` | Defines/Validation | Public USART selector macros and pure validation/policy macros |
 | `Inc/usart_ll.h` | Low-Level | Dumb single point for named USART register reads/writes |
 | `Inc/usart_codec.h`, `Src/usart_codec.c` | Codec | Selector encoding/decoding, BRR divider math, staged register-image mutation |
-| `Inc/usart_config.h`, `Src/usart_config.c` | Config | Instance-independent `usart_config_t` structure-of-structures |
+| `Inc/usart_config.h` | Config | Instance-independent `usart_config_t` structure-of-structures |
 | `Inc/usart.h`, `Src/usart.c` | Driver | Public USART API, validation, clock-state verification, sequencing, batching, status returns |
 
 ## Goals
@@ -72,8 +72,8 @@ removed as part of this migration.
 ## Implementation Rules
 
 - Keep raw register definitions in `BareMetal/Core/Inc/stm32f1xx_usart.h`.
-- Keep USART scalar aliases and pin-mapping structures in
-  `usart_data_types.h`.
+- Keep USART scalar aliases in `usart_data_types.h`. No pin-mapping
+  structures — GPIO/AFIO is entirely application-owned.
 - Keep public selector macros and pure validation macros together in
   `usart_defines.h`.
 - Keep direct hardware reads/writes in the low-level layer. Low-level APIs
@@ -102,7 +102,7 @@ removed as part of this migration.
 | Defines/Validation | `Inc/usart_defines.h` | Public USART selector macros, instance validation for `USART1`/`USART2`/`USART3`, pure validation/policy macros | Hardware reads/writes, clock sequencing, raw register field placement |
 | Low-Level | `Inc/usart_ll.h` | Named static inline register read/write accessors, `LL_USART_*` API names | Public selector translation, field mapping, clock policy, board behavior |
 | Codec | `Inc/usart_codec.h`, `Src/usart_codec.c` | Encoding/decoding selectors, BRR divider math, CR1/CR2/CR3 field placement, SR flag interpretation, caller-owned register-image staging/extraction | Hardware reads/writes, clock sequencing, public API policy |
-| Config | `Inc/usart_config.h`, `Src/usart_config.c` | Instance-independent `usart_config_t` root structure | Register access, RCC/NVIC access, driver orchestration, GPIO/pin data |
+| Config | `Inc/usart_config.h` | Instance-independent `usart_config_t` root structure | Register access, RCC/NVIC access, driver orchestration, GPIO/pin data |
 | Driver | `Inc/usart.h`, `Src/usart.c` | Public APIs, argument validation, clock-state verification, IRQ source/event handling, status returns | Raw register map definitions, board-specific shortcuts, GPIO/AFIO configuration or clocking |
 | Board/Project | `Projects/*` | Application-owned USART peripheral clock gate, GPIO/AFIO pin configuration and clock gates, examples | USART internals, raw register assumptions |
 
