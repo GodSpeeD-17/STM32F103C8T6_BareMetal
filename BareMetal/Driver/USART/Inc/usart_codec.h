@@ -290,7 +290,11 @@ driver_status_t Codec_USART_ExtractIRQEvents
 
 /**
  * @brief Stages a write-0-to-clear image for the write-0-to-clear USART event flags
- * @param[in,out] pSrRegImage Caller-owned `SR` image to update in place
+ * @param[in,out] pSrRegImage Base image to stage the write-0-to-clear update into
+ * Expected values:
+ * - Non-`NULL`: Caller-owned base image; every bit outside `TC`/`CTS` is
+ *   either a hardware no-op to write or explicitly preserved, so this does
+ *   not need to be a fresh register read (see `@note` below)
  * @param[in] events Event-flag bitmask to acknowledge
  * Accepted values:
  * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
@@ -301,7 +305,14 @@ driver_status_t Codec_USART_ExtractIRQEvents
  * @note This API only clears `TC`/`CTS`; every other flag in @p `events` is
  * ignored here because `PE/FE/NE/ORE/IDLE/RXNE` require a live read-`SR`-
  * then-read-`DR` hardware sequence, and `TXE` is never acknowledged. The
- * driver layer owns performing that sequence.
+ * driver layer owns performing that sequence. Critically, the driver must
+ * NOT perform a second `SR` read to build @p `pSrRegImage`: a fresh read
+ * here could observe a newer event than the one already reported through
+ * `Codec_USART_ExtractIRQEvents()`, and the `DR` read that follows would
+ * then silently discard that unreported event. `USART_IRQ_EVENT_ALL` is
+ * the correct caller-supplied base: every bit it does not clear is either
+ * a pure-read hardware bit (write has no effect) or a `TC`/`CTS` bit this
+ * function is not asked to touch (written back as 1, i.e. left alone).
  */
 driver_status_t Codec_USART_StageIRQEventsClear
 (

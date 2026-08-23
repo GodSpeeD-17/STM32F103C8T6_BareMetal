@@ -65,8 +65,8 @@ extern "C" {
  * @brief Returns whether a pointer is a supported USART instance
  * @param[in] USARTx Candidate USART peripheral instance
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p USARTx is not a supported USART peripheral instance
- * @retval - `0x01U`: @p USARTx is a supported USART peripheral instance
+ * @retval - `0x00U`: @p `USARTx` is not a supported USART peripheral instance
+ * @retval - `0x01U`: @p `USARTx` is a supported USART peripheral instance
  * @def USART_INSTANCE_IS_VALID
  * @note The STM32F103C8T6 implements only `USART1`, `USART2`, and `USART3`.
  */
@@ -110,8 +110,8 @@ extern "C" {
  * @brief Returns whether a hardware-enable bitmask is a supported combination
  * @param[in] hardware Candidate hardware-enable bitmask
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p hardware selects at least one unsupported bit
- * @retval - `0x01U`: @p hardware selects only supported bits
+ * @retval - `0x00U`: @p `hardware` selects at least one unsupported bit
+ * @retval - `0x01U`: @p `hardware` selects only supported bits
  * @def USART_HARDWARE_ENABLE_IS_VALID
  */
 #define USART_HARDWARE_ENABLE_IS_VALID(hardware)		\
@@ -139,8 +139,8 @@ extern "C" {
  * @brief Returns whether a data-bit-count selector is supported
  * @param[in] dataBits Candidate data-bit-count selector
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p dataBits is not a supported selector
- * @retval - `0x01U`: @p dataBits is a supported selector
+ * @retval - `0x00U`: @p `dataBits` is not a supported selector
+ * @retval - `0x01U`: @p `dataBits` is a supported selector
  * @def USART_DATA_BITS_IS_VALID
  */
 #define USART_DATA_BITS_IS_VALID(dataBits)				\
@@ -157,8 +157,8 @@ extern "C" {
  * @brief Returns whether a parity selector is supported
  * @param[in] parity Candidate parity selector
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p parity is not a supported selector
- * @retval - `0x01U`: @p parity is a supported selector
+ * @retval - `0x00U`: @p `parity` is not a supported selector
+ * @retval - `0x01U`: @p `parity` is a supported selector
  * @def USART_PARITY_IS_VALID
  */
 #define USART_PARITY_IS_VALID(parity)					\
@@ -177,8 +177,8 @@ extern "C" {
  * @brief Returns whether a stop-bit-count selector is supported
  * @param[in] stopBits Candidate stop-bit-count selector
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p stopBits is not a supported selector
- * @retval - `0x01U`: @p stopBits is a supported selector
+ * @retval - `0x00U`: @p `stopBits` is not a supported selector
+ * @retval - `0x01U`: @p `stopBits` is a supported selector
  * @def USART_STOP_BITS_IS_VALID
  */
 #define USART_STOP_BITS_IS_VALID(stopBits)				\
@@ -222,8 +222,8 @@ extern "C" {
  * @brief Returns whether a baud-rate selector is supported
  * @param[in] baudRate Candidate baud-rate selector
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p baudRate is not a supported selector
- * @retval - `0x01U`: @p baudRate is a supported selector
+ * @retval - `0x00U`: @p `baudRate` is not a supported selector
+ * @retval - `0x01U`: @p `baudRate` is a supported selector
  * @def USART_BAUD_RATE_IS_VALID
  */
 #define USART_BAUD_RATE_IS_VALID(baudRate)				\
@@ -270,8 +270,8 @@ extern "C" {
  * @brief Returns whether an interrupt-request source bitmask is supported
  * @param[in] sources Candidate interrupt-request source bitmask
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p sources selects at least one unsupported bit
- * @retval - `0x01U`: @p sources selects only supported bits
+ * @retval - `0x00U`: @p `sources` selects at least one unsupported bit
+ * @retval - `0x01U`: @p `sources` selects only supported bits
  * @def USART_IRQ_SOURCE_IS_VALID
  */
 #define USART_IRQ_SOURCE_IS_VALID(sources)				\
@@ -301,13 +301,21 @@ extern "C" {
 #define USART_IRQ_EVENT_CTS						((usart_event_flag_t) 0x0200U)
 /** @brief All currently supported USART event flags @def USART_IRQ_EVENT_ALL */
 #define USART_IRQ_EVENT_ALL						((usart_event_flag_t) 0x03FFU)
+/**
+ * @brief Event flags cleared only by the read-`SR`-then-read-`DR` hardware sequence
+ * @def USART_IRQ_EVENT_READ_SEQUENCE
+ * @note `TC`/`CTS` clear via write-0-to-clear instead; `TXE` is never acknowledged.
+ */
+#define USART_IRQ_EVENT_READ_SEQUENCE				\
+	((usart_event_flag_t) (USART_IRQ_EVENT_PE | USART_IRQ_EVENT_FE | USART_IRQ_EVENT_NE | \
+	USART_IRQ_EVENT_ORE | USART_IRQ_EVENT_IDLE | USART_IRQ_EVENT_RXNE))
 
 /**
  * @brief Returns whether an event-flag bitmask is supported
  * @param[in] events Candidate event-flag bitmask
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p events selects at least one unsupported bit
- * @retval - `0x01U`: @p events selects only supported bits
+ * @retval - `0x00U`: @p `events` selects at least one unsupported bit
+ * @retval - `0x01U`: @p `events` selects only supported bits
  * @def USART_IRQ_EVENT_IS_VALID
  */
 #define USART_IRQ_EVENT_IS_VALID(events)				\

@@ -111,7 +111,7 @@ extern "C" {
  * @param[in] pRegister Pointer to a readable USART register image
  * Expected values:
  * - Non-`NULL`: Aligned pointer to one readable 32-bit USART register image
- * @returns Full 32-bit register image currently observed at @p pRegister.
+ * @returns Full 32-bit register image currently observed at @p `pRegister`.
  * @note Caller must pass a valid USART register pointer.
  */
 __STATIC_FORCEINLINE reg LL_USART_ReadRegister(const _IO* const pRegister)
@@ -170,7 +170,7 @@ __STATIC_FORCEINLINE reg LL_USART_ReadSR(const USART_TypeDef* const USARTx)
  * Accepted values:
  * - `0x00000000UL..0xFFFFFFFFUL`: Complete caller-staged `USARTx_SR` image
  * @note Caller owns the write-0-to-clear staging for `TC`/`CTS`; writing a
- * bit that is `1` in @p regImage has no clearing effect on those two flags.
+ * bit that is `1` in @p `regImage` has no clearing effect on those two flags.
  */
 __STATIC_FORCEINLINE void LL_USART_WriteSR(USART_TypeDef* const USARTx, const reg regImage)
 {

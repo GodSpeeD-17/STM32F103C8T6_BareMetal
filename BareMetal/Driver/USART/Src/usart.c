@@ -43,6 +43,13 @@
 #include "stm32f1xx_rcc.h"
 
 // ==================================================================================================== //
+//													Macros												//
+// ==================================================================================================== //
+
+/** @brief Timeout used while polling TXE/RXNE (~9ms @72MHz) @def USART_TRANSFER_TIMEOUT */
+#define USART_TRANSFER_TIMEOUT							((uint32_t) 20000UL)
+
+// ==================================================================================================== //
 //										Local Validation Helpers										//
 // ==================================================================================================== //
 
@@ -136,9 +143,13 @@ __STATIC_FORCEINLINE driver_status_t _USART_ValidateIRQEvents(const usart_event_
  * @param[out] pClockBus Destination for the decoded RCC bus selector
  * @returns @ref driver_status_t "Clock-bus decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pClockBus` was published
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `USARTx` or @p `pClockBus` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pClockBus` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` is unsupported
  * @note `USART1` hangs off APB2; `USART2`/`USART3` hang off APB1.
+ * @pre Every call site validates @p `USARTx` before reaching this helper
+ * (through `_USART_ValidateClockEnabled()` or an explicit instance check);
+ * an invalid @p `USARTx` still safely falls through to the `default` case
+ * below rather than being trusted blindly.
  */
 __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockBus(const USART_TypeDef* const USARTx, rcc_bus_t* const pClockBus)
 {
@@ -146,7 +157,6 @@ __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockBus(const USART_TypeDef* 
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 
 	//! Match by peripheral base address because instance macros are raw memory-mapped pointers.
 	switch ((uintptr_t) USARTx)
@@ -181,8 +191,12 @@ __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockBus(const USART_TypeDef* 
  * @param[out] pClockEnableMask Destination for the decoded clock-enable mask
  * @returns @ref driver_status_t "Clock-enable-mask decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pClockEnableMask` was published
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `USARTx` or @p `pClockEnableMask` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pClockEnableMask` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` is unsupported
+ * @pre Every call site validates @p `USARTx` before reaching this helper
+ * (through `_USART_ValidateClockEnabled()` or an explicit instance check);
+ * an invalid @p `USARTx` still safely falls through to the `default` case
+ * below rather than being trusted blindly.
  */
 __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockEnableMask(const USART_TypeDef* const USARTx, reg* const pClockEnableMask)
 {
@@ -190,7 +204,6 @@ __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockEnableMask(const USART_Ty
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 
 	//! Match by peripheral base address because instance macros are raw memory-mapped pointers.
 	switch ((uintptr_t) USARTx)
@@ -225,8 +238,12 @@ __STATIC_FORCEINLINE driver_status_t _USART_DecodeClockEnableMask(const USART_Ty
  * @param[out] pPeripheralResetMask Destination for the decoded reset mask
  * @returns @ref driver_status_t "Peripheral-reset-mask decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pPeripheralResetMask` was published
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `USARTx` or @p `pPeripheralResetMask` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pPeripheralResetMask` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` is unsupported
+ * @pre Every call site validates @p `USARTx` before reaching this helper
+ * (through `_USART_ValidateClockEnabled()` or an explicit instance check);
+ * an invalid @p `USARTx` still safely falls through to the `default` case
+ * below rather than being trusted blindly.
  */
 __STATIC_FORCEINLINE driver_status_t _USART_DecodePeripheralResetMask(const USART_TypeDef* const USARTx, reg* const pPeripheralResetMask)
 {
@@ -234,7 +251,6 @@ __STATIC_FORCEINLINE driver_status_t _USART_DecodePeripheralResetMask(const USAR
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 
 	//! Match by peripheral base address so deconfiguration cannot pulse an unrelated peripheral reset.
 	switch ((uintptr_t) USARTx)
@@ -280,6 +296,9 @@ __STATIC_FORCEINLINE driver_status_t _USART_ValidateClockEnabled(const USART_Typ
 	rcc_bus_t clockBus = RCC_APB1_BUS;
 	reg clockEnableMask = 0x00000000UL;
 	driver_status_t clockState = DRIVER_STATUS_ERROR;
+
+	//! Validate the instance exactly once; the decode calls below trust it and skip re-validating.
+	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 
 	//! Decode the peripheral's RCC bus and clock-enable mask, then query the RCC directly for the gate state.
 	ASSERT_DRIVER_STATUS(_USART_DecodeClockBus(USARTx, &clockBus));
@@ -473,6 +492,75 @@ driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* 
 }
 
 // ==================================================================================================== //
+// USART Data Transfer APIs
+// ==================================================================================================== //
+
+driver_status_t USART_ReceiveByte(const USART_TypeDef* const USARTx, uint8_t* const pByte)
+{
+	// Local Variables
+	usart_event_flag_t	pendingEvents = USART_IRQ_EVENT_NONE;
+	volatile uint32_t	timeout = USART_TRANSFER_TIMEOUT;
+
+	// Validate Input
+	if (pByte == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	//! Data transfer requires the same clock-gate precondition as every other register-touching API.
+	ASSERT_DRIVER_STATUS(_USART_ValidateClockEnabled(USARTx));
+
+	//! Bound the RXNE spin-wait: a silent peer would otherwise hang this call forever.
+	while (timeout > 0x00UL)
+	{
+		//! Extract Status Register Events
+		ASSERT_DRIVER_STATUS(Codec_USART_ExtractIRQEvents(LL_USART_ReadSR(USARTx), &pendingEvents));
+		//! Check for Receive-Data-Register-Not-Empty (RXNE) 
+		if ((pendingEvents & USART_IRQ_EVENT_RXNE) != USART_IRQ_EVENT_NONE)
+		{
+			//! Read the Data Register
+			*pByte = (uint8_t) LL_USART_ReadDR(USARTx);
+			//! Return Status
+			return DRIVER_STATUS_SUCCESS;
+		}
+		//! Decrement the bounded spin-wait counter
+		timeout--;
+	}
+
+	//! Return a timeout error if RXNE never became set within the bounded poll window
+	return DRIVER_STATUS_ERROR_TIMEOUT;
+}
+
+driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t byte)
+{
+	// Local Variables
+	usart_event_flag_t	pendingEvents = USART_IRQ_EVENT_NONE;
+	volatile uint32_t	timeout = USART_TRANSFER_TIMEOUT;
+
+	//! Data transfer requires the same clock-gate precondition as every other register-touching API.
+	ASSERT_DRIVER_STATUS(_USART_ValidateClockEnabled(USARTx));
+
+	//! Bound the TXE spin-wait so a wedged transmitter cannot hang this call forever.
+	while (timeout > 0x00UL)
+	{
+		//! Extract Status Register Events
+		ASSERT_DRIVER_STATUS(Codec_USART_ExtractIRQEvents(LL_USART_ReadSR(USARTx), &pendingEvents));
+		//! Check for Transmit-Data-Register-Empty (TXE)
+		if ((pendingEvents & USART_IRQ_EVENT_TXE) != USART_IRQ_EVENT_NONE)
+		{
+			//! Write the Data Register
+			LL_USART_WriteDR(USARTx, (reg) byte);
+			//! Return Status
+			return DRIVER_STATUS_SUCCESS;
+		}
+		//! Decrement the bounded spin-wait counter
+		timeout--;
+	}
+
+	//! Return a timeout error if TXE never became set within the bounded poll window
+	return DRIVER_STATUS_ERROR_TIMEOUT;
+}
+
+// ==================================================================================================== //
 // USART IRQ Source APIs
 // ==================================================================================================== //
 
@@ -532,34 +620,28 @@ driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_even
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	//! Decode SR flags independently from CR1/CR3 source state and NVIC delivery state.
-	ASSERT_DRIVER_STATUS(_USART_ValidateClockEnabled(USARTx));
+	//! ISR-path instance check only: clock-enabled state was already proven by USART_Config()/SetIRQSources() and cannot change while this interrupt source is still live.
+	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 	return Codec_USART_ExtractIRQEvents(LL_USART_ReadSR(USARTx), pEvents);
 }
 
 driver_status_t USART_AckIRQEvents(USART_TypeDef* const USARTx, const usart_event_flag_t events)
 {
 	// Local Variables
-	reg srRegImage = 0x00000000UL;
-	const usart_event_flag_t readSequenceEvents =
-	(
-		USART_IRQ_EVENT_PE | USART_IRQ_EVENT_FE | USART_IRQ_EVENT_NE |
-		USART_IRQ_EVENT_ORE | USART_IRQ_EVENT_IDLE | USART_IRQ_EVENT_RXNE
-	);
+	reg srRegImage = (reg) USART_IRQ_EVENT_ALL;
 
-	//! Validate the instance, event mask, and clock gate before touching SR/DR.
+	//! ISR-path instance check only: clock-enabled state was already proven by USART_Config()/SetIRQSources() and cannot change while this interrupt source is still live.
 	ASSERT_DRIVER_STATUS(_USART_ValidateInstance(USARTx));
 	ASSERT_DRIVER_STATUS(_USART_ValidateIRQEvents(events));
-	ASSERT_DRIVER_STATUS(_USART_ValidateClockEnabled(USARTx));
 
-	//! Read SR once; for PE/FE/NE/ORE/IDLE/RXNE this read is the first half of the hardware clear sequence.
-	srRegImage = LL_USART_ReadSR(USARTx);
+	//! Never re-read SR here: a second read could latch a newer event than the one the caller observed via USART_GetIRQEvents(), silently discarding it on the DR read below.
+	//! Starting from all-1s is a safe no-op for every bit except the TC/CTS bits the codec clears explicitly.
 	ASSERT_DRIVER_STATUS(Codec_USART_StageIRQEventsClear(&srRegImage, events));
 	//! Unconditional write: SR is write-0-to-clear for TC/CTS, so re-writing an unchanged image is harmless.
 	LL_USART_WriteSR(USARTx, srRegImage);
 
 	//! Complete the read-SR-then-read-DR sequence for the remaining flags; this discards the buffered DR value.
-	if ((events & readSequenceEvents) != 0x0000U)
+	if ((events & USART_IRQ_EVENT_READ_SEQUENCE) != USART_IRQ_EVENT_NONE)
 	{
 		(void) LL_USART_ReadDR(USARTx);
 	}

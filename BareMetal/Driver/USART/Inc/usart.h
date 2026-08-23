@@ -140,6 +140,59 @@ driver_status_t USART_DeConfig(USART_TypeDef* const USARTx);
 driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* const pConfig);
 
 // ==================================================================================================== //
+// USART Data Transfer APIs
+// ==================================================================================================== //
+
+/**
+ * @brief Blocks until one byte has been received
+ * @details
+ * Spins on the `SR.RXNE` event flag, bounded by `USART_TRANSFER_TIMEOUT`
+ * poll iterations, before reading `DR`. This is a blocking, poll-driven
+ * transfer; it never touches `CR1`/`CR3` interrupt-enable bits.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[out] pByte Destination for the received byte
+ * Expected values:
+ * - Non-`NULL`: Storage for one received byte
+ * @returns @ref driver_status_t "Blocking receive status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pByte` was published
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pByte` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: No byte arrived within the bounded poll window
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * and completed `USART_Config()` with `USART_HARDWARE_ENABLE_RX` before
+ * calling this API.
+ */
+driver_status_t USART_ReceiveByte(const USART_TypeDef* const USARTx, uint8_t* const pByte);
+
+/**
+ * @brief Blocks until one byte has been transmitted
+ * @details
+ * Spins on the `SR.TXE` event flag, bounded by `USART_TRANSFER_TIMEOUT`
+ * poll iterations, before writing `DR`. This is a blocking, poll-driven
+ * transfer; it never touches `CR1`/`CR3` interrupt-enable bits.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] byte Byte to transmit
+ * @returns @ref driver_status_t "Blocking transmit status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `byte` was written to `DR`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: `DR` did not become free within the bounded poll window
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * and completed `USART_Config()` with `USART_HARDWARE_ENABLE_TX` before
+ * calling this API.
+ */
+driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t byte);
+
+// ==================================================================================================== //
 // USART IRQ Source APIs
 // ==================================================================================================== //
 
@@ -211,9 +264,12 @@ driver_status_t USART_SetIRQSources
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p `pEvents` was published successfully
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pEvents` was a null pointer
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @note Reading `SR` through this API participates in the hardware
  * error-flag clearing sequence documented for `USART_AckIRQEvents()`.
+ * @note This is an IRQ-path API: it does not re-verify the USART clock
+ * gate on every call. That precondition was already proven by the
+ * `USART_Config()`/`USART_SetIRQSources()` calls that had to succeed
+ * before this interrupt source could ever fire.
  */
 driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_event_flag_t* const pEvents);
 
@@ -224,7 +280,12 @@ driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_even
  * bit rather than one uniform register write: `TC`/`CTS` are write-0-to-clear;
  * `PE`/`FE`/`NE`/`ORE`/`IDLE`/`RXNE` clear only through the hardware-mandated
  * sequence of reading `SR` followed by reading `DR`. `TXE` is read-only
- * status and is never acknowledged.
+ * status and is never acknowledged. This API does not itself re-read `SR`:
+ * the `SR` half of that sequence is the read already performed by the
+ * preceding `USART_GetIRQEvents()` call, and @p `events` is expected to be
+ * (a subset of) what that call reported. Re-reading `SR` here would risk
+ * observing a newer event than the one being acknowledged and silently
+ * discarding it on the `DR` read below.
  * @param[in] USARTx Target USART peripheral instance
  * Accepted values:
  * - @ref `USART1`
@@ -236,9 +297,12 @@ driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_even
  * @returns @ref driver_status_t "USART event-flag acknowledgement status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected event flag(s) were acknowledged
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` or @p `events` was invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  * @warning Acknowledging `PE`/`FE`/`NE`/`ORE`/`IDLE`/`RXNE` reads and discards
  * the buffered `DR` value as part of the hardware clearing sequence.
+ * @note This is an IRQ-path API: it does not re-verify the USART clock
+ * gate on every call. That precondition was already proven by the
+ * `USART_Config()`/`USART_SetIRQSources()` calls that had to succeed
+ * before this interrupt source could ever fire.
  */
 driver_status_t USART_AckIRQEvents(USART_TypeDef* const USARTx, const usart_event_flag_t events);
 
