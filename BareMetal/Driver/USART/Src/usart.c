@@ -41,6 +41,8 @@
 #include "usart_ll.h"
 #include "rcc.h"
 #include "stm32f1xx_rcc.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 // ==================================================================================================== //
 //													Macros												//
@@ -48,6 +50,8 @@
 
 /** @brief Timeout used while polling TXE/RXNE (~9ms @72MHz) @def USART_TRANSFER_TIMEOUT */
 #define USART_TRANSFER_TIMEOUT							((uint32_t) 20000UL)
+/** @brief Stack buffer capacity for one USART_printf() formatting pass @def USART_PRINTF_BUFFER_SIZE */
+#define USART_PRINTF_BUFFER_SIZE						((size_t) 128UL)
 
 // ==================================================================================================== //
 //										Local Validation Helpers										//
@@ -558,6 +562,41 @@ driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t by
 
 	//! Return a timeout error if TXE never became set within the bounded poll window
 	return DRIVER_STATUS_ERROR_TIMEOUT;
+}
+
+driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFormat, ...)
+{
+	// Local Variables
+	char	buffer[USART_PRINTF_BUFFER_SIZE];
+	va_list	args;
+	int		length;
+
+	// Validate Input
+	if (pFormat == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! va_start/va_end bracket only the formatting call; USART_TransmitByte() below never touches args.
+	va_start(args, pFormat);
+	length = vsnprintf(buffer, sizeof(buffer), pFormat, args);
+	va_end(args);
+
+	if (length < 0)
+	{
+		return DRIVER_STATUS_ERROR_FAIL;
+	}
+	//! vsnprintf() reports the length it would have written; cap at the buffer's actual truncated content.
+	if ((size_t) length >= sizeof(buffer))
+	{
+		length = (int) sizeof(buffer) - 1;
+	}
+
+	for (int i = 0; i < length; i++)
+	{
+		ASSERT_DRIVER_STATUS(USART_TransmitByte(USARTx, (uint8_t) buffer[i]));
+	}
+	return DRIVER_STATUS_SUCCESS;
 }
 
 // ==================================================================================================== //

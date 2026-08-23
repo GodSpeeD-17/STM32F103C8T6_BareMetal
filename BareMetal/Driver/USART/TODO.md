@@ -76,15 +76,17 @@ step below.
 - [ ] Remove the `usart_t` enum, `USART_4`/`USART_5`, and the
   `__usartDriverRegisterMapping__[]` lookup table; migrate every internal
   call site to direct `USART1`/`USART2`/`USART3` pointer identity.
-- [ ] Migrate `Projects/USART/08_USART_Byte_Poll_TX`,
+- [x] Migrate `Projects/USART/08_USART_Byte_Poll_TX`,
   `Projects/USART/09_USART_Byte_Poll_RX`, and
   `Projects/USART/10_USART_printf` to the pointer-identity API. Each project
   explicitly sequences: RCC-enable the USART peripheral clock, RCC-enable
   the GPIO/AFIO clocks and configure the TX/RX pins itself (application
   owns this, matching Timer PWM), then call `USART_Config()`.
-- [ ] Fix `USART_printf()`'s `va_end(args)` call: it currently runs inside
-  the per-character loop instead of once after it, which is undefined
-  behavior because `va_arg()` is used again after `va_end()`.
+- [x] Implement `USART_printf()` on top of `USART_TransmitByte()`:
+  `vsnprintf()` into a bounded stack buffer, one `va_start()`/`va_end()` pair
+  per call, then a plain byte loop. This sidesteps the old per-character
+  `va_end(args)`-inside-the-loop bug entirely rather than patching it, since
+  there is no per-character `va_arg()` walk left to get wrong.
 - [ ] Finish the USART Doxygen pass for the implemented public APIs,
   matching the GPIO stack's completed pass.
 - [ ] Build both USART example projects and run a repo-wide Doxygen
@@ -93,8 +95,8 @@ step below.
 ## Verification Targets
 
 - [x] `Projects/USART/08_USART_Byte_Poll_TX`
-- [ ] `Projects/USART/09_USART_Byte_Poll_RX`
-- [ ] `Projects/USART/10_USART_printf`
+- [x] `Projects/USART/09_USART_Byte_Poll_RX`
+- [x] `Projects/USART/10_USART_printf`
 
 ## Notes
 

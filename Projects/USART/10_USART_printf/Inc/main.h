@@ -2,14 +2,14 @@
  * @file	main.h
  * @author	Shrey Shah
  * @brief	Declares the USART printf demo entry point
- * @version	v1.0
- * @date	22-08-2026
+ * @version	v2.0
+ * @date	23-08-2026
  *
  * @details
  * @section MAIN_H_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior
  * - Invoked by: Layer 4 `app_startup` after initialization succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 USART Driver through `main.c`
+ * - Uses: Layer 2 `app_delay` and Layer 1 USART/GPIO Drivers through `main.c`
  *
  * @section MAIN_H_RESPONSIBILITY Responsibility
  * This header declares the application entry point only. USART configuration
@@ -36,7 +36,7 @@ extern "C" {
 /**
  * @brief Executes the USART printf demo control loop
  * @details
- * Configures USART1 at its default baud rate and repeatedly prints an
+ * Configures USART1 TX on PA9 at 115200 baud and repeatedly prints an
  * incrementing counter via USART_printf(), paced by App_DelayMs().
  * @returns Does not return
  */
