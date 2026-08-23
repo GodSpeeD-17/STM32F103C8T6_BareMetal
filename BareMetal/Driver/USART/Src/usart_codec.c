@@ -27,7 +27,7 @@
 /** @brief Baud-rate preset count @def USART_CODEC_BAUD_RATE_PRESET_COUNT */
 #define USART_CODEC_BAUD_RATE_PRESET_COUNT			((uint8_t) 0x08U)
 /** @brief USART `SR` flags with write-0-to-clear behavior @def USART_CODEC_SR_W0C_FLAG_MASK */
-#define USART_CODEC_SR_W0C_FLAG_MASK				(USART_SR_TC_Msk | USART_SR_CTS_Msk)
+#define USART_CODEC_SR_W0C_FLAG_MASK				(USART_SR_TC | USART_SR_CTS)
 
 // ==================================================================================================== //
 //										Local Baud-Rate Preset Table									//
@@ -139,8 +139,8 @@ __STATIC_FORCEINLINE driver_status_t Codec_USART_StageBitStateInImage
 
 driver_status_t Codec_USART_ExtractHardwareEnableState
 (
-	const reg					cr1RegImage,
-	const reg					cr3RegImage,
+	const reg						cr1RegImage,
+	const reg						cr3RegImage,
 	usart_hardware_enable_t* const	pHardware
 )
 {
@@ -153,19 +153,19 @@ driver_status_t Codec_USART_ExtractHardwareEnableState
 	usart_hardware_enable_t hardware = USART_HARDWARE_ENABLE_NONE;
 
 	//! TX/RX live in CR1; RTS/CTS flow control lives in CR3 — combine into one abstract bitmask.
-	if ((cr1RegImage & USART_CR1_TE_Msk) != 0x00000000UL)
+	if ((cr1RegImage & USART_CR1_TE) != 0x00000000UL)
 	{
 		hardware |= USART_HARDWARE_ENABLE_TX;
 	}
-	if ((cr1RegImage & USART_CR1_RE_Msk) != 0x00000000UL)
+	if ((cr1RegImage & USART_CR1_RE) != 0x00000000UL)
 	{
 		hardware |= USART_HARDWARE_ENABLE_RX;
 	}
-	if ((cr3RegImage & USART_CR3_RTSE_Msk) != 0x00000000UL)
+	if ((cr3RegImage & USART_CR3_RTSE) != 0x00000000UL)
 	{
 		hardware |= USART_HARDWARE_ENABLE_RTS;
 	}
-	if ((cr3RegImage & USART_CR3_CTSE_Msk) != 0x00000000UL)
+	if ((cr3RegImage & USART_CR3_CTSE) != 0x00000000UL)
 	{
 		hardware |= USART_HARDWARE_ENABLE_CTS;
 	}
@@ -197,38 +197,38 @@ driver_status_t Codec_USART_StageHardwareEnableState
 	//! Stage each pin-enable bit independently; unrelated CR1/CR3 bits are preserved.
 	if ((hardware & USART_HARDWARE_ENABLE_TX) != 0x00U)
 	{
-		updatedCr1RegImage |= USART_CR1_TE_Msk;
+		updatedCr1RegImage |= USART_CR1_TE;
 	}
 	else
 	{
-		updatedCr1RegImage &= ~USART_CR1_TE_Msk;
+		updatedCr1RegImage &= ~USART_CR1_TE;
 	}
 
 	if ((hardware & USART_HARDWARE_ENABLE_RX) != 0x00U)
 	{
-		updatedCr1RegImage |= USART_CR1_RE_Msk;
+		updatedCr1RegImage |= USART_CR1_RE;
 	}
 	else
 	{
-		updatedCr1RegImage &= ~USART_CR1_RE_Msk;
+		updatedCr1RegImage &= ~USART_CR1_RE;
 	}
 
 	if ((hardware & USART_HARDWARE_ENABLE_RTS) != 0x00U)
 	{
-		updatedCr3RegImage |= USART_CR3_RTSE_Msk;
+		updatedCr3RegImage |= USART_CR3_RTSE;
 	}
 	else
 	{
-		updatedCr3RegImage &= ~USART_CR3_RTSE_Msk;
+		updatedCr3RegImage &= ~USART_CR3_RTSE;
 	}
 
 	if ((hardware & USART_HARDWARE_ENABLE_CTS) != 0x00U)
 	{
-		updatedCr3RegImage |= USART_CR3_CTSE_Msk;
+		updatedCr3RegImage |= USART_CR3_CTSE;
 	}
 	else
 	{
-		updatedCr3RegImage &= ~USART_CR3_CTSE_Msk;
+		updatedCr3RegImage &= ~USART_CR3_CTSE;
 	}
 
 	*pCr1RegImage = updatedCr1RegImage;
@@ -253,14 +253,14 @@ driver_status_t Codec_USART_ExtractDataConfig
 	}
 
 	//! `M` maps directly onto `usart_data_bits_t`; both are single-bit, exhaustively valid.
-	pLine->dataBits = (usart_data_bits_t) RegOps_ExtractFieldValue(cr1RegImage, USART_CR1_M_Msk, USART_CR1_M_Pos);
+	pLine->dataBits = (usart_data_bits_t) RegOps_ExtractFieldValue(cr1RegImage, USART_CR1_M, USART_CR1_M_Pos);
 
 	//! Parity is synthesized from PCE/PS: PCE clear means no parity regardless of PS.
-	if ((cr1RegImage & USART_CR1_PCE_Msk) == 0x00000000UL)
+	if ((cr1RegImage & USART_CR1_PCE) == 0x00000000UL)
 	{
 		pLine->parity = USART_PARITY_NONE;
 	}
-	else if ((cr1RegImage & USART_CR1_PS_Msk) == 0x00000000UL)
+	else if ((cr1RegImage & USART_CR1_PS) == 0x00000000UL)
 	{
 		pLine->parity = USART_PARITY_EVEN;
 	}
@@ -270,7 +270,7 @@ driver_status_t Codec_USART_ExtractDataConfig
 	}
 
 	//! `STOP[1:0]` maps directly onto `usart_stop_bits_t`'s raw-compatible encoding.
-	pLine->stopBits = (usart_stop_bits_t) RegOps_ExtractFieldValue(cr2RegImage, USART_CR2_STOP_Msk, USART_CR2_STOP_Pos);
+	pLine->stopBits = (usart_stop_bits_t) RegOps_ExtractFieldValue(cr2RegImage, USART_CR2_STOP, USART_CR2_STOP_Pos);
 
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -311,20 +311,20 @@ driver_status_t Codec_USART_StageDataConfig
 	//! Decompose the ordinal parity selector back into the PCE/PS bit pair.
 	if (pLine->parity != USART_PARITY_NONE)
 	{
-		updatedCr1RegImage |= USART_CR1_PCE_Msk;
+		updatedCr1RegImage |= USART_CR1_PCE;
 	}
 	else
 	{
-		updatedCr1RegImage &= ~USART_CR1_PCE_Msk;
+		updatedCr1RegImage &= ~USART_CR1_PCE;
 	}
 
 	if (pLine->parity == USART_PARITY_ODD)
 	{
-		updatedCr1RegImage |= USART_CR1_PS_Msk;
+		updatedCr1RegImage |= USART_CR1_PS;
 	}
 	else
 	{
-		updatedCr1RegImage &= ~USART_CR1_PS_Msk;
+		updatedCr1RegImage &= ~USART_CR1_PS;
 	}
 
 	updatedCr2RegImage = RegOps_StageFieldValue
@@ -344,7 +344,7 @@ driver_status_t Codec_USART_StageDataConfig
 driver_status_t Codec_USART_ExtractOperationState(const reg cr1RegImage)
 {
 	//! UE uses normal positive polarity: clear means disabled, set means enabled.
-	return Codec_USART_ExtractBitStateFromImage(cr1RegImage, USART_CR1_UE_Msk);
+	return Codec_USART_ExtractBitStateFromImage(cr1RegImage, USART_CR1_UE);
 }
 
 driver_status_t Codec_USART_StageOperationState
@@ -353,7 +353,7 @@ driver_status_t Codec_USART_StageOperationState
 	const driver_status_t	operationState
 )
 {
-	return Codec_USART_StageBitStateInImage(pCr1RegImage, USART_CR1_UE_Msk, operationState);
+	return Codec_USART_StageBitStateInImage(pCr1RegImage, USART_CR1_UE, operationState);
 }
 
 // ==================================================================================================== //
@@ -377,8 +377,8 @@ driver_status_t Codec_USART_ExtractBaudRate
 	}
 
 	// Local Variables
-	reg mantissa = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_MANTISSA_Msk, USART_BRR_DIV_MANTISSA_Pos);
-	reg fraction = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_FRACTION_Msk, USART_BRR_DIV_FRACTION_Pos);
+	reg mantissa = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_MANTISSA, USART_BRR_DIV_MANTISSA_Pos);
+	reg fraction = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_FRACTION, USART_BRR_DIV_FRACTION_Pos);
 	reg rawDivider = (mantissa << USART_BRR_DIV_FRACTION_Width) | fraction;
 
 	if (rawDivider == 0x00000000UL)
@@ -487,13 +487,13 @@ driver_status_t Codec_USART_ExtractIRQSources
 	usart_irq_source_t sources = USART_IRQ_SOURCE_NONE;
 
 	//! Sources span CR1 (local status interrupts) and CR3 (CTS/error interrupts).
-	if ((cr1RegImage & USART_CR1_IDLEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_IDLE; }
-	if ((cr1RegImage & USART_CR1_RXNEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_RXNE; }
-	if ((cr1RegImage & USART_CR1_TCIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TC; }
-	if ((cr1RegImage & USART_CR1_TXEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TXE; }
-	if ((cr1RegImage & USART_CR1_PEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_PE; }
-	if ((cr3RegImage & USART_CR3_CTSIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_CTS; }
-	if ((cr3RegImage & USART_CR3_EIE_Msk) != 0x00000000UL)		{ sources |= USART_IRQ_SOURCE_ERROR; }
+	if ((cr1RegImage & USART_CR1_IDLEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_IDLE; }
+	if ((cr1RegImage & USART_CR1_RXNEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_RXNE; }
+	if ((cr1RegImage & USART_CR1_TCIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TC; }
+	if ((cr1RegImage & USART_CR1_TXEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TXE; }
+	if ((cr1RegImage & USART_CR1_PEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_PE; }
+	if ((cr3RegImage & USART_CR3_CTSIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_CTS; }
+	if ((cr3RegImage & USART_CR3_EIE) != 0x00000000UL)		{ sources |= USART_IRQ_SOURCE_ERROR; }
 
 	*pSources = sources;
 	return DRIVER_STATUS_SUCCESS;
@@ -536,11 +536,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr1RegImage |= USART_CR1_IDLEIE_Msk;
+			updatedCr1RegImage |= USART_CR1_IDLEIE;
 		}
 		else
 		{
-			updatedCr1RegImage &= ~USART_CR1_IDLEIE_Msk;
+			updatedCr1RegImage &= ~USART_CR1_IDLEIE;
 		}
 	}
 
@@ -548,11 +548,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr1RegImage |= USART_CR1_RXNEIE_Msk;
+			updatedCr1RegImage |= USART_CR1_RXNEIE;
 		}
 		else
 		{
-			updatedCr1RegImage &= ~USART_CR1_RXNEIE_Msk;
+			updatedCr1RegImage &= ~USART_CR1_RXNEIE;
 		}
 	}
 
@@ -560,11 +560,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr1RegImage |= USART_CR1_TCIE_Msk;
+			updatedCr1RegImage |= USART_CR1_TCIE;
 		}
 		else
 		{
-			updatedCr1RegImage &= ~USART_CR1_TCIE_Msk;
+			updatedCr1RegImage &= ~USART_CR1_TCIE;
 		}
 	}
 
@@ -572,11 +572,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr1RegImage |= USART_CR1_TXEIE_Msk;
+			updatedCr1RegImage |= USART_CR1_TXEIE;
 		}
 		else
 		{
-			updatedCr1RegImage &= ~USART_CR1_TXEIE_Msk;
+			updatedCr1RegImage &= ~USART_CR1_TXEIE;
 		}
 	}
 
@@ -584,11 +584,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr1RegImage |= USART_CR1_PEIE_Msk;
+			updatedCr1RegImage |= USART_CR1_PEIE;
 		}
 		else
 		{
-			updatedCr1RegImage &= ~USART_CR1_PEIE_Msk;
+			updatedCr1RegImage &= ~USART_CR1_PEIE;
 		}
 	}
 
@@ -596,11 +596,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr3RegImage |= USART_CR3_CTSIE_Msk;
+			updatedCr3RegImage |= USART_CR3_CTSIE;
 		}
 		else
 		{
-			updatedCr3RegImage &= ~USART_CR3_CTSIE_Msk;
+			updatedCr3RegImage &= ~USART_CR3_CTSIE;
 		}
 	}
 
@@ -608,11 +608,11 @@ driver_status_t Codec_USART_StageIRQSources
 	{
 		if (setBits != 0x00U)
 		{
-			updatedCr3RegImage |= USART_CR3_EIE_Msk;
+			updatedCr3RegImage |= USART_CR3_EIE;
 		}
 		else
 		{
-			updatedCr3RegImage &= ~USART_CR3_EIE_Msk;
+			updatedCr3RegImage &= ~USART_CR3_EIE;
 		}
 	}
 
