@@ -294,7 +294,15 @@ The current implementation centralizes that precondition in the private
 This keeps call-site behavior explicit:
 
 ```c
-ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(RCC_APB1ENR_TIM2EN, DRIVER_STATUS_ON));
+ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB1_BUS,
+		RCC_APB1ENR_TIM2EN,
+		DRIVER_STATUS_ON
+	)
+);
 ASSERT_DRIVER_STATUS(TIM_SetPrescaler(TIM2, prescaler));
 ```
 

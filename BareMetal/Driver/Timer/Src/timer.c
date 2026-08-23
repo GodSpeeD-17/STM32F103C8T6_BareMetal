@@ -44,6 +44,7 @@
 #include "timer_codec.h"
 #include "timer_ll.h"
 #include "rcc.h"
+#include "stm32f1xx_rcc.h"
 
 // ==================================================================================================== //
 //										Local Driver Configuration										//
@@ -505,7 +506,7 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateClockEnabled(TIM_TypeDef* cons
 	ASSERT_DRIVER_STATUS(_TIM_DecodeAPB1ClockEnableMask(TIMx, &clockEnableMask));
 
 	//! Read the RCC APB1 clock-enable bit for the requested Timer
-	clockState = RCC_GetAPB1ClockState(clockEnableMask);
+	clockState = RCC_GetPeripheralClockState(RCC_APB1_BUS, clockEnableMask);
 	if (clockState != DRIVER_STATUS_ERROR_INVALID_ARG)
 	{
 		if (clockState == DRIVER_STATUS_ON)
@@ -1120,7 +1121,7 @@ driver_status_t TIM_DeConfig(TIM_TypeDef* const TIMx)
 	ASSERT_DRIVER_STATUS(_TIM_DecodeAPB1PeripheralResetMask(TIMx, &peripheralResetMask));
 
 	//! Reset only Timer-owned peripheral state; RCC clock gating and NVIC delivery remain unchanged.
-	return RCC_APB1_ResetPulse(peripheralResetMask);
+	return RCC_PulsePeripheralReset(RCC_APB1_BUS, peripheralResetMask);
 }
 
 driver_status_t TIM_Config(TIM_TypeDef* const TIMx, const tim_config_t* const pConfig)

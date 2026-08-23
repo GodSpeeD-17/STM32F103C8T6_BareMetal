@@ -67,7 +67,7 @@ extern "C" {
  * @brief APB2 clock-enable mask owned by the on-board LED GPIO port
  * @def GPIO_OB_LED_CLOCK_ENABLE_MASK
  * @details
- * The application must enable this clock gate through @ref `RCC_SetAPB2ClockState`
+ * The application must enable this clock gate through @ref `RCC_SetPeripheralClockState`
  * before calling @ref `OB_LED_Init`; the BSP and GPIO drivers only verify it.
  */
 #define GPIO_OB_LED_CLOCK_ENABLE_MASK			(RCC_APB2ENR_IOPCEN)
@@ -95,7 +95,7 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `GPIO_OB_LED_CLOCK_ENABLE_MASK` is disabled, or the
  * internal GPIO staged-image update failed.
  * @pre The application enabled @ref `GPIO_OB_LED_CLOCK_ENABLE_MASK` through
- * @ref `RCC_SetAPB2ClockState` before calling this API.
+ * @ref `RCC_SetPeripheralClockState` before calling this API.
  * @details
  * This API configures @ref `GPIO_OB_LED_PORT` / @ref `GPIO_OB_LED_PIN` through
  * @ref `GPIO_LED_Init`, which applies @ref `GPIO_PIN_MODE_OUTPUT_2MHZ` and

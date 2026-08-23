@@ -2,14 +2,14 @@
  * @file	rcc_codec.h
  * @author	Shrey Shah
  * @brief	Declares pure RCC selector and field transformations
- * @version	v2.0
+ * @version	v2.1
  * @date	23-08-2026
  *
  * @details
  * @section RCC_CODEC_H_HIERARCHY Hierarchy
  * - Position: Layer 2 RCC pure transformation layer
  * - Used by: Layer 3 RCC Driver implementation
- * - Uses: Configuration selectors and Core-owned raw RCC field definitions
+ * - Uses: RCC selector definitions and Core-owned raw RCC field definitions
  *
  * @section RCC_CODEC_H_RESPONSIBILITY Responsibility
  * Codec APIs encode configuration selectors into raw STM32F1 fields, decode
@@ -29,7 +29,7 @@
 // ==================================================================================================== //
 // Includes
 // ==================================================================================================== //
-#include "rcc_config.h"
+#include "rcc_defines.h"
 #include "stm32f1xx_rcc.h"
 
 // --- C++ Compatibility ---

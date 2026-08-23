@@ -253,8 +253,8 @@ Application intent
 Public operations and observations                       rcc.h
       |                    |                    |
       v                    v                    v
-Configuration input   Query constants       Shared/output types
-rcc_config.h          rcc_defines.h         rcc_data_types.h
+Configuration input   Public constants      Shared/output types
+rcc_config.h -------> rcc_defines.h ------> rcc_data_types.h
       |                    |                    |
       +--------------------+--------------------+
                            |
@@ -282,8 +282,8 @@ stm32f1xx_data_types.h
 | Core types (`stm32f1xx_data_types.h`) | Repository-wide integer, register-image, physical-frequency, and Driver-status vocabulary | RCC-specific selectors, register fields, or policy |
 | RCC data types (`rcc_data_types.h`) | Scalar RCC selector types and the read-only `rcc_clock_frequencies_t` observation shared by public RCC interfaces | Selector values, writable configuration structures, raw fields, MMIO, sequencing |
 | Core register model (`stm32f1xx_rcc.h`) | `RCC_TypeDef` register union/`.BIT` layout, base address, raw `Pos`/`Msk`/selector field macros | Driver-facing selector vocabulary, validation, sequencing |
-| Configuration (`rcc_config.h`) | Every accepted configuration selector and every writable nested/root RCC descriptor | Query selectors, observations, raw register fields, MMIO, sequencing |
-| Defines (`rcc_defines.h`) | Non-configuration constants used by observational APIs, including bus-query selectors and the zero-frequency alias | Configuration selectors or structures, raw register fields, MMIO, sequencing |
+| Defines (`rcc_defines.h`) | Every public RCC selector, frequency-policy constant, and Driver-domain selector guard | Configuration structures, raw register fields, MMIO, sequencing |
+| Configuration (`rcc_config.h`) | Every writable nested/root RCC descriptor | Selector definitions, observations, raw register fields, MMIO, sequencing |
 | LL (`rcc_ll.h`/`rcc_ll.c`) | One generic pointer-based read/write primitive pair; named full-register `CR`/`CFGR`/`AHBENR`/`APB2ENR`/`APB1ENR`/`APB2RSTR`/`APB1RSTR` accessors built on it; single-field set/get wrappers; raw field-legality predicates | Selector-to-field translation, sequencing/timeout policy, derived-frequency math |
 | Codec (`rcc_codec.h`/`rcc_codec.c`) | Pure selector⇄field encode/decode and prescaler→divider resolution over scalar values via small LUTs | Peripheral pointers, volatile I/O, hardware sequencing, public status policy |
 | Driver (`rcc.h`/`rcc.c`) | Public validation, clock-tree sequencing (enable→ready→switch→confirm), root `RCC_Config()`/`RCC_ConfigClockTree()`/`RCC_ConfigFlash()` orchestration, derived-frequency cache, clock-gate Get/Set, reset-pulse | Public exposure of Codec, LL, raw register fields, or NVIC/GPIO/AFIO concerns |
@@ -292,11 +292,11 @@ stm32f1xx_data_types.h
 The `rcc_data_types.h` vocabulary layer prevents RCC-specific aliases from
 leaking into the repository-wide Core type gateway. It also owns the
 read-only frequency snapshot because that structure reports Driver state; it
-does not request a configuration. `rcc_config.h` separately builds all
-accepted configuration values and writable descriptors on those aliases.
-Codec consumes that configuration vocabulary directly without including the
-public `rcc.h` Driver header. `rcc_defines.h` remains intentionally smaller:
-it owns only selectors and constants used by observational APIs.
+does not request a configuration. `rcc_defines.h` builds every accepted
+symbolic value and pure Driver-domain selector guard on those aliases.
+`rcc_config.h` includes that vocabulary and owns only writable descriptors.
+Codec consumes `rcc_defines.h` directly without depending on either the
+configuration-structure layer or the public `rcc.h` Driver header.
 
 `rcc.h` includes these three public vocabulary headers, but it does not
 include `rcc_codec.h`, `rcc_ll.h`, or a Core RCC register header. The gate and
@@ -394,7 +394,7 @@ access width and ordering identical across all seven registers LL exposes.
 
 ### Driver-facing selector vocabulary and Codec translation
 
-`rcc_config.h` defines every configuration selector the Driver and Codec share as a plain
+`rcc_defines.h` defines every configuration selector the Driver and Codec share as a plain
 value on an RCC-owned scalar typedef — for example `RCC_SYS_CLK_HSI`,
 `RCC_PLL_MUL_9`, and `RCC_APB1_DIV_2` are all `uint8_t`-backed values
 (`rcc_system_clock_t`, `rcc_pll_mul_t`, `rcc_bus_prescaler_t`). These
@@ -444,9 +444,9 @@ write) and decode (field, after an LL read → Driver) directions.
 | Observe bus prescalers | `CFGR.HPRE/PPRE1/PPRE2` | `LL_RCC_GetAHBPrescaler/GetAPB1Prescaler/GetAPB2Prescaler()` | `Codec_RCC_DecodeAHBPrescaler/DecodeAPB1Prescaler/DecodeAPB2Prescaler()` | `RCC_GetBusPrescaler(bus)` |
 | Program component prescalers | `CFGR.ADCPRE/USBPRE` | `LL_RCC_SetADCPrescaler/SetUSBPrescaler()` | `Codec_RCC_EncodeADCPrescaler/EncodeUSBPrescaler()` | `RCC_ConfigComponentPrescalers()` |
 | Observe/resolve derived frequencies | `CFGR` (all prescaler fields) | Get* accessors above | `Codec_RCC_Get{AHB,APB,ADC}PrescalerDivider()` selector → numeric divider | `RCC_GetBusFrequency()`, `RCC_GetCoreClockFrequency()`, `RCC_GetClockFrequencies()` |
-| Enable/disable a peripheral clock gate | `AHBENR`/`APB2ENR`/`APB1ENR` | `LL_RCC_Enable*Clock/Disable*Clock(mask)` (read‑modify‑write `.REG`) | None; caller supplies the exact `RCC_*ENR_*EN` mask | `RCC_SetAHBClockState/SetAPB2ClockState/SetAPB1ClockState(mask, state)` |
-| Observe a peripheral clock gate | `AHBENR`/`APB2ENR`/`APB1ENR` | `LL_RCC_ReadAHBENR/ReadAPB2ENR/ReadAPB1ENR()` | None; Driver tests `(regImage & mask) == mask` | `RCC_GetAHBClockState/GetAPB2ClockState/GetAPB1ClockState(mask)` |
-| Force/release/pulse a peripheral reset | `APB2RSTR`/`APB1RSTR` | `LL_RCC_Force*Reset/Release*Reset/Pulse*Reset(mask)` | None; caller supplies the exact `RCC_*RSTR_*RST` mask | `RCC_APB2_ResetPulse()` / `RCC_APB1_ResetPulse()` |
+| Enable/disable a peripheral clock gate | `AHBENR`/`APB2ENR`/`APB1ENR` | `LL_RCC_Enable*Clock/Disable*Clock(mask)` (read‑modify‑write `.REG`) | None; Driver validates the bus capability and routes the caller's exact `RCC_*ENR_*EN` mask | `RCC_SetPeripheralClockState(bus, mask, state)` |
+| Observe a peripheral clock gate | `AHBENR`/`APB2ENR`/`APB1ENR` | `LL_RCC_ReadAHBENR/ReadAPB2ENR/ReadAPB1ENR()` | None; Driver selects one register and tests `(regImage & mask) == mask` | `RCC_GetPeripheralClockState(bus, mask)` |
+| Force/release/pulse a peripheral reset | `APB2RSTR`/`APB1RSTR` | `LL_RCC_Force*Reset/Release*Reset/Pulse*Reset(mask)` | None; Driver rejects AHB and routes the caller's exact `RCC_*RSTR_*RST` mask | `RCC_PulsePeripheralReset(bus, mask)` |
 | Apply Flash latency/prefetch | `FLASH_ACR` (Flash block, not RCC) | none (direct `REGOPS_MODIFY`/`REGOPS_SET`/`REGOPS_CLEAR` on `FLASH->ACR.REG`, bypassing `rcc_ll.h`) | None | `RCC_ConfigFlash()` |
 | Apply a complete clock‑tree change | `CR`, `CFGR` | every System Clock/Prescaler LL function above, in sequence | every Codec encode function above | `RCC_ConfigClockTree()` |
 | Apply Flash + clock tree together, correctly ordered | `FLASH_ACR`, `CR`, `CFGR` | (delegates to the two rows above) | (delegates to the rows above) | `RCC_Config()` |
@@ -574,10 +574,11 @@ cause a partial transaction.
 helper: `RCC_Load72MHzDefaultConfig()` populates the documented Blue Pill
 72 MHz preset (HSE → PLL ×9, AHB ÷1, APB1 ÷2, APB2 ÷1, ADC ÷6, USB ÷1.5,
 Flash latency 2 with prefetch enabled) and `RCC_Config72MHz()` delegates
-straight to `RCC_Config()`. It does not accept an arbitrary target frequency
-and does not duplicate `RCC_Config()`'s orchestration, matching the
-repository rule against general-purpose frequency-setter convenience
-functions.
+to `RCC_Config()` only after the preset loader reports success. The loader
+returns `DRIVER_STATUS_ERROR_NULL_PTR` instead of silently ignoring a missing
+destination. Neither helper accepts an arbitrary target frequency or
+duplicates `RCC_Config()`'s orchestration, matching the repository rule
+against general-purpose frequency-setter convenience functions.
 
 ### Derived-frequency computation and caching
 
@@ -608,6 +609,10 @@ is still all-zero — `RCC_FREQ_ZERO` doubles as "not yet populated" for
 `sysclk` specifically, since a real system can never legitimately run at
 0 Hz SYSCLK. `RCC_GetCoreClockFrequency()` and `RCC_GetBusFrequency()` are
 both thin readers of this same cache; they do not perform their own MMIO.
+The bus getter admits only the physical AHB, APB1, and APB2 domains. ADC and
+USB are component-derived clocks, so callers retrieve `adcclk` and `usbclk`
+from the coherent `RCC_GetClockFrequencies()` snapshot instead of pretending
+those components are physical buses.
 
 Every hertz-valued field in `rcc_clock_frequencies_t`, and every RCC
 frequency constant (`RCC_HSI_FREQ`, `RCC_SYSCLK_MAX_FREQ`, …), uses the
@@ -616,18 +621,22 @@ the repository-wide rule that all hertz-valued quantities share one type.
 
 ### Clock-gate and reset ownership boundary
 
-`RCC_SetAHBClockState()`/`RCC_SetAPB2ClockState()`/`RCC_SetAPB1ClockState()`
-and their Get conjugates are the *only* place a peripheral's clock gate may
-be enabled, disabled, or observed. Per the repository's clock-gate-ownership
-rule, other peripheral Drivers (Timer, GPIO, and so on) call these RCC
-functions — or query them to validate a precondition — but never expose a
-duplicate peripheral-prefixed clock API, and never mutate a gate from inside
-their own `Config()`/`DeConfig()`/operation-state APIs. `RCC_APB2_ResetPulse()`
-and `RCC_APB1_ResetPulse()` are the corresponding reset-pulse services that a
+`RCC_SetPeripheralClockState()` and its
+`RCC_GetPeripheralClockState()` conjugate are the *only* public operations
+through which a peripheral clock gate may be enabled, disabled, or observed.
+The caller supplies `RCC_AHB_BUS`, `RCC_APB1_BUS`, or `RCC_APB2_BUS` so the
+Driver can route one stable intent to the matching register-specific LL path.
+Other peripheral Drivers (Timer, GPIO, and so on) call these RCC functions —
+or query them to validate a precondition — but never expose a duplicate
+peripheral-prefixed clock API, and never mutate a gate from inside their own
+`Config()`/`DeConfig()`/operation-state APIs.
+
+`RCC_PulsePeripheralReset()` is the corresponding action service that a
 peripheral's `DeConfig()` may call when hardware-defined reset is the
-documented restoration mechanism, while leaving that peripheral's clock gate
-and NVIC delivery state untouched — the same lifecycle boundary the Timer
-stack documents for its own `DeConfig()`.
+documented restoration mechanism. It accepts APB1 or APB2, rejects AHB because
+STM32F1 RCC exposes no matching AHB peripheral-reset register, and leaves the
+peripheral's clock gate and NVIC delivery state untouched — the same lifecycle
+boundary the Timer stack documents for its own `DeConfig()`.
 
 The gate and reset functions are implemented in `rcc.c`, not inline in
 `rcc.h`. This costs one ordinary Driver call at the application boundary but

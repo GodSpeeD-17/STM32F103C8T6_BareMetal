@@ -38,7 +38,7 @@ static driver_status_t _USART_GPIO_EnableClock(const usart_pin_t* const pin){
 	if(GPIO_PIN_CONFIG_IS_ALTERNATE(pin->config) != 0x00U){
 		clockMask |= RCC_APB2ENR_AFIOEN;
 	}
-	return RCC_SetAPB2ClockState(clockMask, DRIVER_STATUS_ON);
+	return RCC_SetPeripheralClockState(RCC_APB2_BUS, clockMask, DRIVER_STATUS_ON);
 }
 
 /**

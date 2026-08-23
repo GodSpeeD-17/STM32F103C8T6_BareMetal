@@ -2,7 +2,7 @@
  * @file	rcc_data_types.h
  * @author	Shrey Shah
  * @brief	Defines shared data types owned by the RCC Driver stack
- * @version	v1.1
+ * @version	v1.2
  * @date	23-08-2026
  *
  * @details
@@ -44,8 +44,9 @@ extern "C" {
  * @ingroup RCC_03_Driver
  * @details
  * These aliases express RCC selector domains independently from their numeric
- * values. `rcc_config.h` supplies the accepted configuration constants and
- * writable descriptors, while `rcc.h` supplies public operations.
+ * values. `rcc_defines.h` supplies accepted symbolic values,
+ * `rcc_config.h` supplies writable descriptors, and `rcc.h` supplies public
+ * operations.
  * @{
  */
 
@@ -53,7 +54,7 @@ extern "C" {
 // RCC Driver Data Types
 // ==================================================================================================== //
 
-/** @brief RCC bus selector type @typedef rcc_bus_t */
+/** @brief RCC physical AHB, APB1, or APB2 bus selector type @typedef rcc_bus_t */
 typedef uint8_t									rcc_bus_t;
 /** @brief RCC bus-prescaler selector type @typedef rcc_bus_prescaler_t */
 typedef uint8_t									rcc_bus_prescaler_t;

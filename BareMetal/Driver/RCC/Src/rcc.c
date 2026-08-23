@@ -2,7 +2,7 @@
  * @file	rcc.c
  * @author	Shrey Shah
  * @brief	Implements RCC policy, sequencing, and derived clock state
- * @version	v4.0
+ * @version	v5.0
  * @date	23-08-2026
  *
  * @details
@@ -16,8 +16,9 @@
  * derived-frequency cache.
  *
  * @section RCC_C_BOUNDARY Dependency Boundary
- * Configuration vocabulary remains in `rcc_config.h`; raw field translation
- * remains in Codec; mechanical register access remains in LL.
+ * Public selector vocabulary remains in `rcc_defines.h`, configuration
+ * structures remain in `rcc_config.h`, raw field translation remains in
+ * Codec, and mechanical register access remains in LL.
  */
 
 // ==================================================================================================== //
@@ -883,18 +884,41 @@ static driver_status_t _RCC_ValidateClockConfigDependencies
 // RCC Driver Clock Gate and Reset APIs
 // ==================================================================================================== //
 
-driver_status_t RCC_GetAHBClockState(const reg clockMask)
+driver_status_t RCC_GetPeripheralClockState(const rcc_bus_t bus, const reg clockMask)
 {
 	reg regImage = 0x00000000UL;
 
-	//! Reject an empty mask before reading the AHB clock-gate register.
-	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
+	//! Reject an unsupported register bank or empty mask before any volatile read.
+	if ((RCC_IS_BUS_VALID(bus) == 0x00U) || (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	//! Compare one full register image against every requested AHB gate bit.
-	regImage = LL_RCC_ReadAHBENR();
+	//! Route the semantic bus selector to exactly one clock-enable register image.
+	switch (bus)
+	{
+		case RCC_AHB_BUS:
+		{
+			regImage = LL_RCC_ReadAHBENR();
+			break;
+		}
+		case RCC_APB1_BUS:
+		{
+			regImage = LL_RCC_ReadAPB1ENR();
+			break;
+		}
+		case RCC_APB2_BUS:
+		{
+			regImage = LL_RCC_ReadAPB2ENR();
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
+	}
+
+	//! Report ON only when every gate selected by the caller is enabled.
 	if ((regImage & clockMask) == clockMask)
 	{
 		return DRIVER_STATUS_ON;
@@ -905,111 +929,84 @@ driver_status_t RCC_GetAHBClockState(const reg clockMask)
 	}
 }
 
-driver_status_t RCC_SetAHBClockState(const reg clockMask, const driver_status_t clockState)
+driver_status_t RCC_SetPeripheralClockState
+(
+	const rcc_bus_t			bus,
+	const reg				clockMask,
+	const driver_status_t	clockState
+)
 {
-	//! Dispatch each admitted state to its conjugate LL clock-gate operation.
-	if (clockState == DRIVER_STATUS_ON)
-	{
-		return LL_RCC_EnableAHBClock(clockMask);
-	}
-	else if (clockState == DRIVER_STATUS_OFF)
-	{
-		return LL_RCC_DisableAHBClock(clockMask);
-	}
-	else
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-}
-
-driver_status_t RCC_GetAPB2ClockState(const reg clockMask)
-{
-	reg regImage = 0x00000000UL;
-
-	//! Reject an empty mask before reading the APB2 clock-gate register.
-	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
+	//! Validate the complete request before selecting a register-specific LL mutation.
+	if
+	(
+		(RCC_IS_BUS_VALID(bus) == 0x00U)						||
+		(LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)			||
+		((clockState != DRIVER_STATUS_OFF) && (clockState != DRIVER_STATUS_ON))
+	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	//! Compare one full register image against every requested APB2 gate bit.
-	regImage = LL_RCC_ReadAPB2ENR();
-	if ((regImage & clockMask) == clockMask)
+	//! Preserve register ownership in LL while collapsing repeated Driver intent.
+	switch (bus)
 	{
-		return DRIVER_STATUS_ON;
-	}
-	else
-	{
-		return DRIVER_STATUS_OFF;
+		case RCC_AHB_BUS:
+		{
+			if (clockState == DRIVER_STATUS_ON)
+			{
+				return LL_RCC_EnableAHBClock(clockMask);
+			}
+			else
+			{
+				return LL_RCC_DisableAHBClock(clockMask);
+			}
+		}
+		case RCC_APB1_BUS:
+		{
+			if (clockState == DRIVER_STATUS_ON)
+			{
+				return LL_RCC_EnableAPB1Clock(clockMask);
+			}
+			else
+			{
+				return LL_RCC_DisableAPB1Clock(clockMask);
+			}
+		}
+		case RCC_APB2_BUS:
+		{
+			if (clockState == DRIVER_STATUS_ON)
+			{
+				return LL_RCC_EnableAPB2Clock(clockMask);
+			}
+			else
+			{
+				return LL_RCC_DisableAPB2Clock(clockMask);
+			}
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
 	}
 }
 
-driver_status_t RCC_SetAPB2ClockState(const reg clockMask, const driver_status_t clockState)
+driver_status_t RCC_PulsePeripheralReset(const rcc_bus_t bus, const reg resetMask)
 {
-	//! Dispatch each admitted state to its conjugate LL clock-gate operation.
-	if (clockState == DRIVER_STATUS_ON)
-	{
-		return LL_RCC_EnableAPB2Clock(clockMask);
-	}
-	else if (clockState == DRIVER_STATUS_OFF)
-	{
-		return LL_RCC_DisableAPB2Clock(clockMask);
-	}
-	else
+	//! Reject AHB, unsupported selectors, and empty reset masks before the action transaction.
+	if ((RCC_IS_RESET_BUS_VALID(bus) == 0x00U) || (LL_RCC_IS_MASK_VALID(resetMask) == 0x00U))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-}
 
-driver_status_t RCC_GetAPB1ClockState(const reg clockMask)
-{
-	reg regImage = 0x00000000UL;
-
-	//! Reject an empty mask before reading the APB1 clock-gate register.
-	if (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)
+	//! Route the pulse to the only APB reset register selected by the validated bus.
+	if (bus == RCC_APB1_BUS)
 	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	//! Compare one full register image against every requested APB1 gate bit.
-	regImage = LL_RCC_ReadAPB1ENR();
-	if ((regImage & clockMask) == clockMask)
-	{
-		return DRIVER_STATUS_ON;
+		return LL_RCC_PulseAPB1Reset(resetMask);
 	}
 	else
 	{
-		return DRIVER_STATUS_OFF;
+		return LL_RCC_PulseAPB2Reset(resetMask);
 	}
-}
-
-driver_status_t RCC_SetAPB1ClockState(const reg clockMask, const driver_status_t clockState)
-{
-	//! Dispatch each admitted state to its conjugate LL clock-gate operation.
-	if (clockState == DRIVER_STATUS_ON)
-	{
-		return LL_RCC_EnableAPB1Clock(clockMask);
-	}
-	else if (clockState == DRIVER_STATUS_OFF)
-	{
-		return LL_RCC_DisableAPB1Clock(clockMask);
-	}
-	else
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-}
-
-driver_status_t RCC_APB2_ResetPulse(const reg resetMask)
-{
-	//! Delegate the complete APB2 pulse transaction to its single LL owner.
-	return LL_RCC_PulseAPB2Reset(resetMask);
-}
-
-driver_status_t RCC_APB1_ResetPulse(const reg resetMask)
-{
-	//! Delegate the complete APB1 pulse transaction to its single LL owner.
-	return LL_RCC_PulseAPB1Reset(resetMask);
 }
 
 // ==================================================================================================== //
@@ -1306,35 +1303,43 @@ driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig)
 	return DRIVER_STATUS_SUCCESS;
 }
 
-void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig)
+driver_status_t RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig)
 {
-	//! Preserve the caller object when no writable destination was supplied.
+	//! Reject a missing destination before attempting to publish the preset.
 	if (pRCCConfig == NULL)
 	{
-		return;
+		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Populate the Flash policy required before switching SYSCLK to 72 MHz.
 	pRCCConfig->flash.latency = RCC_FLASH_LATENCY_2;
 	pRCCConfig->flash.prefetch = RCC_FLASH_PREFETCH_ENABLE;
 
+	//! Select the external 8 MHz oscillator and PLL multiplication required for 72 MHz SYSCLK.
 	pRCCConfig->clock_tree.system.clk_src = RCC_SYS_CLK_PLL;
 	pRCCConfig->clock_tree.system.pll.source = RCC_PLL_SRC_HSE;
 	pRCCConfig->clock_tree.system.pll.source_prescaler = RCC_PLL_SRC_HSE_DIV_1;
 	pRCCConfig->clock_tree.system.pll.multiplication_factor = RCC_PLL_MUL_9;
 
+	//! Publish bus prescalers that keep every bus within its documented frequency limit.
 	pRCCConfig->clock_tree.bus.AHB = RCC_AHB_DIV_1;
 	pRCCConfig->clock_tree.bus.APB1 = RCC_APB1_DIV_2;
 	pRCCConfig->clock_tree.bus.APB2 = RCC_APB2_DIV_1;
 
+	//! Publish component prescalers for the supported 72 MHz clock-tree preset.
 	pRCCConfig->clock_tree.component.ADC = RCC_ADC_DIV_6;
 	pRCCConfig->clock_tree.component.USB = RCC_USB_DIV_1_5;
+
+	//! Confirm that every member of the caller-owned configuration now contains the preset.
+	return DRIVER_STATUS_SUCCESS;
 }
 
 driver_status_t RCC_Config72MHz(void)
 {
 	rcc_config_t cfg = {0};
 	//! Reuse the public preset loader and root transaction so default setup follows the canonical path.
-	RCC_Load72MHzDefaultConfig(&cfg);
+	ASSERT_DRIVER_STATUS(RCC_Load72MHzDefaultConfig(&cfg));
+	//! Apply the validated preset through the canonical RCC configuration transaction.
 	return RCC_Config(&cfg);
 }
 
@@ -1523,6 +1528,12 @@ rcc_bus_prescaler_t RCC_GetBusPrescaler(const rcc_bus_t bus)
 	reg				apb2Prescaler = RCC_CFGR_PPRE2_DIV1;
 	rcc_bus_prescaler_t		selector = RCC_AHB_DIV_1;
 
+	//! Reject non-bus selectors before reading any prescaler field.
+	if (RCC_IS_BUS_VALID(bus) == 0x00U)
+	{
+		return selector;
+	}
+
 	switch (bus)
 	{
 		case RCC_AHB_BUS:
@@ -1572,12 +1583,18 @@ frequency_t RCC_GetBusFrequency(const rcc_bus_t bus)
 		RCC_FREQ_ZERO
 	};
 
+	//! Reject non-bus selectors before refreshing or reading the shared frequency snapshot.
+	if (RCC_IS_BUS_VALID(bus) == 0x00U)
+	{
+		return RCC_FREQ_ZERO;
+	}
+
 	if (RCC_GetClockFrequencies(&clockFrequencies) != DRIVER_STATUS_SUCCESS)
 	{
 		return RCC_FREQ_ZERO;
 	}
 
-	//! Fold the former standalone ADC/USB getters in here: same snapshot, same fields, one selector switch.
+	//! Return only physical bus clocks; ADC and USB remain available through the coherent snapshot API.
 	switch (bus)
 	{
 		case RCC_AHB_BUS:
@@ -1591,14 +1608,6 @@ frequency_t RCC_GetBusFrequency(const rcc_bus_t bus)
 		case RCC_APB2_BUS:
 		{
 			return clockFrequencies.pclk2;
-		}
-		case RCC_ADC_BUS:
-		{
-			return clockFrequencies.adcclk;
-		}
-		case RCC_USB_BUS:
-		{
-			return clockFrequencies.usbclk;
 		}
 		default:
 		{

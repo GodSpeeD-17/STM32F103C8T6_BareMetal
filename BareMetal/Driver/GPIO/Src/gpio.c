@@ -356,13 +356,30 @@ driver_status_t GPIO_Init
 	}
 
 	//! The application owns clock-gate enabling; this narrow API only verifies it is already on.
-	if (RCC_GetAPB2ClockState(LL_GPIO_GetPortClockMask(GPIOx)) != DRIVER_STATUS_ON)
+	if
+	(
+		RCC_GetPeripheralClockState
+		(
+			RCC_APB2_BUS,
+			LL_GPIO_GetPortClockMask(GPIOx)
+		) != DRIVER_STATUS_ON
+	)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}
 
 	//! Alternate-function configuration additionally requires the AFIO clock gate to already be enabled
-	if ((GPIO_PIN_CONFIG_IS_ALTERNATE(config) != 0x00U) && (RCC_GetAPB2ClockState(RCC_APB2ENR_AFIOEN) != DRIVER_STATUS_ON))
+	if
+	(
+		(GPIO_PIN_CONFIG_IS_ALTERNATE(config) != 0x00U)	&&
+		(
+			RCC_GetPeripheralClockState
+			(
+				RCC_APB2_BUS,
+				RCC_APB2ENR_AFIOEN
+			) != DRIVER_STATUS_ON
+		)
+	)
 	{
 		return DRIVER_STATUS_ERROR_STATE;
 	}

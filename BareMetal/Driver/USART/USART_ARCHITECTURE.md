@@ -160,8 +160,8 @@ and neither is owned by the USART driver:
 
 1. **The USART peripheral's own clock gate** (`RCC_APB2ENR_USART1EN`,
    `RCC_APB1ENR_USART2EN`/`USART3EN`). The application must enable this
-   through `RCC_SetAPB1ClockState()`/`RCC_SetAPB2ClockState()` before calling
-   `USART_Config()`. The driver only verifies it through a private
+   through `RCC_SetPeripheralClockState()` with `RCC_APB1_BUS` or
+   `RCC_APB2_BUS` before calling `USART_Config()`. The driver only verifies it through a private
    `_USART_ValidateClockEnabled()` helper — the direct USART analogue of
    Timer's `_TIM_ValidateClockEnabled()`. This replaces the current
    `usart_config.h`'s `__USART_enableClock__()`/`__USART_disableClock__()`,
@@ -176,7 +176,15 @@ and neither is owned by the USART driver:
    narrowly to the GPIO/AFIO gates its own pin table requires.
 
 ```c
-ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(RCC_APB2ENR_USART1EN, DRIVER_STATUS_ON));
+ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB2_BUS,
+		RCC_APB2ENR_USART1EN,
+		DRIVER_STATUS_ON
+	)
+);
 ASSERT_DRIVER_STATUS(USART_Config(USART1, &config));
 ```
 

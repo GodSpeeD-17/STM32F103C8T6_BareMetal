@@ -2,7 +2,7 @@
  * @file	rcc.h
  * @author	Shrey Shah
  * @brief	Declares RCC operations and observable clock state
- * @version	v4.0
+ * @version	v5.0
  * @date	23-08-2026
  *
  * @details
@@ -58,113 +58,70 @@ extern "C" {
  */
 
 /**
- * @brief Returns the combined state of selected AHB peripheral clock gates
- * @param[in] clockMask Non-zero AHB clock-enable mask
+ * @brief Returns the combined state of selected peripheral clock gates
+ * @details Reads the clock-enable register selected by @p bus and returns ON
+ * only when every bit selected by @p clockMask is enabled.
+ * @param[in] bus Physical RCC bus containing the requested clock gates
  * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw AHB clock-enable mask
- * @returns @ref driver_status_t "AHB clock-gate state"
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested AHB clock gates are disabled
- * @retval - @ref `DRIVER_STATUS_ON`: Requested AHB clock gates are enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero
+ * - @ref `RCC_AHB_BUS`
+ * - @ref `RCC_APB1_BUS`
+ * - @ref `RCC_APB2_BUS`
+ * @param[in] clockMask Non-zero clock-enable mask belonging to @p bus
+ * Accepted values:
+ * - `1UL..0xFFFFFFFFUL`: Any non-zero raw mask valid for the selected clock-enable register
+ * @returns @ref driver_status_t "Peripheral clock-gate state"
+ * @retval - @ref `DRIVER_STATUS_OFF`: One or more requested peripheral clock gates are disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: Every requested peripheral clock gate is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bus or @p clockMask is invalid
+ * @warning Pair @p clockMask with its owning bus; raw mask values are not self-identifying
  */
-driver_status_t RCC_GetAHBClockState(const reg clockMask);
+driver_status_t RCC_GetPeripheralClockState(const rcc_bus_t bus, const reg clockMask);
 
 /**
- * @brief Enables or disables selected AHB peripheral clock gates
- * @details
- * Enables or disables the requested AHB clock gates depending on @p clockState.
- * @param[in] clockMask Non-zero AHB clock-enable mask
+ * @brief Enables or disables selected peripheral clock gates
+ * @details Dispatches the requested state to the clock-enable register selected
+ * by @p bus without changing gates outside @p clockMask.
+ * @param[in] bus Physical RCC bus containing the requested clock gates
  * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw AHB clock-enable mask
- * @param[in] clockState Requested AHB clock-gate state
+ * - @ref `RCC_AHB_BUS`
+ * - @ref `RCC_APB1_BUS`
+ * - @ref `RCC_APB2_BUS`
+ * @param[in] clockMask Non-zero clock-enable mask belonging to @p bus
  * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Disables the requested AHB clock gates
- * - @ref `DRIVER_STATUS_ON`: Enables the requested AHB clock gates
- * @returns @ref driver_status_t "AHB clock-gate operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested AHB clock gates were updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask or @p clockState is invalid
+ * - `1UL..0xFFFFFFFFUL`: Any non-zero raw mask valid for the selected clock-enable register
+ * @param[in] clockState Requested peripheral clock-gate state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable every selected peripheral clock gate
+ * - @ref `DRIVER_STATUS_ON`: Enable every selected peripheral clock gate
+ * @returns @ref driver_status_t "Peripheral clock-gate operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested peripheral clock gates were updated
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bus, @p clockMask, or @p clockState is invalid
+ * @warning Pair @p clockMask with its owning bus; raw mask values are not self-identifying
  */
-driver_status_t RCC_SetAHBClockState(const reg clockMask, const driver_status_t clockState);
+driver_status_t RCC_SetPeripheralClockState
+(
+	const rcc_bus_t			bus,
+	const reg				clockMask,
+	const driver_status_t	clockState
+);
 
 /**
- * @brief Returns the combined state of selected APB2 peripheral clock gates
- * @param[in] clockMask Non-zero APB2 clock-enable mask
+ * @brief Asserts and releases selected peripheral reset bits
+ * @details Dispatches one complete reset pulse to the APB reset register
+ * selected by @p bus. AHB has no supported peripheral-reset register.
+ * @param[in] bus Physical RCC bus containing the requested reset bits
  * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB2 clock-enable mask
- * @returns @ref driver_status_t "APB2 clock-gate state"
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB2 clock gates are disabled
- * @retval - @ref `DRIVER_STATUS_ON`: Requested APB2 clock gates are enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero
+ * - @ref `RCC_APB1_BUS`
+ * - @ref `RCC_APB2_BUS`
+ * @param[in] resetMask Non-zero peripheral-reset mask belonging to @p bus
+ * Accepted values:
+ * - `1UL..0xFFFFFFFFUL`: Any non-zero raw mask valid for the selected reset register
+ * @returns @ref driver_status_t "Peripheral reset-pulse operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested peripherals were reset-pulsed
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bus or @p resetMask is invalid
+ * @warning Pair @p resetMask with its owning bus; raw mask values are not self-identifying
  */
-driver_status_t RCC_GetAPB2ClockState(const reg clockMask);
-
-/**
- * @brief Enables or disables selected APB2 peripheral clock gates
- * @details
- * Enables or disables the requested APB2 clock gates depending on @p clockState.
- * @param[in] clockMask Non-zero APB2 clock-enable mask
- * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB2 clock-enable mask
- * @param[in] clockState Requested APB2 clock-gate state
- * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Disables the requested APB2 clock gates
- * - @ref `DRIVER_STATUS_ON`: Enables the requested APB2 clock gates
- * @returns @ref driver_status_t "APB2 clock-gate operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 clock gates were updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask or @p clockState is invalid
- */
-driver_status_t RCC_SetAPB2ClockState(const reg clockMask, const driver_status_t clockState);
-
-/**
- * @brief Returns the combined state of selected APB1 peripheral clock gates
- * @param[in] clockMask Non-zero APB1 clock-enable mask
- * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB1 clock-enable mask
- * @returns @ref driver_status_t "APB1 clock-gate state"
- * @retval - @ref `DRIVER_STATUS_OFF`: Requested APB1 clock gates are disabled
- * @retval - @ref `DRIVER_STATUS_ON`: Requested APB1 clock gates are enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask was zero
- */
-driver_status_t RCC_GetAPB1ClockState(const reg clockMask);
-
-/**
- * @brief Enables or disables selected APB1 peripheral clock gates
- * @details
- * Enables or disables the requested APB1 clock gates depending on @p clockState.
- * @param[in] clockMask Non-zero APB1 clock-enable mask
- * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB1 clock-enable mask
- * @param[in] clockState Requested APB1 clock-gate state
- * Accepted values:
- * - @ref `DRIVER_STATUS_OFF`: Disables the requested APB1 clock gates
- * - @ref `DRIVER_STATUS_ON`: Enables the requested APB1 clock gates
- * @returns @ref driver_status_t "APB1 clock-gate operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 clock gates were updated
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p clockMask or @p clockState is invalid
- */
-driver_status_t RCC_SetAPB1ClockState(const reg clockMask, const driver_status_t clockState);
-
-/**
- * @brief Asserts and releases selected APB2 peripheral reset bits
- * @param[in] resetMask Non-zero APB2 peripheral-reset mask
- * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB2 reset mask
- * @returns @ref driver_status_t "APB2 reset-pulse operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB2 peripherals were reset-pulsed
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero
- */
-driver_status_t RCC_APB2_ResetPulse(const reg resetMask);
-
-/**
- * @brief Asserts and releases selected APB1 peripheral reset bits
- * @param[in] resetMask Non-zero APB1 peripheral-reset mask
- * Accepted values:
- * - `1UL..0xFFFFFFFFUL`: Any non-zero raw APB1 reset mask
- * @returns @ref driver_status_t "APB1 reset-pulse operation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Requested APB1 peripherals were reset-pulsed
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p resetMask was zero
- */
-driver_status_t RCC_APB1_ResetPulse(const reg resetMask);
+driver_status_t RCC_PulsePeripheralReset(const rcc_bus_t bus, const reg resetMask);
 
 /** @} */ // RCC_03_Driver_07_ClockReset
 
@@ -186,14 +143,12 @@ driver_status_t RCC_APB1_ResetPulse(const reg resetMask);
 frequency_t RCC_GetCoreClockFrequency(void);
 
 /**
- * @brief Returns the current derived frequency of a requested clock domain
- * @param[in] bus Target clock-domain selector
+ * @brief Returns the current derived frequency of a requested physical bus
+ * @param[in] bus Target physical bus selector
  * Accepted values:
  * - @ref `RCC_AHB_BUS`: AHB bus
  * - @ref `RCC_APB1_BUS`: APB1 bus
  * - @ref `RCC_APB2_BUS`: APB2 bus
- * - @ref `RCC_ADC_BUS`: ADC clock
- * - @ref `RCC_USB_BUS`: USB clock
  * @returns @ref frequency_t "Bus clock frequency in hertz"
  * @retval - @ref `RCC_FREQ_ZERO`: The clock is inactive, the selector is invalid, or snapshot refresh failed
  * @retval - `1UL..RCC_SYSCLK_MAX_FREQ`: Current selected clock-domain frequency
@@ -454,10 +409,11 @@ driver_status_t RCC_Config(const rcc_config_t* const pRCCConfig);
  * @param[out] pRCCConfig Destination for the complete preset
  * Expected values:
  * - Non-`NULL`: Every configuration member is populated
- * @returns Nothing
- * @note A `NULL` destination is ignored without side effects
+ * @returns @ref driver_status_t "Default-configuration load status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Complete preset was loaded
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRCCConfig was a null pointer
  */
-void RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig);
+driver_status_t RCC_Load72MHzDefaultConfig(rcc_config_t* const pRCCConfig);
 
 /**
  * @brief Applies the default 72 MHz Blue Pill RCC configuration

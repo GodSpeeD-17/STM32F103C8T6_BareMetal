@@ -104,7 +104,15 @@ static void App_ErrorHandler(void)
 static driver_status_t App_ConfigPWMGPIO(void)
 {
 	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
-	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_PWM_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB2_BUS,
+		APP_PWM_GPIO_CLOCK_MASK,
+		DRIVER_STATUS_ON
+	)
+);
 	return GPIO_SetPinModeConfig
 	(
 		APP_PWM_GPIO_PORT,
@@ -145,7 +153,15 @@ static driver_status_t App_ConfigPWM(void)
 	};
 
 	//! The application owns the Timer clock gate and complete base timebase.
-	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(APP_PWM_TIMER_CLOCK_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB1_BUS,
+		APP_PWM_TIMER_CLOCK_MASK,
+		DRIVER_STATUS_ON
+	)
+);
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_PWM_TIMER, &timerConfig));
 
 	//! Configure TIM2 channel 4 only after the Timer base is valid.

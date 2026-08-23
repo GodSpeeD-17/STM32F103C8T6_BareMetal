@@ -182,8 +182,9 @@
  * @brief Selects the RCC APB1 clock gate for the dedicated delay Timer
  * @def APP_DELAY_TIMER_CLOCK_MASK
  * @details
- * App_DelayTimerInit() passes this mask to `RCC_SetAPB1ClockState()` with `DRIVER_STATUS_ON` before
- * configuring @ref `APP_DELAY_TIMER`. Keeping the gate explicit preserves RCC
+ * App_DelayTimerInit() passes this mask to `RCC_SetPeripheralClockState()`
+ * with `RCC_APB1_BUS` and `DRIVER_STATUS_ON` before configuring
+ * @ref `APP_DELAY_TIMER`. Keeping the gate explicit preserves RCC
  * ownership at the application-service boundary.
  * Accepted values:
  * - `RCC_APB1ENR_TIM2EN`: Clock gate paired with `TIM2`

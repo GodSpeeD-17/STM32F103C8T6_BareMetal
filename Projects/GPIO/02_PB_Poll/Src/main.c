@@ -56,7 +56,15 @@
 
 int main(void)
 {
-	if (RCC_SetAPB2ClockState(APP_GPIO_CLOCK_MASK, DRIVER_STATUS_ON) != DRIVER_STATUS_SUCCESS)
+	if
+	(
+		RCC_SetPeripheralClockState
+		(
+			RCC_APB2_BUS,
+			APP_GPIO_CLOCK_MASK,
+			DRIVER_STATUS_ON
+		) != DRIVER_STATUS_SUCCESS
+	)
 	{
 		OB_LED_Set();
 		while (1);

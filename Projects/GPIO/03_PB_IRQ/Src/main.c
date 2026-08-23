@@ -107,7 +107,15 @@ static void App_ErrorHandler(void)
 static driver_status_t App_Init(void)
 {
 	//! The application explicitly owns the GPIOA port clock gate shared by the LEDs and push button.
-	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB2_BUS,
+		APP_GPIO_CLOCK_MASK,
+		DRIVER_STATUS_ON
+	)
+);
 	ASSERT_DRIVER_STATUS(GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)));
 	ASSERT_DRIVER_STATUS(GPIO_PinReset(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)));
 	ASSERT_DRIVER_STATUS

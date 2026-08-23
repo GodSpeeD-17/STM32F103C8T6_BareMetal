@@ -96,7 +96,15 @@ static void App_ErrorHandler(void)
 static driver_status_t App_ConfigTimerIRQ(void)
 {
 	//! Explicitly enable the application-owned GPIO port clock gate before configuring the LED.
-	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_LED_CLOCK_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB2_BUS,
+		APP_GPIO_LED_CLOCK_MASK,
+		DRIVER_STATUS_ON
+	)
+);
 	//! Configure GPIO for LED
 	ASSERT_DRIVER_STATUS(GPIO_LED_Init(APP_GPIO_LED_PORT, APP_GPIO_LED_PIN));
 
@@ -121,7 +129,15 @@ static driver_status_t App_ConfigTimerIRQ(void)
 	};
 
 	//! Explicitly enable the application-owned TIM3 clock before Timer configuration.
-	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(APP_TIMER_ENABLE_MASK, DRIVER_STATUS_ON));
+	ASSERT_DRIVER_STATUS
+(
+	RCC_SetPeripheralClockState
+	(
+		RCC_APB1_BUS,
+		APP_TIMER_ENABLE_MASK,
+		DRIVER_STATUS_ON
+	)
+);
 	//! Apply only TIM3 base configuration; IRQ-source intent remains a separate application decision.
 	ASSERT_DRIVER_STATUS(TIM_Config(APP_TIMER, &config));
 	//! Explicitly enable the Timer update request before enabling its independently owned NVIC line.
