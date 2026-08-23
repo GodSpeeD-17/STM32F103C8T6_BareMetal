@@ -74,7 +74,7 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
-option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" ON)
+option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
 
 # BSP is required directly by the application for its error-indication path;
 # the component graph resolves BSP -> GPIO -> RCC automatically. Optional

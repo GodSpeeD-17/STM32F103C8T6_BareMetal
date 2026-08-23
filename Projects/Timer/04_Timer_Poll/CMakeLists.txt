@@ -73,7 +73,7 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" OFF)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
-option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" ON)
+option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
 
 # BSP drives the heartbeat LED; Timer is required directly by the application
 # for its own TIM2 blocking-delay demonstration. The component graph resolves
