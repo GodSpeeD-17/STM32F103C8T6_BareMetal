@@ -80,7 +80,7 @@ driver_status_t App_Init(void)
 			DRIVER_STATUS_ON
 		)
 	);
-	//! 
+	//! The debug USART peripheral's own clock gate is separate from its GPIO/AFIO port clock gate above.
 	ASSERT_DRIVER_STATUS
 	(
 		RCC_SetPeripheralClockState
