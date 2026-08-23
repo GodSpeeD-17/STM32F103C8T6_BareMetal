@@ -148,6 +148,8 @@ driver_status_t GPIO_IRQ_Init
 	}
 
 	ASSERT_DRIVER_STATUS(LL_GPIO_IRQ_EnableAFIOClock());
+	//! Mask the selected lines before reconfiguring the GPIO input mode so a transient level
+	//! change while the pin is being reconfigured cannot latch a spurious pending bit.
 	originalExtiImrRegImage = LL_GPIO_IRQ_ReadIMR();
 	extiImrRegImage = RegOps_StageField(originalExtiImrRegImage, (reg) pinMask, 0x00000000UL);
 	currentExtiImrRegImage = originalExtiImrRegImage;
@@ -160,6 +162,8 @@ driver_status_t GPIO_IRQ_Init
 	status = GPIO_Init(GPIOx, pinMask, GPIO_PIN_MODE_INPUT, inputConfig);
 	if (status != DRIVER_STATUS_SUCCESS)
 	{
+		//! Restore the original IMR image on failure so a rejected GPIO configuration attempt
+		//! leaves interrupt masking exactly as it was found.
 		if (currentExtiImrRegImage != originalExtiImrRegImage)
 		{
 			LL_GPIO_IRQ_WriteIMR(originalExtiImrRegImage);
@@ -193,6 +197,8 @@ driver_status_t GPIO_IRQ_Init
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 		exticrStatusMask = (uint8_t) REG_BIT_MASK(regIndex);
+		//! Read each distinct EXTICR register at most once, even when several selected pins
+		//! share the same register, so repeated pins do not repeat an MMIO read.
 		if ((touchedExticrStatus & exticrStatusMask) == 0x00U)
 		{
 			pAfioExticrRegister[regIndex] = pExticrRegister;
@@ -214,6 +220,8 @@ driver_status_t GPIO_IRQ_Init
 		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
+	//! Commit only the EXTICR registers whose staged image actually changed, keeping the
+	//! AFIO write count independent of how many selected pins shared each register.
 	for (regIndex = 0x00U; regIndex < GPIO_IRQ_AFIO_EXTICR_COUNT; ++regIndex)
 	{
 		if ((touchedExticrStatus & (uint8_t) REG_BIT_MASK(regIndex)) != 0x00U)
@@ -233,11 +241,15 @@ driver_status_t GPIO_IRQ_Init
 	{
 		LL_GPIO_IRQ_WriteFTSR(extiFtsrRegImage);
 	}
+	//! Clear any pending bit already latched for the selected lines before unmasking, so a
+	//! stale flag from routing/trigger setup does not immediately fire once IMR is set.
 	extiPrRegImage = LL_GPIO_IRQ_ReadPR();
 	if ((extiPrRegImage & ((reg) pinMask)) != 0x00000000UL)
 	{
 		LL_GPIO_IRQ_WritePR(extiPrRegImage & ((reg) pinMask));
 	}
+	//! Unmask the selected lines last, only after routing, trigger, and pending state are
+	//! fully committed, so the line cannot signal against a half-configured setup.
 	extiImrRegImage = RegOps_StageField(currentExtiImrRegImage, (reg) pinMask, (reg) pinMask);
 	if (extiImrRegImage != currentExtiImrRegImage)
 	{
@@ -273,6 +285,8 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 	}
 
 	ASSERT_DRIVER_STATUS(LL_GPIO_IRQ_EnableAFIOClock());
+	//! Mask the selected lines first so trigger and routing teardown cannot latch a
+	//! spurious pending bit while the line configuration is being torn down.
 	originalExtiImrRegImage = LL_GPIO_IRQ_ReadIMR();
 	extiImrRegImage = RegOps_StageField(originalExtiImrRegImage, (reg) pinMask, 0x00000000UL);
 	currentExtiImrRegImage = originalExtiImrRegImage;
@@ -307,6 +321,8 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 			return DRIVER_STATUS_ERROR_STATE;
 		}
 		exticrStatusMask = (uint8_t) REG_BIT_MASK(regIndex);
+		//! Read each distinct EXTICR register at most once, even when several selected pins
+		//! share the same register, so repeated pins do not repeat an MMIO read.
 		if ((touchedExticrStatus & exticrStatusMask) == 0x00U)
 		{
 			pAfioExticrRegister[regIndex] = pExticrRegister;
@@ -316,6 +332,8 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 		}
 
 		ASSERT_DRIVER_STATUS(Codec_GPIO_IRQ_ExtractPortRouting(afioExticrRegImage[regIndex], currentPin, &routedGPIOx));
+		//! Reject a line that is not currently routed to the requested port, restoring the
+		//! original IMR image first, so this call cannot silently deconfigure another port's line.
 		if (routedGPIOx != GPIOx)
 		{
 			if (currentExtiImrRegImage != originalExtiImrRegImage)
@@ -337,6 +355,8 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 		ASSERT_DRIVER_STATUS(GPIO_PinMaskRemovePin(&remainingPins, currentPin));
 	}
 
+	//! Commit only the EXTICR registers whose staged image actually changed, keeping the
+	//! AFIO write count independent of how many selected pins shared each register.
 	for (regIndex = 0x00U; regIndex < GPIO_IRQ_AFIO_EXTICR_COUNT; ++regIndex)
 	{
 		if ((touchedExticrStatus & (uint8_t) REG_BIT_MASK(regIndex)) != 0x00U)
@@ -356,6 +376,8 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
 	{
 		LL_GPIO_IRQ_WriteFTSR(extiFtsrRegImage);
 	}
+	//! Clear any pending bit left over from the torn-down lines so a stale flag cannot
+	//! surface after this API returns.
 	extiPrRegImage = LL_GPIO_IRQ_ReadPR();
 	if ((extiPrRegImage & ((reg) pinMask)) != 0x00000000UL)
 	{
@@ -373,6 +395,8 @@ driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
+	//! Read EXTI_PR directly: pending state is latched independently of IMR masking, so a
+	//! masked line can still legitimately report pending here.
 	pendingRegImage = LL_GPIO_IRQ_ReadPR();
 	return ((pendingRegImage & (reg) pinMask) != 0x00000000UL) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF;
 }
@@ -384,6 +408,8 @@ driver_status_t GPIO_IRQ_Ack(const gpio_pin_t pinMask)
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
+	//! EXTI_PR bits are write-one-to-clear; writing only the selected pin mask leaves every
+	//! other line's pending bit untouched.
 	LL_GPIO_IRQ_WritePR((reg) pinMask);
 	return DRIVER_STATUS_SUCCESS;
 }

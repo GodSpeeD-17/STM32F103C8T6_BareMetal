@@ -210,6 +210,8 @@ gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
 	gpio_pin_mode_t mode = GPIO_PIN_MODE_INPUT;
 	gpio_pin_config_t config = GPIO_PIN_CONFIG_INPUT_ANALOG;
 
+	//! This selector-only wrapper has no status channel, so a failed extraction
+	//! falls back to the documented reset-state mode instead of an undefined value.
 	if (GPIO_GetPinModeConfig(GPIOx, pin, &mode, &config) != DRIVER_STATUS_SUCCESS)
 	{
 		return GPIO_PIN_MODE_INPUT;
@@ -274,6 +276,8 @@ gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t 
 	gpio_pin_mode_t mode = GPIO_PIN_MODE_INPUT;
 	gpio_pin_config_t config = GPIO_PIN_CONFIG_INPUT_ANALOG;
 
+	//! This selector-only wrapper has no status channel, so a failed extraction
+	//! falls back to the documented reset-state config instead of an undefined value.
 	if (GPIO_GetPinModeConfig(GPIOx, pin, &mode, &config) != DRIVER_STATUS_SUCCESS)
 	{
 		return GPIO_PIN_CONFIG_INPUT_ANALOG;

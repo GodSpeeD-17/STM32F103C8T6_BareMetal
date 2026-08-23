@@ -97,8 +97,11 @@ extern "C" {
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadRegister(const _IO* const pRegister)
 {
+	// Local Variable
 	reg regImage = 0x00000000UL;
+	//! Read the full 32-bit register image into caller-owned storage.
 	(void) RegOps_Read(pRegister, &regImage);
+	//! Return the full 32-bit register image to the caller.
 	return regImage;
 }
 
@@ -106,12 +109,12 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadRegister(const _IO* const pRegister)
  * @brief Writes one GPIO register image by register pointer
  * @param[in]	pRegister	Pointer to a writable GPIO `.REG` member
  * @param[in]	regImage	Full 32-bit register image to write
- * @returns Void.
  * @note Caller must pass a valid writable GPIO register pointer and a complete
  * register image appropriate for that register.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteRegister(_IO* const pRegister, const reg regImage)
 {
+	//! Forward the complete image without adding register-specific policy.
 	(void) RegOps_Write(pRegister, regImage);
 }
 
@@ -124,6 +127,7 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteRegister(_IO* const pRegister, const reg 
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadCRL(GPIO_TypeDef* const GPIOx)
 {
+	//! Address the CRL union image through the shared register-pointer accessor.
 	return LL_GPIO_ReadRegister(LL_GPIO_REG(GPIOx, CRL));
 }
 
@@ -131,11 +135,11 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadCRL(GPIO_TypeDef* const GPIOx)
  * @brief Writes the GPIO `CRL` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Full `GPIOx_CRL` image to write
- * @returns Void.
  * @note Caller owns read-modify-write staging and MODE/CNF field placement.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the staged CRL image without modifying unrelated pin fields.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, CRL), regImage);
 }
 
@@ -148,6 +152,7 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteCRL(GPIO_TypeDef* const GPIOx, const reg 
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadCRH(GPIO_TypeDef* const GPIOx)
 {
+	//! Address the CRH union image through the shared register-pointer accessor.
 	return LL_GPIO_ReadRegister(LL_GPIO_REG(GPIOx, CRH));
 }
 
@@ -155,11 +160,11 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadCRH(GPIO_TypeDef* const GPIOx)
  * @brief Writes the GPIO `CRH` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Full `GPIOx_CRH` image to write
- * @returns Void.
  * @note Caller owns read-modify-write staging and MODE/CNF field placement.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the staged CRH image without modifying unrelated pin fields.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, CRH), regImage);
 }
 
@@ -171,6 +176,7 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteCRH(GPIO_TypeDef* const GPIOx, const reg 
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
 {
+	//! Address the IDR union image through the shared register-pointer accessor.
 	return LL_GPIO_ReadRegister(LL_GPIO_REG(GPIOx, IDR));
 }
 
@@ -184,6 +190,7 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadIDR(GPIO_TypeDef* const GPIOx)
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
 {
+	//! Address the ODR union image through the shared register-pointer accessor.
 	return LL_GPIO_ReadRegister(LL_GPIO_REG(GPIOx, ODR));
 }
 
@@ -191,13 +198,13 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadODR(GPIO_TypeDef* const GPIOx)
  * @brief Writes the GPIO `ODR` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Full `GPIOx_ODR` image to write
- * @returns Void.
  * @note Caller must preserve any bits that should not change. Prefer `BSRR`
  * and `BRR` for set/reset operations; reserve direct ODR writes for explicit
  * full-image updates or toggle-style read-modify-write flows.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the staged ODR image exactly so caller-owned pin preservation stays intact.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, ODR), regImage);
 }
 
@@ -205,13 +212,13 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteODR(GPIO_TypeDef* const GPIOx, const reg 
  * @brief Writes the GPIO `BSRR` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Raw `GPIOx_BSRR` image to write
- * @returns Void.
  * @note `BSRR` is a hardware action register. Lower 16 bits set pins and upper
  * 16 bits reset pins. Public driver policy decides whether to use this path or
  * a staged `ODR` image.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the raw set/reset action image without decoding which pins are affected.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, BSRR), regImage);
 }
 
@@ -219,12 +226,12 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteBSRR(GPIO_TypeDef* const GPIOx, const reg
  * @brief Writes the GPIO `BRR` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Raw `GPIOx_BRR` image to write
- * @returns Void.
  * @note `BRR` is a hardware action register. Bits 0 through 15 reset the
  * matching output pins.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the raw reset action image without decoding which pins are affected.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, BRR), regImage);
 }
 
@@ -236,6 +243,7 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteBRR(GPIO_TypeDef* const GPIOx, const reg 
  */
 __STATIC_FORCEINLINE reg LL_GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
 {
+	//! Address the LCKR union image through the shared register-pointer accessor.
 	return LL_GPIO_ReadRegister(LL_GPIO_REG(GPIOx, LCKR));
 }
 
@@ -243,11 +251,11 @@ __STATIC_FORCEINLINE reg LL_GPIO_ReadLCKR(GPIO_TypeDef* const GPIOx)
  * @brief Writes the GPIO `LCKR` register image
  * @param[in]	GPIOx		GPIO peripheral instance
  * @param[in]	regImage	Full `GPIOx_LCKR` image to write
- * @returns Void.
  * @note Caller owns the STM32F1 lock-key write sequence.
  */
 __STATIC_FORCEINLINE void LL_GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const reg regImage)
 {
+	//! Forward the staged LCKR image so the caller's lock-key sequence stays intact.
 	LL_GPIO_WriteRegister(LL_GPIO_REG(GPIOx, LCKR), regImage);
 }
 
@@ -276,18 +284,16 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const reg
 
 /**
  * @brief Resolves a GPIO peripheral instance to the matching APB2 clock-gate mask
- * @details
- * Supported @p GPIOx inputs:
- * - @ref `GPIOA`
- * - @ref `GPIOB`
- * - @ref `GPIOC`
- * - @ref `GPIOD`
- * - @ref `GPIOE`
- * - @ref `GPIOF`
- * - @ref `GPIOG`
- *
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns GPIO port APB2 clock-gate mask resolved from @p GPIOx
+ * Accepted values:
+ * - @ref `GPIOA`: GPIO port A instance
+ * - @ref `GPIOB`: GPIO port B instance
+ * - @ref `GPIOC`: GPIO port C instance
+ * - @ref `GPIOD`: GPIO port D instance
+ * - @ref `GPIOE`: GPIO port E instance
+ * - @ref `GPIOF`: GPIO port F instance
+ * - @ref `GPIOG`: GPIO port G instance
+ * @returns GPIO port APB2 clock-gate mask resolved from @p `GPIOx`
  * @retval - @ref `RCC_APB2ENR_IOPAEN`: GPIOA APB2 clock-gate mask
  * @retval - @ref `RCC_APB2ENR_IOPBEN`: GPIOB APB2 clock-gate mask
  * @retval - @ref `RCC_APB2ENR_IOPCEN`: GPIOC APB2 clock-gate mask
@@ -299,9 +305,10 @@ __STATIC_FORCEINLINE void LL_GPIO_WriteLCKR(GPIO_TypeDef* const GPIOx, const reg
  */
 __STATIC_FORCEINLINE reg LL_GPIO_GetPortClockMask(const GPIO_TypeDef* const GPIOx)
 {
+	// Local Variable
 	reg clockGateMask = 0x00000000UL;
 
-	/* Map GPIO base address to its APB2 clock-enable bit. */
+	//! Match by peripheral base address because instance macros are raw memory-mapped pointers.
 	switch ((reg) GPIOx)
 	{
 		case GPIOA_BASE_ADDRESS:
@@ -346,54 +353,93 @@ __STATIC_FORCEINLINE reg LL_GPIO_GetPortClockMask(const GPIO_TypeDef* const GPIO
 		}
 	}
 
+	//! Publish the resolved mask, or the zero sentinel for an unsupported port.
 	return clockGateMask;
 }
 
 /**
  * @brief Enables the APB2 clock gate for one GPIO port
+ * @details
+ * This is a dumb single-point forwarder. It resolves @p `GPIOx` to its
+ * `RCC_APB2ENR_IOPxEN` mask through @ref `LL_GPIO_GetPortClockMask` and
+ * delegates the actual gate transition to RCC LL; it performs no other
+ * validation, sequencing, or clock-gate policy of its own.
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref `LL_RCC_EnableAPB2Clock`
+ * Accepted values:
+ * - @ref `GPIOA`: GPIO port A instance
+ * - @ref `GPIOB`: GPIO port B instance
+ * - @ref `GPIOC`: GPIO port C instance
+ * - @ref `GPIOD`: GPIO port D instance
+ * - @ref `GPIOE`: GPIO port E instance
+ * - @ref `GPIOF`: GPIO port F instance
+ * - @ref `GPIOG`: GPIO port G instance
+ * @returns @ref driver_status_t "GPIO port APB2 clock-gate enable status forwarded from RCC LL"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was enabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` did not resolve to a valid APB2 clock-gate mask
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableClock(const GPIO_TypeDef* const GPIOx)
 {
+	//! Resolve the port-specific mask so RCC LL can validate and gate the correct APB2 bit.
 	const reg clockMask = LL_GPIO_GetPortClockMask(GPIOx);
 	return LL_RCC_EnableAPB2Clock(clockMask);
 }
 
 /**
  * @brief Disables the APB2 clock gate for one GPIO port
+ * @details
+ * This is a dumb single-point forwarder. It resolves @p `GPIOx` to its
+ * `RCC_APB2ENR_IOPxEN` mask through @ref `LL_GPIO_GetPortClockMask` and
+ * delegates the actual gate transition to RCC LL; it performs no other
+ * validation, sequencing, or clock-gate policy of its own.
  * @param[in]	GPIOx	GPIO peripheral instance
- * @returns Status forwarded from @ref `LL_RCC_DisableAPB2Clock`
+ * Accepted values:
+ * - @ref `GPIOA`: GPIO port A instance
+ * - @ref `GPIOB`: GPIO port B instance
+ * - @ref `GPIOC`: GPIO port C instance
+ * - @ref `GPIOD`: GPIO port D instance
+ * - @ref `GPIOE`: GPIO port E instance
+ * - @ref `GPIOF`: GPIO port F instance
+ * - @ref `GPIOG`: GPIO port G instance
+ * @returns @ref driver_status_t "GPIO port APB2 clock-gate disable status forwarded from RCC LL"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO port APB2 clock gate was disabled
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx did not resolve to a valid APB2 clock-gate mask
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` did not resolve to a valid APB2 clock-gate mask
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_DisableClock(const GPIO_TypeDef* const GPIOx)
 {
+	//! Resolve the port-specific mask so RCC LL can validate and gate the correct APB2 bit.
 	const reg clockMask = LL_GPIO_GetPortClockMask(GPIOx);
 	return LL_RCC_DisableAPB2Clock(clockMask);
 }
 
 /**
  * @brief Enables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref `LL_RCC_EnableAPB2Clock`
+ * @details
+ * This is a dumb single-point forwarder. It passes the fixed
+ * `RCC_APB2ENR_AFIOEN` bit straight to RCC LL; it performs no validation,
+ * sequencing, or clock-gate policy of its own.
+ * @returns @ref driver_status_t "AFIO APB2 clock-gate enable status forwarded from RCC LL"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was enabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_EnableAFIOClock(void)
 {
+	//! Forward the fixed AFIO gate bit; RCC LL owns the actual enable transaction.
 	return LL_RCC_EnableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 
 /**
  * @brief Disables the AFIO APB2 clock gate
- * @returns Status forwarded from @ref `LL_RCC_DisableAPB2Clock`
+ * @details
+ * This is a dumb single-point forwarder. It passes the fixed
+ * `RCC_APB2ENR_AFIOEN` bit straight to RCC LL; it performs no validation,
+ * sequencing, or clock-gate policy of its own.
+ * @returns @ref driver_status_t "AFIO APB2 clock-gate disable status forwarded from RCC LL"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: AFIO APB2 clock gate was disabled
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: `RCC_APB2ENR_AFIOEN` was rejected by RCC LL
  */
 __STATIC_FORCEINLINE driver_status_t LL_GPIO_DisableAFIOClock(void)
 {
+	//! Forward the fixed AFIO gate bit; RCC LL owns the actual disable transaction.
 	return LL_RCC_DisableAPB2Clock(RCC_APB2ENR_AFIOEN);
 }
 

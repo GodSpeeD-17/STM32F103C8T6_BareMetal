@@ -99,11 +99,11 @@ extern "C" {
  * - @ref `GPIO_IRQ_TRIGGER_FALLING`
  * - @ref `GPIO_IRQ_TRIGGER_RISING`
  * - @ref `GPIO_IRQ_TRIGGER_BOTH`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line initialization completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p inputConfig, or @p trigger was invalid.
+ * @returns @ref driver_status_t "GPIO IRQ line initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line initialization completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p inputConfig, or @p trigger was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The @p GPIOx port clock gate is disabled, or the
- * internal staged-image update failed unexpectedly.
+ * internal staged-image update failed unexpectedly
  * @pre The application enabled the matching GPIO port clock gate through the RCC driver before
  * calling this API; this API forwards that requirement to @ref `GPIO_Init`.
  * @note This API configures the selected GPIO pins as @ref `GPIO_PIN_MODE_INPUT`
@@ -141,10 +141,10 @@ driver_status_t GPIO_IRQ_Init
  * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line deinitialization completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @returns @ref driver_status_t "GPIO IRQ line deinitialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line deinitialization completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly
  * @note This API enables AFIO long enough to restore EXTICR routing. It does
  * not disable AFIO after deinitialization.
  * @note Each selected line must currently be routed to @p GPIOx; this prevents
@@ -158,10 +158,10 @@ driver_status_t GPIO_IRQ_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinM
  * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Pending-line status
- * @retval - @ref `DRIVER_STATUS_ON`: At least one selected GPIO IRQ line is pending.
- * @retval - @ref `DRIVER_STATUS_OFF`: None of the selected GPIO IRQ lines are pending.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid.
+ * @returns @ref driver_status_t "Pending-line status"
+ * @retval - @ref `DRIVER_STATUS_ON`: At least one selected GPIO IRQ line is pending
+ * @retval - @ref `DRIVER_STATUS_OFF`: None of the selected GPIO IRQ lines are pending
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid
  */
 driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask);
 
@@ -170,9 +170,9 @@ driver_status_t GPIO_IRQ_IsTriggered(const gpio_pin_t pinMask);
  * @param[in] pinMask GPIO pin mask identifying the GPIO IRQ line(s)
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pending bit(s) were acknowledged.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid.
+ * @returns @ref driver_status_t "Pending-bit acknowledgement status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pending bit(s) were acknowledged
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pinMask was invalid
  * @note EXTI pending bits are write-one-to-clear bits. This API writes the
  * selected pin mask directly to `EXTI_PR`.
  */

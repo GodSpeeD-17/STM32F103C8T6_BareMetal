@@ -49,7 +49,7 @@
 /**
  * @brief Computes the bit position of one pin's MODE/CNF field inside a CRL/CRH image
  * @param[in] pinIndex Zero-based GPIO pin index
- * @returns CRL/CRH-local bit position for the pin's four-bit MODE/CNF field
+ * @returns CRL/CRH-local bit position for the pin's four-bit MODE/CNF field as @ref reg_field_t
  * @retval - `0U, 4U, 8U, ..., 28U`: Bit position inside the selected CRL/CRH image
  * @note Caller owns validation that @p pinIndex is inside the supported GPIO pin range.
  */
@@ -67,7 +67,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_GetPinConfigModeFieldBitPos(const gp
  * Accepted values:
  * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pPinIndex Destination for decoded zero-based GPIO pin index
- * @returns Decode status
+ * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin was decoded into @p pPinIndex
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinIndex is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
@@ -84,6 +84,8 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_GetPinIndexFromPinMask
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Every other Codec entry point routes single-pin validation through this
+	//! shared decode so an invalid, empty, or multi-pin mask is rejected once.
 	*pPinIndex = GPIO_PinMaskToIndex(pin);
 	if (*pPinIndex == GPIO_PIN_INDEX_INVALID)
 	{
@@ -98,7 +100,10 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_GetPinIndexFromPinMask
  * @param[in] regImage Caller-owned register image
  * @param[in] bitMask Single-bit mask selecting the target field
  * @param[out] pBitState Destination for the extracted bit state
- * @returns Extraction status
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: Selected bit is clear
+ * - @ref `DRIVER_STATUS_ON`: Selected bit is set
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Bit state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBitState is `NULL`
  * @note Writes @ref `DRIVER_STATUS_OFF` when the selected bit is clear and
@@ -130,7 +135,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_ExtractBitStateFromImage
  * - @ref `DRIVER_STATUS_OFF`: Clear the selected bit
  * - @ref `DRIVER_STATUS_ON`: Set the selected bit
  * @param[out] pRegImage Destination for the updated register image
- * @returns Staging status
+ * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p bitState is not an accepted state
@@ -171,7 +176,7 @@ __STATIC_FORCEINLINE driver_status_t Codec_GPIO_StageBitStateInImage
  * @brief Extracts one pin's right-aligned MODE/CNF field from a CRL/CRH image
  * @param[in] crxRegImage Caller-owned CRL/CRH register image
  * @param[in] pinIndex Zero-based GPIO pin index
- * @returns Right-aligned raw `CNF[1:0] | MODE[1:0]` field value
+ * @returns Right-aligned raw `CNF[1:0] | MODE[1:0]` field value as @ref reg_field_t
  * @retval - `0x00U..0x0FU`: Raw MODE/CNF field for @p pinIndex
  * @note This helper reads only the caller-provided image. It does not access hardware.
  * Caller owns validation that @p pinIndex is inside the supported GPIO pin range.
@@ -194,7 +199,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_ExtractPinConfigModeFieldFromImage
 /**
  * @brief Gets the raw `MODE` bits from one right-aligned MODE/CNF field
  * @param[in] configModeField Right-aligned raw `CNF[1:0] | MODE[1:0]` field value
- * @returns Raw STM32F1 `MODE[1:0]` field value
+ * @returns Raw STM32F1 `MODE[1:0]` field value as @ref reg_field_t
  * @retval - @ref `GPIO_CRX_MODE_INPUT`: Input mode
  * @retval - @ref `GPIO_CRX_MODE_OUTPUT_10MHZ`: Output mode, max speed 10 MHz
  * @retval - @ref `GPIO_CRX_MODE_OUTPUT_2MHZ`: Output mode, max speed 2 MHz
@@ -202,13 +207,14 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_ExtractPinConfigModeFieldFromImage
  */
 __STATIC_FORCEINLINE reg_field_t Codec_GPIO_GetPinModeBitsFromField(const reg_field_t configModeField)
 {
+	//! Isolate only the MODE sub-field so CNF bits never leak into mode decoding
 	return (reg_field_t) ((((reg) configModeField) >> GPIO_CODEC_CRX_MODE_BITS_SHIFT) & GPIO_CODEC_CRX_MODE_BITS_MASK);
 }
 
 /**
  * @brief Gets the raw `CNF` bits from one right-aligned MODE/CNF field
  * @param[in] configModeField Right-aligned raw `CNF[1:0] | MODE[1:0]` field value
- * @returns Raw STM32F1 `CNF[1:0]` field value
+ * @returns Raw STM32F1 `CNF[1:0]` field value as @ref reg_field_t
  * @retval - @ref `GPIO_CRX_CNF_INPUT_ANALOG`: Analog input when MODE is input
  * @retval - @ref `GPIO_CRX_CNF_INPUT_FLOATING`: Floating input when MODE is input
  * @retval - @ref `GPIO_CRX_CNF_INPUT_PULL`: Pull-up/pull-down input when MODE is input
@@ -220,6 +226,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_GetPinModeBitsFromField(const reg_fi
  */
 __STATIC_FORCEINLINE reg_field_t Codec_GPIO_GetPinConfigBitsFromField(const reg_field_t configModeField)
 {
+	//! CNF occupies the field's upper two bits and is mode-dependent, so isolate it independently of MODE
 	return (reg_field_t) ((((reg) configModeField) >> GPIO_CODEC_CRX_CNF_BITS_SHIFT) & GPIO_CODEC_CRX_CNF_BITS_MASK);
 }
 
@@ -237,7 +244,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_GetPinConfigBitsFromField(const reg_
  * - @ref `GPIO_CRX_CNF_INPUT_FLOATING` / @ref `GPIO_CRX_CNF_OUTPUT_OPEN_DRAIN`
  * - @ref `GPIO_CRX_CNF_INPUT_PULL` / @ref `GPIO_CRX_CNF_ALTERNATE_PUSH_PULL`
  * - @ref `GPIO_CRX_CNF_INPUT_RESERVED` / @ref `GPIO_CRX_CNF_ALTERNATE_OPEN_DRAIN`
- * @returns Right-aligned raw `CNF[1:0] | MODE[1:0]` field value
+ * @returns Right-aligned raw `CNF[1:0] | MODE[1:0]` field value as @ref reg_field_t
  * @retval - `0x00U..0x0FU`: Packed raw MODE/CNF field
  */
 __STATIC_FORCEINLINE reg_field_t Codec_GPIO_BuildPinConfigModeField(const reg_field_t modeBits, const reg_field_t cnfBits)
@@ -245,6 +252,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_BuildPinConfigModeField(const reg_fi
 	// Local Variable
 	reg_field_t configModeField = (reg_field_t) 0x00U;
 
+	//! Pack MODE and CNF into their fixed sub-field positions so the result matches the CRL/CRH hardware layout
 	configModeField |= (reg_field_t) REG_FIELD_PACK
 	(
 		GPIO_CODEC_CRX_MODE_BITS_SHIFT,
@@ -279,7 +287,7 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_BuildPinConfigModeField(const reg_fi
  * Expected values:
  * - Non-`NULL`: Decoded mode is written to @p pMode
  * - `NULL`: Mode decode result is ignored
- * @returns Decoding status
+ * @returns @ref driver_status_t "Decoding status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: MODE/CNF field was decoded
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig and @p pMode are both `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p configModeField is not decodable
@@ -438,7 +446,7 @@ __STATIC driver_status_t Codec_GPIO_DecodePinConfigModeField
  * `CNF[1:0] | MODE[1:0]` CRL/CRH field value
  * Expected values:
  * - Non-`NULL`: Encoded field is written to @p pConfigModeField
- * @returns Encoding status
+ * @returns @ref driver_status_t "Encoding status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: MODE/CNF field was encoded
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfigModeField is `NULL`
  * @details This helper is pure translation. It does not read or update a
@@ -786,6 +794,7 @@ driver_status_t Codec_GPIO_ExtractLockKeyState
 	driver_status_t* const		pLockKeyState
 )
 {
+	//! LCKK is a fixed single bit shared by all pins, so it reuses the generic bit-state extractor directly
 	return Codec_GPIO_ExtractBitStateFromImage(lckrRegImage, GPIO_LCKR_LCKK, pLockKeyState);
 }
 
@@ -796,5 +805,6 @@ driver_status_t Codec_GPIO_StageLockKeyState
 	reg* const					pLckrRegImage
 )
 {
+	//! LCKK is a fixed single bit shared by all pins, so it reuses the generic bit-state stager directly
 	return Codec_GPIO_StageBitStateInImage(lckrRegImage, GPIO_LCKR_LCKK, lockKeyState, pLckrRegImage);
 }

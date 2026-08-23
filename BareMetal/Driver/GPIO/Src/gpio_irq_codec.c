@@ -38,7 +38,9 @@
  * Accepted values:
  * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pPinIndex Destination for decoded zero-based EXTI line index
- * @returns Decode status
+ * Expected values:
+ * - @ref `GPIO_PIN_INDEX_FIRST` through @ref `GPIO_PIN_INDEX_LAST`: Decoded zero-based EXTI line index
+ * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin was decoded into @p pPinIndex
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinIndex is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
@@ -51,6 +53,7 @@ __STATIC driver_status_t Codec_GPIO_IRQ_GetPinIndexFromPinMask(const gpio_pin_t 
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
+	//! Reuse the shared pin-mask decoder so single-pin validation is not duplicated per caller.
 	*pPinIndex = GPIO_PinMaskToIndex(pin);
 	if (*pPinIndex == GPIO_PIN_INDEX_INVALID)
 	{
@@ -71,6 +74,8 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_IRQ_GetRoutingFieldBitPos(const gpio
 {
 	// Local Variable
 	const gpio_pin_index_t localPinIndex = (gpio_pin_index_t) (pinIndex & GPIO_IRQ_EXTICR_LOCAL_PIN_INDEX_MASK);
+
+	//! Each AFIO EXTICR register packs four pin routes; reduce to the local 2-bit sub-index before scaling by field width.
 	return (reg_field_t) (localPinIndex * GPIO_IRQ_EXTICR_ROUTE_FIELD_WIDTH);
 }
 
@@ -84,7 +89,9 @@ __STATIC_FORCEINLINE reg_field_t Codec_GPIO_IRQ_GetRoutingFieldBitPos(const gpio
  * Accepted values:
  * - @ref `AFIO_EXTICR_PORT_SOURCE_GPIOA` through @ref `AFIO_EXTICR_PORT_SOURCE_GPIOG`
  * @param[out] pGPIOx Destination for decoded GPIO peripheral instance
- * @returns Decode status
+ * Expected values:
+ * - @ref `GPIOA` through @ref `GPIOG`: Decoded GPIO peripheral instance
+ * @returns @ref driver_status_t "Decode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p portRoute was decoded into @p pGPIOx
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pGPIOx is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p portRoute is not supported
@@ -154,7 +161,9 @@ __STATIC driver_status_t Codec_GPIO_IRQ_DecodePortRoute
  * Accepted values:
  * - @ref `GPIOA` through @ref `GPIOG`
  * @param[out] pPortRoute Destination for right-aligned AFIO route field
- * @returns Encode status
+ * Expected values:
+ * - @ref `AFIO_EXTICR_PORT_SOURCE_GPIOA` through @ref `AFIO_EXTICR_PORT_SOURCE_GPIOG`: Encoded raw AFIO EXTICR route field
+ * @returns @ref driver_status_t "Encode status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p GPIOx was encoded into @p pPortRoute
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPortRoute is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx is not supported
@@ -395,6 +404,7 @@ driver_status_t Codec_GPIO_IRQ_StageResetTrigger
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
+	//! Clear both rising and falling trigger bits for the selected line(s) so callers always start from a known reset state.
 	updatedRtsrRegImage = RegOps_StageField(updatedRtsrRegImage, lineMask, 0x00000000UL);
 	updatedFtsrRegImage = RegOps_StageField(updatedFtsrRegImage, lineMask, 0x00000000UL);
 

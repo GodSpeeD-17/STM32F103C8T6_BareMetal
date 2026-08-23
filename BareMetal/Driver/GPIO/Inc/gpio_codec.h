@@ -51,9 +51,25 @@ extern "C" {
  * @param[in] crxRegImage Caller-owned CRL/CRH image containing the target pin field
  * @param[in] odrRegImage Caller-owned ODR image used to resolve input pull-up/pull-down
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target field
  * @param[out] pConfig Optional destination for decoded GPIO configuration selector
+ * Expected values when non-`NULL`:
+ * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
  * @param[out] pMode Optional destination for decoded GPIO mode selector
- * @returns Extraction status
+ * Expected values when non-`NULL`:
+ * - @ref `GPIO_PIN_MODE_INPUT`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin config/mode selectors were extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig and @p pMode are both `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or extracted raw MODE/CNF field is not decodable
@@ -73,11 +89,27 @@ driver_status_t Codec_GPIO_ExtractPinConfigMode
  * @param[in] crxRegImage Caller-owned CRL/CRH image before replacement
  * @param[in] odrRegImage Caller-owned ODR image before replacement
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target field
  * @param[in] config Driver-facing GPIO configuration selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_CONFIG_INPUT_ANALOG`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_FLOATING`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_DOWN`
+ * - @ref `GPIO_PIN_CONFIG_INPUT_PULL_UP`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
+ * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
  * @param[in] mode Driver-facing GPIO mode selector
+ * Accepted values:
+ * - @ref `GPIO_PIN_MODE_INPUT`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
+ * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
  * @param[out] pCrxRegImage Destination for the updated CRL/CRH image
  * @param[out] pOdrRegImage Destination for the updated ODR image
- * @returns Staging status
+ * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: CRL/CRH and ODR images were staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCrxRegImage or @p pOdrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or the config/mode field could not be encoded
@@ -105,8 +137,13 @@ driver_status_t Codec_GPIO_StagePinConfigMode
  * @brief Extracts one GPIO output latch state from an ODR image
  * @param[in] odrRegImage Caller-owned ODR image
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target bit
  * @param[out] pPinState Destination for the extracted output latch state
- * @returns Extraction status
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: Selected ODR bit is clear
+ * - @ref `DRIVER_STATUS_ON`: Selected ODR bit is set
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Output state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinState is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
@@ -125,12 +162,14 @@ driver_status_t Codec_GPIO_ExtractPinOutputState
  * @brief Stages one GPIO output state inside an ODR image
  * @param[in] odrRegImage Caller-owned ODR image before replacement
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target bit
  * @param[in] pinState Requested output latch state
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`: Clear the selected ODR bit
  * - @ref `DRIVER_STATUS_ON`: Set the selected ODR bit
  * @param[out] pOdrRegImage Destination for the updated ODR image
- * @returns Staging status
+ * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: ODR image was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pOdrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or @p pinState is not an accepted state
@@ -152,11 +191,13 @@ driver_status_t Codec_GPIO_StagePinOutputState
  * @brief Extracts one GPIO sampled input state from an IDR image
  * @param[in] idrRegImage Caller-owned IDR image
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target bit
  * @param[out] pPinState Destination for the extracted sampled input state
- * Updated Values:
+ * Expected values:
  * - @ref `DRIVER_STATUS_OFF`: Pin is logic LOW
  * - @ref `DRIVER_STATUS_ON`: Pin is logic HIGH
- * @returns Extraction status
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Input state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinState is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
@@ -179,8 +220,13 @@ driver_status_t Codec_GPIO_ExtractPinInputState
  * @brief Extracts one GPIO configuration lock bit from an LCKR image
  * @param[in] lckrRegImage Caller-owned LCKR image
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target bit
  * @param[out] pLockState Destination for the extracted per-pin lock bit state
- * @returns Extraction status
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: Selected LCK bit is clear
+ * - @ref `DRIVER_STATUS_ON`: Selected LCK bit is set
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Per-pin lock state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockState is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin
@@ -199,12 +245,14 @@ driver_status_t Codec_GPIO_ExtractPinLockState
  * @brief Stages one GPIO configuration lock bit inside an LCKR image
  * @param[in] lckrRegImage Caller-owned LCKR image before replacement
  * @param[in] pin GPIO single-pin mask
+ * Accepted values:
+ * - @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`: Single-pin mask selecting the target bit
  * @param[in] lockState Requested per-pin lock bit state
  * Accepted values:
  * - @ref `DRIVER_STATUS_OFF`: Clear the selected LCK bit
  * - @ref `DRIVER_STATUS_ON`: Set the selected LCK bit
  * @param[out] pLckrRegImage Destination for the updated LCKR image
- * @returns Staging status
+ * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: LCKR image was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLckrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin or @p lockState is not an accepted state
@@ -222,7 +270,10 @@ driver_status_t Codec_GPIO_StagePinLockState
  * @brief Extracts the GPIO lock-key bit from an LCKR image
  * @param[in] lckrRegImage Caller-owned LCKR image
  * @param[out] pLockKeyState Destination for the extracted lock-key bit state
- * @returns Extraction status
+ * Expected values:
+ * - @ref `DRIVER_STATUS_OFF`: `LCKK` is clear
+ * - @ref `DRIVER_STATUS_ON`: `LCKK` is set
+ * @returns @ref driver_status_t "Extraction status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Lock-key state was extracted
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLockKeyState is `NULL`
  * @note Writes @ref `DRIVER_STATUS_OFF` when `LCKK` is clear and
@@ -242,7 +293,7 @@ driver_status_t Codec_GPIO_ExtractLockKeyState
  * - @ref `DRIVER_STATUS_OFF`: Clear `LCKK`
  * - @ref `DRIVER_STATUS_ON`: Set `LCKK`
  * @param[out] pLckrRegImage Destination for the updated LCKR image
- * @returns Staging status
+ * @returns @ref driver_status_t "Staging status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: LCKR image was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLckrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p lockKeyState is not an accepted state

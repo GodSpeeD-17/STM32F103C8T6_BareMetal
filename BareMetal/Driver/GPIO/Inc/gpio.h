@@ -49,16 +49,16 @@ extern "C" {
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @param[out] pMode Destination for the current driver GPIO mode selector
  * Expected values:
- * - Non-`NULL`: Current mode is written to @p pMode
+ * - Non-`NULL`: Current mode is written to @p `pMode`
  * @param[out] pConfig Destination for the current driver GPIO configuration selector
  * Expected values:
- * - Non-`NULL`: Current configuration is written to @p pConfig
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The current mode/config pair was extracted.
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pMode or @p pConfig was `NULL`.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal decode failed unexpectedly.
- * @note @p pin must contain exactly one valid GPIO pin bit.
+ * - Non-`NULL`: Current configuration is written to @p `pConfig`
+ * @returns @ref driver_status_t "Mode/config extraction status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The current mode/config pair was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pMode` or @p `pConfig` was `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pin` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal decode failed unexpectedly
+ * @note @p `pin` must contain exactly one valid GPIO pin bit.
  */
 driver_status_t GPIO_GetPinModeConfig
 (
@@ -98,11 +98,11 @@ driver_status_t GPIO_GetPinModeConfig
  * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode/config pair was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p mode, or @p config was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
- * @note @p mode and @p config must form a valid STM32F1 GPIO mode/config pair.
+ * @returns @ref driver_status_t "Mode/config operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode/config pair was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx`, @p `pinMask`, @p `mode`, or @p `config` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly
+ * @note @p `mode` and @p `config` must form a valid STM32F1 GPIO mode/config pair.
  */
 driver_status_t GPIO_SetPinModeConfig
 (
@@ -114,6 +114,7 @@ driver_status_t GPIO_SetPinModeConfig
 
 /**
  * @brief Returns the current driver-facing mode selector for one GPIO pin
+ * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
  * @param[in] GPIOx GPIO peripheral instance
  * Accepted values:
  * - @ref `GPIOA`
@@ -132,12 +133,14 @@ driver_status_t GPIO_SetPinModeConfig
  * @retval - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`: Pin is in output mode with max speed 2 MHz
  * @retval - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`: Pin is in output mode with max speed 50 MHz
  * @note Returns @ref `GPIO_PIN_MODE_INPUT` if validation or decode fails.
- * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
  */
 gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Configures the mode field of one or more GPIO pins
+ * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
+ * and @ref `GPIO_SetPinModeConfig`. Existing configuration for every selected
+ * pin must remain compatible with @p `mode`.
  * @param[in] GPIOx GPIO peripheral instance
  * Accepted values:
  * - @ref `GPIOA`
@@ -156,13 +159,10 @@ gpio_pin_mode_t GPIO_GetPinMode(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin)
  * - @ref `GPIO_PIN_MODE_OUTPUT_10MHZ`
  * - @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
  * - @ref `GPIO_PIN_MODE_OUTPUT_50MHZ`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode field was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, or @p mode was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
- * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
- * and @ref `GPIO_SetPinModeConfig`.
- * Existing configuration for every selected pin must remain compatible with @p mode.
+ * @returns @ref driver_status_t "Mode field operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested mode field was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx`, @p `pinMask`, or @p `mode` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged
  * @note Use @ref `GPIO_SetPinModeConfig` when changing mode and config together.
  */
 driver_status_t GPIO_SetPinMode
@@ -174,6 +174,7 @@ driver_status_t GPIO_SetPinMode
 
 /**
  * @brief Returns the current driver-facing configuration selector for one GPIO pin
+ * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
  * @param[in] GPIOx GPIO peripheral instance
  * Accepted values:
  * - @ref `GPIOA`
@@ -196,12 +197,14 @@ driver_status_t GPIO_SetPinMode
  * @retval - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`: Pin is alternate-function output push-pull
  * @retval - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`: Pin is alternate-function output open-drain
  * @note Returns @ref `GPIO_PIN_CONFIG_INPUT_ANALOG` if validation or decode fails.
- * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`.
  */
 gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
 /**
  * @brief Configures the electrical configuration field of one or more GPIO pins
+ * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
+ * and @ref `GPIO_SetPinModeConfig`. Existing mode for every selected pin must
+ * remain compatible with @p `config`.
  * @param[in] GPIOx GPIO peripheral instance
  * Accepted values:
  * - @ref `GPIOA`
@@ -224,13 +227,10 @@ gpio_pin_config_t GPIO_GetPinConfig(GPIO_TypeDef* const GPIOx, const gpio_pin_t 
  * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration field was applied.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, or @p config was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged.
- * @details This is a convenience wrapper around @ref `GPIO_GetPinModeConfig`
- * and @ref `GPIO_SetPinModeConfig`.
- * Existing mode for every selected pin must remain compatible with @p config.
+ * @returns @ref driver_status_t "Configuration field operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration field was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx`, @p `pinMask`, or @p `config` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Existing pin state could not be decoded or staged
  * @note Use @ref `GPIO_SetPinModeConfig` when changing mode and config together.
  */
 driver_status_t GPIO_SetPinConfig
@@ -270,14 +270,14 @@ driver_status_t GPIO_SetPinConfig
  * - @ref `GPIO_PIN_CONFIG_OUTPUT_OPEN_DRAIN`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin configuration completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p mode, or @p config was invalid.
+ * @returns @ref driver_status_t "Pin initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin configuration completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx`, @p `pinMask`, @p `mode`, or @p `config` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The GPIO port clock gate (or, for alternate-function
- * @p config, the AFIO clock gate) is disabled, or the internal staged-image update failed unexpectedly.
+ * @p `config`, the AFIO clock gate) is disabled, or the internal staged-image update failed unexpectedly
  * @pre The application enabled the matching GPIO port clock gate, and the AFIO clock gate when
- * @p config is alternate-function, through the RCC driver before calling this API.
- * @note @p mode and @p config must form a valid STM32F1 GPIO mode/config pair.
+ * @p `config` is alternate-function, through the RCC driver before calling this API.
+ * @note @p `mode` and @p `config` must form a valid STM32F1 GPIO mode/config pair.
  * @note This API only verifies the required clock gate(s); it never enables them.
  */
 driver_status_t GPIO_Init
@@ -302,10 +302,10 @@ driver_status_t GPIO_Init
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pins were restored.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @returns @ref driver_status_t "Pin restoration status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected pins were restored
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pinMask` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly
  * @note STM32F1 GPIO reset configuration is input floating:
  * `MODE[1:0] = 0b00`, `CNF[1:0] = 0b01`, so each CRL/CRH pin field is `0x04U`
  * and a full CRL/CRH reset image is `0x44444444UL`.
@@ -333,12 +333,12 @@ driver_status_t GPIO_Deinit(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
  * @param[in] pin GPIO single-pin mask
  * Accepted values:
  * - One value from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver logic-level status
- * @retval - @ref `DRIVER_STATUS_OFF`: The sampled input bit was low.
- * @retval - @ref `DRIVER_STATUS_ON`: The sampled input bit was high.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pin was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal input image extraction failed.
- * @note @p pin must contain exactly one valid GPIO pin bit.
+ * @returns @ref driver_status_t "Logic-level read status"
+ * @retval - @ref `DRIVER_STATUS_OFF`: The sampled input bit was low
+ * @retval - @ref `DRIVER_STATUS_ON`: The sampled input bit was high
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pin` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal input image extraction failed
+ * @note @p `pin` must contain exactly one valid GPIO pin bit.
  */
 driver_status_t GPIO_PinGet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
 
@@ -356,9 +356,9 @@ driver_status_t GPIO_PinGet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pin);
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were set.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
+ * @returns @ref driver_status_t "Output-latch set operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were set
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pinMask` was invalid
  * @note This API writes through `GPIOx_BSRR`; it does not read or write `GPIOx_ODR`.
  */
 driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
@@ -377,9 +377,9 @@ driver_status_t GPIO_PinSet(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask)
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were reset.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
+ * @returns @ref driver_status_t "Output-latch reset operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were reset
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pinMask` was invalid
  * @note This API writes through `GPIOx_BRR`; it does not read or write `GPIOx_ODR`.
  */
 driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
@@ -398,10 +398,10 @@ driver_status_t GPIO_PinReset(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMas
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were toggled.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal output image extraction or staging failed.
+ * @returns @ref driver_status_t "Output-latch toggle operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected output latch bits were toggled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pinMask` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal output image extraction or staging failed
  * @note Toggle uses `GPIOx_ODR` read-modify-write because it must observe the
  * existing latch state before applying the inverted state.
  */
@@ -421,11 +421,11 @@ driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMa
  * @param[in] pinMask GPIO pin mask
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
- * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: LED pin configuration completed successfully.
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
+ * @returns @ref driver_status_t "LED pin initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: LED pin configuration completed successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `GPIOx` or @p `pinMask` was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The GPIO port clock gate is disabled, or the internal
- * staged-image update failed unexpectedly.
+ * staged-image update failed unexpectedly
  * @pre The application enabled the matching GPIO port clock gate through the RCC driver before
  * calling this API.
  * @note This API always configures selected pins as @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`

@@ -66,8 +66,8 @@ extern "C" {
  * @brief Checks if a GPIO pin index is inside the supported GPIO pin-index range
  * @param[in] pinIndex Zero-based GPIO pin index to check
  * @returns Pin-index validity status
- * @retval - `0U`: @p pinIndex is outside `0..15`
- * @retval - Non-zero: @p pinIndex is inside `0..15`
+ * @retval - `0x00U`: @p pinIndex is outside `0..15`
+ * @retval - `0x01U`: @p pinIndex is inside `0..15`
  * @def GPIO_PIN_INDEX_IS_VALID
  */
 #define GPIO_PIN_INDEX_IS_VALID(pinIndex)		\
@@ -254,7 +254,7 @@ __STATIC_FORCEINLINE gpio_pin_t GPIO_PinMaskExtractLowestPin(const gpio_pin_t pi
  * @brief Removes one selected pin from a GPIO pin mask image
  * @param[in,out]	pPinMask	GPIO pin mask image to update
  * @param[in]		pin			GPIO single-pin mask to remove
- * @returns Remove status
+ * @returns @ref driver_status_t "Remove status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pin was removed from @p pPinMask
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pPinMask is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p pin is not a single valid pin selected in @p pPinMask
@@ -373,8 +373,8 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinMaskRemovePin(gpio_pin_t* const pPi
  * @brief Validates a GPIO pin configuration value
  * @param[in]	config	GPIO pin configuration selector to check
  * @returns Validity status of the input GPIO pin configuration selector
- * @retval - `0U`: @p config is not a supported GPIO pin configuration selector
- * @retval - Non-zero: @p config is a supported GPIO pin configuration selector
+ * @retval - `0x00U`: @p config is not a supported GPIO pin configuration selector
+ * @retval - `0x01U`: @p config is a supported GPIO pin configuration selector
  * @def GPIO_PIN_CONFIG_IS_VALID
  */
 #define GPIO_PIN_CONFIG_IS_VALID(config)										\
@@ -441,8 +441,8 @@ __STATIC_FORCEINLINE driver_status_t GPIO_PinMaskRemovePin(gpio_pin_t* const pPi
  * @param[in]	mode	Driver GPIO mode selector
  * @param[in]	config	Driver GPIO configuration selector
  * @returns Compatibility status of the input GPIO mode/config pair
- * @retval - `0U`: @p mode and @p config are not compatible
- * @retval - Non-zero: @p mode and @p config are compatible
+ * @retval - `0x00U`: @p mode and @p config are not compatible
+ * @retval - `0x01U`: @p mode and @p config are compatible
  * @def GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR
  */
 #define GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, config)								\
