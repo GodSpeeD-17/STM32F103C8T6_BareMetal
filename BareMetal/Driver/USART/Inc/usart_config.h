@@ -1,365 +1,148 @@
 /**
- * @file usart_config.h
- * @author Shrey Shah
- * @brief USART Configuration
- * @version 1.0
- * @date 21-09-2025
+ * @file	usart_config.h
+ * @author	Shrey Shah
+ * @brief	Declares the USART Driver root configuration structures
+ * @version	v2.0
+ * @date	23-08-2026
+ *
+ * @details
+ * @section USART_CONFIG_H_HIERARCHY Hierarchy
+ * - Position: Layer 3 USART Driver configuration structures
+ * - Used by: `usart.h`/`.c`
+ * - Uses: `usart_data_types.h` scalar aliases, `usart_defines.h` selector values
+ *
+ * @section USART_CONFIG_H_RESPONSIBILITY Responsibility
+ * Owns the instance-independent `usart_config_t` structure-of-structures
+ * applied by `USART_Config()`. Keeping `USARTx` out of this structure lets
+ * one configuration be reused across `USART1`, `USART2`, and `USART3`.
+ *
+ * @section USART_CONFIG_H_BOUNDARY Dependency Boundary
+ * This header owns configuration structures only. It must not depend on
+ * `usart_codec.h`, `usart_ll.h`, or `usart.h`, and it performs no register
+ * access, clock sequencing, or GPIO pin-table ownership.
  */
 
-/*********************************************** Header Guards ***********************************************/
-#ifndef __USART_CONFIG_H__
-#define __USART_CONFIG_H__
+// Header Guard
+#ifndef USART_CONFIG_H_
+#define USART_CONFIG_H_
 
-/*********************************************** Includes ***********************************************/
-#include "gpio.h"
+// ==================================================================================================== //
+// Includes
+// ==================================================================================================== //
+#include "usart_data_types.h"
+#include "usart_defines.h"
 
-/*********************************************** USART MACROs ***********************************************/
-#define USART_MIN						USART_1
-#define USART_MAX						USART_3
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-/*********************************************** USART1 MACROs ***********************************************/
-#define USART1_CK_GPIO					GPIOA
-#define USART1_CK_PIN					GPIO_PIN_8
-#define USART1_TX_GPIO					GPIOA
-#define USART1_TX_PIN					GPIO_PIN_9
-#define USART1_RX_GPIO					GPIOA
-#define USART1_RX_PIN					GPIO_PIN_10
-#define USART1_CTS_GPIO					GPIOA
-#define USART1_CTS_PIN					GPIO_PIN_11
-#define USART1_RTS_GPIO					GPIOA
-#define USART1_RTS_PIN					GPIO_PIN_12
+/**
+ * @addtogroup USART_03_Driver
+ * @{
+ */
 
-/*********************************************** USART2 MACROs ***********************************************/
-#define USART2_CK_GPIO					GPIOA
-#define USART2_CK_PIN					GPIO_PIN_4
-#define USART2_TX_GPIO					GPIOA
-#define USART2_TX_PIN					GPIO_PIN_2
-#define USART2_RX_GPIO					GPIOA
-#define USART2_RX_PIN					GPIO_PIN_3
-#define USART2_CTS_GPIO					GPIOA
-#define USART2_CTS_PIN					GPIO_PIN_0
-#define USART2_RTS_GPIO					GPIOA
-#define USART2_RTS_PIN					GPIO_PIN_1
+/**
+ * @brief USART Driver configuration structures
+ * @defgroup USART_03_Driver_04_Config USART Driver Configuration Structures
+ * @ingroup USART_03_Driver
+ * @details
+ * `usart_config_t` is the root structure of structures for the currently
+ * admitted USART configuration domains. GPIO/AFIO pin routing is
+ * deliberately absent: it is private driver-owned data resolved internally
+ * by `USART_Config()`, not caller-supplied configuration.
+ * @{
+ */
 
-/*********************************************** USART3 MACROs ***********************************************/
-#define USART3_CK_GPIO					GPIOB
-#define USART3_CK_PIN					GPIO_PIN_12
-#define USART3_TX_GPIO					GPIOB
-#define USART3_TX_PIN					GPIO_PIN_10
-#define USART3_RX_GPIO					GPIOB
-#define USART3_RX_PIN					GPIO_PIN_11
-#define USART3_CTS_GPIO					GPIOB
-#define USART3_CTS_PIN					GPIO_PIN_13
-#define USART3_RTS_GPIO					GPIOB
-#define USART3_RTS_PIN					GPIO_PIN_14
+/**
+ * @brief USART line-format configuration
+ * @details
+ * Represents the `CR1.M`/`CR1.PCE`/`CR1.PS`/`CR2.STOP` domain as one
+ * coherent, instance-independent structure.
+ * @struct usart_config_line_t
+ */
+typedef struct
+{
+	/**
+	 * @brief Parity mode
+	 * Accepted values:
+	 * - @ref `USART_PARITY_NONE`
+	 * - @ref `USART_PARITY_EVEN`
+	 * - @ref `USART_PARITY_ODD`
+	 */
+	usart_parity_t			parity: 2;
 
-/*********************************************** USART Pin Generic Configuration ***********************************************/
-#define USART_TX_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHZ
-#define USART_TX_PIN_CONFIG				GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL
-#define USART_RX_PIN_MODE				GPIO_PIN_MODE_INPUT
-#define USART_RX_PIN_CONFIG				GPIO_PIN_CONFIG_INPUT_PULL_UP
-#define USART_RTS_PIN_MODE				GPIO_PIN_MODE_INPUT
-#define USART_RTS_PIN_CONFIG			GPIO_PIN_CONFIG_INPUT_PULL_UP
-#define USART_CTS_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHZ
-#define USART_CTS_PIN_CONFIG			GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL
-#define USART_CK_PIN_MODE				GPIO_PIN_MODE_OUTPUT_10MHZ
-#define USART_CK_PIN_CONFIG				GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL
+	/**
+	 * @brief Stop-bit count
+	 * Accepted values:
+	 * - @ref `USART_STOP_BIT_1`
+	 * - @ref `USART_STOP_BIT_0_5`
+	 * - @ref `USART_STOP_BIT_2`
+	 * - @ref `USART_STOP_BIT_1_5`
+	 */
+	usart_stop_bits_t		stopBits: 2;
 
-/*********************************************** USART Data Configuration ***********************************************/
-#define USART_DATA_BITS_SHIFT_Pos		(4)
-#define USART_DATA_BITS_Mask			(0x01 << USART_DATA_BITS_SHIFT_Pos)
-#define USART_EXTRACT_DATA_BITS(X)		(((X) & USART_DATA_BITS_Mask) >> USART_DATA_BITS_SHIFT_Pos)
-#define USART_PARITY_SHIFT_Pos			(2)
-#define USART_PARITY_Mask				(0x03 << USART_PARITY_SHIFT_Pos)
-#define USART_EXTRACT_PARITY(X)			(((X) & USART_PARITY_Mask) >> USART_PARITY_SHIFT_Pos)
-#define USART_STOP_BITS_SHIFT_Pos		(0)
-#define USART_STOP_BITS_Mask			(0x03 << USART_STOP_BITS_SHIFT_Pos)
-#define USART_EXTRACT_STOP_BITS(X)		(((X) & USART_STOP_BITS_Mask) >> USART_STOP_BITS_SHIFT_Pos)
+	/**
+	 * @brief Data-bit count
+	 * Accepted values:
+	 * - @ref `USART_DATA_BITS_8`
+	 * - @ref `USART_DATA_BITS_9`
+	 */
+	usart_data_bits_t		dataBits: 1;
 
-/*********************************************** USART Instances ***********************************************/
-typedef enum {
-	USART_1 = (uint8_t) 0x01,
-	USART_2,
-	USART_3,
-	USART_4,
-	USART_5
-} usart_t;
+} usart_config_line_t;
 
-/*********************************************** USART Baud Rate ***********************************************/
-typedef enum {
-	USART_BAUD_9600 = 0x00,
-	USART_BAUD_19200,
-	USART_BAUD_38400,
-	USART_BAUD_57600,
-	USART_BAUD_115200,
-	USART_BAUD_230400,
-	USART_BAUD_460800,
-	USART_BAUD_921600,
-} usart_baud_t;
+/**
+ * @brief USART root configuration
+ * @details
+ * Applied atomically by `USART_Config()`. IRQ-source enablement is
+ * deliberately absent, matching the Timer driver's rule that interrupt
+ * intent remains an explicit, separately sequenced application action
+ * through `USART_SetIRQSources()`.
+ * @struct usart_config_t
+ */
+typedef struct
+{
+	/**
+	 * @brief TX/RX/RTS/CTS pin-enable selection
+	 * Accepted values: (Any logical combination of)
+	 * - @ref `USART_HARDWARE_ENABLE_NONE`
+	 * - @ref `USART_HARDWARE_ENABLE_TX`
+	 * - @ref `USART_HARDWARE_ENABLE_RX`
+	 * - @ref `USART_HARDWARE_ENABLE_RTS`
+	 * - @ref `USART_HARDWARE_ENABLE_CTS`
+	 * - @ref `USART_HARDWARE_ENABLE_TX_RX`
+	 * - @ref `USART_HARDWARE_ENABLE_RTS_CTS`
+	 * - @ref `USART_HARDWARE_ENABLE_ALL`
+	 */
+	usart_hardware_enable_t	hardware;
 
-/*********************************************** USART Hardware Configuration ***********************************************/
-typedef enum {
-	// Disable All Hardware Pins
-	USART_ALL_DISABLE      = (uint8_t)0x00,
-	
-	// Communication Pins
-	USART_TX_ENABLE        = (uint8_t)0x01,
-	USART_RX_ENABLE        = (uint8_t)0x02,
-	USART_TX_RX_ENABLE     = (uint8_t)(USART_TX_ENABLE | USART_RX_ENABLE),
-	
-	// Hardware Flow Control Pins
-	USART_RTS_ENABLE       = (uint8_t)0x04,
-	USART_CTS_ENABLE       = (uint8_t)0x08,
-	USART_RTS_CTS_ENABLE   = (uint8_t)(USART_RTS_ENABLE | USART_CTS_ENABLE),
-	
-	// Clock pin
-	USART_CK_ENABLE        = (uint8_t)0x10,
-	
-	// Common combinations
-	USART_FULL_DUPLEX      = (uint8_t)(USART_TX_RX_ENABLE),
-	USART_HALF_DUPLEX_TX      = (uint8_t)(USART_TX_ENABLE),
-	USART_HALF_DUPLEX_RX      = (uint8_t)(USART_RX_ENABLE),
-	
-	// USART Full Flow Control
-	USART_FULL_FLOW_CONTROL = (uint8_t)(USART_TX_RX_ENABLE | USART_RTS_CTS_ENABLE),
-	USART_FULL_FEATURED     = (uint8_t)(USART_TX_RX_ENABLE | USART_RTS_CTS_ENABLE | USART_CK_ENABLE),
-	
-	// All pins enabled
-	USART_ALL_ENABLE       = (uint8_t)(USART_TX_ENABLE | USART_RX_ENABLE | USART_RTS_ENABLE | 
-									   USART_CTS_ENABLE | USART_CK_ENABLE)
-} usart_hardware_enable_t;
+	/** @brief Data-bit/parity/stop-bit line format */
+	usart_config_line_t		line;
 
-/*********************************************** USART Data Bits ***********************************************/
-typedef enum {
-	USART_8_BITS = (uint8_t) 0x00,
-	USART_9_BITS = (uint8_t) 0x01,
-} usart_data_bits_t;
+	/**
+	 * @brief Baud rate
+	 * Accepted values:
+	 * - @ref `USART_BAUD_RATE_9600`
+	 * - @ref `USART_BAUD_RATE_19200`
+	 * - @ref `USART_BAUD_RATE_38400`
+	 * - @ref `USART_BAUD_RATE_57600`
+	 * - @ref `USART_BAUD_RATE_115200`
+	 * - @ref `USART_BAUD_RATE_230400`
+	 * - @ref `USART_BAUD_RATE_460800`
+	 * - @ref `USART_BAUD_RATE_921600`
+	 */
+	usart_baud_rate_t			baudRate;
 
-/*********************************************** USART Parity Bits ***********************************************/
-typedef enum {
-	USART_PARITY_NONE = (uint8_t) 0x00,
-	USART_PARITY_EVEN = (uint8_t) 0x02,
-	USART_PARITY_ODD = (uint8_t) 0x03
-} usart_parity_t;
-
-/*********************************************** USART Stop Bits ***********************************************/
-typedef enum {
-	USART_STOP_BIT_1 = (uint8_t) 0x00,
-	USART_STOP_BIT_0_5 = (uint8_t) 0x01,
-	USART_STOP_BIT_2 = (uint8_t) 0x02,
-	USART_STOP_BIT_1_5 = (uint8_t) 0x03,
-} usart_stop_bits;
-
-/*********************************************** USART Data Configuration ***********************************************/
-typedef enum {
-	USART_CONFIG_8N1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8N0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8N1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8N2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8E1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8E0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8E1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8E2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8O1 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8O0_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8O1_5 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_8O2 = (uint8_t) ((USART_8_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9N1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9N0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9N1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9N2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_NONE << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9E1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9E0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9E1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9E2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_EVEN << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9O1 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9O0_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_0_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9O1_5 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_1_5 << USART_STOP_BITS_SHIFT_Pos)),
-	USART_CONFIG_9O2 = (uint8_t) ((USART_9_BITS << USART_DATA_BITS_SHIFT_Pos) | (USART_PARITY_ODD << USART_PARITY_SHIFT_Pos) | (USART_STOP_BIT_2 << USART_STOP_BITS_SHIFT_Pos)),
-} usart_data_config_t;
-
-/*********************************************** Custom USART Hardware Mapping Structure ***********************************************/
-typedef struct {
-	// GPIO Port
-	GPIO_TypeDef* GPIOx;
-	// GPIO Pin
-	gpio_pin_t pin;
-	// GPIO Pin Mode
-	gpio_pin_mode_t mode;
-	// GPIO Pin Configuration
-	gpio_pin_config_t config;
-} usart_pin_t;
-
-/*********************************************** USART GPIO Mapping Structure ***********************************************/
-typedef struct {
-	// USART TX Pin
-	usart_pin_t TX;
-	// USART RX Pin
-	usart_pin_t RX;
-	// USART RTS Pin
-	usart_pin_t RTS;
-	// USART CTS Pin
-	usart_pin_t CTS;
-	// USART Clock
-	usart_pin_t CK;
-} usart_gpio_t;
-
-/*********************************************** USART Configuration Structure ***********************************************/
-typedef struct {
-	// USART Hardware Pins
-	usart_hardware_enable_t hardware: 5;
-	// Baud Rate
-	usart_baud_t baud_rate: 4;
-	// USART Configuration
-	usart_data_config_t config: 5;
 } usart_config_t;
 
-/*********************************************** USART Lookup Table ***********************************************/
-extern const USART_TypeDef* __usartDriverRegisterMapping__[];
-/*********************************************** USART Clock APIs ***********************************************/
-/**
- * @brief Enables the USART Clock
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- */
-__STATIC_FORCEINLINE void __USART_enableClock__(const usart_t usart){
-	// USART 1
-	if(usart == USART_1){
-		RCC->APB2ENR.REG |= RCC_APB2ENR_USART1EN;
-	}
-	// USART2~5
-	else {
-		RCC->APB1ENR.REG |= (1 << ((usart - USART_2) + RCC_APB1ENR_USART2EN_Pos));
-	}
+/** @} */ // USART_03_Driver_04_Config
+
+/** @} */ // USART_03_Driver
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
-/**
- * @brief Disables the USART Clock
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- */
-__STATIC_FORCEINLINE void __USART_disableClock__(const usart_t usart){
-	// USART 1
-	if(usart == USART_1){
-		RCC->APB2ENR.REG &= ~RCC_APB2ENR_USART1EN;
-	}
-	// USART2~5
-	else {
-		RCC->APB1ENR.REG &= ~(1 << ((usart - USART_2) + RCC_APB1ENR_USART2EN_Pos));
-	}
-}
-
-/*********************************************** USART Module APIs ***********************************************/
-/**
- * @brief Retrieves the USART Register Mapping Structure
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return Pointer to USART Register Mapping Structure
- */
-__STATIC_FORCEINLINE USART_TypeDef* USART_Get_Mapping(const usart_t usart){
-	// USART Register Mapping
-	return (__usartDriverRegisterMapping__[usart]);
-}
-
-/**
- * @brief Enables the USART Module
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- */
-__STATIC_FORCEINLINE void USART_Enable(const usart_t usart){
-	// Enable the USART Module
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR1.REG |= USART_CR1_UE;
-}
-
-/**
- * @brief Disables the USART Module
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- */
-__STATIC_FORCEINLINE void USART_Disable(const usart_t usart){
-	// Disable the USART Module
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR1.REG &= ~USART_CR1_UE;
-}
-
-/*********************************************** USART Module APIs ***********************************************/
-/**
- * @brief Enables the TX using DMA
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- */
-__STATIC_FORCEINLINE void USART_DMA_TX_Enable(const usart_t usart){
-	// Enable the DMA TX
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR3.REG |= USART_CR3_DMAT;
-}
-
-/**
- * @brief Disables the TX using DMA
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
- */
-__STATIC_FORCEINLINE void USART_DMA_TX_Disable(const usart_t usart){
-	// Disable the DMA TX
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR3.REG &= ~USART_CR3_DMAT;
-}
-
-/**
- * @brief Enables the RX using DMA
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
- */
-__STATIC_FORCEINLINE void USART_DMA_RX_Enable(const usart_t usart){
-	// Enable the DMA RX
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR3.REG |= USART_CR3_DMAR;
-}
-
-/**
- * @brief Disables the RX using DMA
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
- */
-__STATIC_FORCEINLINE void USART_DMA_RX_Disable(const usart_t usart){
-	// Disable the DMA RX
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->CR3.REG &= ~USART_CR3_DMAR;
-}
-
-/*********************************************** USART Configuration Retrieving APIs ***********************************************/
-/**
- * @brief Retrieves USART GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_gpio_t* Pointer to USART GPIO Configuration Structure
- */
-const usart_gpio_t* USART_GPIO_Config_Get(const usart_t usart);
-
-/**
- * @brief Retrieves USART TX Pin GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_pin_t* Pointer to USART TX GPIO Configuration Structure
- */
-const usart_pin_t* USART_TX_GPIO_Config_Get(const usart_t usart);
-
-/**
- * @brief Retrieves USART RX Pin GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_pin_t* Pointer to USART RX GPIO Configuration Structure
- */
-const usart_pin_t* USART_RX_GPIO_Config_Get(const usart_t usart);
-
-/**
- * @brief Retrieves USART RTS Pin GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_pin_t* Pointer to USART RTS GPIO Configuration Structure
- */
-const usart_pin_t* USART_RTS_GPIO_Config_Get(const usart_t usart);
-
-/**
- * @brief Retrieves USART CTS Pin GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_pin_t* Pointer to USART CTS GPIO Configuration Structure
- */
-const usart_pin_t* USART_CTS_GPIO_Config_Get(const usart_t usart);
-
-/**
- * @brief Retrieves USART CK Pin GPIO Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`  
- * @return usart_pin_t* Pointer to USART CK GPIO Configuration Structure
- */
-const usart_pin_t* USART_CK_GPIO_Config_Get(const usart_t usart);
-
-#endif /* __USART_CONFIG_H__ */
+#endif /* USART_CONFIG_H_ */

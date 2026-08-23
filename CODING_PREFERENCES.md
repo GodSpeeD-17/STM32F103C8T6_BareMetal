@@ -293,6 +293,35 @@ the unsuffixed mask alias. A multi-bit field exposes `_Pos`, `_Width`,
 macros use `reg_bit_pos_t` and `reg_field_width_t`; mask macros use
 `REG_BIT_MASK()` or `REG_FIELD_MASK()`.
 
+## Selector Macro Naming Versus Typedef
+
+Every value macro for a selector typedef must carry that typedef's own stem
+(its name with the trailing `_t` removed), not merely live in the right
+Doxygen group or file section. Singular/plural drift is acceptable —
+`usart_stop_bits_t` pairing with `USART_STOP_BIT_1` / `_0_5` / `_2` / `_1_5`
+keeps the shared `STOP_BIT(S)` stem even though the typedef is plural and the
+values are singular — but dropping the stem entirely is not. Do not name
+values by only their narrower Doxygen subgroup or by convenience shorthand
+when the typedef itself implies a fuller name.
+
+The typedef's paired `_IS_VALID` validation macro is normally written with
+the complete stem already; if that validation macro's stem does not match
+the plain value macros, the value macros are the ones that drifted and must
+be renamed to match, not the validation macro. For example,
+`usart_data_bits_t` had values `USART_8_BITS` / `USART_9_BITS` beside an
+already-correct `USART_DATA_BITS_IS_VALID`; the values were renamed to
+`USART_DATA_BITS_8` / `USART_DATA_BITS_9`. Likewise `usart_hardware_enable_t`
+had values `USART_TX_ENABLE` / `USART_RX_ENABLE` / `USART_RTS_ENABLE` /
+`USART_CTS_ENABLE` / `USART_TX_RX_ENABLE` / `USART_RTS_CTS_ENABLE` /
+`USART_HARDWARE_ALL` / `USART_HARDWARE_NONE` beside an already-correct
+`USART_HARDWARE_ENABLE_IS_VALID`; every value was renamed onto the shared
+`USART_HARDWARE_ENABLE_*` stem (`_NONE`, `_TX`, `_RX`, `_RTS`, `_CTS`,
+`_TX_RX`, `_RTS_CTS`, `_ALL`).
+
+A consistent stem lets IDE autocomplete surface a selector's full value set
+the moment the typedef-derived prefix is typed, without the author needing to
+already know an unrelated shorthand name.
+
 Use tab characters, not runs of spaces, for macro value alignment and for the
 leading indentation of multi-line macro continuations. The single lexical
 separator after `#define` and the conventional ` *` inside Doxygen blocks are
@@ -870,6 +899,9 @@ that must remain consistent.
 
 ## Preference Log
 
+- 2026-08-23: Required every selector-typedef value macro to carry that
+  typedef's own stem, matching an already-correctly-named `_IS_VALID`
+  validation macro rather than the other way around.
 - 2026-08-22: Prohibited configuration structures that only bundle a small
   set of single-use scalar function arguments; required explicit typed
   parameters unless the values form a reusable domain object or invariant.

@@ -40,14 +40,17 @@ step below.
   - `Codec_USART_Extract/StageFlowControlState` (`CR3.RTSE/CTSE`)
   - `Codec_USART_Extract/StageOperationState` (`CR1.UE`)
   - `Codec_USART_Extract/StageBaudRate` (BRR mantissa/fraction from
-    `busFrequency` + numeric baud rate)
+    `busFrequency` + preset `usart_baud_rate_t` selector, resolved to bps
+    internally)
   - `Codec_USART_Extract/StageIRQSources` (`CR1` + `CR3` enable bits)
-  - `Codec_USART_ExtractIRQEvents` and the per-bit-correct
-    `Codec_USART_AckIRQEvents` (write-0-to-clear for `TC`/`CTS`; read-SR-then-
-    read-DR for `PE/FE/NE/ORE/IDLE/RXNE`; `TXE` never acknowledged)
+  - `Codec_USART_ExtractIRQEvents` (pure `SR` decode) and
+    `Codec_USART_StageIRQEventsClear` (write-0-to-clear staging for `TC`/
+    `CTS` only); the driver owns the actual read-SR-then-read-DR hardware
+    sequence for `PE/FE/NE/ORE/IDLE/RXNE` since that requires live register
+    access, which the codec does not perform. `TXE` is never acknowledged.
 - [ ] Refactor `Inc/usart_config.h`/`Src/usart_config.c` into the
   instance-independent `usart_config_t` root structure (hardware-enable,
-  data config, numeric baud rate) plus the per-instance default GPIO pin
+  data config, preset baud rate) plus the per-instance default GPIO pin
   table, re-keyed from `usart_t` enum index to `USART_TypeDef*` pointer
   identity.
 - [ ] Refactor `Inc/usart.h` into public API only, no inline hardware

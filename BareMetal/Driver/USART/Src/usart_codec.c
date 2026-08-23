@@ -1,0 +1,669 @@
+/**
+ * @file	usart_codec.c
+ * @author	Shrey Shah
+ * @brief	USART Selector Codec Implementation
+ * @version	v1.0
+ * @date	23-08-2026
+ *
+ * @details
+ * This source file implements the USART codec layer. It encodes
+ * driver-facing USART selectors into raw STM32F1 USART fields, decodes raw
+ * fields back into driver-facing selectors, and returns updated
+ * caller-owned register images. It does not read or write peripheral
+ * hardware.
+ */
+
+// ==================================================================================================== //
+//												Includes												//
+// ==================================================================================================== //
+#include "usart_codec.h"
+
+// ==================================================================================================== //
+//												Local Defines											//
+// ==================================================================================================== //
+
+/** @brief Width of a one-bit USART register field @def USART_CODEC_FIELD_WIDTH_1BIT */
+#define USART_CODEC_FIELD_WIDTH_1BIT				((reg_field_width_t) 0x01U)
+/** @brief Baud-rate preset count @def USART_CODEC_BAUD_RATE_PRESET_COUNT */
+#define USART_CODEC_BAUD_RATE_PRESET_COUNT			((uint8_t) 0x08U)
+/** @brief USART `SR` flags with write-0-to-clear behavior @def USART_CODEC_SR_W0C_FLAG_MASK */
+#define USART_CODEC_SR_W0C_FLAG_MASK				(USART_SR_TC_Msk | USART_SR_CTS_Msk)
+
+// ==================================================================================================== //
+//										Local Baud-Rate Preset Table									//
+// ==================================================================================================== //
+
+/**
+ * @brief Numeric bits-per-second value for each supported @ref usart_baud_rate_t preset
+ * @details Indexed by the preset's ordinal selector value.
+ */
+static const uint32_t __usartCodecBaudRatePresetTable__[USART_CODEC_BAUD_RATE_PRESET_COUNT] =
+{
+	[USART_BAUD_RATE_9600]		= 9600UL,
+	[USART_BAUD_RATE_19200]		= 19200UL,
+	[USART_BAUD_RATE_38400]		= 38400UL,
+	[USART_BAUD_RATE_57600]		= 57600UL,
+	[USART_BAUD_RATE_115200]	= 115200UL,
+	[USART_BAUD_RATE_230400]	= 230400UL,
+	[USART_BAUD_RATE_460800]	= 460800UL,
+	[USART_BAUD_RATE_921600]	= 921600UL,
+};
+
+// ==================================================================================================== //
+//										Local Register Image Helpers									//
+// ==================================================================================================== //
+
+/**
+ * @brief Validates whether a state selector is an accepted ON/OFF state
+ * @param[in] state Driver state selector
+ * @returns @ref driver_status_t "Binary-state validation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p state is accepted
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not @ref `DRIVER_STATUS_OFF` or @ref `DRIVER_STATUS_ON`
+ */
+__STATIC_FORCEINLINE driver_status_t Codec_USART_ValidateState(const driver_status_t state)
+{
+	//! Codec binary state helpers accept only explicit OFF/ON states, never generic SUCCESS/ERROR states.
+	if ((state != DRIVER_STATUS_OFF) && (state != DRIVER_STATUS_ON))
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+/**
+ * @brief Extracts one positive-polarity bit state from a register image
+ * @param[in] regImage Caller-owned register image
+ * @param[in] bitMask Register-positioned bit mask
+ * @returns @ref driver_status_t "Decoded state"
+ * @retval - @ref `DRIVER_STATUS_OFF`: @p bitMask is clear in @p regImage
+ * @retval - @ref `DRIVER_STATUS_ON`: @p bitMask is set in @p regImage
+ */
+__STATIC_FORCEINLINE driver_status_t Codec_USART_ExtractBitStateFromImage(const reg regImage, const reg bitMask)
+{
+	//! Positive-polarity hardware bit convention: clear means OFF, set means ON.
+	if ((regImage & bitMask) != 0x00000000UL)
+	{
+		return DRIVER_STATUS_ON;
+	}
+	else
+	{
+		return DRIVER_STATUS_OFF;
+	}
+}
+
+/**
+ * @brief Stages one positive-polarity bit state inside a register image
+ * @param[in,out] pRegImage Caller-owned register image to update in place
+ * @param[in] bitMask Register-positioned bit mask
+ * @param[in] state Requested ON/OFF state
+ * @returns @ref driver_status_t "Staging status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p bitMask was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pRegImage is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p state is not an accepted state
+ */
+__STATIC_FORCEINLINE driver_status_t Codec_USART_StageBitStateInImage
+(
+	reg* const				pRegImage,
+	const reg				bitMask,
+	const driver_status_t	state
+)
+{
+	// Validate Input
+	if (pRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(Codec_USART_ValidateState(state));
+
+	// Local Variable
+	reg updatedRegImage = *pRegImage;
+
+	//! Convert the driver ON/OFF state into the raw bit value and stage only that bit.
+	if (state == DRIVER_STATUS_ON)
+	{
+		updatedRegImage |= bitMask;
+	}
+	else
+	{
+		updatedRegImage &= ~bitMask;
+	}
+
+	*pRegImage = updatedRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										USART Hardware Enable Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractHardwareEnableState
+(
+	const reg					cr1RegImage,
+	const reg					cr3RegImage,
+	usart_hardware_enable_t* const	pHardware
+)
+{
+	if (pHardware == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	// Local Variable
+	usart_hardware_enable_t hardware = USART_HARDWARE_ENABLE_NONE;
+
+	//! TX/RX live in CR1; RTS/CTS flow control lives in CR3 — combine into one abstract bitmask.
+	if ((cr1RegImage & USART_CR1_TE_Msk) != 0x00000000UL)
+	{
+		hardware |= USART_HARDWARE_ENABLE_TX;
+	}
+	if ((cr1RegImage & USART_CR1_RE_Msk) != 0x00000000UL)
+	{
+		hardware |= USART_HARDWARE_ENABLE_RX;
+	}
+	if ((cr3RegImage & USART_CR3_RTSE_Msk) != 0x00000000UL)
+	{
+		hardware |= USART_HARDWARE_ENABLE_RTS;
+	}
+	if ((cr3RegImage & USART_CR3_CTSE_Msk) != 0x00000000UL)
+	{
+		hardware |= USART_HARDWARE_ENABLE_CTS;
+	}
+
+	*pHardware = hardware;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_USART_StageHardwareEnableState
+(
+	reg* const						pCr1RegImage,
+	reg* const						pCr3RegImage,
+	const usart_hardware_enable_t	hardware
+)
+{
+	if ((pCr1RegImage == NULL) || (pCr3RegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (USART_HARDWARE_ENABLE_IS_VALID(hardware) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	// Local Variables
+	reg updatedCr1RegImage = *pCr1RegImage;
+	reg updatedCr3RegImage = *pCr3RegImage;
+
+	//! Stage each pin-enable bit independently; unrelated CR1/CR3 bits are preserved.
+	if ((hardware & USART_HARDWARE_ENABLE_TX) != 0x00U)
+	{
+		updatedCr1RegImage |= USART_CR1_TE_Msk;
+	}
+	else
+	{
+		updatedCr1RegImage &= ~USART_CR1_TE_Msk;
+	}
+
+	if ((hardware & USART_HARDWARE_ENABLE_RX) != 0x00U)
+	{
+		updatedCr1RegImage |= USART_CR1_RE_Msk;
+	}
+	else
+	{
+		updatedCr1RegImage &= ~USART_CR1_RE_Msk;
+	}
+
+	if ((hardware & USART_HARDWARE_ENABLE_RTS) != 0x00U)
+	{
+		updatedCr3RegImage |= USART_CR3_RTSE_Msk;
+	}
+	else
+	{
+		updatedCr3RegImage &= ~USART_CR3_RTSE_Msk;
+	}
+
+	if ((hardware & USART_HARDWARE_ENABLE_CTS) != 0x00U)
+	{
+		updatedCr3RegImage |= USART_CR3_CTSE_Msk;
+	}
+	else
+	{
+		updatedCr3RegImage &= ~USART_CR3_CTSE_Msk;
+	}
+
+	*pCr1RegImage = updatedCr1RegImage;
+	*pCr3RegImage = updatedCr3RegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										USART Data-Config Codecs										//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractDataConfig
+(
+	const reg					cr1RegImage,
+	const reg					cr2RegImage,
+	usart_config_line_t* const	pLine
+)
+{
+	if (pLine == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `M` maps directly onto `usart_data_bits_t`; both are single-bit, exhaustively valid.
+	pLine->dataBits = (usart_data_bits_t) RegOps_ExtractFieldValue(cr1RegImage, USART_CR1_M_Msk, USART_CR1_M_Pos);
+
+	//! Parity is synthesized from PCE/PS: PCE clear means no parity regardless of PS.
+	if ((cr1RegImage & USART_CR1_PCE_Msk) == 0x00000000UL)
+	{
+		pLine->parity = USART_PARITY_NONE;
+	}
+	else if ((cr1RegImage & USART_CR1_PS_Msk) == 0x00000000UL)
+	{
+		pLine->parity = USART_PARITY_EVEN;
+	}
+	else
+	{
+		pLine->parity = USART_PARITY_ODD;
+	}
+
+	//! `STOP[1:0]` maps directly onto `usart_stop_bits_t`'s raw-compatible encoding.
+	pLine->stopBits = (usart_stop_bits_t) RegOps_ExtractFieldValue(cr2RegImage, USART_CR2_STOP_Msk, USART_CR2_STOP_Pos);
+
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_USART_StageDataConfig
+(
+	reg* const						pCr1RegImage,
+	reg* const						pCr2RegImage,
+	const usart_config_line_t* const	pLine
+)
+{
+	if ((pCr1RegImage == NULL) || (pCr2RegImage == NULL) || (pLine == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (USART_DATA_BITS_IS_VALID(pLine->dataBits) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	if (USART_PARITY_IS_VALID(pLine->parity) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	if (USART_STOP_BITS_IS_VALID(pLine->stopBits) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	// Local Variables
+	reg updatedCr1RegImage = *pCr1RegImage;
+	reg updatedCr2RegImage = *pCr2RegImage;
+
+	updatedCr1RegImage = RegOps_StageFieldValue
+	(
+		updatedCr1RegImage, USART_CR1_M_Pos, (reg) pLine->dataBits, USART_CODEC_FIELD_WIDTH_1BIT
+	);
+
+	//! Decompose the ordinal parity selector back into the PCE/PS bit pair.
+	if (pLine->parity != USART_PARITY_NONE)
+	{
+		updatedCr1RegImage |= USART_CR1_PCE_Msk;
+	}
+	else
+	{
+		updatedCr1RegImage &= ~USART_CR1_PCE_Msk;
+	}
+
+	if (pLine->parity == USART_PARITY_ODD)
+	{
+		updatedCr1RegImage |= USART_CR1_PS_Msk;
+	}
+	else
+	{
+		updatedCr1RegImage &= ~USART_CR1_PS_Msk;
+	}
+
+	updatedCr2RegImage = RegOps_StageFieldValue
+	(
+		updatedCr2RegImage, USART_CR2_STOP_Pos, (reg) pLine->stopBits, USART_CR2_STOP_Width
+	);
+
+	*pCr1RegImage = updatedCr1RegImage;
+	*pCr2RegImage = updatedCr2RegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										USART Operation-State Codecs									//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractOperationState(const reg cr1RegImage)
+{
+	//! UE uses normal positive polarity: clear means disabled, set means enabled.
+	return Codec_USART_ExtractBitStateFromImage(cr1RegImage, USART_CR1_UE_Msk);
+}
+
+driver_status_t Codec_USART_StageOperationState
+(
+	reg* const				pCr1RegImage,
+	const driver_status_t	operationState
+)
+{
+	return Codec_USART_StageBitStateInImage(pCr1RegImage, USART_CR1_UE_Msk, operationState);
+}
+
+// ==================================================================================================== //
+//										USART Baud Rate Codecs											//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractBaudRate
+(
+	const reg					brrRegImage,
+	const frequency_t			busFrequency,
+	usart_baud_rate_t* const	pBaudRate
+)
+{
+	if (pBaudRate == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (busFrequency == 0x00000000UL)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	// Local Variables
+	reg mantissa = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_MANTISSA_Msk, USART_BRR_DIV_MANTISSA_Pos);
+	reg fraction = RegOps_ExtractFieldValue(brrRegImage, USART_BRR_DIV_FRACTION_Msk, USART_BRR_DIV_FRACTION_Pos);
+	reg rawDivider = (mantissa << USART_BRR_DIV_FRACTION_Width) | fraction;
+
+	if (rawDivider == 0x00000000UL)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	//! `16 * USARTDIV` equals the raw 16-bit divider, so the actual baud rate is a direct division.
+	uint32_t actualBaudRate = busFrequency / rawDivider;
+
+	//! Resolve the closest supported preset; BRR quantization means this is rarely an exact match.
+	uint8_t closestIndex = 0x00U;
+	uint32_t closestDelta = 0xFFFFFFFFUL;
+	for (uint8_t index = 0x00U; index < USART_CODEC_BAUD_RATE_PRESET_COUNT; index++)
+	{
+		uint32_t presetBps = __usartCodecBaudRatePresetTable__[index];
+		uint32_t delta = 0x00000000UL;
+
+		if (actualBaudRate > presetBps)
+		{
+			delta = actualBaudRate - presetBps;
+		}
+		else
+		{
+			delta = presetBps - actualBaudRate;
+		}
+
+		if (delta < closestDelta)
+		{
+			closestDelta = delta;
+			closestIndex = index;
+		}
+	}
+
+	*pBaudRate = (usart_baud_rate_t) closestIndex;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_USART_StageBaudRate
+(
+	reg* const				pBrrRegImage,
+	const frequency_t		busFrequency,
+	const usart_baud_rate_t	baudRate
+)
+{
+	if (pBrrRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (USART_BAUD_RATE_IS_VALID(baudRate) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	if (busFrequency == 0x00000000UL)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	// Local Variables
+	uint32_t targetBps = __usartCodecBaudRatePresetTable__[baudRate];
+
+	//! USARTDIV * 100, fixed-point, per RM0008's 16x-oversampled asynchronous formula.
+	uint32_t scaledDivider = (busFrequency * 25UL) / (4UL * targetBps);
+	uint32_t mantissa = scaledDivider / 100UL;
+	uint32_t fractionRemainder = scaledDivider - (mantissa * 100UL);
+	uint32_t fraction = ((fractionRemainder * 16UL) + 50UL) / 100UL;
+
+	//! Rounding the fraction up to 16 carries one unit into the mantissa.
+	if (fraction >= 16UL)
+	{
+		mantissa += 1UL;
+		fraction = 0UL;
+	}
+
+	reg updatedBrrRegImage = *pBrrRegImage;
+	updatedBrrRegImage = RegOps_StageFieldValue
+	(
+		updatedBrrRegImage, USART_BRR_DIV_MANTISSA_Pos, (reg) mantissa, USART_BRR_DIV_MANTISSA_Width
+	);
+	updatedBrrRegImage = RegOps_StageFieldValue
+	(
+		updatedBrrRegImage, USART_BRR_DIV_FRACTION_Pos, (reg) fraction, USART_BRR_DIV_FRACTION_Width
+	);
+
+	*pBrrRegImage = updatedBrrRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										USART IRQ Source Codecs										//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractIRQSources
+(
+	const reg					cr1RegImage,
+	const reg					cr3RegImage,
+	usart_irq_source_t* const	pSources
+)
+{
+	if (pSources == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	// Local Variable
+	usart_irq_source_t sources = USART_IRQ_SOURCE_NONE;
+
+	//! Sources span CR1 (local status interrupts) and CR3 (CTS/error interrupts).
+	if ((cr1RegImage & USART_CR1_IDLEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_IDLE; }
+	if ((cr1RegImage & USART_CR1_RXNEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_RXNE; }
+	if ((cr1RegImage & USART_CR1_TCIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TC; }
+	if ((cr1RegImage & USART_CR1_TXEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TXE; }
+	if ((cr1RegImage & USART_CR1_PEIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_PE; }
+	if ((cr3RegImage & USART_CR3_CTSIE_Msk) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_CTS; }
+	if ((cr3RegImage & USART_CR3_EIE_Msk) != 0x00000000UL)		{ sources |= USART_IRQ_SOURCE_ERROR; }
+
+	*pSources = sources;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_USART_StageIRQSources
+(
+	reg* const					pCr1RegImage,
+	reg* const					pCr3RegImage,
+	const usart_irq_source_t	sources,
+	const driver_status_t		sourceState
+)
+{
+	if ((pCr1RegImage == NULL) || (pCr3RegImage == NULL))
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (USART_IRQ_SOURCE_IS_VALID(sources) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+	ASSERT_DRIVER_STATUS(Codec_USART_ValidateState(sourceState));
+
+	// Local Variables
+	reg updatedCr1RegImage = *pCr1RegImage;
+	reg updatedCr3RegImage = *pCr3RegImage;
+	uint8_t setBits = 0x00U;
+
+	if (sourceState == DRIVER_STATUS_ON)
+	{
+		setBits = 0x01U;
+	}
+	else
+	{
+		setBits = 0x00U;
+	}
+
+	//! Stage only the CR1/CR3 enable bits selected by `sources`, leaving every other bit untouched.
+	if ((sources & USART_IRQ_SOURCE_IDLE) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr1RegImage |= USART_CR1_IDLEIE_Msk;
+		}
+		else
+		{
+			updatedCr1RegImage &= ~USART_CR1_IDLEIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_RXNE) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr1RegImage |= USART_CR1_RXNEIE_Msk;
+		}
+		else
+		{
+			updatedCr1RegImage &= ~USART_CR1_RXNEIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_TC) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr1RegImage |= USART_CR1_TCIE_Msk;
+		}
+		else
+		{
+			updatedCr1RegImage &= ~USART_CR1_TCIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_TXE) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr1RegImage |= USART_CR1_TXEIE_Msk;
+		}
+		else
+		{
+			updatedCr1RegImage &= ~USART_CR1_TXEIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_PE) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr1RegImage |= USART_CR1_PEIE_Msk;
+		}
+		else
+		{
+			updatedCr1RegImage &= ~USART_CR1_PEIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_CTS) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr3RegImage |= USART_CR3_CTSIE_Msk;
+		}
+		else
+		{
+			updatedCr3RegImage &= ~USART_CR3_CTSIE_Msk;
+		}
+	}
+
+	if ((sources & USART_IRQ_SOURCE_ERROR) != 0x00U)
+	{
+		if (setBits != 0x00U)
+		{
+			updatedCr3RegImage |= USART_CR3_EIE_Msk;
+		}
+		else
+		{
+			updatedCr3RegImage &= ~USART_CR3_EIE_Msk;
+		}
+	}
+
+	*pCr1RegImage = updatedCr1RegImage;
+	*pCr3RegImage = updatedCr3RegImage;
+	return DRIVER_STATUS_SUCCESS;
+}
+
+// ==================================================================================================== //
+//										USART IRQ Event Codecs											//
+// ==================================================================================================== //
+
+driver_status_t Codec_USART_ExtractIRQEvents
+(
+	const reg				srRegImage,
+	usart_event_flag_t* const	pEvents
+)
+{
+	if (pEvents == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+
+	//! `SR[9:0]` bit positions are identical to the public event-flag bit positions.
+	*pEvents = (usart_event_flag_t) (srRegImage & USART_IRQ_EVENT_ALL);
+	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t Codec_USART_StageIRQEventsClear
+(
+	reg* const				pSrRegImage,
+	const usart_event_flag_t	events
+)
+{
+	if (pSrRegImage == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	if (USART_IRQ_EVENT_IS_VALID(events) == 0x00U)
+	{
+		return DRIVER_STATUS_ERROR_INVALID_ARG;
+	}
+
+	// Local Variable
+	reg updatedRegImage = *pSrRegImage;
+
+	//! Only TC/CTS clear through an SR write; write 1 to every other w0c flag so it is preserved.
+	const reg toClear = ((reg) events) & USART_CODEC_SR_W0C_FLAG_MASK;
+	updatedRegImage |= (USART_CODEC_SR_W0C_FLAG_MASK & ~toClear);
+	updatedRegImage &= ~toClear;
+
+	*pSrRegImage = updatedRegImage;
+	return DRIVER_STATUS_SUCCESS;
+}

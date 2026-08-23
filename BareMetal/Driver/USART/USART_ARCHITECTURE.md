@@ -63,8 +63,10 @@ removed as part of this migration.
 - Keep IRQ *sources* (enable bits) and IRQ *events* (status flags) as
   separate vocabularies, matching the Timer driver's
   `tim_irq_source_t`/`tim_event_flag_t` split.
-- Keep baud rate as an explicit numeric value computed against the live bus
-  frequency, not a fixed preset enum.
+- Keep baud rate as a fixed preset selector (matching the original
+  `usart_baud_t` enum's supported rates), resolved to its numeric
+  bits-per-second value inside the codec before computing the divider
+  against the live bus frequency.
 
 ## Implementation Rules
 
@@ -118,8 +120,9 @@ Use the codec layer for:
 - `RTSE`/`CTSE` hardware flow-control staging in `CR3`.
 - `UE` operation-state staging in `CR1`.
 - BRR mantissa/fraction computation from `(busFrequency, baudRate)` per
-  RM0008 — pure arithmetic, no register access, so it belongs here rather
-  than in the driver.
+  RM0008, where `baudRate` is resolved from its preset selector to a numeric
+  bits-per-second value first — pure arithmetic, no register access, so it
+  belongs here rather than in the driver.
 - IRQ source staging/extraction across `CR1` (`IDLEIE/RXNEIE/TCIE/TXEIE/
   PEIE`) and `CR3` (`CTSIE`, `EIE`).
 - IRQ event extraction from `SR`, with the asymmetric acknowledgement rules
@@ -190,20 +193,21 @@ ASSERT_DRIVER_STATUS(USART_Config(USART1, &config));
 
 ## Baud Rate Policy
 
-Replace the current fixed `usart_baud_t` enum (9600..921600) and its
-`__usartDriverBaudRateMapping__[]` lookup table with a plain numeric baud
-rate value, matching the Timer stack's precedent of removing frequency-preset
-functions in favor of explicit configuration data. The codec computes the
-`BRR` mantissa/fraction directly from the live bus frequency
-(`RCC_GetBusFrequency()`) and the requested numeric baud rate:
+Keep the original `usart_baud_t` preset vocabulary (`9600`..`921600`),
+carried forward as the current `usart_baud_rate_t`/`USART_BAUD_RATE_*`
+selector convention instead of the old enum-plus-lookup-table shape. The
+codec resolves the selected preset to its numeric bits-per-second value
+internally and computes the `BRR` mantissa/fraction against the live bus
+frequency (`RCC_GetBusFrequency()`):
 
 ```c
-driver_status_t Codec_USART_StageBaudRate(const frequency_t busFrequency, const uint32_t baudRate, reg* const pBRRImage);
-driver_status_t Codec_USART_ExtractBaudRate(const frequency_t busFrequency, const reg brrImage, uint32_t* const pBaudRate);
+driver_status_t Codec_USART_StageBaudRate(reg* const pBrrRegImage, const frequency_t busFrequency, const usart_baud_rate_t baudRate);
+driver_status_t Codec_USART_ExtractBaudRate(const reg brrRegImage, const frequency_t busFrequency, usart_baud_rate_t* const pBaudRate);
 ```
 
-No baud-rate preset constants or lookup table remain; callers provide the
-numeric rate they want directly.
+`Codec_USART_ExtractBaudRate()` resolves the closest supported preset to the
+raw `BRR` divider; it is not guaranteed to round-trip exactly because `BRR`
+quantizes to 1/16th-bit-period steps.
 
 ## IRQ Source/Event Model
 
@@ -253,8 +257,10 @@ Not preserved (deliberate breaks, each with a stated reason):
 - `usart_t` enum and `__usartDriverRegisterMapping__[]` — replaced by direct
   `USART_TypeDef*` pointer identity, matching `GPIOx`/`TIMx`.
 - `USART_4`/`USART_5` selectors — the peripherals don't exist on this part.
-- `usart_baud_t` preset enum and its lookup table — replaced by a numeric
-  baud rate value.
+- `__usartDriverBaudRateMapping__[]` public lookup table — the preset
+  vocabulary itself is kept (renamed to `usart_baud_rate_t`/
+  `USART_BAUD_RATE_*`), but the bps resolution table moves inside
+  `usart_codec.c` as private implementation detail.
 - `usart_irq_t` single-vocabulary enum and the `irq & 0x1F` shift trick —
   replaced by the `usart_irq_source_t`/`usart_event_flag_t` split.
 - `__USART_enableClock__()`/`__USART_disableClock__()` — removed; the

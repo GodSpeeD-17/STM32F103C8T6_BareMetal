@@ -89,22 +89,22 @@ extern "C" {
  * @{
  */
 
-/** @brief No USART hardware pins selected @def USART_HARDWARE_NONE */
-#define USART_HARDWARE_NONE						((usart_hardware_enable_t) 0x00U)
-/** @brief Enables the transmitter pin @def USART_TX_ENABLE */
-#define USART_TX_ENABLE							((usart_hardware_enable_t) 0x01U)
-/** @brief Enables the receiver pin @def USART_RX_ENABLE */
-#define USART_RX_ENABLE							((usart_hardware_enable_t) 0x02U)
-/** @brief Enables both the transmitter and receiver pins @def USART_TX_RX_ENABLE */
-#define USART_TX_RX_ENABLE						((usart_hardware_enable_t) (USART_TX_ENABLE | USART_RX_ENABLE))
-/** @brief Enables the RTS hardware flow-control pin @def USART_RTS_ENABLE */
-#define USART_RTS_ENABLE						((usart_hardware_enable_t) 0x04U)
-/** @brief Enables the CTS hardware flow-control pin @def USART_CTS_ENABLE */
-#define USART_CTS_ENABLE						((usart_hardware_enable_t) 0x08U)
-/** @brief Enables both the RTS and CTS hardware flow-control pins @def USART_RTS_CTS_ENABLE */
-#define USART_RTS_CTS_ENABLE					((usart_hardware_enable_t) (USART_RTS_ENABLE | USART_CTS_ENABLE))
-/** @brief All currently supported USART hardware pins @def USART_HARDWARE_ALL */
-#define USART_HARDWARE_ALL						((usart_hardware_enable_t) (USART_TX_RX_ENABLE | USART_RTS_CTS_ENABLE))
+/** @brief No USART hardware pins selected @def USART_HARDWARE_ENABLE_NONE */
+#define USART_HARDWARE_ENABLE_NONE						((usart_hardware_enable_t) 0x00U)
+/** @brief Enables the transmitter pin @def USART_HARDWARE_ENABLE_TX */
+#define USART_HARDWARE_ENABLE_TX							((usart_hardware_enable_t) 0x01U)
+/** @brief Enables the receiver pin @def USART_HARDWARE_ENABLE_RX */
+#define USART_HARDWARE_ENABLE_RX							((usart_hardware_enable_t) 0x02U)
+/** @brief Enables both the transmitter and receiver pins @def USART_HARDWARE_ENABLE_TX_RX */
+#define USART_HARDWARE_ENABLE_TX_RX						((usart_hardware_enable_t) (USART_HARDWARE_ENABLE_TX | USART_HARDWARE_ENABLE_RX))
+/** @brief Enables the RTS hardware flow-control pin @def USART_HARDWARE_ENABLE_RTS */
+#define USART_HARDWARE_ENABLE_RTS						((usart_hardware_enable_t) 0x04U)
+/** @brief Enables the CTS hardware flow-control pin @def USART_HARDWARE_ENABLE_CTS */
+#define USART_HARDWARE_ENABLE_CTS						((usart_hardware_enable_t) 0x08U)
+/** @brief Enables both the RTS and CTS hardware flow-control pins @def USART_HARDWARE_ENABLE_RTS_CTS */
+#define USART_HARDWARE_ENABLE_RTS_CTS					((usart_hardware_enable_t) (USART_HARDWARE_ENABLE_RTS | USART_HARDWARE_ENABLE_CTS))
+/** @brief All currently supported USART hardware pins @def USART_HARDWARE_ENABLE_ALL */
+#define USART_HARDWARE_ENABLE_ALL						((usart_hardware_enable_t) (USART_HARDWARE_ENABLE_TX_RX | USART_HARDWARE_ENABLE_RTS_CTS))
 
 /**
  * @brief Returns whether a hardware-enable bitmask is a supported combination
@@ -115,7 +115,7 @@ extern "C" {
  * @def USART_HARDWARE_ENABLE_IS_VALID
  */
 #define USART_HARDWARE_ENABLE_IS_VALID(hardware)		\
-	(((usart_hardware_enable_t) (hardware) & (usart_hardware_enable_t) (~USART_HARDWARE_ALL)) == 0x00U)
+	(((usart_hardware_enable_t) (hardware) & (usart_hardware_enable_t) (~USART_HARDWARE_ENABLE_ALL)) == 0x00U)
 
 /** @} */ // USART_03_Driver_02_Defines_02_Hardware
 
@@ -130,10 +130,10 @@ extern "C" {
  * @{
  */
 
-/** @brief 8 data bits per frame @def USART_8_BITS */
-#define USART_8_BITS							((usart_data_bits_t) 0x00U)
-/** @brief 9 data bits per frame @def USART_9_BITS */
-#define USART_9_BITS							((usart_data_bits_t) 0x01U)
+/** @brief 8 data bits per frame @def USART_DATA_BITS_8 */
+#define USART_DATA_BITS_8							((usart_data_bits_t) 0x00U)
+/** @brief 9 data bits per frame @def USART_DATA_BITS_9 */
+#define USART_DATA_BITS_9							((usart_data_bits_t) 0x01U)
 
 /**
  * @brief Returns whether a data-bit-count selector is supported
@@ -144,7 +144,7 @@ extern "C" {
  * @def USART_DATA_BITS_IS_VALID
  */
 #define USART_DATA_BITS_IS_VALID(dataBits)				\
-	(((dataBits) == USART_8_BITS) || ((dataBits) == USART_9_BITS))
+	(((dataBits) == USART_DATA_BITS_8) || ((dataBits) == USART_DATA_BITS_9))
 
 /** @brief No parity bit @def USART_PARITY_NONE */
 #define USART_PARITY_NONE						((usart_parity_t) 0x00U)
@@ -191,28 +191,43 @@ extern "C" {
 // ==================================================================================================== //
 
 /**
- * @brief USART numeric baud-rate validation
+ * @brief USART preset baud-rate selectors
  * @defgroup USART_03_Driver_02_Defines_04_BaudRate USART Baud Rate Defines
  * @ingroup USART_03_Driver_02_Defines
  * @details
- * There is no preset enum. Callers supply an explicit numeric baud rate;
- * `usart_codec.h` computes the `BRR` divider against the live bus frequency.
+ * Callers select a fixed preset; `usart_codec.h` resolves the preset to its
+ * numeric bits-per-second value and computes the `BRR` divider against the
+ * live bus frequency.
  * @{
  */
 
+/** @brief 9600 bits per second @def USART_BAUD_RATE_9600 */
+#define USART_BAUD_RATE_9600					((usart_baud_rate_t) 0x00U)
+/** @brief 19200 bits per second @def USART_BAUD_RATE_19200 */
+#define USART_BAUD_RATE_19200					((usart_baud_rate_t) 0x01U)
+/** @brief 38400 bits per second @def USART_BAUD_RATE_38400 */
+#define USART_BAUD_RATE_38400					((usart_baud_rate_t) 0x02U)
+/** @brief 57600 bits per second @def USART_BAUD_RATE_57600 */
+#define USART_BAUD_RATE_57600					((usart_baud_rate_t) 0x03U)
+/** @brief 115200 bits per second @def USART_BAUD_RATE_115200 */
+#define USART_BAUD_RATE_115200					((usart_baud_rate_t) 0x04U)
+/** @brief 230400 bits per second @def USART_BAUD_RATE_230400 */
+#define USART_BAUD_RATE_230400					((usart_baud_rate_t) 0x05U)
+/** @brief 460800 bits per second @def USART_BAUD_RATE_460800 */
+#define USART_BAUD_RATE_460800					((usart_baud_rate_t) 0x06U)
+/** @brief 921600 bits per second @def USART_BAUD_RATE_921600 */
+#define USART_BAUD_RATE_921600					((usart_baud_rate_t) 0x07U)
+
 /**
- * @brief Returns whether a numeric baud rate is a well-formed request
- * @param[in] baudRate Candidate numeric baud rate, in bits per second
+ * @brief Returns whether a baud-rate selector is supported
+ * @param[in] baudRate Candidate baud-rate selector
  * @returns Boolean-style validity result
- * @retval - `0x00U`: @p baudRate is zero
- * @retval - `0x01U`: @p baudRate is non-zero
+ * @retval - `0x00U`: @p baudRate is not a supported selector
+ * @retval - `0x01U`: @p baudRate is a supported selector
  * @def USART_BAUD_RATE_IS_VALID
- * @note This macro only rejects a structurally meaningless request. Whether
- * @p baudRate is achievable against the live bus frequency is a Codec/Driver
- * concern, not a pure selector-validation concern.
  */
 #define USART_BAUD_RATE_IS_VALID(baudRate)				\
-	((usart_baud_rate_t) (baudRate) != 0x00000000UL)
+	((usart_baud_rate_t) (baudRate) <= USART_BAUD_RATE_921600)
 
 /** @} */ // USART_03_Driver_02_Defines_04_BaudRate
 

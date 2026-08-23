@@ -1,205 +1,253 @@
-/***************************************************************************************
- *  File: usart.h
- *  Author: Shrey Shah
- *  Created on: 21/09/2025
- ***************************************************************************************/
-// Header Guards
-#ifndef __USART_H__
-#define __USART_H__
-
-/*********************************************** Includes ***********************************************/
-// USART Configuration
-#include "usart_config.h"
-// Clocks (APB1/APB2)
-#include "rcc.h"
-// va_list
-#include <stdarg.h>
-
-/*********************************************** USART Interrupt ***********************************************/
-typedef enum {
-	USART_IRQ_NONE = 0x00,
-	// IDLE Interrupt
-	USART_IRQ_IDLE = 0x01,
-	// RX Data Interrupt
-	USART_IRQ_RX = 0x02,
-	// TX Complete Interrupt
-	USART_IRQ_TC = 0x04,
-	// TX Data Register Empty Interrupt
-	USART_IRQ_TX = 0x08,
-	// Parity Error Interrupt
-	USART_IRQ_PE = 0x10,
-	// Common combinations
-	USART_IRQ_RX_TX = (USART_IRQ_RX | USART_IRQ_TX),
-	// Typical UART configurations
-	USART_IRQ_STANDARD = (USART_IRQ_RX | USART_IRQ_TX | USART_IRQ_PE),
-	USART_IRQ_FULL = (USART_IRQ_IDLE | USART_IRQ_RX | USART_IRQ_TC | USART_IRQ_TX | USART_IRQ_PE),
-	// Error interrupts
-	USART_IRQ_ERRORS = USART_IRQ_PE,
-} usart_irq_t;
-
-/*********************************************** Helper APIs ***********************************************/
 /**
- * @brief Checks if USART TX Buffer is Empty
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @returns Status of USART TX Buffer
- * @return - 0: TX Buffer Full
- * @return - 1: TX Buffer Empty
- * @note Check status using this function before using `USART_Send_Char()`
- */
-__STATIC_FORCEINLINE uint8_t USART_TX_Ready(const usart_t usart){
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart); 
-	uint32_t usartTXReady = 0x00;
-	usartTXReady = (thisUsart->SR.REG & USART_SR_TXE);
-	return (uint8_t)(usartTXReady >> USART_SR_TXE_Pos);
-}
-
-/**
- * @brief Transmits a character on USART
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param character Character to be transmitted
- * @note Check status using `USART_TX_Ready()` before using this function
- */
-__STATIC_FORCEINLINE void USART_TX_Byte(const usart_t usart, const uint8_t character){
-	// Transfer the data
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	thisUsart->DR.REG = character;
-}
-
-/**
- * @brief Checks if USART RX Buffer is Full
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @returns Status of USART RX Buffer
- * @return - 0: RX Buffer Empty
- * @return - 1: RX Buffer Full
- * @note Check status using this function before using `USART_Recv_Char()`
- */
-__STATIC_FORCEINLINE uint8_t USART_RX_Ready(const usart_t usart){
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	uint32_t usartRXReady = 0x00;
-	usartRXReady = (thisUsart->SR.REG & USART_SR_RXNE);
-	return (uint8_t)(usartRXReady >> USART_SR_RXNE_Pos);
-}
-
-/**
- * @brief Receives a character on USART
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @return 8-bits data read in the `USARTx->DR`
- * @note Check status using `USART_RX_Ready()` before using this function
- */
-__STATIC_FORCEINLINE uint8_t USART_RX_Byte(const usart_t usart){
-	// Receive the data
-	USART_TypeDef* thisUsart = USART_Get_Mapping(usart);
-	uint8_t recvData = thisUsart->DR.REG;
-	return (recvData & 0xFF);
-}
-
-/**
- * @brief Blocking USART transmit byte
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param character Character to be transmitted
- * @note Blocking Function which takes care of USART TX
- */
-__STATIC_FORCEINLINE void USART_sendByte(const usart_t usart, const uint8_t character){
-	// Wait till TX Buffer is Empty
-	while(USART_TX_Ready(usart) != 0x01);
-	// Transmit the data
-	USART_TX_Byte(usart, character);
-}
-
-/**
- * @brief Configures the following by default:
- * @brief - Data Bits: 8
- * @brief - Parity Bits: None
- * @brief - Stop Bits: 1
- * @brief - Baud Rate: 9600
- * @brief - Hardware Pins: TX+RX Enable
- * @param usartConfig pointer to USART Configuration Structure. Refer `usart_config_t`
- */
-__STATIC_FORCEINLINE void USART_Default_Config(usart_config_t* usartConfig){
-	// USART Communication Configuration
-	usartConfig->config = USART_CONFIG_8N1;
-	// USART Baud Rate Configuration
-	usartConfig->baud_rate = USART_BAUD_9600;
-	// USART Hardware Pins
-	usartConfig->hardware = USART_TX_RX_ENABLE;
-}
-
-/*********************************************** USART APIs ***********************************************/
-/**
- * @brief USART Hardware Pins Configure
+ * @file	usart.h
+ * @author	Shrey Shah
+ * @brief	USART Driver Public Interface
+ * @version	v2.0
+ * @date	23-08-2026
+ *
  * @details
- * Explicitly enables the GPIO port clock gate (and the AFIO clock gate, for
- * alternate-function pins) for every selected pin through the RCC driver before
- * calling GPIO configuration, so GPIO never has to enable a foreign clock gate.
- * @param hardware Refer `usart_hardware_enable_t`
- * @param usartGpioConfig Refer `usart_gpio_t`
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success
+ * This header exposes the public USART driver API for UART (asynchronous)
+ * mode only, per `USART_ARCHITECTURE.md`. Public code sees `USART_TypeDef*`
+ * instance identity, `usart_config_t` configuration, public selectors, and
+ * driver entry points. Low-level register access and codec image staging
+ * remain private to `usart.c`.
+ *
+ * This pass admits only:
+ * - `CR1.UE` operation state
+ * - Root `USART_Config()`/`USART_DeConfig()` lifecycle
+ * - `CR1`/`CR3` interrupt-request sources and `SR` event flags
+ *
+ * Byte-level TX/RX helpers and `USART_printf()` are intentionally not yet
+ * declared here. Their signatures are undecided pending the `usart_codec.h`/
+ * `usart.c` rewrite; they will return once frozen, rebuilt on `usart_ll.h`
+ * instead of direct register access. Synchronous clock, Smartcard, IrDA,
+ * LIN, multiprocessor wake, and DMA remain deferred; see
+ * `USART_ARCHITECTURE.md`'s Deferred Domains table.
  */
-driver_status_t USART_GPIO_Config(const usart_hardware_enable_t hardware, usart_gpio_t* const usartGpioConfig);
+
+// Header Guard
+#ifndef USART_H_
+#define USART_H_
+
+// ==================================================================================================== //
+// Includes
+// ==================================================================================================== //
+#include "usart_config.h"
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
- * @brief Set USART Baud Rate
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param baudRate Refer `usart_baud_t`
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success 
+ * @addtogroup USART_03_Driver
+ * @{
  */
-driver_status_t USART_BaudRate_Set(const usart_t usart, const usart_baud_t baudRate);
+
+// ==================================================================================================== //
+// USART Operation State APIs
+// ==================================================================================================== //
 
 /**
- * @brief Sets the USART Communication Configuration
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param hardware Defines Hardware Feature Usage. Refer `usart_hardware_enable_t`
- * @param dataConfig Communication Standards for USART. Refer `usart_data_config_t`
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success 
+ * @brief Returns the current USART operation state
+ * @details Reads `CR1.UE` only; it does not query the RCC clock gate.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @returns @ref driver_status_t "USART operation-state observation"
+ * @retval - @ref `DRIVER_STATUS_OFF`: The USART peripheral is disabled
+ * @retval - @ref `DRIVER_STATUS_ON`: The USART peripheral is enabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
  */
-driver_status_t USART_DataConfig_Set(const usart_t usart, const usart_hardware_enable_t hardware, const usart_data_config_t dataConfig);
+driver_status_t USART_GetOperationState(const USART_TypeDef* const USARTx);
 
 /**
- * @brief Configures the USART Module
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param usartConfig Pointer to USART Configuration Structure
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success
+ * @brief Sets the USART operation state
+ * @details
+ * Owns only the `CR1.UE` Read/Modify/Write transaction. It does not enable
+ * or disable the RCC peripheral clock gate.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] operationState Requested USART operation state
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable the USART peripheral
+ * - @ref `DRIVER_STATUS_ON`: Enable the USART peripheral
+ * @returns @ref driver_status_t "USART operation-state operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested operation state was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx or @p operationState was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * before calling this API.
  */
-driver_status_t USART_Config(const usart_t usart, usart_config_t* const usartConfig);
+driver_status_t USART_SetOperationState(USART_TypeDef* const USARTx, const driver_status_t operationState);
+
+// ==================================================================================================== //
+// USART Configuration APIs
+// ==================================================================================================== //
 
 /**
- * @brief Enables USART-local interrupt sources
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
- * @param irq USART IRQ Combinations. Refer `usart_irq_t`
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success
- * @note This API does not enable the corresponding NVIC vector. The
- * application or integration layer owns global IRQ delivery.
+ * @brief Restores one USART instance to its power-on register state
+ * @details Pulses the matching `APB1RSTR`/`APB2RSTR` reset bit through
+ * `RCC_PulsePeripheralReset()`. Leaves the RCC clock gate and NVIC delivery
+ * state unchanged.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @returns @ref driver_status_t "USART de-configuration operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested USART instance was reset-pulsed
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * before calling this API.
  */
-driver_status_t USART_IRQ_Enable(const usart_t usart, const usart_irq_t irq);
+driver_status_t USART_DeConfig(USART_TypeDef* const USARTx);
 
 /**
- * @brief Disables USART-local interrupt sources
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3` 
- * @param irq USART IRQ Combinations. Refer `usart_irq_t`
- * @return Status of Driver Operation
- * @returns - DRIVER_STATUS_ERROR_FAIL: Failure
- * @returns - DRIVER_STATUS_SUCCESS: Success
- * @note This API does not disable the corresponding NVIC vector.
+ * @brief Applies one complete USART line/hardware/baud-rate configuration
+ * @details
+ * Validates @p USARTx and every field in @p pConfig, verifies the USART
+ * peripheral clock gate is already enabled, enables the GPIO/AFIO clock
+ * gate(s) required by this instance's private pin table and configures
+ * those pins, then stages and commits the hardware-enable, line-format, and
+ * baud-rate domains. This API never enables the USART peripheral's own
+ * clock gate.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] pConfig USART configuration to apply
+ * Expected values:
+ * - Non-`NULL`: Complete hardware, line-format, and baud-rate policy
+ * @returns @ref driver_status_t "USART configuration operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested configuration was applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pConfig was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid, or @p pConfig
+ * contained an invalid hardware, line-format, or baud-rate selector
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * before calling this API.
+ * @note This API enables the GPIO port clock gate, and the AFIO clock gate
+ * for alternate-function pins, for its own private pin table only. It never
+ * enables the USART peripheral's own clock gate.
  */
-driver_status_t USART_IRQ_Disable(const usart_t usart, const usart_irq_t irq);
+driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* const pConfig);
+
+// ==================================================================================================== //
+// USART IRQ Source APIs
+// ==================================================================================================== //
 
 /**
- * @brief Transmits formatted data on USART
- * @param usart USART Instance: `USART_1`, `USART_2`, `USART_3`
- * @param format Formatted string
- * @note `float` decimal restricted max to 6 places
+ * @brief Returns the currently enabled USART interrupt-request sources
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[out] pSources Destination for the enabled interrupt-request source bitmask
+ * Expected values:
+ * - Any OR-combination of @ref `USART_IRQ_SOURCE_IDLE` through @ref `USART_IRQ_SOURCE_ERROR`
+ * @returns @ref driver_status_t "USART interrupt-request source query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pSources was published successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pSources was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
  */
-void USART_printf(const usart_t usart, const char* format, ...);
+driver_status_t USART_GetIRQSources(const USART_TypeDef* const USARTx, usart_irq_source_t* const pSources);
 
+/**
+ * @brief Enables or disables selected USART interrupt-request sources
+ * @details
+ * Sources span two registers (`CR1` for `IDLE`/`RXNE`/`TC`/`TXE`/`PE`, `CR3`
+ * for `CTS`/error); this API stages and writes only the registers touched
+ * by @p sources. It does not enable the matching NVIC vector.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] sources Interrupt-request source bitmask to change
+ * Accepted values:
+ * - Any OR-combination of @ref `USART_IRQ_SOURCE_IDLE` through @ref `USART_IRQ_SOURCE_ERROR`
+ * @param[in] sourceState Requested state for every selected source
+ * Accepted values:
+ * - @ref `DRIVER_STATUS_OFF`: Disable every selected interrupt-request source
+ * - @ref `DRIVER_STATUS_ON`: Enable every selected interrupt-request source
+ * @returns @ref driver_status_t "USART interrupt-request source operation status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The requested sources were updated
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx, @p sources, or @p sourceState was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @note This API does not enable or disable the corresponding NVIC vector.
+ * The application or integration layer owns global IRQ delivery.
+ */
+driver_status_t USART_SetIRQSources
+(
+	USART_TypeDef* const		USARTx,
+	const usart_irq_source_t	sources,
+	const driver_status_t		sourceState
+);
 
-#endif /* __USART_H__ */
+// ==================================================================================================== //
+// USART IRQ Event APIs
+// ==================================================================================================== //
+
+/**
+ * @brief Returns the currently pending USART event flags
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[out] pEvents Destination for the pending event-flag bitmask
+ * Expected values:
+ * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
+ * @returns @ref driver_status_t "USART event-flag query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p pEvents was published successfully
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pEvents was a null pointer
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @note Reading `SR` through this API participates in the hardware
+ * error-flag clearing sequence documented for `USART_AckIRQEvents()`.
+ */
+driver_status_t USART_GetIRQEvents(const USART_TypeDef* const USARTx, usart_event_flag_t* const pEvents);
+
+/**
+ * @brief Acknowledges selected USART event flags
+ * @details
+ * Applies the correct hardware-specific clearing mechanism per selected
+ * bit rather than one uniform register write: `TC`/`CTS` are write-0-to-clear;
+ * `PE`/`FE`/`NE`/`ORE`/`IDLE`/`RXNE` clear only through the hardware-mandated
+ * sequence of reading `SR` followed by reading `DR`. `TXE` is read-only
+ * status and is never acknowledged.
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] events Event-flag bitmask to acknowledge
+ * Accepted values:
+ * - Any OR-combination of @ref `USART_IRQ_EVENT_PE` through @ref `USART_IRQ_EVENT_CTS`
+ * @returns @ref driver_status_t "USART event-flag acknowledgement status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: The selected event flag(s) were acknowledged
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p USARTx or @p events was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @warning Acknowledging `PE`/`FE`/`NE`/`ORE`/`IDLE`/`RXNE` reads and discards
+ * the buffered `DR` value as part of the hardware clearing sequence.
+ */
+driver_status_t USART_AckIRQEvents(USART_TypeDef* const USARTx, const usart_event_flag_t events);
+
+/** @} */ // USART_03_Driver
+
+// --- C++ Compatibility ---
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* USART_H_ */

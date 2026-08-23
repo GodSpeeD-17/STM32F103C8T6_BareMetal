@@ -57,8 +57,8 @@ typedef uint8_t				usart_parity_t;
 typedef uint8_t				usart_stop_bits_t;
 /** @brief USART hardware pin-enable bitmask type (TX/RX/RTS/CTS) @typedef usart_hardware_enable_t */
 typedef uint8_t				usart_hardware_enable_t;
-/** @brief USART numeric baud rate type, in bits per second @typedef usart_baud_rate_t */
-typedef uint32_t			usart_baud_rate_t;
+/** @brief USART preset baud-rate selector type @typedef usart_baud_rate_t */
+typedef uint8_t				usart_baud_rate_t;
 /** @brief USART interrupt-request source selector bitmask type (`CR1` + `CR3` enable bits) @typedef usart_irq_source_t */
 typedef uint8_t				usart_irq_source_t;
 /** @brief USART interrupt event-flag bitmask type (`SR` status bits) @typedef usart_event_flag_t */
