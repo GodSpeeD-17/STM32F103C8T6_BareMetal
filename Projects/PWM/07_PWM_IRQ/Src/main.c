@@ -89,7 +89,7 @@ static volatile uint8_t isDutyStepRequired = 0U;
 static void App_ErrorHandler(void)
 {
 	//! Indicate
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 
 	while (1)
 	{

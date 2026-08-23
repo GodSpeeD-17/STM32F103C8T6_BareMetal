@@ -65,8 +65,8 @@ driver_status_t App_Init(void)
 		)
 	);
 	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
-	ASSERT_DRIVER_STATUS(OB_LED_Init());
-	OB_LED_Reset();
+	ASSERT_DRIVER_STATUS(BSP_OB_LED_Init());
+	BSP_OB_LED_Reset();
 #endif
 
 #if (APP_ENABLE_DEBUG_UART == 1U)
@@ -91,7 +91,7 @@ driver_status_t App_Init(void)
 		)
 	);
 	//! Configure the debug UART for TX-only logging before application code runs.
-	ASSERT_DRIVER_STATUS(Debug_UART_Init());
+	ASSERT_DRIVER_STATUS(BSP_Debug_UART_Init());
 #endif
 
 	return DRIVER_STATUS_SUCCESS;

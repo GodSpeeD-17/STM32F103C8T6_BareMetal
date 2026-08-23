@@ -50,7 +50,7 @@
  */
 static void App_ErrorHandler(void)
 {
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 	while (1)
 	{
 		//! Preserve the visible error state until the board is reset.
@@ -97,7 +97,7 @@ int main(void)
 	while (1)
 	{
 		//! Toggle on-board LED
-		OB_LED_Toggle();
+		BSP_OB_LED_Toggle();
 
 		//! Stop the demo on timeout or lost Timer ownership instead of hiding the status.
 		if (TIM_BlockingDelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)

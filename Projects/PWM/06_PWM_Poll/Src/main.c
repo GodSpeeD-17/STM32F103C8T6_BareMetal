@@ -79,7 +79,7 @@
  */
 static void App_ErrorHandler(void)
 {
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 	while (1)
 	{
 		//! Preserve the visible active-low error indication until reset.
@@ -216,7 +216,7 @@ int main(void)
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
-		OB_LED_Toggle();
+		BSP_OB_LED_Toggle();
 
 		//! Decrease the Duty Cycle from 100% to 0% in APP_PWM_DUTY_STEP decrements, then increase back to 100%.
 		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MAX; dutyCycle > TIM_PWM_DUTY_CYCLE_MIN; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP))
@@ -236,7 +236,7 @@ int main(void)
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
-		OB_LED_Toggle();
+		BSP_OB_LED_Toggle();
 
 		//! Block for a moment before the next ramp begins to allow the user to see the completed ramp.
 		if (App_DelayMs(APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)

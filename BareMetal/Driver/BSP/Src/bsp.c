@@ -24,27 +24,27 @@
 //										On-Board LED APIs												//
 // ==================================================================================================== //
 
-driver_status_t OB_LED_Init(void)
+driver_status_t BSP_OB_LED_Init(void)
 {
 	return GPIO_LED_Init(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
-void OB_LED_Set(void)
+void BSP_OB_LED_Set(void)
 {
 	(void) GPIO_PinReset(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
-void OB_LED_Reset(void)
+void BSP_OB_LED_Reset(void)
 {
 	(void) GPIO_PinSet(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
-void OB_LED_Toggle(void)
+void BSP_OB_LED_Toggle(void)
 {
 	(void) GPIO_PinToggle(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
 
-driver_status_t OB_LED_Deinit(void)
+driver_status_t BSP_OB_LED_Deinit(void)
 {
 	return GPIO_Deinit(GPIO_OB_LED_PORT, GPIO_OB_LED_PIN);
 }
@@ -55,7 +55,7 @@ driver_status_t OB_LED_Deinit(void)
 //										Debug UART APIs												//
 // ==================================================================================================== //
 
-driver_status_t Debug_UART_Init(void)
+driver_status_t BSP_Debug_UART_Init(void)
 {
 	const usart_config_t debugUartConfig =
 	{
@@ -84,7 +84,7 @@ driver_status_t Debug_UART_Init(void)
 	return USART_SetOperationState(GPIO_DEBUG_UART_INSTANCE, DRIVER_STATUS_ON);
 }
 
-driver_status_t Debug_UART_Printf(const char* const pFormat, ...)
+driver_status_t BSP_Debug_UART_Printf(const char* const pFormat, ...)
 {
 	// Local Variables
 	va_list			args;
@@ -96,7 +96,7 @@ driver_status_t Debug_UART_Printf(const char* const pFormat, ...)
 	return status;
 }
 
-driver_status_t Debug_UART_Deinit(void)
+driver_status_t BSP_Debug_UART_Deinit(void)
 {
 	ASSERT_DRIVER_STATUS(USART_DeConfig(GPIO_DEBUG_UART_INSTANCE));
 	return GPIO_Deinit(GPIO_DEBUG_UART_PORT, GPIO_DEBUG_UART_TX_PIN);

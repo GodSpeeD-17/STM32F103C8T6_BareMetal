@@ -79,7 +79,7 @@ int main(void)
 
 	while (1)
 	{
-		OB_LED_Toggle();
+		BSP_OB_LED_Toggle();
 		(void) App_DelayMs(LOOP_DELAY_MS);
 	}
 }

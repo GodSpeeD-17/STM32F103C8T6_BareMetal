@@ -149,8 +149,8 @@
  * Accepted values:
  * - `0U`: Leave the on-board LED GPIO untouched by App_Init()
  * - `1U`: Initialize the on-board LED GPIO and force it off; project default
- * @note Application code still owns every OB_LED_Set() / OB_LED_Reset() /
- * OB_LED_Toggle() call; this switch only guarantees the pin is configured
+ * @note Application code still owns every BSP_OB_LED_Set() / BSP_OB_LED_Reset() /
+ * BSP_OB_LED_Toggle() call; this switch only guarantees the pin is configured
  * and starts from a known state
  */
 #define APP_ENABLE_ONBOARD_LED			(1U)

@@ -90,7 +90,7 @@ static volatile uint32_t buttonLastIrqTick = 0x00000000UL;
  */
 static void App_ErrorHandler(void)
 {
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 	while (1)
 	{
 		// Stay here so the on-board LED remains the visible error indicator.
@@ -158,7 +158,7 @@ int main(void)
 
 	while (1)
 	{
-		OB_LED_Toggle();
+		BSP_OB_LED_Toggle();
 		(void) App_DelayMs(LOOP_DELAY_MS);
 	}
 }

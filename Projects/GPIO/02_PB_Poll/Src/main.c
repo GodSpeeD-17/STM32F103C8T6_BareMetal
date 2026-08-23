@@ -66,19 +66,19 @@ int main(void)
 		) != DRIVER_STATUS_SUCCESS
 	)
 	{
-		OB_LED_Set();
+		BSP_OB_LED_Set();
 		while (1);
 	}
 
 	if (GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)) != DRIVER_STATUS_SUCCESS)
 	{
-		OB_LED_Set();
+		BSP_OB_LED_Set();
 		while (1);
 	}
 
 	if (GPIO_Init(PUSH_BUTTON_PORT, PUSH_BUTTON_PIN, GPIO_PIN_MODE_INPUT, GPIO_PIN_CONFIG_INPUT_FLOATING) != DRIVER_STATUS_SUCCESS)
 	{
-		OB_LED_Set();
+		BSP_OB_LED_Set();
 		while (1);
 	}
 

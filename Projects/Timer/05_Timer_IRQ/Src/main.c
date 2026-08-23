@@ -75,7 +75,7 @@ static volatile uint8_t isActionRequired = 0U;
 static void App_ErrorHandler(void)
 {
 	//! Indicate the error state by turning on the on-board LED
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 
 	//! Infinite loop to preserve the error state until the board is reset
 	while (1);

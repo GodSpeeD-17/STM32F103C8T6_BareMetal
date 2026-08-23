@@ -71,7 +71,7 @@ extern "C" {
  * @def GPIO_OB_LED_CLOCK_ENABLE_MASK
  * @details
  * The application must enable this clock gate through @ref `RCC_SetPeripheralClockState`
- * before calling @ref `OB_LED_Init`; the BSP and GPIO drivers only verify it.
+ * before calling @ref `BSP_OB_LED_Init`; the BSP and GPIO drivers only verify it.
  */
 #define GPIO_OB_LED_CLOCK_ENABLE_MASK			(RCC_APB2ENR_IOPCEN)
 
@@ -106,7 +106,7 @@ extern "C" {
  * by the set/reset helper APIs below. This API only verifies the clock gate;
  * it never enables it.
  */
-driver_status_t OB_LED_Init(void);
+driver_status_t BSP_OB_LED_Init(void);
 
 /**
  * @brief Sets the active-low board on-board LED
@@ -114,7 +114,7 @@ driver_status_t OB_LED_Init(void);
  * The Blue Pill LED turns on when PC13 is driven low, so this API resets the
  * GPIO output latch through @ref `GPIO_PinReset`.
  */
-void OB_LED_Set(void);
+void BSP_OB_LED_Set(void);
 
 /**
  * @brief Resets the active-low board on-board LED
@@ -122,7 +122,7 @@ void OB_LED_Set(void);
  * The Blue Pill LED turns off when PC13 is driven high, so this API sets the
  * GPIO output latch through @ref `GPIO_PinSet`.
  */
-void OB_LED_Reset(void);
+void BSP_OB_LED_Reset(void);
 
 /**
  * @brief Toggles the active-low board on-board LED
@@ -130,7 +130,7 @@ void OB_LED_Reset(void);
  * This API forwards to @ref `GPIO_PinToggle` for the board LED pin. The logical
  * LED state changes because the underlying PC13 output latch is inverted.
  */
-void OB_LED_Toggle(void);
+void BSP_OB_LED_Toggle(void);
 
 /**
  * @brief Deinitializes the board on-board LED GPIO
@@ -143,7 +143,7 @@ void OB_LED_Toggle(void);
  * @ref `GPIO_OB_LED_PIN`, restoring the pin to the GPIO reset-style floating
  * input configuration used by the driver.
  */
-driver_status_t OB_LED_Deinit(void);
+driver_status_t BSP_OB_LED_Deinit(void);
 
 #if defined(BSP_ENABLE_DEBUG_UART)
 
@@ -172,7 +172,7 @@ driver_status_t OB_LED_Deinit(void);
  * @def GPIO_DEBUG_UART_CLOCK_ENABLE_MASK
  * @details
  * The application must enable this clock gate through
- * @ref `RCC_SetPeripheralClockState` before calling @ref `Debug_UART_Init`;
+ * @ref `RCC_SetPeripheralClockState` before calling @ref `BSP_Debug_UART_Init`;
  * the BSP and USART drivers only verify it.
  */
 #define GPIO_DEBUG_UART_CLOCK_ENABLE_MASK		(RCC_APB2ENR_USART1EN)
@@ -181,7 +181,7 @@ driver_status_t OB_LED_Deinit(void);
  * @def GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK
  * @details
  * The application must enable this clock gate through
- * @ref `RCC_SetPeripheralClockState` before calling @ref `Debug_UART_Init`;
+ * @ref `RCC_SetPeripheralClockState` before calling @ref `BSP_Debug_UART_Init`;
  * the BSP and GPIO drivers only verify it.
  */
 #define GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK	(RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
@@ -208,7 +208,7 @@ driver_status_t OB_LED_Deinit(void);
  * @ref `GPIO_DEBUG_UART_BAUD_RATE`. This API only verifies the clock gates;
  * it never enables them.
  */
-driver_status_t Debug_UART_Init(void);
+driver_status_t BSP_Debug_UART_Init(void);
 
 /**
  * @brief Transmits a printf-style debug message over the board debug UART
@@ -220,9 +220,9 @@ driver_status_t Debug_UART_Init(void);
  * - Non-`NULL`: A null-terminated format string
  * @param[in] ... Variadic arguments matching @p `pFormat`'s conversion specifiers
  * @returns @ref driver_status_t "Blocking formatted-transmit status", see `USART_vprintf()`
- * @pre @ref `Debug_UART_Init` completed successfully before calling this API.
+ * @pre @ref `BSP_Debug_UART_Init` completed successfully before calling this API.
  */
-driver_status_t Debug_UART_Printf(const char* const pFormat, ...);
+driver_status_t BSP_Debug_UART_Printf(const char* const pFormat, ...);
 
 /**
  * @brief Deinitializes the board debug UART
@@ -231,7 +231,7 @@ driver_status_t Debug_UART_Printf(const char* const pFormat, ...);
  * Forwards to @ref `USART_DeConfig` for @ref `GPIO_DEBUG_UART_INSTANCE`, then
  * @ref `GPIO_Deinit` for @ref `GPIO_DEBUG_UART_PORT` / @ref `GPIO_DEBUG_UART_TX_PIN`.
  */
-driver_status_t Debug_UART_Deinit(void);
+driver_status_t BSP_Debug_UART_Deinit(void);
 
 #endif /* BSP_ENABLE_DEBUG_UART */
 

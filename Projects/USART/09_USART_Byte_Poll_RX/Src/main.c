@@ -82,7 +82,7 @@
 static void App_ErrorHandler(void)
 {
 	//! Indicate Error
-	OB_LED_Set();
+	BSP_OB_LED_Set();
 	//! Infinite Loop
 	while (1)
 	{
