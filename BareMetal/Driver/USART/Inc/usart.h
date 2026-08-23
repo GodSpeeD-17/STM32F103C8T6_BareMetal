@@ -31,6 +31,7 @@
 // Includes
 // ==================================================================================================== //
 #include "usart_config.h"
+#include <stdarg.h>
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus
@@ -197,13 +198,48 @@ driver_status_t USART_ReceiveByte(const USART_TypeDef* const USARTx, uint8_t* co
 driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t byte);
 
 /**
+ * @brief Formats and blocks until a `va_list`-style printf string has been transmitted
+ * @details
+ * Formats @p `pFormat` against @p `args` into a bounded stack buffer through
+ * `vsnprintf()`, then transmits the resulting bytes one at a time through
+ * `USART_TransmitByte()`. A formatted string longer than the internal buffer
+ * is silently truncated, matching `vsnprintf()`'s own truncation behavior;
+ * it is never a partial/garbled transmission. `USART_printf()` and any other
+ * variadic caller (e.g. a board-level debug-print wrapper) share this single
+ * implementation instead of duplicating the buffer/loop logic.
+ * @note Worst-case block time is the transmitted byte count multiplied by
+ * `USART_TransmitByte()`'s own worst case (~9ms at 72MHz SYSCLK per byte).
+ * @param[in] USARTx Target USART peripheral instance
+ * Accepted values:
+ * - @ref `USART1`
+ * - @ref `USART2`
+ * - @ref `USART3`
+ * @param[in] pFormat `printf`-style format string
+ * Expected values:
+ * - Non-`NULL`: A null-terminated format string
+ * @param[in] args Variadic arguments matching @p `pFormat`'s conversion specifiers
+ * Expected values:
+ * - An active `va_list` started by the caller through `va_start()`; this
+ *   function never calls `va_start()`/`va_end()` on it
+ * @returns @ref driver_status_t "Blocking formatted-transmit status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every formatted byte was transmitted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pFormat` is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: `vsnprintf()` reported a formatting error
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A byte did not become transmittable within its bounded poll window
+ * @pre The application enabled the USART peripheral clock gate through RCC
+ * and completed `USART_Config()` with `USART_HARDWARE_ENABLE_TX` before
+ * calling this API.
+ */
+driver_status_t USART_vprintf(USART_TypeDef* const USARTx, const char* const pFormat, va_list args);
+
+/**
  * @brief Formats and blocks until a printf-style string has been transmitted
  * @details
- * Formats @p `pFormat` and its variadic arguments into a bounded stack
- * buffer through `vsnprintf()`, then transmits the resulting bytes one at a
- * time through `USART_TransmitByte()`. A formatted string longer than the
- * internal buffer is silently truncated, matching `vsnprintf()`'s own
- * truncation behavior; it is never a partial/garbled transmission.
+ * Thin variadic wrapper: brackets @p `...` in one `va_start()`/`va_end()`
+ * pair and forwards to `USART_vprintf()` for the actual formatting and
+ * transmission.
  * @note Worst-case block time is the transmitted byte count multiplied by
  * `USART_TransmitByte()`'s own worst case (~9ms at 72MHz SYSCLK per byte).
  * @param[in] USARTx Target USART peripheral instance
@@ -215,16 +251,7 @@ driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t by
  * Expected values:
  * - Non-`NULL`: A null-terminated format string
  * @param[in] ... Variadic arguments matching @p `pFormat`'s conversion specifiers
- * @returns @ref driver_status_t "Blocking formatted-transmit status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every formatted byte was transmitted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pFormat` is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: `vsnprintf()` reported a formatting error
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `USARTx` was invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The USART peripheral clock gate is disabled
- * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: A byte did not become transmittable within its bounded poll window
- * @pre The application enabled the USART peripheral clock gate through RCC
- * and completed `USART_Config()` with `USART_HARDWARE_ENABLE_TX` before
- * calling this API.
+ * @returns @ref driver_status_t "Blocking formatted-transmit status", see `USART_vprintf()`
  */
 driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFormat, ...);
 

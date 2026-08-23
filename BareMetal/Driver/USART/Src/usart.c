@@ -564,11 +564,10 @@ driver_status_t USART_TransmitByte(USART_TypeDef* const USARTx, const uint8_t by
 	return DRIVER_STATUS_ERROR_TIMEOUT;
 }
 
-driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFormat, ...)
+driver_status_t USART_vprintf(USART_TypeDef* const USARTx, const char* const pFormat, va_list args)
 {
 	// Local Variables
 	char	buffer[USART_PRINTF_BUFFER_SIZE];
-	va_list	args;
 	int		length;
 
 	// Validate Input
@@ -577,11 +576,7 @@ driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFor
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! va_start/va_end bracket only the formatting call; USART_TransmitByte() below never touches args.
-	va_start(args, pFormat);
 	length = vsnprintf(buffer, sizeof(buffer), pFormat, args);
-	va_end(args);
-
 	if (length < 0)
 	{
 		return DRIVER_STATUS_ERROR_FAIL;
@@ -597,6 +592,19 @@ driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFor
 		ASSERT_DRIVER_STATUS(USART_TransmitByte(USARTx, (uint8_t) buffer[i]));
 	}
 	return DRIVER_STATUS_SUCCESS;
+}
+
+driver_status_t USART_printf(USART_TypeDef* const USARTx, const char* const pFormat, ...)
+{
+	// Local Variables
+	va_list			args;
+	driver_status_t	status;
+
+	//! va_start/va_end bracket only the forwarding call; USART_vprintf() never touches args past that.
+	va_start(args, pFormat);
+	status = USART_vprintf(USARTx, pFormat, args);
+	va_end(args);
+	return status;
 }
 
 // ==================================================================================================== //

@@ -24,6 +24,9 @@
 //												Includes												//
 // ==================================================================================================== //
 #include "gpio.h"
+#if defined(BSP_ENABLE_DEBUG_UART)
+#include "usart.h"
+#endif /* BSP_ENABLE_DEBUG_UART */
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus
@@ -141,6 +144,96 @@ void OB_LED_Toggle(void);
  * input configuration used by the driver.
  */
 driver_status_t OB_LED_Deinit(void);
+
+#if defined(BSP_ENABLE_DEBUG_UART)
+
+// ==================================================================================================== //
+//										Debug UART APIs												//
+// ==================================================================================================== //
+
+/**
+ * @brief USART peripheral instance used for board debug logging
+ * @def GPIO_DEBUG_UART_INSTANCE
+ */
+#define GPIO_DEBUG_UART_INSTANCE				(USART1)
+/**
+ * @brief GPIO port carrying the default-remap USART1 TX pin
+ * @def GPIO_DEBUG_UART_PORT
+ */
+#define GPIO_DEBUG_UART_PORT					(GPIOA)
+/**
+ * @brief PA9 carrying the default-remap USART1 TX pin
+ * @def GPIO_DEBUG_UART_TX_PIN
+ * @details Debug logging is TX-only; the board defines no debug RX pin.
+ */
+#define GPIO_DEBUG_UART_TX_PIN					(GPIO_PIN_9)
+/**
+ * @brief APB2 clock-enable mask owned by the debug USART peripheral
+ * @def GPIO_DEBUG_UART_CLOCK_ENABLE_MASK
+ * @details
+ * The application must enable this clock gate through
+ * @ref `RCC_SetPeripheralClockState` before calling @ref `Debug_UART_Init`;
+ * the BSP and USART drivers only verify it.
+ */
+#define GPIO_DEBUG_UART_CLOCK_ENABLE_MASK		(RCC_APB2ENR_USART1EN)
+/**
+ * @brief APB2 clock-enable mask owned by the debug UART's GPIO/AFIO port
+ * @def GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK
+ * @details
+ * The application must enable this clock gate through
+ * @ref `RCC_SetPeripheralClockState` before calling @ref `Debug_UART_Init`;
+ * the BSP and GPIO drivers only verify it.
+ */
+#define GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK	(RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
+/**
+ * @brief Debug UART baud-rate preset
+ * @def GPIO_DEBUG_UART_BAUD_RATE
+ */
+#define GPIO_DEBUG_UART_BAUD_RATE				(USART_BAUD_RATE_115200)
+
+/**
+ * @brief Initializes the board debug UART for TX-only logging
+ * @returns @ref driver_status_t "Debug UART initialization status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Debug UART GPIO and USART configuration were applied
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Board debug UART GPIO mapping was invalid
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `GPIO_DEBUG_UART_CLOCK_ENABLE_MASK` or
+ * @ref `GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK` is disabled
+ * @pre The application enabled @ref `GPIO_DEBUG_UART_CLOCK_ENABLE_MASK` and
+ * @ref `GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK` through
+ * @ref `RCC_SetPeripheralClockState` before calling this API.
+ * @details
+ * Configures @ref `GPIO_DEBUG_UART_PORT` / @ref `GPIO_DEBUG_UART_TX_PIN` as
+ * alternate-function push-pull, then configures and enables
+ * @ref `GPIO_DEBUG_UART_INSTANCE` for TX-only, 8N1 operation at
+ * @ref `GPIO_DEBUG_UART_BAUD_RATE`. This API only verifies the clock gates;
+ * it never enables them.
+ */
+driver_status_t Debug_UART_Init(void);
+
+/**
+ * @brief Transmits a printf-style debug message over the board debug UART
+ * @details
+ * Forwards to @ref `USART_vprintf` for @ref `GPIO_DEBUG_UART_INSTANCE`, the
+ * same formatting/transmit path @ref `USART_printf` uses.
+ * @param[in] pFormat `printf`-style format string
+ * Expected values:
+ * - Non-`NULL`: A null-terminated format string
+ * @param[in] ... Variadic arguments matching @p `pFormat`'s conversion specifiers
+ * @returns @ref driver_status_t "Blocking formatted-transmit status", see `USART_vprintf()`
+ * @pre @ref `Debug_UART_Init` completed successfully before calling this API.
+ */
+driver_status_t Debug_UART_Printf(const char* const pFormat, ...);
+
+/**
+ * @brief Deinitializes the board debug UART
+ * @returns @ref driver_status_t "Debug UART deinitialization status"
+ * @details
+ * Forwards to @ref `USART_DeConfig` for @ref `GPIO_DEBUG_UART_INSTANCE`, then
+ * @ref `GPIO_Deinit` for @ref `GPIO_DEBUG_UART_PORT` / @ref `GPIO_DEBUG_UART_TX_PIN`.
+ */
+driver_status_t Debug_UART_Deinit(void);
+
+#endif /* BSP_ENABLE_DEBUG_UART */
 
 #endif /* STM32F103C8T6__ */
 

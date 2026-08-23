@@ -20,6 +20,14 @@ set(STM32_DRIVER_SysTick_DEPENDENCIES "")
 set(STM32_DRIVER_Timer_DEPENDENCIES RCC)
 set(STM32_DRIVER_USART_DEPENDENCIES RCC GPIO)
 
+# Optional cross-module links activate only when the consuming project
+# independently selects both modules; unlike the mandatory table above, they
+# never pull the listed module into a project that did not already request
+# it. BSP's board debug-UART wrapper is gated on this: only a project that
+# already selected USART gets it linked into BSP and BSP_ENABLE_DEBUG_UART
+# compiled in (see stm32_register_driver_targets() and bsp.h/bsp.c).
+set(STM32_DRIVER_BSP_OPTIONAL_DEPENDENCIES USART)
+
 function(stm32_tree_emit_line prefix is_last label)
     if(is_last)
         message(STATUS "${prefix}└── ${label}")
@@ -214,6 +222,33 @@ function(stm32_register_driver_targets)
             endif()
         endforeach()
     endforeach()
+
+    # Link optional cross-module dependencies only where the consuming project
+    # independently resolved both sides; see STM32_DRIVER_BSP_OPTIONAL_DEPENDENCIES.
+    foreach(module_name IN LISTS resolved_driver_modules)
+        set(module_target "stm32_driver_${module_name}")
+        set(optional_variable "STM32_DRIVER_${module_name}_OPTIONAL_DEPENDENCIES")
+        get_target_property(module_target_type ${module_target} TYPE)
+        foreach(optional_name IN LISTS ${optional_variable})
+            list(FIND resolved_driver_modules "${optional_name}" optional_module_index)
+            if(NOT optional_module_index EQUAL -1)
+                if(module_target_type STREQUAL "INTERFACE_LIBRARY")
+                    target_link_libraries(${module_target} INTERFACE stm32_driver_${optional_name})
+                else()
+                    target_link_libraries(${module_target} PUBLIC stm32_driver_${optional_name})
+                endif()
+            endif()
+        endforeach()
+    endforeach()
+
+    # BSP's board debug-UART wrapper (Debug_UART_Init/Printf/Deinit) compiles
+    # in only when this project also resolved USART; see BSP_ENABLE_DEBUG_UART
+    # in bsp.h/bsp.c.
+    list(FIND resolved_driver_modules "BSP" bsp_module_index)
+    list(FIND resolved_driver_modules "USART" usart_module_index)
+    if((NOT bsp_module_index EQUAL -1) AND (NOT usart_module_index EQUAL -1))
+        target_compile_definitions(stm32_driver_BSP PUBLIC BSP_ENABLE_DEBUG_UART)
+    endif()
 
     set(RESOLVED_DRIVER_MODULES "${resolved_driver_modules}" PARENT_SCOPE)
     set(SELECTED_DRIVER_TARGETS "${selected_driver_targets}" PARENT_SCOPE)
