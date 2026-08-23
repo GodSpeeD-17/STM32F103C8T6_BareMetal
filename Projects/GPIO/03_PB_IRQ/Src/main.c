@@ -32,6 +32,7 @@
 #include "gpio.h"
 #include "gpio_irq.h"
 #include "nvic.h"
+#include "rcc.h"
 
 // ==================================================================================================== //
 // Private Defines
@@ -65,6 +66,8 @@
 #define PUSH_BUTTON_INPUT_CONFIG				GPIO_PIN_CONFIG_INPUT_FLOATING
 /** @brief Push-button EXTI trigger selector @def PUSH_BUTTON_IRQ_TRIGGER */
 #define PUSH_BUTTON_IRQ_TRIGGER					GPIO_IRQ_TRIGGER_FALLING
+/** @brief Application-owned GPIO port clock gate shared by every pin above @def APP_GPIO_CLOCK_MASK */
+#define APP_GPIO_CLOCK_MASK						(RCC_APB2ENR_IOPAEN)
 /** @} */
 
 // ==================================================================================================== //
@@ -103,6 +106,8 @@ static void APP_ErrorHandler(void)
  */
 static driver_status_t APP_Init(void)
 {
+	//! The application explicitly owns the GPIOA port clock gate shared by the LEDs and push button.
+	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
 	ASSERT_DRIVER_STATUS(GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)));
 	ASSERT_DRIVER_STATUS(GPIO_PinReset(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)));
 	ASSERT_DRIVER_STATUS

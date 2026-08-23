@@ -18,6 +18,7 @@
 #include "gpio.h"
 #include "gpio_codec.h"
 #include "gpio_ll.h"
+#include "rcc.h"
 
 // ==================================================================================================== //
 //												Local Defines											//
@@ -342,23 +343,24 @@ driver_status_t GPIO_Init
 	// Validate Input
 	if
 	(
-		(GPIO_PORT_IS_VALID(GPIOx) == 0x00U) ||
-		(GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U) ||
-		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U) ||
-		(GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U) ||
+		(GPIO_PORT_IS_VALID(GPIOx) == 0x00U) || (GPIO_PIN_MASK_IS_VALID(pinMask) == 0x00U) ||
+		(GPIO_PIN_MODE_IS_VALID(mode) == 0x00U) || (GPIO_PIN_CONFIG_IS_VALID(config) == 0x00U) ||
 		(GPIO_PIN_MODE_CONFIG_IS_VALID_PAIR(mode, config) == 0x00U)
 	)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	//! Enable the GPIO peripheral clock before touching the selected GPIO registers
-	ASSERT_DRIVER_STATUS(LL_GPIO_EnableClock(GPIOx));
-
-	//! Enable AFIO clock when the requested configuration uses alternate function output
-	if (GPIO_PIN_CONFIG_IS_ALTERNATE(config) != 0x00U)
+	//! The application owns clock-gate enabling; this narrow API only verifies it is already on.
+	if (RCC_GetAPB2ClockState(LL_GPIO_GetPortClockMask(GPIOx)) != DRIVER_STATUS_ON)
 	{
-		ASSERT_DRIVER_STATUS(LL_GPIO_EnableAFIOClock());
+		return DRIVER_STATUS_ERROR_STATE;
+	}
+
+	//! Alternate-function configuration additionally requires the AFIO clock gate to already be enabled
+	if ((GPIO_PIN_CONFIG_IS_ALTERNATE(config) != 0x00U) && (RCC_GetAPB2ClockState(RCC_APB2ENR_AFIOEN) != DRIVER_STATUS_ON))
+	{
+		return DRIVER_STATUS_ERROR_STATE;
 	}
 
 	//! Apply requested selectors through the normal mode/config staging path

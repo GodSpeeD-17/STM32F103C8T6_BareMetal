@@ -40,6 +40,8 @@
 #define APP_GPIO_LED_PORT			(GPIOA)
 /** @brief Application GPIO Pin @def APP_GPIO_LED_PIN */
 #define APP_GPIO_LED_PIN			(GPIO_PIN_3)
+/** @brief Application-owned GPIO port clock gate for the LED @def APP_GPIO_LED_CLOCK_MASK */
+#define APP_GPIO_LED_CLOCK_MASK		(RCC_APB2ENR_IOPAEN)
 /** @brief Application Timer @def APP_TIMER */
 #define APP_TIMER					(TIM3)
 /** @brief Application Timer Clock Enable Mask @def APP_TIMER_ENABLE_MASK */
@@ -93,6 +95,8 @@ static void APP_ErrorHandler(void)
  */
 static driver_status_t APP_ConfigTimerIRQ(void)
 {
+	//! Explicitly enable the application-owned GPIO port clock gate before configuring the LED.
+	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_LED_CLOCK_MASK, DRIVER_STATUS_ON));
 	//! Configure GPIO for LED
 	ASSERT_DRIVER_STATUS(GPIO_LED_Init(APP_GPIO_LED_PORT, APP_GPIO_LED_PIN));
 

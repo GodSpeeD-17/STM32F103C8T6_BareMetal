@@ -54,6 +54,8 @@ driver_status_t App_Init(void)
 #endif
 
 #if (APP_ENABLE_ONBOARD_LED == 1U)
+	//! The application explicitly owns the on-board LED GPIO port clock gate.
+	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(GPIO_OB_LED_CLOCK_ENABLE_MASK, DRIVER_STATUS_ON));
 	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
 	ASSERT_DRIVER_STATUS(OB_LED_Init());
 	OB_LED_Reset();

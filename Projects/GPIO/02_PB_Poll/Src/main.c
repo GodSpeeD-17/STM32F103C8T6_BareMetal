@@ -27,6 +27,7 @@
 #include "app_delay.h"
 #include "bsp.h"
 #include "gpio.h"
+#include "rcc.h"
 
 // ==================================================================================================== //
 // Private Defines
@@ -46,6 +47,8 @@
 #define PUSH_BUTTON_PORT				GPIOA
 /** @brief Push-button GPIO pin mask (externally pulled-up) @def PUSH_BUTTON_PIN */
 #define PUSH_BUTTON_PIN					GPIO_PIN_1
+/** @brief Application-owned GPIO port clock gate shared by every pin above @def APP_GPIO_CLOCK_MASK */
+#define APP_GPIO_CLOCK_MASK				(RCC_APB2ENR_IOPAEN)
 
 // ==================================================================================================== //
 // Application Entry Point
@@ -53,6 +56,12 @@
 
 int main(void)
 {
+	if (RCC_SetAPB2ClockState(APP_GPIO_CLOCK_MASK, DRIVER_STATUS_ON) != DRIVER_STATUS_SUCCESS)
+	{
+		OB_LED_Set();
+		while (1);
+	}
+
 	if (GPIO_LED_Init(RED_LED_PORT, (RED_LED_PIN | YELLOW_LED_PIN)) != DRIVER_STATUS_SUCCESS)
 	{
 		OB_LED_Set();

@@ -271,10 +271,14 @@ driver_status_t GPIO_SetPinConfig
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_PUSH_PULL`
  * - @ref `GPIO_PIN_CONFIG_ALTERNATE_OPEN_DRAIN`
  * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock enable and pin configuration completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Pin configuration completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p mode, or @p config was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The GPIO port clock gate (or, for alternate-function
+ * @p config, the AFIO clock gate) is disabled, or the internal staged-image update failed unexpectedly.
+ * @pre The application enabled the matching GPIO port clock gate, and the AFIO clock gate when
+ * @p config is alternate-function, through the RCC driver before calling this API.
  * @note @p mode and @p config must form a valid STM32F1 GPIO mode/config pair.
+ * @note This API only verifies the required clock gate(s); it never enables them.
  */
 driver_status_t GPIO_Init
 (
@@ -418,11 +422,15 @@ driver_status_t GPIO_PinToggle(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMa
  * Accepted values:
  * - One or more OR-combined values from @ref `GPIO_PIN_0` through @ref `GPIO_PIN_15`
  * @returns Driver operation status
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Clock enable and LED pin configuration completed successfully.
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: LED pin configuration completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx or @p pinMask was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The GPIO port clock gate is disabled, or the internal
+ * staged-image update failed unexpectedly.
+ * @pre The application enabled the matching GPIO port clock gate through the RCC driver before
+ * calling this API.
  * @note This API always configures selected pins as @ref `GPIO_PIN_MODE_OUTPUT_2MHZ`
  * with @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`.
+ * @note This API only verifies the required clock gate; it never enables it.
  */
 driver_status_t GPIO_LED_Init(GPIO_TypeDef* const GPIOx, const gpio_pin_t pinMask);
 

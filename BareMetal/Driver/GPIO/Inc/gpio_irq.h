@@ -102,7 +102,10 @@ extern "C" {
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: GPIO IRQ line initialization completed successfully.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p GPIOx, @p pinMask, @p inputConfig, or @p trigger was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed unexpectedly.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The @p GPIOx port clock gate is disabled, or the
+ * internal staged-image update failed unexpectedly.
+ * @pre The application enabled the matching GPIO port clock gate through the RCC driver before
+ * calling this API; this API forwards that requirement to @ref `GPIO_Init`.
  * @note This API configures the selected GPIO pins as @ref `GPIO_PIN_MODE_INPUT`
  * before routing and unmasking the EXTI line(s).
  * @note Use @ref `GPIO_PIN_CONFIG_INPUT_FLOATING` when the board already has

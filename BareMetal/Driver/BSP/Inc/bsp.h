@@ -63,6 +63,14 @@ extern "C" {
  * latch turns the LED on, while a set output latch turns it off.
  */
 #define GPIO_OB_LED_PIN							GPIO_PIN_13
+/**
+ * @brief APB2 clock-enable mask owned by the on-board LED GPIO port
+ * @def GPIO_OB_LED_CLOCK_ENABLE_MASK
+ * @details
+ * The application must enable this clock gate through @ref `RCC_SetAPB2ClockState`
+ * before calling @ref `OB_LED_Init`; the BSP and GPIO drivers only verify it.
+ */
+#define GPIO_OB_LED_CLOCK_ENABLE_MASK			(RCC_APB2ENR_IOPCEN)
 
 // Uncomment this to achieve delay from SysTick
 // #define SYSTICK_DELAY__
@@ -84,12 +92,16 @@ extern "C" {
  * @returns Driver operation status
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: On-board LED GPIO was initialized.
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: Board LED GPIO mapping was invalid.
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal GPIO staged-image update failed.
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: @ref `GPIO_OB_LED_CLOCK_ENABLE_MASK` is disabled, or the
+ * internal GPIO staged-image update failed.
+ * @pre The application enabled @ref `GPIO_OB_LED_CLOCK_ENABLE_MASK` through
+ * @ref `RCC_SetAPB2ClockState` before calling this API.
  * @details
  * This API configures @ref `GPIO_OB_LED_PORT` / @ref `GPIO_OB_LED_PIN` through
  * @ref `GPIO_LED_Init`, which applies @ref `GPIO_PIN_MODE_OUTPUT_2MHZ` and
  * @ref `GPIO_PIN_CONFIG_OUTPUT_PUSH_PULL`. The active-low polarity is handled
- * by the set/reset helper APIs below.
+ * by the set/reset helper APIs below. This API only verifies the clock gate;
+ * it never enables it.
  */
 driver_status_t OB_LED_Init(void);
 

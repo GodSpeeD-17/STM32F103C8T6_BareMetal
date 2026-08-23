@@ -35,6 +35,7 @@
  * caller supplies a pre-staged full register image.
  */
 
+// Header Guards
 #ifndef LL_GPIO_H_
 #define LL_GPIO_H_
 
