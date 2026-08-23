@@ -15,7 +15,7 @@
  * This interface exposes the single ordered initialization transaction used
  * before `main`. The implementation configures the clock first and then every
  * application service enabled by `app_config.h`, including the optional
- * on-board LED GPIO.
+ * on-board LED GPIO and the optional debug UART.
  *
  * @section APP_INIT_H_BOUNDARY Dependency Boundary
  * This header includes shared status types only. RCC, SysTick, Timer, BSP,
@@ -53,8 +53,9 @@ extern "C" {
  * @details
  * Applies the 72 MHz RCC preset first, initializes the SysTick-backed timebase
  * when enabled, initializes the optional dedicated microsecond-delay Timer,
- * then configures the optional on-board LED GPIO and forces it off. Processing
- * stops at the first failed transaction.
+ * configures the optional on-board LED GPIO and forces it off, then
+ * configures the optional debug UART. Processing stops at the first failed
+ * transaction.
  * @returns @ref driver_status_t "Application initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every enabled application service was initialized
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An enabled service resolved to a `NULL` peripheral instance
@@ -65,6 +66,7 @@ extern "C" {
  * @retval - @ref `DRIVER_STATUS_ERROR`: RCC hardware state could not be decoded
  * @note Timer hardware is untouched when @ref `APP_ENABLE_TIMER_US_DELAY` is `0U`
  * @note The on-board LED GPIO is untouched when @ref `APP_ENABLE_ONBOARD_LED` is `0U`
+ * @note The debug UART is untouched when @ref `APP_ENABLE_DEBUG_UART` is `0U`, the Template default
  */
 driver_status_t App_Init(void);
 

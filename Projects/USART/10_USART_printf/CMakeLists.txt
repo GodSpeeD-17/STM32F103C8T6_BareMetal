@@ -74,6 +74,7 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
+option(APP_ENABLE_DEBUG_UART "Enable App_Init() debug-UART (BSP Debug_UART_*) configuration" OFF)
 option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" ON)
 
 # USART is required directly by the application; the component graph
@@ -114,6 +115,7 @@ target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
+    APP_ENABLE_DEBUG_UART=$<BOOL:${APP_ENABLE_DEBUG_UART}>
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf

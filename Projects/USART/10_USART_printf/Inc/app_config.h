@@ -159,6 +159,35 @@
 
 #endif /* APP_ENABLE_ONBOARD_LED */
 
+// ==================================================================================================== //
+// Optional Debug UART Configuration
+// ==================================================================================================== //
+
+#ifndef APP_ENABLE_DEBUG_UART
+
+/**
+ * @brief Selects the optional BSP debug-UART initialization
+ * @def APP_ENABLE_DEBUG_UART
+ * @details
+ * CMake normally defines this macro from `APP_ENABLE_DEBUG_UART`. When it is
+ * `1U`, App_Init() configures the board debug UART (USART1 TX on PA9,
+ * 115200 8N1) through `Debug_UART_Init()` before application code runs. This
+ * fallback definition supports builds that do not inject the CMake option.
+ * Accepted values:
+ * - `0U`: Leave the debug UART untouched by the Template; Template default
+ * - `1U`: Initialize the debug UART peripheral and GPIO/AFIO clock gates,
+ *   then call `Debug_UART_Init()`
+ * @note This project's own `main.c` already owns and configures USART1 for
+ * its printf demo, so enabling this alongside that demo redundantly
+ * reconfigures the same peripheral with the same settings before `main()`
+ * runs; it is off by default for exactly that reason
+ * @note Application code still owns every `Debug_UART_Printf()` call; this
+ * switch only guarantees the peripheral is configured before `main()` runs
+ */
+#define APP_ENABLE_DEBUG_UART			(0U)
+
+#endif /* APP_ENABLE_DEBUG_UART */
+
 #if (APP_ENABLE_TIMER_US_DELAY == 1U)
 
 /**

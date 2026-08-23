@@ -13,9 +13,9 @@
  *
  * @section APP_INIT_C_RESPONSIBILITY Responsibility
  * App_Init() establishes the system clock, starts the configured monotonic
- * timebase, allocates the optional Timer delay service, and configures the
- * optional on-board LED in that order. It propagates the first initialization
- * failure unchanged.
+ * timebase, allocates the optional Timer delay service, configures the
+ * optional on-board LED, then configures the optional debug UART in that
+ * order. It propagates the first initialization failure unchanged.
  *
  * @section APP_INIT_C_BOUNDARY Dependency Boundary
  * This module selects and orders services but does not access peripheral
@@ -30,9 +30,9 @@
 #include "app_delay.h"
 #include "app_time.h"
 #include "rcc.h"
-#if (APP_ENABLE_ONBOARD_LED == 1U)
+#if (APP_ENABLE_ONBOARD_LED == 1U) || (APP_ENABLE_DEBUG_UART == 1U)
 #include "bsp.h"
-#endif /* APP_ENABLE_ONBOARD_LED */
+#endif /* APP_ENABLE_ONBOARD_LED || APP_ENABLE_DEBUG_UART */
 
 // ==================================================================================================== //
 // Public API
@@ -56,17 +56,42 @@ driver_status_t App_Init(void)
 #if (APP_ENABLE_ONBOARD_LED == 1U)
 	//! The application explicitly owns the on-board LED GPIO port clock gate.
 	ASSERT_DRIVER_STATUS
-(
-	RCC_SetPeripheralClockState
 	(
-		RCC_APB2_BUS,
-		GPIO_OB_LED_CLOCK_ENABLE_MASK,
-		DRIVER_STATUS_ON
-	)
-);
+		RCC_SetPeripheralClockState
+		(
+			RCC_APB2_BUS,
+			GPIO_OB_LED_CLOCK_ENABLE_MASK,
+			DRIVER_STATUS_ON
+		)
+	);
 	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
 	ASSERT_DRIVER_STATUS(OB_LED_Init());
 	OB_LED_Reset();
+#endif
+
+#if (APP_ENABLE_DEBUG_UART == 1U)
+	//! The application explicitly owns the debug UART peripheral and GPIO/AFIO clock gates.
+	ASSERT_DRIVER_STATUS
+	(
+		RCC_SetPeripheralClockState
+		(
+			RCC_APB2_BUS,
+			GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK,
+			DRIVER_STATUS_ON
+		)
+	);
+	//! 
+	ASSERT_DRIVER_STATUS
+	(
+		RCC_SetPeripheralClockState
+		(
+			RCC_APB2_BUS,
+			GPIO_DEBUG_UART_CLOCK_ENABLE_MASK,
+			DRIVER_STATUS_ON
+		)
+	);
+	//! Configure the debug UART for TX-only logging before application code runs.
+	ASSERT_DRIVER_STATUS(Debug_UART_Init());
 #endif
 
 	return DRIVER_STATUS_SUCCESS;
