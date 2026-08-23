@@ -91,7 +91,7 @@ step below.
 
 ## Verification Targets
 
-- [ ] `Projects/USART/08_USART_Byte_TX`
+- [x] `Projects/USART/08_USART_Byte_TX`
 - [ ] `Projects/USART/10_USART_printf`
 
 ## Notes

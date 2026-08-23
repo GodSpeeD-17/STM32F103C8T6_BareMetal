@@ -37,7 +37,8 @@ extern "C" {
  * @brief Executes the USART byte-TX demo control loop
  * @details
  * Configures USART1 and repeatedly transmits one incrementing byte from 'A'
- * to 'Z', paced by App_DelayMs().
+ * to 'Z', paced by App_DelayMs(), sending a single '\n' byte right after
+ * 'Z' to mark each completed cycle.
  * @returns Does not return
  */
 int main(void);
