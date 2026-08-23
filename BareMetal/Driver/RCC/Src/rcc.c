@@ -937,12 +937,7 @@ driver_status_t RCC_SetPeripheralClockState
 )
 {
 	//! Validate the complete request before selecting a register-specific LL mutation.
-	if
-	(
-		(RCC_IS_BUS_VALID(bus) == 0x00U)						||
-		(LL_RCC_IS_MASK_VALID(clockMask) == 0x00U)			||
-		((clockState != DRIVER_STATUS_OFF) && (clockState != DRIVER_STATUS_ON))
-	)
+	if ((RCC_IS_BUS_VALID(bus) == 0x00U) || (LL_RCC_IS_MASK_VALID(clockMask) == 0x00U) || ((clockState != DRIVER_STATUS_OFF) && (clockState != DRIVER_STATUS_ON)))
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}

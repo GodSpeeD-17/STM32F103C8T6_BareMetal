@@ -306,7 +306,8 @@ See [`TODO.md`](TODO.md) for the exact commit-sized checklist. In summary:
    stay application-owned, matching Timer PWM).
 6. Driver orchestration (clock verification, IRQ source/event split).
 7. Removal of `usart_t`/preset enums/the lookup table.
-8. Project migration (`08_USART_Byte_TX`, `10_USART_printf`).
+8. Project migration (`08_USART_Byte_Poll_TX`, `09_USART_Byte_Poll_RX`,
+   `10_USART_printf`).
 9. Doxygen pass.
 
 ## Before Editing

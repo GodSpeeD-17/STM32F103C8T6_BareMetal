@@ -149,6 +149,9 @@ driver_status_t USART_Config(USART_TypeDef* const USARTx, const usart_config_t* 
  * Spins on the `SR.RXNE` event flag, bounded by `USART_TRANSFER_TIMEOUT`
  * poll iterations, before reading `DR`. This is a blocking, poll-driven
  * transfer; it never touches `CR1`/`CR3` interrupt-enable bits.
+ * @note Worst-case block time is `USART_TRANSFER_TIMEOUT` iterations of the
+ * internal poll loop (~9ms at 72MHz SYSCLK); this is a bounded spin-wait, not
+ * a millisecond-accurate deadline.
  * @param[in] USARTx Target USART peripheral instance
  * Accepted values:
  * - @ref `USART1`
@@ -175,6 +178,9 @@ driver_status_t USART_ReceiveByte(const USART_TypeDef* const USARTx, uint8_t* co
  * Spins on the `SR.TXE` event flag, bounded by `USART_TRANSFER_TIMEOUT`
  * poll iterations, before writing `DR`. This is a blocking, poll-driven
  * transfer; it never touches `CR1`/`CR3` interrupt-enable bits.
+ * @note Worst-case block time is `USART_TRANSFER_TIMEOUT` iterations of the
+ * internal poll loop (~9ms at 72MHz SYSCLK); this is a bounded spin-wait, not
+ * a millisecond-accurate deadline.
  * @param[in] USARTx Target USART peripheral instance
  * Accepted values:
  * - @ref `USART1`

@@ -76,7 +76,8 @@ step below.
 - [ ] Remove the `usart_t` enum, `USART_4`/`USART_5`, and the
   `__usartDriverRegisterMapping__[]` lookup table; migrate every internal
   call site to direct `USART1`/`USART2`/`USART3` pointer identity.
-- [ ] Migrate `Projects/USART/08_USART_Byte_TX` and
+- [ ] Migrate `Projects/USART/08_USART_Byte_Poll_TX`,
+  `Projects/USART/09_USART_Byte_Poll_RX`, and
   `Projects/USART/10_USART_printf` to the pointer-identity API. Each project
   explicitly sequences: RCC-enable the USART peripheral clock, RCC-enable
   the GPIO/AFIO clocks and configure the TX/RX pins itself (application
@@ -91,7 +92,8 @@ step below.
 
 ## Verification Targets
 
-- [x] `Projects/USART/08_USART_Byte_TX`
+- [x] `Projects/USART/08_USART_Byte_Poll_TX`
+- [ ] `Projects/USART/09_USART_Byte_Poll_RX`
 - [ ] `Projects/USART/10_USART_printf`
 
 ## Notes
