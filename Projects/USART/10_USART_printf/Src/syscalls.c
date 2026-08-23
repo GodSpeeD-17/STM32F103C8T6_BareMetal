@@ -13,7 +13,14 @@
  *
  * @section SYSCALLS_C_RESPONSIBILITY Responsibility
  * _sbrk() owns the current program break and admits allocations only inside
- * the heap interval defined by the linker script.
+ * the heap interval defined by the linker script. The remaining stubs
+ * (_close/_lseek/_read/_write/_fstat/_isatty/_exit/_kill/_getpid) satisfy
+ * link-time references pulled in by `-u _printf_float`, which this project
+ * needs to demonstrate `USART_printf()`'s "%f" conversion under
+ * `--specs=nano.specs`. This demo never routes through libc's file-descriptor
+ * layer at runtime — `USART_printf()` formats into a stack buffer through
+ * `vsnprintf()` and transmits it directly — so every stub below is
+ * link-satisfying only and is never called.
  *
  * @section SYSCALLS_C_BOUNDARY Dependency Boundary
  * This module has no dependency on startup, application services, Core
@@ -24,6 +31,7 @@
 // Includes
 // ==================================================================================================== //
 #include <errno.h>
+#include <sys/stat.h>
 #include "stm32f1xx_data_types.h"
 
 // ==================================================================================================== //
@@ -40,6 +48,17 @@ extern uint8_t _eheap;
 // ==================================================================================================== //
 
 void* _sbrk(intptr_t increment);
+//! newlib declares only the _r reentrant wrappers in reent.h; the plain syscalls below have no
+//! toolchain-provided prototype, so each is declared here immediately ahead of its definition.
+int _close(int file);
+int _lseek(int file, int offset, int whence);
+int _read(int file, char* pBuffer, int length);
+int _write(int file, const char* pBuffer, int length);
+int _fstat(int file, struct stat* pStat);
+int _isatty(int file);
+int _kill(int pid, int signal);
+int _getpid(void);
+void _exit(int status);
 
 // ==================================================================================================== //
 // Private Data
@@ -105,4 +124,123 @@ void* _sbrk(intptr_t increment)
 	}
 
 	return pPreviousHeapEnd;
+}
+
+// ==================================================================================================== //
+// C Library File-Descriptor Stubs
+// ==================================================================================================== //
+
+/**
+ * @brief Link-satisfying stub for the C library's close() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `-1` with `errno` set to `ENOSYS`
+ */
+int _close(int file)
+{
+	(void) file;
+	errno = ENOSYS;
+	return -1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's lseek() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `-1` with `errno` set to `ENOSYS`
+ */
+int _lseek(int file, int offset, int whence)
+{
+	(void) file;
+	(void) offset;
+	(void) whence;
+	errno = ENOSYS;
+	return -1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's read() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `-1` with `errno` set to `ENOSYS`
+ */
+int _read(int file, char* pBuffer, int length)
+{
+	(void) file;
+	(void) pBuffer;
+	(void) length;
+	errno = ENOSYS;
+	return -1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's write() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `-1` with `errno` set to `ENOSYS`
+ */
+int _write(int file, const char* pBuffer, int length)
+{
+	(void) file;
+	(void) pBuffer;
+	(void) length;
+	errno = ENOSYS;
+	return -1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's fstat() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `0` describing every file descriptor as a character device
+ */
+int _fstat(int file, struct stat* pStat)
+{
+	(void) file;
+	pStat->st_mode = S_IFCHR;
+	return 0;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's isatty() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `0` (never a terminal)
+ */
+int _isatty(int file)
+{
+	(void) file;
+	return 0;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's kill() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `-1` with `errno` set to `ENOSYS`
+ */
+int _kill(int pid, int signal)
+{
+	(void) pid;
+	(void) signal;
+	errno = ENOSYS;
+	return -1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's getpid() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * @returns `1`, the traditional bare-metal single-process identifier
+ */
+int _getpid(void)
+{
+	return 1;
+}
+
+/**
+ * @brief Link-satisfying stub for the C library's exit() syscall
+ * @details Never exercised at runtime; see this file's Responsibility section.
+ * Halts instead of returning, matching `_exit()`'s no-return contract.
+ * @returns Does not return
+ */
+void _exit(int status)
+{
+	(void) status;
+	while (1)
+	{
+		//! Halt: there is no OS to return control to.
+	}
 }

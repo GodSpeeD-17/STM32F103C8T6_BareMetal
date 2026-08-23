@@ -139,7 +139,20 @@ int main(void)
 	while (1)
 	{
 		//! USART_printf() blocks internally on each formatted byte; no separate readiness poll is needed here.
-		if (USART_printf(APP_USART, "Hello World: %u\t0x%.4X\r\n", count, count) != DRIVER_STATUS_SUCCESS)
+		//! Exercises %u, %X, %c, %p, and %f in one call to demonstrate the supported conversions.
+		if
+		(
+			USART_printf
+			(
+				APP_USART,
+				"[%u] Hello World:\t0x%.4X\tchar='%c'\tptr=%p\tval=%.2f\r\n",
+				count,
+				count,
+				(char) ('A' + (count % 26U)),
+				(void*) &count,
+				(double) count * 0.5
+			) != DRIVER_STATUS_SUCCESS
+		)
 		{
 			App_ErrorHandler();
 		}

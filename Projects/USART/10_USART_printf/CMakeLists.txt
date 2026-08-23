@@ -114,3 +114,9 @@ target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
 )
+
+# The shared --specs=nano.specs link policy strips floating-point printf
+# support by default; this demo's format string exercises "%f" on purpose,
+# so pull the newlib-nano float formatter in for this one target only
+# instead of widening the shared STM32F103Flags.cmake link policy.
+target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
