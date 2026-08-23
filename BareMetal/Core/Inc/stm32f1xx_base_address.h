@@ -69,6 +69,12 @@ extern "C" {
 #define TIM6_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + TIM6_OFFSET))
 /** @brief Basic Timer 7 Base Memory Address @def TIM7_BASE_ADDRESS */
 #define TIM7_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + TIM7_OFFSET))
+/** @brief Window Watchdog Base @def WWDG_BASE_ADDR */
+#define WWDG_BASE_ADDR							((uintptr_t) (APB1_BASE_ADDR + WWDG_OFFSET))
+/** @brief Independent Watchdog Base @def IWDG_BASE_ADDR */
+#define IWDG_BASE_ADDR							((uintptr_t) (APB1_BASE_ADDR + IWDG_OFFSET))
+/** @brief SPI2/I2S2 Base Memory Address @def SPI2_BASE_ADDRESS */
+#define SPI2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + SPI2_OFFSET))
 /** @brief USART2 Base Memory Address @def USART2_BASE_ADDRESS */
 #define USART2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + USART2_OFFSET))
 /** @brief USART3 Base Memory Address @def USART3_BASE_ADDRESS */
@@ -77,11 +83,6 @@ extern "C" {
 #define I2C1_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C1_OFFSET))
 /** @brief I2C2 Base Memory Address @def I2C2_BASE_ADDRESS */
 #define I2C2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C2_OFFSET))
-/** @brief Window Watchdog Base @def WWDG_BASE_ADDR */
-#define WWDG_BASE_ADDR							((uintptr_t) (APB1_BASE_ADDR + WWDG_OFFSET))
-/** @brief Independent Watchdog Base @def IWDG_BASE_ADDR */
-#define IWDG_BASE_ADDR							((uintptr_t) (APB1_BASE_ADDR + IWDG_OFFSET))
-
 // ------------------------------------------------------------------------------------------
 // APB2 Peripheral Base Addresses
 // ------------------------------------------------------------------------------------------
@@ -109,6 +110,8 @@ extern "C" {
 #define ADC2_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + ADC2_OFFSET))
 /** @brief TIM1 Base Memory Address @def TIM1_BASE_ADDRESS */
 #define TIM1_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + TIM1_OFFSET))
+/** @brief SPI1 Base Memory Address @def SPI1_BASE_ADDRESS */
+#define SPI1_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + SPI1_OFFSET))
 /** @brief TIM8 Base Memory Address @def TIM8_BASE_ADDRESS */
 #define TIM8_BASE_ADDRESS						((uintptr_t) (APB2_BASE_ADDR + TIM8_OFFSET))
 /** @brief USART1 Base Memory Address @def USART1_BASE_ADDRESS */

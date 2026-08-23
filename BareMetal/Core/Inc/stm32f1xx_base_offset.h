@@ -54,6 +54,8 @@ extern "C" {
 #define WWDG_OFFSET								((uintptr_t) 0x00002C00UL)
 /** @brief IWDG offset from @ref `APB1_BASE_ADDR` @def IWDG_OFFSET */
 #define IWDG_OFFSET								((uintptr_t) 0x00003000UL)
+/** @brief SPI2/I2S2 offset from @ref `APB1_BASE_ADDR` @def SPI2_OFFSET */
+#define SPI2_OFFSET								((uintptr_t) 0x00003800UL)
 /** @brief USART2 offset from @ref `APB1_BASE_ADDR` @def USART2_OFFSET */
 #define USART2_OFFSET							((uintptr_t) 0x00004400UL)
 /** @brief USART3 offset from @ref `APB1_BASE_ADDR` @def USART3_OFFSET */
@@ -91,6 +93,8 @@ extern "C" {
 #define ADC2_OFFSET								((uintptr_t) 0x00002800UL)
 /** @brief TIM1 offset from @ref `APB2_BASE_ADDR` @def TIM1_OFFSET */
 #define TIM1_OFFSET								((uintptr_t) 0x00002C00UL)
+/** @brief SPI1 offset from @ref `APB2_BASE_ADDR` @def SPI1_OFFSET */
+#define SPI1_OFFSET								((uintptr_t) 0x00003000UL)
 /** @brief TIM8 offset from @ref `APB2_BASE_ADDR` @def TIM8_OFFSET */
 #define TIM8_OFFSET								((uintptr_t) 0x00003400UL)
 /** @brief USART1 offset from @ref `APB2_BASE_ADDR` @def USART1_OFFSET */

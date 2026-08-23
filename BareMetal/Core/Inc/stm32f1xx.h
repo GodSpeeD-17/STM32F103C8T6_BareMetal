@@ -48,6 +48,7 @@ extern "C" {
 #include "stm32f1xx_exti.h"
 #include "stm32f1xx_gpio.h"
 #include "stm32f1xx_i2c.h"
+#include "stm32f1xx_spi.h"
 #include "stm32f1xx_timer.h"
 #include "stm32f1xx_rcc.h"
 #include "stm32f1xx_usart.h"
@@ -186,6 +187,8 @@ extern "C" {
 #define WWDG									((WWDG_TypeDef*) WWDG_BASE_ADDR)
 /** @brief Independent Watchdog @def IWDG */
 #define IWDG									((IWDG_TypeDef*) IWDG_BASE_ADDR)
+/** @brief SPI2/I2S2 Peripheral @def SPI2 */
+#define SPI2									((SPI_TypeDef*) SPI2_BASE_ADDRESS)
 /** @brief USART2 Peripheral @def USART2 */
 #define USART2									((USART_TypeDef*) USART2_BASE_ADDRESS)
 /** @brief USART3 Peripheral @def USART3 */
@@ -222,6 +225,8 @@ extern "C" {
 #define ADC2									((ADC_TypeDef*) ADC2_BASE_ADDRESS)
 /** @brief Advanced-control Timer 1 @def TIM1 */
 #define TIM1									((Adv_TIM_TypeDef*) TIM1_BASE_ADDRESS)
+/** @brief SPI1 Peripheral @def SPI1 */
+#define SPI1									((SPI_TypeDef*) SPI1_BASE_ADDRESS)
 /** @brief Advanced-control Timer 8 @def TIM8 */
 #define TIM8									((Adv_TIM_TypeDef*) TIM8_BASE_ADDRESS)
 /** @brief USART1  @def USART1 */
