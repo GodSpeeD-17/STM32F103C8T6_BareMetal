@@ -37,13 +37,13 @@ extern "C" {
 
 // ----------------------------------- CRC_DR Register Bit Defines ------------------------------------ //
 /** @brief Bit position of the `CRC_DR_DR` field @def CRC_DR_DR_Pos */
-#define CRC_DR_DR_Pos		((reg_bit_pos_t) 0U)
+#define CRC_DR_DR_Pos			((reg_bit_pos_t) 0U)
 /** @brief Width of the `CRC_DR_DR` field @def CRC_DR_DR_Width */
-#define CRC_DR_DR_Width		((reg_field_width_t) 32U)
+#define CRC_DR_DR_Width			((reg_field_width_t) 32U)
 /** @brief Register-positioned mask for the `CRC_DR_DR` field @def CRC_DR_DR_Msk */
-#define CRC_DR_DR_Msk		((reg) 0xFFFFFFFFUL)
+#define CRC_DR_DR_Msk			((reg) 0xFFFFFFFFUL)
 /** @brief Data register bits @def CRC_DR_DR */
-#define CRC_DR_DR			CRC_DR_DR_Msk
+#define CRC_DR_DR				CRC_DR_DR_Msk
 
 // ----------------------------------- CRC_IDR Register Bit Defines ----------------------------------- //
 /** @brief Bit position of the `CRC_IDR_IDR` field @def CRC_IDR_IDR_Pos */
@@ -116,46 +116,46 @@ extern "C" {
 
 // ---------------------------------- PWR PVD Level Selector Defines ---------------------------------- //
 /** @brief PVD level 2.2V @def PWR_CR_PLS_LEV0 */
-#define PWR_CR_PLS_LEV0		0x00000000U
+#define PWR_CR_PLS_LEV0			(0x00000000UL)
 /** @brief PVD level 2.3V @def PWR_CR_PLS_LEV1 */
-#define PWR_CR_PLS_LEV1		0x00000020U
+#define PWR_CR_PLS_LEV1			(0x00000020UL)
 /** @brief PVD level 2.4V @def PWR_CR_PLS_LEV2 */
-#define PWR_CR_PLS_LEV2		0x00000040U
+#define PWR_CR_PLS_LEV2			(0x00000040UL)
 /** @brief PVD level 2.5V @def PWR_CR_PLS_LEV3 */
-#define PWR_CR_PLS_LEV3		0x00000060U
+#define PWR_CR_PLS_LEV3			(0x00000060UL)
 /** @brief PVD level 2.6V @def PWR_CR_PLS_LEV4 */
-#define PWR_CR_PLS_LEV4		0x00000080U
+#define PWR_CR_PLS_LEV4			(0x00000080UL)
 /** @brief PVD level 2.7V @def PWR_CR_PLS_LEV5 */
-#define PWR_CR_PLS_LEV5		0x000000A0U
+#define PWR_CR_PLS_LEV5			(0x000000A0UL)
 /** @brief PVD level 2.8V @def PWR_CR_PLS_LEV6 */
-#define PWR_CR_PLS_LEV6		0x000000C0U
+#define PWR_CR_PLS_LEV6			(0x000000C0UL)
 /** @brief PVD level 2.9V @def PWR_CR_PLS_LEV7 */
-#define PWR_CR_PLS_LEV7		0x000000E0U
+#define PWR_CR_PLS_LEV7			(0x000000E0UL)
 
 // ----------------------------------- Legacy Compatibility Defines ----------------------------------- //
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V2` @def PWR_CR_PLS_2V2 */
-#define PWR_CR_PLS_2V2		PWR_CR_PLS_LEV0
+#define PWR_CR_PLS_2V2			PWR_CR_PLS_LEV0
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V3` @def PWR_CR_PLS_2V3 */
-#define PWR_CR_PLS_2V3		PWR_CR_PLS_LEV1
+#define PWR_CR_PLS_2V3			PWR_CR_PLS_LEV1
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V4` @def PWR_CR_PLS_2V4 */
-#define PWR_CR_PLS_2V4		PWR_CR_PLS_LEV2
+#define PWR_CR_PLS_2V4			PWR_CR_PLS_LEV2
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V5` @def PWR_CR_PLS_2V5 */
-#define PWR_CR_PLS_2V5		PWR_CR_PLS_LEV3
+#define PWR_CR_PLS_2V5			PWR_CR_PLS_LEV3
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V6` @def PWR_CR_PLS_2V6 */
-#define PWR_CR_PLS_2V6		PWR_CR_PLS_LEV4
+#define PWR_CR_PLS_2V6			PWR_CR_PLS_LEV4
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V7` @def PWR_CR_PLS_2V7 */
-#define PWR_CR_PLS_2V7		PWR_CR_PLS_LEV5
+#define PWR_CR_PLS_2V7			PWR_CR_PLS_LEV5
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V8` @def PWR_CR_PLS_2V8 */
-#define PWR_CR_PLS_2V8		PWR_CR_PLS_LEV6
+#define PWR_CR_PLS_2V8			PWR_CR_PLS_LEV6
 /** @brief Register or selector value represented by `PWR_CR_PLS_2V9` @def PWR_CR_PLS_2V9 */
-#define PWR_CR_PLS_2V9		PWR_CR_PLS_LEV7
+#define PWR_CR_PLS_2V9			PWR_CR_PLS_LEV7
 
 /** @brief Bit position of the `PWR_CR_DBP` field @def PWR_CR_DBP_Pos */
-#define PWR_CR_DBP_Pos		((reg_bit_pos_t) 8U)
+#define PWR_CR_DBP_Pos			((reg_bit_pos_t) 8U)
 /** @brief Register-positioned mask for the `PWR_CR_DBP` field @def PWR_CR_DBP_Msk */
-#define PWR_CR_DBP_Msk		REG_BIT_MASK(PWR_CR_DBP_Pos)
+#define PWR_CR_DBP_Msk			REG_BIT_MASK(PWR_CR_DBP_Pos)
 /** @brief Disable Backup Domain write protection @def PWR_CR_DBP */
-#define PWR_CR_DBP			PWR_CR_DBP_Msk
+#define PWR_CR_DBP				PWR_CR_DBP_Msk
 
 // ----------------------------------- PWR_CSR Register Bit Defines ----------------------------------- //
 /** @brief Bit position of the `PWR_CSR_WUF` field @def PWR_CSR_WUF_Pos */
@@ -189,13 +189,13 @@ extern "C" {
 
 // ----------------------------------- BKP_DR1 Register Bit Defines ----------------------------------- //
 /** @brief Bit position of the `BKP_DR1_D` field @def BKP_DR1_D_Pos */
-#define BKP_DR1_D_Pos		((reg_bit_pos_t) 0U)
+#define BKP_DR1_D_Pos			((reg_bit_pos_t) 0U)
 /** @brief Width of the `BKP_DR1_D` field @def BKP_DR1_D_Width */
-#define BKP_DR1_D_Width		((reg_field_width_t) 16U)
+#define BKP_DR1_D_Width			((reg_field_width_t) 16U)
 /** @brief Register-positioned mask for the `BKP_DR1_D` field @def BKP_DR1_D_Msk */
-#define BKP_DR1_D_Msk		REG_FIELD_MASK(BKP_DR1_D_Pos, BKP_DR1_D_Width)
+#define BKP_DR1_D_Msk			REG_FIELD_MASK(BKP_DR1_D_Pos, BKP_DR1_D_Width)
 /** @brief Backup data @def BKP_DR1_D */
-#define BKP_DR1_D			BKP_DR1_D_Msk
+#define BKP_DR1_D				BKP_DR1_D_Msk
 
 // ----------------------------------- BKP_DR2 Register Bit Defines ----------------------------------- //
 /** @brief Bit position of the `BKP_DR2_D` field @def BKP_DR2_D_Pos */
@@ -11479,419 +11479,6 @@ extern "C" {
 #define SPI_I2SCFGR_I2SMOD_Msk		REG_BIT_MASK(SPI_I2SCFGR_I2SMOD_Pos)
 /** @brief I2S mode selection @def SPI_I2SCFGR_I2SMOD */
 #define SPI_I2SCFGR_I2SMOD			SPI_I2SCFGR_I2SMOD_Msk
-
-// ==================================================================================================== //
-//								Inter-Integrated Circuit (I2C) Register Defines							//
-// ==================================================================================================== //
-
-// ----------------------------------- I2C_CR1 Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_CR1_PE` field @def I2C_CR1_PE_Pos */
-#define I2C_CR1_PE_Pos				((reg_bit_pos_t) 0U)
-/** @brief Register-positioned mask for the `I2C_CR1_PE` field @def I2C_CR1_PE_Msk */
-#define I2C_CR1_PE_Msk				REG_BIT_MASK(I2C_CR1_PE_Pos)
-/** @brief Peripheral Enable @def I2C_CR1_PE */
-#define I2C_CR1_PE					I2C_CR1_PE_Msk
-/** @brief Bit position of the `I2C_CR1_SMBUS` field @def I2C_CR1_SMBUS_Pos */
-#define I2C_CR1_SMBUS_Pos			((reg_bit_pos_t) 1U)
-/** @brief Register-positioned mask for the `I2C_CR1_SMBUS` field @def I2C_CR1_SMBUS_Msk */
-#define I2C_CR1_SMBUS_Msk			REG_BIT_MASK(I2C_CR1_SMBUS_Pos)
-/** @brief SMBus Mode @def I2C_CR1_SMBUS */
-#define I2C_CR1_SMBUS				I2C_CR1_SMBUS_Msk
-/** @brief Bit position of the `I2C_CR1_SMBTYPE` field @def I2C_CR1_SMBTYPE_Pos */
-#define I2C_CR1_SMBTYPE_Pos			((reg_bit_pos_t) 3U)
-/** @brief Register-positioned mask for the `I2C_CR1_SMBTYPE` field @def I2C_CR1_SMBTYPE_Msk */
-#define I2C_CR1_SMBTYPE_Msk			REG_BIT_MASK(I2C_CR1_SMBTYPE_Pos)
-/** @brief SMBus Type @def I2C_CR1_SMBTYPE */
-#define I2C_CR1_SMBTYPE				I2C_CR1_SMBTYPE_Msk
-/** @brief Bit position of the `I2C_CR1_ENARP` field @def I2C_CR1_ENARP_Pos */
-#define I2C_CR1_ENARP_Pos			((reg_bit_pos_t) 4U)
-/** @brief Register-positioned mask for the `I2C_CR1_ENARP` field @def I2C_CR1_ENARP_Msk */
-#define I2C_CR1_ENARP_Msk			REG_BIT_MASK(I2C_CR1_ENARP_Pos)
-/** @brief ARP Enable @def I2C_CR1_ENARP */
-#define I2C_CR1_ENARP				I2C_CR1_ENARP_Msk
-/** @brief Bit position of the `I2C_CR1_ENPEC` field @def I2C_CR1_ENPEC_Pos */
-#define I2C_CR1_ENPEC_Pos			((reg_bit_pos_t) 5U)
-/** @brief Register-positioned mask for the `I2C_CR1_ENPEC` field @def I2C_CR1_ENPEC_Msk */
-#define I2C_CR1_ENPEC_Msk			REG_BIT_MASK(I2C_CR1_ENPEC_Pos)
-/** @brief PEC Enable @def I2C_CR1_ENPEC */
-#define I2C_CR1_ENPEC				I2C_CR1_ENPEC_Msk
-/** @brief Bit position of the `I2C_CR1_ENGC` field @def I2C_CR1_ENGC_Pos */
-#define I2C_CR1_ENGC_Pos			((reg_bit_pos_t) 6U)
-/** @brief Register-positioned mask for the `I2C_CR1_ENGC` field @def I2C_CR1_ENGC_Msk */
-#define I2C_CR1_ENGC_Msk			REG_BIT_MASK(I2C_CR1_ENGC_Pos)
-/** @brief General Call Enable @def I2C_CR1_ENGC */
-#define I2C_CR1_ENGC				I2C_CR1_ENGC_Msk
-/** @brief Bit position of the `I2C_CR1_NOSTRETCH` field @def I2C_CR1_NOSTRETCH_Pos */
-#define I2C_CR1_NOSTRETCH_Pos		((reg_bit_pos_t) 7U)
-/** @brief Register-positioned mask for the `I2C_CR1_NOSTRETCH` field @def I2C_CR1_NOSTRETCH_Msk */
-#define I2C_CR1_NOSTRETCH_Msk		REG_BIT_MASK(I2C_CR1_NOSTRETCH_Pos)
-/** @brief Clock Stretching Disable (Slave mode) @def I2C_CR1_NOSTRETCH */
-#define I2C_CR1_NOSTRETCH			I2C_CR1_NOSTRETCH_Msk
-/** @brief Bit position of the `I2C_CR1_START` field @def I2C_CR1_START_Pos */
-#define I2C_CR1_START_Pos			((reg_bit_pos_t) 8U)
-/** @brief Register-positioned mask for the `I2C_CR1_START` field @def I2C_CR1_START_Msk */
-#define I2C_CR1_START_Msk			REG_BIT_MASK(I2C_CR1_START_Pos)
-/** @brief Start Generation @def I2C_CR1_START */
-#define I2C_CR1_START				I2C_CR1_START_Msk
-/** @brief Bit position of the `I2C_CR1_STOP` field @def I2C_CR1_STOP_Pos */
-#define I2C_CR1_STOP_Pos			((reg_bit_pos_t) 9U)
-/** @brief Register-positioned mask for the `I2C_CR1_STOP` field @def I2C_CR1_STOP_Msk */
-#define I2C_CR1_STOP_Msk			REG_BIT_MASK(I2C_CR1_STOP_Pos)
-/** @brief Stop Generation @def I2C_CR1_STOP */
-#define I2C_CR1_STOP				I2C_CR1_STOP_Msk
-/** @brief Bit position of the `I2C_CR1_ACK` field @def I2C_CR1_ACK_Pos */
-#define I2C_CR1_ACK_Pos				((reg_bit_pos_t) 10U)
-/** @brief Register-positioned mask for the `I2C_CR1_ACK` field @def I2C_CR1_ACK_Msk */
-#define I2C_CR1_ACK_Msk				REG_BIT_MASK(I2C_CR1_ACK_Pos)
-/** @brief Acknowledge Enable @def I2C_CR1_ACK */
-#define I2C_CR1_ACK					I2C_CR1_ACK_Msk
-/** @brief Bit position of the `I2C_CR1_POS` field @def I2C_CR1_POS_Pos */
-#define I2C_CR1_POS_Pos				((reg_bit_pos_t) 11U)
-/** @brief Register-positioned mask for the `I2C_CR1_POS` field @def I2C_CR1_POS_Msk */
-#define I2C_CR1_POS_Msk				REG_BIT_MASK(I2C_CR1_POS_Pos)
-/** @brief Acknowledge/PEC Position (for data reception) @def I2C_CR1_POS */
-#define I2C_CR1_POS					I2C_CR1_POS_Msk
-/** @brief Bit position of the `I2C_CR1_PEC` field @def I2C_CR1_PEC_Pos */
-#define I2C_CR1_PEC_Pos				((reg_bit_pos_t) 12U)
-/** @brief Register-positioned mask for the `I2C_CR1_PEC` field @def I2C_CR1_PEC_Msk */
-#define I2C_CR1_PEC_Msk				REG_BIT_MASK(I2C_CR1_PEC_Pos)
-/** @brief Packet Error Checking @def I2C_CR1_PEC */
-#define I2C_CR1_PEC					I2C_CR1_PEC_Msk
-/** @brief Bit position of the `I2C_CR1_ALERT` field @def I2C_CR1_ALERT_Pos */
-#define I2C_CR1_ALERT_Pos			((reg_bit_pos_t) 13U)
-/** @brief Register-positioned mask for the `I2C_CR1_ALERT` field @def I2C_CR1_ALERT_Msk */
-#define I2C_CR1_ALERT_Msk			REG_BIT_MASK(I2C_CR1_ALERT_Pos)
-/** @brief SMBus Alert @def I2C_CR1_ALERT */
-#define I2C_CR1_ALERT				I2C_CR1_ALERT_Msk
-/** @brief Bit position of the `I2C_CR1_SWRST` field @def I2C_CR1_SWRST_Pos */
-#define I2C_CR1_SWRST_Pos			((reg_bit_pos_t) 15U)
-/** @brief Register-positioned mask for the `I2C_CR1_SWRST` field @def I2C_CR1_SWRST_Msk */
-#define I2C_CR1_SWRST_Msk			REG_BIT_MASK(I2C_CR1_SWRST_Pos)
-/** @brief Software Reset @def I2C_CR1_SWRST */
-#define I2C_CR1_SWRST				I2C_CR1_SWRST_Msk
-
-// ----------------------------------- I2C_CR2 Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_CR2_FREQ` field @def I2C_CR2_FREQ_Pos */
-#define I2C_CR2_FREQ_Pos		((reg_bit_pos_t) 0U)
-/** @brief Width of the `I2C_CR2_FREQ` field @def I2C_CR2_FREQ_Width */
-#define I2C_CR2_FREQ_Width		((reg_field_width_t) 6U)
-/** @brief Register-positioned mask for the `I2C_CR2_FREQ` field @def I2C_CR2_FREQ_Msk */
-#define I2C_CR2_FREQ_Msk		REG_FIELD_MASK(I2C_CR2_FREQ_Pos, I2C_CR2_FREQ_Width)
-/** @brief FREQ[5:0] bits (Peripheral Clock Frequency) @def I2C_CR2_FREQ */
-#define I2C_CR2_FREQ			I2C_CR2_FREQ_Msk
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_0` @def I2C_CR2_FREQ_0 */
-#define I2C_CR2_FREQ_0			(0x01UL << I2C_CR2_FREQ_Pos)
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_1` @def I2C_CR2_FREQ_1 */
-#define I2C_CR2_FREQ_1			(0x02UL << I2C_CR2_FREQ_Pos)
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_2` @def I2C_CR2_FREQ_2 */
-#define I2C_CR2_FREQ_2			(0x04UL << I2C_CR2_FREQ_Pos)
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_3` @def I2C_CR2_FREQ_3 */
-#define I2C_CR2_FREQ_3			(0x08UL << I2C_CR2_FREQ_Pos)
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_4` @def I2C_CR2_FREQ_4 */
-#define I2C_CR2_FREQ_4			(0x10UL << I2C_CR2_FREQ_Pos)
-/** @brief Register or selector value represented by `I2C_CR2_FREQ_5` @def I2C_CR2_FREQ_5 */
-#define I2C_CR2_FREQ_5			(0x20UL << I2C_CR2_FREQ_Pos)
-
-/** @brief Bit position of the `I2C_CR2_ITERREN` field @def I2C_CR2_ITERREN_Pos */
-#define I2C_CR2_ITERREN_Pos		((reg_bit_pos_t) 8U)
-/** @brief Register-positioned mask for the `I2C_CR2_ITERREN` field @def I2C_CR2_ITERREN_Msk */
-#define I2C_CR2_ITERREN_Msk		REG_BIT_MASK(I2C_CR2_ITERREN_Pos)
-/** @brief Error Interrupt Enable @def I2C_CR2_ITERREN */
-#define I2C_CR2_ITERREN			I2C_CR2_ITERREN_Msk
-/** @brief Bit position of the `I2C_CR2_ITEVTEN` field @def I2C_CR2_ITEVTEN_Pos */
-#define I2C_CR2_ITEVTEN_Pos		((reg_bit_pos_t) 9U)
-/** @brief Register-positioned mask for the `I2C_CR2_ITEVTEN` field @def I2C_CR2_ITEVTEN_Msk */
-#define I2C_CR2_ITEVTEN_Msk		REG_BIT_MASK(I2C_CR2_ITEVTEN_Pos)
-/** @brief Event Interrupt Enable @def I2C_CR2_ITEVTEN */
-#define I2C_CR2_ITEVTEN			I2C_CR2_ITEVTEN_Msk
-/** @brief Bit position of the `I2C_CR2_ITBUFEN` field @def I2C_CR2_ITBUFEN_Pos */
-#define I2C_CR2_ITBUFEN_Pos		((reg_bit_pos_t) 10U)
-/** @brief Register-positioned mask for the `I2C_CR2_ITBUFEN` field @def I2C_CR2_ITBUFEN_Msk */
-#define I2C_CR2_ITBUFEN_Msk		REG_BIT_MASK(I2C_CR2_ITBUFEN_Pos)
-/** @brief Buffer Interrupt Enable @def I2C_CR2_ITBUFEN */
-#define I2C_CR2_ITBUFEN			I2C_CR2_ITBUFEN_Msk
-/** @brief Bit position of the `I2C_CR2_DMAEN` field @def I2C_CR2_DMAEN_Pos */
-#define I2C_CR2_DMAEN_Pos		((reg_bit_pos_t) 11U)
-/** @brief Register-positioned mask for the `I2C_CR2_DMAEN` field @def I2C_CR2_DMAEN_Msk */
-#define I2C_CR2_DMAEN_Msk		REG_BIT_MASK(I2C_CR2_DMAEN_Pos)
-/** @brief DMA Requests Enable @def I2C_CR2_DMAEN */
-#define I2C_CR2_DMAEN			I2C_CR2_DMAEN_Msk
-/** @brief Bit position of the `I2C_CR2_LAST` field @def I2C_CR2_LAST_Pos */
-#define I2C_CR2_LAST_Pos		((reg_bit_pos_t) 12U)
-/** @brief Register-positioned mask for the `I2C_CR2_LAST` field @def I2C_CR2_LAST_Msk */
-#define I2C_CR2_LAST_Msk		REG_BIT_MASK(I2C_CR2_LAST_Pos)
-/** @brief DMA Last Transfer @def I2C_CR2_LAST */
-#define I2C_CR2_LAST			I2C_CR2_LAST_Msk
-
-// ---------------------------------- I2C_OAR1 Register Bit Defines ----------------------------------- //
-/** @brief Interface Address @def I2C_OAR1_ADD1_7 */
-#define I2C_OAR1_ADD1_7				0x000000FEU
-/** @brief Interface Address @def I2C_OAR1_ADD8_9 */
-#define I2C_OAR1_ADD8_9				0x00000300U
-
-/** @brief Bit position of the `I2C_OAR1_ADD0` field @def I2C_OAR1_ADD0_Pos */
-#define I2C_OAR1_ADD0_Pos			((reg_bit_pos_t) 0U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD0` field @def I2C_OAR1_ADD0_Msk */
-#define I2C_OAR1_ADD0_Msk			REG_BIT_MASK(I2C_OAR1_ADD0_Pos)
-/** @brief Bit 0 @def I2C_OAR1_ADD0 */
-#define I2C_OAR1_ADD0				I2C_OAR1_ADD0_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD1` field @def I2C_OAR1_ADD1_Pos */
-#define I2C_OAR1_ADD1_Pos			((reg_bit_pos_t) 1U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD1` field @def I2C_OAR1_ADD1_Msk */
-#define I2C_OAR1_ADD1_Msk			REG_BIT_MASK(I2C_OAR1_ADD1_Pos)
-/** @brief Bit 1 @def I2C_OAR1_ADD1 */
-#define I2C_OAR1_ADD1				I2C_OAR1_ADD1_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD2` field @def I2C_OAR1_ADD2_Pos */
-#define I2C_OAR1_ADD2_Pos			((reg_bit_pos_t) 2U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD2` field @def I2C_OAR1_ADD2_Msk */
-#define I2C_OAR1_ADD2_Msk			REG_BIT_MASK(I2C_OAR1_ADD2_Pos)
-/** @brief Bit 2 @def I2C_OAR1_ADD2 */
-#define I2C_OAR1_ADD2				I2C_OAR1_ADD2_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD3` field @def I2C_OAR1_ADD3_Pos */
-#define I2C_OAR1_ADD3_Pos			((reg_bit_pos_t) 3U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD3` field @def I2C_OAR1_ADD3_Msk */
-#define I2C_OAR1_ADD3_Msk			REG_BIT_MASK(I2C_OAR1_ADD3_Pos)
-/** @brief Bit 3 @def I2C_OAR1_ADD3 */
-#define I2C_OAR1_ADD3				I2C_OAR1_ADD3_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD4` field @def I2C_OAR1_ADD4_Pos */
-#define I2C_OAR1_ADD4_Pos			((reg_bit_pos_t) 4U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD4` field @def I2C_OAR1_ADD4_Msk */
-#define I2C_OAR1_ADD4_Msk			REG_BIT_MASK(I2C_OAR1_ADD4_Pos)
-/** @brief Bit 4 @def I2C_OAR1_ADD4 */
-#define I2C_OAR1_ADD4				I2C_OAR1_ADD4_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD5` field @def I2C_OAR1_ADD5_Pos */
-#define I2C_OAR1_ADD5_Pos			((reg_bit_pos_t) 5U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD5` field @def I2C_OAR1_ADD5_Msk */
-#define I2C_OAR1_ADD5_Msk			REG_BIT_MASK(I2C_OAR1_ADD5_Pos)
-/** @brief Bit 5 @def I2C_OAR1_ADD5 */
-#define I2C_OAR1_ADD5				I2C_OAR1_ADD5_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD6` field @def I2C_OAR1_ADD6_Pos */
-#define I2C_OAR1_ADD6_Pos			((reg_bit_pos_t) 6U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD6` field @def I2C_OAR1_ADD6_Msk */
-#define I2C_OAR1_ADD6_Msk			REG_BIT_MASK(I2C_OAR1_ADD6_Pos)
-/** @brief Bit 6 @def I2C_OAR1_ADD6 */
-#define I2C_OAR1_ADD6				I2C_OAR1_ADD6_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD7` field @def I2C_OAR1_ADD7_Pos */
-#define I2C_OAR1_ADD7_Pos			((reg_bit_pos_t) 7U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD7` field @def I2C_OAR1_ADD7_Msk */
-#define I2C_OAR1_ADD7_Msk			REG_BIT_MASK(I2C_OAR1_ADD7_Pos)
-/** @brief Bit 7 @def I2C_OAR1_ADD7 */
-#define I2C_OAR1_ADD7				I2C_OAR1_ADD7_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD8` field @def I2C_OAR1_ADD8_Pos */
-#define I2C_OAR1_ADD8_Pos			((reg_bit_pos_t) 8U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD8` field @def I2C_OAR1_ADD8_Msk */
-#define I2C_OAR1_ADD8_Msk			REG_BIT_MASK(I2C_OAR1_ADD8_Pos)
-/** @brief Bit 8 @def I2C_OAR1_ADD8 */
-#define I2C_OAR1_ADD8				I2C_OAR1_ADD8_Msk
-/** @brief Bit position of the `I2C_OAR1_ADD9` field @def I2C_OAR1_ADD9_Pos */
-#define I2C_OAR1_ADD9_Pos			((reg_bit_pos_t) 9U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADD9` field @def I2C_OAR1_ADD9_Msk */
-#define I2C_OAR1_ADD9_Msk			REG_BIT_MASK(I2C_OAR1_ADD9_Pos)
-/** @brief Bit 9 @def I2C_OAR1_ADD9 */
-#define I2C_OAR1_ADD9				I2C_OAR1_ADD9_Msk
-
-/** @brief Bit position of the `I2C_OAR1_ADDMODE` field @def I2C_OAR1_ADDMODE_Pos */
-#define I2C_OAR1_ADDMODE_Pos		((reg_bit_pos_t) 15U)
-/** @brief Register-positioned mask for the `I2C_OAR1_ADDMODE` field @def I2C_OAR1_ADDMODE_Msk */
-#define I2C_OAR1_ADDMODE_Msk		REG_BIT_MASK(I2C_OAR1_ADDMODE_Pos)
-/** @brief Addressing Mode (Slave mode) @def I2C_OAR1_ADDMODE */
-#define I2C_OAR1_ADDMODE			I2C_OAR1_ADDMODE_Msk
-
-// ---------------------------------- I2C_OAR2 Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_OAR2_ENDUAL` field @def I2C_OAR2_ENDUAL_Pos */
-#define I2C_OAR2_ENDUAL_Pos		((reg_bit_pos_t) 0U)
-/** @brief Register-positioned mask for the `I2C_OAR2_ENDUAL` field @def I2C_OAR2_ENDUAL_Msk */
-#define I2C_OAR2_ENDUAL_Msk		REG_BIT_MASK(I2C_OAR2_ENDUAL_Pos)
-/** @brief Dual addressing mode enable @def I2C_OAR2_ENDUAL */
-#define I2C_OAR2_ENDUAL			I2C_OAR2_ENDUAL_Msk
-/** @brief Bit position of the `I2C_OAR2_ADD2` field @def I2C_OAR2_ADD2_Pos */
-#define I2C_OAR2_ADD2_Pos		((reg_bit_pos_t) 1U)
-/** @brief Width of the `I2C_OAR2_ADD2` field @def I2C_OAR2_ADD2_Width */
-#define I2C_OAR2_ADD2_Width		((reg_field_width_t) 7U)
-/** @brief Register-positioned mask for the `I2C_OAR2_ADD2` field @def I2C_OAR2_ADD2_Msk */
-#define I2C_OAR2_ADD2_Msk		REG_FIELD_MASK(I2C_OAR2_ADD2_Pos, I2C_OAR2_ADD2_Width)
-/** @brief Interface address @def I2C_OAR2_ADD2 */
-#define I2C_OAR2_ADD2			I2C_OAR2_ADD2_Msk
-
-// ----------------------------------- I2C_DR Register Bit Defines ------------------------------------ //
-/** @brief Bit position of the `I2C_DR_DR` field @def I2C_DR_DR_Pos */
-#define I2C_DR_DR_Pos		((reg_bit_pos_t) 0U)
-/** @brief Width of the `I2C_DR_DR` field @def I2C_DR_DR_Width */
-#define I2C_DR_DR_Width		((reg_field_width_t) 8U)
-/** @brief Register-positioned mask for the `I2C_DR_DR` field @def I2C_DR_DR_Msk */
-#define I2C_DR_DR_Msk		REG_FIELD_MASK(I2C_DR_DR_Pos, I2C_DR_DR_Width)
-/** @brief 8-bit Data Register @def I2C_DR_DR */
-#define I2C_DR_DR			I2C_DR_DR_Msk
-
-// ----------------------------------- I2C_SR1 Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_SR1_SB` field @def I2C_SR1_SB_Pos */
-#define I2C_SR1_SB_Pos				((reg_bit_pos_t) 0U)
-/** @brief Register-positioned mask for the `I2C_SR1_SB` field @def I2C_SR1_SB_Msk */
-#define I2C_SR1_SB_Msk				REG_BIT_MASK(I2C_SR1_SB_Pos)
-/** @brief Start Bit (Master mode) @def I2C_SR1_SB */
-#define I2C_SR1_SB					I2C_SR1_SB_Msk
-/** @brief Bit position of the `I2C_SR1_ADDR` field @def I2C_SR1_ADDR_Pos */
-#define I2C_SR1_ADDR_Pos			((reg_bit_pos_t) 1U)
-/** @brief Register-positioned mask for the `I2C_SR1_ADDR` field @def I2C_SR1_ADDR_Msk */
-#define I2C_SR1_ADDR_Msk			REG_BIT_MASK(I2C_SR1_ADDR_Pos)
-/** @brief Address sent (master mode)/matched (slave mode) @def I2C_SR1_ADDR */
-#define I2C_SR1_ADDR				I2C_SR1_ADDR_Msk
-/** @brief Bit position of the `I2C_SR1_BTF` field @def I2C_SR1_BTF_Pos */
-#define I2C_SR1_BTF_Pos				((reg_bit_pos_t) 2U)
-/** @brief Register-positioned mask for the `I2C_SR1_BTF` field @def I2C_SR1_BTF_Msk */
-#define I2C_SR1_BTF_Msk				REG_BIT_MASK(I2C_SR1_BTF_Pos)
-/** @brief Byte Transfer Finished @def I2C_SR1_BTF */
-#define I2C_SR1_BTF					I2C_SR1_BTF_Msk
-/** @brief Bit position of the `I2C_SR1_ADD10` field @def I2C_SR1_ADD10_Pos */
-#define I2C_SR1_ADD10_Pos			((reg_bit_pos_t) 3U)
-/** @brief Register-positioned mask for the `I2C_SR1_ADD10` field @def I2C_SR1_ADD10_Msk */
-#define I2C_SR1_ADD10_Msk			REG_BIT_MASK(I2C_SR1_ADD10_Pos)
-/** @brief 10-bit header sent (Master mode) @def I2C_SR1_ADD10 */
-#define I2C_SR1_ADD10				I2C_SR1_ADD10_Msk
-/** @brief Bit position of the `I2C_SR1_STOPF` field @def I2C_SR1_STOPF_Pos */
-#define I2C_SR1_STOPF_Pos			((reg_bit_pos_t) 4U)
-/** @brief Register-positioned mask for the `I2C_SR1_STOPF` field @def I2C_SR1_STOPF_Msk */
-#define I2C_SR1_STOPF_Msk			REG_BIT_MASK(I2C_SR1_STOPF_Pos)
-/** @brief Stop detection (Slave mode) @def I2C_SR1_STOPF */
-#define I2C_SR1_STOPF				I2C_SR1_STOPF_Msk
-/** @brief Bit position of the `I2C_SR1_RXNE` field @def I2C_SR1_RXNE_Pos */
-#define I2C_SR1_RXNE_Pos			((reg_bit_pos_t) 6U)
-/** @brief Register-positioned mask for the `I2C_SR1_RXNE` field @def I2C_SR1_RXNE_Msk */
-#define I2C_SR1_RXNE_Msk			REG_BIT_MASK(I2C_SR1_RXNE_Pos)
-/** @brief Data Register not Empty (receivers) @def I2C_SR1_RXNE */
-#define I2C_SR1_RXNE				I2C_SR1_RXNE_Msk
-/** @brief Bit position of the `I2C_SR1_TXE` field @def I2C_SR1_TXE_Pos */
-#define I2C_SR1_TXE_Pos				((reg_bit_pos_t) 7U)
-/** @brief Register-positioned mask for the `I2C_SR1_TXE` field @def I2C_SR1_TXE_Msk */
-#define I2C_SR1_TXE_Msk				REG_BIT_MASK(I2C_SR1_TXE_Pos)
-/** @brief Data Register Empty (transmitters) @def I2C_SR1_TXE */
-#define I2C_SR1_TXE					I2C_SR1_TXE_Msk
-/** @brief Bit position of the `I2C_SR1_BERR` field @def I2C_SR1_BERR_Pos */
-#define I2C_SR1_BERR_Pos			((reg_bit_pos_t) 8U)
-/** @brief Register-positioned mask for the `I2C_SR1_BERR` field @def I2C_SR1_BERR_Msk */
-#define I2C_SR1_BERR_Msk			REG_BIT_MASK(I2C_SR1_BERR_Pos)
-/** @brief Bus Error @def I2C_SR1_BERR */
-#define I2C_SR1_BERR				I2C_SR1_BERR_Msk
-/** @brief Bit position of the `I2C_SR1_ARLO` field @def I2C_SR1_ARLO_Pos */
-#define I2C_SR1_ARLO_Pos			((reg_bit_pos_t) 9U)
-/** @brief Register-positioned mask for the `I2C_SR1_ARLO` field @def I2C_SR1_ARLO_Msk */
-#define I2C_SR1_ARLO_Msk			REG_BIT_MASK(I2C_SR1_ARLO_Pos)
-/** @brief Arbitration Lost (master mode) @def I2C_SR1_ARLO */
-#define I2C_SR1_ARLO				I2C_SR1_ARLO_Msk
-/** @brief Bit position of the `I2C_SR1_AF` field @def I2C_SR1_AF_Pos */
-#define I2C_SR1_AF_Pos				((reg_bit_pos_t) 10U)
-/** @brief Register-positioned mask for the `I2C_SR1_AF` field @def I2C_SR1_AF_Msk */
-#define I2C_SR1_AF_Msk				REG_BIT_MASK(I2C_SR1_AF_Pos)
-/** @brief Acknowledge Failure @def I2C_SR1_AF */
-#define I2C_SR1_AF					I2C_SR1_AF_Msk
-/** @brief Bit position of the `I2C_SR1_OVR` field @def I2C_SR1_OVR_Pos */
-#define I2C_SR1_OVR_Pos				((reg_bit_pos_t) 11U)
-/** @brief Register-positioned mask for the `I2C_SR1_OVR` field @def I2C_SR1_OVR_Msk */
-#define I2C_SR1_OVR_Msk				REG_BIT_MASK(I2C_SR1_OVR_Pos)
-/** @brief Overrun/Underrun @def I2C_SR1_OVR */
-#define I2C_SR1_OVR					I2C_SR1_OVR_Msk
-/** @brief Bit position of the `I2C_SR1_PECERR` field @def I2C_SR1_PECERR_Pos */
-#define I2C_SR1_PECERR_Pos			((reg_bit_pos_t) 12U)
-/** @brief Register-positioned mask for the `I2C_SR1_PECERR` field @def I2C_SR1_PECERR_Msk */
-#define I2C_SR1_PECERR_Msk			REG_BIT_MASK(I2C_SR1_PECERR_Pos)
-/** @brief PEC Error in reception @def I2C_SR1_PECERR */
-#define I2C_SR1_PECERR				I2C_SR1_PECERR_Msk
-/** @brief Bit position of the `I2C_SR1_TIMEOUT` field @def I2C_SR1_TIMEOUT_Pos */
-#define I2C_SR1_TIMEOUT_Pos			((reg_bit_pos_t) 14U)
-/** @brief Register-positioned mask for the `I2C_SR1_TIMEOUT` field @def I2C_SR1_TIMEOUT_Msk */
-#define I2C_SR1_TIMEOUT_Msk			REG_BIT_MASK(I2C_SR1_TIMEOUT_Pos)
-/** @brief Timeout or Tlow Error @def I2C_SR1_TIMEOUT */
-#define I2C_SR1_TIMEOUT				I2C_SR1_TIMEOUT_Msk
-/** @brief Bit position of the `I2C_SR1_SMBALERT` field @def I2C_SR1_SMBALERT_Pos */
-#define I2C_SR1_SMBALERT_Pos		((reg_bit_pos_t) 15U)
-/** @brief Register-positioned mask for the `I2C_SR1_SMBALERT` field @def I2C_SR1_SMBALERT_Msk */
-#define I2C_SR1_SMBALERT_Msk		REG_BIT_MASK(I2C_SR1_SMBALERT_Pos)
-/** @brief SMBus Alert @def I2C_SR1_SMBALERT */
-#define I2C_SR1_SMBALERT			I2C_SR1_SMBALERT_Msk
-
-// ----------------------------------- I2C_SR2 Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_SR2_MSL` field @def I2C_SR2_MSL_Pos */
-#define I2C_SR2_MSL_Pos				((reg_bit_pos_t) 0U)
-/** @brief Register-positioned mask for the `I2C_SR2_MSL` field @def I2C_SR2_MSL_Msk */
-#define I2C_SR2_MSL_Msk				REG_BIT_MASK(I2C_SR2_MSL_Pos)
-/** @brief Master/Slave @def I2C_SR2_MSL */
-#define I2C_SR2_MSL					I2C_SR2_MSL_Msk
-/** @brief Bit position of the `I2C_SR2_BUSY` field @def I2C_SR2_BUSY_Pos */
-#define I2C_SR2_BUSY_Pos			((reg_bit_pos_t) 1U)
-/** @brief Register-positioned mask for the `I2C_SR2_BUSY` field @def I2C_SR2_BUSY_Msk */
-#define I2C_SR2_BUSY_Msk			REG_BIT_MASK(I2C_SR2_BUSY_Pos)
-/** @brief Bus Busy @def I2C_SR2_BUSY */
-#define I2C_SR2_BUSY				I2C_SR2_BUSY_Msk
-/** @brief Bit position of the `I2C_SR2_TRA` field @def I2C_SR2_TRA_Pos */
-#define I2C_SR2_TRA_Pos				((reg_bit_pos_t) 2U)
-/** @brief Register-positioned mask for the `I2C_SR2_TRA` field @def I2C_SR2_TRA_Msk */
-#define I2C_SR2_TRA_Msk				REG_BIT_MASK(I2C_SR2_TRA_Pos)
-/** @brief Transmitter/Receiver @def I2C_SR2_TRA */
-#define I2C_SR2_TRA					I2C_SR2_TRA_Msk
-/** @brief Bit position of the `I2C_SR2_GENCALL` field @def I2C_SR2_GENCALL_Pos */
-#define I2C_SR2_GENCALL_Pos			((reg_bit_pos_t) 4U)
-/** @brief Register-positioned mask for the `I2C_SR2_GENCALL` field @def I2C_SR2_GENCALL_Msk */
-#define I2C_SR2_GENCALL_Msk			REG_BIT_MASK(I2C_SR2_GENCALL_Pos)
-/** @brief General Call Address (Slave mode) @def I2C_SR2_GENCALL */
-#define I2C_SR2_GENCALL				I2C_SR2_GENCALL_Msk
-/** @brief Bit position of the `I2C_SR2_SMBDEFAULT` field @def I2C_SR2_SMBDEFAULT_Pos */
-#define I2C_SR2_SMBDEFAULT_Pos		((reg_bit_pos_t) 5U)
-/** @brief Register-positioned mask for the `I2C_SR2_SMBDEFAULT` field @def I2C_SR2_SMBDEFAULT_Msk */
-#define I2C_SR2_SMBDEFAULT_Msk		REG_BIT_MASK(I2C_SR2_SMBDEFAULT_Pos)
-/** @brief SMBus Device Default Address (Slave mode) @def I2C_SR2_SMBDEFAULT */
-#define I2C_SR2_SMBDEFAULT			I2C_SR2_SMBDEFAULT_Msk
-/** @brief Bit position of the `I2C_SR2_SMBHOST` field @def I2C_SR2_SMBHOST_Pos */
-#define I2C_SR2_SMBHOST_Pos			((reg_bit_pos_t) 6U)
-/** @brief Register-positioned mask for the `I2C_SR2_SMBHOST` field @def I2C_SR2_SMBHOST_Msk */
-#define I2C_SR2_SMBHOST_Msk			REG_BIT_MASK(I2C_SR2_SMBHOST_Pos)
-/** @brief SMBus Host Header (Slave mode) @def I2C_SR2_SMBHOST */
-#define I2C_SR2_SMBHOST				I2C_SR2_SMBHOST_Msk
-/** @brief Bit position of the `I2C_SR2_DUALF` field @def I2C_SR2_DUALF_Pos */
-#define I2C_SR2_DUALF_Pos			((reg_bit_pos_t) 7U)
-/** @brief Register-positioned mask for the `I2C_SR2_DUALF` field @def I2C_SR2_DUALF_Msk */
-#define I2C_SR2_DUALF_Msk			REG_BIT_MASK(I2C_SR2_DUALF_Pos)
-/** @brief Dual Flag (Slave mode) @def I2C_SR2_DUALF */
-#define I2C_SR2_DUALF				I2C_SR2_DUALF_Msk
-/** @brief Bit position of the `I2C_SR2_PEC` field @def I2C_SR2_PEC_Pos */
-#define I2C_SR2_PEC_Pos				((reg_bit_pos_t) 8U)
-/** @brief Width of the `I2C_SR2_PEC` field @def I2C_SR2_PEC_Width */
-#define I2C_SR2_PEC_Width			((reg_field_width_t) 8U)
-/** @brief Register-positioned mask for the `I2C_SR2_PEC` field @def I2C_SR2_PEC_Msk */
-#define I2C_SR2_PEC_Msk				REG_FIELD_MASK(I2C_SR2_PEC_Pos, I2C_SR2_PEC_Width)
-/** @brief Packet Error Checking Register @def I2C_SR2_PEC */
-#define I2C_SR2_PEC					I2C_SR2_PEC_Msk
-
-// ----------------------------------- I2C_CCR Register Bit Defines ----------------------------------- //
-/** @brief Bit position of the `I2C_CCR_CCR` field @def I2C_CCR_CCR_Pos */
-#define I2C_CCR_CCR_Pos			((reg_bit_pos_t) 0U)
-/** @brief Width of the `I2C_CCR_CCR` field @def I2C_CCR_CCR_Width */
-#define I2C_CCR_CCR_Width		((reg_field_width_t) 12U)
-/** @brief Register-positioned mask for the `I2C_CCR_CCR` field @def I2C_CCR_CCR_Msk */
-#define I2C_CCR_CCR_Msk			REG_FIELD_MASK(I2C_CCR_CCR_Pos, I2C_CCR_CCR_Width)
-/** @brief Clock Control Register in Fast/Standard mode (Master mode) @def I2C_CCR_CCR */
-#define I2C_CCR_CCR				I2C_CCR_CCR_Msk
-/** @brief Bit position of the `I2C_CCR_DUTY` field @def I2C_CCR_DUTY_Pos */
-#define I2C_CCR_DUTY_Pos		((reg_bit_pos_t) 14U)
-/** @brief Register-positioned mask for the `I2C_CCR_DUTY` field @def I2C_CCR_DUTY_Msk */
-#define I2C_CCR_DUTY_Msk		REG_BIT_MASK(I2C_CCR_DUTY_Pos)
-/** @brief Fast Mode Duty Cycle @def I2C_CCR_DUTY */
-#define I2C_CCR_DUTY			I2C_CCR_DUTY_Msk
-/** @brief Bit position of the `I2C_CCR_FS` field @def I2C_CCR_FS_Pos */
-#define I2C_CCR_FS_Pos			((reg_bit_pos_t) 15U)
-/** @brief Register-positioned mask for the `I2C_CCR_FS` field @def I2C_CCR_FS_Msk */
-#define I2C_CCR_FS_Msk			REG_BIT_MASK(I2C_CCR_FS_Pos)
-/** @brief I2C Master Mode Selection @def I2C_CCR_FS */
-#define I2C_CCR_FS				I2C_CCR_FS_Msk
-
-// ---------------------------------- I2C_TRISE Register Bit Defines ---------------------------------- //
-/** @brief Bit position of the `I2C_TRISE_TRISE` field @def I2C_TRISE_TRISE_Pos */
-#define I2C_TRISE_TRISE_Pos			((reg_bit_pos_t) 0U)
-/** @brief Width of the `I2C_TRISE_TRISE` field @def I2C_TRISE_TRISE_Width */
-#define I2C_TRISE_TRISE_Width		((reg_field_width_t) 6U)
-/** @brief Register-positioned mask for the `I2C_TRISE_TRISE` field @def I2C_TRISE_TRISE_Msk */
-#define I2C_TRISE_TRISE_Msk			REG_FIELD_MASK(I2C_TRISE_TRISE_Pos, I2C_TRISE_TRISE_Width)
-/** @brief Maximum Rise Time in Fast/Standard mode (Master mode) @def I2C_TRISE_TRISE */
-#define I2C_TRISE_TRISE				I2C_TRISE_TRISE_Msk
 
 // ==================================================================================================== //
 //										Debug MCU Register Defines										//

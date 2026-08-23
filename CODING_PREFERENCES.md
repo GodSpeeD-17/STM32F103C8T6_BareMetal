@@ -64,6 +64,17 @@ guards without Doxygen blocks are excluded.
    * @retval - `0x01U`: The selector is supported
   ```
 
+- Every Doxygen `@p` reference to a function parameter must place the
+  parameter name inside backticks too, the same as `@ref`:
+
+  ```c
+   * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `pConfig` was a null pointer
+   * @note Reading `SR` through this API participates in @p `events` clearing
+  ```
+
+  The parameter itself is already code on the other end of the reference
+  (a function argument), so the doc-side mention stays code-styled too.
+
 - Two Doxygen 1.9 parser quirks are accepted, not bugs to work around:
   - Repeated return-value warnings because the parser reads the list marker
     (`-`) as the return-value key — do not rewrite the house style to
@@ -466,11 +477,15 @@ before learning the hardware model.
 
 ## 3.3 Macro Alignment & Banner Grouping
 
-- Align related `#define` values within each banner section: find the
-  longest macro name in that section, place exactly two tabs after it, and
-  add enough tabs after every shorter name so all values start in the same
-  column. Recalculate this independently per section — never use one
-  file-wide column.
+- Align related `#define` values across their complete major banner domain:
+  find the longest macro name in that domain, place exactly two tabs after
+  it, and add enough tabs after every shorter name so all values start in the
+  same column. Register sub-banners do not reset alignment; for example,
+  every macro beneath one peripheral's `Register Defines` banner shares one
+  column across CR1, CR2, SR1, SR2, and the remaining register sections.
+  A single peripheral Core register header also keeps its device constants
+  and register-field macros in that shared column. Recalculate only when
+  entering a logically independent module or file domain.
 
   ```c
   /** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US */
@@ -484,7 +499,22 @@ before learning the hardware model.
 - Use tab characters, not runs of spaces, for this alignment and for
   multi-line macro continuation indentation. The single separator after
   `#define` and the conventional ` *` inside Doxygen blocks are not
-  indentation and remain spaces.
+  indentation and remain spaces. Evaluate visual alignment with a four-column
+  tab stop; macro values must begin in the same rendered column under that
+  setting.
+
+- Keep every register-field macro family visually atomic: place no blank
+  lines between its `_Pos`, optional `_Width`, `_Msk`, and unsuffixed alias,
+  then place exactly one blank line before the next field family. Treat a
+  standalone raw field-value macro as its own family and separate it the same
+  way. This whitespace is a semantic boundary that makes each complete field
+  definition immediately distinguishable from the next.
+
+- Within one register-map structure, align every sibling bitfield's trailing
+  `/**< ... */` comment to one shared column across all register unions. Use
+  the longest declaration as the anchor, place exactly two tabs after it, and
+  add tabs after shorter declarations as required. Apply the same rule to
+  documented closing register members such as `} CR1;` and `} SR2;`.
 
 (See [2.2 Register Field Macro Naming](#22-register-field-macro-naming) for
 the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
@@ -542,11 +572,22 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   wraps it to validate its own instance/register selection, and other
   peripherals (GPIO, RCC) can reuse the same primitive while keeping their
   own rules.
-- When hardware topology differs by peripheral instance, keep the mapping
-  in a static LUT indexed by the driver's stable instance index, using the
+- Reserve a static LUT for genuine table-shaped per-instance data — the
+  kind of mapping that would otherwise need real metadata storage (e.g. a
+  GPIO pin-routing table with port/pin/mode per instance). When such a LUT
+  is needed, index it by the driver's stable instance index using the
   smallest element type that represents the mapping directly (an array of
-  `rcc_bus_t`, not an array of metadata structures). Shared logic consumes
-  the mapped value instead of hard-coding one bus or branching per instance.
+  `rcc_bus_t`, not an array of metadata structures).
+- For a small, fixed dispatch over 2-3 known instances (such as resolving
+  one RCC bus selector or one clock/reset mask per instance), prefer a
+  `switch` on the peripheral base address over a LUT. A LUT trades memory
+  for faster access, and that trade only pays for itself when the access is
+  either genuinely hot or the data is too rich to express as `switch` cases;
+  neither applies to a one-time-per-configuration-call constant lookup. Use
+  the same base-address `switch` shape already established for register-field
+  and reset-mask decoding (see `_TIM_DecodeAPB1ClockEnableMask()`), not a
+  parallel array, so the lookup mechanism stays consistent regardless of
+  which instance property is being resolved.
 
 ## 4.2 Register Access Pattern (`.REG` / `.BIT`)
 
@@ -923,6 +964,23 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 
 # Preference Log
 
+- 2026-08-23: Extended peripheral-header alignment across device constants,
+  all register-field macros, sibling bitfield comments, and documented closing
+  register members so the complete header uses coherent shared columns.
+- 2026-08-23: Restricted static LUTs to genuine table-shaped per-instance
+  data; required a base-address `switch` instead of a parallel array for
+  small fixed dispatch such as an RCC bus or clock/reset mask lookup, since
+  the memory-for-speed LUT trade-off doesn't pay for itself on a one-time
+  configuration-path lookup.
+- 2026-08-23: Clarified that one peripheral `Register Defines` domain uses a
+  single macro-value column across every register sub-banner; sub-banners do
+  not restart alignment.
+- 2026-08-23: Fixed the repository's visual-alignment basis at four-column
+  tab stops so tab-only macro alignment renders consistently in the owner's
+  editor.
+- 2026-08-23: Required exactly one blank line between complete register-field
+  macro families, with no blank lines inside a `_Pos`/optional `_Width`/`_Msk`/
+  alias family; standalone raw field values follow the same separation rule.
 - 2026-08-23: Extended the fully braced, multi-line requirement from `switch`
   cases to every `if`/`else` body, prohibiting collapsed single-line
   `{ statement; }` forms even for runs of similar short conditions.
@@ -933,6 +991,9 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 - 2026-08-23: Required every selector-typedef value macro to carry that
   typedef's own stem, matching an already-correctly-named `_IS_VALID`
   validation macro rather than the other way around.
+- 2026-08-23: Required Doxygen `@p` parameter references to backtick-wrap the
+  parameter name, the same as `@ref`, since the referenced parameter is
+  already code on the declaration side.
 - 2026-08-22: Prohibited configuration structures that only bundle a small
   set of single-use scalar function arguments; required explicit typed
   parameters unless the values form a reusable domain object or invariant.
