@@ -86,6 +86,7 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable the optional BSP on-board LED initialization" ON)
+option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" ON)
 
 # RCC is required by the base clock initialization path. Optional services add
 # only their owning Driver module; disabled peripherals contribute no sources
@@ -134,8 +135,10 @@ target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf
-# support by default; pull the newlib-nano float formatter in for this
-# target so any printf-family "%f" conversion link-succeeds if this demo
-# adopts formatted output later, instead of widening the shared
-# STM32F103Flags.cmake link policy for every project.
-target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
+# support by default. APP_ENABLE_PRINTF_FLOAT controls whether this target
+# pulls the newlib-nano float formatter in via -u _printf_float, scoped to
+# this one target rather than widening the shared STM32F103Flags.cmake link
+# policy for every project.
+if(APP_ENABLE_PRINTF_FLOAT)
+    target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
+endif()
