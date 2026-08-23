@@ -39,8 +39,8 @@ extern "C" {
 
 /**
  * @brief Application hardware-service initialization
- * @defgroup APP_Init Application Initialization
- * @ingroup APP_Template
+ * @defgroup App_Init Application Initialization
+ * @ingroup App_Template
  * @{
  */
 

@@ -39,8 +39,8 @@ extern "C" {
 
 /**
  * @brief Application blocking-delay services
- * @defgroup APP_Delay Application Delay
- * @ingroup APP_Template
+ * @defgroup App_Delay Application Delay
+ * @ingroup App_Template
  * @{
  */
 

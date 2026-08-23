@@ -35,13 +35,13 @@
 
 /**
  * @brief Application-owned Template services
- * @defgroup APP_Template Application Template
+ * @defgroup App_Template Application Template
  */
 
 /**
  * @brief Compile-time application feature and timing policy
- * @defgroup APP_Config Application Configuration
- * @ingroup APP_Template
+ * @defgroup App_Config Application Configuration
+ * @ingroup App_Template
  * @details
  * These macros select which timing capabilities are compiled, define the
  * application timebase contract, and map an optional dedicated Timer service
@@ -194,6 +194,6 @@
 
 #endif /* APP_ENABLE_TIMER_US_DELAY */
 
-/** @} */ // APP_Config
+/** @} */ // App_Config
 
 #endif /* APP_CONFIG_H_ */

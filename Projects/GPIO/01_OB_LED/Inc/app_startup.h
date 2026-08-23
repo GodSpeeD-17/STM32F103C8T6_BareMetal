@@ -38,8 +38,8 @@ extern "C" {
 
 /**
  * @brief Application-owned processor startup contract
- * @defgroup APP_Startup Application Startup
- * @ingroup APP_Template
+ * @defgroup App_Startup Application Startup
+ * @ingroup App_Template
  * @{
  */
 

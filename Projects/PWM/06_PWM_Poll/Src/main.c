@@ -77,7 +77,7 @@
  * App_Init() already configures and forces off the BSP on-board LED, so this
  * handler only needs to set it once.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -90,7 +90,7 @@ static void APP_ErrorHandler(void)
  * @brief Configures application-owned PA3 routing for TIM2 channel 4
  * @returns @ref driver_status_t "GPIO configuration status"
  */
-static driver_status_t APP_ConfigPWMGPIO(void)
+static driver_status_t App_ConfigPWMGPIO(void)
 {
 	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
 	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_PWM_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
@@ -107,7 +107,7 @@ static driver_status_t APP_ConfigPWMGPIO(void)
  * @brief Configures the Timer base followed by TIM2 channel 4 PWM
  * @returns @ref driver_status_t "PWM initialization status"
  */
-static driver_status_t APP_ConfigPWM(void)
+static driver_status_t App_ConfigPWM(void)
 {
 	const tim_config_t timerConfig =
 	{
@@ -156,7 +156,7 @@ static driver_status_t APP_ConfigPWM(void)
 }
 
 /** @brief Programs one duty value into the TIM2 channel 4 preload */
-static driver_status_t APP_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
+static driver_status_t App_SetDutyCycle(const tim_pwm_duty_cycle_t dutyCycle)
 {
 	return TIM_SetPWMDuty(APP_PWM_TIMER, TIMx_CHANNEL_4, dutyCycle);
 }
@@ -170,13 +170,13 @@ int main(void)
 	tim_pwm_duty_cycle_t dutyCycle = TIM_PWM_DUTY_CYCLE_MIN;
 
 	//! Physical output configuration is intentionally outside the Timer PWM driver.
-	if (APP_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
-	if (APP_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	//! Infinite Loop
@@ -185,18 +185,18 @@ int main(void)
 		//! Increase the Duty Cycle from 0% to 100% in APP_PWM_DUTY_STEP increments, then decrease back to 0%.
 		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MIN; dutyCycle < TIM_PWM_DUTY_CYCLE_MAX; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle + APP_PWM_DUTY_STEP))
 		{
-			if (APP_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
-				APP_ErrorHandler();
+				App_ErrorHandler();
 			}
 			if (App_DelayMs(APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 			{
-				APP_ErrorHandler();
+				App_ErrorHandler();
 			}
 		}
-		if (APP_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MAX) != DRIVER_STATUS_SUCCESS)
+		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MAX) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
@@ -205,18 +205,18 @@ int main(void)
 		//! Decrease the Duty Cycle from 100% to 0% in APP_PWM_DUTY_STEP decrements, then increase back to 100%.
 		for (dutyCycle = TIM_PWM_DUTY_CYCLE_MAX; dutyCycle > TIM_PWM_DUTY_CYCLE_MIN; dutyCycle = (tim_pwm_duty_cycle_t) (dutyCycle - APP_PWM_DUTY_STEP))
 		{
-			if (APP_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
+			if (App_SetDutyCycle(dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
-				APP_ErrorHandler();
+				App_ErrorHandler();
 			}
 			if (App_DelayMs(APP_PWM_STEP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 			{
-				APP_ErrorHandler();
+				App_ErrorHandler();
 			}
 		}
-		if (APP_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MIN) != DRIVER_STATUS_SUCCESS)
+		if (App_SetDutyCycle(TIM_PWM_DUTY_CYCLE_MIN) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 
 		//! Toggle the LED to indicate a completed ramp before the next ramp begins.
@@ -225,7 +225,7 @@ int main(void)
 		//! Block for a moment before the next ramp begins to allow the user to see the completed ramp.
 		if (App_DelayMs(APP_PWM_LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 	}
 }

@@ -86,7 +86,7 @@ static volatile uint8_t isDutyStepRequired = 0U;
  * handler only needs to set it once. Used to prevent return into an
  * unacknowledged or incorrectly configured IRQ path.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	//! Indicate
 	OB_LED_Set();
@@ -101,7 +101,7 @@ static void APP_ErrorHandler(void)
  * @brief Configures application-owned PA3 routing for TIM2 channel 4
  * @returns @ref driver_status_t "GPIO configuration status"
  */
-static driver_status_t APP_ConfigPWMGPIO(void)
+static driver_status_t App_ConfigPWMGPIO(void)
 {
 	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
 	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_PWM_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
@@ -123,7 +123,7 @@ static driver_status_t APP_ConfigPWMGPIO(void)
  * interrupt can arrive before TIM2_IRQHandler() is ready to service it.
  * @returns @ref driver_status_t "PWM-IRQ initialization status"
  */
-static driver_status_t APP_ConfigPWM(void)
+static driver_status_t App_ConfigPWM(void)
 {
 	const tim_config_t timerConfig =
 	{
@@ -187,13 +187,13 @@ int main(void)
 	int16_t rampDirection = +1;
 
 	//! Physical output configuration is intentionally outside the Timer PWM driver.
-	if (APP_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigPWMGPIO() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
-	if (APP_ConfigPWM() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigPWM() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	//! Infinite Loop
@@ -222,7 +222,7 @@ int main(void)
 			//! Update the duty cycle
 			if (TIM_SetPWMDuty(APP_PWM_TIMER, APP_PWM_CHANNEL_MASK, dutyCycle) != DRIVER_STATUS_SUCCESS)
 			{
-				APP_ErrorHandler();
+				App_ErrorHandler();
 			}
 		}
 		else
@@ -252,7 +252,7 @@ void TIM2_IRQHandler(void)
 	//! Read the public pending-event mask
 	if (TIM_GetIRQEvents(APP_PWM_TIMER, &irqEvents) != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 	//! Service only the update flag
 	if ((irqEvents & TIMx_IRQ_EVENT_UPDATE) != TIMx_IRQ_EVENT_NONE)
@@ -263,7 +263,7 @@ void TIM2_IRQHandler(void)
 		//! Acknowledge only the serviced update flag and preserve unrelated Timer flags.
 		if (TIM_AckIRQEvents(APP_PWM_TIMER, TIMx_IRQ_EVENT_UPDATE) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 	}
 }

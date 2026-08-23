@@ -13,7 +13,7 @@ implementation rules, naming policy, and alignment plan.
 |------|-------|----------------|
 | `Inc/gpio_data_types.h` | Data Types | GPIO scalar typedef aliases |
 | `Inc/gpio_defines.h` | GPIO Defines/Validation | Public GPIO selector macros and pure validation/policy macros |
-| `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
+| `Inc/gpio_ll.h` | Low-Level | Dumb single point for named GPIO register reads/writes and clock forwarding |
 | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Codec | Selector encoding/decoding, raw CRL/CRH field placement, and staged register-image mutation |
 | `Inc/gpio.h`, `Src/gpio.c` | Driver | Public GPIO API, validation, sequencing, batching, status returns, and generic GPIO convenience codecs |
 | `Inc/gpio_irq*.h`, `Src/gpio_irq*.c` | GPIO IRQ | GPIO-backed EXTI routing, trigger staging, NVIC integration |
@@ -104,7 +104,7 @@ clock sequencing, batching decisions, or board-specific pin policy.
 | Core | `BareMetal/Core/Inc/stm32f1xx_gpio.h` | GPIO register structs, offsets, raw masks, and reset-level hardware facts | Driver selectors, board aliases, public validation |
 | Data Types | `Inc/gpio_data_types.h` | GPIO scalar typedef aliases such as `gpio_pin_t`, `gpio_pin_mode_t`, and `gpio_pin_config_t` | Public selector macros, validation macros, `GPIO_TypeDef`, full MCU include coupling, register layout, board behavior |
 | Defines/Validation | `Inc/gpio_defines.h` | Public GPIO selector macros and pure validation/policy macros that guard those selectors | Hardware reads/writes, clock sequencing, batching decisions, raw register field placement |
-| Low-Level | `Inc/gpio_ll.h`, `Src/gpio_ll.c` | Named static inline register read/write accessors, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, pin-index field mapping, raw CRL/CRH field placement, public compatibility policy, batching decisions, board behavior |
+| Low-Level | `Inc/gpio_ll.h` | Named static inline register read/write accessors, raw GPIO clock forwarding, `LL_GPIO_*` API names | Public selector translation, pin-index field mapping, raw CRL/CRH field placement, public compatibility policy, batching decisions, board behavior |
 | Codec | `Inc/gpio_codec.h`, `Src/gpio_codec.c` | Encoding/decoding selectors, pin-index to CRL/CRH image mapping, raw CRL/CRH field placement, and caller-owned register-image staging/extraction | Hardware reads/writes, clock sequencing, public API policy |
 | Driver | `Inc/gpio.h`, `Src/gpio.c` | Public APIs, explicit pin/mode/config input validation, mode/config compatibility, clock sequencing, read/write batching, dirty tracking, status returns | Raw register map definitions, board-specific shortcuts |
 | Board/Project | `BareMetal/Driver/BSP` and `Projects/*` | Blue Pill LED aliases, package pin availability decisions, examples | GPIO internals and raw register assumptions |

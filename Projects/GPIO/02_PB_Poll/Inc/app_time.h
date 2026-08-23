@@ -39,8 +39,8 @@ extern "C" {
 
 /**
  * @brief Application monotonic millisecond service
- * @defgroup APP_Time Application Time
- * @ingroup APP_Template
+ * @defgroup App_Time Application Time
+ * @ingroup App_Template
  * @{
  */
 
@@ -133,7 +133,7 @@ void SysTick_Handler(void);
 
 #endif /* APP_ENABLE_SYSTICK_TIMEBASE */
 
-/** @} */ // APP_Time
+/** @} */ // App_Time
 
 // --- C++ Compatibility ---
 #ifdef __cplusplus

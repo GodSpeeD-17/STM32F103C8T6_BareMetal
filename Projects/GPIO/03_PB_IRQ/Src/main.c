@@ -88,7 +88,7 @@ static volatile uint32_t buttonLastIrqTick = 0x00000000UL;
  * handler only needs to set it once. Used only when project-local peripheral
  * setup fails before the main demo loop.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -104,7 +104,7 @@ static void APP_ErrorHandler(void)
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One project GPIO mapping was invalid.
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Internal staged-image update failed.
  */
-static driver_status_t APP_Init(void)
+static driver_status_t App_Init(void)
 {
 	//! The application explicitly owns the GPIOA port clock gate shared by the LEDs and push button.
 	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
@@ -132,7 +132,7 @@ static driver_status_t APP_Init(void)
  * @retval - @ref `DRIVER_STATUS_ON`: The IRQ event is accepted.
  * @retval - @ref `DRIVER_STATUS_OFF`: The IRQ event is ignored as bounce.
  */
-__STATIC_FORCEINLINE driver_status_t APP_PushButtonIRQDebounceAccepted(const uint32_t currentTick)
+__STATIC_FORCEINLINE driver_status_t App_PushButtonIRQDebounceAccepted(const uint32_t currentTick)
 {
 	return (((currentTick - buttonLastIrqTick) > BUTTON_DEBOUNCE_DELAY_MS) ? DRIVER_STATUS_ON : DRIVER_STATUS_OFF);
 }
@@ -143,9 +143,9 @@ __STATIC_FORCEINLINE driver_status_t APP_PushButtonIRQDebounceAccepted(const uin
 
 int main(void)
 {
-	if (APP_Init() != DRIVER_STATUS_SUCCESS)
+	if (App_Init() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	while (1)
@@ -172,7 +172,7 @@ void EXTI1_IRQHandler(void)
 
 	if (GPIO_IRQ_IsTriggered(PUSH_BUTTON_PIN) == DRIVER_STATUS_ON)
 	{
-		if (APP_PushButtonIRQDebounceAccepted(currentTick) == DRIVER_STATUS_ON)
+		if (App_PushButtonIRQDebounceAccepted(currentTick) == DRIVER_STATUS_ON)
 		{
 			buttonLastIrqTick = currentTick;
 			(void) GPIO_PinToggle(RED_LED_PORT, RED_LED_PIN);

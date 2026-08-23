@@ -31,7 +31,7 @@ extern "C" {
 
 /**
  * @brief GPIO on-board LED demo application
- * @defgroup APP_Main Application Control Loop
+ * @defgroup App_Main Application Control Loop
  * @{
  */
 

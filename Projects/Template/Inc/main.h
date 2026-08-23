@@ -31,8 +31,8 @@ extern "C" {
 
 /**
  * @brief Template application control loop
- * @defgroup APP_Main Application Control Loop
- * @ingroup APP_Template
+ * @defgroup App_Main Application Control Loop
+ * @ingroup App_Template
  * @{
  */
 

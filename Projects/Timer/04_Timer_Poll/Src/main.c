@@ -48,7 +48,7 @@
  * App_Init() already configures and forces off the BSP on-board LED, so this
  * handler only needs to set it once after a Timer operation fails.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	OB_LED_Set();
 	while (1)
@@ -67,7 +67,7 @@ static void APP_ErrorHandler(void)
  * @note The application explicitly enables the TIM2 clock gate before Timer
  * configuration, which leaves counter operation disabled for @ref TIM_BlockingDelayMs
  */
-static driver_status_t APP_ConfigTimer(void)
+static driver_status_t App_ConfigTimer(void)
 {
 	//! Explicitly enable the application-owned TIM2 clock before configuring the blocking-delay service.
 	ASSERT_DRIVER_STATUS(RCC_SetAPB1ClockState(RCC_APB1ENR_TIM2EN, DRIVER_STATUS_ON));
@@ -81,9 +81,9 @@ static driver_status_t APP_ConfigTimer(void)
 
 int main(void)
 {
-	if (APP_ConfigTimer() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigTimer() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	while (1)
@@ -94,7 +94,7 @@ int main(void)
 		//! Stop the demo on timeout or lost Timer ownership instead of hiding the status.
 		if (TIM_BlockingDelayMs(TIM2, LOOP_DELAY_MS) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 	}
 }

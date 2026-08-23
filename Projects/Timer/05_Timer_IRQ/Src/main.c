@@ -72,7 +72,7 @@ static volatile uint8_t isActionRequired = 0U;
  * handler only needs to set it once. Used to prevent return into an
  * unacknowledged or incorrectly configured IRQ path.
  */
-static void APP_ErrorHandler(void)
+static void App_ErrorHandler(void)
 {
 	//! Indicate the error state by turning on the on-board LED
 	OB_LED_Set();
@@ -93,7 +93,7 @@ static void APP_ErrorHandler(void)
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A required Timer clock or IRQ state was unavailable
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: TIM3 was running during configuration
  */
-static driver_status_t APP_ConfigTimerIRQ(void)
+static driver_status_t App_ConfigTimerIRQ(void)
 {
 	//! Explicitly enable the application-owned GPIO port clock gate before configuring the LED.
 	ASSERT_DRIVER_STATUS(RCC_SetAPB2ClockState(APP_GPIO_LED_CLOCK_MASK, DRIVER_STATUS_ON));
@@ -139,9 +139,9 @@ static driver_status_t APP_ConfigTimerIRQ(void)
 
 int main(void)
 {
-	if (APP_ConfigTimerIRQ() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigTimerIRQ() != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 
 	while (1)
@@ -177,7 +177,7 @@ void TIM3_IRQHandler(void)
 	//! Read the public pending-event mask
 	if (TIM_GetIRQEvents(APP_TIMER, &irqEvents) != DRIVER_STATUS_SUCCESS)
 	{
-		APP_ErrorHandler();
+		App_ErrorHandler();
 	}
 	//! Service only the update flag
 	if ((irqEvents & TIMx_IRQ_EVENT_UPDATE) != TIMx_IRQ_EVENT_NONE)
@@ -188,7 +188,7 @@ void TIM3_IRQHandler(void)
 		//! Acknowledge only the serviced update flag and preserve unrelated Timer flags.
 		if (TIM_AckIRQEvents(APP_TIMER, TIMx_IRQ_EVENT_UPDATE) != DRIVER_STATUS_SUCCESS)
 		{
-			APP_ErrorHandler();
+			App_ErrorHandler();
 		}
 	}
 }
