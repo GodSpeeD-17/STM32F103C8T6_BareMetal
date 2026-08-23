@@ -65,6 +65,8 @@ extern "C" {
 #define I2C1_OFFSET								((uintptr_t) 0x00005400UL)
 /** @brief I2C2 Peripheral Offset @def I2C2_OFFSET */
 #define I2C2_OFFSET								((uintptr_t) 0x00005800UL)
+/** @brief CAN1 offset from @ref `APB1_BASE_ADDR` @def CAN1_OFFSET */
+#define CAN1_OFFSET								((uintptr_t) 0x00006400UL)
 
 // ------------------------------------------------------------------------------------------
 // APB2 Peripheral Offset

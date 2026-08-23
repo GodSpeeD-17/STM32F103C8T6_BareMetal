@@ -44,6 +44,7 @@ extern "C" {
 #include "stm32f1xx_adc.h"
 #include "stm32f1xx_advtim.h"
 #include "stm32f1xx_afio.h"
+#include "stm32f1xx_can.h"
 #include "stm32f1xx_dma.h"
 #include "stm32f1xx_exti.h"
 #include "stm32f1xx_gpio.h"
@@ -197,6 +198,8 @@ extern "C" {
 #define I2C1 									((I2C_TypeDef*) I2C1_BASE_ADDRESS)
 /** @brief I2C2 Peripheral  @def I2C2 */ 
 #define I2C2 									((I2C_TypeDef*) I2C2_BASE_ADDRESS)
+/** @brief Controller Area Network peripheral @def CAN1 */
+#define CAN1									((CAN_TypeDef*) CAN1_BASE_ADDRESS)
 
 // ------------------------------------------------------------------------------------------
 // APB2 Peripherals

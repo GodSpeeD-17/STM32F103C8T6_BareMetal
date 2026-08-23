@@ -87,6 +87,8 @@ extern "C" {
 #define I2C1_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C1_OFFSET))
 /** @brief I2C2 Base Memory Address @def I2C2_BASE_ADDRESS */
 #define I2C2_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + I2C2_OFFSET))
+/** @brief CAN1 Base Memory Address @def CAN1_BASE_ADDRESS */
+#define CAN1_BASE_ADDRESS						((uintptr_t) (APB1_BASE_ADDR + CAN1_OFFSET))
 
 // ------------------------------------------------------------------------------------------
 // APB2 Peripheral Base Addresses
