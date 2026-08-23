@@ -4,147 +4,87 @@ This file records the repository owner's coding and documentation preferences.
 Update it whenever a new preference is established, and consult it before every
 code change, review, or Doxygen pass.
 
-## Doxygen Pass Scope
+Sections are grouped by concern (Documentation, Naming, Formatting,
+Architecture, Application Template) so a specific rule can be found without
+reading the whole file. The **Preference Log** at the end is the only
+chronological section — it exists to show *when* and *why* each rule was
+adopted, not to be read top-to-bottom for daily reference.
 
-A Doxygen pass is not limited to editing `/** ... */` blocks. It must include:
+---
 
-- Correct and complete file, group, function, parameter, return-value, note,
-  precondition, and warning documentation where applicable.
-- An explicit `@def MACRO_NAME` in the Doxygen block for every documented
-  macro, including short one-line constant macros.
+# 1. Documentation
+
+## 1.1 What Counts as a Doxygen Pass
+
+A Doxygen pass is not limited to editing `/** ... */` blocks. It includes:
+
+- Correct, complete file/group/function/parameter/return-value/note/
+  precondition/warning documentation, wherever applicable.
+- An explicit `@def MACRO_NAME` in every documented macro's block, including
+  short one-line constant macros.
 - Valid Doxygen command syntax with resolvable references.
-- Concise `//!` comments inside functions that explain important logic,
-  sequencing, preservation rules, hardware constraints, and side effects.
-- Source formatting consistent with the call-layout rules below.
+- Concise `//!` comments inside functions explaining logic, sequencing,
+  preservation rules, hardware constraints, and side effects.
+- Source formatting consistent with the [Call Layout](#32-function--macro-call-layout) rules.
 - A Doxygen validation run plus relevant compile, test, and diff checks.
 
-A Doxygen pass is incomplete until every documented `#define` in scope has
-been checked for an exact matching `@def` name and the audit reports zero
-omissions. This applies equally to public, private, object-like, function-like,
-and one-line macros; header guards without Doxygen blocks are excluded.
+A pass is incomplete until every `#define` in scope has an exact matching
+`@def` name and the audit reports zero omissions. This applies to public,
+private, object-like, function-like, and one-line macros alike; header
+guards without Doxygen blocks are excluded.
 
-## Two-Part Peripheral Documentation Model
+## 1.2 Doxygen Reference & Retval Syntax
 
-Every canonical peripheral `.md` page must be self-explanatory and contain
-exactly two primary teaching parts in this order:
+- Every macro or symbolic constant used as a Doxygen `@ref` must place the
+  target inside backticks — in accepted/expected-value lists, parameter
+  descriptions, return descriptions, notes, warnings, and ordinary prose:
 
-1. **Theory with Register Mapping Bridge**
-2. **Implementation with Theory Bridge**
+  ```c
+   * - @ref `PERIPH_EVENT_UPDATE`: Update event
+   * - Any non-empty combination contained by @ref `PERIPH_EVENT_ALL`
+   * @note Start operation with @ref `DRIVER_STATUS_ON`
+  ```
 
-The **Theory with Register Mapping Bridge** part explains the peripheral
-without requiring source-code knowledge. It must cover the peripheral's
-purpose, terminology, state model, hardware flow, peer interactions, and the
-significance of every register in the supported scope. Its register mapping
-must state the owner, address/offset, width, implemented range, access class,
-special read/write semantics, side effects, and relationships between
-registers.
+  Do not add a second quoted display label after the `@ref` target. Types,
+  structures, members, groups, and functions stay unwrapped unless the
+  surrounding style explicitly requires code styling.
 
-The **Implementation with Theory Bridge** part maps that complete hardware
-model into the repository. It must trace each theoretical state or action
-through its Core C member, LL access, Codec transformation or documented
-no-Codec reason, Driver transaction, public API, volatile access width,
-ordering, validation, preservation, synchronization, concurrency, and
-shared-resource rules. It must also explain deliberately omitted access
-directions or lower-layer functions.
+- Use this exact status-return layout — list marker, backtick-wrapped `@ref`,
+  one colon, no trailing period:
 
-The first part answers **what the hardware means and which registers express
-it**. The second answers **how this project implements that theory and why the
-implementation has its present shape**. Do not interleave these parts in a way
-that forces a reader to understand source symbols before learning the hardware
-model.
+  ```c
+   * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was captured
+   * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer is `NULL`
+  ```
 
-The peripheral `.md` file is the single canonical long-form page for that
-peripheral's theory, architecture, register model, layer ownership, and
-implementation mapping. Give its top-level Markdown heading a stable explicit
-Doxygen page identifier. The peripheral's public Driver and LL Doxygen groups
-must link to that page with `@ref`. Source Doxygen must not duplicate the
-peripheral theory. File/group comments summarize scope and ownership, while
-individual API comments document only their local parameters, results,
-preconditions, side effects, exact hardware transaction, and safety warnings.
+- Use the same list/colon layout for non-status return values:
 
-The generated project documentation must use a concise Markdown main page as a
-navigation index. That page references each documentation-ready peripheral
-`.md` page and directs readers to the generated module/API reference; it does
-not duplicate the peripheral guides. `Doxyfile` must include canonical
-peripheral pages in `INPUT` and configure the navigation index through
-`USE_MDFILE_AS_MAINPAGE`.
+  ```c
+   * @retval - `0x00U`: The selector is not supported
+   * @retval - `0x01U`: The selector is supported
+  ```
 
-Only current, reviewed peripheral guides belong in the generated project
-documentation. Mutable audit scratchpads, TODO files, superseded architecture
-snapshots, and internal planning records remain excluded unless they are
-explicitly promoted to current user-facing documentation. A new peripheral is
-not documentation-complete until its page is linked from both the project
-navigation index and the relevant generated Doxygen groups.
+- Two Doxygen 1.9 parser quirks are accepted, not bugs to work around:
+  - Repeated return-value warnings because the parser reads the list marker
+    (`-`) as the return-value key — do not rewrite the house style to
+    silence these.
+  - `unexpected token TK_EOF as the argument of ref` for the required
+    backtick-wrapped `@ref \`SYMBOL\`` form, when the symbol actually exists.
+  - Missing targets, undocumented symbols, and malformed commands remain
+    real validation failures — only the two exact warnings above are exempt.
 
-For special registers, explicitly distinguish stored state from an action
-port in the canonical peripheral `.md`. Explain write-one-to-set,
-write-one-to-clear, write-zero-to-clear, read-clear, FIFO, data-port,
-keyed-write, and write-only behavior before describing the corresponding C
-access. Source Doxygen repeats only the operation-specific warning required to
-use an accessor safely. A C `volatile` declaration communicates access
-generation but does not, by itself, document these hardware semantics.
-
-Use the repository's Doxygen return-value layout exactly:
-
-```c
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Register image was captured
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer is `NULL`
-```
-
-For status-returning functions, retain the list marker, reference the symbolic
-status with a backtick-wrapped `@ref` target, and separate the description with
-one colon. Do not terminate status descriptions with a period.
-
-The configured Doxygen version may report repeated return-value warnings
-because it parses the list marker as the return-value key. Those exact `'-'`
-warnings are an accepted consequence of the repository display convention;
-do not rewrite the documented house style to silence them. All other Doxygen
-warnings remain subject to the normal validation pass.
-
-The configured Doxygen 1.9 parser may also report `unexpected token TK_EOF as
-the argument of ref` for the required backtick-wrapped `@ref` form. Those
-exact parser warnings are accepted when the referenced symbol exists and the
-source follows the required `@ref \`SYMBOL\`` layout. Missing targets,
-undocumented symbols, malformed commands, and every other warning remain
-validation failures.
-
-Use the corresponding list layout for non-status return values:
-
-```c
- * @retval - `0x00U`: The selector is not supported
- * @retval - `0x01U`: The selector is supported
-```
-
-Every macro or symbolic constant used as a Doxygen `@ref` must place the target
-inside backticks. Apply this consistently in accepted/expected-value lists,
-parameter descriptions, return descriptions, notes, warnings, and ordinary
-Doxygen prose:
-
-```c
- * - @ref `PERIPH_EVENT_UPDATE`: Update event
- * - Any non-empty combination contained by @ref `PERIPH_EVENT_ALL`
- * @note Start operation with @ref `DRIVER_STATUS_ON`
-```
-
-Do not add a second quoted display label after the `@ref` target. References to
-types, structures, members, groups, or functions remain unwrapped unless the
-surrounding repository style explicitly requires code styling.
-
-## Function Doxygen Layout
+## 1.3 Function Doxygen Layout
 
 Document every public and private function in this order:
 
-1. `@brief`, followed by `@details` when behavior, ownership, sequencing, or
-   side effects require explanation.
-2. One `@param[in]`, `@param[out]`, or `@param[in,out]` entry per parameter.
-3. An `Accepted values:` or `Expected values:` list immediately after each
-   parameter whenever its valid input or output vocabulary can be stated.
-4. A function-specific `@returns` line naming the returned status type for
-   status-returning functions.
+1. `@brief`, then `@details` when behavior, ownership, sequencing, or side
+   effects need explanation.
+2. One `@param[in]` / `@param[out]` / `@param[in,out]` entry per parameter.
+3. An `Accepted values:` (input) or `Expected values:` (output) list right
+   after each parameter, whenever its vocabulary can be stated.
+4. A function-specific `@returns` line naming the returned status type.
 5. Complete `@retval` entries for every status the implementation can return.
 6. Applicable `@pre`, `@note`, and `@warning` entries.
-
-Use this status-returning function format:
 
 ```c
  * @param[in] operationState Requested Timer operation state
@@ -156,9 +96,8 @@ Use this status-returning function format:
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` / @p `operationState` was invalid
 ```
 
-Validation helpers use an action-oriented `@brief` beginning with
-`Validates`, a referenced `driver_status_t` return line whose quoted text names
-the specific validation, and the same repository return-value layout:
+Validation helpers use an action-oriented `@brief` starting with
+`Validates`, plus the same return layout:
 
 ```c
  * @brief Validates that the Timer counter is stopped
@@ -168,26 +107,23 @@ the specific validation, and the same repository return-value layout:
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: Timer counter is running
 ```
 
-Parameter documentation must be specific to that parameter. Do not combine
-several parameters into one Accepted Values block, and do not omit a finite
-selector/range list when the API defines one. Status lists must match the
-implementation, including distinct null-pointer, invalid-argument, state,
-busy, and timeout paths.
+- Document each parameter on its own — never combine several parameters
+  into one Accepted Values block.
+- Never omit a finite selector/range list when the API defines one.
+- The `@retval` list must match the implementation exactly, including
+  distinct null-pointer, invalid-argument, state, busy, and timeout paths.
 
-## Structure Doxygen Layout
+## 1.4 Structure Doxygen Layout
 
 Document every public and private structure with `@struct` using the public
-typedef name, followed by one complete Doxygen block per member. Every member
-block must contain:
+typedef name. Every member needs one complete block containing:
 
 1. A focused `@brief` explaining the member's semantic role.
-2. An `Accepted Values:` list for writable configuration/input members, or an
-   `Expected Values:` list for observation/output members.
-3. Explicit symbolic values when the vocabulary is finite; do not hide the
+2. An `Accepted Values:` list (writable/config members) or `Expected Values:`
+   list (observation/output members).
+3. Explicit symbolic values when the vocabulary is finite — never hide the
    valid set behind vague prose.
-4. `@memberof` naming the public typedef that owns the member.
-
-Use this layout:
+4. `@memberof` naming the owning public typedef.
 
 ```c
 /**
@@ -207,698 +143,794 @@ typedef struct _peripheral_config_t
 } peripheral_config_t;
 ```
 
-Do not use a trailing `/**< ... */` member comment when a complete member
-contract can be documented. Keep accepted/expected lists directly inside the
-owning member block so the structure can be audited without following its
-consumers.
-
-## Function-Local Logic Comments
-
-Place a concise `//!` comment immediately before the operation or block it
-explains:
-
-```c
-//! Reuse the shared apply path to keep batching and dirty writes consistent.
-ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
-```
-
-Comments should explain why the operation exists or what invariant it protects.
-Avoid comments that merely translate the following C statement into English.
-
-Every function body must contain at least one meaningful `//!` logic comment,
-including one-line adapters, getters, setters, startup handlers, and minimal
-interrupt handlers. For a thin function, explain why direct delegation, an
-atomic read, or a bounded interrupt-side operation is the correct ownership
-choice. Function-level Doxygen does not replace this implementation-local
-explanation.
-
-## Function and Macro Call Layout
-
-Keep a call on one line when it remains readable:
-
-```c
-ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
-```
-
-When a nested or argument-heavy call needs multiple lines, expand every nesting
-level. Put each function or macro name on its own line, place its opening
-parenthesis on the following line, use one argument per line, and align closing
-parentheses with their call depth:
-
-```c
-ASSERT_DRIVER_STATUS
-(
-	Codec_TIM_ExtractTimeBaseConfig
-	(
-		LL_TIM_ReadPSC(TIMx),
-		LL_TIM_ReadARR(TIMx),
-		LL_TIM_ReadCNT(TIMx),
-		&timeBase
-	)
-);
-```
-
-Do not expand short calls mechanically. Choose the compact or expanded form
-based on readability and keep the chosen form consistent within the module.
-
-## Macro Alignment
-
-Align related `#define` values within each banner section. Find the longest
-macro name in that section, place exactly two tab characters after that name,
-and add enough tabs after every shorter name for all values to start in the
-same column:
-
-```c
-/** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US */
-#define TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
-/** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US */
-#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
-/** @brief Fixed setup allowance added to the blocking polling-loop budget @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE */
-#define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
-```
-
-Recalculate alignment independently for each banner section; do not use one
-file-wide column.
-
-Group raw register-field macros under one logical banner per owning hardware
-register. Within each register banner, order fields from the least-significant
-implemented bit toward the most-significant implemented bit. When two
-documented views begin at the same bit, keep each view internally complete and
-place the broader register/subregister view before its contained fields.
-
-Use the owning block, register, and field in every field-macro root:
-`BLOCK_REGISTER_FIELD`. A single-bit field exposes `_Pos`, `_Msk`, and
-the unsuffixed mask alias. A multi-bit field exposes `_Pos`, `_Width`,
-`_Msk`, and the unsuffixed mask alias, in that order. Position and width
-macros use `reg_bit_pos_t` and `reg_field_width_t`; mask macros use
-`REG_BIT_MASK()` or `REG_FIELD_MASK()`.
-
-## Selector Macro Naming Versus Typedef
-
-Every value macro for a selector typedef must carry that typedef's own stem
-(its name with the trailing `_t` removed), not merely live in the right
-Doxygen group or file section. Singular/plural drift is acceptable —
-`usart_stop_bits_t` pairing with `USART_STOP_BIT_1` / `_0_5` / `_2` / `_1_5`
-keeps the shared `STOP_BIT(S)` stem even though the typedef is plural and the
-values are singular — but dropping the stem entirely is not. Do not name
-values by only their narrower Doxygen subgroup or by convenience shorthand
-when the typedef itself implies a fuller name.
-
-The typedef's paired `_IS_VALID` validation macro is normally written with
-the complete stem already; if that validation macro's stem does not match
-the plain value macros, the value macros are the ones that drifted and must
-be renamed to match, not the validation macro. For example,
-`usart_data_bits_t` had values `USART_8_BITS` / `USART_9_BITS` beside an
-already-correct `USART_DATA_BITS_IS_VALID`; the values were renamed to
-`USART_DATA_BITS_8` / `USART_DATA_BITS_9`. Likewise `usart_hardware_enable_t`
-had values `USART_TX_ENABLE` / `USART_RX_ENABLE` / `USART_RTS_ENABLE` /
-`USART_CTS_ENABLE` / `USART_TX_RX_ENABLE` / `USART_RTS_CTS_ENABLE` /
-`USART_HARDWARE_ALL` / `USART_HARDWARE_NONE` beside an already-correct
-`USART_HARDWARE_ENABLE_IS_VALID`; every value was renamed onto the shared
-`USART_HARDWARE_ENABLE_*` stem (`_NONE`, `_TX`, `_RX`, `_RTS`, `_CTS`,
-`_TX_RX`, `_RTS_CTS`, `_ALL`).
-
-A consistent stem lets IDE autocomplete surface a selector's full value set
-the moment the typedef-derived prefix is typed, without the author needing to
-already know an unrelated shorthand name.
-
-Use tab characters, not runs of spaces, for macro value alignment and for the
-leading indentation of multi-line macro continuations. The single lexical
-separator after `#define` and the conventional ` *` inside Doxygen blocks are
-not indentation and remain spaces.
-
-Keep register-mask macros native to the 32-bit register width and prefer the
-direct `0x01UL` shift expression. Support field widths `0U..31U`; use
-`0xFFFFFFFFUL` explicitly when all 32 register bits are required. Document
-that positioned bits beyond bit 31 are discarded instead of complicating the
-macro to preserve out-of-range bits.
-
-Use the `reg` typedef for register images, register masks, register field
-values, and pointers to caller-owned register images. Reserve fixed-width
-integer types for values that are not register representations, and use
-`uintptr_t` for address arithmetic.
-
-Use the Core-owned `frequency_t` typedef for every hertz-valued API return,
-output, structure field, constant, and intermediate value. Do not introduce
-peripheral-specific aliases such as `rcc_freq_t` or `tim_frequency_t` for the
-same physical quantity. Prescaler selectors and dimensionless divider values
-must retain their own semantic types rather than using `frequency_t`.
-
-Prefer role-specific names such as `registerImage`, `positionedFieldMask`, and
-`fieldPosition` over shortened names such as `regImage`, `mask`, `value`, and
-`pos` inside shared register helpers.
-
-Express register-field replacement as explicit copy, clear, and set
-operations. Keep the final return separate so each preservation step remains
-easy to inspect.
-
-## Control Flow
-
-Prefer explicit `if`/`else` branches over ternary expressions. The slightly
-longer form is preferred because state mapping and error behavior remain easy
-to scan.
-
-Use fully braced, multi-line `switch` cases. Put assignments, `break`, and
-returns on separate lines:
-
-```c
-//! Match by peripheral base address because instance macros are raw memory-mapped pointers.
-switch ((uintptr_t) TIMx)
-{
-	case TIM2_BASE_ADDRESS:
-	{
-		*pClockMask = RCC_APB1ENR_TIM2EN;
-		break;
-	}
-	default:
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-}
-```
-
-Do not place a case assignment and `break`, or a default label and return, on
-the same line.
-
-## Validation and Fallible Boolean Results
-
-Every public or private validation function must return `driver_status_t`.
-Return `DRIVER_STATUS_SUCCESS` when the input is valid and the most
-specific applicable error status when it is not. Do not return `uint8_t`,
-`bool`, `0x00U`, or `0x01U` as a validation result.
-
-Fallible predicates and state queries must preserve the distinction between a
-legitimate negative state and an operation failure. They must not convert a
-null pointer, invalid argument, unavailable clock, invalid hardware state, or
-other error into `0`, `false`, or an apparent OFF/not-pending result.
-
-Use one of these contracts:
-
-- Validation-only helper: return `DRIVER_STATUS_SUCCESS` or a specific
-  `DRIVER_STATUS_ERROR_*` value.
-- Truly binary state getter: return `DRIVER_STATUS_OFF` or
-  `DRIVER_STATUS_ON` directly, while preserving distinct error statuses.
-- Fallible data, mask, or extensible-state query: return operation status and
-  publish the result through an output pointer only after the operation
-  succeeds.
-
-Compatibility wrappers must not collapse a status-returning API into a raw
-Boolean result. Remove or migrate such wrappers instead of treating an error
-as a valid negative result.
-
-Driver and Codec orchestration, staging, commit, validation, and cleanup
-helpers that participate in a status-returning call chain must also return
-`driver_status_t`. Do not declare such a helper `void` merely because its
-current LL register operations cannot report failure. Return
-`DRIVER_STATUS_SUCCESS` after the operation and preserve status propagation at
-the caller so later validation or hardware-error reporting does not require an
-API-contract change.
-
-Reserve `void` for interfaces whose contract is inherently void, such as an
-interrupt-handler ABI, and for deliberately dumb LL write primitives that own
-no validation, sequencing, or fallible policy.
-
-## Layer Ownership and Reuse
-
-Place behavior that is independent of a specific peripheral in the lowest
-shared layer that can express it safely. Peripheral layers should retain only
-their own validation, register selection, sequencing, and hardware policy.
-
-Place every raw register-field macro in the Core register header of the
-hardware block that physically owns the register, even when another Driver
-consumes that field. For example, `SCB_AIRCR_xxx` symbols belong in
-`stm32f1xx_scb.h`; the NVIC stack may consume `AIRCR.PRIGROUP` without owning
-or duplicating its definitions. Compatibility headers may include the owner
-header to preserve macro visibility, but they must not redeclare the macros.
-
-When a Core register structure models named register fields, expose the
-hardware word as a register-member union with a full-width `.REG` image and a
-named `.BIT` field view, following the Timer register-map pattern. Keep the
-fields in least-significant-bit-first order and represent every gap explicitly
-with a reserved field so the view totals exactly 32 bits. If one physical bit
-range has different read and write meanings, place named views such as
-`.BIT.READ` and `.BIT.WRITE` inside the register union rather than selecting
-one misleading interpretation.
-
-Use `.REG` as the canonical LL transaction path. A `.BIT` view documents and
-exposes field placement, but it does not authorize compiler-generated
-read-modify-write accesses where the hardware contract requires a staged
-full-register transfer. Keyed, action, write-only, and write-one-to-clear
-register transactions must use the appropriate full-register operation.
-
-Centralize each peripheral LL's ordinary full-width volatile access in one
-generic pointer-based read primitive and one generic pointer-based write
-primitive. Named register accessors select the appropriate `.REG` pointer and
-delegate to those primitives; they must not repeat direct dereference or
-`RegOps_Read()` / `RegOps_Write()` mechanics. Keep the named surface symmetric
-where hardware permits. Preserve truthful asymmetry for read-only, write-only,
-and action-port registers, and document why an unavailable direction or
-conjugate does not exist. Semantic helpers such as a write-to-clear reset may
-delegate through the corresponding named register writer.
-
-Do not centralize peripheral instance/capability predicates or
-peripheral-specific operating limits in `stm32f1xx_defines.h`. Introduce them
-only when required and keep them inside the respective peripheral stack; for
-example, oscillator and clock-frequency limits belong to RCC.
-
-For example, compare-and-write behavior belongs in `RegOps_WriteIfChanged()`.
-Timer may wrap it to validate a Timer instance and select CR1, PSC, ARR, or CNT;
-GPIO and RCC can later reuse the same primitive while preserving their own
-peripheral-specific rules.
-
-When hardware topology differs by peripheral instance, keep the mapping in a
-static LUT indexed by the driver's stable instance index. Use the smallest
-element type that represents the mapping directly; for example, a Timer-to-bus
-table should be an array of `rcc_bus_t`, not an array of one-field metadata
-structures. Shared logic should consume the mapped value instead of hard-coding
-one bus or duplicating per-instance branches.
-
-## Structured Configuration and Transaction Decomposition
-
-A root configuration structure is a structure of independently coherent
-configuration domains. The root public configuration function represents the
-largest admitted configuration transaction for that peripheral. It must
-visibly orchestrate each domain represented by the root structure; do not hide
-the entire operation behind a private `_PERIPH_ApplyConfig()` helper that merely
-duplicates the public function's authority.
-
-Do not create a configuration structure merely because one function accepts
-more than one value. Prefer explicit typed parameters when a small set of
-single-use scalar values has no independently reusable domain, lifecycle, or
-cross-field object invariant. SysTick clock-source and reload configuration is
-the canonical two-scalar example. A structure remains appropriate when its
-members form a stable domain that is passed, stored, returned, nested, or
-validated as one reusable object.
-
-Every nested configuration structure that represents an independently useful
-and admitted operation must normally have a symmetric public grouped `Get` /
-`Set` pair. Deliberately asymmetric hardware actions remain exceptions and
-must document why no conjugate exists. The root function and grouped setter
-must reuse the same narrowly scoped private staging helper; the grouped getter
-uses the corresponding extraction path. Derive helpers from reusable
-configuration domains and shared invariants, not merely to shorten a public
-function.
-
-Use this generic ownership model:
-
-```c
-typedef struct _periph_config_t
-{
-	periph_timebase_config_t	timebase;
-	periph_counter_config_t		counter;
-
-} periph_config_t;
-```
-
-Do not place interrupt-request source enables inside a root configuration
-structure. IRQ-source enablement must remain an explicit application action so
-the call site proves that interrupt generation was intentional. Root
-configuration preserves the peripheral IRQ-source register, and the
-application separately configures peripheral sources before enabling NVIC
-delivery.
-
-Use this generic sequence:
-
-```c
-ASSERT_DRIVER_STATUS(RCC_EnablePeripheralClock(PERIPH1_CLOCK_MASK));
-ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
-ASSERT_DRIVER_STATUS
-(
-	PERIPH_SetIRQSources
-	(
-		PERIPH1,
-		PERIPH_IRQ_SOURCE_UPDATE,
-		DRIVER_STATUS_ON
-	)
-);
-ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
-ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
-ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
-```
-
-Clock-gate ownership remains explicit and outside the peripheral Driver. The
-application uses the RCC Driver to enable the required peripheral gate before
-configuration. A peripheral Driver may query RCC to validate that precondition,
-but it must not expose duplicate peripheral-prefixed clock APIs or enable,
-disable, restore, or otherwise mutate the gate inside `Config()`, `DeConfig()`,
-grouped configuration, operation-state, IRQ, or action APIs.
-
-`DeConfig()` restores the peripheral register bank through the peer RCC reset
-service when that is the hardware-defined reset mechanism, but it leaves the
-application-owned clock gate and NVIC delivery state unchanged. The application
-explicitly decides when either external resource is disabled. This keeps the
-full lifecycle visible at the call site:
-
-```text
-RCC clock enable
-  -> peripheral base configuration
-  -> peripheral IRQ-source configuration
-  -> NVIC pending-state cleanup and delivery enablement
-  -> peripheral operation enablement
-```
-
-Omitting `PERIPH_SetIRQSources()` means the root configuration leaves existing
-peripheral IRQ-source state unchanged. Disabling sources is equally explicit;
-the application passes the owned source mask with `DRIVER_STATUS_OFF`.
-
-Root peripheral configuration must not read, validate, clear, disable, or
-enable NVIC delivery state. The application owns the explicit ordering between
-base configuration, peripheral IRQ-source enablement, pending-line cleanup,
-NVIC delivery enablement, and the final transition to active peripheral state.
-
-The corresponding staging helpers each accept only one configuration domain
-and the caller-owned register images that domain can modify:
-
-```c
-static driver_status_t _PERIPH_StageTimeBaseConfig
-(
-	const periph_timebase_config_t* const	pTimeBaseConfig,
-	reg* const								pPrescalerRegisterImage,
-	reg* const								pAutoReloadRegisterImage,
-	reg* const								pCounterRegisterImage
-);
-
-static driver_status_t _PERIPH_StageCounterConfig
-(
-	const periph_counter_config_t* const	pCounterConfig,
-	reg* const								pControlRegisterImage
-);
-```
-
-A staging helper must:
-
-- perform only the transformation described by its name and
-  configuration-domain input;
-- validate its own pointer/domain contract and return `driver_status_t`;
-- transform caller-owned, non-volatile register images without performing
-  MMIO, clock, reset, NVIC, operation-state, or cleanup work;
-- use Codec functions for individual field encoding instead of duplicating
-  register placement in the Driver;
-- stage through local working images and publish all output images only after
-  every fallible transformation succeeds; and
-- preserve every register field outside its declared domain.
-
-Every structure contained by a public root configuration object has one
-corresponding private Driver `_PERIPH_Stage<Domain>Config()` helper. That helper
-owns the atomic local-copy/publication boundary for its structure and invokes
-the grouped Codec transformation for field placement. It must not stage policy
-or register images outside the fields represented by that structure. The
-architecture requires one reusable staging path per configuration member.
-
-Public configuration APIs own the Read/Modify/Write transaction. Their generic
-flow is:
-
-```text
-PERIPH_GetTimeBaseConfig()
-  -> validate public output and live preconditions
-  -> read every required register image once
-  -> extract the complete timebase structure without changing hardware
-
-PERIPH_SetTimeBaseConfig()
-  -> validate public input and live preconditions
-  -> read every required current register image once
-  -> call _PERIPH_StageTimeBaseConfig(...)
-  -> commit changed images in the required hardware order
-  -> run the documented cleanup path
-
-PERIPH_Config()
-  -> validate the complete root request and lifecycle preconditions
-  -> read every image required by all represented domains
-  -> call _PERIPH_StageCounterConfig(...)
-  -> call _PERIPH_StageTimeBaseConfig(...)
-  -> commit only after all fallible staging succeeds
-  -> preserve peripheral IRQ-source state
-  -> run the documented cleanup path
-```
-
-The root function must not implement a second copy of the grouped staging
-logic, and it must not call public grouped setters when doing so would create
-multiple partially committed transactions. It reuses their private staging
-helpers, stages the whole root request before the first write, and then owns one
-ordered commit. Conversely, a grouped public setter reads and commits only the
-registers required by its own domain.
-
-Private helpers stage cached values but do not commit configuration MMIO. The
-public configuration API directly compares and writes its cached images in the
-required hardware order, including any temporary policy, action-register, or
-restoration sequence. This keeps the public function's maximum authority and
-actual hardware cost visible. Only deliberately mechanical LL register-write
-primitives remain `void`.
-
-For Timer, this means `TIM_Config()` visibly composes the staging paths for
-`tim_config_counter_t` and `tim_config_timebase_t` while preserving
-`TIMx_DIER`.
-`TIM_GetCounterConfig()` / `TIM_SetCounterConfig()` and
-`TIM_GetTimeBaseConfig()` / `TIM_SetTimeBaseConfig()` provide the grouped
-domain pairs. Their setters reuse the respective staging paths, while the root
-transaction performs one all-base-domain ordered commit. No private helper
-shadows all of `TIM_Config()`, and no configuration path calls
-`TIM_DeConfig()`.
-Applications configure Timer interrupt generation separately through
-`TIM_SetIRQSources()`.
-
-## MMIO Access Minimization and Modular Transactions
-
-Modularity must not multiply volatile register accesses. Helper boundaries
-separate validation, staging, and commit responsibilities; they do not grant
-each helper permission to reread or rewrite the same hardware register.
-
-For each coherent Driver transaction:
-
-1. validate the complete request and every live precondition that can fail;
-2. snapshot each required volatile register exactly once;
-3. pass caller-owned `reg` images through narrow, MMIO-free staging helpers;
-4. coalesce every compatible domain or field change into the final register
-   image;
-5. dirty-write each changed register exactly once when hardware semantics
-   permit; and
-6. perform additional reads or writes only when a named hardware requirement
-   makes them necessary, such as an unlock sequence, mode transition,
-   write-zero-to-clear or write-one-to-clear behavior, read-to-clear behavior,
-   or a preload/update-event commit.
-
-Hold the declared exclusive application ownership or transaction guard across
-the complete snapshot/stage/commit interval. Do not reread a cached
-configuration register solely to repeat a precondition check immediately
-before commit; if concurrency must be supported, define and acquire an explicit
-guard rather than weakening the cached-image transaction model.
-
-Do not reread a register merely because multiple staging helpers consume its
-fields. Do not let separate helpers commit partial images when the public API
-owns one coherent transaction. Every additional MMIO access must be justified
-by the peripheral contract and documented beside the sequence that requires
-it. Correct hardware ordering takes precedence over forcing an unsafe
-single-write implementation.
-
-Do not introduce a transaction structure merely to shorten a helper signature
-or hide several temporal images of the same register. Pass independently
-required `reg` images explicitly so the helper's inputs, outputs, and authority
-remain visible. A structure is appropriate only when the grouped data forms a
-stable reusable domain with its own invariant—not when it is only an argument
-container.
-
-When hardware makes a requested field read-only or otherwise non-writable in
-the current mode, return the appropriate `driver_status_t` error before the
-first write. Do not hide a multi-step mode transition inside one configuration
-call merely to make the request succeed. The application must explicitly call
-the public APIs that leave the restrictive mode, apply the requested field,
-and restore the desired mode. This keeps lifecycle and mode-transition intent
-visible while each admitted transaction retains one coherent final image and
-the minimum register-access count.
-
-Use this generic rejection shape before staging the final image:
-
-```c
-periph_domain_config_t currentConfig;
-
-ASSERT_DRIVER_STATUS
-(
-	Codec_PERIPH_ExtractDomainConfig(currentRegisterImage, &currentConfig)
-);
-
-//! Reject a field transition that hardware cannot accept in the current mode.
-if ((currentConfig.mode == PERIPH_MODE_RESTRICTIVE) &&
-	(currentConfig.field != pConfig->field))
-{
-	return DRIVER_STATUS_ERROR_STATE;
-}
-```
-
-The application then performs the required mode changes as separate public
-transactions; the Driver does not synthesize those calls or intermediate MMIO
-writes internally.
-
-Use this generic transaction shape:
-
-```c
-driver_status_t PERIPH_SetDomainConfig
-(
-	PERIPH_TypeDef* const				pPeripheral,
-	const periph_domain_config_t* const	pConfig
-)
-{
-	// Local Variables
-	reg currentRegisterImage = 0x00000000UL;
-	reg targetRegisterImage = 0x00000000UL;
-
-	// Validate Input and State
-	ASSERT_DRIVER_STATUS(_PERIPH_ValidateDomainTransaction(pPeripheral, pConfig));
-
-	//! Snapshot once, then let modular helpers transform only local images.
-	currentRegisterImage = LL_PERIPH_ReadControl(pPeripheral);
-	targetRegisterImage = currentRegisterImage;
-	ASSERT_DRIVER_STATUS(_PERIPH_StageDomainConfig(pConfig, &targetRegisterImage));
-
-	//! Coalesce compatible changes into one dirty write.
-	if (currentRegisterImage != targetRegisterImage)
-	{
-		LL_PERIPH_WriteControl(pPeripheral, targetRegisterImage);
-	}
-
-	return DRIVER_STATUS_SUCCESS;
-}
-```
-
-If hardware requires an intermediate image, the public transaction performs
-the minimum ordered multi-write sequence directly. Its Doxygen and `//!` logic
-comments must name the hardware rule that makes each additional access
-mandatory.
-
-## Conjugate API Naming and Scope
-
-Conjugate API pairs must be symmetric in both naming and semantic scope. Use
-the same subject in both names, such as `TIM_Config()` / `TIM_DeConfig()` or
-`TIM_GetIRQEvents()` / `TIM_AckIRQEvents()`. Do not label two functions as a
-pair when one owns only a narrow subdomain and the other resets or mutates the
-complete peripheral.
-
-Every public getter for a mutable operation state must have its symmetric
-setter, such as `PERIPH_GetOperationState()` /
-`PERIPH_SetOperationState(operationState)`. When one state domain accepts both
-`DRIVER_STATUS_OFF` and `DRIVER_STATUS_ON`, prefer that single Get/Set pair over
-combining a getter with separate public `Disable()` and `Enable()` functions.
-Separate action verbs remain appropriate only when the hardware actions are
-genuinely asymmetric and cannot be represented truthfully as one state setter;
-document that exception explicitly.
-
-A root configuration type such as `tim_config_t` represents every currently
-admitted base-configuration domain intentionally included in that object. Its
-root configuration API applies that whole object, while preserving explicitly
-separate operational domains such as IRQ-source enables. Its deconfiguration
-conjugate restores the complete peripheral to the documented reset state.
-Conjugate lifecycle entry points remain independent: a configuration function
-must not call its deconfiguration conjugate, and a deconfiguration function
-must not call its configuration conjugate. The application owns their ordering
-and explicitly requests a reset when required. Configuration preserves
-deferred, unrepresented, and explicitly separated domains.
-
-Do not expose general-purpose convenience functions that configure a
-peripheral to an arbitrary requested frequency. Callers provide explicit
-register-semantic configuration values. A narrowly named service-bootstrap
-helper is acceptable when a concrete admitted service requires one fixed
-configuration, validates its documented clock assumption, and delegates the
-canonical root configuration API. For example, `TIM_ConfigForBlockingDelay()` may
-configure the dedicated blocking polling-delay service for a validated 72 MHz Timer
-kernel clock; it must not become a general frequency setter.
-
-Calculated-frequency getters are acceptable because they observe and report
-programmed state without mutating configuration.
-
-## Application Template Ownership and Naming
-
-Keep startup declarations, linker-symbol declarations, the vector table, and
-application-service policy inside each project. The shared Driver root must not
-own or inject a project's startup implementation.
-
-Name project-owned Template service modules `app_*.*`, including
-`app_startup.[ch]`. Retain conventional filenames only for `main.[ch]` and
-`syscalls.c`. Reusable SysTick hardware access belongs to the shared
-`BareMetal/Driver/SysTick` stack and retains `systick.[ch]` plus the direct
-`SysTick_` public-function prefix. Application time state and the strong
-`SysTick_Handler()` definition belong to the project-owned `app_time` service;
-the handler performs only the minimum state publication needed by main context.
-Symbols called by the processor, linker, or C library retain their required ABI
-names; other project-owned public service functions use the `App_` prefix.
-
-Project include directories take precedence over shared Driver include
-directories so a project-local `startup.h` cannot resolve to legacy shared
-startup content.
-
-Every application Template header that declares a function or object with
-external linkage must wrap those declarations in an `extern "C"` guard for C++
-consumers. Macro-only configuration headers do not require a linkage guard.
-
-Application Template files use `stm32f1xx_data_types.h` as their direct source
-of fixed-width integers, shared physical quantities, register vocabulary, and
-driver statuses. Do not include `<stdint.h>` or another standard scalar-type
-header directly from a Template file. Standard headers that provide a distinct
-service, such as `<errno.h>`, remain direct dependencies where that service is
-used.
-
-## Section Banner Formatting
-
-Write section-banner titles left-aligned without decorative whitespace
-padding. Keep ordinary section titles between the existing border lines:
-
-```c
-// ==================================================================================================== //
-// Public API
-// ==================================================================================================== //
-```
-
-Do not center section titles with runs of spaces or tabs. Follow the established
-Timer-header style for structural boundaries: use one `// Header Guard` line
-immediately before the opening `#ifndef` / `#define`, use
-`// --- C++ Compatibility ---` at both C++ linkage boundaries, and close the
-file directly with `#endif /* HEADER_GUARD */`. Do not add redundant
-`Header Guard End`, `C++ Compatibility End`, or `Documentation Group` banner
-sections.
-
-Use banners to express logical API hierarchy, not merely to divide a long file.
-A major `=` banner owns one coherent domain such as configuration, operation
-control, state observation, tick storage, or interrupt handling. When a domain
-contains distinct pairs or subdomains, place each beneath a left-aligned `-`
-sub-banner. Do not club unrelated control, state, and data APIs beneath one
-generic banner. Header and source files must use the same banner names and API
-order.
-
-Within every lifecycle or operation-control conjugate pair, place the
-teardown/release operation before the setup/acquire operation: `Destroy` before
-`Create`, `DeConfig` before `Config`, `Disable` before `Enable`, and `Stop`
-before `Start`. Apply this order consistently to declarations, definitions, and
-documentation.
-
-## Application Template File Documentation
-
-Use the Timer module as the concrete Doxygen and file-layout reference for
-application Template files, subject to later explicit repository-owner
-preferences such as left-aligned section titles. Every file begins with the
-standard `@file`, `@author`, `@brief`, `@version`, `@date`, and `@details`
-metadata layout.
-
-The `@details` block must make the file's architectural position understandable
-without reading another file. Use uniquely identified `@section` blocks for
-hierarchy, responsibility, and dependency boundary. State the file's layer or
-cross-cutting role, its direct users, its direct dependencies, and its
-prohibited ownership. Never use an unexplained arrow as a substitute for a
-named `includes`, `calls`, `uses`, or `is invoked by` relationship.
-
-Number application architecture layers from hardware upward. Layer 1 is always
-the hardware-nearest project/Driver access layer. Increasing layer numbers must
-represent progressively more software-only service, policy, behavior, and
-orchestration responsibility. A higher numbered layer may depend downward; a
-lower numbered layer must not depend upward.
-
-Every application configuration macro must explain more than its literal
-value. Its Doxygen documents its architectural significance, the capability or
-behavior it controls, its direct consumers, every accepted value, relevant
-cross-macro or hardware constraints, and what defining it does not perform.
-Feature flags must document both enabled and disabled behavior. Hardware
-selection macros must document exclusive ownership and every companion mapping
-that must remain consistent.
-
-## Preference Log
-
+- Do not use a trailing `/**< ... */` member comment when a complete member
+  contract can be documented instead.
+- Keep accepted/expected lists inside the owning member block so the
+  structure can be audited without following its consumers.
+
+## 1.5 Function-Local `//!` Logic Comments
+
+- Place a concise `//!` comment immediately before the operation/block it
+  explains:
+
+  ```c
+  //! Reuse the shared apply path to keep batching and dirty writes consistent.
+  ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+  ```
+
+- A comment must explain *why* the operation exists or *what invariant* it
+  protects — never just translate the following C statement into English.
+- Every function body needs at least one meaningful `//!` comment, including
+  one-line adapters, getters, setters, startup handlers, and minimal
+  interrupt handlers. For a thin function, explain why direct delegation, an
+  atomic read, or a bounded interrupt-side operation is the correct
+  ownership choice. Function-level Doxygen does not substitute for this.
+- **A comment is incomplete if a reader would need to ask a follow-up
+  question to understand why the line exists.** A label for *what* the
+  operation does is not the same as an explanation of *why* it's written
+  that way. This applies most to non-obvious arithmetic, bit-manipulation,
+  rounding, or hardware-quirk lines — state the actual mechanism, and
+  include a concrete before/after example whenever the comment describes a
+  numeric trick (rounding, scaling, masking).
+
+  Insufficient — names the operation, not the mechanism:
+  ```c
+  //! Convert the x100 remainder into one of BRR's 16 fractional steps, rounding to nearest.
+  uint32_t fraction = ((fractionRemainder * USART_CODEC_BRR_OVERSAMPLING) + USART_CODEC_BRR_DIV_SCALE_HALF) / USART_CODEC_BRR_DIV_SCALE_FACTOR;
+  ```
+
+  Complete — states the mechanism with a worked example:
+  ```c
+  //! DIV_FRACTION expresses the fraction in sixteenths, not hundredths, so rescale by
+  //! OVERSAMPLING (x16) before dividing back out by the x100 scale. Plain integer
+  //! division always truncates toward zero (e.g. 1.6 -> 1), so DIV_SCALE_HALF (half of
+  //! the x100 divisor) is added first to turn that truncation into round-to-nearest
+  //! (e.g. 1.6 -> 2), matching RM0008's own rounded BRR worked examples.
+  uint32_t fraction = ((fractionRemainder * USART_CODEC_BRR_OVERSAMPLING) + USART_CODEC_BRR_DIV_SCALE_HALF) / USART_CODEC_BRR_DIV_SCALE_FACTOR;
+  ```
+
+- This same standard applies to macro `@brief`s: a brief that only restates
+  where a bit lives (its register/field name) instead of what it does to
+  hardware behavior fails the same test.
+
+## 1.6 Peripheral `.md` Two-Part Documentation Model
+
+Every canonical peripheral `.md` page must be self-explanatory and contain
+exactly two teaching parts, in this order:
+
+1. **Theory with Register Mapping Bridge** — explains the peripheral without
+   requiring source-code knowledge:
+   - Purpose, terminology, state model, hardware flow, peer interactions,
+     and the significance of every register in scope.
+   - Register mapping states: owner, address/offset, width, implemented
+     range, access class, special read/write semantics, side effects, and
+     relationships between registers.
+2. **Implementation with Theory Bridge** — maps that hardware model onto the
+   repository:
+   - Traces each theoretical state/action through its Core C member, LL
+     access, Codec transformation (or documented no-Codec reason), Driver
+     transaction, public API, volatile access width, ordering, validation,
+     preservation, synchronization, concurrency, and shared-resource rules.
+   - Explains deliberately omitted access directions or lower-layer
+     functions.
+
+Part 1 answers *what the hardware means and which registers express it*;
+part 2 answers *how this project implements that theory and why*. Do not
+interleave them in a way that forces a reader to understand source symbols
+before learning the hardware model.
+
+- The peripheral `.md` file is the single canonical long-form page for that
+  peripheral's theory, architecture, register model, layer ownership, and
+  implementation mapping — give its top-level heading a stable Doxygen page
+  identifier.
+- The peripheral's public Driver/LL Doxygen groups must `@ref` that page.
+  Source Doxygen must not duplicate the theory: file/group comments
+  summarize scope and ownership; individual API comments document only
+  their local parameters, results, preconditions, side effects, exact
+  hardware transaction, and safety warnings.
+- The generated project documentation uses a concise Markdown main page as a
+  navigation index, referencing each documentation-ready peripheral page
+  without duplicating it. `Doxyfile` must list canonical peripheral pages in
+  `INPUT` and configure the index through `USE_MDFILE_AS_MAINPAGE`.
+- Only current, reviewed peripheral guides belong in the generated docs.
+  Scratchpads, TODO files, superseded architecture snapshots, and internal
+  planning records stay excluded unless explicitly promoted. A peripheral
+  isn't documentation-complete until its page is linked from both the
+  navigation index *and* the relevant generated Doxygen groups.
+- For special registers, explicitly distinguish stored state from an action
+  port: explain write-one-to-set, write-one-to-clear, write-zero-to-clear,
+  read-clear, FIFO, data-port, keyed-write, and write-only behavior *before*
+  describing the corresponding C access. Source Doxygen repeats only the
+  operation-specific safety warning; a `volatile` declaration alone does not
+  document these semantics.
+
+## 1.7 Application Template File Documentation
+
+- Use the Timer module as the concrete Doxygen/file-layout reference for
+  application Template files, subject to later explicit overrides (e.g.
+  left-aligned section titles). Every file starts with the standard `@file`,
+  `@author`, `@brief`, `@version`, `@date`, `@details` metadata.
+- The `@details` block must make the file's architectural position
+  understandable standalone, using uniquely identified `@section` blocks for
+  hierarchy, responsibility, and dependency boundary: the file's layer or
+  cross-cutting role, its direct users, its direct dependencies, and its
+  prohibited ownership. Never use an unexplained arrow instead of a named
+  `includes`/`calls`/`uses`/`is invoked by` relationship.
+- Number application layers from hardware upward. Layer 1 is always the
+  hardware-nearest project/Driver access layer; increasing numbers own
+  progressively more software-only service, policy, behavior, and
+  orchestration. A higher layer may depend downward; a lower layer must not
+  depend upward.
+- Every application configuration macro's Doxygen must explain more than its
+  literal value: its architectural significance, the capability/behavior it
+  controls, its direct consumers, every accepted value, relevant cross-macro
+  or hardware constraints, and what defining it does *not* do. Feature flags
+  document both enabled and disabled behavior; hardware-selection macros
+  document exclusive ownership and every companion mapping that must stay
+  consistent.
+
+---
+
+# 2. Naming Conventions
+
+## 2.1 Selector Macros vs. Typedef Stem
+
+- Every value macro for a selector typedef must carry that typedef's own
+  stem (its name minus the trailing `_t`) — not merely live in the right
+  Doxygen group or file section. Singular/plural drift is fine
+  (`usart_stop_bits_t` pairing with `USART_STOP_BIT_1`/`_0_5`/`_2`/`_1_5`
+  keeps the shared `STOP_BIT(S)` stem despite the plural/singular mismatch),
+  but dropping the stem entirely is not.
+- The typedef's `_IS_VALID` validation macro is normally already named with
+  the full stem. If that validation macro's stem doesn't match the plain
+  value macros, the *value macros* drifted and must be renamed to match —
+  not the validator. For example:
+  - `usart_data_bits_t` had values `USART_8_BITS`/`USART_9_BITS` beside an
+    already-correct `USART_DATA_BITS_IS_VALID` → renamed to
+    `USART_DATA_BITS_8`/`USART_DATA_BITS_9`.
+  - `usart_hardware_enable_t` had values `USART_TX_ENABLE`/`USART_RX_ENABLE`/
+    `USART_RTS_ENABLE`/`USART_CTS_ENABLE`/`USART_TX_RX_ENABLE`/
+    `USART_RTS_CTS_ENABLE`/`USART_HARDWARE_ALL`/`USART_HARDWARE_NONE` beside
+    an already-correct `USART_HARDWARE_ENABLE_IS_VALID` → every value
+    renamed onto the shared `USART_HARDWARE_ENABLE_*` stem.
+- A consistent stem lets IDE autocomplete surface a selector's full value
+  set the moment its typedef-derived prefix is typed, without the author
+  needing to already know an unrelated shorthand name.
+
+## 2.2 Register Field Macro Naming
+
+- Use the owning block, register, and field in every field-macro root:
+  `BLOCK_REGISTER_FIELD`.
+- A single-bit field exposes `_Pos`, `_Msk`, and the unsuffixed mask alias.
+- A multi-bit field exposes `_Pos`, `_Width`, `_Msk`, and the unsuffixed
+  mask alias, in that order.
+- `_Pos`/`_Width` use `reg_bit_pos_t`/`reg_field_width_t`; `_Msk` uses
+  `REG_BIT_MASK()` or `REG_FIELD_MASK()`.
+- Group raw register-field macros under one banner per owning register;
+  order fields least-significant-bit first. When two documented views begin
+  at the same bit, keep each internally complete and place the broader
+  register/subregister view before its contained fields.
+- Keep register-mask macros native to the 32-bit register width; prefer the
+  direct `0x01UL` shift expression. Support field widths `0U..31U`; use
+  `0xFFFFFFFFUL` explicitly when all 32 bits are required. Document that
+  positioned bits beyond bit 31 are discarded instead of complicating the
+  macro to preserve out-of-range bits.
+
+## 2.3 Scalar & Register Types
+
+- Use `reg` for register images, register masks, register field values, and
+  pointers to caller-owned register images. Reserve fixed-width integer
+  types for values that are not register representations, and use
+  `uintptr_t` for address arithmetic.
+- Use the Core-owned `frequency_t` typedef for every hertz-valued API
+  return, output, structure field, constant, and intermediate value. Do not
+  introduce peripheral-specific aliases (`rcc_freq_t`, `tim_frequency_t`)
+  for the same physical quantity. Prescaler selectors and dimensionless
+  divider values keep their own semantic types instead of using
+  `frequency_t`.
+
+## 2.4 Variable Naming in Shared Helpers
+
+- Prefer role-specific names — `registerImage`, `positionedFieldMask`,
+  `fieldPosition` — over shortened generic names — `regImage`, `mask`,
+  `value`, `pos` — inside shared register helpers.
+- Express register-field replacement as explicit copy, clear, and set
+  operations, with the final return kept separate so each preservation step
+  stays easy to inspect.
+
+## 2.5 Application Template File & Symbol Naming
+
+- Startup declarations, linker-symbol declarations, the vector table, and
+  application-service policy live inside each project — the shared Driver
+  root must not own or inject a project's startup implementation.
+- Name project-owned Template service modules `app_*.*`, including
+  `app_startup.[ch]`. Keep conventional names only for `main.[ch]` and
+  `syscalls.c`.
+- Reusable SysTick hardware access is the shared `BareMetal/Driver/SysTick`
+  stack, keeping `systick.[ch]` and the `SysTick_` prefix as a naming
+  exception. Application time state and the strong `SysTick_Handler()`
+  definition belong to the project-owned `app_time` service; the handler
+  performs only the minimum state publication needed by main context.
+- Symbols called by the processor, linker, or C library keep their required
+  ABI names; every other project-owned public service function uses the
+  `App_` prefix.
+- Project include directories take precedence over shared Driver include
+  directories, so a project-local `startup.h` cannot resolve to legacy
+  shared startup content.
+
+---
+
+# 3. Source Formatting & Layout
+
+## 3.1 Control Flow
+
+- Prefer explicit `if`/`else` over ternary expressions — the longer form
+  keeps state mapping and error behavior easy to scan.
+- Use fully braced, multi-line `switch` cases, with assignments, `break`,
+  and returns on separate lines:
+
+  ```c
+  //! Match by peripheral base address because instance macros are raw memory-mapped pointers.
+  switch ((uintptr_t) TIMx)
+  {
+  	case TIM2_BASE_ADDRESS:
+  	{
+  		*pClockMask = RCC_APB1ENR_TIM2EN;
+  		break;
+  	}
+  	default:
+  	{
+  		return DRIVER_STATUS_ERROR_INVALID_ARG;
+  	}
+  }
+  ```
+
+  Never place a case assignment and `break`, or a default label and return,
+  on the same line.
+
+- The same fully braced, multi-line requirement applies to **every**
+  `if`/`else` body, including single-statement bodies. Never collapse a
+  condition and its body onto one line, and never pack multiple single-line
+  `if` statements into an aligned column of `{ statement; }` blocks — even
+  when a run of similar short conditions looks compact and readable that
+  way:
+
+  ```c
+  // Not this:
+  if ((cr1RegImage & USART_CR1_IDLEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_IDLE; }
+  if ((cr1RegImage & USART_CR1_RXNEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_RXNE; }
+
+  // This:
+  if ((cr1RegImage & USART_CR1_IDLEIE) != 0x00000000UL)
+  {
+  	sources |= USART_IRQ_SOURCE_IDLE;
+  }
+  if ((cr1RegImage & USART_CR1_RXNEIE) != 0x00000000UL)
+  {
+  	sources |= USART_IRQ_SOURCE_RXNE;
+  }
+  ```
+
+  This stays consistent with the `switch` layout above and remains easy to
+  extend with a second statement or a breakpoint later.
+
+- Do not introduce a local variable solely to avoid a ternary, or to
+  pre-compute a value that is already directly available at each use site.
+  If the input itself can be tested inline at every branch, test it there
+  instead of caching it in a redundant intermediate:
+
+  ```c
+  // Not this — setBits only ever restates sourceState, adding a variable that
+  // tracks no additional information:
+  const uint8_t setBits = (sourceState == DRIVER_STATUS_ON) ? 0x01U : 0x00U;
+  if (setBits) { updatedCr1RegImage |= USART_CR1_IDLEIE; } else { updatedCr1RegImage &= ~USART_CR1_IDLEIE; }
+
+  // This — test the real input directly at each site:
+  if (sourceState == DRIVER_STATUS_ON)
+  {
+  	updatedCr1RegImage |= USART_CR1_IDLEIE;
+  }
+  else
+  {
+  	updatedCr1RegImage &= ~USART_CR1_IDLEIE;
+  }
+  ```
+
+## 3.2 Function & Macro Call Layout
+
+- Keep a call on one line when it stays readable:
+
+  ```c
+  ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+  ```
+
+- When a nested or argument-heavy call needs multiple lines, expand *every*
+  nesting level: each function/macro name on its own line, its opening
+  parenthesis on the next line, one argument per line, closing parentheses
+  aligned to their call depth:
+
+  ```c
+  ASSERT_DRIVER_STATUS
+  (
+  	Codec_TIM_ExtractTimeBaseConfig
+  	(
+  		LL_TIM_ReadPSC(TIMx),
+  		LL_TIM_ReadARR(TIMx),
+  		LL_TIM_ReadCNT(TIMx),
+  		&timeBase
+  	)
+  );
+  ```
+
+- Do not expand short calls mechanically — choose compact vs. expanded based
+  on readability, and keep the chosen form consistent within a module.
+
+## 3.3 Macro Alignment & Banner Grouping
+
+- Align related `#define` values within each banner section: find the
+  longest macro name in that section, place exactly two tabs after it, and
+  add enough tabs after every shorter name so all values start in the same
+  column. Recalculate this independently per section — never use one
+  file-wide column.
+
+  ```c
+  /** @brief Microsecond delay chunk used by the millisecond blocking helper @def TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US */
+  #define TIM_DRIVER_BLOCKING_DELAY_MS_CHUNK_US			((uint16_t) 1000U)
+  /** @brief Conservative polling-loop budget per requested microsecond @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US */
+  #define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_PER_US		((uint32_t) 1024UL)
+  /** @brief Fixed setup allowance added to the blocking polling-loop budget @def TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE */
+  #define TIM_DRIVER_BLOCKING_DELAY_POLL_BUDGET_BASE		((uint32_t) 1024UL)
+  ```
+
+- Use tab characters, not runs of spaces, for this alignment and for
+  multi-line macro continuation indentation. The single separator after
+  `#define` and the conventional ` *` inside Doxygen blocks are not
+  indentation and remain spaces.
+
+(See [2.2 Register Field Macro Naming](#22-register-field-macro-naming) for
+the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
+
+## 3.4 Section Banner Formatting
+
+- Write section-banner titles left-aligned, without decorative padding,
+  between the existing border lines — never centered with space/tab runs:
+
+  ```c
+  // ==================================================================================================== //
+  // Public API
+  // ==================================================================================================== //
+  ```
+
+- Follow the Timer-header structural style: one `// Header Guard` line
+  immediately before `#ifndef`/`#define`, `// --- C++ Compatibility ---` at
+  both linkage boundaries, and close the file directly with
+  `#endif /* HEADER_GUARD */`. Do not add redundant `Header Guard End`,
+  `C++ Compatibility End`, or `Documentation Group` banners.
+- Use banners to express logical API hierarchy, not just to divide a long
+  file. A major `=` banner owns one coherent domain (configuration,
+  operation control, state observation, tick storage, interrupt handling);
+  a domain with distinct pairs/subdomains gets a left-aligned `-`
+  sub-banner beneath it. Don't club unrelated control/state/data APIs under
+  one generic banner. Header and source files use the same banner names and
+  API order.
+- Within every lifecycle/operation-control conjugate pair, place the
+  teardown/release operation before the setup/acquire operation: `Destroy`
+  before `Create`, `DeConfig` before `Config`, `Disable` before `Enable`,
+  `Stop` before `Start`. Apply this order consistently in declarations,
+  definitions, and documentation.
+
+---
+
+# 4. Driver Architecture
+
+## 4.1 Layer Ownership & Reuse
+
+- Place peripheral-independent behavior in the lowest shared layer that can
+  express it safely. Peripheral layers keep only their own validation,
+  register selection, sequencing, and hardware policy.
+- Place every raw register-field macro in the Core header of the hardware
+  block that *physically* owns the register, even when another Driver
+  consumes that field (e.g. `SCB_AIRCR_xxx` belongs in `stm32f1xx_scb.h`;
+  NVIC may consume `AIRCR.PRIGROUP` without owning or duplicating it).
+  Compatibility headers may include the owner header to preserve macro
+  visibility, but must not redeclare the macros.
+- Do not centralize peripheral instance/capability predicates or
+  peripheral-specific operating limits in `stm32f1xx_defines.h` — keep them
+  in the respective peripheral stack (e.g. oscillator/clock-frequency
+  limits belong to RCC).
+- Peripheral-independent register *behavior* (e.g. compare-and-write) lives
+  in a shared primitive like `RegOps_WriteIfChanged()`; a peripheral (Timer)
+  wraps it to validate its own instance/register selection, and other
+  peripherals (GPIO, RCC) can reuse the same primitive while keeping their
+  own rules.
+- When hardware topology differs by peripheral instance, keep the mapping
+  in a static LUT indexed by the driver's stable instance index, using the
+  smallest element type that represents the mapping directly (an array of
+  `rcc_bus_t`, not an array of metadata structures). Shared logic consumes
+  the mapped value instead of hard-coding one bus or branching per instance.
+
+## 4.2 Register Access Pattern (`.REG` / `.BIT`)
+
+- When a Core register structure models named fields, expose the hardware
+  word as a register-member union with a full-width `.REG` image and a
+  named `.BIT` field view (the Timer register-map pattern). Order fields
+  least-significant-bit first, and represent every gap explicitly with a
+  reserved field so the view totals exactly 32 bits. If one physical bit
+  range has different read and write meanings, add named `.BIT.READ` /
+  `.BIT.WRITE` views inside the union instead of picking one misleading
+  interpretation.
+- `.REG` is the canonical LL transaction path. A `.BIT` view documents and
+  exposes field placement, but does not authorize a compiler-generated
+  read-modify-write where the hardware contract requires a staged
+  full-register transfer — keyed, action, write-only, and
+  write-one-to-clear transactions must use the full-register operation.
+- Centralize each peripheral LL's ordinary full-width volatile access in one
+  generic pointer-based read primitive and one generic pointer-based write
+  primitive. Named register accessors select the right `.REG` pointer and
+  delegate to those primitives — never repeat direct dereference or
+  `RegOps_Read()`/`RegOps_Write()` mechanics. Keep the named surface
+  symmetric where hardware permits; preserve truthful asymmetry for
+  read-only, write-only, and action-port registers, documenting *why* the
+  missing direction/conjugate doesn't exist. A semantic write-to-clear
+  helper may delegate through the corresponding named writer.
+
+## 4.3 Validation & Fallible Results (`driver_status_t`)
+
+- Every validation function returns `driver_status_t`:
+  `DRIVER_STATUS_SUCCESS` when valid, the most specific
+  `DRIVER_STATUS_ERROR_*` otherwise. Never return `uint8_t`, `bool`,
+  `0x00U`, or `0x01U` as a validation result.
+- Fallible predicates and state queries must preserve the distinction
+  between a legitimate negative state and an operation failure — never
+  collapse a null pointer, invalid argument, unavailable clock, invalid
+  hardware state, or other error into `0`, `false`, or an apparent
+  OFF/not-pending result.
+- Use one of these three contracts:
+  - **Validation-only helper** — returns `DRIVER_STATUS_SUCCESS` or a
+    specific `DRIVER_STATUS_ERROR_*`.
+  - **Truly binary state getter** — returns `DRIVER_STATUS_OFF`/`_ON`
+    directly, while still preserving distinct error statuses.
+  - **Fallible data/mask/extensible-state query** — returns operation
+    status, publishing the result through an output pointer only after the
+    operation succeeds.
+- Compatibility wrappers must not collapse a status-returning API into a
+  raw Boolean result — remove or migrate such wrappers instead of treating
+  an error as a valid negative result.
+- Driver and Codec orchestration/staging/commit/validation/cleanup helpers
+  that participate in a status-returning call chain must also return
+  `driver_status_t` — never `void` merely because current LL operations
+  can't fail. Return `DRIVER_STATUS_SUCCESS` and preserve status
+  propagation so later validation or hardware-error reporting doesn't need
+  an API-contract change.
+- Reserve `void` for interfaces whose contract is inherently void (an
+  interrupt-handler ABI) and for deliberately dumb LL write primitives that
+  own no validation, sequencing, or fallible policy.
+
+## 4.4 Conjugate API Naming & Scope
+
+- Conjugate API pairs must be symmetric in both naming and semantic scope —
+  `TIM_Config()`/`TIM_DeConfig()`, `TIM_GetIRQEvents()`/`TIM_AckIRQEvents()`.
+  Never pair a function that owns only a narrow subdomain with one that
+  resets or mutates the complete peripheral.
+- Every public getter for a mutable operation state needs its symmetric
+  setter (`PERIPH_GetOperationState()` / `PERIPH_SetOperationState(state)`).
+  When a state domain accepts both `DRIVER_STATUS_OFF` and `_ON`, prefer
+  that single Get/Set pair over separate public `Disable()`/`Enable()`
+  functions. Separate action verbs remain appropriate only when the
+  hardware actions are genuinely asymmetric and can't be one truthful state
+  setter — document that exception explicitly.
+- A root configuration type (`tim_config_t`) represents every currently
+  admitted base-configuration domain intentionally included in it. Its
+  root config API applies the whole object while preserving explicitly
+  separate operational domains (e.g. IRQ-source enables). Its
+  deconfiguration conjugate restores the documented reset state. Conjugate
+  lifecycle entry points stay independent: a configuration function must
+  not call its deconfiguration conjugate, and vice versa — the application
+  owns their ordering and explicitly requests a reset when needed.
+- Do not expose general-purpose convenience functions that configure a
+  peripheral to an arbitrary requested frequency — callers provide explicit
+  register-semantic values. A narrowly named service-bootstrap helper is
+  acceptable when a concrete admitted service needs one fixed
+  configuration, validates its documented clock assumption, and delegates
+  the canonical root configuration API (e.g. `TIM_ConfigForBlockingDelay()`
+  for a validated 72 MHz Timer kernel clock) — it must never become a
+  general frequency setter.
+- Calculated-frequency *getters* are fine — they observe/report programmed
+  state without mutating configuration.
+
+## 4.5 Structured Configuration & Transaction Decomposition
+
+**Configuration structures**
+
+- A root configuration structure is a structure of independently coherent
+  configuration domains. Do not create a configuration structure merely
+  because one function accepts more than one value — prefer explicit typed
+  parameters when a small set of single-use scalar values has no
+  independently reusable domain, lifecycle, or cross-field invariant
+  (SysTick clock-source + reload is the canonical example). A structure is
+  appropriate only when its members form a stable domain that's passed,
+  stored, returned, nested, or validated as one reusable object.
+- Every nested configuration structure representing an independently
+  useful, admitted operation normally needs a symmetric public grouped
+  `Get`/`Set` pair. Deliberately asymmetric hardware actions are exceptions
+  and must document why no conjugate exists. The root function and the
+  grouped setter reuse the same narrowly scoped private staging helper; the
+  grouped getter uses the matching extraction path.
+
+  ```c
+  typedef struct _periph_config_t
+  {
+  	periph_timebase_config_t	timebase;
+  	periph_counter_config_t		counter;
+
+  } periph_config_t;
+  ```
+
+- Do not place interrupt-request source enables inside a root configuration
+  structure — IRQ-source enablement stays an explicit application action so
+  the call site proves interrupt generation was intentional. Root
+  configuration preserves the peripheral IRQ-source register; the
+  application configures sources separately before enabling NVIC delivery:
+
+  ```c
+  ASSERT_DRIVER_STATUS(RCC_EnablePeripheralClock(PERIPH1_CLOCK_MASK));
+  ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
+  ASSERT_DRIVER_STATUS
+  (
+  	PERIPH_SetIRQSources
+  	(
+  		PERIPH1,
+  		PERIPH_IRQ_SOURCE_UPDATE,
+  		DRIVER_STATUS_ON
+  	)
+  );
+  ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
+  ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
+  ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
+  ```
+
+  Omitting `PERIPH_SetIRQSources()` leaves existing IRQ-source state
+  unchanged; disabling sources is equally explicit, passing the owned
+  source mask with `DRIVER_STATUS_OFF`.
+
+**Clock, reset, and NVIC ownership**
+
+- Clock-gate ownership stays explicit and outside the peripheral Driver.
+  The application uses the RCC Driver to enable the required gate *before*
+  configuration. A peripheral Driver may query RCC to validate that
+  precondition, but must not expose duplicate clock APIs or mutate the gate
+  inside `Config()`, `DeConfig()`, grouped configuration, operation-state,
+  IRQ, or action APIs.
+- `DeConfig()` restores the peripheral register bank through the peer RCC
+  reset service when that's the hardware-defined mechanism, but leaves the
+  application-owned clock gate and NVIC delivery state unchanged. The
+  application explicitly decides when either external resource is
+  disabled:
+
+  ```text
+  RCC clock enable
+    -> peripheral base configuration
+    -> peripheral IRQ-source configuration
+    -> NVIC pending-state cleanup and delivery enablement
+    -> peripheral operation enablement
+  ```
+
+- Root peripheral configuration must not read, validate, clear, disable, or
+  enable NVIC delivery state — the application owns the explicit ordering
+  between base configuration, IRQ-source enablement, pending-line cleanup,
+  NVIC delivery enablement, and the final transition to active state.
+
+**Staging helpers**
+
+- Staging helpers each accept only one configuration domain plus the
+  caller-owned register images that domain can modify:
+
+  ```c
+  static driver_status_t _PERIPH_StageTimeBaseConfig
+  (
+  	const periph_timebase_config_t* const	pTimeBaseConfig,
+  	reg* const								pPrescalerRegisterImage,
+  	reg* const								pAutoReloadRegisterImage,
+  	reg* const								pCounterRegisterImage
+  );
+
+  static driver_status_t _PERIPH_StageCounterConfig
+  (
+  	const periph_counter_config_t* const	pCounterConfig,
+  	reg* const								pControlRegisterImage
+  );
+  ```
+
+- A staging helper must:
+  - perform only the transformation named by its signature;
+  - validate its own pointer/domain contract and return `driver_status_t`;
+  - transform caller-owned, non-volatile images with no MMIO, clock, reset,
+    NVIC, operation-state, or cleanup work;
+  - use Codec functions for individual field encoding instead of
+    duplicating register placement in the Driver;
+  - stage through local working images and publish output only after every
+    fallible transformation succeeds; and
+  - preserve every register field outside its declared domain.
+- Every structure inside a public root configuration object has one
+  corresponding private `_PERIPH_Stage<Domain>Config()` helper, owning the
+  atomic local-copy/publication boundary for its structure and invoking the
+  grouped Codec transformation. One reusable staging path per configuration
+  member — no exceptions.
+
+**Public API ownership**
+
+- Public configuration APIs own the full Read/Modify/Write transaction:
+
+  ```text
+  PERIPH_GetTimeBaseConfig()
+    -> validate public output and live preconditions
+    -> read every required register image once
+    -> extract the complete timebase structure without changing hardware
+
+  PERIPH_SetTimeBaseConfig()
+    -> validate public input and live preconditions
+    -> read every required current register image once
+    -> call _PERIPH_StageTimeBaseConfig(...)
+    -> commit changed images in the required hardware order
+    -> run the documented cleanup path
+
+  PERIPH_Config()
+    -> validate the complete root request and lifecycle preconditions
+    -> read every image required by all represented domains
+    -> call _PERIPH_StageCounterConfig(...)
+    -> call _PERIPH_StageTimeBaseConfig(...)
+    -> commit only after all fallible staging succeeds
+    -> preserve peripheral IRQ-source state
+    -> run the documented cleanup path
+  ```
+
+- The root function must not duplicate the grouped staging logic, and must
+  not call public grouped setters when that would create multiple partially
+  committed transactions — it reuses their private staging helpers, stages
+  the whole root request before the first write, then owns one ordered
+  commit. A grouped public setter reads and commits only its own domain's
+  registers.
+- Private helpers stage cached values but never commit configuration MMIO
+  themselves — the public configuration API directly compares and writes
+  its cached images in the required hardware order, including any
+  temporary policy, action-register, or restoration sequence. This keeps
+  the public function's maximum authority and real hardware cost visible.
+  Only deliberately mechanical LL register-write primitives stay `void`.
+- Timer example: `TIM_Config()` visibly composes the staging paths for
+  `tim_config_counter_t` and `tim_config_timebase_t` while preserving
+  `TIMx_DIER`. `TIM_GetCounterConfig()`/`SetCounterConfig()` and
+  `TIM_GetTimeBaseConfig()`/`SetTimeBaseConfig()` are the grouped domain
+  pairs; their setters reuse the staging paths while the root transaction
+  performs one all-domain ordered commit. No private helper shadows all of
+  `TIM_Config()`, and no configuration path calls `TIM_DeConfig()`.
+  Applications configure Timer interrupt generation separately through
+  `TIM_SetIRQSources()`.
+
+## 4.6 MMIO Access Minimization
+
+- Modularity must not multiply volatile register accesses. Helper
+  boundaries separate validation, staging, and commit responsibilities —
+  they never grant a helper permission to reread or rewrite the same
+  hardware register.
+- For each coherent Driver transaction:
+  1. Validate the complete request and every live precondition that can
+     fail.
+  2. Snapshot each required volatile register exactly once.
+  3. Pass caller-owned `reg` images through narrow, MMIO-free staging
+     helpers.
+  4. Coalesce every compatible domain/field change into the final register
+     image.
+  5. Dirty-write each changed register exactly once when hardware allows.
+  6. Perform additional reads/writes only when a named hardware
+     requirement demands it — an unlock sequence, mode transition,
+     write-zero/write-one-to-clear behavior, read-to-clear behavior, or a
+     preload/update-event commit.
+- Hold the declared exclusive ownership or transaction guard across the
+  whole snapshot/stage/commit interval. Do not reread a cached
+  configuration register just to repeat a precondition check right before
+  commit — if concurrency must be supported, define an explicit guard
+  instead of weakening the cached-image model.
+- Do not reread a register merely because multiple staging helpers consume
+  its fields, and do not let separate helpers commit partial images when
+  one public API owns the coherent transaction. Every additional MMIO
+  access must be justified by the peripheral contract and documented
+  beside the sequence requiring it — correct hardware ordering takes
+  precedence over forcing an unsafe single-write implementation.
+- Do not introduce a transaction structure merely to shorten a helper
+  signature or hide several temporal images of the same register — pass
+  independently required `reg` images explicitly so inputs, outputs, and
+  authority stay visible. A structure is appropriate only for a stable,
+  reusable domain with its own invariant, never as a bare argument
+  container.
+- When hardware makes a requested field read-only/non-writable in the
+  current mode, return the appropriate `driver_status_t` error *before* the
+  first write. Do not hide a multi-step mode transition inside one
+  configuration call to force the request to succeed — the application
+  explicitly calls the public APIs that leave the restrictive mode, apply
+  the field, and restore the desired mode:
+
+  ```c
+  periph_domain_config_t currentConfig;
+
+  ASSERT_DRIVER_STATUS
+  (
+  	Codec_PERIPH_ExtractDomainConfig(currentRegisterImage, &currentConfig)
+  );
+
+  //! Reject a field transition that hardware cannot accept in the current mode.
+  if ((currentConfig.mode == PERIPH_MODE_RESTRICTIVE) &&
+  	(currentConfig.field != pConfig->field))
+  {
+  	return DRIVER_STATUS_ERROR_STATE;
+  }
+  ```
+
+  The Driver never synthesizes those mode-change calls or intermediate MMIO
+  writes internally.
+- The generic single-register transaction shape:
+
+  ```c
+  driver_status_t PERIPH_SetDomainConfig
+  (
+  	PERIPH_TypeDef* const				pPeripheral,
+  	const periph_domain_config_t* const	pConfig
+  )
+  {
+  	// Local Variables
+  	reg currentRegisterImage = 0x00000000UL;
+  	reg targetRegisterImage = 0x00000000UL;
+
+  	// Validate Input and State
+  	ASSERT_DRIVER_STATUS(_PERIPH_ValidateDomainTransaction(pPeripheral, pConfig));
+
+  	//! Snapshot once, then let modular helpers transform only local images.
+  	currentRegisterImage = LL_PERIPH_ReadControl(pPeripheral);
+  	targetRegisterImage = currentRegisterImage;
+  	ASSERT_DRIVER_STATUS(_PERIPH_StageDomainConfig(pConfig, &targetRegisterImage));
+
+  	//! Coalesce compatible changes into one dirty write.
+  	if (currentRegisterImage != targetRegisterImage)
+  	{
+  		LL_PERIPH_WriteControl(pPeripheral, targetRegisterImage);
+  	}
+
+  	return DRIVER_STATUS_SUCCESS;
+  }
+  ```
+
+  If hardware requires an intermediate image, the public transaction
+  performs the minimum ordered multi-write sequence directly, with Doxygen
+  and `//!` comments naming the hardware rule that makes each additional
+  access mandatory.
+
+---
+
+# 5. Application Template Rules
+
+(For file/symbol naming specifics, see
+[2.5 Application Template File & Symbol Naming](#25-application-template-file--symbol-naming).)
+
+- Every application Template header that declares an externally linked
+  function or object must wrap those declarations in an `extern "C"` guard
+  for C++ consumers. Macro-only configuration headers don't need this.
+- Application Template files use `stm32f1xx_data_types.h` as their direct
+  source of fixed-width integers, shared physical quantities, register
+  vocabulary, and driver statuses — never include `<stdint.h>` or another
+  standard scalar-type header directly from a Template file. Standard
+  headers providing a distinct service (`<errno.h>`) remain direct
+  dependencies where that service is actually used.
+
+---
+
+# Preference Log
+
+- 2026-08-23: Extended the fully braced, multi-line requirement from `switch`
+  cases to every `if`/`else` body, prohibiting collapsed single-line
+  `{ statement; }` forms even for runs of similar short conditions.
+- 2026-08-23: Required `//!` logic comments (and macro `@brief`s) to state the
+  actual mechanism behind non-obvious arithmetic/bit-manipulation/rounding
+  lines, with a worked example for numeric tricks, rather than only labeling
+  what the operation does.
 - 2026-08-23: Required every selector-typedef value macro to carry that
   typedef's own stem, matching an already-correctly-named `_IS_VALID`
   validation macro rather than the other way around.

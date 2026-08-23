@@ -191,6 +191,7 @@ driver_status_t Codec_USART_StageOperationState
  * @note The resolved preset is the closest supported rate to the raw
  * divider; `BRR` quantizes to 1/16th-bit-period steps, so this is not
  * guaranteed to round-trip exactly against a prior @ref Codec_USART_StageBaudRate call.
+ * @see RM0008 Section 27.3.4 Fractional baud rate generation
  */
 driver_status_t Codec_USART_ExtractBaudRate
 (
@@ -210,6 +211,7 @@ driver_status_t Codec_USART_ExtractBaudRate
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: `BRR` divider was staged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pBrrRegImage is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p baudRate is not a supported preset, or @p busFrequency is zero
+ * @see RM0008 Section 27.3.4 Fractional baud rate generation
  */
 driver_status_t Codec_USART_StageBaudRate
 (

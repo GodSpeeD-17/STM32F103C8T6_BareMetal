@@ -29,6 +29,30 @@
 /** @brief USART `SR` flags with write-0-to-clear behavior @def USART_CODEC_SR_W0C_FLAG_MASK */
 #define USART_CODEC_SR_W0C_FLAG_MASK				(USART_SR_TC | USART_SR_CTS)
 
+/**
+ * @brief Fixed-point scale factor representing `USARTDIV` as an integer (`USARTDIV x100`)
+ * @def USART_CODEC_BRR_DIV_SCALE_FACTOR
+ * @see RM0008 Section 27.3.4 Fractional baud rate generation
+ */
+#define USART_CODEC_BRR_DIV_SCALE_FACTOR			100UL
+/**
+ * @brief RM0008's 16x oversampling divisor in `baud = fCK / (16 * USARTDIV)`
+ * @def USART_CODEC_BRR_OVERSAMPLING
+ * @details
+ * The same constant also equals the number of fractional steps encoded by
+ * `BRR.DIV_FRACTION` (`2^4 = 16`) — the fraction field expresses 16ths of
+ * one mantissa unit precisely because the hardware oversamples by 16.
+ * @see RM0008 Section 27.3.4 Fractional baud rate generation
+ */
+#define USART_CODEC_BRR_OVERSAMPLING				16UL
+/**
+ * @brief Half of @ref USART_CODEC_BRR_DIV_SCALE_FACTOR
+ * @def USART_CODEC_BRR_DIV_SCALE_HALF
+ * @details Added before an integer division to round to nearest instead of
+ * truncating toward zero.
+ */
+#define USART_CODEC_BRR_DIV_SCALE_HALF				(USART_CODEC_BRR_DIV_SCALE_FACTOR / 2UL)
+
 // ==================================================================================================== //
 //										Local Baud-Rate Preset Table									//
 // ==================================================================================================== //
@@ -277,8 +301,8 @@ driver_status_t Codec_USART_ExtractDataConfig
 
 driver_status_t Codec_USART_StageDataConfig
 (
-	reg* const						pCr1RegImage,
-	reg* const						pCr2RegImage,
+	reg* const							pCr1RegImage,
+	reg* const							pCr2RegImage,
 	const usart_config_line_t* const	pLine
 )
 {
@@ -424,6 +448,7 @@ driver_status_t Codec_USART_StageBaudRate
 	const usart_baud_rate_t	baudRate
 )
 {
+	// Validate Input
 	if (pBrrRegImage == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -437,33 +462,39 @@ driver_status_t Codec_USART_StageBaudRate
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
 
-	// Local Variables
-	uint32_t targetBps = __usartCodecBaudRatePresetTable__[baudRate];
+	//! RM0008 27.3.4: baud = fCK / (16 * USARTDIV), so USARTDIV = fCK / (16 * baud).
+	//! Widen only the division to 64 bits because `busFrequency * 100` can exceed
+	//! UINT32_MAX (e.g. 72 MHz * 100); the quotient always fits back in 32 bits.
+	uint32_t scaledDivider = (uint32_t) (((uint64_t) busFrequency * USART_CODEC_BRR_DIV_SCALE_FACTOR) / (USART_CODEC_BRR_OVERSAMPLING * (uint64_t) __usartCodecBaudRatePresetTable__[baudRate]));
 
-	//! USARTDIV * 100, fixed-point, per RM0008's 16x-oversampled asynchronous formula.
-	uint32_t scaledDivider = (busFrequency * 25UL) / (4UL * targetBps);
-	uint32_t mantissa = scaledDivider / 100UL;
-	uint32_t fractionRemainder = scaledDivider - (mantissa * 100UL);
-	uint32_t fraction = ((fractionRemainder * 16UL) + 50UL) / 100UL;
+	//! scaledDivider is USARTDIV x100; splitting it by /100 and the x100 remainder
+	//! recovers USARTDIV's integer part (mantissa) and fractional part (in hundredths).
+	uint32_t mantissa = scaledDivider / USART_CODEC_BRR_DIV_SCALE_FACTOR;
+	uint32_t fractionRemainder = scaledDivider - (mantissa * USART_CODEC_BRR_DIV_SCALE_FACTOR);
 
-	//! Rounding the fraction up to 16 carries one unit into the mantissa.
-	if (fraction >= 16UL)
+	//! DIV_FRACTION expresses the fraction in sixteenths, not hundredths, so rescale by
+	//! OVERSAMPLING (x16) before dividing back out by the x100 scale. Plain integer
+	//! division always truncates toward zero (e.g. 1.6 -> 1), so DIV_SCALE_HALF (half of
+	//! the x100 divisor) is added first to turn that truncation into round-to-nearest
+	//! (e.g. 1.6 -> 2), matching RM0008's own rounded BRR worked examples.
+	uint32_t fraction = ((fractionRemainder * USART_CODEC_BRR_OVERSAMPLING) + USART_CODEC_BRR_DIV_SCALE_HALF) / USART_CODEC_BRR_DIV_SCALE_FACTOR;
+
+	//! Rounding to nearest can push fraction up to a full 16/16, which does not fit
+	//! DIV_FRACTION's 4-bit range (max 15); treat that overflow as one whole extra
+	//! mantissa unit with zero fraction, the same way 1.99 rounds up to 2.0.
+	if (fraction >= USART_CODEC_BRR_OVERSAMPLING)
 	{
 		mantissa += 1UL;
 		fraction = 0UL;
 	}
 
+	//! Update the caller's BRR register image with the new mantissa/fraction values, leaving every other bit untouched.
 	reg updatedBrrRegImage = *pBrrRegImage;
-	updatedBrrRegImage = RegOps_StageFieldValue
-	(
-		updatedBrrRegImage, USART_BRR_DIV_MANTISSA_Pos, (reg) mantissa, USART_BRR_DIV_MANTISSA_Width
-	);
-	updatedBrrRegImage = RegOps_StageFieldValue
-	(
-		updatedBrrRegImage, USART_BRR_DIV_FRACTION_Pos, (reg) fraction, USART_BRR_DIV_FRACTION_Width
-	);
-
+	updatedBrrRegImage = RegOps_StageFieldValue(updatedBrrRegImage, USART_BRR_DIV_MANTISSA_Pos, (reg) mantissa, USART_BRR_DIV_MANTISSA_Width);
+	updatedBrrRegImage = RegOps_StageFieldValue(updatedBrrRegImage, USART_BRR_DIV_FRACTION_Pos, (reg) fraction, USART_BRR_DIV_FRACTION_Width);
 	*pBrrRegImage = updatedBrrRegImage;
+
+	// Return Status
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -478,6 +509,7 @@ driver_status_t Codec_USART_ExtractIRQSources
 	usart_irq_source_t* const	pSources
 )
 {
+	// Validate Input
 	if (pSources == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -487,13 +519,34 @@ driver_status_t Codec_USART_ExtractIRQSources
 	usart_irq_source_t sources = USART_IRQ_SOURCE_NONE;
 
 	//! Sources span CR1 (local status interrupts) and CR3 (CTS/error interrupts).
-	if ((cr1RegImage & USART_CR1_IDLEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_IDLE; }
-	if ((cr1RegImage & USART_CR1_RXNEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_RXNE; }
-	if ((cr1RegImage & USART_CR1_TCIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TC; }
-	if ((cr1RegImage & USART_CR1_TXEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_TXE; }
-	if ((cr1RegImage & USART_CR1_PEIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_PE; }
-	if ((cr3RegImage & USART_CR3_CTSIE) != 0x00000000UL)	{ sources |= USART_IRQ_SOURCE_CTS; }
-	if ((cr3RegImage & USART_CR3_EIE) != 0x00000000UL)		{ sources |= USART_IRQ_SOURCE_ERROR; }
+	if ((cr1RegImage & USART_CR1_IDLEIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_IDLE;
+	}
+	if ((cr1RegImage & USART_CR1_RXNEIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_RXNE;
+	}
+	if ((cr1RegImage & USART_CR1_TCIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_TC;
+	}
+	if ((cr1RegImage & USART_CR1_TXEIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_TXE;
+	}
+	if ((cr1RegImage & USART_CR1_PEIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_PE;
+	}
+	if ((cr3RegImage & USART_CR3_CTSIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_CTS;
+	}
+	if ((cr3RegImage & USART_CR3_EIE) != 0x00000000UL)
+	{
+		sources |= USART_IRQ_SOURCE_ERROR;
+	}
 
 	*pSources = sources;
 	return DRIVER_STATUS_SUCCESS;
@@ -507,6 +560,7 @@ driver_status_t Codec_USART_StageIRQSources
 	const driver_status_t		sourceState
 )
 {
+	// Validate Input
 	if ((pCr1RegImage == NULL) || (pCr3RegImage == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
@@ -520,21 +574,11 @@ driver_status_t Codec_USART_StageIRQSources
 	// Local Variables
 	reg updatedCr1RegImage = *pCr1RegImage;
 	reg updatedCr3RegImage = *pCr3RegImage;
-	uint8_t setBits = 0x00U;
-
-	if (sourceState == DRIVER_STATUS_ON)
-	{
-		setBits = 0x01U;
-	}
-	else
-	{
-		setBits = 0x00U;
-	}
 
 	//! Stage only the CR1/CR3 enable bits selected by `sources`, leaving every other bit untouched.
 	if ((sources & USART_IRQ_SOURCE_IDLE) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr1RegImage |= USART_CR1_IDLEIE;
 		}
@@ -546,7 +590,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_RXNE) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr1RegImage |= USART_CR1_RXNEIE;
 		}
@@ -558,7 +602,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_TC) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr1RegImage |= USART_CR1_TCIE;
 		}
@@ -570,7 +614,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_TXE) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr1RegImage |= USART_CR1_TXEIE;
 		}
@@ -582,7 +626,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_PE) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr1RegImage |= USART_CR1_PEIE;
 		}
@@ -594,7 +638,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_CTS) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr3RegImage |= USART_CR3_CTSIE;
 		}
@@ -606,7 +650,7 @@ driver_status_t Codec_USART_StageIRQSources
 
 	if ((sources & USART_IRQ_SOURCE_ERROR) != 0x00U)
 	{
-		if (setBits != 0x00U)
+		if (sourceState == DRIVER_STATUS_ON)
 		{
 			updatedCr3RegImage |= USART_CR3_EIE;
 		}
@@ -625,11 +669,7 @@ driver_status_t Codec_USART_StageIRQSources
 //										USART IRQ Event Codecs											//
 // ==================================================================================================== //
 
-driver_status_t Codec_USART_ExtractIRQEvents
-(
-	const reg				srRegImage,
-	usart_event_flag_t* const	pEvents
-)
+driver_status_t Codec_USART_ExtractIRQEvents(const reg srRegImage, usart_event_flag_t* const pEvents)
 {
 	if (pEvents == NULL)
 	{
@@ -643,7 +683,7 @@ driver_status_t Codec_USART_ExtractIRQEvents
 
 driver_status_t Codec_USART_StageIRQEventsClear
 (
-	reg* const				pSrRegImage,
+	reg* const					pSrRegImage,
 	const usart_event_flag_t	events
 )
 {
