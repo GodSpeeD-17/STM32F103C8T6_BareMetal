@@ -101,45 +101,45 @@ driver_status_t Codec_USART_StageHardwareEnableState
 // ==================================================================================================== //
 
 /**
- * @brief Extracts the USART data-bit/parity/stop-bit line format from `CR1`/`CR2` images
+ * @brief Extracts the USART data-bit/parity/stop-bit frame format from `CR1`/`CR2` images
  * @param[in] cr1RegImage Caller-owned `CR1` image
  * @param[in] cr2RegImage Caller-owned `CR2` image
- * @param[out] pLine Destination for the decoded line-format configuration
+ * @param[out] pFrameFormat Destination for the decoded frame-format configuration
  * Expected member values:
- * - @ref usart_config_line_t::dataBits : @ref `USART_DATA_BITS_8` or @ref `USART_DATA_BITS_9`
- * - @ref usart_config_line_t::parity : @ref `USART_PARITY_NONE`, @ref `USART_PARITY_EVEN`, or @ref `USART_PARITY_ODD`
- * - @ref usart_config_line_t::stopBits : @ref `USART_STOP_BIT_1`, @ref `USART_STOP_BIT_0_5`,
+ * - @ref usart_frame_format_t::dataBits : @ref `USART_DATA_BITS_8` or @ref `USART_DATA_BITS_9`
+ * - @ref usart_frame_format_t::parity : @ref `USART_PARITY_NONE`, @ref `USART_PARITY_EVEN`, or @ref `USART_PARITY_ODD`
+ * - @ref usart_frame_format_t::stopBits : @ref `USART_STOP_BIT_1`, @ref `USART_STOP_BIT_0_5`,
  *   @ref `USART_STOP_BIT_2`, or @ref `USART_STOP_BIT_1_5`
  * @returns @ref driver_status_t "Extraction status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Line-format configuration was extracted
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pLine is `NULL`
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Frame-format configuration was extracted
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pFrameFormat is `NULL`
  */
 driver_status_t Codec_USART_ExtractDataConfig
 (
 	const reg					cr1RegImage,
 	const reg					cr2RegImage,
-	usart_config_line_t* const	pLine
+	usart_frame_format_t* const	pFrameFormat
 );
 
 /**
- * @brief Stages the USART data-bit/parity/stop-bit line format into `CR1`/`CR2` images
+ * @brief Stages the USART data-bit/parity/stop-bit frame format into `CR1`/`CR2` images
  * @param[in,out] pCr1RegImage Caller-owned `CR1` image to update in place
  * @param[in,out] pCr2RegImage Caller-owned `CR2` image to update in place
- * @param[in] pLine Line-format configuration to stage
+ * @param[in] pFrameFormat Frame-format configuration to stage
  * Accepted member values:
- * - @ref usart_config_line_t::dataBits : Any value accepted by @ref `USART_DATA_BITS_IS_VALID`
- * - @ref usart_config_line_t::parity : Any value accepted by @ref `USART_PARITY_IS_VALID`
- * - @ref usart_config_line_t::stopBits : Any value accepted by @ref `USART_STOP_BITS_IS_VALID`
+ * - @ref usart_frame_format_t::dataBits : Any value accepted by @ref `USART_DATA_BITS_IS_VALID`
+ * - @ref usart_frame_format_t::parity : Any value accepted by @ref `USART_PARITY_IS_VALID`
+ * - @ref usart_frame_format_t::stopBits : Any value accepted by @ref `USART_STOP_BITS_IS_VALID`
  * @returns @ref driver_status_t "Staging status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Line-format configuration was staged
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage, @p pCr2RegImage, or @p pLine is `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more line-format fields cannot be encoded
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Frame-format configuration was staged
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p pCr1RegImage, @p pCr2RegImage, or @p pFrameFormat is `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: One or more frame-format fields cannot be encoded
  */
 driver_status_t Codec_USART_StageDataConfig
 (
 	reg* const						pCr1RegImage,
 	reg* const						pCr2RegImage,
-	const usart_config_line_t* const	pLine
+	const usart_frame_format_t* const	pFrameFormat
 );
 
 // ==================================================================================================== //

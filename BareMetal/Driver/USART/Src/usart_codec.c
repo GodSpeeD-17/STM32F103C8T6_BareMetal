@@ -268,33 +268,33 @@ driver_status_t Codec_USART_ExtractDataConfig
 (
 	const reg					cr1RegImage,
 	const reg					cr2RegImage,
-	usart_config_line_t* const	pLine
+	usart_frame_format_t* const	pFrameFormat
 )
 {
-	if (pLine == NULL)
+	if (pFrameFormat == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
 	//! `M` maps directly onto `usart_data_bits_t`; both are single-bit, exhaustively valid.
-	pLine->dataBits = (usart_data_bits_t) RegOps_ExtractFieldValue(cr1RegImage, USART_CR1_M, USART_CR1_M_Pos);
+	pFrameFormat->dataBits = (usart_data_bits_t) RegOps_ExtractFieldValue(cr1RegImage, USART_CR1_M, USART_CR1_M_Pos);
 
 	//! Parity is synthesized from PCE/PS: PCE clear means no parity regardless of PS.
 	if ((cr1RegImage & USART_CR1_PCE) == 0x00000000UL)
 	{
-		pLine->parity = USART_PARITY_NONE;
+		pFrameFormat->parity = USART_PARITY_NONE;
 	}
 	else if ((cr1RegImage & USART_CR1_PS) == 0x00000000UL)
 	{
-		pLine->parity = USART_PARITY_EVEN;
+		pFrameFormat->parity = USART_PARITY_EVEN;
 	}
 	else
 	{
-		pLine->parity = USART_PARITY_ODD;
+		pFrameFormat->parity = USART_PARITY_ODD;
 	}
 
 	//! `STOP[1:0]` maps directly onto `usart_stop_bits_t`'s raw-compatible encoding.
-	pLine->stopBits = (usart_stop_bits_t) RegOps_ExtractFieldValue(cr2RegImage, USART_CR2_STOP, USART_CR2_STOP_Pos);
+	pFrameFormat->stopBits = (usart_stop_bits_t) RegOps_ExtractFieldValue(cr2RegImage, USART_CR2_STOP, USART_CR2_STOP_Pos);
 
 	return DRIVER_STATUS_SUCCESS;
 }
@@ -303,22 +303,22 @@ driver_status_t Codec_USART_StageDataConfig
 (
 	reg* const							pCr1RegImage,
 	reg* const							pCr2RegImage,
-	const usart_config_line_t* const	pLine
+	const usart_frame_format_t* const	pFrameFormat
 )
 {
-	if ((pCr1RegImage == NULL) || (pCr2RegImage == NULL) || (pLine == NULL))
+	if ((pCr1RegImage == NULL) || (pCr2RegImage == NULL) || (pFrameFormat == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	if (USART_DATA_BITS_IS_VALID(pLine->dataBits) == 0x00U)
+	if (USART_DATA_BITS_IS_VALID(pFrameFormat->dataBits) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	if (USART_PARITY_IS_VALID(pLine->parity) == 0x00U)
+	if (USART_PARITY_IS_VALID(pFrameFormat->parity) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
-	if (USART_STOP_BITS_IS_VALID(pLine->stopBits) == 0x00U)
+	if (USART_STOP_BITS_IS_VALID(pFrameFormat->stopBits) == 0x00U)
 	{
 		return DRIVER_STATUS_ERROR_INVALID_ARG;
 	}
@@ -329,11 +329,11 @@ driver_status_t Codec_USART_StageDataConfig
 
 	updatedCr1RegImage = RegOps_StageFieldValue
 	(
-		updatedCr1RegImage, USART_CR1_M_Pos, (reg) pLine->dataBits, USART_CODEC_FIELD_WIDTH_1BIT
+		updatedCr1RegImage, USART_CR1_M_Pos, (reg) pFrameFormat->dataBits, USART_CODEC_FIELD_WIDTH_1BIT
 	);
 
 	//! Decompose the ordinal parity selector back into the PCE/PS bit pair.
-	if (pLine->parity != USART_PARITY_NONE)
+	if (pFrameFormat->parity != USART_PARITY_NONE)
 	{
 		updatedCr1RegImage |= USART_CR1_PCE;
 	}
@@ -342,7 +342,7 @@ driver_status_t Codec_USART_StageDataConfig
 		updatedCr1RegImage &= ~USART_CR1_PCE;
 	}
 
-	if (pLine->parity == USART_PARITY_ODD)
+	if (pFrameFormat->parity == USART_PARITY_ODD)
 	{
 		updatedCr1RegImage |= USART_CR1_PS;
 	}
@@ -353,7 +353,7 @@ driver_status_t Codec_USART_StageDataConfig
 
 	updatedCr2RegImage = RegOps_StageFieldValue
 	(
-		updatedCr2RegImage, USART_CR2_STOP_Pos, (reg) pLine->stopBits, USART_CR2_STOP_Width
+		updatedCr2RegImage, USART_CR2_STOP_Pos, (reg) pFrameFormat->stopBits, USART_CR2_STOP_Width
 	);
 
 	*pCr1RegImage = updatedCr1RegImage;

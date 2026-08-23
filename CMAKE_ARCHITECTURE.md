@@ -244,9 +244,9 @@ Every resolved Driver becomes `stm32_driver_<Module>` with a public alias of
 header lookup under `Inc`, final link options, and project-specific compile
 definitions. Project headers receive lookup priority over shared headers.
 
-The shared `BareMetal/Driver` root remains a private compatibility include path
-for legacy projects that still include the old shared `startup.h`. New Template
-applications do not depend on that compatibility path.
+Every project now depends only on its own `app_startup.[ch]` and the
+component interfaces it selects; the legacy shared `startup.h` and its
+compatibility include path have been removed.
 
 ## Driver Capability Resolution
 

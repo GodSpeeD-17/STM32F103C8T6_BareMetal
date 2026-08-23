@@ -24,9 +24,10 @@ step below.
   this directory (`USART_ARCHITECTURE.md`, this file).
 - [ ] Introduce `Inc/usart_data_types.h` for USART scalar aliases
   (`usart_data_bits_t`, `usart_parity_t`, `usart_stop_bits_t`,
-  `usart_hardware_enable_t`, `usart_irq_source_t`, `usart_event_flag_t`) and
-  the `usart_pin_t`/`usart_gpio_t` pin-mapping structures moved out of
-  `usart_config.h`.
+  `usart_hardware_enable_t`, `usart_irq_source_t`, `usart_event_flag_t`,
+  `usart_baud_rate_t`). No pin-mapping structures — GPIO/AFIO pin
+  configuration is entirely application-owned, matching Timer PWM, so the
+  driver never needs a `usart_pin_t`/`usart_gpio_t` type.
 - [ ] Introduce `Inc/usart_defines.h` for public USART selector macros,
   `USART1`/`USART2`/`USART3` instance validation, and pure validation
   helpers. Drop the `USART_4`/`USART_5` selectors — they don't exist on this
@@ -50,9 +51,10 @@ step below.
     access, which the codec does not perform. `TXE` is never acknowledged.
 - [ ] Refactor `Inc/usart_config.h`/`Src/usart_config.c` into the
   instance-independent `usart_config_t` root structure (hardware-enable,
-  data config, preset baud rate) plus the per-instance default GPIO pin
-  table, re-keyed from `usart_t` enum index to `USART_TypeDef*` pointer
-  identity.
+  data config, preset baud rate) only. No GPIO pin table: GPIO/AFIO pin
+  routing, configuration, and clocking are entirely application-owned,
+  matching Timer PWM, so `__usartDriverGPIOMapping__[]` is removed rather
+  than re-keyed.
 - [ ] Refactor `Inc/usart.h` into public API only, no inline hardware
   access: `USART_GetOperationState`/`SetOperationState` (`CR1.UE`),
   `USART_Config`/`USART_DeConfig`, `USART_GetIRQSources`/`SetIRQSources`,
@@ -63,9 +65,10 @@ step below.
     application to enable the USART peripheral clock gate through RCC before
     `USART_Config()`, verified through a new private
     `_USART_ValidateClockEnabled()`.
-  - Keep `_USART_GPIO_EnableClock()` as the driver-owned GPIO/AFIO pin-clock
-    sequencing step (already correct from the GPIO clock-ownership fix
-    earlier this session).
+  - No GPIO/AFIO pin-clock sequencing in the driver at all — the application
+    enables those clocks and configures the pins itself, matching Timer
+    PWM's GPIO ownership model. An earlier draft of this checklist proposed
+    a driver-owned `_USART_GPIO_EnableClock()`; that plan is reversed.
   - Replace the `irq & 0x1F` CR1-only shift trick in
     `USART_IRQ_Enable`/`Disable` with codec-based `CR1`+`CR3` field
     placement through the new `usart_irq_source_t` split.
@@ -73,9 +76,10 @@ step below.
   `__usartDriverRegisterMapping__[]` lookup table; migrate every internal
   call site to direct `USART1`/`USART2`/`USART3` pointer identity.
 - [ ] Migrate `Projects/USART/08_USART_Byte_TX` and
-  `Projects/USART/10_USART_printf` to the pointer-identity API and explicit
-  RCC clock-gate sequencing (USART peripheral clock, then GPIO/AFIO clocks
-  are handled by the driver, then `USART_Config()`).
+  `Projects/USART/10_USART_printf` to the pointer-identity API. Each project
+  explicitly sequences: RCC-enable the USART peripheral clock, RCC-enable
+  the GPIO/AFIO clocks and configure the TX/RX pins itself (application
+  owns this, matching Timer PWM), then call `USART_Config()`.
 - [ ] Fix `USART_printf()`'s `va_end(args)` call: it currently runs inside
   the per-character loop instead of once after it, which is undefined
   behavior because `va_arg()` is used again after `va_end()`.
@@ -95,14 +99,15 @@ step below.
   the same as Timer and GPIO.
 - RCC/application owns the USART peripheral clock gate; the driver only
   verifies it through `_USART_ValidateClockEnabled()` and never mutates it.
-- The driver owns GPIO/AFIO pin-clock sequencing for its own private pin
-  table through `_USART_GPIO_EnableClock()`, because the application does not
-  know which physical pins a given `USARTx` instance uses by default.
+- GPIO/AFIO pin selection, configuration, and clocking are entirely
+  application-owned — the driver has no pin table and never touches GPIO,
+  matching Timer PWM's GPIO ownership model exactly.
 - IRQ sources (`CR1`+`CR3` enable bits) and IRQ events (`SR` flags) are
   separate types; acknowledgement is per-bit-correct, not one uniform
   register write.
-- Baud rate is a plain numeric value computed against the live bus
-  frequency; there is no preset enum or lookup table.
+- Baud rate is a preset selector (`usart_baud_rate_t`/`USART_BAUD_RATE_*`)
+  resolved to its numeric bits-per-second value inside `usart_codec.c`,
+  which then computes the `BRR` divider against the live bus frequency.
 - Every meaningful codec Stage API should have a conjugate Extract API,
   except where the hardware is naturally asymmetric (documented explicitly,
   not silently omitted).

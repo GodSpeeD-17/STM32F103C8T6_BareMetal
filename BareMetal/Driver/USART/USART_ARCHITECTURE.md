@@ -24,8 +24,9 @@ Non-goals for this pass:
 - Smartcard, IrDA, and LIN modes.
 - Multiprocessor addressed wake-up.
 - DMA-driven TX/RX.
-- AFIO USART pin remap (the driver's static per-instance pin table has no
-  remap concept yet; this is a known limitation, not a silent gap).
+- GPIO/AFIO pin configuration, routing, and remap — entirely application-owned,
+  matching Timer PWM's GPIO ownership model; the driver has no pin concept at
+  all.
 
 ## Instance Capability Table
 
@@ -43,11 +44,11 @@ removed as part of this migration.
 
 | File | Layer | Responsibility |
 |------|-------|----------------|
-| `Inc/usart_data_types.h` | Data Types | USART scalar typedef aliases and the pin/GPIO-mapping structures |
+| `Inc/usart_data_types.h` | Data Types | USART scalar typedef aliases |
 | `Inc/usart_defines.h` | Defines/Validation | Public USART selector macros and pure validation/policy macros |
 | `Inc/usart_ll.h` | Low-Level | Dumb single point for named USART register reads/writes |
 | `Inc/usart_codec.h`, `Src/usart_codec.c` | Codec | Selector encoding/decoding, BRR divider math, staged register-image mutation |
-| `Inc/usart_config.h`, `Src/usart_config.c` | Config | Instance-independent `usart_config_t` structure-of-structures, plus the per-instance default GPIO pin table |
+| `Inc/usart_config.h`, `Src/usart_config.c` | Config | Instance-independent `usart_config_t` structure-of-structures |
 | `Inc/usart.h`, `Src/usart.c` | Driver | Public USART API, validation, clock-state verification, sequencing, batching, status returns |
 
 ## Goals
@@ -86,25 +87,24 @@ removed as part of this migration.
   `Codec_USART_Stage*()` has a matching `Codec_USART_Extract*()`.
   Extraction-only APIs are allowed for naturally read-only or asymmetric
   hardware behavior (see [IRQ Source/Event Model](#irq-sourceevent-model)).
-- Keep clock sequencing, GPIO pin setup, batching, and write ordering in the
-  driver.
-- Keep the per-instance default GPIO pin table (currently
-  `usart_config.c`'s `__usartDriverGPIOMapping__[]`) as driver-owned private
-  data, keyed by `USART_TypeDef*` pointer identity instead of `usart_t` enum
-  index.
+- Keep batching and write ordering in the driver. GPIO pin setup and its
+  clock gates are never a driver responsibility — the application owns
+  GPIO mode, output speed, AFIO remap, and pin lifecycle for the USART's
+  TX/RX/RTS/CTS pins entirely, exactly like Timer PWM's GPIO ownership
+  model. The driver has no pin table at all.
 
 ## Layer Ownership
 
 | Layer | USART Files | Owns | Must Avoid |
 |-------|-------------|------|------------|
 | Core | `BareMetal/Core/Inc/stm32f1xx_usart.h` | USART register structs, offsets, raw masks, reset-level hardware facts | Driver selectors, board aliases, public validation |
-| Data Types | `Inc/usart_data_types.h` | Scalar aliases such as `usart_data_bits_t`, `usart_parity_t`, `usart_stop_bits_t`, `usart_hardware_enable_t`, `usart_irq_source_t`, `usart_event_flag_t`, and the `usart_pin_t`/`usart_gpio_t` structures | Public selector macros, validation macros, `USART_TypeDef`, register layout, board behavior |
+| Data Types | `Inc/usart_data_types.h` | Scalar aliases such as `usart_data_bits_t`, `usart_parity_t`, `usart_stop_bits_t`, `usart_hardware_enable_t`, `usart_irq_source_t`, `usart_event_flag_t` | Public selector macros, validation macros, `USART_TypeDef`, register layout, board behavior, GPIO/pin structures |
 | Defines/Validation | `Inc/usart_defines.h` | Public USART selector macros, instance validation for `USART1`/`USART2`/`USART3`, pure validation/policy macros | Hardware reads/writes, clock sequencing, raw register field placement |
 | Low-Level | `Inc/usart_ll.h` | Named static inline register read/write accessors, `LL_USART_*` API names | Public selector translation, field mapping, clock policy, board behavior |
 | Codec | `Inc/usart_codec.h`, `Src/usart_codec.c` | Encoding/decoding selectors, BRR divider math, CR1/CR2/CR3 field placement, SR flag interpretation, caller-owned register-image staging/extraction | Hardware reads/writes, clock sequencing, public API policy |
-| Config | `Inc/usart_config.h`, `Src/usart_config.c` | Instance-independent `usart_config_t` root structure, per-instance default pin table | Register access, RCC/NVIC access, driver orchestration |
-| Driver | `Inc/usart.h`, `Src/usart.c` | Public APIs, argument validation, clock-state verification, GPIO/AFIO pin-clock sequencing for its own pin table, IRQ source/event handling, status returns | Raw register map definitions, board-specific shortcuts |
-| Board/Project | `Projects/*` | Application-owned USART peripheral clock gate, examples | USART internals, raw register assumptions |
+| Config | `Inc/usart_config.h`, `Src/usart_config.c` | Instance-independent `usart_config_t` root structure | Register access, RCC/NVIC access, driver orchestration, GPIO/pin data |
+| Driver | `Inc/usart.h`, `Src/usart.c` | Public APIs, argument validation, clock-state verification, IRQ source/event handling, status returns | Raw register map definitions, board-specific shortcuts, GPIO/AFIO configuration or clocking |
+| Board/Project | `Projects/*` | Application-owned USART peripheral clock gate, GPIO/AFIO pin configuration and clock gates, examples | USART internals, raw register assumptions |
 
 ## Codec Rationale
 
@@ -143,40 +143,46 @@ The driver should:
 2. Verify the USART peripheral clock gate is already enabled (application
    owns enabling it through RCC beforehand) — return
    `DRIVER_STATUS_ERROR_STATE` otherwise.
-3. Enable the GPIO port clock gate (and AFIO, for alternate-function pins)
-   for every pin this instance's default pin table selects, through
-   `_USART_GPIO_EnableClock()`, then call `GPIO_Init()` for each selected pin.
-4. Read `CR1`/`CR2`/`CR3`/`BRR` once each.
-5. Stage hardware-enable, data-config, flow-control, and baud-rate fields
+3. Read `CR1`/`CR2`/`CR3`/`BRR` once each.
+4. Stage hardware-enable, data-config, flow-control, and baud-rate fields
    through codec APIs.
-6. Write only the dirty registers.
-7. Return a user-facing `driver_status_t`.
+5. Write only the dirty registers.
+6. Return a user-facing `driver_status_t`.
 
 `USART_Config()` never enables the USART peripheral's own clock gate — that
 is exclusively an application/RCC operation, matching the rule already
-enforced for `GPIO_Init()` and `TIM_Config()`.
+enforced for `GPIO_Init()` and `TIM_Config()`. It also never touches GPIO
+mode, AFIO remap, or GPIO/AFIO clock gates: the application configures and
+clocks whichever physical TX/RX/RTS/CTS pins it has routed entirely on its
+own, before calling this API — exactly matching Timer PWM's GPIO ownership
+model, not the driver-owned pin table an earlier draft of this document
+proposed.
 
 ## Clock Ownership Policy
 
-Two independent clock gates are involved in bringing up a USART instance,
-and neither is owned by the USART driver:
+Only one clock gate is ever the USART driver's concern, and even that one is
+application-owned:
 
-1. **The USART peripheral's own clock gate** (`RCC_APB2ENR_USART1EN`,
-   `RCC_APB1ENR_USART2EN`/`USART3EN`). The application must enable this
-   through `RCC_SetPeripheralClockState()` with `RCC_APB1_BUS` or
-   `RCC_APB2_BUS` before calling `USART_Config()`. The driver only verifies it through a private
-   `_USART_ValidateClockEnabled()` helper — the direct USART analogue of
-   Timer's `_TIM_ValidateClockEnabled()`. This replaces the current
-   `usart_config.h`'s `__USART_enableClock__()`/`__USART_disableClock__()`,
-   which self-enable the peripheral clock from inside the driver and must be
-   removed.
-2. **The GPIO port/AFIO clock gates for the USART's pins.** The USART pin
-   map is private driver data (the application does not know which
-   physical pins `USART_Config()` will touch), so the driver itself owns
-   sequencing this clock gate through `_USART_GPIO_EnableClock()` — already
-   implemented this session — before calling `GPIO_Init()`. This is the one
-   place USART enables an RCC clock gate directly, and it is scoped
-   narrowly to the GPIO/AFIO gates its own pin table requires.
+**The USART peripheral's own clock gate** (`RCC_APB2ENR_USART1EN`,
+`RCC_APB1ENR_USART2EN`/`USART3EN`). The application must enable this through
+`RCC_SetPeripheralClockState()` with `RCC_APB1_BUS` or `RCC_APB2_BUS` before
+calling `USART_Config()`. The driver only verifies it through a private
+`_USART_ValidateClockEnabled()` helper — the direct USART analogue of
+Timer's `_TIM_ValidateClockEnabled()`. This replaces the current
+`usart_config.h`'s `__USART_enableClock__()`/`__USART_disableClock__()`,
+which self-enable the peripheral clock from inside the driver and must be
+removed.
+
+**GPIO/AFIO pin clocks are entirely out of the driver's scope**, matching
+Timer PWM's `TIMER_PWM_ARCHITECTURE.md` exactly: the driver has no pin
+table, so it never enables a GPIO/AFIO clock gate itself. The application
+must:
+
+- enable the required GPIO port and AFIO clocks;
+- configure GPIO mode, output speed, and AFIO remap for the TX/RX/RTS/CTS
+  pins it has chosen to route to a given USART instance;
+- retain that GPIO configuration while the USART instance is in use; and
+- restore or repurpose the GPIO pins after USART deconfiguration.
 
 ```c
 ASSERT_DRIVER_STATUS
@@ -188,6 +194,8 @@ ASSERT_DRIVER_STATUS
 		DRIVER_STATUS_ON
 	)
 );
+// Application also enables the GPIO/AFIO clocks and configures TX/RX pins
+// here, exactly like a Timer PWM channel — the driver takes no part in it.
 ASSERT_DRIVER_STATUS(USART_Config(USART1, &config));
 ```
 
@@ -265,6 +273,11 @@ Not preserved (deliberate breaks, each with a stated reason):
   replaced by the `usart_irq_source_t`/`usart_event_flag_t` split.
 - `__USART_enableClock__()`/`__USART_disableClock__()` — removed; the
   application owns the USART peripheral clock gate through RCC.
+- `__usartDriverGPIOMapping__[]` pin table and any driver-owned GPIO/AFIO
+  pin-clock sequencing — removed entirely, not just re-keyed. GPIO/AFIO pin
+  selection, configuration, and clocking become fully application-owned,
+  matching Timer PWM's GPIO ownership model, rather than migrated into the
+  new driver.
 
 ## Deferred Domains
 
@@ -276,7 +289,6 @@ Not preserved (deliberate breaks, each with a stated reason):
 | LIN break detection | `CR2.LINEN/LBDL`, `CR2.LBDIE` (source) | Deferred; no consumer |
 | Multiprocessor address/wake | `CR1.WAKE`, `CR2.ADD` | Deferred; no consumer |
 | DMA | `CR3.DMAR/DMAT` | Deferred; needs a peer contract with the `DMA` driver, same open item Timer records for its own DMA sources |
-| AFIO USART remap | AFIO `MAPR` USART remap bits | Deferred; the current static per-instance pin table has no remap concept |
 
 Raw register fields for these domains stay defined in Core/LL as
 unclassified raw foundation; they do not justify Driver/Codec scope until a
@@ -290,9 +302,9 @@ See [`TODO.md`](TODO.md) for the exact commit-sized checklist. In summary:
 2. Data types and defines/validation split.
 3. Low-level `LL_USART_*` register access.
 4. Codec translation and BRR/field staging.
-5. Config structure and per-instance pin table migration to pointer identity.
-6. Driver orchestration (clock verification, IRQ source/event split, pin
-   setup).
+5. Config structure migration to pointer identity (no pin table — GPIO/AFIO
+   stay application-owned, matching Timer PWM).
+6. Driver orchestration (clock verification, IRQ source/event split).
 7. Removal of `usart_t`/preset enums/the lookup table.
 8. Project migration (`08_USART_Byte_TX`, `10_USART_printf`).
 9. Doxygen pass.

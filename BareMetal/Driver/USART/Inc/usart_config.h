@@ -19,7 +19,8 @@
  * @section USART_CONFIG_H_BOUNDARY Dependency Boundary
  * This header owns configuration structures only. It must not depend on
  * `usart_codec.h`, `usart_ll.h`, or `usart.h`, and it performs no register
- * access, clock sequencing, or GPIO pin-table ownership.
+ * access or clock sequencing. GPIO/AFIO pin configuration is entirely
+ * application-owned (matching Timer PWM); this header has no pin concept.
  */
 
 // Header Guard
@@ -49,17 +50,18 @@ extern "C" {
  * @details
  * `usart_config_t` is the root structure of structures for the currently
  * admitted USART configuration domains. GPIO/AFIO pin routing is
- * deliberately absent: it is private driver-owned data resolved internally
- * by `USART_Config()`, not caller-supplied configuration.
+ * deliberately absent: it is entirely application-owned (matching Timer
+ * PWM's GPIO ownership model), not something `USART_Config()` touches at
+ * any level.
  * @{
  */
 
 /**
- * @brief USART line-format configuration
+ * @brief USART frame format configuration
  * @details
  * Represents the `CR1.M`/`CR1.PCE`/`CR1.PS`/`CR2.STOP` domain as one
  * coherent, instance-independent structure.
- * @struct usart_config_line_t
+ * @struct usart_frame_format_t
  */
 typedef struct
 {
@@ -69,6 +71,7 @@ typedef struct
 	 * - @ref `USART_PARITY_NONE`
 	 * - @ref `USART_PARITY_EVEN`
 	 * - @ref `USART_PARITY_ODD`
+	 * @memberof usart_frame_format_t
 	 */
 	usart_parity_t			parity: 2;
 
@@ -79,6 +82,7 @@ typedef struct
 	 * - @ref `USART_STOP_BIT_0_5`
 	 * - @ref `USART_STOP_BIT_2`
 	 * - @ref `USART_STOP_BIT_1_5`
+	 * @memberof usart_frame_format_t
 	 */
 	usart_stop_bits_t		stopBits: 2;
 
@@ -87,10 +91,11 @@ typedef struct
 	 * Accepted values:
 	 * - @ref `USART_DATA_BITS_8`
 	 * - @ref `USART_DATA_BITS_9`
+	 * @memberof usart_frame_format_t
 	 */
 	usart_data_bits_t		dataBits: 1;
 
-} usart_config_line_t;
+} usart_frame_format_t;
 
 /**
  * @brief USART root configuration
@@ -103,6 +108,12 @@ typedef struct
  */
 typedef struct
 {
+	/** 
+	 * @brief Data-bit/parity/stop-bit frame format
+	 * @memberof usart_config_t
+	 */
+	usart_frame_format_t		frameFormat;
+
 	/**
 	 * @brief TX/RX/RTS/CTS pin-enable selection
 	 * Accepted values: (Any logical combination of)
@@ -114,11 +125,9 @@ typedef struct
 	 * - @ref `USART_HARDWARE_ENABLE_TX_RX`
 	 * - @ref `USART_HARDWARE_ENABLE_RTS_CTS`
 	 * - @ref `USART_HARDWARE_ENABLE_ALL`
+	 * @memberof usart_config_t
 	 */
-	usart_hardware_enable_t	hardware;
-
-	/** @brief Data-bit/parity/stop-bit line format */
-	usart_config_line_t		line;
+	usart_hardware_enable_t		hardware;
 
 	/**
 	 * @brief Baud rate
@@ -131,6 +140,7 @@ typedef struct
 	 * - @ref `USART_BAUD_RATE_230400`
 	 * - @ref `USART_BAUD_RATE_460800`
 	 * - @ref `USART_BAUD_RATE_921600`
+	 * @memberof usart_config_t
 	 */
 	usart_baud_rate_t			baudRate;
 

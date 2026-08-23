@@ -6,12 +6,10 @@ include_guard(GLOBAL)
 function(stm32_add_firmware_target)
     add_executable(${PROJECT_NAME}.elf ${PROJECT_SOURCES})
 
-    # Application headers retain first lookup priority. DRIVER_ROOT remains a
-    # private compatibility path for legacy examples that include startup.h;
-    # new Template projects consume only their selected component interfaces.
+    # Application headers retain first lookup priority. Template projects
+    # consume only their selected component interfaces.
     target_include_directories(${PROJECT_NAME}.elf BEFORE PRIVATE
         ${PROJ_DIR}/Inc
-        ${DRIVER_ROOT}
     )
 
     # Linking resolved component targets supplies their object files and usage

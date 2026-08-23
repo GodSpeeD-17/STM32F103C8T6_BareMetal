@@ -355,8 +355,7 @@ before learning the hardware model.
   ABI names; every other project-owned public service function uses the
   `App_` prefix.
 - Project include directories take precedence over shared Driver include
-  directories, so a project-local `startup.h` cannot resolve to legacy
-  shared startup content.
+  directories.
 
 ---
 
