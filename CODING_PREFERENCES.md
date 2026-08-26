@@ -710,11 +710,15 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   structure — IRQ-source enablement stays an explicit application action so
   the call site proves interrupt generation was intentional. Root
   configuration preserves the peripheral IRQ-source register; the
-  application configures sources separately before enabling NVIC delivery:
+  application clears stale peripheral and NVIC pending state, enables NVIC
+  delivery, and only then enables the peripheral IRQ source:
 
   ```c
   ASSERT_DRIVER_STATUS(RCC_EnablePeripheralClock(PERIPH1_CLOCK_MASK));
   ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
+  ASSERT_DRIVER_STATUS(PERIPH_AckIRQEvents(PERIPH1, PERIPH_IRQ_EVENT_UPDATE));
+  ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
+  ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
   ASSERT_DRIVER_STATUS
   (
   	PERIPH_SetIRQSources
@@ -724,8 +728,6 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   		DRIVER_STATUS_ON
   	)
   );
-  ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
-  ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
   ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
   ```
 
@@ -750,15 +752,20 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   ```text
   RCC clock enable
     -> peripheral base configuration
-    -> peripheral IRQ-source configuration
+    -> stale peripheral-event acknowledgement
     -> NVIC pending-state cleanup and delivery enablement
+    -> peripheral IRQ-source enablement
     -> peripheral operation enablement
   ```
 
 - Root peripheral configuration must not read, validate, clear, disable, or
   enable NVIC delivery state — the application owns the explicit ordering
-  between base configuration, IRQ-source enablement, pending-line cleanup,
-  NVIC delivery enablement, and the final transition to active state.
+  between base configuration, stale-event cleanup, pending-line cleanup, NVIC
+  delivery enablement, peripheral IRQ-source enablement, and the final
+  transition to active state. For external peripheral IRQs, enable the NVIC
+  mask before enabling the peripheral source so every subsequently generated
+  request has an already-established delivery path. SysTick is exempt because
+  it does not use an external NVIC IRQ line.
 
 **Staging helpers**
 
@@ -947,24 +954,32 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 
 - Split board support by cohesive hardware capability. The Blue Pill board
   package uses `bsp_gpio.[ch]` for board GPIO conveniences and
-  `bsp_usart.[ch]` for the fixed board USART transport; do not place either
-  implementation back into a monolithic `bsp.c`.
+  `bsp_usart.[ch]` for the fixed board USART transport, and `bsp_timer.[ch]`
+  for the configuration-locked TIM4 microsecond-delay service; do not place
+  any capability implementation back into a monolithic `bsp.c`.
 - Each capability implementation includes its own matching public header
   first. Each public capability header is self-contained and includes only
   the headers required by its public macros, types, and declarations.
   Implementation-only dependencies remain in the `.c` file.
 - `bsp.h` is an aggregate compatibility header. It includes capability headers
   only under BSP-owned build definitions such as
-  `BSP_GPIO_CAPABILITY_ENABLED` and `BSP_USART_CAPABILITY_ENABLED`; shared BSP
-  code never consumes project-owned `APP_ENABLE_*` policy.
-- New and minimal consumers include `bsp_gpio.h` or `bsp_usart.h` directly and
-  request the matching `BSP_GPIO` or `BSP_USART` CMake component. The aggregate
-  `BSP` component deliberately resolves both capabilities.
+  `BSP_GPIO_CAPABILITY_ENABLED`, `BSP_USART_CAPABILITY_ENABLED`, and
+  `BSP_TIMER_CAPABILITY_ENABLED`; shared BSP code never consumes project-owned
+  `APP_ENABLE_*` policy.
+- New and minimal consumers include `bsp_gpio.h`, `bsp_usart.h`, or
+  `bsp_timer.h` directly and request the matching `BSP_GPIO`, `BSP_USART`, or
+  `BSP_TIMER` CMake component. The aggregate `BSP` component deliberately
+  resolves every board capability.
 - Expose one canonical public initialization transaction per capability:
-  `BSP_InitOBLED()` and `BSP_InitUSART()`. Each initializer owns every RCC,
-  GPIO, and peripheral operation needed to make its board capability ready and
-  deterministic. Application boot code conditionally orchestrates those calls;
-  it does not reproduce board clock masks or configuration sequences.
+  `BSP_InitOBLED()`, `BSP_InitUSART()`, and `BSP_InitTimerUSDelay()`. Each
+  initializer owns every RCC, GPIO, and peripheral operation needed to make
+  its board capability ready and deterministic. Application boot code
+  conditionally orchestrates those calls; it does not reproduce board clock
+  masks or configuration sequences.
+- Expose `BSP_TimerDelayUs()` as the sole steady-state operation of the TIM4
+  delay capability. It accepts the application-facing `uint32_t` duration,
+  owns decomposition into the Timer Driver's 16-bit transactions, and returns
+  the first exact Driver failure without adding another board Timer API.
 - Divide each complete BSP initializer into private `static inline` helpers
   for its cohesive clock, GPIO, and peripheral subtransactions. Do not expose
   those helpers or implementation-only RCC masks in public BSP headers.
@@ -972,6 +987,14 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   them. Legacy debug-USART wrappers may remain in the USART capability as
   explicitly documented compatibility APIs, but they delegate canonical BSP
   behavior and do not create a second initialization policy.
+- `BSP_TIMER` exclusively reserves TIM4 as a polling-only 1 MHz counter for
+  microsecond delays. Its initialization owns the TIM4 RCC gate and complete
+  fixed delay configuration; its delay operation owns bounded chunking and
+  Driver-status propagation. It never enables a Timer IRQ source, requests
+  NVIC, publishes application time, or consumes the application's interrupt-
+  driven timebase selection. CMake selects this capability when the application
+  requests microsecond delay support, and that configuration must reject TIM4
+  as the simultaneous application timebase.
 
 ---
 
@@ -989,11 +1012,38 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   standard scalar-type header directly from a Template file. Standard
   headers providing a distinct service (`<errno.h>`) remain direct
   dependencies where that service is actually used.
+- Keep `app_time.h` and `app_time.c` project-local. A new project copies their
+  canonical baseline from `Projects/Template` and thereafter owns both files;
+  do not replace them with one shared implementation or include a shared `.c`
+  file. This is deliberate policy-layer duplication, not reusable Driver/BSP
+  duplication.
+- The project-local timing service owns the complete application timebase
+  policy: the selected SysTick or general-purpose Timer base, its requested
+  tick frequency, the monotonic software tick, peripheral IRQ-source and NVIC
+  sequencing where applicable, and the selected strong IRQ-handler ABI symbol.
+  Every application timebase is interrupt-driven.
+- Strong timing handlers remain project-local so each application can use the
+  selected IRQ's full capabilities: event inspection and service ordering,
+  selective acknowledgement, scheduling publication, diagnostics, profiling,
+  shared-event handling, and project-specific error policy. A shared strong
+  handler, weak hook, or callback layer must not seize or narrow that ownership
+  merely to remove identical starter code.
+- Consolidate application timing and delay behavior into the project-local
+  `app_time.[ch]` pair; do not retain a separate `app_delay.[ch]` pair. The
+  millisecond/tick delays consume the application-owned interrupt-driven
+  timebase. Optional microsecond delay APIs delegate to the independently
+  selected polling-only `BSP_TIMER` capability and do not reproduce its TIM4
+  clock or fixed configuration sequence.
 
 ---
 
 # Preference Log
 
+- 2026-08-26: Kept `app_time.[ch]` intentionally project-local so each
+  application retains unrestricted strong SysTick/Timer IRQ ownership, merged
+  application delay behavior into that pair, and assigned the optional
+  polling-only 1 MHz TIM4 microsecond-delay configuration to the independently
+  selected `BSP_TIMER` capability.
 - 2026-08-26: Split BSP into independently selected GPIO and USART capability
   headers/sources and CMake components, retained `bsp.h` as a guarded aggregate,
   required capability headers to be self-contained and minimal, and assigned

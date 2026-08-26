@@ -79,7 +79,9 @@ audit's historical PWM API proposals.
   DIER without reading or modifying NVIC delivery, and applications explicitly
   sequence `TIM_SetIRQSources()`, NVIC delivery, and the active-state transition.
 - [x] Stage all timebase/commit images and validate the stopped-counter precondition before the first MMIO write.
-- [x] Timer-to-RCC-bus ownership is centralized in a static `rcc_bus_t` LUT so future APB mappings do not change frequency logic.
+- [x] Timer-to-RCC-bus ownership is centralized in the private
+  `_TIM_DecodeRCCBus()` base-address switch; no instance-index API or static
+  topology LUT remains.
 - [x] `TIM_BlockingDelayUs()` requires application-owned allocation through
   `TIM_ConfigForBlockingDelay()`, avoids redundant runtime base-configuration
   validation, and uses bounded polling with cleanup on timeout.
@@ -187,11 +189,18 @@ revision identification, and future feature admission.
   APIs validate that the required gate is enabled and never change it.
 - `TIM_Config()` and `TIM_DeConfig()` are independent root lifecycle operations;
   neither calls its conjugate, changes the RCC gate, or changes NVIC delivery.
-  The application explicitly orders clock enable, Timer configuration, Timer
-  IRQ-source configuration, NVIC delivery, and Timer operation enablement.
-- `TIM_Config()` preserves every `TIMx_DIER` source; applications explicitly
-  call `TIM_SetIRQSources()` before enabling the independently owned NVIC line
-  and starting the counter. Root configuration does not inspect NVIC state.
-- Every Timer API that accesses the peripheral verifies clock availability
-  through the private `_TIM_ValidateClockEnabled()` helper and does not change
-  clock state.
+  The application explicitly orders clock enable, Timer configuration, stale
+  event cleanup, NVIC delivery enablement, Timer IRQ-source enablement, and
+  Timer operation enablement.
+- `TIM_Config()` preserves every `TIMx_DIER` source; applications clear stale
+  Timer/NVIC state and enable the independently owned NVIC line before calling
+  `TIM_SetIRQSources()` and starting the counter. Root configuration does not
+  inspect NVIC state.
+- [x] Promote `TIM_GetInputClockFrequency()` as an RCC-derived public
+  observation that requires stable System/Core clocks but no enabled Timer
+  gate or Timer MMIO access.
+- Timer configuration and foreground APIs that access the peripheral verify
+  clock availability through `_TIM_ValidateClockEnabled()` and never change
+  clock state. The ISR-oriented `TIM_GetIRQEvents()` and
+  `TIM_AckIRQEvents()` hot paths instead rely on the documented invariant that
+  the application retains the Timer gate throughout IRQ-service lifetime.

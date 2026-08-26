@@ -402,11 +402,14 @@ static driver_status_t _PERIPH_StageCounterConfig
 
 IRQ-source enablement is intentionally absent from the generic root object.
 Root configuration preserves peripheral interrupt-source state. Applications
-must call the peripheral's explicit IRQ-source setter before independently
-enabling NVIC delivery:
+must clear stale peripheral and NVIC pending state and enable NVIC delivery
+before calling the peripheral's explicit IRQ-source setter:
 
 ```c
 ASSERT_DRIVER_STATUS(PERIPH_Config(PERIPH1, &config));
+ASSERT_DRIVER_STATUS(PERIPH_AckIRQEvents(PERIPH1, PERIPH_IRQ_EVENT_UPDATE));
+ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
+ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
 ASSERT_DRIVER_STATUS
 (
 	PERIPH_SetIRQSources
@@ -416,8 +419,6 @@ ASSERT_DRIVER_STATUS
 		DRIVER_STATUS_ON
 	)
 );
-ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(PERIPH1_IRQn));
-ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(PERIPH1_IRQn));
 ASSERT_DRIVER_STATUS(PERIPH_SetOperationState(PERIPH1, DRIVER_STATUS_ON));
 ```
 
@@ -426,8 +427,11 @@ source setter preserves existing source state; disabling sources likewise
 requires an explicit `DRIVER_STATUS_OFF` request.
 
 Root configuration does not query NVIC delivery as a hidden precondition.
-The application owns the sequence from peripheral configuration through IRQ
-source enablement and NVIC delivery to the final active-state transition.
+The application owns the sequence from peripheral configuration through stale
+event cleanup, NVIC delivery enablement, peripheral IRQ-source enablement, and
+the final active-state transition. External peripheral IRQs establish the
+NVIC delivery path before the peripheral is permitted to generate requests;
+SysTick has no external NVIC line and is therefore exempt.
 
 The staging helpers operate only on non-volatile caller-owned images, use
 Codec transformations for field placement, preserve unrelated fields, return
@@ -517,11 +521,12 @@ function must also declare one audience:
 
 ### Current Timer Public Inventory
 
-The application header `timer.h` exposes 34 callable symbols, all through the
+The application header `timer.h` exposes 35 callable symbols, all through the
 primary public surface; the six legacy IRQ compatibility wrappers are removed.
-`timer_defines.h` additionally exposes four pure callable utilities:
-`TIM_InstanceToIndex`, `TIM_ChannelMaskToIndex`,
-`TIM_ChannelMaskExtractLowestChannel`, and `TIM_ChannelMaskRemoveChannel`.
+`timer_defines.h` additionally exposes three pure callable channel utilities:
+`TIM_ChannelMaskToIndex`, `TIM_ChannelMaskExtractLowestChannel`, and
+`TIM_ChannelMaskRemoveChannel`. The unconsumed instance-index API and its LUT
+were removed in favor of private base-address switch decoding.
 
 | Family | Current surface | Current verdict |
 | --- | --- | --- |
@@ -529,11 +534,12 @@ primary public surface; the six legacy IRQ compatibility wrappers are removed.
 | Operation state | `TIM_GetOperationState`, `TIM_SetOperationState` | Coherent ownership of `CR1.CEN`. |
 | Lifecycle | `TIM_Config`, `TIM_DeConfig` | Independent lifecycle entry points requiring an enabled application-owned gate. Configuration covers the timebase and counter domains represented by `tim_config_t`; both APIs leave RCC gate and NVIC state unchanged. |
 | General frequency-setting presets | none | General frequency-targeting configuration functions were removed; applications provide explicit prescaler/configuration data. |
+| Input-clock observation | `TIM_GetInputClockFrequency` | Public RCC-derived Timer kernel-clock query; requires a stable configured clock tree but no Timer clock gate or Timer MMIO access. |
 | Blocking-delay service configuration | `TIM_ConfigForBlockingDelay` | Narrow fixed service bootstrap; validates a 72 MHz Timer kernel clock, delegates the canonical root configuration, and establishes the stable OPM/ARPE/UDIS/UIF policy required by blocking polling. |
 | Grouped base configuration | timebase and counter `Get`/`Set` pairs | Domain structures, grouped staging, and shared apply paths; timebase validation/staging now precedes the MMIO-only commit phase. |
 | Timebase scalar access | programmed frequency, PSC, ARR, and CNT functions | PSC/ARR/CNT pairs and `TIM_GetProgrammedTickFrequency` are present. A narrow symmetric programmed-frequency setter is absent; active shadow state remains unobservable. |
 | Counter behavior scalar access | DIR, CMS, OPM, ARPE, URS, and digital-filter clock-division pairs | Complete for represented CR1 fields; cross-field compatibility and live-state constraints need strengthening. |
-| IRQ/event handling | `TIM_GetIRQSources`, `TIM_SetIRQSources`, `TIM_GetIRQEvents`, `TIM_AckIRQEvents` | Separate DIER-source and SR-event types cover trigger and overcapture vocabulary; NVIC delivery is independent. Generic acknowledgement rejects input-capture lanes until capture consumption is admitted. |
+| IRQ/event handling | `TIM_GetIRQSources`, `TIM_SetIRQSources`, `TIM_GetIRQEvents`, `TIM_AckIRQEvents` | Separate DIER-source and SR-event types cover trigger and overcapture vocabulary; NVIC delivery is independent. ISR event Get/Ack paths rely on the initialized gate-lifetime invariant instead of querying RCC per interrupt. Generic acknowledgement rejects input-capture lanes until capture consumption is admitted. |
 | Former IRQ compatibility | six `TIM_IRQ_*` wrappers | Removed after consumer migration; no Boolean error-collapsing wrapper remains. |
 | Blocking delay | `TIM_BlockingDelayUs`, `TIM_BlockingDelayMs` | Existing consumers justify preservation, but this is a dedicated-Timer service, not a generic peripheral primitive. Applications must allocate the instance through `TIM_ConfigForBlockingDelay` and preserve its configuration; delay calls do not revalidate base configuration. |
 | Channel/output compare | none | Accepted-next primitives for the dormant PWM migration are absent despite partial Codec/LL groundwork. |
@@ -550,6 +556,7 @@ Driver API candidates.
 | Existing public family | Lifecycle state | Disposition |
 | --- | --- | --- |
 | Base clock, operation, timebase, counter functions | Implemented; not fully verified | Retain while closing atomicity, transition, concurrency, and documentation gates. |
+| `TIM_GetInputClockFrequency` | Implemented; retained | Public observation for policy-layer prescaler calculation after RCC clock-tree stabilization; performs no Timer MMIO and has no Timer clock-gate precondition. |
 | `TIM_Config` | Implemented; retained trace evidence open | Independent conjugate of `TIM_DeConfig`; it applies timebase/counter state, leaves IRQ-source and NVIC delivery state unobserved and unchanged, never invokes deconfiguration, and reuses both grouped staging paths before one root-owned ordered commit. |
 | Former frequency-setting configuration functions | Removed | `TIM_ConfigTickFrequency`, `TIM_Config1MHz`, `TIM_ConfigBaseTickFrequency`, and `TIM_ConfigBase1MHz` have no canonical replacement; use explicit `tim_config_t` data. |
 | `TIM_ConfigForBlockingDelay` | Dedicated service bootstrap | Retain only for the admitted blocking polling-delay service; it validates the fixed 72 MHz kernel-clock contract before delegating `TIM_Config`. |
@@ -561,7 +568,7 @@ Driver API candidates.
 | Former `tim_irq_enable_t` | Removed | IRQ source staging now uses `DRIVER_STATUS_OFF/ON`. |
 | Former `TIM_Get/SetClockDivision` and `TIMx_CKD_CLK_*` selectors | Migrated | Replaced by digital-filter sampling-clock vocabulary around CR1.CKD (`tDTS`). |
 | Former `TIMx_UPDATE_SOURCE_OVF_DMA` | Migrated | Replaced by `TIMx_UPDATE_SOURCE_OVERFLOW_UNDERFLOW_ONLY`; URS does not make DMA an update source. |
-| Four public pure `timer_defines.h` utilities | Raw/public utility candidates | Keep instance indexing only if peer/public consumers need it; otherwise privatize. Keep channel-mask iteration only if an admitted public/peer path consumes it. |
+| Three public pure `timer_defines.h` channel utilities | Raw/public utility candidates | Keep channel-mask iteration only if an admitted public/peer path consumes it; the unused instance-index utility was removed. |
 | Master/slave, capture, Hall/XOR, and DMA selector families | Deferred raw/Codec groundwork | Not a public guarantee; reconsider only with named consumers and completed capability evidence. |
 
 ### Current Private Helper Inventory
@@ -570,7 +577,7 @@ The current private functions form useful categories.
 
 | Category | Existing examples | Assessment |
 | --- | --- | --- |
-| Topology and peer integration | `_TIM_GetClockBus`, `_TIM_DecodeAPB1ClockEnableMask`, `_TIM_DecodeAPB1PeripheralResetMask`, `_TIM_DecodeIRQ`, `_TIM_GetInputClockFrequency` | Correct ownership; the current TIM2-TIM4 mappings are explicit and use instance-safe address decoding. |
+| Topology and peer integration | `_TIM_DecodeRCCBus`, `_TIM_DecodeAPB1ClockEnableMask`, `_TIM_DecodeAPB1PeripheralResetMask`, `_TIM_DecodeIRQ` | Correct ownership; the current TIM2-TIM4 mappings are explicit and use instance-safe address decoding. Public `TIM_GetInputClockFrequency` composes the private bus mapping with RCC observations without Timer MMIO. |
 | Validation and preconditions | instance, selector, state, clock-enabled, counter-stopped, IRQ-source/event, and channel-event acknowledge validators | Correct category; broader grouped compatibility, capability, channel, and transaction-wide validation remain incomplete. |
 | Register-bound dirty write | `_TIM_WriteCR1IfChanged`, `_TIM_WriteCNTIfChanged` | Correctly delegates comparison/write mechanics to `RegOps_WriteIfChanged` for independent scalar transactions; the ordered base commits compare their already validated images directly. |
 | Base-domain staging | `_TIM_StageCounterConfig`, `_TIM_StageTimeBaseConfig`, `_TIM_StageTimeBaseUpdate` | All are MMIO-free, reuse Codec stages, keep independently required images explicit, and publish outputs only after every fallible stage succeeds. Counter staging produces one final CR1 image and rejects direction changes that hardware cannot accept in the current center-aligned mode. |

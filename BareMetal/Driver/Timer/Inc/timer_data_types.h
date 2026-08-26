@@ -83,8 +83,6 @@ typedef uint8_t									tim_master_mode_t;
 typedef uint8_t									tim_slave_mode_t;
 /** @brief Timer remap selector type @typedef tim_remap_t */
 typedef uint8_t									tim_remap_t;
-/** @brief Timer instance index type @typedef tim_instance_index_t */
-typedef uint8_t									tim_instance_index_t;
 /** @brief Timer prescaler value type @typedef tim_prescaler_t */
 typedef uint16_t								tim_prescaler_t;
 /** @brief Timer auto-reload value type @typedef tim_auto_reload_t */

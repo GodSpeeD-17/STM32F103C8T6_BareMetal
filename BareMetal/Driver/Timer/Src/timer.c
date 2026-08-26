@@ -62,44 +62,38 @@
 // ==================================================================================================== //
 
 /**
- * @brief Maps each supported Timer index to its RCC clock bus
- * @note Entries are indexed using the value returned by @ref TIM_InstanceToIndex.
- */
-static const rcc_bus_t _TIM_ClockBusLUT[TIM_INSTANCE_COUNT] =
-{
-	[TIM_INSTANCE_INDEX_TIM2] = RCC_APB1_BUS,
-	[TIM_INSTANCE_INDEX_TIM3] = RCC_APB1_BUS,
-	[TIM_INSTANCE_INDEX_TIM4] = RCC_APB1_BUS
-};
-
-/**
  * @brief Resolves the RCC clock bus associated with one Timer instance
  * @param[in] TIMx Timer peripheral instance
- * @param[out] pClockBus Destination for the resolved RCC clock bus
+ * @param[out] pRCCBus Destination for the decoded RCC clock bus
  * @returns @ref driver_status_t "Clock-bus lookup status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer clock bus was resolved
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer was `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was unsupported
  */
-__STATIC_FORCEINLINE driver_status_t _TIM_GetClockBus(const TIM_TypeDef* const TIMx, rcc_bus_t* const pClockBus)
+__STATIC_FORCEINLINE driver_status_t _TIM_DecodeRCCBus(const TIM_TypeDef* const TIMx, rcc_bus_t* const pRCCBus)
 {
-	// Local Variable
-	tim_instance_index_t instanceIndex = TIM_INSTANCE_INDEX_INVALID;
-
 	//! Validate both pointers before resolving or publishing the bus selector.
-	if ((TIMx == NULL) || (pClockBus == NULL))
+	if ((TIMx == NULL) || (pRCCBus == NULL))
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
 
-	//! Reject the invalid index sentinel before indexing the static bus table.
-	instanceIndex = TIM_InstanceToIndex(TIMx);
-	if (TIM_INSTANCE_INDEX_IS_VALID(instanceIndex) == 0x00U)
+	//! Decode static STM32F1 clock topology directly without an index conversion or runtime LUT access.
+	switch ((uintptr_t) TIMx)
 	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
+		case TIM2_BASE_ADDRESS:
+		case TIM3_BASE_ADDRESS:
+		case TIM4_BASE_ADDRESS:
+		{
+			*pRCCBus = RCC_APB1_BUS;
+			break;
+		}
+		default:
+		{
+			return DRIVER_STATUS_ERROR_INVALID_ARG;
+		}
 	}
 
-	*pClockBus = _TIM_ClockBusLUT[instanceIndex];
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -323,24 +317,6 @@ __STATIC_FORCEINLINE driver_status_t _TIM_ValidateIRQSources(const tim_irq_sourc
 	return DRIVER_STATUS_SUCCESS;
 }
 
-/**
- * @brief Validates a non-empty Timer event-flag mask
- * @param[in] irqEvents Timer event flags to validate
- * @returns @ref driver_status_t "IRQ-event validation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: @p irqEvents contains only supported event flags
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p irqEvents is empty or contains unsupported event flags
- */
-__STATIC_FORCEINLINE driver_status_t _TIM_ValidateIRQEvents(const tim_event_flag_t irqEvents)
-{
-	//! Require at least one event and reject every bit outside the public SR vocabulary.
-	if ((irqEvents == TIMx_IRQ_EVENT_NONE) || ((((uint32_t) irqEvents) & (~((uint32_t) TIMx_IRQ_EVENT_ALL))) != 0x00UL))
-	{
-		return DRIVER_STATUS_ERROR_INVALID_ARG;
-	}
-
-	return DRIVER_STATUS_SUCCESS;
-}
-
 // ==================================================================================================== //
 //										Local RCC Integration Helpers									//
 // ==================================================================================================== //
@@ -444,48 +420,6 @@ __STATIC_FORCEINLINE driver_status_t _TIM_DecodeAPB1PeripheralResetMask(const TI
 		}
 	}
 
-	return DRIVER_STATUS_SUCCESS;
-}
-
-/**
- * @brief Derives one Timer instance's kernel clock from its mapped RCC bus
- * @param[in] TIMx Timer peripheral instance
- * @param[out] pFrequency Destination for the Timer kernel frequency in hertz
- * @returns @ref driver_status_t "Frequency derivation status"
- * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer kernel frequency was derived
- * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: An input pointer was `NULL`
- * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p TIMx was unsupported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The mapped bus frequency was unavailable
- * @note STM32F1 APB Timer kernels run at twice their bus frequency whenever
- * that APB bus is prescaled.
- */
-__STATIC_FORCEINLINE driver_status_t _TIM_GetInputClockFrequency(const TIM_TypeDef* const TIMx, frequency_t* const pFrequency)
-{
-	// Local Variables
-	rcc_bus_t timerClockBus = RCC_APB1_BUS;
-	frequency_t timerInputClock = 0UL;
-
-	//! Validate destination storage before resolving or consulting the Timer clock bus.
-	if (pFrequency == NULL)
-	{
-		return DRIVER_STATUS_ERROR_NULL_PTR;
-	}
-	ASSERT_DRIVER_STATUS(_TIM_GetClockBus(TIMx, &timerClockBus));
-
-	//! Derive the peripheral clock from the bus selected by the instance LUT.
-	timerInputClock = RCC_GetBusFrequency(timerClockBus);
-	if (timerInputClock == 0UL)
-	{
-		return DRIVER_STATUS_ERROR_STATE;
-	}
-
-	//! Apply the Timer-kernel x2 rule only when the mapped APB bus is prescaled.
-	if (RCC_GetBusPrescaler(timerClockBus) != RCC_APB1_DIV_1)
-	{
-		timerInputClock <<= 1U;
-	}
-
-	*pFrequency = timerInputClock;
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -1411,6 +1345,37 @@ driver_status_t TIM_SetCounterConfig(TIM_TypeDef* const TIMx, const tim_config_c
 //										Timer TimeBase Field APIs										//
 // ==================================================================================================== //
 
+driver_status_t TIM_GetInputClockFrequency(TIM_TypeDef* const TIMx, frequency_t* const pInputClockHz)
+{
+	// Local Variables
+	rcc_bus_t	timerClockBus = RCC_APB1_BUS;
+	frequency_t	timerInputClockHz = RCC_FREQ_ZERO;
+
+	//! Validate destination storage before resolving or consulting the Timer clock bus.
+	if (pInputClockHz == NULL)
+	{
+		return DRIVER_STATUS_ERROR_NULL_PTR;
+	}
+	ASSERT_DRIVER_STATUS(_TIM_DecodeRCCBus(TIMx, &timerClockBus));
+
+	//! Derive the peripheral clock from the stable RCC bus-frequency snapshot selected by the instance mapping.
+	timerInputClockHz = RCC_GetBusFrequency(timerClockBus);
+	if (timerInputClockHz == RCC_FREQ_ZERO)
+	{
+		return DRIVER_STATUS_ERROR_STATE;
+	}
+
+	//! Apply the STM32F1 Timer-kernel x2 rule only when the mapped APB bus is prescaled.
+	if (RCC_GetBusPrescaler(timerClockBus) != RCC_APB1_DIV_1)
+	{
+		timerInputClockHz <<= 1U;
+	}
+
+	//! Publish only the fully derived result so caller storage remains unchanged on every failure path.
+	*pInputClockHz = timerInputClockHz;
+	return DRIVER_STATUS_SUCCESS;
+}
+
 driver_status_t TIM_GetProgrammedTickFrequency(TIM_TypeDef* const TIMx, frequency_t* const pFrequency)
 {
 	// Local Variables
@@ -1425,7 +1390,7 @@ driver_status_t TIM_GetProgrammedTickFrequency(TIM_TypeDef* const TIMx, frequenc
 
 	//! Reuse the public PSC getter so instance validation, clock-gate verification, and extraction stay centralized.
 	ASSERT_DRIVER_STATUS(TIM_GetPrescaler(TIMx, &prescaler));
-	ASSERT_DRIVER_STATUS(_TIM_GetInputClockFrequency(TIMx, &timerInputClock));
+	ASSERT_DRIVER_STATUS(TIM_GetInputClockFrequency(TIMx, &timerInputClock));
 
 	//! Hardware divides the Timer input clock by PSC + 1 to produce the counter tick frequency.
 	*pFrequency = (frequency_t) (timerInputClock / (((frequency_t) prescaler) + 1UL));
@@ -1904,13 +1869,9 @@ driver_status_t TIM_GetIRQSources(TIM_TypeDef* const TIMx, tim_irq_source_t* con
 	return Codec_TIM_ExtractIRQSources(LL_TIM_ReadDIER(TIMx), pIrqSources);
 }
 
-driver_status_t TIM_SetIRQSources
-(
-	TIM_TypeDef* const			TIMx,
-	const tim_irq_source_t		irqSources,
-	const driver_status_t		sourceState
-)
+driver_status_t TIM_SetIRQSources(TIM_TypeDef* const TIMx, const tim_irq_source_t irqSources, const driver_status_t sourceState)
 {
+	// Local Variables
 	reg dierRegImage = 0x00000000UL;
 	reg currentDierRegImage = 0x00000000UL;
 
@@ -1923,15 +1884,7 @@ driver_status_t TIM_SetIRQSources
 	dierRegImage = LL_TIM_ReadDIER(TIMx);
 	currentDierRegImage = dierRegImage;
 	//! Stage only the selected DIER sources while preserving unrelated interrupt and DMA enables.
-	ASSERT_DRIVER_STATUS
-	(
-		Codec_TIM_StageIRQSources
-		(
-			&dierRegImage,
-			irqSources,
-			sourceState
-		)
-	);
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageIRQSources(&dierRegImage, irqSources, sourceState));
 	//! Avoid a DIER write when the selected sources already have the requested state.
 	if (dierRegImage != currentDierRegImage)
 	{
@@ -1943,30 +1896,31 @@ driver_status_t TIM_SetIRQSources
 
 driver_status_t TIM_GetIRQEvents(TIM_TypeDef* const TIMx, tim_event_flag_t* const pIrqEvents)
 {
-	//! Validate destination storage before reading the Timer status register.
+	//! Validate the ISR-owned pointers without re-reading the initialization-owned RCC gate.
 	if (pIrqEvents == NULL)
 	{
 		return DRIVER_STATUS_ERROR_NULL_PTR;
 	}
-	//! Decode SR flags independently from DIER source state and NVIC delivery state.
-	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
+
+	//! Read SR once and decode flags independently from DIER source state and NVIC delivery state.
 	return Codec_TIM_ExtractIRQEvents(LL_TIM_ReadSR(TIMx), pIrqEvents);
 }
 
 driver_status_t TIM_AckIRQEvents(TIM_TypeDef* const TIMx, const tim_event_flag_t irqEvents)
 {
-	reg srRegImage = 0x00000000UL;
+	// Local Variable
+	reg srAckRegImage = 0x00000000UL;
 
-	//! Validate the instance, event mask, and capture-lane policy before touching W0C status bits.
+	//! Validate the ISR-owned instance without re-reading the initialization-owned RCC gate.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateInstance(TIMx));
-	ASSERT_DRIVER_STATUS(_TIM_ValidateIRQEvents(irqEvents));
-	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
+	//! Stage and validate the complete W0C image without reading the live status register.
+	ASSERT_DRIVER_STATUS(Codec_TIM_StageIRQEventAck(&srAckRegImage, irqEvents));
+	//! Preserve unread input captures by checking channel mode only when a channel event was selected.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateIRQEventAckMode(TIMx, irqEvents));
 
-	//! Snapshot SR for Codec traceability, then issue one unconditional semantic W0C write.
-	srRegImage = LL_TIM_ReadSR(TIMx);
-	ASSERT_DRIVER_STATUS(Codec_TIM_StageIRQEventAck(&srRegImage, irqEvents));
-	LL_TIM_WriteSR(TIMx, srRegImage);
+	//! Write zeros only for selected flags and ones for every unselected W0C flag.
+	LL_TIM_WriteSR(TIMx, srAckRegImage);
 	return DRIVER_STATUS_SUCCESS;
 }
 
@@ -2005,7 +1959,7 @@ driver_status_t TIM_ConfigForBlockingDelay(TIM_TypeDef* const TIMx)
 	//! Require the application-owned Timer gate before validating the fixed delay clock contract.
 	ASSERT_DRIVER_STATUS(_TIM_ValidateClockEnabled(TIMx));
 	//! Reject an incompatible clock tree before changing Timer register state.
-	ASSERT_DRIVER_STATUS(_TIM_GetInputClockFrequency(TIMx, &timerInputClock));
+	ASSERT_DRIVER_STATUS(TIM_GetInputClockFrequency(TIMx, &timerInputClock));
 	if (timerInputClock != RCC_SYSCLK_MAX_FREQ)
 	{
 		return DRIVER_STATUS_ERROR_STATE;

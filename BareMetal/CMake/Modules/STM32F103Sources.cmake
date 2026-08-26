@@ -7,11 +7,11 @@ include_guard(GLOBAL)
 # Direct Driver dependencies form one downward build graph. Transitive modules
 # are resolved automatically, so an application selects capabilities instead of
 # repeating the implementation dependencies of each capability. BSP exposes
-# independently selectable GPIO and USART capability targets because their
-# hardware requirements differ. The aggregate BSP component remains available
-# for compatibility and deliberately selects both capabilities.
+# independently selectable GPIO, USART, and Timer capability targets because
+# their hardware requirements differ. The aggregate BSP component remains
+# available for compatibility and deliberately selects every capability.
 set(STM32_DRIVER_ADC_DEPENDENCIES GPIO)
-set(STM32_DRIVER_BSP_DEPENDENCIES BSP_GPIO BSP_USART)
+set(STM32_DRIVER_BSP_DEPENDENCIES BSP_GPIO BSP_USART BSP_TIMER)
 set(STM32_DRIVER_BSP_SOURCES "")
 set(STM32_DRIVER_BSP_GPIO_DIRECTORY BSP)
 set(STM32_DRIVER_BSP_GPIO_DEPENDENCIES GPIO)
@@ -21,6 +21,10 @@ set(STM32_DRIVER_BSP_USART_DIRECTORY BSP)
 set(STM32_DRIVER_BSP_USART_DEPENDENCIES GPIO USART)
 set(STM32_DRIVER_BSP_USART_SOURCES Src/bsp_usart.c)
 set(STM32_DRIVER_BSP_USART_COMPILE_DEFINITIONS BSP_USART_CAPABILITY_ENABLED=1)
+set(STM32_DRIVER_BSP_TIMER_DIRECTORY BSP)
+set(STM32_DRIVER_BSP_TIMER_DEPENDENCIES Timer)
+set(STM32_DRIVER_BSP_TIMER_SOURCES Src/bsp_timer.c)
+set(STM32_DRIVER_BSP_TIMER_COMPILE_DEFINITIONS BSP_TIMER_CAPABILITY_ENABLED=1)
 set(STM32_DRIVER_DMA_DEPENDENCIES "")
 set(STM32_DRIVER_GPIO_DEPENDENCIES RCC)
 set(STM32_DRIVER_I2C_DEPENDENCIES RCC)

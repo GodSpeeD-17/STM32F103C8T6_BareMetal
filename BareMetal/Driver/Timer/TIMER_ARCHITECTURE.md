@@ -425,6 +425,9 @@ Timer IRQ-source configuration is a separate explicit sequence:
 
 ```c
 ASSERT_DRIVER_STATUS(TIM_Config(TIM3, &config));
+ASSERT_DRIVER_STATUS(TIM_AckIRQEvents(TIM3, TIMx_IRQ_EVENT_UPDATE));
+ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(TIM3_IRQn));
+ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(TIM3_IRQn));
 ASSERT_DRIVER_STATUS
 (
 	TIM_SetIRQSources
@@ -434,15 +437,22 @@ ASSERT_DRIVER_STATUS
 		DRIVER_STATUS_ON
 	)
 );
-ASSERT_DRIVER_STATUS(NVIC_ClearPendingIRQ(TIM3_IRQn));
-ASSERT_DRIVER_STATUS(NVIC_EnableIRQ(TIM3_IRQn));
 ASSERT_DRIVER_STATUS(TIM_SetOperationState(TIM3, DRIVER_STATUS_ON));
 ```
 
-This ordering proves that the application deliberately requested Timer-side
-interrupt generation and NVIC delivery before starting the counter.
+This ordering clears stale Timer/NVIC state and establishes NVIC delivery
+before the Timer source can generate a request. It also proves that the
+application deliberately requested both layers before starting the counter.
 `TIM_Config()` never reads or modifies Timer IRQ sources or NVIC delivery
 state.
+
+`TIM_GetIRQEvents()` and `TIM_AckIRQEvents()` are ISR-oriented hot paths. They
+validate the instance and caller-owned event data but deliberately do not query
+the RCC gate on every interrupt; successful initialization and the complete
+IRQ-service lifetime own that invariant. Event observation performs one `SR`
+read. Event acknowledgement stages a W0C image without reading `SR`, performs
+only the channel-mode reads required by selected capture/compare flags, and
+then issues one `SR` write.
 
 General frequency-targeting configuration functions are intentionally absent.
 Applications provide explicit prescaler and timebase configuration data. The
@@ -450,8 +460,11 @@ sole fixed-frequency exception is `TIM_ConfigForBlockingDelay()`: a narrowly nam
 bootstrap for the admitted blocking polling-delay service that first validates a 72 MHz
 Timer kernel clock, then delegates the canonical configuration to
 `TIM_Config()`.
-`TIM_GetProgrammedTickFrequency()` remains as an observational calculation
-from the live Timer kernel clock and programmed PSC value.
+`TIM_GetInputClockFrequency()` exposes the RCC-derived Timer kernel clock
+without Timer MMIO or a Timer clock-gate precondition so policy layers can
+calculate their explicit prescaler values after System/Core clocks stabilize.
+`TIM_GetProgrammedTickFrequency()` remains the separate observational
+calculation from that live Timer kernel clock and the programmed PSC value.
 
 `TIM_BlockingDelayUs()` is a blocking polling helper for a dedicated Timer that the
 application successfully allocated through `TIM_ConfigForBlockingDelay()` and has not

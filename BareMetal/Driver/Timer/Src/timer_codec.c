@@ -34,6 +34,24 @@
 	TIM_SR_CC3IF	| TIM_SR_CC4IF	| TIM_SR_TIF	|				\
 	TIM_SR_CC1OF	| TIM_SR_CC2OF	| TIM_SR_CC3OF	| TIM_SR_CC4OF	\
 )
+/** @brief Event bits already aligned with their Timer SR positions @def TIM_CODEC_IRQ_EVENT_DIRECT_MASK */
+#define TIM_CODEC_IRQ_EVENT_DIRECT_MASK							\
+(																	\
+	TIMx_IRQ_EVENT_UPDATE	| TIMx_IRQ_EVENT_CC1	| TIMx_IRQ_EVENT_CC2	|\
+	TIMx_IRQ_EVENT_CC3		| TIMx_IRQ_EVENT_CC4						\
+)
+/** @brief Compact trigger-event bit requiring SR-position translation @def TIM_CODEC_IRQ_EVENT_TRIGGER_MASK */
+#define TIM_CODEC_IRQ_EVENT_TRIGGER_MASK							(TIMx_IRQ_EVENT_TRIGGER)
+/** @brief Compact overcapture-event bits requiring SR-position translation @def TIM_CODEC_IRQ_EVENT_OVERCAPTURE_MASK */
+#define TIM_CODEC_IRQ_EVENT_OVERCAPTURE_MASK					\
+(																	\
+	TIMx_IRQ_EVENT_CC1_OVERCAPTURE | TIMx_IRQ_EVENT_CC2_OVERCAPTURE |\
+	TIMx_IRQ_EVENT_CC3_OVERCAPTURE | TIMx_IRQ_EVENT_CC4_OVERCAPTURE	\
+)
+/** @brief Shift between compact trigger event and SR.TIF @def TIM_CODEC_IRQ_EVENT_TRIGGER_SR_SHIFT */
+#define TIM_CODEC_IRQ_EVENT_TRIGGER_SR_SHIFT					((reg_bit_pos_t) 1U)
+/** @brief Shift between compact overcapture events and SR.CCxOF @def TIM_CODEC_IRQ_EVENT_OVERCAPTURE_SR_SHIFT */
+#define TIM_CODEC_IRQ_EVENT_OVERCAPTURE_SR_SHIFT			((reg_bit_pos_t) 3U)
 
 // ==================================================================================================== //
 //										Local Register Image Helpers									//
@@ -1361,51 +1379,21 @@ __STATIC_FORCEINLINE tim_irq_source_t Codec_TIM_DecodeDIERRawToIRQSources(const 
  */
 __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQEventsToSRRaw(const tim_event_flag_t irqEvents)
 {
-	reg rawMask = 0x00000000UL;
+	//! Translate the three contiguous event regions directly instead of branching once per flag.
+	return
+	(
+		((reg) irqEvents & ((reg) TIM_CODEC_IRQ_EVENT_DIRECT_MASK)) |
 
-	//! Map the event vocabulary explicitly because its compact layout intentionally differs from SR.
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_UPDATE)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_UIF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC1)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC1IF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC2)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC2IF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC3)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC3IF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC4)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC4IF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_TRIGGER)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_TIF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC1_OVERCAPTURE)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC1OF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC2_OVERCAPTURE)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC2OF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC3_OVERCAPTURE)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC3OF;
-	}
-	if ((((uint32_t) irqEvents) & ((uint32_t) TIMx_IRQ_EVENT_CC4_OVERCAPTURE)) != 0x00000000UL)
-	{
-		rawMask |= TIM_SR_CC4OF;
-	}
+		(
+			((reg) irqEvents & ((reg) TIM_CODEC_IRQ_EVENT_TRIGGER_MASK)) <<
+			TIM_CODEC_IRQ_EVENT_TRIGGER_SR_SHIFT
+		) |
 
-	return rawMask;
+		(
+			((reg) irqEvents & ((reg) TIM_CODEC_IRQ_EVENT_OVERCAPTURE_MASK)) <<
+			TIM_CODEC_IRQ_EVENT_OVERCAPTURE_SR_SHIFT
+		)
+	);
 }
 
 /**
@@ -1415,51 +1403,21 @@ __STATIC_FORCEINLINE reg Codec_TIM_EncodeIRQEventsToSRRaw(const tim_event_flag_t
  */
 __STATIC_FORCEINLINE tim_event_flag_t Codec_TIM_DecodeSRRawToIRQEvents(const reg srRegImage)
 {
-	tim_event_flag_t irqEvents = TIMx_IRQ_EVENT_NONE;
+	//! Translate the three contiguous SR flag regions directly into the compact public event vocabulary.
+	return (tim_event_flag_t)
+	(
+		(srRegImage & ((reg) TIM_CODEC_IRQ_EVENT_DIRECT_MASK)) |
 
-	//! Surface every implemented event independently from interrupt-request enable state.
-	if ((srRegImage & TIM_SR_UIF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_UPDATE;
-	}
-	if ((srRegImage & TIM_SR_CC1IF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC1;
-	}
-	if ((srRegImage & TIM_SR_CC2IF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC2;
-	}
-	if ((srRegImage & TIM_SR_CC3IF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC3;
-	}
-	if ((srRegImage & TIM_SR_CC4IF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC4;
-	}
-	if ((srRegImage & TIM_SR_TIF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_TRIGGER;
-	}
-	if ((srRegImage & TIM_SR_CC1OF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC1_OVERCAPTURE;
-	}
-	if ((srRegImage & TIM_SR_CC2OF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC2_OVERCAPTURE;
-	}
-	if ((srRegImage & TIM_SR_CC3OF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC3_OVERCAPTURE;
-	}
-	if ((srRegImage & TIM_SR_CC4OF) != 0x00000000UL)
-	{
-		irqEvents |= TIMx_IRQ_EVENT_CC4_OVERCAPTURE;
-	}
+		(
+			(srRegImage & TIM_SR_TIF) >>
+			TIM_CODEC_IRQ_EVENT_TRIGGER_SR_SHIFT
+		) |
 
-	return irqEvents;
+		(
+			(srRegImage & (TIM_SR_CC1OF | TIM_SR_CC2OF | TIM_SR_CC3OF | TIM_SR_CC4OF)) >>
+			TIM_CODEC_IRQ_EVENT_OVERCAPTURE_SR_SHIFT
+		)
+	);
 }
 
 /**

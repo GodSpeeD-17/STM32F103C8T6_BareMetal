@@ -7,9 +7,10 @@
  *
  * @details
  * This compatibility interface exposes only the board capabilities selected
- * by CMake. New consumers include `bsp_gpio.h` or `bsp_usart.h` directly so
- * their compile-time dependency remains explicit. BSP-owned capability macros,
- * rather than application-owned `APP_ENABLE_*` policy, control this aggregate.
+ * by CMake. New consumers include `bsp_gpio.h`, `bsp_usart.h`, or
+ * `bsp_timer.h` directly so their compile-time dependency remains explicit.
+ * BSP-owned capability macros, rather than application-owned `APP_ENABLE_*`
+ * policy, control this aggregate.
  */
 
 // Header Guard
@@ -23,5 +24,9 @@
 #if defined(BSP_USART_CAPABILITY_ENABLED)
 #include "bsp_usart.h"
 #endif /* BSP_USART_CAPABILITY_ENABLED */
+
+#if defined(BSP_TIMER_CAPABILITY_ENABLED)
+#include "bsp_timer.h"
+#endif /* BSP_TIMER_CAPABILITY_ENABLED */
 
 #endif /* BSP_H_ */

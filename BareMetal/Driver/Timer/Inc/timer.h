@@ -339,6 +339,35 @@ driver_status_t TIM_SetCounterConfig(TIM_TypeDef* const TIMx, const tim_config_c
 // ==================================================================================================== //
 
 /**
+ * @brief Returns the RCC-derived input clock frequency for one Timer instance
+ * @details
+ * Resolves the RCC bus that supplies @p `TIMx`, reads its current bus
+ * frequency, and applies the STM32F1 Timer-kernel x2 rule when that APB bus is
+ * prescaled. This observation does not access Timer registers and therefore
+ * does not require the Timer peripheral clock gate to be enabled.
+ *
+ * @param[in] TIMx Timer peripheral instance
+ * Accepted values:
+ * - `TIM2`
+ * - `TIM3`
+ * - `TIM4`
+ * @param[out] pInputClockHz Destination for the Timer input clock frequency in hertz
+ * Expected values:
+ * - Non-`NULL`: Derived Timer input clock frequency is written on success
+ * - `1UL..0xFFFFFFFFUL`: Any non-zero value representable by @ref frequency_t
+ * @returns @ref driver_status_t "Timer input-clock query status"
+ * @retval - @ref `DRIVER_STATUS_SUCCESS`: Timer input clock frequency was derived
+ * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pInputClockHz` was `NULL`
+ * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` was unsupported
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The mapped RCC bus frequency was unavailable
+ * @pre The application has completed System/Core clock-tree configuration and
+ * the RCC-derived bus frequencies are stable
+ * @note @p `pInputClockHz` remains unchanged when this function fails
+ * @note This function neither reads Timer MMIO nor changes the Timer clock gate
+ */
+driver_status_t TIM_GetInputClockFrequency(TIM_TypeDef* const TIMx, frequency_t* const pInputClockHz);
+
+/**
  * @brief Returns the Timer tick frequency derived from the programmed prescaler
  * @details
  * Reads `TIMx_PSC` and derives the counter tick frequency from the Timer input
@@ -879,7 +908,9 @@ driver_status_t TIM_SetIRQSources
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Latched Timer events were returned
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` or @p `pIrqEvents` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` is unsupported
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: Timer APB1 clock gate is disabled
+ * @pre The application keeps the matching Timer APB1 clock gate enabled for
+ * the complete IRQ-service lifetime
+ * @note This ISR-oriented hot path does not query RCC clock-gate state
  */
 driver_status_t TIM_GetIRQEvents(TIM_TypeDef* const TIMx, tim_event_flag_t* const pIrqEvents);
 
@@ -916,7 +947,11 @@ driver_status_t TIM_GetIRQEvents(TIM_TypeDef* const TIMx, tim_event_flag_t* cons
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Selected Timer events were acknowledged
  * @retval - @ref `DRIVER_STATUS_ERROR_NULL_PTR`: @p `TIMx` is `NULL`
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: @p `TIMx` or @p `irqEvents` is invalid
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: The Timer clock is disabled or a selected event belongs to an input-capture lane
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: A selected event belongs to an input-capture lane
+ * @pre The application keeps the matching Timer APB1 clock gate enabled for
+ * the complete IRQ-service lifetime
+ * @note This ISR-oriented hot path does not query RCC clock-gate state or read
+ * `TIMx_SR` before issuing its W0C acknowledgement
  * @warning An event arriving on a selected source between observation and
  * acknowledgement can be lost. Service handlers must re-sample until their
  * owned event set is quiescent.

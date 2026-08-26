@@ -66,32 +66,6 @@ extern "C" {
  * @{
  */
 
-/** @brief First supported general-purpose Timer instance index @def TIM_INSTANCE_INDEX_FIRST */
-#define TIM_INSTANCE_INDEX_FIRST						((tim_instance_index_t) 0x00U)
-/** @brief Timer 2 instance index @def TIM_INSTANCE_INDEX_TIM2 */
-#define TIM_INSTANCE_INDEX_TIM2							((tim_instance_index_t) 0x00U)
-/** @brief Timer 3 instance index @def TIM_INSTANCE_INDEX_TIM3 */
-#define TIM_INSTANCE_INDEX_TIM3							((tim_instance_index_t) 0x01U)
-/** @brief Timer 4 instance index @def TIM_INSTANCE_INDEX_TIM4 */
-#define TIM_INSTANCE_INDEX_TIM4							((tim_instance_index_t) 0x02U)
-/** @brief Last supported general-purpose Timer instance index @def TIM_INSTANCE_INDEX_LAST */
-#define TIM_INSTANCE_INDEX_LAST							TIM_INSTANCE_INDEX_TIM4
-/** @brief Number of supported general-purpose Timer instances @def TIM_INSTANCE_COUNT */
-#define TIM_INSTANCE_COUNT								((tim_instance_index_t) (TIM_INSTANCE_INDEX_LAST + 1U))
-/** @brief Invalid Timer instance index sentinel @def TIM_INSTANCE_INDEX_INVALID */
-#define TIM_INSTANCE_INDEX_INVALID						TIM_INSTANCE_COUNT
-
-/**
- * @brief Checks whether a Timer instance index is supported by this driver
- * @param[in]	instanceIndex	Timer instance index to check
- * @returns Timer instance-index validity status
- * @retval - `0x00U`: @p `instanceIndex` is outside the supported range
- * @retval - `0x01U`: @p `instanceIndex` is supported
- * @def TIM_INSTANCE_INDEX_IS_VALID
- */
-#define TIM_INSTANCE_INDEX_IS_VALID(instanceIndex)		\
-	(((uint32_t) (instanceIndex)) <= ((uint32_t) TIM_INSTANCE_INDEX_LAST))
-
 /**
  * @brief Checks whether a Timer peripheral instance is supported by this driver
  * @param[in]	TIMx	Timer peripheral instance
@@ -110,52 +84,6 @@ extern "C" {
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM3_BASE_ADDRESS)) ||	\
 	(((uintptr_t) (TIMx)) == ((uintptr_t) TIM4_BASE_ADDRESS))		\
 )
-
-/**
- * @brief Converts a supported Timer instance to a zero-based instance index
- * @param[in] TIMx Timer peripheral instance
- * Accepted values:
- * - `TIM2`
- * - `TIM3`
- * - `TIM4`
- * @returns @ref tim_instance_index_t "Timer instance index"
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM2`: @p `TIMx` is `TIM2`
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM3`: @p `TIMx` is `TIM3`
- * @retval - @ref `TIM_INSTANCE_INDEX_TIM4`: @p `TIMx` is `TIM4`
- * @retval - @ref `TIM_INSTANCE_INDEX_INVALID`: @p `TIMx` is not supported
- */
-__STATIC_FORCEINLINE tim_instance_index_t TIM_InstanceToIndex(const TIM_TypeDef* const TIMx)
-{
-	// Local Variables
-	tim_instance_index_t instanceIndex = TIM_INSTANCE_INDEX_INVALID;
-	const uintptr_t timerAddress = (uintptr_t) TIMx;
-	//! Translate the peripheral base address without dereferencing the instance.
-	switch (timerAddress)
-	{
-		case TIM2_BASE_ADDRESS:
-		{
-			instanceIndex = TIM_INSTANCE_INDEX_TIM2;
-			break;
-		}
-		case TIM3_BASE_ADDRESS:
-		{
-			instanceIndex = TIM_INSTANCE_INDEX_TIM3;
-			break;
-		}
-		case TIM4_BASE_ADDRESS:
-		{
-			instanceIndex = TIM_INSTANCE_INDEX_TIM4;
-			break;
-		}
-		default:
-		{
-			instanceIndex = TIM_INSTANCE_INDEX_INVALID;
-			break;
-		}
-	}
-
-	return instanceIndex;
-}
 
 /** @} */ // TIM_03_Driver_02_Defines_01_Instance
 
