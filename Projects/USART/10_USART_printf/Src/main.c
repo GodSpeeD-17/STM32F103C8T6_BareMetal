@@ -76,7 +76,7 @@ static void App_ErrorHandler(void)
  * @brief Configures application-owned PA9 routing for USART1 TX
  * @returns @ref driver_status_t "GPIO configuration status"
  */
-static driver_status_t App_ConfigUSARTGPIO(void)
+static driver_status_t App_ConfigGPIOForUSART(void)
 {
 	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
 	ASSERT_DRIVER_STATUS(RCC_SetPeripheralClockState(RCC_APB2_BUS, APP_USART_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
@@ -126,7 +126,7 @@ int main(void)
 	uint16_t count = 0x0000U;
 
 	//! Physical pin routing is intentionally outside the USART driver.
-	if (App_ConfigUSARTGPIO() != DRIVER_STATUS_SUCCESS)
+	if (App_ConfigGPIOForUSART() != DRIVER_STATUS_SUCCESS)
 	{
 		App_ErrorHandler();
 	}
