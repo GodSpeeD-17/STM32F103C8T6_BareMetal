@@ -15,8 +15,9 @@
  * _sbrk() owns the current program break and admits allocations only inside
  * the heap interval defined by the linker script. The remaining stubs
  * (_close/_lseek/_read/_write/_fstat/_isatty/_exit/_kill/_getpid) satisfy
- * link-time references pulled in by `-u _printf_float`, which this project
- * needs to demonstrate `USART_printf()`'s "%f" conversion under
+ * link-time references that may be pulled in by the C library. When
+ * `APP_ENABLE_FLOAT` is enabled, CMake adds `-u _printf_float` so this project
+ * can demonstrate `USART_printf()`'s "%f" conversion under
  * `--specs=nano.specs`. This demo never routes through libc's file-descriptor
  * layer at runtime — `USART_printf()` formats into a stack buffer through
  * `vsnprintf()` and transmits it directly — so every stub below is

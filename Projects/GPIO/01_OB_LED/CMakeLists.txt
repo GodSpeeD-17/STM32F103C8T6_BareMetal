@@ -69,12 +69,35 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 
 # These cache options mirror the Template's application-facing hardware
 # policy. They control both shared Driver inclusion below and conditional
-# Template code through the compile definitions published at the end of
+# application code through the compile definitions published at the end of
 # this file.
-option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
+set(APP_TIMEBASE_SOURCE "SYSTICK" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
+set_property(CACHE APP_TIMEBASE_SOURCE PROPERTY STRINGS OFF SYSTICK TIM2 TIM3 TIM4)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
-option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
+option(APP_ENABLE_DEBUG "Enable optional BSP USART debug transport initialization" OFF)
+option(APP_ENABLE_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
+
+# Normalize the human-readable selector once so module resolution and C
+# preprocessing consume the same application timebase decision.
+string(TOUPPER "${APP_TIMEBASE_SOURCE}" _app_timebase_source)
+if(_app_timebase_source STREQUAL "OFF")
+    set(_app_timebase_source_define APP_TIME_SOURCE_NONE)
+elseif(_app_timebase_source STREQUAL "SYSTICK")
+    set(_app_timebase_source_define APP_TIME_SOURCE_SYSTICK)
+elseif(_app_timebase_source STREQUAL "TIM2")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM2)
+elseif(_app_timebase_source STREQUAL "TIM3")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM3)
+elseif(_app_timebase_source STREQUAL "TIM4")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM4)
+else()
+    message(FATAL_ERROR "APP_TIMEBASE_SOURCE must be OFF, SYSTICK, TIM2, TIM3, or TIM4.")
+endif()
+
+if(APP_ENABLE_TIMER_US_DELAY AND _app_timebase_source STREQUAL "TIM4")
+    message(FATAL_ERROR "APP_TIMEBASE_SOURCE=TIM4 conflicts with APP_ENABLE_TIMER_US_DELAY=ON because BSP_TIMER exclusively reserves TIM4.")
+endif()
 
 # BSP_GPIO is required directly by the application regardless of
 # APP_ENABLE_ONBOARD_LED: main.c always drives the on-board LED, and that
@@ -82,11 +105,16 @@ option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf s
 # The component graph resolves BSP_GPIO -> GPIO -> RCC automatically. Optional
 # services add only their owning Driver module.
 set(app_driver_modules BSP_GPIO)
-if(APP_ENABLE_SYSTICK_TIMEBASE)
+if(APP_ENABLE_DEBUG)
+    list(APPEND app_driver_modules BSP_USART)
+endif()
+if(_app_timebase_source STREQUAL "SYSTICK")
     list(APPEND app_driver_modules SysTick)
+elseif(_app_timebase_source MATCHES "^TIM[234]$")
+    list(APPEND app_driver_modules Timer NVIC)
 endif()
 if(APP_ENABLE_TIMER_US_DELAY)
-    list(APPEND app_driver_modules Timer)
+    list(APPEND app_driver_modules BSP_TIMER)
 endif()
 
 # ====================================================================================================
@@ -113,16 +141,18 @@ stm32f103_configure_project(
 # sources and app_config.h consume the same values used for Driver selection,
 # keeping compiled application APIs synchronized with linked Driver modules.
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
-    APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
+    APP_TIMEBASE_SOURCE=${_app_timebase_source_define}
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
+    APP_ENABLE_DEBUG=$<BOOL:${APP_ENABLE_DEBUG}>
+    APP_ENABLE_FLOAT=$<BOOL:${APP_ENABLE_FLOAT}>
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf
-# support by default. APP_ENABLE_PRINTF_FLOAT controls whether this target
+# support by default. APP_ENABLE_FLOAT controls whether this target
 # pulls the newlib-nano float formatter in via -u _printf_float, scoped to
 # this one target rather than widening the shared STM32F103Flags.cmake link
 # policy for every project.
-if(APP_ENABLE_PRINTF_FLOAT)
+if(APP_ENABLE_FLOAT)
     target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
 endif()

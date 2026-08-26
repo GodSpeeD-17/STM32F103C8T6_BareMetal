@@ -3,7 +3,7 @@
  * @author	Shrey Shah
  * @brief	Defines the compile-time policy shared by application services
  * @version	v1.0
- * @date	22-08-2026
+ * @date	26-08-2026
  *
  * @details
  * @section APP_CONFIG_H_HIERARCHY Application Hierarchy
@@ -11,8 +11,9 @@
  * - Layer 4 - Entry: `app_startup` performs reset handling
  * - Layer 3 - Orchestration: `app_init` initializes services and `main` runs
  *   application behavior
- * - Layer 2 - Services: `app_time` and `app_delay` provide reusable operations
- * - Layer 1 - Hardware access: shared SysTick, RCC, and Timer Drivers
+ * - Layer 2 - Service: `app_time` owns timebase and blocking-delay operations
+ * - Layer 1 - Hardware access: shared SysTick, RCC, Timer, GPIO, USART, and
+ *   selected BSP capabilities
  * Layer 1 is always closest to hardware. Increasing layer numbers represent
  * progressively more software-only behavior, policy, and orchestration.
  *
@@ -21,12 +22,13 @@
  * Layers 2 and 3 read it; it does not call or initialize any layer.
  *
  * @section APP_CONFIG_H_USERS Direct Users
- * `app_init.c`, `main.c`, `app_time.h`, and `app_delay.h` include this file.
+ * `app_init.c`, `main.c`, and `app_time.h` include this file.
  *
  * @section APP_CONFIG_H_BOUNDARY Dependency Boundary
  * This file includes no project, Core, or Driver header. It selects features
  * and publishes constants only. Layer 3 orders enabled services; Layer 2
- * services request their Layer 1 hardware transactions.
+ * services request their Layer 1 hardware transactions. Board mappings remain
+ * owned by their capability headers and are never republished here.
  */
 
 // Header Guard
@@ -34,7 +36,7 @@
 #define APP_CONFIG_H_
 
 /**
- * @brief Application-owned Template services
+ * @brief Application-owned services
  * @defgroup App_Template Application Template
  */
 
@@ -43,72 +45,65 @@
  * @defgroup App_Config Application Configuration
  * @ingroup App_Template
  * @details
- * These macros select which timing capabilities are compiled, define the
- * application timebase contract, and map an optional dedicated Timer service
- * to its hardware instance and RCC clock gate. Defining a macro publishes
- * policy only; Layer 3 orders initialization while each Layer 2 service owns
- * its cohesive Layer 1 hardware transaction.
+ * These macros select timing, board-capability, and diagnostic behavior. The
+ * timebase source selects the hardware that generates the service's fixed
+ * 1 ms tick; the independently selected TIM4 microsecond-delay service remains
+ * BSP-owned.
+ * Defining a macro publishes policy only, while Layer 3 orders initialization
+ * and the Layer 2 time service owns its selected Layer 1 transactions.
  * @{
  */
 
 // ==================================================================================================== //
-// SysTick Timebase Configuration
+// Application Timebase Configuration
 // ==================================================================================================== //
 
-#ifndef APP_ENABLE_SYSTICK_TIMEBASE
+/** @brief Disables the interrupt-driven application timebase @def APP_TIME_SOURCE_NONE */
+#define APP_TIME_SOURCE_NONE			(0U)
+/** @brief Selects the Cortex-M3 SysTick application timebase @def APP_TIME_SOURCE_SYSTICK */
+#define APP_TIME_SOURCE_SYSTICK			(1U)
+/** @brief Selects TIM2 as the application timebase @def APP_TIME_SOURCE_TIM2 */
+#define APP_TIME_SOURCE_TIM2			(2U)
+/** @brief Selects TIM3 as the application timebase @def APP_TIME_SOURCE_TIM3 */
+#define APP_TIME_SOURCE_TIM3			(3U)
+/** @brief Selects TIM4 as the application timebase @def APP_TIME_SOURCE_TIM4 */
+#define APP_TIME_SOURCE_TIM4			(4U)
+
+#ifndef APP_TIMEBASE_SOURCE
 
 /**
- * @brief Selects the SysTick-backed application millisecond timebase
- * @def APP_ENABLE_SYSTICK_TIMEBASE
+ * @brief Selects the interrupt-driven application timebase source
+ * @def APP_TIMEBASE_SOURCE
  * @details
- * CMake normally defines this master switch from
- * `APP_ENABLE_SYSTICK_TIMEBASE`. When enabled, the build adds the shared
- * SysTick Driver, App_Init() starts the application time service, `main`
- * enables its non-blocking periodic example, and App_DelayMs() becomes
- * operational. This fallback supports builds that do not inject the option.
+ * CMake normally publishes this token from its `APP_TIMEBASE_SOURCE` cache
+ * selection and resolves only the matching Driver modules. App_Init()
+ * passes it explicitly to App_TimeInit() after the RCC clock tree is stable.
+ * This fallback selects SysTick for direct builds that do not inject policy.
  * Accepted values:
- * - `0U`: Omit application timebase initialization and time-dependent behavior
- * - `1U`: Compile and initialize the SysTick-backed millisecond capability
- * @note Selecting `0U` leaves SysTick unconfigured by the Template and causes
- * App_DelayMs() to report @ref `DRIVER_STATUS_ERROR_STATE`
- * @note This switch does not allocate a general-purpose Timer or enable NVIC
- * delivery; SysTick is a dedicated Cortex-M3 exception
+ * - @ref `APP_TIME_SOURCE_NONE`: Leave every timebase source unconfigured
+ * - @ref `APP_TIME_SOURCE_SYSTICK`: Use the undivided processor clock and SysTick exception
+ * - @ref `APP_TIME_SOURCE_TIM2`: Use the TIM2 update event and external IRQ
+ * - @ref `APP_TIME_SOURCE_TIM3`: Use the TIM3 update event and external IRQ
+ * - @ref `APP_TIME_SOURCE_TIM4`: Use the TIM4 update event and external IRQ
+ * @note Selecting @ref `APP_TIME_SOURCE_NONE` causes App_DelayMs() to report
+ * @ref `DRIVER_STATUS_ERROR_STATE`
+ * @note A selected TIM2, TIM3, or TIM4 source is reserved exclusively by the
+ * project-local application time service for its complete initialized lifetime
+ * @warning TIM4 cannot simultaneously serve as the application timebase and
+ * the BSP-owned microsecond-delay Timer
  */
-#define APP_ENABLE_SYSTICK_TIMEBASE		(1U)
+#define APP_TIMEBASE_SOURCE				APP_TIME_SOURCE_SYSTICK
 
-#endif /* APP_ENABLE_SYSTICK_TIMEBASE */
+#endif /* APP_TIMEBASE_SOURCE */
 
-/**
- * @brief Defines the SysTick interrupt rate that represents milliseconds
- * @def APP_SYSTICK_TICK_HZ
- * @details
- * App_TimeInit() converts this frequency and the processor clock into the
- * register-semantic SysTick reload value. At `1000UL`, one interrupt
- * represents one millisecond, so App_TimeGetTickMs() requires no conversion.
- * Accepted values:
- * - `1000UL`: Required rate for the current one-tick-equals-one-millisecond contract
- * @note The configured AHB clock must be exactly divisible by this frequency
- * and must produce a SysTick reload period within the 24-bit hardware limit
- * @warning Changing this value requires corresponding time-unit conversion in
- * `app_time`; changing only the macro makes every `*Ms` API report the wrong unit
- */
-#define APP_SYSTICK_TICK_HZ				(1000UL)
-
-/**
- * @brief Defines the non-blocking demonstration task period in milliseconds
- * @def APP_MAIN_PERIOD_MS
- * @details
- * `main.c` compares the elapsed application time against this interval and
- * advances its previous-deadline tick by the same amount when the interval is
- * due. The macro changes application scheduling cadence without changing the
- * SysTick interrupt frequency.
- * Accepted values:
- * - `1UL..0x7FFFFFFFUL`: Non-zero wrap-safe scheduling interval
- * @note This macro has no effect when @ref `APP_ENABLE_SYSTICK_TIMEBASE` is `0U`
- * @note Replace the demonstration block in `main.c` with project behavior while
- * retaining this period only when the application needs it
- */
-#define APP_MAIN_PERIOD_MS				(1000UL)
+#if \
+	(APP_TIMEBASE_SOURCE != APP_TIME_SOURCE_NONE) && \
+	(APP_TIMEBASE_SOURCE != APP_TIME_SOURCE_SYSTICK) && \
+	(APP_TIMEBASE_SOURCE != APP_TIME_SOURCE_TIM2) && \
+	(APP_TIMEBASE_SOURCE != APP_TIME_SOURCE_TIM3) && \
+	(APP_TIMEBASE_SOURCE != APP_TIME_SOURCE_TIM4)
+#error "APP_TIMEBASE_SOURCE must select NONE, SYSTICK, TIM2, TIM3, or TIM4."
+#endif /* APP_TIMEBASE_SOURCE validity */
 
 // ==================================================================================================== //
 // Optional Timer Delay Configuration
@@ -121,18 +116,23 @@
  * @def APP_ENABLE_TIMER_US_DELAY
  * @details
  * CMake normally defines this macro from `APP_ENABLE_TIMER_US_DELAY`. When it
- * is `1U`, the build adds the Timer Driver, app_delay exposes its microsecond
- * APIs, and App_Init() configures the dedicated delay Timer once. This fallback
- * definition supports builds that do not inject the CMake option.
+ * is `1U`, the build adds the `BSP_TIMER` capability, app_time exposes
+ * App_DelayUs(), and App_Init() requests the complete BSP-owned TIM4
+ * initialization transaction. This fallback supports direct builds that do
+ * not inject the option.
  * Accepted values:
- * - `0U`: Exclude the Timer delay API and leave every general-purpose Timer untouched
- * - `1U`: Compile, initialize, and expose the dedicated polling-delay service
+ * - `0U`: Exclude the microsecond-delay API and leave BSP TIM4 unrequested
+ * - `1U`: Compile, initialize, and expose the BSP TIM4 polling-delay service
  * @note This service polls Timer completion; it does not enable Timer IRQ
  * sources or NVIC delivery
  */
 #define APP_ENABLE_TIMER_US_DELAY		(0U)
 
 #endif /* APP_ENABLE_TIMER_US_DELAY */
+
+#if (APP_ENABLE_TIMER_US_DELAY == 1U) && (APP_TIMEBASE_SOURCE == APP_TIME_SOURCE_TIM4)
+#error "APP_TIME_SOURCE_TIM4 conflicts with the BSP-owned TIM4 microsecond-delay capability."
+#endif /* APP_ENABLE_TIMER_US_DELAY && APP_TIME_SOURCE_TIM4 */
 
 // ==================================================================================================== //
 // Optional On-Board LED Configuration
@@ -141,62 +141,67 @@
 #ifndef APP_ENABLE_ONBOARD_LED
 
 /**
- * @brief Selects the optional BSP on-board LED initialization
+ * @brief Selects the optional BSP on-board LED initialization and fault indication
  * @def APP_ENABLE_ONBOARD_LED
  * @details
  * CMake normally defines this macro from `APP_ENABLE_ONBOARD_LED`. When it is
- * `1U`, the build adds the BSP Driver, and App_Init() configures the board
- * on-board LED GPIO and forces it to a deterministic off state. This fallback
- * definition supports builds that do not inject the CMake option.
+ * `1U`, App_Init() configures the board on-board LED GPIO and forces it to a
+ * deterministic off state before application behavior begins.
+ * This fallback definition supports builds that do not inject the CMake option.
  * Accepted values:
- * - `0U`: Leave the on-board LED GPIO untouched by the Template
- * - `1U`: Initialize the on-board LED GPIO and force it off; Template default
- * @note Application code still owns every BSP_OB_LED_Set() / BSP_OB_LED_Reset() /
- * BSP_OB_LED_Toggle() call; this switch only guarantees the pin is configured
- * and starts from a known state
+ * - `0U`: Leave the on-board LED GPIO untouched
+ * - `1U`: Initialize the on-board LED GPIO and force it off; default
+ * @note Application code owns every BSP_OB_LED_Set() / BSP_OB_LED_Reset() /
+ * BSP_OB_LED_Toggle() call; this switch does not make BSP own application
+ * control flow
+ * @note CMake requests the LED-only `BSP_GPIO` capability only when this macro
+ * is `1U`
  */
 #define APP_ENABLE_ONBOARD_LED			(1U)
 
 #endif /* APP_ENABLE_ONBOARD_LED */
 
-#if (APP_ENABLE_TIMER_US_DELAY == 1U)
+// ==================================================================================================== //
+// Optional Float and Debug Configuration
+// ==================================================================================================== //
+
+#ifndef APP_ENABLE_FLOAT
 
 /**
- * @brief Selects the Timer instance reserved for microsecond blocking delays
- * @def APP_DELAY_TIMER
+ * @brief Selects application code that requires float or double arithmetic
+ * @def APP_ENABLE_FLOAT
  * @details
- * App_DelayTimerInit() passes this instance to TIM_ConfigForBlockingDelay(),
- * and App_DelayUs() passes it to TIM_BlockingDelayUs(). The Timer remains
- * configured between calls so a delay does not repeatedly configure hardware.
+ * CMake normally defines this policy from `APP_ENABLE_FLOAT`. It controls
+ * whether the application may compile float-dependent behavior and whether
+ * CMake links newlib-nano's `%f` formatter.
  * Accepted values:
- * - `TIM2`: Reserve Timer 2 for the delay service
- * - `TIM3`: Reserve Timer 3 for the delay service
- * - `TIM4`: Reserve Timer 4 for the delay service; Template default
- * @pre @ref `APP_DELAY_TIMER_CLOCK_MASK` must select the matching APB1 clock gate
- * @warning The application must not reuse or reconfigure the selected Timer
- * while the delay service owns it
+ * - `0U`: Exclude float-dependent application behavior
+ * - `1U`: Permit float-dependent application behavior
+ * @note This switch alone does not enable diagnostics or call any BSP API
  */
-#define APP_DELAY_TIMER					TIM4
+#define APP_ENABLE_FLOAT				(0U)
+
+#endif /* APP_ENABLE_FLOAT */
+
+#ifndef APP_ENABLE_DEBUG
 
 /**
- * @brief Selects the RCC APB1 clock gate for the dedicated delay Timer
- * @def APP_DELAY_TIMER_CLOCK_MASK
+ * @brief Selects optional application debug behavior
+ * @def APP_ENABLE_DEBUG
  * @details
- * App_DelayTimerInit() passes this mask to `RCC_SetPeripheralClockState()`
- * with `RCC_APB1_BUS` and `DRIVER_STATUS_ON` before configuring
- * @ref `APP_DELAY_TIMER`. Keeping the gate explicit preserves RCC
- * ownership at the application-service boundary.
+ * CMake normally defines this policy from `APP_ENABLE_DEBUG`. When enabled,
+ * App_Init() acquires the complete BSP USART transport before `main()` starts.
+ * When disabled, that implicit boot-only path is not compiled and application
+ * code remains responsible for any USART configuration it requires.
  * Accepted values:
- * - `RCC_APB1ENR_TIM2EN`: Clock gate paired with `TIM2`
- * - `RCC_APB1ENR_TIM3EN`: Clock gate paired with `TIM3`
- * - `RCC_APB1ENR_TIM4EN`: Clock gate paired with `TIM4`; Template default
- * @pre This mask must correspond exactly to @ref `APP_DELAY_TIMER`
- * @note The macro enables no clock by itself; Layer 3 App_Init() reaches the
- * Layer 2 delay service, which explicitly requests the Layer 1 RCC transaction
+ * - `0U`: Exclude optional application debug behavior
+ * - `1U`: Compile optional application debug behavior
+ * @note This demonstration convenience controls implicit BSP USART acquisition
+ * only; it does not restrict application-owned USART Driver configuration
  */
-#define APP_DELAY_TIMER_CLOCK_MASK		RCC_APB1ENR_TIM4EN
+#define APP_ENABLE_DEBUG				(0U)
 
-#endif /* APP_ENABLE_TIMER_US_DELAY */
+#endif /* APP_ENABLE_DEBUG */
 
 /** @} */ // App_Config
 

@@ -12,8 +12,9 @@
  * - Uses: Layer 1 USART Driver through `main.c`
  *
  * @section MAIN_H_RESPONSIBILITY Responsibility
- * This header declares the application entry point only. USART configuration
- * and timing constants live in `main.c` as they are private to this demo.
+ * This header declares the application entry point only. The default path's
+ * explicit USART configuration and timing constants live in `main.c`; Debug
+ * policy may instead supply the same hardware through BSP before entry.
  *
  * @section MAIN_H_BOUNDARY Dependency Boundary
  * This header is standalone so startup does not acquire application-service or

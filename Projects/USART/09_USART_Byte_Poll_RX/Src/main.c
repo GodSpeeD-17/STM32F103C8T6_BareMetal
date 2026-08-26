@@ -16,12 +16,14 @@
  * `USART_ReceiveByte()` to pick up a one-byte mode command that drives an
  * external LED on PA3: '0' off, '1' always on, '2' toggles every 1000ms, '3'
  * toggles every 500ms. The toggle modes are timed against the non-blocking
- * `App_TimeGetElapsedMs()` application timebase rather than a blocking delay,
+ * `App_TimeGetElapsedTicks()` application timebase rather than a blocking delay,
  * so the LED keeps toggling on schedule between received bytes. A receive
  * timeout (no byte within the bounded poll window) is expected while the
- * sender is idle and is not an error. The application owns RCC and GPIO
- * configuration in that order; the USART driver never touches GPIO or its
- * own clock gate.
+ * sender is idle and is not an error. By default the application owns RCC,
+ * GPIO, and USART configuration in that order; the USART Driver never touches
+ * GPIO or its own clock gate. Debug mode instead demonstrates the BSP
+ * initialization shortcut and reuses that configured transport without a
+ * second application USART configuration pass.
  *
  * @section MAIN_C_BOUNDARY Dependency Boundary
  * Application behavior belongs here. Processor startup, clock configuration,
@@ -32,6 +34,7 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
+#include "app_config.h"
 #include "app_time.h"
 #include "bsp_gpio.h"
 #include "gpio.h"
@@ -94,6 +97,7 @@ static void App_ErrorHandler(void)
  * @brief Configures application-owned PA10 routing for USART1 RX
  * @returns @ref driver_status_t "GPIO configuration status"
  */
+#if (APP_ENABLE_DEBUG == 0U)
 static driver_status_t App_ConfigGPIOForUSART(void)
 {
 	//! The application explicitly owns the GPIO-port clock gate.
@@ -107,6 +111,7 @@ static driver_status_t App_ConfigGPIOForUSART(void)
 		GPIO_PIN_CONFIG_INPUT_FLOATING
 	);
 }
+#endif /* APP_ENABLE_DEBUG */
 
 /**
  * @brief Configures application-owned PA3 as the received-byte LED output
@@ -123,6 +128,7 @@ static driver_status_t App_ConfigLEDGPIO(void)
  * @brief Configures USART1 for RX-only 115200 8N1 operation
  * @returns @ref driver_status_t "USART initialization status"
  */
+#if (APP_ENABLE_DEBUG == 0U)
 static driver_status_t App_ConfigUSART(void)
 {
 	const usart_config_t usartConfig =
@@ -144,6 +150,7 @@ static driver_status_t App_ConfigUSART(void)
 	//! Enabling UE is the final independent USART operation.
 	return USART_SetOperationState(APP_USART, DRIVER_STATUS_ON);
 }
+#endif /* APP_ENABLE_DEBUG */
 
 // ==================================================================================================== //
 // Application Entry Point
@@ -160,19 +167,24 @@ int main(void)
 	//! Tick at which the toggle modes last flipped the LED
 	uint32_t lastToggleTickMs = 0x00UL;
 
-	//! Physical pin routing is intentionally outside the USART driver.
+#if (APP_ENABLE_DEBUG == 0U)
+	//! The default educational path explicitly configures USART routing through shared RCC/GPIO Drivers.
 	if (App_ConfigGPIOForUSART() != DRIVER_STATUS_SUCCESS)
 	{
 		App_ErrorHandler();
 	}
+#endif /* APP_ENABLE_DEBUG */
 	if (App_ConfigLEDGPIO() != DRIVER_STATUS_SUCCESS)
 	{
 		App_ErrorHandler();
 	}
+#if (APP_ENABLE_DEBUG == 0U)
+	//! The application configures USART state only when boot-time Debug did not already acquire the BSP transport.
 	if (App_ConfigUSART() != DRIVER_STATUS_SUCCESS)
 	{
 		App_ErrorHandler();
 	}
+#endif /* APP_ENABLE_DEBUG */
 
 	//! Infinite Loop
 	while (1)
@@ -195,7 +207,7 @@ int main(void)
 					{
 						App_ErrorHandler();
 					}
-					lastToggleTickMs = App_TimeGetTickMs();
+					lastToggleTickMs = App_TimeGetTick();
 					break;
 				}
 
@@ -207,7 +219,7 @@ int main(void)
 					{
 						App_ErrorHandler();
 					}
-					lastToggleTickMs = App_TimeGetTickMs();
+					lastToggleTickMs = App_TimeGetTick();
 					break;
 				}
 
@@ -243,7 +255,7 @@ int main(void)
 		if (togglePeriodMs != 0x00UL)
 		{
 			//! Time elapsed? 
-			if (App_TimeGetElapsedMs(lastToggleTickMs) >= togglePeriodMs)
+			if (App_TimeGetElapsedTicks(lastToggleTickMs) >= togglePeriodMs)
 			{
 				//! Toggle the GPIO
 				if (GPIO_PinToggle(APP_USART_GPIO_PORT, APP_LED_PIN_MASK) != DRIVER_STATUS_SUCCESS)
@@ -251,7 +263,7 @@ int main(void)
 					App_ErrorHandler();
 				}
 				//! Update the last toggle timestamp
-				lastToggleTickMs = App_TimeGetTickMs();
+				lastToggleTickMs = App_TimeGetTick();
 			}
 		}
 	}

@@ -15,9 +15,10 @@
  * _sbrk() owns the current program break and admits allocations only inside
  * the heap interval defined by the linker script. The remaining stubs
  * (_close/_lseek/_read/_write/_fstat/_isatty/_exit/_kill/_getpid) satisfy
- * link-time references pulled in by `-u _printf_float` in this project's
- * CMakeLists.txt, which enables floating-point printf-family conversions
- * under `--specs=nano.specs`. None of this demo's code performs file I/O, so
+ * link-time references that may be pulled in by the C library. When
+ * `APP_ENABLE_FLOAT` is enabled, this project's CMakeLists.txt adds
+ * `-u _printf_float` for floating-point printf-family conversions under
+ * `--specs=nano.specs`. None of this demo's code performs file I/O, so
  * every stub below is link-satisfying only and is never called.
  *
  * @section SYSCALLS_C_BOUNDARY Dependency Boundary

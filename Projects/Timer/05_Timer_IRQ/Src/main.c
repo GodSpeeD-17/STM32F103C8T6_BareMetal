@@ -9,7 +9,7 @@
  * @section MAIN_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior implementation
  * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 Timer/GPIO/BSP/NVIC Drivers
+ * - Uses: Layer 2 `app_time` and Layer 1 Timer/GPIO/BSP/NVIC Drivers
  *
  * @section MAIN_C_RESPONSIBILITY Responsibility
  * Configures TIM3 with a 10 kHz counter tick and a 10000-count period. The
@@ -25,7 +25,7 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
-#include "app_delay.h"
+#include "app_time.h"
 #include "bsp_gpio.h"
 #include "gpio.h"
 #include "nvic.h"

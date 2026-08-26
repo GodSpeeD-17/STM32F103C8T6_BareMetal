@@ -9,7 +9,7 @@
  * @section MAIN_H_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior
  * - Invoked by: Layer 4 `app_startup` after initialization succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 GPIO/BSP Drivers through `main.c`
+ * - Uses: Layer 2 `app_time` and Layer 1 GPIO/BSP Drivers through `main.c`
  *
  * @section MAIN_H_RESPONSIBILITY Responsibility
  * This header declares the application entry point only. Timing constants and

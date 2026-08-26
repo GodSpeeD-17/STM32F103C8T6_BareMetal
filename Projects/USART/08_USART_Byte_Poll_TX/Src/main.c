@@ -9,15 +9,17 @@
  * @section MAIN_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior implementation
  * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 USART/GPIO/BSP Drivers
+ * - Uses: Layer 2 `app_time` and Layer 1 USART/GPIO/BSP Drivers
  *
  * @section MAIN_C_RESPONSIBILITY Responsibility
  * Configures USART1 TX on PA9 at 115200 baud and repeatedly transmits one
  * incrementing byte from 'A' to 'Z', each blocking on its own
  * `USART_TransmitByte()` call, sending a single '\n' byte right after 'Z' to
  * mark the end of each completed cycle before wrapping back to 'A'. The
- * application owns RCC, GPIO/AFIO, and USART configuration in that order;
- * the USART driver never touches GPIO or its own clock gate.
+ * By default the application owns RCC, GPIO, and USART configuration in that
+ * order; the USART Driver never touches GPIO or its own clock gate. Debug mode
+ * instead demonstrates the BSP initialization shortcut and reuses that
+ * configured transport without a second application configuration pass.
  *
  * @section MAIN_C_BOUNDARY Dependency Boundary
  * Application behavior belongs here. Processor startup, clock configuration,
@@ -28,7 +30,8 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
-#include "app_delay.h"
+#include "app_config.h"
+#include "app_time.h"
 #include "bsp_gpio.h"
 #include "gpio.h"
 #include "rcc.h"
@@ -42,9 +45,9 @@
 #define APP_USART							(USART1)
 /** @brief Application-owned USART peripheral clock gate @def APP_USART_CLOCK_MASK */
 #define APP_USART_CLOCK_MASK				(RCC_APB2ENR_USART1EN)
-/** @brief Application-owned GPIO and AFIO clock gates @def APP_USART_GPIO_CLOCK_MASK */
-#define APP_USART_GPIO_CLOCK_MASK			(RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
-/** @brief GPIO port carrying default-remap USART1 TX @def APP_USART_GPIO_PORT */
+/** @brief Application-owned GPIO clock gate @def APP_USART_GPIO_CLOCK_MASK */
+#define APP_USART_GPIO_CLOCK_MASK			(RCC_APB2ENR_IOPAEN)
+/** @brief GPIO port carrying reset-default USART1 TX @def APP_USART_GPIO_PORT */
 #define APP_USART_GPIO_PORT					(GPIOA)
 /** @brief PA9 carrying default-remap USART1 TX @def APP_USART_TX_PIN_MASK */
 #define APP_USART_TX_PIN_MASK				((gpio_pin_t) GPIO_PIN_9)
@@ -78,9 +81,10 @@ static void App_ErrorHandler(void)
  * @brief Configures application-owned PA9 routing for USART1 TX
  * @returns @ref driver_status_t "GPIO configuration status"
  */
+#if (APP_ENABLE_DEBUG == 0U)
 static driver_status_t App_ConfigGPIOForUSART(void)
 {
-	//! The application explicitly owns both the GPIO-port and AFIO clock gates.
+	//! The untouched reset-default PA9 route needs GPIOA but no AFIO clock or remap transaction.
 	ASSERT_DRIVER_STATUS(RCC_SetPeripheralClockState(RCC_APB2_BUS, APP_USART_GPIO_CLOCK_MASK, DRIVER_STATUS_ON));
 	//! 50 MHz drive strength keeps TX edge rate comfortable across every supported baud preset.
 	return GPIO_SetPinModeConfig
@@ -117,6 +121,7 @@ static driver_status_t App_ConfigUSART(void)
 	//! Enabling UE is the final independent USART operation.
 	return USART_SetOperationState(APP_USART, DRIVER_STATUS_ON);
 }
+#endif /* APP_ENABLE_DEBUG */
 
 // ==================================================================================================== //
 // Application Entry Point
@@ -127,7 +132,8 @@ int main(void)
 	//! Data to be sent
 	uint8_t counter = 'A';
 
-	//! Physical pin routing is intentionally outside the USART driver.
+#if (APP_ENABLE_DEBUG == 0U)
+	//! The default educational path explicitly configures routing and USART state through shared Drivers.
 	if (App_ConfigGPIOForUSART() != DRIVER_STATUS_SUCCESS)
 	{
 		App_ErrorHandler();
@@ -136,6 +142,7 @@ int main(void)
 	{
 		App_ErrorHandler();
 	}
+#endif /* APP_ENABLE_DEBUG */
 
 	//! Infinite Loop
 	while (1)

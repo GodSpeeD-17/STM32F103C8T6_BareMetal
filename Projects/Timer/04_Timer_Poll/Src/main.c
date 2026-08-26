@@ -15,7 +15,7 @@
  * Configures TIM2 as a dedicated 1 MHz blocking polling-delay source. The
  * application toggles the on-board LED once per blocking delay interval and
  * treats any Timer status failure as terminal. TIM2 is owned directly by this
- * demo rather than through `app_delay`, since demonstrating the Timer
+ * demo rather than through `app_time`, since demonstrating the Timer
  * driver's own blocking-delay API is the point of this project.
  *
  * @section MAIN_C_BOUNDARY Dependency Boundary

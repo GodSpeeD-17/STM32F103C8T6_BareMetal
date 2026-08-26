@@ -13,7 +13,7 @@
  *
  * @section MAIN_H_RESPONSIBILITY Responsibility
  * This header declares the application entry point only. This demo
- * deliberately owns TIM2 directly instead of through `app_delay`, so the
+ * deliberately owns TIM2 directly instead of through `app_time`, so the
  * Timer driver's blocking-delay API stays visible end to end.
  *
  * @section MAIN_H_BOUNDARY Dependency Boundary

@@ -9,7 +9,7 @@
  * @section MAIN_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior implementation
  * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 GPIO/BSP Drivers
+ * - Uses: Layer 2 `app_time` and Layer 1 GPIO/BSP Drivers
  *
  * @section MAIN_C_RESPONSIBILITY Responsibility
  * The application polls an externally pulled-up push button and toggles the
@@ -24,7 +24,7 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
-#include "app_delay.h"
+#include "app_time.h"
 #include "bsp_gpio.h"
 #include "gpio.h"
 #include "rcc.h"

@@ -9,7 +9,7 @@
  * @section MAIN_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior implementation
  * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
- * - Uses: Layer 2 `app_delay` and Layer 1 BSP Driver
+ * - Uses: Layer 2 `app_time` and Layer 1 BSP Driver
  *
  * @section MAIN_C_RESPONSIBILITY Responsibility
  * The application toggles the BSP on-board active-low LED on a fixed period.
@@ -24,7 +24,7 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
-#include "app_delay.h"
+#include "app_time.h"
 #include "bsp_gpio.h"
 
 // ==================================================================================================== //
@@ -32,7 +32,7 @@
 // ==================================================================================================== //
 
 /** @brief On-board LED toggle period in milliseconds @def LED_TOGGLE_DELAY_MS */
-#define LED_TOGGLE_DELAY_MS					(500UL)
+#define LED_TOGGLE_DELAY_MS					(2000UL)
 
 // ==================================================================================================== //
 // Application Entry Point

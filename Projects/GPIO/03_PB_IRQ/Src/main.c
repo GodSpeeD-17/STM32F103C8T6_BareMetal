@@ -9,7 +9,7 @@
  * @section MAIN_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior implementation
  * - Called by: Layer 4 Reset_Handler() after App_Init() succeeds
- * - Uses: Layer 2 `app_time`/`app_delay` and Layer 1 GPIO/BSP/NVIC Drivers
+ * - Uses: Layer 2 `app_time` and Layer 1 GPIO/BSP/NVIC Drivers
  *
  * @section MAIN_C_RESPONSIBILITY Responsibility
  * This project configures an externally pulled-up push button as a GPIO-backed
@@ -26,7 +26,6 @@
 // Includes
 // ==================================================================================================== //
 #include "main.h"
-#include "app_delay.h"
 #include "app_time.h"
 #include "bsp_gpio.h"
 #include "gpio.h"
@@ -176,7 +175,7 @@ int main(void)
  */
 void EXTI1_IRQHandler(void)
 {
-	const uint32_t currentTick = App_TimeGetTickMs();
+	const uint32_t currentTick = App_TimeGetTick();
 
 	if (GPIO_IRQ_IsTriggered(PUSH_BUTTON_PIN) == DRIVER_STATUS_ON)
 	{
