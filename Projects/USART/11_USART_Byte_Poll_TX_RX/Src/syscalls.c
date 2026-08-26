@@ -16,8 +16,8 @@
  * the heap interval defined by the linker script. The remaining stubs
  * (_close/_lseek/_read/_write/_fstat/_isatty/_exit/_kill/_getpid) satisfy
  * link-time references that may be pulled in by the C library. When
- * `APP_ENABLE_USART`, `APP_ENABLE_DEBUG`, and `APP_ENABLE_FLOAT` are enabled,
- * this project's CMakeLists.txt adds `-u _printf_float` for floating-point
+ * `APP_ENABLE_DEBUG` and `APP_ENABLE_FLOAT` are enabled, this project's
+ * CMakeLists.txt adds `-u _printf_float` for floating-point
  * `printf`-family conversions under `--specs=nano.specs`. None of this demo's
  * code performs file I/O, so every stub below is link-satisfying only and is
  * never called.
@@ -32,6 +32,7 @@
 // ==================================================================================================== //
 #include <errno.h>
 #include <sys/stat.h>
+#include "cmsis_gcc.h"
 #include "stm32f1xx_data_types.h"
 
 // ==================================================================================================== //
@@ -65,7 +66,7 @@ void _exit(int status);
 // ==================================================================================================== //
 
 /** @brief Current application heap boundary managed by _sbrk() */
-static uint8_t* pHeapEnd = &_sheap;
+__STATIC uint8_t* pHeapEnd = &_sheap;
 
 // ==================================================================================================== //
 // C Library Heap Adapter

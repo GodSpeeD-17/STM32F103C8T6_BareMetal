@@ -3,7 +3,7 @@
  * @author	Shrey Shah
  * @brief	Declares application-owned hardware-service initialization
  * @version	v1.0
- * @date	22-08-2026
+ * @date	26-08-2026
  *
  * @details
  * @section APP_INIT_H_HIERARCHY Hierarchy
@@ -15,14 +15,14 @@
  * This interface exposes the single ordered initialization transaction used
  * before `main`. The implementation configures the clock first and then every
  * application service enabled by `app_config.h`. It configures the optional
- * on-board LED capability when selected. When @ref `APP_ENABLE_USART` is
- * `1U`, it directs BSP to perform the complete RCC/GPIO/USART transaction for
- * the fixed full-duplex transport before `main` starts polling it.
+ * on-board LED capability when selected. Debug policy additionally directs BSP
+ * to configure the fixed full-duplex transport before emitting boot text;
+ * otherwise application behavior owns any required USART acquisition.
  *
  * @section APP_INIT_H_BOUNDARY Dependency Boundary
- * This header includes shared status types only. RCC, SysTick, Timer, BSP,
- * and application-service headers remain private to
- * `app_init.c` and do not leak upward into startup.
+ * This header includes shared status types only. RCC, selected timebase
+ * Drivers, BSP capabilities, and application-service headers remain private
+ * to `app_init.c` and do not leak upward into startup.
  */
 
 // Header Guard
@@ -53,15 +53,14 @@ extern "C" {
 /**
  * @brief Initializes the hardware services selected by application policy
  * @details
- * Applies the 72 MHz RCC preset first, initializes the SysTick-backed timebase
- * when enabled, initializes the optional dedicated microsecond-delay Timer,
- * then requests the optional BSP on-board LED transaction. When
- * @ref `APP_ENABLE_USART` is `1U`, BSP_InitUSART() enables GPIOA/USART1 clocks
- * and configures the fixed PA9/PA10 115200-baud 8N1 full-duplex board
- * transport, then optionally emits a diagnostic through
- * BSP_USART_printf(). When the capability is `0U`, no USART hardware is
- * accessed and initialization proceeds to valid idle firmware. Processing
- * stops at the first failed enabled transaction.
+ * Applies the 72 MHz RCC preset first, initializes the selected SysTick or
+ * general-purpose Timer as the fixed 1 ms application timebase, requests the
+ * optional BSP-owned TIM4 microsecond-delay transaction, then requests the
+ * optional BSP on-board LED transaction. When debug is enabled,
+ * BSP_InitUSART() enables the GPIOA/USART1 clocks and configures the fixed
+ * PA9/PA10 115200-baud 8N1 full-duplex board transport before a diagnostic is
+ * emitted through BSP_USART_printf(). Processing stops at the first failed
+ * transaction.
  * @returns @ref driver_status_t "Application initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every enabled application service was initialized
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: An enabled service configuration was invalid
@@ -69,15 +68,16 @@ extern "C" {
  * `BSP_USART_printf()` formatting failed
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: An enabled service hardware
  * precondition was not satisfied, including a selected board USART clock gate
- * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The optional dedicated Timer was running
+ * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: A selected timebase or BSP Timer was running
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: RCC initialization or an
  * enabled debug diagnostic's `BSP_USART_printf()` TX polling timed out
  * @retval - @ref `DRIVER_STATUS_ERROR`: RCC hardware state could not be decoded
- * @note Timer hardware is untouched when @ref `APP_ENABLE_TIMER_US_DELAY` is `0U`
+ * @note Timebase hardware is untouched when @ref `APP_TIMEBASE_SOURCE` is
+ * @ref `APP_TIME_SOURCE_NONE`
+ * @note BSP TIM4 hardware is untouched when @ref `APP_ENABLE_TIMER_US_DELAY` is `0U`
  * @note The on-board LED GPIO is untouched when @ref `APP_ENABLE_ONBOARD_LED` is `0U`
- * @note Board USART setup is omitted when @ref `APP_ENABLE_USART` is `0U`;
- * when enabled, BSP owns the complete RCC, pin, and USART configuration
- * transaction
+ * @note BSP owns the complete board USART RCC, pin, and peripheral
+ * configuration transaction requested here only when debug is enabled
  */
 driver_status_t App_BootInit(void);
 

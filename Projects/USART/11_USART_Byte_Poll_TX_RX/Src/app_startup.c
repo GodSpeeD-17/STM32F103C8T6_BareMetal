@@ -133,7 +133,7 @@
  * @def APP_DECLARE_DEFAULT_HANDLER
  */
 #define APP_DECLARE_DEFAULT_HANDLER(handlerName)		\
-	void __attribute__((weak, alias("Default_Handler"))) handlerName(void)
+	void __WEAK __attribute__((alias("Default_Handler"))) handlerName(void)
 
 // ==================================================================================================== //
 // Weak Exception Handlers
@@ -200,7 +200,7 @@ APP_DECLARE_DEFAULT_HANDLER(USBWakeUp_IRQHandler);
  * @brief Project-owned processor vector table placed at the Flash image origin
  * @details Contains 16 Cortex-M3 core entries followed by 43 device IRQ entries.
  */
-__attribute__((used, section(".isr_vector"))) static const uintptr_t appVectorTable[APP_CORE_VECTOR_COUNT + APP_EXTERNAL_VECTOR_COUNT] =
+__USED __attribute__((section(".isr_vector"))) __STATIC const uintptr_t appVectorTable[APP_CORE_VECTOR_COUNT + APP_EXTERNAL_VECTOR_COUNT] =
 {
 	(uintptr_t) &_estack,
 	(uintptr_t) Reset_Handler,
@@ -286,7 +286,7 @@ void Default_Handler(void)
  * calls App_BootInit() and main() only after global and static C storage is valid.
  * @returns Does not return
  */
-__attribute__((noreturn)) void Reset_Handler(void)
+__NO_RETURN void Reset_Handler(void)
 {
 	//! The linker aligns `.data` to four bytes and this loop copies dereferenceable 32-bit words, so
 	//! `uint32_t*` exposes its actual transfer width and alignment. `uintptr_t` only stores an address

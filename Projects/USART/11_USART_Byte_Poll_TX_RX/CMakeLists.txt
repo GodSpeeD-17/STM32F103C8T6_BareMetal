@@ -67,44 +67,65 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 # Application Feature Selection
 # ====================================================================================================
 
-# These cache options mirror the Template's application-facing hardware
-# policy. They control both shared Driver inclusion below and conditional
-# Template code through the compile definitions published at the end of
-# this file. Floating-point application logic and generic debug code are
-# independent capabilities; together they select floating-point diagnostics.
-option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
+# These cache options define Project 11's application-facing hardware policy.
+# The timebase source selects exactly one interrupt-driven hardware owner while
+# its fixed 1 kHz interrupt defines a 1 ms application tick. Floating-point
+# application logic and generic debug code remain independent features;
+# together they select floating-point diagnostics.
+set(APP_TIMEBASE_SOURCE "SYSTICK" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
+set_property(CACHE APP_TIMEBASE_SOURCE PROPERTY STRINGS OFF SYSTICK TIM2 TIM3 TIM4)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_BootInit() on-board LED configuration" ON)
-option(APP_ENABLE_USART "Enable the BSP-owned USART1 PA9/PA10 polling transport" ON)
 option(APP_ENABLE_FLOAT "Enable application float and double dependent code" OFF)
 option(APP_ENABLE_DEBUG "Enable application debug code" OFF)
 
-# Debug output has no alternate sink in Project 11: the BSP USART capability
-# is its sole transport, so reject a configuration that would compile debug
-# policy without linking or initializing the required board resource.
-if(APP_ENABLE_DEBUG AND NOT APP_ENABLE_USART)
-    message(
-        FATAL_ERROR
-        "APP_ENABLE_DEBUG=ON requires APP_ENABLE_USART=ON because Project 11 debug output uses the BSP USART transport."
-    )
+# Normalize the human-readable selector once, then publish the corresponding
+# application token so CMake module resolution and C preprocessing consume one
+# coherent source decision.
+string(TOUPPER "${APP_TIMEBASE_SOURCE}" _app_timebase_source)
+if(_app_timebase_source STREQUAL "OFF")
+    set(_app_timebase_source_define APP_TIME_SOURCE_NONE)
+elseif(_app_timebase_source STREQUAL "SYSTICK")
+    set(_app_timebase_source_define APP_TIME_SOURCE_SYSTICK)
+elseif(_app_timebase_source STREQUAL "TIM2")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM2)
+elseif(_app_timebase_source STREQUAL "TIM3")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM3)
+elseif(_app_timebase_source STREQUAL "TIM4")
+    set(_app_timebase_source_define APP_TIME_SOURCE_TIM4)
+else()
+    message(FATAL_ERROR "APP_TIMEBASE_SOURCE must be OFF, SYSTICK, TIM2, TIM3, or TIM4.")
+endif()
+
+# BSP_TIMER owns TIM4 exclusively as a polling-only microsecond-delay source;
+# one firmware cannot simultaneously assign TIM4 to the interrupt timebase.
+if(APP_ENABLE_TIMER_US_DELAY AND _app_timebase_source STREQUAL "TIM4")
+    message(FATAL_ERROR "APP_TIMEBASE_SOURCE=TIM4 conflicts with APP_ENABLE_TIMER_US_DELAY=ON because BSP_TIMER exclusively reserves TIM4.")
 endif()
 
 # RCC is required unconditionally because App_BootInit() establishes the
-# system clock. BSP capabilities are requested only when their separately
-# selected application behavior needs them: BSP_GPIO -> GPIO -> RCC for the LED,
-# and BSP_USART -> GPIO/USART -> RCC for the full-duplex board transport.
-set(app_driver_modules RCC)
+# system clock. Each source adds only its hardware path: SysTick has no RCC or
+# NVIC dependency, while TIM2-TIM4 need Timer plus external NVIC delivery.
+# The application always polls the USART Driver directly. Without debug it also
+# requests GPIO for its explicit initialization path; debug instead requests
+# BSP_USART, whose capability dependency supplies GPIO for the boot transport.
+# LED and TIM4 polling delay remain independently selected capabilities.
+set(app_driver_modules RCC USART)
+if(APP_ENABLE_DEBUG)
+    list(APPEND app_driver_modules BSP_USART)
+else()
+    list(APPEND app_driver_modules GPIO)
+endif()
 if(APP_ENABLE_ONBOARD_LED)
     list(APPEND app_driver_modules BSP_GPIO)
 endif()
-if(APP_ENABLE_USART)
-    list(APPEND app_driver_modules BSP_USART)
-endif()
-if(APP_ENABLE_SYSTICK_TIMEBASE)
+if(_app_timebase_source STREQUAL "SYSTICK")
     list(APPEND app_driver_modules SysTick)
+elseif(_app_timebase_source MATCHES "^TIM[234]$")
+    list(APPEND app_driver_modules Timer NVIC)
 endif()
 if(APP_ENABLE_TIMER_US_DELAY)
-    list(APPEND app_driver_modules Timer)
+    list(APPEND app_driver_modules BSP_TIMER)
 endif()
 
 # ====================================================================================================
@@ -127,23 +148,21 @@ stm32f103_configure_project(
     FLASH_ADDRESS 0x08000000
 )
 
-# Publish normalized 0/1 feature states only to this firmware target. Template
-# sources and app_config.h consume the same values used for Driver selection,
-# keeping compiled application APIs synchronized with linked Driver modules.
+# Publish the selected source and normalized optional feature states only to
+# this firmware target. Project 11 sources consume the same values used for
+# Driver selection, keeping compiled APIs synchronized with linked modules.
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
-    APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
+    APP_TIMEBASE_SOURCE=${_app_timebase_source_define}
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
-    APP_ENABLE_USART=$<BOOL:${APP_ENABLE_USART}>
     APP_ENABLE_FLOAT=$<BOOL:${APP_ENABLE_FLOAT}>
     APP_ENABLE_DEBUG=$<BOOL:${APP_ENABLE_DEBUG}>
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf
-# support by default. A `%f` conversion is compiled only when the board USART
-# transport, independently selected float behavior, and debug output meet in
-# this project, so only that conjunction pulls newlib-nano's formatter in via
-# -u _printf_float.
-if(APP_ENABLE_USART AND APP_ENABLE_FLOAT AND APP_ENABLE_DEBUG)
+# support by default. A `%f` conversion is compiled only when independently
+# selected float behavior and debug output meet in this project, so only that
+# conjunction pulls newlib-nano's formatter in via -u _printf_float.
+if(APP_ENABLE_FLOAT AND APP_ENABLE_DEBUG)
     target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
 endif()

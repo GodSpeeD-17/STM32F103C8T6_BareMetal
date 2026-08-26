@@ -17,9 +17,9 @@
  * calls App_BootInit(), and transfers control to main().
  *
  * @section APP_STARTUP_H_BOUNDARY Dependency Boundary
- * This header includes only `stm32f1xx_data_types.h`. It owns no peripheral
- * policy, heap adaptation, or application service, and no lower layer includes
- * it.
+ * This header includes shared data types and CMSIS compiler abstractions only.
+ * It owns no peripheral policy, heap adaptation, or application service, and
+ * no lower layer includes it.
  */
 
 // Header Guard
@@ -29,6 +29,7 @@
 // ==================================================================================================== //
 // Includes
 // ==================================================================================================== //
+#include "cmsis_gcc.h"
 #include "stm32f1xx_data_types.h"
 
 // --- C++ Compatibility ---
@@ -74,7 +75,7 @@ extern uint32_t _estack;
  * @pre The linker provides valid ordered `_sidata`, `_sdata`, `_edata`, `_sbss`, `_ebss`, and `_estack` symbols
  * @note This processor reset entry point is the second vector-table entry and never returns
  */
-__attribute__((noreturn)) void Reset_Handler(void);
+__NO_RETURN void Reset_Handler(void);
 
 /**
  * @brief Contains execution after an unimplemented exception or fatal startup error
