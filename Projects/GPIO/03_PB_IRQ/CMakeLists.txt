@@ -78,9 +78,9 @@ option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf s
 
 # BSP and NVIC are required directly by the application: BSP drives the
 # heartbeat LED and NVIC arms the push-button EXTI line. The component graph
-# resolves BSP -> GPIO -> RCC automatically; GPIO IRQ support is part of the
+# resolves BSP_GPIO -> GPIO -> RCC automatically; GPIO IRQ support is part of the
 # GPIO Driver stack. Optional services add only their owning Driver module.
-set(app_driver_modules BSP NVIC)
+set(app_driver_modules BSP_GPIO NVIC)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()

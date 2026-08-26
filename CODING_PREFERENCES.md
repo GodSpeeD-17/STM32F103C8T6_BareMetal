@@ -943,6 +943,36 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
   and `//!` comments naming the hardware rule that makes each additional
   access mandatory.
 
+## 4.7 BSP Capability Packaging and Initialization
+
+- Split board support by cohesive hardware capability. The Blue Pill board
+  package uses `bsp_gpio.[ch]` for board GPIO conveniences and
+  `bsp_usart.[ch]` for the fixed board USART transport; do not place either
+  implementation back into a monolithic `bsp.c`.
+- Each capability implementation includes its own matching public header
+  first. Each public capability header is self-contained and includes only
+  the headers required by its public macros, types, and declarations.
+  Implementation-only dependencies remain in the `.c` file.
+- `bsp.h` is an aggregate compatibility header. It includes capability headers
+  only under BSP-owned build definitions such as
+  `BSP_GPIO_CAPABILITY_ENABLED` and `BSP_USART_CAPABILITY_ENABLED`; shared BSP
+  code never consumes project-owned `APP_ENABLE_*` policy.
+- New and minimal consumers include `bsp_gpio.h` or `bsp_usart.h` directly and
+  request the matching `BSP_GPIO` or `BSP_USART` CMake component. The aggregate
+  `BSP` component deliberately resolves both capabilities.
+- Expose one canonical public initialization transaction per capability:
+  `BSP_InitOBLED()` and `BSP_InitUSART()`. Each initializer owns every RCC,
+  GPIO, and peripheral operation needed to make its board capability ready and
+  deterministic. Application boot code conditionally orchestrates those calls;
+  it does not reproduce board clock masks or configuration sequences.
+- Divide each complete BSP initializer into private `static inline` helpers
+  for its cohesive clock, GPIO, and peripheral subtransactions. Do not expose
+  those helpers or implementation-only RCC masks in public BSP headers.
+- Keep steady-state board operations public only when a current consumer needs
+  them. Legacy debug-USART wrappers may remain in the USART capability as
+  explicitly documented compatibility APIs, but they delegate canonical BSP
+  behavior and do not create a second initialization policy.
+
 ---
 
 # 5. Application Template Rules
@@ -964,6 +994,11 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 
 # Preference Log
 
+- 2026-08-26: Split BSP into independently selected GPIO and USART capability
+  headers/sources and CMake components, retained `bsp.h` as a guarded aggregate,
+  required capability headers to be self-contained and minimal, and assigned
+  complete RCC/GPIO/peripheral initialization ownership to `BSP_InitOBLED()`
+  and `BSP_InitUSART()` with private static-inline subtransaction helpers.
 - 2026-08-23: Extended peripheral-header alignment across device constants,
   all register-field macros, sibling bitfield comments, and documented closing
   register members so the complete header uses coherent shared columns.

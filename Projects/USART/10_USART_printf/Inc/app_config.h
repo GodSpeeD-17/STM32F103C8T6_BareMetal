@@ -170,13 +170,16 @@
  * @def APP_ENABLE_DEBUG_UART
  * @details
  * CMake normally defines this macro from `APP_ENABLE_DEBUG_UART`. When it is
- * `1U`, App_Init() configures the board debug UART (USART1 TX on PA9,
- * 115200 8N1) through `BSP_Debug_UART_Init()` before application code runs. This
- * fallback definition supports builds that do not inject the CMake option.
+ * `1U`, CMake requests the `BSP_USART` capability and App_Init() configures
+ * the board debug UART through `BSP_InitUSART()` before application code
+ * runs. The compatibility wrapper delegates to the canonical fixed USART1
+ * PA9/PA10 115200-baud 8N1 full-duplex board transport; this printf project
+ * uses only its transmitter. This fallback definition supports builds that do
+ * not inject the CMake option.
  * Accepted values:
  * - `0U`: Leave the debug UART untouched by the Template; Template default
- * - `1U`: Initialize the debug UART peripheral and GPIO/AFIO clock gates,
- *   then call `BSP_Debug_UART_Init()`
+ * - `1U`: Initialize the debug UART peripheral and GPIOA clock gates,
+ *   then call `BSP_InitUSART()`
  * @note This project's own `main.c` already owns and configures USART1 for
  * its printf demo, so enabling this alongside that demo redundantly
  * reconfigures the same peripheral with the same settings before `main()`

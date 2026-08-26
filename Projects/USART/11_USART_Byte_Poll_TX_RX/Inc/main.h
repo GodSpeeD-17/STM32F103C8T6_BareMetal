@@ -9,12 +9,12 @@
  * @section MAIN_H_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application behavior
  * - Invoked by: Layer 4 `app_startup` after initialization succeeds
- * - Uses: Layer 1 BSP board UART and optional on-board LED APIs through
+ * - Uses: Layer 1 BSP board USART and optional on-board LED APIs through
  *   `main.c`
  *
  * @section MAIN_H_RESPONSIBILITY Responsibility
  * This header declares the application entry point only. Application policy
- * and one-time board-UART initialization live in `app_config.h` and
+ * and one-time board-USART initialization live in `app_config.h` and
  * `app_init.c`; `main.c` owns only the resulting polling behavior.
  *
  * @section MAIN_H_BOUNDARY Dependency Boundary
@@ -38,11 +38,13 @@ extern "C" {
 /**
  * @brief Executes the USART byte TX/RX polling demo control loop
  * @details
- * After App_BootInit() configures BSP's USART1 transport with both TX and RX
- * enabled, this loop repeatedly receives one byte and immediately transmits
- * the same byte back to the connected terminal. Both operations use the BSP
- * forwarding APIs and the USART Driver's bounded polling behavior; no
- * interrupt handler or DMA channel participates in the transfer path.
+ * When @ref `APP_ENABLE_USART` is `1U`, App_BootInit() configures BSP's
+ * USART1 transport with both TX and RX enabled, then this loop repeatedly
+ * receives one byte and immediately transmits the same byte back to the
+ * connected terminal. Both operations use BSP forwarding APIs and the USART
+ * Driver's bounded polling behavior; no interrupt handler or DMA channel
+ * participates. When the capability is `0U`, this entry remains an idle loop
+ * and compiles no BSP_USART_* reference.
  * @returns Does not return
  */
 int main(void);

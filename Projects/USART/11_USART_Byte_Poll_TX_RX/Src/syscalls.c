@@ -15,11 +15,12 @@
  * _sbrk() owns the current program break and admits allocations only inside
  * the heap interval defined by the linker script. The remaining stubs
  * (_close/_lseek/_read/_write/_fstat/_isatty/_exit/_kill/_getpid) satisfy
- * link-time references that may be pulled in by the C library. When both
- * `APP_ENABLE_DEBUG` and `APP_ENABLE_FLOAT` are enabled, this project's
- * CMakeLists.txt adds `-u _printf_float` for floating-point `printf`-family
- * conversions under `--specs=nano.specs`. None of this demo's code performs
- * file I/O, so every stub below is link-satisfying only and is never called.
+ * link-time references that may be pulled in by the C library. When
+ * `APP_ENABLE_USART`, `APP_ENABLE_DEBUG`, and `APP_ENABLE_FLOAT` are enabled,
+ * this project's CMakeLists.txt adds `-u _printf_float` for floating-point
+ * `printf`-family conversions under `--specs=nano.specs`. None of this demo's
+ * code performs file I/O, so every stub below is link-satisfying only and is
+ * never called.
  *
  * @section SYSCALLS_C_BOUNDARY Dependency Boundary
  * This module has no dependency on startup, application services, Core

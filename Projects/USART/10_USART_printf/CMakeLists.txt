@@ -77,10 +77,14 @@ option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
 option(APP_ENABLE_DEBUG_UART "Enable App_Init() debug-UART (BSP Debug_UART_*) configuration" OFF)
 option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" ON)
 
-# USART is required directly by the application; the component graph
-# resolves USART -> RCC and USART -> GPIO automatically. BSP remains for the
-# default on-board LED configuration.
-set(app_driver_modules BSP USART)
+# USART is required directly by the application; the component graph resolves
+# USART -> RCC and USART -> GPIO automatically. BSP_GPIO remains the LED capability,
+# while the complete BSP USART initialization capability is additionally
+# requested only when its application switch is enabled.
+set(app_driver_modules BSP_GPIO USART)
+if(APP_ENABLE_DEBUG_UART)
+    list(APPEND app_driver_modules BSP_USART)
+endif()
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()

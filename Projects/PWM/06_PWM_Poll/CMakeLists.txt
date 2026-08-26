@@ -77,9 +77,9 @@ option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
 option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
 
 # BSP drives the ramp-complete LED, and Timer is required directly by the
-# application for TIM2 PWM. The component graph resolves BSP -> GPIO -> RCC
+# application for TIM2 PWM. The component graph resolves BSP_GPIO -> GPIO -> RCC
 # and Timer -> RCC automatically.
-set(app_driver_modules BSP Timer)
+set(app_driver_modules BSP_GPIO Timer)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()

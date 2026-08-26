@@ -76,12 +76,12 @@ option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay ser
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)
 option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
 
-# BSP is required directly by the application regardless of
+# BSP_GPIO is required directly by the application regardless of
 # APP_ENABLE_ONBOARD_LED: main.c always drives the on-board LED, and that
 # option only selects whether App_Init() or main.c performs OB_LED_Init().
-# The component graph resolves BSP -> GPIO -> RCC automatically. Optional
+# The component graph resolves BSP_GPIO -> GPIO -> RCC automatically. Optional
 # services add only their owning Driver module.
-set(app_driver_modules BSP)
+set(app_driver_modules BSP_GPIO)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()

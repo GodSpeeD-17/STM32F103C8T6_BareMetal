@@ -14,8 +14,9 @@
  * @section APP_INIT_C_RESPONSIBILITY Responsibility
  * App_Init() establishes the system clock, starts the configured monotonic
  * timebase, allocates the optional Timer delay service, configures the
- * optional on-board LED, then configures the optional debug UART in that
- * order. It propagates the first initialization failure unchanged.
+ * optional on-board LED, then requests the optional BSP USART capability in
+ * that order. Each BSP initializer owns its complete board-resource setup,
+ * and this orchestrator propagates the first failure unchanged.
  *
  * @section APP_INIT_C_BOUNDARY Dependency Boundary
  * This module selects and orders services but does not access peripheral
@@ -30,9 +31,13 @@
 #include "app_delay.h"
 #include "app_time.h"
 #include "rcc.h"
-#if (APP_ENABLE_ONBOARD_LED == 1U) || (APP_ENABLE_DEBUG_UART == 1U)
-#include "bsp.h"
-#endif /* APP_ENABLE_ONBOARD_LED || APP_ENABLE_DEBUG_UART */
+#if (APP_ENABLE_ONBOARD_LED == 1U)
+#include "bsp_gpio.h"
+#endif /* APP_ENABLE_ONBOARD_LED */
+
+#if (APP_ENABLE_DEBUG_UART == 1U)
+#include "bsp_usart.h"
+#endif /* APP_ENABLE_DEBUG_UART */
 
 // ==================================================================================================== //
 // Public API
@@ -54,44 +59,13 @@ driver_status_t App_Init(void)
 #endif
 
 #if (APP_ENABLE_ONBOARD_LED == 1U)
-	//! The application explicitly owns the on-board LED GPIO port clock gate.
-	ASSERT_DRIVER_STATUS
-	(
-		RCC_SetPeripheralClockState
-		(
-			RCC_APB2_BUS,
-			GPIO_OB_LED_CLOCK_ENABLE_MASK,
-			DRIVER_STATUS_ON
-		)
-	);
-	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
-	ASSERT_DRIVER_STATUS(BSP_OB_LED_Init());
-	BSP_OB_LED_Reset();
+	//! Request the complete BSP-owned RCC/GPIO transaction; successful initialization leaves the active-low LED off.
+	ASSERT_DRIVER_STATUS(BSP_InitOBLED());
 #endif
 
 #if (APP_ENABLE_DEBUG_UART == 1U)
-	//! The application explicitly owns the debug UART peripheral and GPIO/AFIO clock gates.
-	ASSERT_DRIVER_STATUS
-	(
-		RCC_SetPeripheralClockState
-		(
-			RCC_APB2_BUS,
-			GPIO_DEBUG_UART_GPIO_CLOCK_ENABLE_MASK,
-			DRIVER_STATUS_ON
-		)
-	);
-	//! The debug USART peripheral's own clock gate is separate from its GPIO/AFIO port clock gate above.
-	ASSERT_DRIVER_STATUS
-	(
-		RCC_SetPeripheralClockState
-		(
-			RCC_APB2_BUS,
-			GPIO_DEBUG_UART_CLOCK_ENABLE_MASK,
-			DRIVER_STATUS_ON
-		)
-	);
-	//! Configure the debug UART for TX-only logging before application code runs.
-	ASSERT_DRIVER_STATUS(BSP_Debug_UART_Init());
+	//! Request the complete BSP-owned RCC/GPIO/USART transaction before application debug output can use the transport.
+	ASSERT_DRIVER_STATUS(BSP_InitUSART());
 #endif
 
 	return DRIVER_STATUS_SUCCESS;

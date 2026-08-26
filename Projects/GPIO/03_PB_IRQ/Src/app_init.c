@@ -31,7 +31,7 @@
 #include "app_time.h"
 #include "rcc.h"
 #if (APP_ENABLE_ONBOARD_LED == 1U)
-#include "bsp.h"
+#include "bsp_gpio.h"
 #endif /* APP_ENABLE_ONBOARD_LED */
 
 // ==================================================================================================== //
@@ -54,19 +54,8 @@ driver_status_t App_Init(void)
 #endif
 
 #if (APP_ENABLE_ONBOARD_LED == 1U)
-	//! The application explicitly owns the on-board LED GPIO port clock gate.
-	ASSERT_DRIVER_STATUS
-(
-	RCC_SetPeripheralClockState
-	(
-		RCC_APB2_BUS,
-		GPIO_OB_LED_CLOCK_ENABLE_MASK,
-		DRIVER_STATUS_ON
-	)
-);
-	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
-	ASSERT_DRIVER_STATUS(BSP_OB_LED_Init());
-	BSP_OB_LED_Reset();
+	//! Request the complete BSP-owned RCC/GPIO transaction; successful initialization leaves the active-low LED off.
+	ASSERT_DRIVER_STATUS(BSP_InitOBLED());
 #endif
 
 	return DRIVER_STATUS_SUCCESS;

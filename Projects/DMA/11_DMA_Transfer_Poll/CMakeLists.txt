@@ -79,7 +79,7 @@ option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf s
 # DMA is required directly by the application for the memory-to-memory
 # transfer; it has no Driver dependencies of its own. BSP drives the
 # heartbeat LED and resolves GPIO -> RCC automatically.
-set(app_driver_modules BSP DMA)
+set(app_driver_modules BSP_GPIO DMA)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()

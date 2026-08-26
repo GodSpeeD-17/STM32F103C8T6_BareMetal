@@ -9,15 +9,15 @@
  * @section APP_INIT_H_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application orchestration
  * - Used by: Layer 4 `app_startup`
- * - Uses: Layer 2 application services and Layer 1 RCC and BSP Drivers
+ * - Uses: Layer 2 application services and Layer 1 RCC and selected BSP capabilities
  *
  * @section APP_INIT_H_RESPONSIBILITY Responsibility
  * This interface exposes the single ordered initialization transaction used
  * before `main`. The implementation configures the clock first and then every
  * application service enabled by `app_config.h`. It configures the optional
- * on-board LED GPIO, then enables application-owned board UART clock gates
- * and directs BSP to establish the fixed full-duplex transport before `main`
- * starts polling it.
+ * on-board LED capability when selected. When @ref `APP_ENABLE_USART` is
+ * `1U`, it directs BSP to perform the complete RCC/GPIO/USART transaction for
+ * the fixed full-duplex transport before `main` starts polling it.
  *
  * @section APP_INIT_H_BOUNDARY Dependency Boundary
  * This header includes shared status types only. RCC, SysTick, Timer, BSP,
@@ -55,27 +55,29 @@ extern "C" {
  * @details
  * Applies the 72 MHz RCC preset first, initializes the SysTick-backed timebase
  * when enabled, initializes the optional dedicated microsecond-delay Timer,
- * then configures the optional on-board LED GPIO and forces it off. It next
- * enables GPIOA and USART1 clock gates before BSP_USART_Init() configures the
- * fixed PA9/PA10 115200-baud 8N1 full-duplex board transport, then optionally
- * emits a diagnostic through BSP_USART_printf(). Processing stops at the first
- * failed transaction.
+ * then requests the optional BSP on-board LED transaction. When
+ * @ref `APP_ENABLE_USART` is `1U`, BSP_InitUSART() enables GPIOA/USART1 clocks
+ * and configures the fixed PA9/PA10 115200-baud 8N1 full-duplex board
+ * transport, then optionally emits a diagnostic through
+ * BSP_USART_printf(). When the capability is `0U`, no USART hardware is
+ * accessed and initialization proceeds to valid idle firmware. Processing
+ * stops at the first failed enabled transaction.
  * @returns @ref driver_status_t "Application initialization status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: Every enabled application service was initialized
  * @retval - @ref `DRIVER_STATUS_ERROR_INVALID_ARG`: An enabled service configuration was invalid
  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: An enabled debug diagnostic's
  * `BSP_USART_printf()` formatting failed
  * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: An enabled service hardware
- * precondition was not satisfied, including a board UART clock gate during debug output
+ * precondition was not satisfied, including a selected board USART clock gate
  * @retval - @ref `DRIVER_STATUS_ERROR_BUSY`: The optional dedicated Timer was running
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: RCC initialization or an
  * enabled debug diagnostic's `BSP_USART_printf()` TX polling timed out
  * @retval - @ref `DRIVER_STATUS_ERROR`: RCC hardware state could not be decoded
  * @note Timer hardware is untouched when @ref `APP_ENABLE_TIMER_US_DELAY` is `0U`
  * @note The on-board LED GPIO is untouched when @ref `APP_ENABLE_ONBOARD_LED` is `0U`
- * @note Board UART setup is unconditional for this polling-echo project;
- * the application owns its clock-gate transaction while BSP owns the fixed
- * pin and USART configuration
+ * @note Board USART setup is omitted when @ref `APP_ENABLE_USART` is `0U`;
+ * when enabled, BSP owns the complete RCC, pin, and USART configuration
+ * transaction
  */
 driver_status_t App_BootInit(void);
 

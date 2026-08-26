@@ -9,15 +9,16 @@
  * @section APP_INIT_C_HIERARCHY Hierarchy
  * - Position: Layer 3 - Application orchestration implementation
  * - Called by: Layer 4 Reset_Handler()
- * - Uses: Layer 2 `app_time` / `app_delay` and Layer 1 RCC/BSP Drivers
+ * - Uses: Layer 2 `app_time` / `app_delay` and Layer 1 RCC/selected BSP capabilities
  *
  * @section APP_INIT_C_RESPONSIBILITY Responsibility
  * App_BootInit() establishes the system clock, starts the configured monotonic
  * timebase, allocates the optional Timer delay service, configures the
- * optional on-board LED, then enables the board UART's application-owned
- * clocks and establishes its polling-echo transport through BSP. When
- * selected, it emits the boot diagnostic only after that UART is ready. It
- * propagates the first initialization failure unchanged.
+ * optional on-board LED, and, when selected, requests the complete board USART
+ * initialization transaction from BSP. When debug is selected with that
+ * transport, it emits the boot
+ * diagnostic only after the USART is ready. It propagates the first
+ * initialization failure unchanged.
  *
  * @section APP_INIT_C_BOUNDARY Dependency Boundary
  * This module selects and orders services but does not access peripheral
@@ -32,21 +33,28 @@
 #include "app_delay.h"
 #include "app_time.h"
 #include "rcc.h"
-#include "bsp.h"
+
+#if (APP_ENABLE_ONBOARD_LED == 1U)
+#include "bsp_gpio.h"
+#endif /* APP_ENABLE_ONBOARD_LED */
+
+#if (APP_ENABLE_USART == 1U)
+#include "bsp_usart.h"
+#endif /* APP_ENABLE_USART */
 
 // ==================================================================================================== //
 // Local Helpers
 // ==================================================================================================== //
 
-#if (APP_ENABLE_DEBUG == 1U)
+#if (APP_ENABLE_USART == 1U) && (APP_ENABLE_DEBUG == 1U)
 /**
  * @brief Emits the optional post-configuration boot diagnostic
  * @returns @ref driver_status_t "Debug boot-diagnostic status"
  * @retval - @ref `DRIVER_STATUS_SUCCESS`: The boot diagnostic was transmitted
  * @retval - @ref `DRIVER_STATUS_ERROR_FAIL`: `vsnprintf()` could not format the fixed diagnostic string
- * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: USART1's application-owned peripheral clock gate was disabled
+ * @retval - @ref `DRIVER_STATUS_ERROR_STATE`: USART1's BSP-owned initialization state was unavailable
  * @retval - @ref `DRIVER_STATUS_ERROR_TIMEOUT`: USART TX did not become ready in its polling window
- * @pre BSP_USART_Init() completed successfully and no code disabled USART1's
+ * @pre BSP_InitUSART() completed successfully and no code disabled USART1's
  * peripheral clock gate before this helper executes
  * @note The fixed format literal and fixed BSP mapping exclude the lower
  * formatter's null-format and invalid-instance failure paths
@@ -63,7 +71,7 @@ static driver_status_t App_DebugLogBootReady(void)
 	return BSP_USART_printf("[boot] USART polling echo ready\r\n");
 #endif /* APP_ENABLE_FLOAT */
 }
-#endif /* APP_ENABLE_DEBUG */
+#endif /* APP_ENABLE_USART && APP_ENABLE_DEBUG */
 
 // ==================================================================================================== //
 // Public API
@@ -85,23 +93,19 @@ driver_status_t App_BootInit(void)
 #endif /* APP_ENABLE_TIMER_US_DELAY */
 
 #if (APP_ENABLE_ONBOARD_LED == 1U)
-	//! The application explicitly owns the on-board LED GPIO port clock gate.
-	ASSERT_DRIVER_STATUS(RCC_SetPeripheralClockState(RCC_APB2_BUS, GPIO_OB_LED_CLOCK_ENABLE_MASK, DRIVER_STATUS_ON));
-	//! Configure the on-board LED GPIO and force a deterministic off state before application code runs.
-	ASSERT_DRIVER_STATUS(BSP_OB_LED_Init());
-	BSP_OB_LED_Reset();
+	//! Request the complete BSP-owned RCC/GPIO transaction; successful initialization leaves the active-low LED off.
+	ASSERT_DRIVER_STATUS(BSP_InitOBLED());
 #endif /* APP_ENABLE_ONBOARD_LED */
 
-	//! Clock gates are application-owned preconditions; BSP configures the fixed PA9/PA10 and USART1 mapping without mutating RCC.
-	ASSERT_DRIVER_STATUS(RCC_SetPeripheralClockState(RCC_APB2_BUS, BSP_USART_GPIO_CLOCK_ENABLE_MASK, DRIVER_STATUS_ON));
-	ASSERT_DRIVER_STATUS(RCC_SetPeripheralClockState(RCC_APB2_BUS, BSP_USART_CLOCK_ENABLE_MASK, DRIVER_STATUS_ON));
-	//! Main's polling loop requires the board transport to be fully configured before its first RXNE wait.
-	ASSERT_DRIVER_STATUS(BSP_USART_Init());
+#if (APP_ENABLE_USART == 1U)
+	//! Request the complete BSP-owned RCC/GPIO/USART transaction before main performs its first RXNE poll.
+	ASSERT_DRIVER_STATUS(BSP_InitUSART());
 
 #if (APP_ENABLE_DEBUG == 1U)
 	//! Optional boot text is emitted only after BSP configured USART1's pins, baud rate, and UE state.
 	ASSERT_DRIVER_STATUS(App_DebugLogBootReady());
 #endif /* APP_ENABLE_DEBUG */
+#endif /* APP_ENABLE_USART */
 
 	return DRIVER_STATUS_SUCCESS;
 }

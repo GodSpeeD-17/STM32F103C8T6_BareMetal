@@ -13,7 +13,7 @@
  *   application behavior
  * - Layer 2 - Services: `app_time` and `app_delay` provide reusable operations
  * - Layer 1 - Hardware access: shared SysTick, RCC, Timer, GPIO, USART, and
- *   optional BSP Drivers
+ *   selected BSP capabilities
  * Layer 1 is always closest to hardware. Increasing layer numbers represent
  * progressively more software-only behavior, policy, and orchestration.
  *
@@ -28,8 +28,8 @@
  * This file includes no project, Core, or Driver header. It selects features
  * and publishes constants only. Layer 3 orders enabled services; Layer 2
  * services request their Layer 1 hardware transactions. Project 11's fixed
- * full-duplex UART mapping is a BSP capability; this file selects only
- * application behavior and never republishes board pin or USART mappings.
+ * full-duplex USART mapping is a BSP capability; this file selects only its
+ * application use and never republishes board pin or USART mappings.
  */
 
 // Header Guard
@@ -46,11 +46,11 @@
  * @defgroup App_Config Application Configuration
  * @ingroup App_Template
  * @details
- * These macros select which timing capabilities are compiled, define the
- * application timebase contract, and map an optional dedicated Timer service
- * to its hardware instance and RCC clock gate. Defining a macro publishes
- * policy only; Layer 3 orders initialization while each Layer 2 service owns
- * its cohesive Layer 1 hardware transaction.
+ * These macros select timing, board-capability, and diagnostic behavior,
+ * define the application timebase contract, and map an optional dedicated
+ * Timer service to its hardware instance and RCC clock gate. Defining a macro
+ * publishes policy only; Layer 3 orders initialization while each Layer 2
+ * service owns its cohesive Layer 1 hardware transaction.
  * @{
  */
 
@@ -122,6 +122,40 @@
 #endif /* APP_ENABLE_TIMER_US_DELAY */
 
 // ==================================================================================================== //
+// Optional USART Configuration
+// ==================================================================================================== //
+
+#ifndef APP_ENABLE_USART
+
+/**
+ * @brief Selects the BSP-owned USART1 full-duplex polling capability
+ * @def APP_ENABLE_USART
+ * @details
+ * CMake normally publishes this policy as a normalized `0`/`1` target
+ * definition from its `APP_ENABLE_USART` option. When it is `1U`, Project 11
+ * requests the `BSP_USART` capability, App_BootInit() calls BSP_InitUSART() to
+ * enable GPIOA/USART1 clocks and configure the transport, and `main()`
+ * compiles its bounded-polling receive-and-echo loop. When it is `0U`, no
+ * Project 11 BSP_USART_* reference is compiled and `main()` remains an idle
+ * firmware loop that accesses no USART hardware. This fallback supports
+ * builds that bypass CMake.
+ * Accepted values:
+ * - `0U`: Exclude the board USART capability and run idle firmware
+ * - `1U`: Configure and use the board USART1 PA9/PA10 polling transport
+ * @pre @ref `APP_ENABLE_DEBUG` must be `0U` when this macro is `0U` because
+ * the board USART is Project 11's only diagnostic transport
+ * @note This switch does not define the USART1 instance, pin route, baud rate,
+ * frame format, or RCC masks; those fixed board details remain BSP-owned in
+ * `bsp_usart.h`
+ * @note @ref `APP_ENABLE_FLOAT` is independent and may be `1U` regardless of
+ * this capability; it does not itself access USART hardware or link `%f`
+ * formatting
+ */
+#define APP_ENABLE_USART				(1U)
+
+#endif /* APP_ENABLE_USART */
+
+// ==================================================================================================== //
 // Optional On-Board LED Configuration
 // ==================================================================================================== //
 
@@ -133,19 +167,20 @@
  * @details
  * CMake normally defines this macro from `APP_ENABLE_ONBOARD_LED`. When it is
  * `1U`, App_BootInit() configures the board on-board LED GPIO and forces it
- * to a deterministic off state, and `main.c` compiles the fault-indication
- * call in App_ErrorHandler(). This fallback definition supports builds that
- * do not inject the CMake option.
+ * to a deterministic off state. When the USART polling capability is also
+ * enabled, `main.c` compiles the fault-indication call in App_ErrorHandler().
+ * This fallback definition supports builds that do not inject the CMake option.
  * Accepted values:
- * - `0U`: Leave the on-board LED GPIO untouched and preserve the error loop
- *   without a visible LED indication
+ * - `0U`: Leave the on-board LED GPIO untouched; enabled USART fault handling
+ *   runs without a visible LED indication
  * - `1U`: Initialize the on-board LED GPIO, force it off, and compile the
- *   error-handler LED indication; Template default
+ *   enabled-USART error-handler LED indication; Template default
  * @note Application code owns every BSP_OB_LED_Set() / BSP_OB_LED_Reset() /
  * BSP_OB_LED_Toggle() call; this switch does not make BSP own application
  * control flow
- * @note Project 11 always links BSP for its board UART capability; `0U` only
- * removes this separate LED behavior
+ * @note CMake requests the LED-only `BSP` capability only when this macro is
+ * `1U`; the independent board USART capability is controlled by
+ * @ref `APP_ENABLE_USART`
  */
 #define APP_ENABLE_ONBOARD_LED			(1U)
 
@@ -162,13 +197,15 @@
  * @def APP_ENABLE_FLOAT
  * @details
  * CMake normally defines this policy from `APP_ENABLE_FLOAT`. It controls
- * whether the application may compile float-dependent behavior. When debug is
- * also enabled, Project 11 emits float-derived diagnostics and CMake links
- * newlib-nano's `%f` formatter; otherwise it does not add printf formatting.
+ * whether the application may compile float-dependent behavior. When debug
+ * and the USART capability are also enabled, Project 11 emits a float-derived
+ * boot diagnostic and CMake links newlib-nano's `%f` formatter; otherwise it
+ * does not add printf formatting.
  * Accepted values:
  * - `0U`: Exclude float-dependent application behavior
  * - `1U`: Permit float-dependent application behavior
- * @note This switch alone does not enable diagnostics or call any BSP API
+ * @note This switch alone does not enable diagnostics, call any BSP API, or
+ * require @ref `APP_ENABLE_USART`
  */
 #define APP_ENABLE_FLOAT				(0U)
 
@@ -181,21 +218,32 @@
  * @def APP_ENABLE_DEBUG
  * @details
  * CMake normally defines this policy from `APP_ENABLE_DEBUG`. When enabled,
- * App_BootInit() emits a USART readiness message after transport setup and
- * `main.c` emits a diagnostic after each successful echo, both through the
- * already configured BSP_USART_printf() transport. When disabled, neither
- * diagnostic path is compiled or changes the polling echo transaction.
+ * App_BootInit() emits a USART readiness message after transport setup through
+ * the already configured BSP_USART_printf() transport. When disabled, that
+ * diagnostic path is not compiled and does not change the polling echo
+ * transaction.
  * Accepted values:
  * - `0U`: Exclude optional application debug behavior
  * - `1U`: Compile optional application debug behavior
- * @note This switch does not initialize the board UART; App_BootInit() owns
- * its clock-gate transaction and calls BSP_USART_Init()
+ * @pre @ref `APP_ENABLE_USART` must be `1U`; the compile-time contract below
+ * rejects the invalid `APP_ENABLE_DEBUG=1U` / `APP_ENABLE_USART=0U` pair for
+ * builds that bypass CMake
+ * @note This switch does not initialize the board USART; App_BootInit() calls
+ * BSP_InitUSART() for the complete BSP-owned transaction when
+ * @ref `APP_ENABLE_USART` is `1U`
  * @note `%f` formatting is linked only when this switch and
  * @ref `APP_ENABLE_FLOAT` are both `1U`
  */
 #define APP_ENABLE_DEBUG				(0U)
 
 #endif /* APP_ENABLE_DEBUG */
+
+// A direct compiler invocation bypasses CMake's configuration-time rejection,
+// so preserve the same transport contract before any application source can
+// compile a debug path without the board USART capability.
+#if (APP_ENABLE_DEBUG == 1U) && (APP_ENABLE_USART != 1U)
+#error "APP_ENABLE_DEBUG=1U requires APP_ENABLE_USART=1U because Project 11 has no other diagnostic transport."
+#endif /* APP_ENABLE_DEBUG && !APP_ENABLE_USART */
 
 #if (APP_ENABLE_TIMER_US_DELAY == 1U)
 

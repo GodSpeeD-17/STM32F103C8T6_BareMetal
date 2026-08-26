@@ -33,7 +33,7 @@
 // ==================================================================================================== //
 #include "main.h"
 #include "app_time.h"
-#include "bsp.h"
+#include "bsp_gpio.h"
 #include "gpio.h"
 #include "rcc.h"
 #include "usart.h"

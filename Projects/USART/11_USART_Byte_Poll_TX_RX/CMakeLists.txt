@@ -75,13 +75,31 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 option(APP_ENABLE_SYSTICK_TIMEBASE "Enable the SysTick millisecond timebase" ON)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_BootInit() on-board LED configuration" ON)
+option(APP_ENABLE_USART "Enable the BSP-owned USART1 PA9/PA10 polling transport" ON)
 option(APP_ENABLE_FLOAT "Enable application float and double dependent code" OFF)
 option(APP_ENABLE_DEBUG "Enable application debug code" OFF)
 
-# Project 11 always uses the BSP-owned board UART. The component graph resolves
-# BSP -> GPIO/USART and their lower dependencies; LED policy changes only
-# application code, never the required UART capability.
-set(app_driver_modules BSP)
+# Debug output has no alternate sink in Project 11: the BSP USART capability
+# is its sole transport, so reject a configuration that would compile debug
+# policy without linking or initializing the required board resource.
+if(APP_ENABLE_DEBUG AND NOT APP_ENABLE_USART)
+    message(
+        FATAL_ERROR
+        "APP_ENABLE_DEBUG=ON requires APP_ENABLE_USART=ON because Project 11 debug output uses the BSP USART transport."
+    )
+endif()
+
+# RCC is required unconditionally because App_BootInit() establishes the
+# system clock. BSP capabilities are requested only when their separately
+# selected application behavior needs them: BSP_GPIO -> GPIO -> RCC for the LED,
+# and BSP_USART -> GPIO/USART -> RCC for the full-duplex board transport.
+set(app_driver_modules RCC)
+if(APP_ENABLE_ONBOARD_LED)
+    list(APPEND app_driver_modules BSP_GPIO)
+endif()
+if(APP_ENABLE_USART)
+    list(APPEND app_driver_modules BSP_USART)
+endif()
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()
@@ -116,14 +134,16 @@ target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     APP_ENABLE_SYSTICK_TIMEBASE=$<BOOL:${APP_ENABLE_SYSTICK_TIMEBASE}>
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
+    APP_ENABLE_USART=$<BOOL:${APP_ENABLE_USART}>
     APP_ENABLE_FLOAT=$<BOOL:${APP_ENABLE_FLOAT}>
     APP_ENABLE_DEBUG=$<BOOL:${APP_ENABLE_DEBUG}>
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf
-# support by default. A `%f` conversion is compiled only when independently
-# selected float behavior and debug output meet in this project, so only that
-# conjunction pulls the newlib-nano formatter in via -u _printf_float.
-if(APP_ENABLE_FLOAT AND APP_ENABLE_DEBUG)
+# support by default. A `%f` conversion is compiled only when the board USART
+# transport, independently selected float behavior, and debug output meet in
+# this project, so only that conjunction pulls newlib-nano's formatter in via
+# -u _printf_float.
+if(APP_ENABLE_USART AND APP_ENABLE_FLOAT AND APP_ENABLE_DEBUG)
     target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
 endif()

@@ -90,7 +90,7 @@ option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf s
 
 # RCC is required by the base clock initialization path. Optional services add
 # only their owning Driver module; disabled peripherals contribute no sources
-# or public Driver include directory to this application target. BSP resolves
+# or public Driver include directory to this application target. BSP_GPIO resolves
 # GPIO -> RCC automatically through the shared component graph.
 set(app_driver_modules RCC)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
@@ -100,7 +100,7 @@ if(APP_ENABLE_TIMER_US_DELAY)
     list(APPEND app_driver_modules Timer)
 endif()
 if(APP_ENABLE_ONBOARD_LED)
-    list(APPEND app_driver_modules BSP)
+    list(APPEND app_driver_modules BSP_GPIO)
 endif()
 
 # ====================================================================================================

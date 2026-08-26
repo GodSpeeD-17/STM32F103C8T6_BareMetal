@@ -28,7 +28,7 @@
 #include "main.h"
 #include "app_delay.h"
 #include "app_time.h"
-#include "bsp.h"
+#include "bsp_gpio.h"
 #include "gpio.h"
 #include "gpio_irq.h"
 #include "nvic.h"

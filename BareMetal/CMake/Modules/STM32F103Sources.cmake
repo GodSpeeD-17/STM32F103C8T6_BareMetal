@@ -6,9 +6,21 @@ include_guard(GLOBAL)
 
 # Direct Driver dependencies form one downward build graph. Transitive modules
 # are resolved automatically, so an application selects capabilities instead of
-# repeating the implementation dependencies of each capability.
+# repeating the implementation dependencies of each capability. BSP exposes
+# independently selectable GPIO and USART capability targets because their
+# hardware requirements differ. The aggregate BSP component remains available
+# for compatibility and deliberately selects both capabilities.
 set(STM32_DRIVER_ADC_DEPENDENCIES GPIO)
-set(STM32_DRIVER_BSP_DEPENDENCIES GPIO USART)
+set(STM32_DRIVER_BSP_DEPENDENCIES BSP_GPIO BSP_USART)
+set(STM32_DRIVER_BSP_SOURCES "")
+set(STM32_DRIVER_BSP_GPIO_DIRECTORY BSP)
+set(STM32_DRIVER_BSP_GPIO_DEPENDENCIES GPIO)
+set(STM32_DRIVER_BSP_GPIO_SOURCES Src/bsp_gpio.c)
+set(STM32_DRIVER_BSP_GPIO_COMPILE_DEFINITIONS BSP_GPIO_CAPABILITY_ENABLED=1)
+set(STM32_DRIVER_BSP_USART_DIRECTORY BSP)
+set(STM32_DRIVER_BSP_USART_DEPENDENCIES GPIO USART)
+set(STM32_DRIVER_BSP_USART_SOURCES Src/bsp_usart.c)
+set(STM32_DRIVER_BSP_USART_COMPILE_DEFINITIONS BSP_USART_CAPABILITY_ENABLED=1)
 set(STM32_DRIVER_DMA_DEPENDENCIES "")
 set(STM32_DRIVER_GPIO_DEPENDENCIES RCC)
 set(STM32_DRIVER_I2C_DEPENDENCIES RCC)
@@ -19,6 +31,19 @@ set(STM32_DRIVER_SSD1306_DEPENDENCIES I2C Ring_Buffer)
 set(STM32_DRIVER_SysTick_DEPENDENCIES "")
 set(STM32_DRIVER_Timer_DEPENDENCIES RCC)
 set(STM32_DRIVER_USART_DEPENDENCIES RCC GPIO)
+
+function(stm32_get_driver_module_directory module_name output_variable)
+    set(module_directory_name "${module_name}")
+    set(module_directory_variable "STM32_DRIVER_${module_name}_DIRECTORY")
+
+    # A capability target may own sources under an established Driver directory
+    # without duplicating public headers or creating a synthetic Driver folder.
+    if(DEFINED ${module_directory_variable})
+        set(module_directory_name "${${module_directory_variable}}")
+    endif()
+
+    set(${output_variable} "${DRIVER_ROOT}/${module_directory_name}" PARENT_SCOPE)
+endfunction()
 
 function(stm32_tree_emit_line prefix is_last label)
     if(is_last)
@@ -37,7 +62,7 @@ function(stm32_resolve_driver_modules output_variable)
     # transitive closure is known. list(FIND) preserves first-requested order.
     while(module_index LESS module_count)
         list(GET resolved_modules ${module_index} module_name)
-        set(module_directory "${DRIVER_ROOT}/${module_name}")
+        stm32_get_driver_module_directory("${module_name}" module_directory)
         if(NOT IS_DIRECTORY "${module_directory}")
             message(FATAL_ERROR "Unknown Driver module '${module_name}': ${module_directory}")
         endif()
@@ -151,18 +176,30 @@ function(stm32_register_driver_targets)
     set(module_index 0)
     foreach(module_name IN LISTS resolved_driver_modules)
         math(EXPR module_index "${module_index} + 1")
-        set(module_directory "${DRIVER_ROOT}/${module_name}")
+        stm32_get_driver_module_directory("${module_name}" module_directory)
         set(module_include_directory "${module_directory}/Inc")
         set(module_target "stm32_driver_${module_name}")
 
         file(GLOB module_headers CONFIGURE_DEPENDS "${module_include_directory}/*.h")
-        file(GLOB module_sources CONFIGURE_DEPENDS
-            "${module_directory}/Src/*.c"
-            "${module_directory}/Src/*.cpp"
-            "${module_directory}/Src/*.cxx"
-            "${module_directory}/Src/*.s"
-            "${module_directory}/Src/*.S"
-        )
+        set(module_sources "")
+        set(module_sources_variable "STM32_DRIVER_${module_name}_SOURCES")
+        if(DEFINED ${module_sources_variable})
+            foreach(module_source_relative_path IN LISTS ${module_sources_variable})
+                set(module_source_path "${module_directory}/${module_source_relative_path}")
+                if(NOT EXISTS "${module_source_path}")
+                    message(FATAL_ERROR "Driver source for '${module_name}' does not exist: ${module_source_path}")
+                endif()
+                list(APPEND module_sources "${module_source_path}")
+            endforeach()
+        else()
+            file(GLOB module_sources CONFIGURE_DEPENDS
+                "${module_directory}/Src/*.c"
+                "${module_directory}/Src/*.cpp"
+                "${module_directory}/Src/*.cxx"
+                "${module_directory}/Src/*.s"
+                "${module_directory}/Src/*.S"
+            )
+        endif()
         list(SORT module_headers)
         list(SORT module_sources)
 
@@ -180,6 +217,19 @@ function(stm32_register_driver_targets)
             target_link_libraries(${module_target} INTERFACE stm32::core)
             if(IS_DIRECTORY "${module_include_directory}")
                 target_include_directories(${module_target} INTERFACE "${module_include_directory}")
+            endif()
+        endif()
+
+        # Capability-owned public headers may expose only the API families that
+        # the selected component actually links. This is a build-component
+        # contract, never an application feature macro consumed by BSP code.
+        set(module_compile_definitions_variable "STM32_DRIVER_${module_name}_COMPILE_DEFINITIONS")
+        if(DEFINED ${module_compile_definitions_variable})
+            get_target_property(module_target_type ${module_target} TYPE)
+            if(module_target_type STREQUAL "INTERFACE_LIBRARY")
+                target_compile_definitions(${module_target} INTERFACE ${${module_compile_definitions_variable}})
+            else()
+                target_compile_definitions(${module_target} PUBLIC ${${module_compile_definitions_variable}})
             endif()
         endif()
         add_library(stm32::driver::${module_name} ALIAS ${module_target})

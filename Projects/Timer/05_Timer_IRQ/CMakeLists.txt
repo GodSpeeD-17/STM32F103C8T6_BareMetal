@@ -78,8 +78,8 @@ option(APP_ENABLE_PRINTF_FLOAT "Enable newlib-nano floating-point printf/scanf s
 
 # BSP drives the error-indication LED, NVIC arms the TIM3 update IRQ line, and
 # Timer is required directly by the application for TIM3. The component graph
-# resolves BSP -> GPIO -> RCC and Timer -> RCC automatically.
-set(app_driver_modules BSP NVIC Timer)
+# resolves BSP_GPIO -> GPIO -> RCC and Timer -> RCC automatically.
+set(app_driver_modules BSP_GPIO NVIC Timer)
 if(APP_ENABLE_SYSTICK_TIMEBASE)
     list(APPEND app_driver_modules SysTick)
 endif()
