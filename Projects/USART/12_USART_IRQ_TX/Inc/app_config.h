@@ -19,9 +19,7 @@
  *
  * @section APP_CONFIG_H_POSITION Position of This File
  * `app_config.h` is cross-cutting compile-time policy, not a runtime layer.
- * Layers 2 and 3 read it; it does not call or initialize any layer. This
- * Template copy is the canonical baseline: repository-wide policy changes are
- * verified here before propagation to existing projects.
+ * Layers 2 and 3 read it; it does not call or initialize any layer.
  *
  * @section APP_CONFIG_H_USERS Direct Users
  * `app_init.c`, `main.c`, and `app_time.h` include this file.
@@ -29,8 +27,9 @@
  * @section APP_CONFIG_H_BOUNDARY Dependency Boundary
  * This file includes no project, Core, or Driver header. It selects features
  * and publishes constants only. Layer 3 orders enabled services; Layer 2
- * services request their Layer 1 hardware transactions. Board mappings remain
- * owned by their capability headers and are never republished here.
+ * services request their Layer 1 hardware transactions. Project 12's fixed
+ * USART1 mapping is a BSP capability; this file never republishes
+ * its board pin or USART mappings.
  */
 
 // Header Guard
@@ -78,7 +77,7 @@
  * @def APP_TIMEBASE_SOURCE
  * @details
  * CMake normally publishes this token from its `APP_TIMEBASE_SOURCE` cache
- * selection and resolves only the matching Driver modules. App_Init()
+ * selection and resolves only the matching Driver modules. App_BootInit()
  * passes it explicitly to App_TimeInit() after the RCC clock tree is stable.
  * This fallback selects SysTick for direct builds that do not inject policy.
  * Accepted values:
@@ -119,7 +118,7 @@
  * @details
  * CMake normally defines this macro from `APP_ENABLE_TIMER_US_DELAY`. When it
  * is `1U`, the build adds the `BSP_TIMER` capability, app_time exposes
- * App_DelayUs(), and App_Init() requests the complete BSP-owned TIM4
+ * App_DelayUs(), and App_BootInit() requests the complete BSP-owned TIM4
  * initialization transaction. This fallback supports direct builds that do
  * not inject the option.
  * Accepted values:
@@ -147,17 +146,20 @@
  * @def APP_ENABLE_ONBOARD_LED
  * @details
  * CMake normally defines this macro from `APP_ENABLE_ONBOARD_LED`. When it is
- * `1U`, App_Init() configures the board on-board LED GPIO and forces it to a
- * deterministic off state before application behavior begins.
+ * `1U`, App_BootInit() configures the board on-board LED GPIO and forces it
+ * to a deterministic off state, and `main.c` compiles the fault-indication
+ * call in App_ErrorHandler().
  * This fallback definition supports builds that do not inject the CMake option.
  * Accepted values:
- * - `0U`: Leave the on-board LED GPIO untouched
- * - `1U`: Initialize the on-board LED GPIO and force it off; Template default
+ * - `0U`: Leave the on-board LED GPIO untouched; USART fault handling runs
+ *   without a visible LED indication
+ * - `1U`: Initialize the on-board LED GPIO, force it off, and compile the
+ *   USART error-handler LED indication; Template default
  * @note Application code owns every BSP_OB_LED_Set() / BSP_OB_LED_Reset() /
  * BSP_OB_LED_Toggle() call; this switch does not make BSP own application
  * control flow
  * @note CMake requests the LED-only `BSP_GPIO` capability only when this macro
- * is `1U`
+ * is `1U`; the Project 12 application USART capability remains independent
  */
 #define APP_ENABLE_ONBOARD_LED			(1U)
 
@@ -174,8 +176,10 @@
  * @def APP_ENABLE_FLOAT
  * @details
  * CMake normally defines this policy from `APP_ENABLE_FLOAT`. It controls
- * whether the application may compile float-dependent behavior and whether
- * CMake links newlib-nano's `%f` formatter.
+ * whether the application may compile float-dependent behavior. When debug is
+ * also enabled, Project 12 emits a float-derived boot diagnostic and CMake
+ * links newlib-nano's `%f` formatter; otherwise it does not add printf
+ * formatting.
  * Accepted values:
  * - `0U`: Exclude float-dependent application behavior
  * - `1U`: Permit float-dependent application behavior
@@ -192,14 +196,17 @@
  * @def APP_ENABLE_DEBUG
  * @details
  * CMake normally defines this policy from `APP_ENABLE_DEBUG`. When enabled,
- * App_Init() acquires the complete BSP USART transport before `main()` starts.
- * When disabled, that implicit boot-only path is not compiled and application
- * code remains responsible for any USART configuration it requires.
+ * App_BootInit() acquires the BSP USART transport and emits a readiness message
+ * through BSP_USART_printf(). When disabled, that implicit boot-only path is
+ * not compiled; `main()` explicitly configures its USART through RCC, GPIO,
+ * USART and NVIC Drivers for the interrupt-driven TX application instead.
  * Accepted values:
  * - `0U`: Exclude optional application debug behavior
  * - `1U`: Compile optional application debug behavior
- * @note This demonstration convenience controls implicit BSP USART acquisition
- * only; it does not restrict application-owned USART Driver configuration
+ * @note This switch controls implicit BSP USART acquisition and diagnostics;
+ * it does not restrict application-owned USART Driver configuration
+ * @note `%f` formatting is linked only when this switch and
+ * @ref `APP_ENABLE_FLOAT` are both `1U`
  */
 #define APP_ENABLE_DEBUG				(0U)
 

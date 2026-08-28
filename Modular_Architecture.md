@@ -5,6 +5,11 @@ This document records the locked project convention implemented by
 application services. Reusable peripheral hardware behavior remains in shared
 Drivers.
 
+`Projects/Template` is the sole project-creation baseline. Repository-wide
+application policy and structure changes are implemented and verified there
+first, then propagated to existing numbered projects; a numbered example is
+never used as the seed for another project.
+
 ## Goal
 
 Every copied file has one clear reason to change, every dependency points
@@ -219,7 +224,8 @@ single-use scalar values do not form a reusable domain object or invariant.
 
 ## Audit order for a new project
 
-Read and modify the copied project in dependency order:
+Copy the current `Projects/Template` directory, then read and modify that owned
+copy in dependency order:
 
 1. `app_config.h` — select capabilities and constants.
 2. `app_time.[ch]` — understand monotonic time and the minimal handler.

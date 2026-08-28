@@ -68,9 +68,9 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 # ====================================================================================================
 
 # These cache options mirror the Template's application-facing hardware
-# policy. The application timebase defaults OFF here: this demo paces itself with its own
-# directly owned TIM2 blocking delay and never calls App_DelayMs().
-set(APP_TIMEBASE_SOURCE "OFF" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
+# policy. SysTick is the repository-wide default even though this demo paces
+# itself with its directly owned TIM2 blocking delay; callers may select OFF.
+set(APP_TIMEBASE_SOURCE "SYSTICK" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
 set_property(CACHE APP_TIMEBASE_SOURCE PROPERTY STRINGS OFF SYSTICK TIM2 TIM3 TIM4)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)

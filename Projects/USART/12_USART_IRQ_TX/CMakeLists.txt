@@ -1,34 +1,25 @@
-# This file is the complete build entrypoint copied with every application.
-# It owns application identity, feature selection, and the list of shared
-# Drivers consumed by that application. Compiler flags, Core sources, linker
-# behavior, utility targets, and artifact generation remain centralized in
-# BareMetal/CMake so copied projects do not duplicate platform policy.
-# Repository-wide application build-policy changes originate and are verified
-# here before being propagated to existing projects; numbered examples are not
-# templates for new applications.
-# CMake grammar requires each command name and its opening parenthesis to share
-# one line; the repository's multi-line C function-call layout does not apply.
+# This file is the build entrypoint for the USART interrupt-driven TX demonstration.
+# It owns application identity and direct Driver capability selection. Shared
+# compiler, Core, linker, artifact, and utility-target policy remains under
+# BareMetal/CMake so this project contains no duplicated platform machinery.
 
 # ====================================================================================================
 # CMake Compatibility
 # ====================================================================================================
 
-# Require the CMake version against which the shared STM32F103 pipeline is
-# maintained. Rejecting older versions avoids partially supported behavior.
+# Require the minimum version supported by the shared STM32F103 pipeline.
 cmake_minimum_required(VERSION 3.28)
 
 # ====================================================================================================
 # Shared Repository Discovery
 # ====================================================================================================
 
-# External projects may explicitly identify the repository containing the
-# shared BareMetal platform. An empty value preserves zero-configuration use
-# for projects stored anywhere below this repository root.
+# Projects kept outside this repository may supply the directory containing
+# BareMetal explicitly. An empty value enables automatic upward discovery.
 set(STM32F103_REPO_ROOT "" CACHE PATH "STM32F103C8T6 repository root containing BareMetal")
 
 if(STM32F103_REPO_ROOT)
-    # Normalize an explicit absolute or project-relative override before it is
-    # validated and consumed by the shared build entrypoint.
+    # Normalize an absolute or project-relative caller override before use.
     get_filename_component(
         _stm32_repo_root
         "${STM32F103_REPO_ROOT}"
@@ -36,13 +27,11 @@ if(STM32F103_REPO_ROOT)
         BASE_DIR "${CMAKE_CURRENT_LIST_DIR}"
     )
 else()
-    # Walk upward from the copied project until the shared build entrypoint is
-    # found. This permits arbitrary project nesting within the repository.
+    # Walk upward so any project nested inside the repository configures with
+    # no caller-supplied path.
     set(_stm32_repo_root "${CMAKE_CURRENT_LIST_DIR}")
     while(NOT EXISTS "${_stm32_repo_root}/BareMetal/CMake/STM32F103Project.cmake")
         get_filename_component(_stm32_repo_parent "${_stm32_repo_root}" DIRECTORY)
-        # Stop at the filesystem root so a missing repository fails cleanly
-        # through the common validation below instead of looping forever.
         if(_stm32_repo_parent STREQUAL _stm32_repo_root)
             break()
         endif()
@@ -50,8 +39,8 @@ else()
     endwhile()
 endif()
 
-# Validate the one shared entrypoint required by both discovery paths. The
-# diagnostic also tells an external application how to repair its configuration.
+# Fail with the exact external-project remedy when neither discovery path
+# resolves the shared build entrypoint.
 if(NOT EXISTS "${_stm32_repo_root}/BareMetal/CMake/STM32F103Project.cmake")
     message(
         FATAL_ERROR
@@ -60,22 +49,17 @@ if(NOT EXISTS "${_stm32_repo_root}/BareMetal/CMake/STM32F103Project.cmake")
     )
 endif()
 
-# Import only the public project-configuration interface. That interface owns
-# all lower shared CMake modules and prevents application-level include chains.
+# Import the single public CMake interface; it owns every lower build module.
 include("${_stm32_repo_root}/BareMetal/CMake/STM32F103Project.cmake")
 
 # ====================================================================================================
 # Toolchain and Application Identity
 # ====================================================================================================
 
-# Select the Arm cross-toolchain before project() allows CMake to probe a host
-# compiler. The shared function also enables compile_commands.json generation.
+# Select the canonical Arm toolchain before project() probes a compiler.
 stm32f103_setup_toolchain()
 
-# Derive the application and firmware-target name from the copied directory.
-# Renaming the project directory therefore renames its ELF/BIN/HEX/MAP outputs.
-# C, C++, and assembly are enabled up front so adding a C++ application source
-# does not require restructuring this build entrypoint.
+# Keep the target and generated artifact names synchronized with this folder.
 get_filename_component(_stm32_project_name "${CMAKE_CURRENT_LIST_DIR}" NAME)
 project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 
@@ -83,18 +67,21 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 # Application Feature Selection
 # ====================================================================================================
 
-# These cache options are the application-facing hardware-service policy. They
-# control both shared Driver inclusion below and conditional Template code
-# through the compile definitions published at the end of this file.
+# These cache options define Project 12's application-facing hardware policy.
+# The timebase source selects exactly one interrupt-driven hardware owner while
+# its fixed 1 kHz interrupt defines a 1 ms application tick. Floating-point
+# application logic and generic debug code remain independent features;
+# together they select floating-point diagnostics.
 set(APP_TIMEBASE_SOURCE "SYSTICK" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
 set_property(CACHE APP_TIMEBASE_SOURCE PROPERTY STRINGS OFF SYSTICK TIM2 TIM3 TIM4)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
-option(APP_ENABLE_ONBOARD_LED "Enable the optional BSP on-board LED initialization" ON)
-option(APP_ENABLE_DEBUG "Enable optional BSP USART debug transport initialization" OFF)
-option(APP_ENABLE_FLOAT "Enable newlib-nano floating-point printf/scanf support (-u _printf_float)" OFF)
+option(APP_ENABLE_ONBOARD_LED "Enable App_BootInit() on-board LED configuration" ON)
+option(APP_ENABLE_FLOAT "Enable application float and double dependent code" OFF)
+option(APP_ENABLE_DEBUG "Enable application debug code" OFF)
 
-# Normalize the human-readable selector once so module resolution and C
-# preprocessing consume the same application timebase decision.
+# Normalize the human-readable selector once, then publish the corresponding
+# application token so CMake module resolution and C preprocessing consume one
+# coherent source decision.
 string(TOUPPER "${APP_TIMEBASE_SOURCE}" _app_timebase_source)
 if(_app_timebase_source STREQUAL "OFF")
     set(_app_timebase_source_define APP_TIME_SOURCE_NONE)
@@ -110,68 +97,72 @@ else()
     message(FATAL_ERROR "APP_TIMEBASE_SOURCE must be OFF, SYSTICK, TIM2, TIM3, or TIM4.")
 endif()
 
+# BSP_TIMER owns TIM4 exclusively as a polling-only microsecond-delay source;
+# one firmware cannot simultaneously assign TIM4 to the interrupt timebase.
 if(APP_ENABLE_TIMER_US_DELAY AND _app_timebase_source STREQUAL "TIM4")
     message(FATAL_ERROR "APP_TIMEBASE_SOURCE=TIM4 conflicts with APP_ENABLE_TIMER_US_DELAY=ON because BSP_TIMER exclusively reserves TIM4.")
 endif()
 
-# RCC is required by the base clock initialization path. Optional services add
-# only their owning Driver module; disabled peripherals contribute no sources
-# or public Driver include directory to this application target. BSP_GPIO resolves
-# GPIO -> RCC automatically through the shared component graph.
-set(app_driver_modules RCC)
+# RCC is required unconditionally because App_BootInit() establishes the
+# system clock. Each source adds only its hardware path: SysTick has no RCC or
+# NVIC dependency, while TIM2-TIM4 need Timer plus external NVIC delivery.
+# The application always owns USART1 NVIC delivery and uses the USART LL surface
+# in Handler mode. Without debug it also requests GPIO for explicit PA9/USART1
+# initialization; debug instead requests BSP_USART, whose dependency supplies
+# GPIO for the boot transport. LED and TIM4 delay remain independent.
+set(app_driver_modules RCC USART NVIC)
 if(APP_ENABLE_DEBUG)
     list(APPEND app_driver_modules BSP_USART)
-endif()
-if(_app_timebase_source STREQUAL "SYSTICK")
-    list(APPEND app_driver_modules SysTick)
-elseif(_app_timebase_source MATCHES "^TIM[234]$")
-    list(APPEND app_driver_modules Timer NVIC)
-endif()
-if(APP_ENABLE_TIMER_US_DELAY)
-    list(APPEND app_driver_modules BSP_TIMER)
+else()
+    list(APPEND app_driver_modules GPIO)
 endif()
 if(APP_ENABLE_ONBOARD_LED)
     list(APPEND app_driver_modules BSP_GPIO)
 endif()
+if(_app_timebase_source STREQUAL "SYSTICK")
+    list(APPEND app_driver_modules SysTick)
+elseif(_app_timebase_source MATCHES "^TIM[234]$")
+    list(APPEND app_driver_modules Timer)
+endif()
+if(APP_ENABLE_TIMER_US_DELAY)
+    list(APPEND app_driver_modules BSP_TIMER)
+endif()
 
 # ====================================================================================================
-# Shared Firmware Build Configuration
+# Firmware Build Configuration
 # ====================================================================================================
 
-# Hand application policy to the shared pipeline. It discovers project sources,
-# adds the selected Driver stacks, applies the common Cortex-M3 flags and linker
-# script, and generates firmware plus utility targets. CMake metadata remains in
-# the selected binary directory; final firmware files are grouped in Artifacts.
+# Hand application policy to the shared pipeline the same way the Template
+# does, so this demonstration exercises the modular application layers end
+# to end instead of the legacy startup/systick pairing.
 stm32f103_configure_project(
-    # Keep deployable outputs separate from CMake cache and generator files.
+    # Store deployable firmware separately from CMake generator metadata.
     BUILD_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Artifacts"
-    # Print selected Driver filenames during configuration without full paths.
+    # Keep the configuration summary compact while retaining module detail.
     DRIVER_MODULE_TREE SHOW_FILENAME_ONLY
     # Compile and expose exactly the shared Driver stacks selected above.
     DRIVER_MODULES
         ${app_driver_modules}
-    # Use the shared pipeline's supported -O1 optimization policy.
+    # Preserve the demonstration's established optimization and Flash origin.
     OPTIMIZATION_LEVEL 1
-    # Link the application at the STM32F103C8T6 internal-Flash base address.
     FLASH_ADDRESS 0x08000000
 )
 
-# Publish normalized 0/1 feature states only to this firmware target. Template
-# sources and app_config.h consume the same values used for Driver selection,
-# keeping compiled application APIs synchronized with linked Driver modules.
+# Publish the selected source and normalized optional feature states only to
+# this firmware target. Project 12 sources consume the same values used for
+# Driver selection, keeping compiled APIs synchronized with linked modules.
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     APP_TIMEBASE_SOURCE=${_app_timebase_source_define}
     APP_ENABLE_TIMER_US_DELAY=$<BOOL:${APP_ENABLE_TIMER_US_DELAY}>
     APP_ENABLE_ONBOARD_LED=$<BOOL:${APP_ENABLE_ONBOARD_LED}>
-    APP_ENABLE_DEBUG=$<BOOL:${APP_ENABLE_DEBUG}>
     APP_ENABLE_FLOAT=$<BOOL:${APP_ENABLE_FLOAT}>
+    APP_ENABLE_DEBUG=$<BOOL:${APP_ENABLE_DEBUG}>
 )
 
 # The shared --specs=nano.specs link policy strips floating-point printf
-# support by default. APP_ENABLE_FLOAT controls whether this target
-# pulls the newlib-nano float formatter in via -u _printf_float, scoped to
-# this one target rather than widening the shared STM32F103Flags.cmake link
-# policy for every project.
-if(APP_ENABLE_FLOAT)
+# support by default. A `%f` conversion is compiled only when independently
+# selected float behavior and debug output meet in this project, so only that
+# conjunction pulls newlib-nano's formatter in via -u _printf_float.
+if(APP_ENABLE_FLOAT AND APP_ENABLE_DEBUG)
     target_link_options(${PROJECT_NAME}.elf PRIVATE -u _printf_float)
 endif()

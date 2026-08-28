@@ -203,6 +203,22 @@ typedef struct _peripheral_config_t
 - This same standard applies to macro `@brief`s: a brief that only restates
   where a bit lives (its register/field name) instead of what it does to
   hardware behavior fails the same test.
+- Interrupt-source and interrupt-status macro documentation must describe the
+  request mechanism, not merely call the symbol an "interrupt enable" or
+  restate the flag name. The documented contract must identify:
+  - the complete Boolean condition that asserts the peripheral interrupt
+    request, including every gating enable/mode bit and every source flag;
+  - whether setting the enable while its source flag is already set requests
+    service immediately;
+  - the hardware event that sets the source flag and the software action that
+    clears it, so the reader can determine when the request deasserts and why
+    an uncleared source re-enters the handler; and
+  - that the peripheral source enable controls request generation only, while
+    NVIC enablement independently controls delivery to the processor.
+
+  Put source-specific behavior on the public mask alias itself so opening that
+  symbol's generated page answers these questions without requiring the reader
+  to infer semantics from the macro expansion or navigate to another symbol.
 
 ## 1.6 Peripheral `.md` Two-Part Documentation Model
 
@@ -1003,6 +1019,12 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 (For file/symbol naming specifics, see
 [2.5 Application Template File & Symbol Naming](#25-application-template-file--symbol-naming).)
 
+- Treat `Projects/Template` as the canonical seed for every new application;
+  never create a new project by copying another numbered example. A policy,
+  structure, service, CMake default, or documentation change intended for all
+  current and future projects must be implemented and verified in the Template
+  first, then propagated to existing projects. Project-specific behavior stays
+  in its owning project and does not flow back into the Template.
 - Every application Template header that declares an externally linked
   function or object must wrap those declarations in an `extern "C"` guard
   for C++ consumers. Macro-only configuration headers don't need this.
@@ -1037,8 +1059,34 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 
 ---
 
+# 6. Shared Build Reporting
+
+- The shared CMake configure report must enumerate the project-local headers
+  and sources in the same filename/full-path tree mode used for selected Driver
+  modules. Summary counts distinguish headers, compiled sources, and include
+  directories; an include-directory count must never be labeled as a count of
+  included files.
+- The post-link memory report must present exact bytes, human-readable KiB,
+  used/free/capacity totals, utilization percentages, visual utilization bars,
+  and the `.text`/`.data`/`.bss` storage roles without requiring the raw
+  `arm-none-eabi-size` output to be interpreted manually.
+
+---
+
 # Preference Log
 
+- 2026-08-28: Required shared CMake diagnostics to list project-local C/header
+  files alongside selected Driver files, report semantically correct file and
+  include-directory counts, and render a readable Flash/RAM memory summary with
+  free space, utilization bars, and section-storage roles.
+- 2026-08-28: Required interrupt enable/status macro documentation to state
+  the full request condition, already-set behavior, flag set/clear mechanism,
+  repeated-entry consequence, and separate NVIC-delivery requirement on the
+  public mask alias rather than merely restating a register bit name.
+- 2026-08-28: Established `Projects/Template` as the mandatory canonical seed
+  for new applications and required cross-project policy/structure changes to
+  be implemented and verified there before propagation; numbered examples may
+  not serve as project-creation baselines.
 - 2026-08-26: Kept `app_time.[ch]` intentionally project-local so each
   application retains unrestricted strong SysTick/Timer IRQ ownership, merged
   application delay behavior into that pair, and assigned the optional

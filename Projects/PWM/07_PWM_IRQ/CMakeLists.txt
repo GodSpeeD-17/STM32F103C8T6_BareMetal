@@ -80,10 +80,9 @@ project(${_stm32_project_name} VERSION 1.0.0 LANGUAGES C CXX ASM)
 # These cache options mirror the Template's application-facing hardware
 # policy. They control both shared Driver inclusion below and conditional
 # application code through the compile definitions published at the end of
-# this file. The demo needs neither an interrupt-driven application timebase nor the TIM4 polling
-# delay service: the ramp is entirely event-driven by the TIM2 update IRQ, and
-# the idle main loop sleeps on __WFI() instead of blocking on App_DelayMs().
-set(APP_TIMEBASE_SOURCE "OFF" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
+# this file. SysTick is the repository-wide default even though the PWM ramp
+# remains independently event-driven by TIM2; callers may still select OFF.
+set(APP_TIMEBASE_SOURCE "SYSTICK" CACHE STRING "Application timebase source: OFF, SYSTICK, TIM2, TIM3, or TIM4")
 set_property(CACHE APP_TIMEBASE_SOURCE PROPERTY STRINGS OFF SYSTICK TIM2 TIM3 TIM4)
 option(APP_ENABLE_TIMER_US_DELAY "Enable the optional TIM4 microsecond delay service" OFF)
 option(APP_ENABLE_ONBOARD_LED "Enable App_Init() on-board LED configuration" ON)

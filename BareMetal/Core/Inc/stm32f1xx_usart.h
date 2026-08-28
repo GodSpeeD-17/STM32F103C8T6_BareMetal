@@ -90,6 +90,17 @@ extern "C" {
  * the USART codec and LL layers. They are intentionally raw register symbols;
  * driver-facing selectors and validation belong above this register layer.
  *
+ * @section USART_InterruptRequestModel USART Interrupt Request Model
+ * Each USART interrupt-enable bit gates the current value of one or more
+ * status flags; it does not arm a detector that waits only for the next flag
+ * transition. Consequently, setting an enable while its source flag is
+ * already `1` asserts the USART interrupt request immediately. The request
+ * remains active until software clears every enabled source flag or disables
+ * its source. Returning from the handler without doing either can cause
+ * immediate handler re-entry. These bits control the peripheral request only;
+ * processor delivery independently requires the corresponding NVIC interrupt
+ * line to be enabled.
+ *
  * @{
  */
 
@@ -101,70 +112,151 @@ extern "C" {
 #define USART_SR_PE_Pos						((reg_bit_pos_t) 0U)
 /** @brief Parity mismatch detected on the current received word (`USARTx_SR.PE`) bit mask @def USART_SR_PE_Msk */
 #define USART_SR_PE_Msk						REG_BIT_MASK(USART_SR_PE_Pos)
-/** @brief Parity mismatch detected on the current received word (`USARTx_SR.PE`) bit mask alias @def USART_SR_PE */
+/**
+ * @brief Reports a parity mismatch on the current received word
+ * @details
+ * Hardware sets `SR.PE` after receiving a word with the wrong parity. When
+ * `CR1.PEIE` is also `1`, the set flag keeps the USART interrupt request
+ * active. Clear `PE` only after `RXNE` becomes set, by reading `SR` and then
+ * reading `DR`; otherwise the enabled request remains active.
+ * @def USART_SR_PE
+ */
 #define USART_SR_PE							USART_SR_PE_Msk
 
 /** @brief Stop bit not found at the expected sampling point (`USARTx_SR.FE`) bit position @def USART_SR_FE_Pos */
 #define USART_SR_FE_Pos						((reg_bit_pos_t) 1U)
 /** @brief Stop bit not found at the expected sampling point (`USARTx_SR.FE`) bit mask @def USART_SR_FE_Msk */
 #define USART_SR_FE_Msk						REG_BIT_MASK(USART_SR_FE_Pos)
-/** @brief Stop bit not found at the expected sampling point (`USARTx_SR.FE`) bit mask alias @def USART_SR_FE */
+/**
+ * @brief Reports that a valid stop bit was not sampled for the received frame
+ * @details
+ * Hardware sets `SR.FE` after frame desynchronization, excessive noise, or a
+ * received break character. Read `SR` and then `DR` to clear it. In DMA
+ * reception, `CR3.EIE=1` and `CR3.DMAR=1` make the set flag hold the USART
+ * interrupt request active until the flag or either gate is cleared.
+ * @def USART_SR_FE
+ */
 #define USART_SR_FE							USART_SR_FE_Msk
 
 /** @brief Noise detected while sampling a received bit (`USARTx_SR.NE`) bit position @def USART_SR_NE_Pos */
 #define USART_SR_NE_Pos						((reg_bit_pos_t) 2U)
 /** @brief Noise detected while sampling a received bit (`USARTx_SR.NE`) bit mask @def USART_SR_NE_Msk */
 #define USART_SR_NE_Msk						REG_BIT_MASK(USART_SR_NE_Pos)
-/** @brief Noise detected while sampling a received bit (`USARTx_SR.NE`) bit mask alias @def USART_SR_NE */
+/**
+ * @brief Reports noise detected while sampling a received frame
+ * @details
+ * Hardware sets `SR.NE` when a received frame contains a noisy sample. Read
+ * `SR` and then `DR` to clear it. In DMA reception, `CR3.EIE=1` and
+ * `CR3.DMAR=1` make the set flag hold the USART interrupt request active until
+ * the flag or either gate is cleared.
+ * @def USART_SR_NE
+ */
 #define USART_SR_NE							USART_SR_NE_Msk
 
 /** @brief New word received while the previous word in `DR` was still unread (`USARTx_SR.ORE`) bit position @def USART_SR_ORE_Pos */
 #define USART_SR_ORE_Pos					((reg_bit_pos_t) 3U)
 /** @brief New word received while the previous word in `DR` was still unread (`USARTx_SR.ORE`) bit mask @def USART_SR_ORE_Msk */
 #define USART_SR_ORE_Msk					REG_BIT_MASK(USART_SR_ORE_Pos)
-/** @brief New word received while the previous word in `DR` was still unread (`USARTx_SR.ORE`) bit mask alias @def USART_SR_ORE */
+/**
+ * @brief Reports that a new received word arrived before the previous `DR` value was read
+ * @details
+ * Hardware sets `SR.ORE` when the receive shift register is ready to transfer
+ * a word while `SR.RXNE` is still `1`. `CR1.RXNEIE=1` makes `ORE` request an
+ * interrupt; DMA reception can also request one through `CR3.EIE=1` while
+ * `CR3.DMAR=1`. Read `SR` and then `DR` to clear `ORE` and deassert those
+ * requests when no other enabled source remains.
+ * @def USART_SR_ORE
+ */
 #define USART_SR_ORE						USART_SR_ORE_Msk
 
 /** @brief Idle frame detected on the receive line (`USARTx_SR.IDLE`) bit position @def USART_SR_IDLE_Pos */
 #define USART_SR_IDLE_Pos					((reg_bit_pos_t) 4U)
 /** @brief Idle frame detected on the receive line (`USARTx_SR.IDLE`) bit mask @def USART_SR_IDLE_Msk */
 #define USART_SR_IDLE_Msk					REG_BIT_MASK(USART_SR_IDLE_Pos)
-/** @brief Idle frame detected on the receive line (`USARTx_SR.IDLE`) bit mask alias @def USART_SR_IDLE */
+/**
+ * @brief Reports that the receive line entered the idle state after activity
+ * @details
+ * Hardware sets `SR.IDLE` when it detects an idle line, and does not set it
+ * again until a new received word first sets `RXNE`. When `CR1.IDLEIE` is also
+ * `1`, `IDLE` keeps the USART interrupt request active. Read `SR` and then
+ * `DR` to clear the flag and deassert that source.
+ * @def USART_SR_IDLE
+ */
 #define USART_SR_IDLE						USART_SR_IDLE_Msk
 
 /** @brief Received data is ready to read from `DR` (`USARTx_SR.RXNE`) bit position @def USART_SR_RXNE_Pos */
 #define USART_SR_RXNE_Pos					((reg_bit_pos_t) 5U)
 /** @brief Received data is ready to read from `DR` (`USARTx_SR.RXNE`) bit mask @def USART_SR_RXNE_Msk */
 #define USART_SR_RXNE_Msk					REG_BIT_MASK(USART_SR_RXNE_Pos)
-/** @brief Received data is ready to read from `DR` (`USARTx_SR.RXNE`) bit mask alias @def USART_SR_RXNE */
+/**
+ * @brief Reports that one received word is ready to read from `DR`
+ * @details
+ * Hardware sets `SR.RXNE` when it transfers a received word from the shift
+ * register into `DR`. When `CR1.RXNEIE` is also `1`, the flag keeps the USART
+ * interrupt request active. Reading `DR` clears `RXNE`, allowing that request
+ * to deassert when `ORE` and every other enabled source are also clear.
+ * @def USART_SR_RXNE
+ */
 #define USART_SR_RXNE						USART_SR_RXNE_Msk
 
 /** @brief Last transmitted frame, including its stop bit, has completed (`USARTx_SR.TC`) bit position @def USART_SR_TC_Pos */
 #define USART_SR_TC_Pos						((reg_bit_pos_t) 6U)
 /** @brief Last transmitted frame, including its stop bit, has completed (`USARTx_SR.TC`) bit mask @def USART_SR_TC_Msk */
 #define USART_SR_TC_Msk						REG_BIT_MASK(USART_SR_TC_Pos)
-/** @brief Last transmitted frame, including its stop bit, has completed (`USARTx_SR.TC`) bit mask alias @def USART_SR_TC */
+/**
+ * @brief Reports that the final frame has completely left the transmitter
+ * @details
+ * Hardware sets `SR.TC` after the complete frame has been transmitted and
+ * `SR.TXE` is already `1`. When `CR1.TCIE` is also `1`, `TC` keeps the USART
+ * interrupt request active. Clear `TC` by writing `0`, or by reading `SR` and
+ * then writing `DR`, before returning with `TCIE` still enabled.
+ * @def USART_SR_TC
+ */
 #define USART_SR_TC							USART_SR_TC_Msk
 
 /** @brief Transmit data register is empty and ready to accept the next byte (`USARTx_SR.TXE`) bit position @def USART_SR_TXE_Pos */
 #define USART_SR_TXE_Pos					((reg_bit_pos_t) 7U)
 /** @brief Transmit data register is empty and ready to accept the next byte (`USARTx_SR.TXE`) bit mask @def USART_SR_TXE_Msk */
 #define USART_SR_TXE_Msk					REG_BIT_MASK(USART_SR_TXE_Pos)
-/** @brief Transmit data register is empty and ready to accept the next byte (`USARTx_SR.TXE`) bit mask alias @def USART_SR_TXE */
+/**
+ * @brief Reports that `DR` can accept the next word without overwriting pending data
+ * @details
+ * Hardware sets `SR.TXE` when it moves the transmit data-register contents
+ * into the shift register. `TXE` resets to `1`, so setting `CR1.TXEIE` normally
+ * requests the first transmit ISR immediately. Writing `DR` clears `TXE` and
+ * deasserts that source until hardware moves the new word to the shift
+ * register and sets `TXE` again.
+ * @def USART_SR_TXE
+ */
 #define USART_SR_TXE						USART_SR_TXE_Msk
 
 /** @brief LIN break character detected on the receive line (`USARTx_SR.LBD`) bit position @def USART_SR_LBD_Pos */
 #define USART_SR_LBD_Pos					((reg_bit_pos_t) 8U)
 /** @brief LIN break character detected on the receive line (`USARTx_SR.LBD`) bit mask @def USART_SR_LBD_Msk */
 #define USART_SR_LBD_Msk					REG_BIT_MASK(USART_SR_LBD_Pos)
-/** @brief LIN break character detected on the receive line (`USARTx_SR.LBD`) bit mask alias @def USART_SR_LBD */
+/**
+ * @brief Reports that the configured LIN break pattern was detected
+ * @details
+ * Hardware sets `SR.LBD` when it detects a LIN break. When `CR2.LBDIE` is also
+ * `1`, the flag keeps the USART interrupt request active. Write `0` to `LBD`
+ * or clear `LBDIE` to deassert that source.
+ * @def USART_SR_LBD
+ */
 #define USART_SR_LBD						USART_SR_LBD_Msk
 
 /** @brief `CTS` input pin changed state since it was last cleared (`USARTx_SR.CTS`) bit position @def USART_SR_CTS_Pos */
 #define USART_SR_CTS_Pos					((reg_bit_pos_t) 9U)
 /** @brief `CTS` input pin changed state since it was last cleared (`USARTx_SR.CTS`) bit mask @def USART_SR_CTS_Msk */
 #define USART_SR_CTS_Msk					REG_BIT_MASK(USART_SR_CTS_Pos)
-/** @brief `CTS` input pin changed state since it was last cleared (`USARTx_SR.CTS`) bit mask alias @def USART_SR_CTS */
+/**
+ * @brief Reports that the hardware-flow-control `CTS` input changed state
+ * @details
+ * Hardware sets `SR.CTS` when the `CTS` input toggles while `CR3.CTSE` is set.
+ * When `CR3.CTSIE` is also `1`, the flag keeps the USART interrupt request
+ * active. Write `0` to `CTS` or clear `CTSIE` to deassert that source. This
+ * flag is unavailable on UART4 and UART5.
+ * @def USART_SR_CTS
+ */
 #define USART_SR_CTS						USART_SR_CTS_Msk
 
 // ---------------------------------------------------------------------------------------------------- //
