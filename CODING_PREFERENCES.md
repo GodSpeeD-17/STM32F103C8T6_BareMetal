@@ -1061,24 +1061,32 @@ the register-banner ordering and `_Pos`/`_Width`/`_Msk` family rules.)
 
 # 6. Shared Build Reporting
 
-- The shared CMake configure report must enumerate the project-local headers
-  and sources in the same filename/full-path tree mode used for selected Driver
+- The shared CMake configure report must enumerate project-local headers and
+  sources under a dedicated `[Local]` section whose tree starts directly with
+  `Inc/` and `Src/`, using the same filename/full-path mode as selected Driver
   modules. Summary counts distinguish headers, compiled sources, and include
   directories; an include-directory count must never be labeled as a count of
   included files.
 - The post-link memory report must present exact bytes, human-readable KiB,
-  used/free/capacity totals, utilization percentages, visual utilization bars,
-  and the `.text`/`.data`/`.bss` storage roles without requiring the raw
-  `arm-none-eabi-size` output to be interpreted manually.
+  used/free/capacity totals, utilization percentages, and the GNU Berkeley-size
+  category composition used to derive Flash (`text + data`) and RAM
+  (`data + bss`) consumption. Keep this in one compact aligned region table;
+  use exactly one row per region and make every numeric cell self-contained as
+  `bytes (KiB)`. Do not split one region across multiple unit rows, print a
+  separate detailed category table, add decorative graphs or duplicated
+  visualizations, or repeat the CMake status prefix on every report line.
+  Prioritize auditable numeric detail.
 
 ---
 
 # Preference Log
 
 - 2026-08-28: Required shared CMake diagnostics to list project-local C/header
-  files alongside selected Driver files, report semantically correct file and
-  include-directory counts, and render a readable Flash/RAM memory summary with
-  free space, utilization bars, and section-storage roles.
+  files in a dedicated `[Local]` `Inc/`/`Src/` tree alongside selected Driver
+  files, report semantically correct file and include-directory counts, and
+  render one compact aligned Flash/RAM table with free space, utilization
+  percentages, and explicit GNU-size composition formulas, without a separate
+  category table or decorative graphics.
 - 2026-08-28: Required interrupt enable/status macro documentation to state
   the full request condition, already-set behavior, flag set/clear mechanism,
   repeated-entry consequence, and separate NVIC-delivery requirement on the

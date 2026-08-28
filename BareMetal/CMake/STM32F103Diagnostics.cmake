@@ -62,18 +62,28 @@ function(stm32_print_configuration_summary)
 endfunction()
 
 function(stm32_print_source_summary)
-    # Source counts are printed after collection so the user can confirm
-    # which parts of the firmware graph were actually included.
+    # File counts are printed after collection so the user can confirm which
+    # parts of the firmware graph were actually exposed or compiled.
+    list(LENGTH PROJECT_HEADERS project_header_count)
     list(LENGTH PROJECT_SOURCES project_source_count)
+    list(LENGTH CORE_HEADERS core_header_count)
     list(LENGTH CORE_SOURCES core_source_count)
+    list(LENGTH SELECTED_DRIVER_HEADERS driver_header_count)
     list(LENGTH SELECTED_DRIVER_SOURCES driver_source_count)
     list(LENGTH SELECTED_DRIVER_INCLUDES driver_include_count)
     math(EXPR total_source_count "${project_source_count} + ${driver_source_count} + ${core_source_count}")
+    math(EXPR total_header_count "${project_header_count} + ${driver_header_count} + ${core_header_count}")
+    math(EXPR total_file_count "${total_source_count} + ${total_header_count}")
 
     stm32_print_section("Source Summary")
+    stm32_print_kv("Project Headers" "${project_header_count}")
     stm32_print_kv("Project Sources" "${project_source_count}")
+    stm32_print_kv("Driver Headers" "${driver_header_count}")
     stm32_print_kv("Driver Sources" "${driver_source_count}")
-    stm32_print_kv("Driver Includes" "${driver_include_count}")
+    stm32_print_kv("Driver Inc Dirs" "${driver_include_count}")
+    stm32_print_kv("Core Headers" "${core_header_count}")
     stm32_print_kv("Core Sources" "${core_source_count}")
+    stm32_print_kv("Total Headers" "${total_header_count}")
     stm32_print_kv("Total Sources" "${total_source_count}")
+    stm32_print_kv("Total Files" "${total_file_count}")
 endfunction()

@@ -87,6 +87,11 @@ function(stm32_resolve_driver_modules output_variable)
 endfunction()
 
 function(stm32_register_core_target)
+    file(GLOB_RECURSE core_headers CONFIGURE_DEPENDS
+        "${CORE_ROOT}/Inc/*.h"
+        "${CORE_ROOT}/Inc/*.hpp"
+        "${CORE_ROOT}/Inc/*.hxx"
+    )
     file(GLOB_RECURSE core_sources CONFIGURE_DEPENDS
         "${CORE_ROOT}/Src/*.c"
         "${CORE_ROOT}/Src/*.cpp"
@@ -94,6 +99,8 @@ function(stm32_register_core_target)
         "${CORE_ROOT}/Src/*.s"
         "${CORE_ROOT}/Src/*.S"
     )
+    list(SORT core_headers)
+    list(SORT core_sources)
 
     # Core is currently header-only, but the OBJECT/INTERFACE split allows a
     # future shared Core source to remain owned by this same stable target.
@@ -108,10 +115,11 @@ function(stm32_register_core_target)
     endif()
     add_library(stm32::core ALIAS stm32_core)
 
+    set(CORE_HEADERS "${core_headers}" PARENT_SCOPE)
     set(CORE_SOURCES "${core_sources}" PARENT_SCOPE)
 endfunction()
 
-function(stm32_print_driver_tree module_name module_index module_count module_headers module_sources)
+function(stm32_print_file_tree module_name module_index module_count module_headers module_sources)
     if(module_index EQUAL module_count)
         set(module_is_last TRUE)
         set(module_child_prefix "    ")
@@ -163,8 +171,48 @@ function(stm32_print_driver_tree module_name module_index module_count module_he
     endforeach()
 endfunction()
 
+function(stm32_print_local_tree local_headers local_sources)
+    set(section_names Inc Src)
+    foreach(section_name IN LISTS section_names)
+        if(section_name STREQUAL "Inc")
+            set(section_items ${local_headers})
+            set(section_is_last FALSE)
+            set(item_prefix "  │   ")
+        else()
+            set(section_items ${local_sources})
+            set(section_is_last TRUE)
+            set(item_prefix "      ")
+        endif()
+
+        stm32_tree_emit_line("  " ${section_is_last} "${section_name}")
+
+        if(section_items)
+            list(LENGTH section_items section_item_count)
+            set(section_item_index 0)
+            foreach(item IN LISTS section_items)
+                math(EXPR section_item_index "${section_item_index} + 1")
+                if(DRIVER_MODULE_TREE STREQUAL "SHOW_FULL_PATH")
+                    set(display_item "${item}")
+                else()
+                    get_filename_component(display_item "${item}" NAME)
+                endif()
+
+                if(section_item_index EQUAL section_item_count)
+                    set(item_is_last TRUE)
+                else()
+                    set(item_is_last FALSE)
+                endif()
+                stm32_tree_emit_line("${item_prefix}" ${item_is_last} "${display_item}")
+            endforeach()
+        else()
+            stm32_tree_emit_line("${item_prefix}" TRUE "<none>")
+        endif()
+    endforeach()
+endfunction()
+
 function(stm32_register_driver_targets)
     stm32_resolve_driver_modules(resolved_driver_modules)
+    set(selected_driver_headers "")
     set(selected_driver_sources "")
     set(selected_driver_includes "")
     set(selected_driver_targets "")
@@ -239,12 +287,13 @@ function(stm32_register_driver_targets)
         add_library(stm32::driver::${module_name} ALIAS ${module_target})
 
         list(APPEND selected_driver_targets ${module_target})
+        list(APPEND selected_driver_headers ${module_headers})
         list(APPEND selected_driver_sources ${module_sources})
         if(IS_DIRECTORY "${module_include_directory}")
             list(APPEND selected_driver_includes "${module_include_directory}")
         endif()
 
-        stm32_print_driver_tree(
+        stm32_print_file_tree(
             "${module_name}"
             ${module_index}
             ${module_count}
@@ -269,13 +318,29 @@ function(stm32_register_driver_targets)
         endforeach()
     endforeach()
 
+    # Capability modules can share one physical include directory. Keep the
+    # summary file/path counts unique even though each capability tree remains
+    # explicit about the interface it exposes.
+    list(REMOVE_DUPLICATES selected_driver_headers)
+    list(REMOVE_DUPLICATES selected_driver_sources)
+    list(REMOVE_DUPLICATES selected_driver_includes)
+    list(SORT selected_driver_headers)
+    list(SORT selected_driver_sources)
+    list(SORT selected_driver_includes)
+
     set(RESOLVED_DRIVER_MODULES "${resolved_driver_modules}" PARENT_SCOPE)
     set(SELECTED_DRIVER_TARGETS "${selected_driver_targets}" PARENT_SCOPE)
+    set(SELECTED_DRIVER_HEADERS "${selected_driver_headers}" PARENT_SCOPE)
     set(SELECTED_DRIVER_SOURCES "${selected_driver_sources}" PARENT_SCOPE)
     set(SELECTED_DRIVER_INCLUDES "${selected_driver_includes}" PARENT_SCOPE)
 endfunction()
 
 function(stm32_collect_sources)
+    file(GLOB_RECURSE project_headers CONFIGURE_DEPENDS
+        "${PROJ_DIR}/Inc/*.h"
+        "${PROJ_DIR}/Inc/*.hpp"
+        "${PROJ_DIR}/Inc/*.hxx"
+    )
     file(GLOB_RECURSE project_sources CONFIGURE_DEPENDS
         "${PROJ_DIR}/Src/*.c"
         "${PROJ_DIR}/Src/*.cpp"
@@ -286,16 +351,26 @@ function(stm32_collect_sources)
     if(NOT project_sources)
         message(FATAL_ERROR "No application sources found under ${PROJ_DIR}/Src")
     endif()
+    list(SORT project_headers)
+    list(SORT project_sources)
 
+    set(PROJECT_HEADERS "${project_headers}")
     set(PROJECT_SOURCES "${project_sources}")
+
+    stm32_print_section("Local")
+    stm32_print_local_tree("${PROJECT_HEADERS}" "${PROJECT_SOURCES}")
+
     stm32_register_core_target()
     stm32_register_driver_targets()
     stm32_print_source_summary()
 
+    set(PROJECT_HEADERS "${PROJECT_HEADERS}" PARENT_SCOPE)
     set(PROJECT_SOURCES "${PROJECT_SOURCES}" PARENT_SCOPE)
+    set(CORE_HEADERS "${CORE_HEADERS}" PARENT_SCOPE)
     set(CORE_SOURCES "${CORE_SOURCES}" PARENT_SCOPE)
     set(RESOLVED_DRIVER_MODULES "${RESOLVED_DRIVER_MODULES}" PARENT_SCOPE)
     set(SELECTED_DRIVER_TARGETS "${SELECTED_DRIVER_TARGETS}" PARENT_SCOPE)
+    set(SELECTED_DRIVER_HEADERS "${SELECTED_DRIVER_HEADERS}" PARENT_SCOPE)
     set(SELECTED_DRIVER_SOURCES "${SELECTED_DRIVER_SOURCES}" PARENT_SCOPE)
     set(SELECTED_DRIVER_INCLUDES "${SELECTED_DRIVER_INCLUDES}" PARENT_SCOPE)
 endfunction()
